@@ -1,0 +1,23 @@
+{
+    "window_title": "DAOC – Charakterverwaltung",
+    "welcome_message": "Willkommen im Charakter-Manager!",
+    "existing_character_label": "Bestehender Charakter:",
+    "file_menu_label": "Datei",
+    "view_menu_label": "Ansicht",
+    "help_menu_label": "Hilfe",
+    "about_menu_label": "Über",
+    "language_menu_label": "Sprache",
+    "none_option": "Keine",
+    "create_button_text": "Neuer Charakter",
+    "exit_button_text": "Beenden",
+    "new_char_dialog_title": "Neuer Charakter",
+    "new_char_dialog_prompt": "Geben Sie den Namen des Charakters ein:",
+    "success_title": "Erfolg",
+    "error_title": "Fehler",
+    "warning_title": "Abgebrochen",
+    "creation_cancelled_message": "Charaktererstellung abgebrochen.",
+    "char_exists_error": "Ein Charakter mit dem Namen '{name}' existiert bereits.",
+    "char_saved_success": "Charakter '{name}' erfolgreich gespeichert.",
+    "about_message_title": "Über {app_name}",
+    "about_message_content": "Version: {version}"
+}

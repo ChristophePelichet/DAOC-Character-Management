@@ -31,5 +31,7 @@
     "config_saved_success": "Configuration enregistrée avec succès.",
     "config_debug_mode_label": "Activer le mode débogage (crée debug.log)",
     "config_log_path_label": "Répertoire des logs",
-    "select_log_folder_dialog_title": "Sélectionner le dossier des logs"
+    "select_log_folder_dialog_title": "Sélectionner le dossier des logs",
+    "config_language_label": "Langue de l'application",
+    "language_name": "Français"
 }

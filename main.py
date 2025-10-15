@@ -1,4 +1,5 @@
 import os
+import sys
 import tkinter as tk
 import logging
 from tkinter import ttk, simpledialog, messagebox, Menu, filedialog
@@ -39,17 +40,6 @@ class CharacterApp:
         self.file_menu.add_command(label=lang.get("exit_button_text"), command=master.quit)
         self.file_menu_button.pack(side=tk.LEFT)
 
-        # --- Create "View" menu ---
-        self.view_menu_button = ttk.Menubutton(toolbar, text=lang.get("view_menu_label"))
-        self.view_menu = Menu(self.view_menu_button, tearoff=0)
-        self.view_menu_button["menu"] = self.view_menu
-        self.view_menu_button.pack(side=tk.LEFT)
-
-        # --- Submenu for language ---
-        self.language_submenu = Menu(self.view_menu, tearoff=0)
-        self.view_menu.add_cascade(label=lang.get("language_menu_label"), menu=self.language_submenu)
-        self.populate_language_menu()
-
         # --- Create "Help" menu (?) ---
         self.help_menu_button = ttk.Menubutton(toolbar, text="?")
         self.help_menu = Menu(self.help_menu_button, tearoff=0)
@@ -78,17 +68,6 @@ class CharacterApp:
 
         # Load the character list on application startup
         self.refresh_character_list()
-
-    def populate_language_menu(self):
-        """Populates the language submenu with the found .json files."""
-        self.language_submenu.delete(0, "end")
-        available_langs = get_available_languages()
-        for lang_code in available_langs:
-            # The lambda captures the value of lang_code at creation time
-            self.language_submenu.add_command(
-                label=lang_code.upper(), 
-                command=lambda lc=lang_code: self.change_language(lc)
-            )
 
     def create_new_character(self):
         """
@@ -132,6 +111,7 @@ class CharacterApp:
     def change_language(self, lang_code):
         """Changes the application language and updates the UI."""
         logging.info(f"Changing language to {lang_code}.")
+        config.set("language", lang_code)
         lang.set_language(lang_code)
         self.retranslate_ui()
 
@@ -141,15 +121,13 @@ class CharacterApp:
         self.label.config(text=lang.get("welcome_message"))
         self.char_label.config(text=lang.get("existing_character_label"))
         
-        # File Menu
+        # Rebuild File Menu
         self.file_menu_button.config(text=lang.get("file_menu_label"))
-        self.file_menu.entryconfig(0, label=lang.get("create_button_text"))
-        self.file_menu.entryconfig(1, label=lang.get("configuration_menu_label"))
-        self.file_menu.entryconfig(3, label=lang.get("exit_button_text")) # Index 3 because there is a separator
-
-        # View Menu
-        self.view_menu_button.config(text=lang.get("view_menu_label"))
-        self.view_menu.entryconfig(0, label=lang.get("language_menu_label"))
+        self.file_menu.delete(0, "end")
+        self.file_menu.add_command(label=lang.get("create_button_text"), command=self.create_new_character)
+        self.file_menu.add_command(label=lang.get("configuration_menu_label"), command=self.open_configuration_window)
+        self.file_menu.add_separator()
+        self.file_menu.add_command(label=lang.get("exit_button_text"), command=self.master.quit)
 
         # Update the combobox if it's empty
         if not self.character_menu['values']:
@@ -169,9 +147,30 @@ class CharacterApp:
         logging.debug("Opening configuration window.")
         config_window = tk.Toplevel(self.master)
         config_window.title(lang.get("configuration_window_title"))
-        config_window.geometry("500x280")
+        config_window.geometry("500x340")
         config_window.resizable(True, True)
         config_window.grab_set()  # Modal behavior
+
+        # --- Language Selection ---
+        self.available_languages = get_available_languages() # e.g., {'fr': 'Français', 'en': 'English'}
+        
+        language_frame = ttk.Frame(config_window, padding=(10, 10, 10, 0))
+        language_frame.pack(fill=tk.X)
+        
+        language_label = ttk.Label(language_frame, text=lang.get("config_language_label") + ":")
+        language_label.pack(side=tk.LEFT, padx=(0, 5))
+
+        # The variable will store the full name for display
+        current_lang_code = config.get("language")
+        self.language_var = tk.StringVar(value=self.available_languages.get(current_lang_code))
+
+        language_combo = ttk.Combobox(language_frame, textvariable=self.language_var, state="readonly")
+        language_combo['values'] = list(self.available_languages.values())
+        language_combo.pack(side=tk.LEFT)
+
+        # --- Separator for future options ---
+        separator = ttk.Separator(config_window, orient='horizontal')
+        separator.pack(fill='x', padx=10, pady=10)
 
         # --- Widgets for Character Folder Path ---
         path_frame = ttk.LabelFrame(config_window, text=lang.get("config_path_label"), padding=10)
@@ -185,17 +184,17 @@ class CharacterApp:
         browse_button = ttk.Button(path_frame, text=lang.get("browse_button"), command=self.browse_character_folder)
         browse_button.pack(side=tk.LEFT)
 
-        # --- Separator for future options ---
-        separator = ttk.Separator(config_window, orient='horizontal')
-        separator.pack(fill='x', padx=10, pady=10)
+        # --- Separator for directory sections ---
+        dir_separator = ttk.Separator(config_window, orient='horizontal')
+        dir_separator.pack(fill='x', padx=20, pady=5)
 
         # --- Debugging Mode Checkbox ---
-        debug_frame = ttk.Frame(config_window, padding=(10, 0))
-        debug_frame.pack(fill=tk.X, padx=10)
+        debug_frame = ttk.Frame(config_window, padding=(10, 0, 10, 5))
+        debug_frame.pack(fill=tk.X)
 
         self.debug_mode_var = tk.BooleanVar(value=config.get("debug_mode", False))
         debug_check = ttk.Checkbutton(debug_frame, text=lang.get("config_debug_mode_label"), variable=self.debug_mode_var)
-        debug_check.pack(side=tk.LEFT)
+        debug_check.pack(side=tk.LEFT, padx=10)
 
         # --- Widgets for Log Folder Path ---
         log_path_frame = ttk.LabelFrame(config_window, text=lang.get("config_log_path_label"), padding=10)
@@ -244,12 +243,23 @@ class CharacterApp:
         if not new_debug_mode and old_debug_mode:
             logging.info("Debug mode has been DEACTIVATED. This is the last log entry.")
 
+        # Check if language has changed
+        selected_lang_name = self.language_var.get()
+        # Find the code corresponding to the selected name
+        new_lang_code = None
+        for code, name in self.available_languages.items():
+            if name == selected_lang_name:
+                new_lang_code = code
+                break
+        if new_lang_code and new_lang_code != config.get("language"):
+            self.change_language(new_lang_code)
+
         # Save all settings
         config.set("character_folder", self.char_path_var.get())
         config.set("log_folder", self.log_path_var.get())
         config.set("debug_mode", new_debug_mode)
         
-        # Re-apply logging settings immediately
+        # Re-apply logging settings immediately after saving debug mode
         setup_logging()
         
         # Log activation now that logging is configured

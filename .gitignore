@@ -2,3 +2,7 @@
 Characters
 .venv
 Logs
+Configuration
+main.spec
+build
+dist

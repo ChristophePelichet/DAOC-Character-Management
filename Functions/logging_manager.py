@@ -2,19 +2,17 @@ import logging
 import os
 from logging.handlers import RotatingFileHandler
 from .config_manager import config
-
-# Define the log file path at the project root
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+from .path_manager import get_base_path
 
 def get_log_dir():
     """
     Gets the log directory from the config.
-    If not set, defaults to a 'Logs' folder in the project root.
+    If not set, defaults to a 'Logs' folder next to the executable.
     """
     path = config.get("log_folder")
     if path and os.path.isdir(path):
         return path
-    return os.path.join(PROJECT_ROOT, "Logs")
+    return os.path.join(get_base_path(), "Logs")
 
 def setup_logging():
     """

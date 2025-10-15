@@ -1,8 +1,11 @@
 import json
 import os
+import sys
 import logging
+from .config_manager import config
 
 logger = logging.getLogger(__name__)
+
 
 class LanguageManager:
     """
@@ -18,9 +21,17 @@ class LanguageManager:
 
     def load_language(self, lang_code):
         """Loads a JSON language file."""
-        # Build the path to the 'Language' folder at the project root
-        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-        lang_file = os.path.join(project_root, 'Language', f'{lang_code}.json')
+        try:
+            # PyInstaller creates a temp folder and stores path in _MEIPASS
+            base_path = sys._MEIPASS
+        except Exception:
+            # In development, use the relative path
+            base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
+        lang_dir = os.path.join(base_path, 'Language')
+        lang_file = os.path.join(lang_dir, f'{lang_code}.json')
+
+        logger.debug(f"Attempting to load language file from: {lang_file}")
 
         try:
             with open(lang_file, 'r', encoding='utf-8') as f:
@@ -35,17 +46,45 @@ class LanguageManager:
         return self.strings.get(key, key).format(**kwargs)
 
 def get_available_languages():
-    """Scans the 'Language' folder and returns a list of available language codes."""
-    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-    lang_dir = os.path.join(project_root, 'Language')
+    """
+    Scans the 'Language' folder and returns a dictionary mapping language codes to full names.
+    Sorts languages with a specific order: 'fr', 'en', then alphabetically.
+    """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
+    lang_dir = os.path.join(base_path, 'Language')
     if not os.path.exists(lang_dir):
-        return []
+        return {}
     
-    languages = []
+    languages = {}
     for filename in os.listdir(lang_dir):
         if filename.endswith('.json'):
-            languages.append(os.path.splitext(filename)[0])
-    return sorted(languages)
+            code = os.path.splitext(filename)[0]
+            try:
+                with open(os.path.join(lang_dir, filename), 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    languages[code] = data.get("language_name", code)
+            except (json.JSONDecodeError, IOError):
+                continue
+    
+    # Custom sort order: 'fr', then 'en', then alphabetically
+    all_codes = list(languages.keys())
+    final_sorted_codes = []
+
+    if 'fr' in all_codes:
+        final_sorted_codes.append('fr')
+        all_codes.remove('fr')
+    
+    if 'en' in all_codes:
+        final_sorted_codes.append('en')
+        all_codes.remove('en')
+        
+    final_sorted_codes.extend(sorted(all_codes))
+    return {code: languages[code] for code in final_sorted_codes}
 
 # Global instance to be easily accessible throughout the application
-lang = LanguageManager()
+lang = LanguageManager(config.get("language", "fr"))

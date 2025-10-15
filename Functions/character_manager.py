@@ -3,6 +3,7 @@ import os
 import uuid # To generate unique identifiers
 import logging
 from .config_manager import config
+from .path_manager import get_base_path
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +15,7 @@ def get_character_dir():
     path = config.get("character_folder")
     if path and os.path.isdir(path):
         return path
-    return os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')), 'Characters')
+    return os.path.join(get_base_path(), 'Characters')
 
 def _ensure_character_directory_exists():
     """Checks and creates the 'Characters' directory if it does not exist."""

@@ -30,5 +30,7 @@
     "config_saved_success": "Einstellungen erfolgreich gespeichert.",
     "config_debug_mode_label": "Debug-Modus aktivieren (erstellt debug.log)",
     "config_log_path_label": "Log-Verzeichnis",
-    "select_log_folder_dialog_title": "Log-Ordner auswählen"
+    "select_log_folder_dialog_title": "Log-Ordner auswählen",
+    "config_language_label": "Anwendungssprache",
+    "language_name": "Deutsch"
 }

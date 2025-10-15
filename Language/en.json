@@ -19,5 +19,16 @@
     "char_exists_error": "A character named '{name}' already exists.",
     "char_saved_success": "Character '{name}' saved successfully.",
     "about_message_title": "About {app_name}",
-    "about_message_content": "Version: {version}"
+    "about_message_content": "Version: {version}",
+    "configuration_menu_label": "Settings",
+    "configuration_window_title": "Settings Window",
+    "config_window_content": "Configuration options will be here.",
+    "config_path_label": "Character Directory",
+    "browse_button": "Browse...",
+    "save_button": "Save",
+    "select_folder_dialog_title": "Select Character Folder",
+    "config_saved_success": "Settings saved successfully.",
+    "config_debug_mode_label": "Enable debug mode (creates debug.log)",
+    "config_log_path_label": "Log Directory",
+    "select_log_folder_dialog_title": "Select Log Folder"
 }

@@ -1,19 +1,27 @@
 import json
 import os
 import uuid # To generate unique identifiers
+import logging
+from .config_manager import config
 
-# Define the path to the 'Characters' directory at the project root.
-# This assumes that main.py is run from the project root (e.g., d:/my_cool_project).
-# os.path.dirname(__file__) -> d:/my_cool_project/Functions
-# os.path.abspath(os.path.join(os.path.dirname(__file__), '..')) -> d:/my_cool_project
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-CHARACTER_DIR = os.path.join(PROJECT_ROOT, 'Characters')
+logger = logging.getLogger(__name__)
+
+def get_character_dir():
+    """
+    Gets the character directory from the config.
+    If not set, defaults to a 'Characters' folder in the project root.
+    """
+    path = config.get("character_folder")
+    if path and os.path.isdir(path):
+        return path
+    return os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')), 'Characters')
 
 def _ensure_character_directory_exists():
     """Checks and creates the 'Characters' directory if it does not exist."""
-    if not os.path.exists(CHARACTER_DIR):
-        os.makedirs(CHARACTER_DIR)
-        print(f"Répertoire créé : {CHARACTER_DIR}")
+    character_dir = get_character_dir()
+    if not os.path.exists(character_dir):
+        os.makedirs(character_dir)
+        logger.info(f"Directory created: {character_dir}")
 
 def create_character_data(name):
     """
@@ -39,7 +47,7 @@ def save_character(character_data):
     # and remove all non-alphanumeric characters (except underscore).
     base_name = character_data['name'].lower().replace(' ', '_')
     sanitized_name = "".join(c for c in base_name if c.isalnum() or c == '_')
-    filename = os.path.join(CHARACTER_DIR, f"{sanitized_name}.json")
+    filename = os.path.join(get_character_dir(), f"{sanitized_name}.json")
 
     # Check if the file already exists to ensure name uniqueness
     if os.path.exists(filename):
@@ -49,25 +57,27 @@ def save_character(character_data):
         with open(filename, 'w', encoding='utf-8') as f:
             json.dump(character_data, f, indent=4, ensure_ascii=False)
         return True, f"Personnage '{character_data['name']}' sauvegardé dans {filename}"
-    except IOError as e:
+    except (IOError, OSError) as e:
         return False, f"Erreur lors de la sauvegarde du personnage : {e}"
 
 def get_all_characters():
     """
     Scans the 'Characters' directory and returns a list of character names.
     """
-    if not os.path.exists(CHARACTER_DIR):
+    character_dir = get_character_dir()
+    if not os.path.exists(character_dir):
         return []  # Return an empty list if the directory does not exist
 
     character_names = []
-    for filename in os.listdir(CHARACTER_DIR):
+    for filename in os.listdir(character_dir):
         if filename.endswith('.json'):
             try:
-                with open(os.path.join(CHARACTER_DIR, filename), 'r', encoding='utf-8') as f:
+                with open(os.path.join(character_dir, filename), 'r', encoding='utf-8') as f:
                     data = json.load(f)
                     if 'name' in data:
                         character_names.append(data['name'])
-            except (json.JSONDecodeError, IOError):
+            except (json.JSONDecodeError, IOError) as e:
                 # Ignore corrupted or unreadable files to avoid crashing the app
+                logger.warning(f"Could not read or parse character file {filename}: {e}")
                 continue
     return sorted(character_names)

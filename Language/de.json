@@ -19,5 +19,16 @@
     "char_exists_error": "Ein Charakter mit dem Namen '{name}' existiert bereits.",
     "char_saved_success": "Charakter '{name}' erfolgreich gespeichert.",
     "about_message_title": "Über {app_name}",
-    "about_message_content": "Version: {version}"
+    "about_message_content": "Version: {version}",
+    "configuration_menu_label": "Einstellungen",
+    "configuration_window_title": "Einstellungsfenster",
+    "config_window_content": "Konfigurationsoptionen werden hier sein.",
+    "config_path_label": "Charakterverzeichnis",
+    "browse_button": "Durchsuchen...",
+    "save_button": "Speichern",
+    "select_folder_dialog_title": "Charakterordner auswählen",
+    "config_saved_success": "Einstellungen erfolgreich gespeichert.",
+    "config_debug_mode_label": "Debug-Modus aktivieren (erstellt debug.log)",
+    "config_log_path_label": "Log-Verzeichnis",
+    "select_log_folder_dialog_title": "Log-Ordner auswählen"
 }

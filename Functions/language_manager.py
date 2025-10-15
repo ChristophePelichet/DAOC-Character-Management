@@ -1,6 +1,8 @@
 import json
 import os
+import logging
 
+logger = logging.getLogger(__name__)
 
 class LanguageManager:
     """
@@ -24,7 +26,7 @@ class LanguageManager:
             with open(lang_file, 'r', encoding='utf-8') as f:
                 self.strings = json.load(f)
         except (FileNotFoundError, json.JSONDecodeError) as e:
-            print(f"Erreur: Impossible de charger le fichier de langue '{lang_file}'. {e}")
+            logger.error(f"Could not load language file '{lang_file}'. {e}")
             # In case of an error, use an empty dictionary to avoid crashing
             self.strings = {}
 

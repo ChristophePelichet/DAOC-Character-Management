@@ -20,5 +20,16 @@
     "char_saved_success": "Personnage '{name}' sauvegardé avec succès.",
     "create_char_tooltip": "Créer un nouveau personnage",
     "about_message_title": "À propos de {app_name}",
-    "about_message_content": "Version : {version}"
+    "about_message_content": "Version : {version}",
+    "configuration_menu_label": "Configuration",
+    "configuration_window_title": "Fenêtre de Configuration",
+    "config_window_content": "Les options de configuration seront ici.",
+    "config_path_label": "Répertoire des personnages",
+    "browse_button": "Parcourir...",
+    "save_button": "Enregistrer",
+    "select_folder_dialog_title": "Sélectionner le dossier des personnages",
+    "config_saved_success": "Configuration enregistrée avec succès.",
+    "config_debug_mode_label": "Activer le mode débogage (crée debug.log)",
+    "config_log_path_label": "Répertoire des logs",
+    "select_log_folder_dialog_title": "Sélectionner le dossier des logs"
 }

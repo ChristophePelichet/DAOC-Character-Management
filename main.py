@@ -5,7 +5,7 @@ import logging
 from tkinter import ttk, simpledialog, messagebox, Menu, filedialog
 from Functions.character_manager import create_character_data, save_character, get_all_characters, get_character_dir
 from Functions.language_manager import lang, get_available_languages
-from Functions.config_manager import config
+from Functions.config_manager import config, get_config_dir
 from Functions.logging_manager import setup_logging, get_log_dir
 
 # Setup logging at the very beginning
@@ -147,7 +147,7 @@ class CharacterApp:
         logging.debug("Opening configuration window.")
         config_window = tk.Toplevel(self.master)
         config_window.title(lang.get("configuration_window_title"))
-        config_window.geometry("500x340")
+        config_window.geometry("500x440")
         config_window.resizable(True, True)
         config_window.grab_set()  # Modal behavior
 
@@ -167,6 +167,24 @@ class CharacterApp:
         language_combo = ttk.Combobox(language_frame, textvariable=self.language_var, state="readonly")
         language_combo['values'] = list(self.available_languages.values())
         language_combo.pack(side=tk.LEFT)
+
+        # --- Separator ---
+        separator_conf = ttk.Separator(config_window, orient='horizontal')
+        separator_conf.pack(fill='x', padx=10, pady=10)
+
+        # --- Widgets for Config Folder Path ---
+        config_path_frame = ttk.LabelFrame(config_window, text=lang.get("config_file_path_label"), padding=10)
+        config_path_frame.pack(fill=tk.X, padx=10, pady=5)
+
+        self.config_path_var = tk.StringVar(value=get_config_dir())
+        
+        config_path_entry = ttk.Entry(config_path_frame, textvariable=self.config_path_var, width=50)
+        config_path_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5))
+
+        config_browse_button = ttk.Button(config_path_frame, text=lang.get("browse_button"), command=self.browse_config_folder)
+        config_browse_button.pack(side=tk.LEFT)
+
+
 
         # --- Separator for future options ---
         separator = ttk.Separator(config_window, orient='horizontal')
@@ -215,6 +233,15 @@ class CharacterApp:
         save_button = ttk.Button(button_frame, text=lang.get("save_button"), command=lambda: self.save_configuration(config_window))
         save_button.pack(side=tk.RIGHT)
 
+    def browse_config_folder(self):
+        """Opens a dialog to select a directory for the configuration file."""
+        directory = filedialog.askdirectory(
+            title=lang.get("select_config_folder_dialog_title"),
+            initialdir=self.config_path_var.get() or os.path.expanduser("~")
+        )
+        if directory:
+            self.config_path_var.set(directory)
+
     def browse_character_folder(self):
         """Opens a dialog to select a directory."""
         directory = filedialog.askdirectory(
@@ -255,6 +282,7 @@ class CharacterApp:
             self.change_language(new_lang_code)
 
         # Save all settings
+        config.set("config_folder", self.config_path_var.get())
         config.set("character_folder", self.char_path_var.get())
         config.set("log_folder", self.log_path_var.get())
         config.set("debug_mode", new_debug_mode)

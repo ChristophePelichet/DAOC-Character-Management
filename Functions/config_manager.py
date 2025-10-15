@@ -2,9 +2,15 @@ import json
 import os
 import sys
 
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-CONFIG_DIR = os.path.join(PROJECT_ROOT, 'Configuration')
-CONFIG_FILE = os.path.join(CONFIG_DIR, 'config.json')
+def get_config_dir():
+    """
+    Gets the configuration directory. It checks the config itself for a custom path,
+    otherwise defaults to a 'Configuration' folder at the application base.
+    This function is defined outside the class to be accessible from the UI.
+    """
+    from .path_manager import get_base_path
+    # config.get() is safe here because it's a global instance
+    return config.get("config_folder") or os.path.join(get_base_path(), 'Configuration')
 
 class ConfigManager:
     """Manages loading and saving application settings from a JSON file."""
@@ -15,11 +21,24 @@ class ConfigManager:
 
     def load_config(self):
         """Loads the configuration from config.json. Creates it with defaults if it doesn't exist."""
+        # To find the config file, we must first determine its directory.
+        # This is a bit of a chicken-and-egg problem. We assume it's in the default location first.
+        from .path_manager import get_base_path
+        default_config_dir = os.path.join(get_base_path(), 'Configuration')
+        CONFIG_FILE = os.path.join(default_config_dir, 'config.json')
+
         try:
             with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
                 self.config = json.load(f)
+                # If a custom path is defined, re-check from that path. This handles moved configs.
+                custom_config_dir = self.config.get("config_folder")
+                if custom_config_dir and custom_config_dir != default_config_dir:
+                    CONFIG_FILE = os.path.join(custom_config_dir, 'config.json')
+                    with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
+                        self.config = json.load(f)
         except (FileNotFoundError, json.JSONDecodeError):
             self.config = {
+                "config_folder": default_config_dir, # Store its own path
                 "character_folder": None,
                 "debug_mode": False,
                 "log_folder": None,
@@ -30,12 +49,13 @@ class ConfigManager:
     def save_config(self):
         """Saves the current configuration to config.json."""
         try:
-            # Ensure the configuration directory exists
-            os.makedirs(CONFIG_DIR, exist_ok=True)
+            config_dir = self.get("config_folder") or get_config_dir()
+            os.makedirs(config_dir, exist_ok=True)
+            CONFIG_FILE = os.path.join(config_dir, 'config.json')
             with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
                 json.dump(self.config, f, indent=4)
         except (IOError, OSError) as e:
-            print(f"Critical Error: Could not save config file at {CONFIG_FILE}: {e}", file=sys.stderr)
+            print(f"Critical Error: Could not save config file: {e}", file=sys.stderr)
 
     def get(self, key, default=None):
         """Gets a value from the configuration."""

@@ -4,20 +4,20 @@ import os
 
 class LanguageManager:
     """
-    Gère le chargement et l'accès aux chaînes de texte pour l'internationalisation.
+    Manages loading and accessing text strings for internationalization.
     """
     def __init__(self, lang_code='fr'):
         self.strings = {}
         self.load_language(lang_code)
     
     def set_language(self, lang_code):
-        """Change la langue active et recharge les chaînes de texte."""
+        """Changes the active language and reloads the text strings."""
         self.load_language(lang_code)
 
     def load_language(self, lang_code):
-        """Charge un fichier de langue JSON."""
-        # Construit le chemin vers le dossier 'Language' à la racine du projet
-        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..')) # This is d:/Projets/1
+        """Loads a JSON language file."""
+        # Build the path to the 'Language' folder at the project root
+        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
         lang_file = os.path.join(project_root, 'Language', f'{lang_code}.json')
 
         try:
@@ -25,15 +25,15 @@ class LanguageManager:
                 self.strings = json.load(f)
         except (FileNotFoundError, json.JSONDecodeError) as e:
             print(f"Erreur: Impossible de charger le fichier de langue '{lang_file}'. {e}")
-            # En cas d'erreur, on utilise un dictionnaire vide pour éviter de planter
+            # In case of an error, use an empty dictionary to avoid crashing
             self.strings = {}
 
     def get(self, key, **kwargs):
-        """Récupère une chaîne de texte par sa clé et la formate si nécessaire."""
+        """Retrieves a text string by its key and formats it if necessary."""
         return self.strings.get(key, key).format(**kwargs)
 
 def get_available_languages():
-    """Scanne le dossier 'Language' et retourne une liste des codes de langue disponibles."""
+    """Scans the 'Language' folder and returns a list of available language codes."""
     project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
     lang_dir = os.path.join(project_root, 'Language')
     if not os.path.exists(lang_dir):
@@ -45,5 +45,5 @@ def get_available_languages():
             languages.append(os.path.splitext(filename)[0])
     return sorted(languages)
 
-# Instance globale pour être facilement accessible dans toute l'application
+# Global instance to be easily accessible throughout the application
 lang = LanguageManager()

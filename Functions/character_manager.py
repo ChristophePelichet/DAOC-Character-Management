@@ -1,25 +1,25 @@
 import json
 import os
-import uuid # Pour générer des identifiants uniques
+import uuid # To generate unique identifiers
 
-# Définir le chemin du répertoire 'Characters' à la racine du projet.
-# Cela suppose que main.py est exécuté depuis la racine du projet (d:/mon_super_projet).
-# os.path.dirname(__file__) -> d:/mon_super_projet/Functions
-# os.path.abspath(os.path.join(os.path.dirname(__file__), '..')) -> d:/mon_super_projet
+# Define the path to the 'Characters' directory at the project root.
+# This assumes that main.py is run from the project root (e.g., d:/my_cool_project).
+# os.path.dirname(__file__) -> d:/my_cool_project/Functions
+# os.path.abspath(os.path.join(os.path.dirname(__file__), '..')) -> d:/my_cool_project
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 CHARACTER_DIR = os.path.join(PROJECT_ROOT, 'Characters')
 
 def _ensure_character_directory_exists():
-    """Vérifie et crée le répertoire 'Characters' s'il n'existe pas."""
+    """Checks and creates the 'Characters' directory if it does not exist."""
     if not os.path.exists(CHARACTER_DIR):
         os.makedirs(CHARACTER_DIR)
         print(f"Répertoire créé : {CHARACTER_DIR}")
 
 def create_character_data(name):
     """
-    Crée un dictionnaire de données de base pour un nouveau personnage.
+    Creates a basic data dictionary for a new character.
     """
-    character_id = str(uuid.uuid4()) # Génère un ID unique
+    character_id = str(uuid.uuid4()) # Generate a unique ID
     return {
         "id": character_id,
         "name": name,
@@ -30,18 +30,18 @@ def create_character_data(name):
 
 def save_character(character_data):
     """
-    Sauvegarde les données d'un personnage dans un fichier JSON.
-    Vérifie d'abord si un personnage avec le même nom existe déjà.
+    Saves a character's data to a JSON file.
+    First, it checks if a character with the same name already exists.
     """
     _ensure_character_directory_exists()
     
-    # Nettoie le nom : conversion en minuscules, remplacement des espaces par des underscores,
-    # et suppression de tous les caractères non alphanumériques (et non underscore).
+    # Sanitize the name: convert to lowercase, replace spaces with underscores,
+    # and remove all non-alphanumeric characters (except underscore).
     base_name = character_data['name'].lower().replace(' ', '_')
     sanitized_name = "".join(c for c in base_name if c.isalnum() or c == '_')
     filename = os.path.join(CHARACTER_DIR, f"{sanitized_name}.json")
 
-    # Vérifier si le fichier existe déjà pour garantir l'unicité du nom
+    # Check if the file already exists to ensure name uniqueness
     if os.path.exists(filename):
         return False, f"Un personnage nommé '{character_data['name']}' existe déjà."
 
@@ -54,10 +54,10 @@ def save_character(character_data):
 
 def get_all_characters():
     """
-    Scanne le répertoire 'Characters' et retourne une liste des noms de personnages.
+    Scans the 'Characters' directory and returns a list of character names.
     """
     if not os.path.exists(CHARACTER_DIR):
-        return []  # Retourne une liste vide si le répertoire n'existe pas
+        return []  # Return an empty list if the directory does not exist
 
     character_names = []
     for filename in os.listdir(CHARACTER_DIR):
@@ -68,6 +68,6 @@ def get_all_characters():
                     if 'name' in data:
                         character_names.append(data['name'])
             except (json.JSONDecodeError, IOError):
-                # Ignorer les fichiers corrompus ou illisibles pour ne pas planter l'app
+                # Ignore corrupted or unreadable files to avoid crashing the app
                 continue
     return sorted(character_names)

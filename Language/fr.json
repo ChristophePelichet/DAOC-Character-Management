@@ -16,6 +16,7 @@
     "char_name_empty_error": "Le nom du personnage ne peut pas être vide.",
     "success_title": "Succès",
     "error_title": "Erreur",
+    "info_title": "Information",
     "warning_title": "Annulé",
     "creation_cancelled_message": "Création de personnage annulée.",
     "char_exists_error": "Un personnage nommé '{name}' existe déjà.",
@@ -36,8 +37,7 @@
     "config_debug_mode_label": "Activer le mode débogage (crée debug.log)",
     "config_log_path_label": "Répertoire des logs",
     "select_log_folder_dialog_title": "Sélectionner le dossier des logs",
-    "config_img_path_label": "Répertoire des images",
-    "select_img_folder_dialog_title": "Sélectionner le dossier des images",
     "config_language_label": "Langue de l'application",
-    "language_name": "Français"
+    "language_name": "Français",
+    "import_from_web_button": "Importer depuis le web..."
 }

@@ -63,9 +63,21 @@ class NewCharacterDialog(simpledialog.Dialog):
         self.realm_combo.grid(row=4, columnspan=2, padx=5, pady=2)
         self.realm_combo.bind("<<ComboboxSelected>>", self.update_realm_icon)
 
+        # --- Separator and Import button ---
+        separator = ttk.Separator(master, orient='horizontal')
+        separator.grid(row=5, columnspan=2, sticky='ew', pady=10)
+
+        self.import_button = ttk.Button(master, text=lang.get("import_from_web_button"), command=self.import_from_web)
+        self.import_button.grid(row=6, columnspan=2, pady=5)
+
         self.update_realm_icon() # Set initial icon
 
         return self.name_entry # initial focus
+
+    def import_from_web(self):
+        """Placeholder for web import functionality."""
+        # This will be implemented later
+        messagebox.showinfo(lang.get("info_title"), "Fonctionnalité d'importation en cours de développement.", parent=self)
 
     def validate(self):
         name = self.name_entry.get().strip()
@@ -91,12 +103,6 @@ def create_new_character_dialog(parent):
     """
     dialog = NewCharacterDialog(parent, title=lang.get("new_char_dialog_title"))
     return dialog.result
-
-
-
-
-
-
 
 class CharacterApp:
     """
@@ -154,8 +160,7 @@ class CharacterApp:
 
     def create_new_character(self):
         """
-        Handles the action of creating a new character:
-        asks the user for a name and saves the character.
+        Handles the action of creating a new character.
         """
         result = create_new_character_dialog(self.master)
 
@@ -304,19 +309,6 @@ class CharacterApp:
         log_browse_button = ttk.Button(log_path_frame, text=lang.get("browse_button"), command=self.browse_log_folder)
         log_browse_button.pack(side=tk.LEFT)
 
-        # --- Widgets for Img Folder Path ---
-        img_path_frame = ttk.LabelFrame(config_window, text=lang.get("config_img_path_label"), padding=10)
-        img_path_frame.pack(fill=tk.X, padx=10, pady=10)
-
-        self.img_path_var = tk.StringVar(value=get_img_dir())
-        
-        img_path_entry = ttk.Entry(img_path_frame, textvariable=self.img_path_var, width=50)
-        img_path_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5))
-
-        img_browse_button = ttk.Button(img_path_frame, text=lang.get("browse_button"), command=self.browse_img_folder)
-        img_browse_button.pack(side=tk.LEFT)
-
-
         # --- Save Button ---
         button_frame = ttk.Frame(config_window, padding=10)
         button_frame.pack(fill=tk.X, side=tk.BOTTOM)
@@ -351,15 +343,6 @@ class CharacterApp:
         if directory:
             self.log_path_var.set(directory)
 
-    def browse_img_folder(self):
-        """Opens a dialog to select a directory for images."""
-        directory = filedialog.askdirectory(
-            title=lang.get("select_img_folder_dialog_title"),
-            initialdir=self.img_path_var.get() or os.path.expanduser("~")
-        )
-        if directory:
-            self.img_path_var.set(directory)
-
     def save_configuration(self, window):
         """Saves the configuration and closes the window."""
         # Get old and new debug mode states for comparison
@@ -385,7 +368,6 @@ class CharacterApp:
         config.set("config_folder", self.config_path_var.get())
         config.set("character_folder", self.char_path_var.get())
         config.set("log_folder", self.log_path_var.get())
-        config.set("img_folder", self.img_path_var.get())
         config.set("debug_mode", new_debug_mode)
         
         # Re-apply logging settings immediately after saving debug mode

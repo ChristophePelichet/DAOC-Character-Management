@@ -16,6 +16,7 @@
     "char_name_empty_error": "Character name cannot be empty.",
     "success_title": "Success",
     "error_title": "Error",
+    "info_title": "Information",
     "warning_title": "Cancelled",
     "creation_cancelled_message": "Character creation cancelled.",
     "char_exists_error": "A character named '{name}' already exists.",
@@ -35,8 +36,7 @@
     "config_debug_mode_label": "Enable debug mode (creates debug.log)",
     "config_log_path_label": "Log Directory",
     "select_log_folder_dialog_title": "Select Log Folder",
-    "config_img_path_label": "Image Directory",
-    "select_img_folder_dialog_title": "Select Image Folder",
     "config_language_label": "Application Language",
-    "language_name": "English"
+    "language_name": "English",
+    "import_from_web_button": "Import from web..."
 }

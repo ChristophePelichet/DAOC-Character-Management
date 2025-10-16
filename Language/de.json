@@ -16,6 +16,7 @@
     "char_name_empty_error": "Der Charaktername darf nicht leer sein.",
     "success_title": "Erfolg",
     "error_title": "Fehler",
+    "info_title": "Information",
     "warning_title": "Abgebrochen",
     "creation_cancelled_message": "Charaktererstellung abgebrochen.",
     "char_exists_error": "Ein Charakter mit dem Namen '{name}' existiert bereits.",
@@ -35,8 +36,7 @@
     "config_debug_mode_label": "Debug-Modus aktivieren (erstellt debug.log)",
     "config_log_path_label": "Log-Verzeichnis",
     "select_log_folder_dialog_title": "Log-Ordner auswählen",
-    "config_img_path_label": "Bilderverzeichnis",
-    "select_img_folder_dialog_title": "Bilderverzeichnis auswählen",
     "config_language_label": "Anwendungssprache",
-    "language_name": "Deutsch"
+    "language_name": "Deutsch",
+    "import_from_web_button": "Aus dem Web importieren..."
 }

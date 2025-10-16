@@ -12,6 +12,8 @@
     "exit_button_text": "Beenden",
     "new_char_dialog_title": "Neuer Charakter",
     "new_char_dialog_prompt": "Geben Sie den Namen des Charakters ein:",
+    "new_char_realm_prompt": "Wähle ein Reich:",
+    "char_name_empty_error": "Der Charaktername darf nicht leer sein.",
     "success_title": "Erfolg",
     "error_title": "Fehler",
     "warning_title": "Abgebrochen",
@@ -33,6 +35,8 @@
     "config_debug_mode_label": "Debug-Modus aktivieren (erstellt debug.log)",
     "config_log_path_label": "Log-Verzeichnis",
     "select_log_folder_dialog_title": "Log-Ordner auswählen",
+    "config_img_path_label": "Bilderverzeichnis",
+    "select_img_folder_dialog_title": "Bilderverzeichnis auswählen",
     "config_language_label": "Anwendungssprache",
     "language_name": "Deutsch"
 }

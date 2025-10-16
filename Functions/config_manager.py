@@ -41,6 +41,7 @@ class ConfigManager:
                 "config_folder": default_config_dir, # Store its own path
                 "character_folder": None,
                 "debug_mode": False,
+                "img_folder": None,
                 "log_folder": None,
                 "language": "fr"
             }

@@ -14,6 +14,16 @@ def get_log_dir():
         return path
     return os.path.join(get_base_path(), "Logs")
 
+def get_img_dir():
+    """
+    Gets the image directory from the config.
+    If not set, defaults to an 'Img' folder next to the executable.
+    """
+    path = config.get("img_folder")
+    if path and os.path.isdir(path):
+        return path
+    return os.path.join(get_base_path(), "Img")
+
 def setup_logging():
     """
     Configures the application's logger based on settings in config.json.

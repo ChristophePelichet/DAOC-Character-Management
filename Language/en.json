@@ -12,6 +12,8 @@
     "exit_button_text": "Exit",
     "new_char_dialog_title": "New Character",
     "new_char_dialog_prompt": "Enter the character's name:",
+    "new_char_realm_prompt": "Choose a realm:",
+    "char_name_empty_error": "Character name cannot be empty.",
     "success_title": "Success",
     "error_title": "Error",
     "warning_title": "Cancelled",
@@ -33,6 +35,8 @@
     "config_debug_mode_label": "Enable debug mode (creates debug.log)",
     "config_log_path_label": "Log Directory",
     "select_log_folder_dialog_title": "Select Log Folder",
+    "config_img_path_label": "Image Directory",
+    "select_img_folder_dialog_title": "Select Image Folder",
     "config_language_label": "Application Language",
     "language_name": "English"
 }

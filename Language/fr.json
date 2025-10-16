@@ -12,6 +12,8 @@
     "exit_button_text": "Quitter",
     "new_char_dialog_title": "Nouveau Personnage",
     "new_char_dialog_prompt": "Entrez le nom du personnage :",
+    "new_char_realm_prompt": "Choisissez un royaume :",
+    "char_name_empty_error": "Le nom du personnage ne peut pas être vide.",
     "success_title": "Succès",
     "error_title": "Erreur",
     "warning_title": "Annulé",
@@ -34,6 +36,8 @@
     "config_debug_mode_label": "Activer le mode débogage (crée debug.log)",
     "config_log_path_label": "Répertoire des logs",
     "select_log_folder_dialog_title": "Sélectionner le dossier des logs",
+    "config_img_path_label": "Répertoire des images",
+    "select_img_folder_dialog_title": "Sélectionner le dossier des images",
     "config_language_label": "Langue de l'application",
     "language_name": "Français"
 }

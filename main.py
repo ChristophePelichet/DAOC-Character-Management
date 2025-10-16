@@ -3,16 +3,99 @@ import sys
 import tkinter as tk
 import logging
 from tkinter import ttk, simpledialog, messagebox, Menu, filedialog
-from Functions.character_manager import create_character_data, save_character, get_all_characters, get_character_dir
+from PIL import Image, ImageTk # type: ignore
+from Functions.character_manager import create_character_data, save_character, get_all_characters, get_character_dir, REALM_ICONS
 from Functions.language_manager import lang, get_available_languages
 from Functions.config_manager import config, get_config_dir
-from Functions.logging_manager import setup_logging, get_log_dir
+from Functions.logging_manager import setup_logging, get_log_dir, get_img_dir
+from Functions.path_manager import get_base_path
 
 # Setup logging at the very beginning
 setup_logging()
 # --- Application Constants ---
 APP_NAME = "Character Manager"
 APP_VERSION = "0.1"
+
+class NewCharacterDialog(simpledialog.Dialog):
+    """Custom dialog to create a new character with a name and a realm."""
+    def __init__(self, parent, title=None):
+        self.realms = REALM_ICONS
+        self.result = None
+        self.icon_images = {} # To hold PhotoImage objects
+        super().__init__(parent, title)
+
+    def _load_icons(self):
+        """Load realm icons and store them as PhotoImage objects."""
+        try:
+            # PyInstaller creates a temp folder and stores path in _MEIPASS
+            base_path = sys._MEIPASS
+        except Exception:
+            base_path = get_base_path()
+        img_dir = os.path.join(base_path, "Img")
+        for realm, icon_path in self.realms.items():
+            try:
+                full_path = os.path.join(img_dir, icon_path)
+                img = Image.open(full_path)
+                img = img.resize((32, 32), Image.Resampling.LANCZOS) # Resize for display
+                self.icon_images[realm] = ImageTk.PhotoImage(img)
+            except FileNotFoundError:
+                logging.warning(f"Icon not found for {realm} at {full_path}")
+                self.icon_images[realm] = None # Handle missing icon gracefully    
+
+    def body(self, master):
+        self._load_icons()
+
+        # --- Realm Icon Display ---
+        self.realm_icon_label = ttk.Label(master)
+        self.realm_icon_label.grid(row=0, columnspan=2, padx=5, pady=(5, 10)) # Centered at the top
+
+        # --- Name entry ---
+        ttk.Label(master, text=lang.get("new_char_dialog_prompt")).grid(row=1, columnspan=2, sticky=tk.W, padx=5, pady=2)
+        self.name_entry = ttk.Entry(master, width=30)
+        self.name_entry.grid(row=2, columnspan=2, padx=5, pady=2)
+        self.name_entry.focus_set()
+
+        # --- Realm selection ---
+        ttk.Label(master, text=lang.get("new_char_realm_prompt")).grid(row=3, columnspan=2, sticky=tk.W, padx=5, pady=2)
+
+        self.realm_var = tk.StringVar(value=list(self.realms.keys())[0])
+        self.realm_combo = ttk.Combobox(master, textvariable=self.realm_var, values=list(self.realms.keys()), state="readonly")
+        self.realm_combo.grid(row=4, columnspan=2, padx=5, pady=2)
+        self.realm_combo.bind("<<ComboboxSelected>>", self.update_realm_icon)
+
+        self.update_realm_icon() # Set initial icon
+
+        return self.name_entry # initial focus
+
+    def validate(self):
+        name = self.name_entry.get().strip()
+        if not name:
+            messagebox.showwarning(lang.get("error_title"), lang.get("char_name_empty_error"), parent=self)
+            return 0
+        return 1
+
+    def apply(self):
+        name = self.name_entry.get().strip()
+        realm = self.realm_var.get()
+        self.result = (name, realm)
+    
+    def update_realm_icon(self, event=None):
+        """Updates the displayed icon based on the selected realm."""
+        selected_realm = self.realm_var.get()
+        self.realm_icon_label.config(image=self.icon_images.get(selected_realm))
+
+def create_new_character_dialog(parent):
+    """
+    Wrapper function to launch the custom dialog and return the result.
+    Returns a tuple (name, realm) or None if cancelled.
+    """
+    dialog = NewCharacterDialog(parent, title=lang.get("new_char_dialog_title"))
+    return dialog.result
+
+
+
+
+
 
 
 class CharacterApp:
@@ -74,24 +157,19 @@ class CharacterApp:
         Handles the action of creating a new character:
         asks the user for a name and saves the character.
         """
-        character_name = simpledialog.askstring(
-            lang.get("new_char_dialog_title"),
-            lang.get("new_char_dialog_prompt"),
-            parent=self.master
-        )
+        result = create_new_character_dialog(self.master)
 
-        if character_name:
-            character_data = create_character_data(character_name)
+        if result:
+            character_name, realm = result
+            character_data = create_character_data(character_name, realm)
             success, response = save_character(character_data)            
-
-            # The response from save_character is now expected to be a simple string
-            message = response
             
             if success:
                 self.refresh_character_list() # Update the list after creation
                 logging.info(f"Successfully created character '{character_name}'.")
                 messagebox.showinfo(lang.get("success_title"), lang.get("char_saved_success", name=character_name))
             else:
+                # The error message from save_character is already translated
                 messagebox.showerror(lang.get("error_title"), lang.get("char_exists_error", name=character_name))
         else:
             messagebox.showwarning(lang.get("warning_title"), lang.get("creation_cancelled_message"))
@@ -226,6 +304,19 @@ class CharacterApp:
         log_browse_button = ttk.Button(log_path_frame, text=lang.get("browse_button"), command=self.browse_log_folder)
         log_browse_button.pack(side=tk.LEFT)
 
+        # --- Widgets for Img Folder Path ---
+        img_path_frame = ttk.LabelFrame(config_window, text=lang.get("config_img_path_label"), padding=10)
+        img_path_frame.pack(fill=tk.X, padx=10, pady=10)
+
+        self.img_path_var = tk.StringVar(value=get_img_dir())
+        
+        img_path_entry = ttk.Entry(img_path_frame, textvariable=self.img_path_var, width=50)
+        img_path_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5))
+
+        img_browse_button = ttk.Button(img_path_frame, text=lang.get("browse_button"), command=self.browse_img_folder)
+        img_browse_button.pack(side=tk.LEFT)
+
+
         # --- Save Button ---
         button_frame = ttk.Frame(config_window, padding=10)
         button_frame.pack(fill=tk.X, side=tk.BOTTOM)
@@ -260,6 +351,15 @@ class CharacterApp:
         if directory:
             self.log_path_var.set(directory)
 
+    def browse_img_folder(self):
+        """Opens a dialog to select a directory for images."""
+        directory = filedialog.askdirectory(
+            title=lang.get("select_img_folder_dialog_title"),
+            initialdir=self.img_path_var.get() or os.path.expanduser("~")
+        )
+        if directory:
+            self.img_path_var.set(directory)
+
     def save_configuration(self, window):
         """Saves the configuration and closes the window."""
         # Get old and new debug mode states for comparison
@@ -285,6 +385,7 @@ class CharacterApp:
         config.set("config_folder", self.config_path_var.get())
         config.set("character_folder", self.char_path_var.get())
         config.set("log_folder", self.log_path_var.get())
+        config.set("img_folder", self.img_path_var.get())
         config.set("debug_mode", new_debug_mode)
         
         # Re-apply logging settings immediately after saving debug mode

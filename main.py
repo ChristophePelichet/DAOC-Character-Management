@@ -135,7 +135,7 @@ class DebugWindow(tk.Toplevel):
         self.destroy()
 class NewCharacterDialog(tk.Toplevel):
     """Custom dialog to create a new character with a name and a realm."""
-    def __init__(self, parent, title=None):
+    def __init__(self, parent, title=None, icon_images=None):
         super().__init__(parent)
         self.transient(parent)
         if title:
@@ -143,7 +143,7 @@ class NewCharacterDialog(tk.Toplevel):
 
         self.realms = REALM_ICONS
         self.result = None
-        self.icon_images = {} # To hold PhotoImage objects
+        self.icon_images = icon_images or {} # Use pre-loaded icons
 
         self.body_frame = ttk.Frame(self, padding="10 10 10 10")
         self.body_frame.pack(fill="both", expand=True)
@@ -153,27 +153,7 @@ class NewCharacterDialog(tk.Toplevel):
 
         self.grab_set() # Modal behavior
 
-    def _load_icons(self):
-        """Load realm icons and store them as PhotoImage objects."""
-        try:
-            # PyInstaller creates a temp folder and stores path in _MEIPASS
-            base_path = sys._MEIPASS
-        except Exception:
-            base_path = get_base_path()
-        img_dir = os.path.join(base_path, "Img")
-        for realm, icon_path in self.realms.items():
-            try:
-                full_path = os.path.join(img_dir, icon_path)
-                img = Image.open(full_path)
-                img = img.resize((32, 32), Image.Resampling.LANCZOS) # Resize for display
-                self.icon_images[realm] = ImageTk.PhotoImage(img)
-            except FileNotFoundError:
-                logging.warning(f"Icon not found for {realm} at {full_path}")
-                self.icon_images[realm] = None # Handle missing icon gracefully    
-
     def body(self, master):
-        self._load_icons()
-
         # --- Realm Icon Display ---
         self.realm_icon_label = ttk.Label(master)
         self.realm_icon_label.grid(row=0, columnspan=2, padx=5, pady=(5, 10)) # Centered at the top
@@ -232,7 +212,7 @@ def create_new_character_dialog(parent):
     Wrapper function to launch the custom dialog and return the result.
     Returns a tuple (name, realm) or None if cancelled.
     """
-    dialog = NewCharacterDialog(parent, title=lang.get("new_char_dialog_title"))
+    dialog = NewCharacterDialog(parent, title=lang.get("new_char_dialog_title"), icon_images=parent.app.realm_icons)
     parent.wait_window(dialog)
     return dialog.result
 
@@ -247,6 +227,11 @@ class CharacterApp:
         master.title(lang.get("window_title"))
         master.geometry("450x300")
         master.app = self # Make app instance accessible
+
+        # --- Pre-load resources for performance ---
+        self.realm_icons = self._load_realm_icons()
+        self.available_languages = get_available_languages()
+        self.config_window = None
 
         # --- Debug Window ---
         self.debug_window = None
@@ -263,11 +248,17 @@ class CharacterApp:
         self.file_menu_button = ttk.Menubutton(toolbar, text=lang.get("file_menu_label"))
         self.file_menu = Menu(self.file_menu_button, tearoff=0)
         
+        # Store references to menu items for easier re-translation
+        self.menu_items = {}
+
         self.file_menu_button["menu"] = self.file_menu
         self.file_menu.add_command(label=lang.get("create_button_text"), command=self.create_new_character)
+        self.menu_items['create_index'] = self.file_menu.index('end')
         self.file_menu.add_command(label=lang.get("configuration_menu_label"), command=self.open_configuration_window)
+        self.menu_items['config_index'] = self.file_menu.index('end')
         self.file_menu.add_separator()
         self.file_menu.add_command(label=lang.get("exit_button_text"), command=master.quit)
+        self.menu_items['exit_index'] = self.file_menu.index('end')
         self.file_menu_button.pack(side=tk.LEFT)
 
         # --- Create "Help" menu (?) ---
@@ -275,6 +266,7 @@ class CharacterApp:
         self.help_menu = Menu(self.help_menu_button, tearoff=0)
         self.help_menu_button["menu"] = self.help_menu
         self.help_menu.add_command(label=lang.get("about_menu_label"), command=self.show_about_dialog)
+        self.menu_items['about_index'] = self.help_menu.index('end')
         # Place the help button on the right side of the toolbar
         self.help_menu_button.pack(side=tk.RIGHT)
 
@@ -305,6 +297,22 @@ class CharacterApp:
         self.status_label = ttk.Label(self.status_bar, text="Initialisation...")
         self.status_label.pack(side=tk.LEFT)
 
+    def _load_realm_icons(self):
+        """Loads and resizes realm icons once at startup."""
+        logging.debug("Pre-loading realm icons.")
+        icon_images = {}
+        img_dir = get_img_dir() # Use the centralized function
+        for realm, icon_path in REALM_ICONS.items():
+            try:
+                full_path = os.path.join(img_dir, icon_path)
+                img = Image.open(full_path)
+                img = img.resize((32, 32), Image.Resampling.LANCZOS)
+                icon_images[realm] = ImageTk.PhotoImage(img)
+            except FileNotFoundError:
+                logging.warning(f"Icon not found for {realm} at {full_path}")
+                icon_images[realm] = None
+        return icon_images
+
     def create_new_character(self):
         """
         Handles the action of creating a new character manually.
@@ -320,8 +328,13 @@ class CharacterApp:
                 logging.info(f"Successfully created character '{character_name}'.")
                 messagebox.showinfo(lang.get("success_title"), lang.get("char_saved_success", name=character_name))
             else:
-                logging.error(f"Failed to create character '{character_name}': {response}")
-                messagebox.showerror(lang.get("error_title"), response) # Display the actual error from save_character
+                # If the response is a known error key, translate it. Otherwise, display as is.
+                if response == "char_exists_error":
+                    error_message = lang.get(response, name=character_name)
+                else:
+                    error_message = response # For other potential errors
+                logging.error(f"Failed to create character '{character_name}': {error_message}")
+                messagebox.showerror(lang.get("error_title"), error_message)
         else:
             messagebox.showwarning(lang.get("warning_title"), lang.get("creation_cancelled_message"))
 
@@ -352,11 +365,10 @@ class CharacterApp:
         
         # Rebuild File Menu
         self.file_menu_button.config(text=lang.get("file_menu_label"))
-        self.file_menu.delete(0, "end")
-        self.file_menu.add_command(label=lang.get("create_button_text"), command=self.create_new_character)
-        self.file_menu.add_command(label=lang.get("configuration_menu_label"), command=self.open_configuration_window)
-        self.file_menu.add_separator()
-        self.file_menu.add_command(label=lang.get("exit_button_text"), command=self.master.quit)
+        self.file_menu.entryconfig(self.menu_items['create_index'], label=lang.get("create_button_text"))
+        self.file_menu.entryconfig(self.menu_items['config_index'], label=lang.get("configuration_menu_label"))
+        self.file_menu.entryconfig(self.menu_items['exit_index'], label=lang.get("exit_button_text"))
+        self.help_menu.entryconfig(self.menu_items['about_index'], label=lang.get("about_menu_label"))
 
         # Update the combobox if it's empty
         if not self.character_menu['values']:
@@ -364,6 +376,10 @@ class CharacterApp:
         
         # Update status bar if it exists
         self.update_status_bar(lang.get("status_bar_loaded", duration=self.master.load_time))
+        
+        # Retranslate the config window if it exists
+        if self.config_window:
+            self._retranslate_configuration_window()
 
     def show_debug_window(self):
         """Creates and shows the debug window."""
@@ -397,103 +413,132 @@ class CharacterApp:
         if hasattr(self, 'status_label'):
             self.status_label.config(text=message)
 
-    def open_configuration_window(self):
-        """Opens the configuration window."""
-        logging.debug("Opening configuration window.")
-        config_window = tk.Toplevel(self.master)
-        config_window.title(lang.get("configuration_window_title"))
-        config_window.geometry("500x440")
-        config_window.resizable(True, True)
-        config_window.grab_set()  # Modal behavior
+    def _create_configuration_window(self):
+        """Creates the configuration window widgets. Called only once."""
+        logging.debug("Creating configuration window for the first time.")
+        self.config_window = tk.Toplevel(self.master)
+        self.config_window.title(lang.get("configuration_window_title"))
+        self.config_window.geometry("500x440")
+        self.config_window.resizable(True, True)
+        
+        self.config_widgets = {} # To store widgets that need re-translation
+        # Instead of destroying, hide the window
+        self.config_window.protocol("WM_DELETE_WINDOW", self.hide_configuration_window)
 
         # --- Language Selection ---
-        self.available_languages = get_available_languages() # e.g., {'fr': 'Français', 'en': 'English'}
-        
-        language_frame = ttk.Frame(config_window, padding=(10, 10, 10, 0))
+        language_frame = ttk.Frame(self.config_window, padding=(10, 10, 10, 0))
         language_frame.pack(fill=tk.X)
         
-        language_label = ttk.Label(language_frame, text=lang.get("config_language_label") + ":")
-        language_label.pack(side=tk.LEFT, padx=(0, 5))
+        self.config_widgets['language_label'] = ttk.Label(language_frame, text=lang.get("config_language_label") + ":")
+        self.config_widgets['language_label'].pack(side=tk.LEFT, padx=(0, 5))
 
-        # The variable will store the full name for display
-        current_lang_code = config.get("language")
-        self.language_var = tk.StringVar(value=self.available_languages.get(current_lang_code))
-
+        self.language_var = tk.StringVar()
         language_combo = ttk.Combobox(language_frame, textvariable=self.language_var, state="readonly")
         language_combo['values'] = list(self.available_languages.values())
         language_combo.pack(side=tk.LEFT)
 
         # --- Separator ---
-        separator_conf = ttk.Separator(config_window, orient='horizontal')
+        separator_conf = ttk.Separator(self.config_window, orient='horizontal')
         separator_conf.pack(fill='x', padx=10, pady=10)
 
         # --- Widgets for Config Folder Path ---
-        config_path_frame = ttk.LabelFrame(config_window, text=lang.get("config_file_path_label"), padding=10)
-        config_path_frame.pack(fill=tk.X, padx=10, pady=5)
-
-        self.config_path_var = tk.StringVar(value=get_config_dir())
-        
-        config_path_entry = ttk.Entry(config_path_frame, textvariable=self.config_path_var, width=50)
+        self.config_widgets['config_path_frame'] = ttk.LabelFrame(self.config_window, text=lang.get("config_file_path_label"), padding=10)
+        self.config_widgets['config_path_frame'].pack(fill=tk.X, padx=10, pady=5)
+        self.config_path_var = tk.StringVar()
+        config_path_entry = ttk.Entry(self.config_widgets['config_path_frame'], textvariable=self.config_path_var, width=50)
         config_path_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5))
-
-        config_browse_button = ttk.Button(config_path_frame, text=lang.get("browse_button"), command=self.browse_config_folder)
-        config_browse_button.pack(side=tk.LEFT)
-
-
+        self.config_widgets['config_browse_button'] = ttk.Button(self.config_widgets['config_path_frame'], text=lang.get("browse_button"), command=self.browse_config_folder)
+        self.config_widgets['config_browse_button'].pack(side=tk.LEFT)
 
         # --- Separator for future options ---
-        separator = ttk.Separator(config_window, orient='horizontal')
+        separator = ttk.Separator(self.config_window, orient='horizontal')
         separator.pack(fill='x', padx=10, pady=10)
 
         # --- Widgets for Character Folder Path ---
-        path_frame = ttk.LabelFrame(config_window, text=lang.get("config_path_label"), padding=10)
-        path_frame.pack(fill=tk.X, padx=10, pady=10)
-
-        self.char_path_var = tk.StringVar(value=get_character_dir())
-        
-        path_entry = ttk.Entry(path_frame, textvariable=self.char_path_var, width=50)
+        self.config_widgets['path_frame'] = ttk.LabelFrame(self.config_window, text=lang.get("config_path_label"), padding=10)
+        self.config_widgets['path_frame'].pack(fill=tk.X, padx=10, pady=10)
+        self.char_path_var = tk.StringVar()
+        path_entry = ttk.Entry(self.config_widgets['path_frame'], textvariable=self.char_path_var, width=50)
         path_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5))
-
-        browse_button = ttk.Button(path_frame, text=lang.get("browse_button"), command=self.browse_character_folder)
-        browse_button.pack(side=tk.LEFT)
+        self.config_widgets['browse_button'] = ttk.Button(self.config_widgets['path_frame'], text=lang.get("browse_button"), command=self.browse_character_folder)
+        self.config_widgets['browse_button'].pack(side=tk.LEFT)
 
         # --- Separator for directory sections ---
-        dir_separator = ttk.Separator(config_window, orient='horizontal')
+        dir_separator = ttk.Separator(self.config_window, orient='horizontal')
         dir_separator.pack(fill='x', padx=20, pady=5)
 
         # --- Debugging Mode Checkbox ---
-        debug_frame = ttk.Frame(config_window, padding=(10, 0, 10, 5))
+        debug_frame = ttk.Frame(self.config_window, padding=(10, 0, 10, 5))
         debug_frame.pack(fill=tk.X)
-
-        self.debug_mode_var = tk.BooleanVar(value=config.get("debug_mode", True))
-        debug_check = ttk.Checkbutton(debug_frame, text=lang.get("config_debug_mode_label"), variable=self.debug_mode_var)
-        debug_check.pack(side=tk.LEFT, padx=10)
+        self.debug_mode_var = tk.BooleanVar()
+        self.config_widgets['debug_check'] = ttk.Checkbutton(debug_frame, text=lang.get("config_debug_mode_label"), variable=self.debug_mode_var)
+        self.config_widgets['debug_check'].pack(side=tk.LEFT, padx=10)
 
         # --- Show Debug Window Checkbox ---
-        show_debug_win_frame = ttk.Frame(config_window, padding=(10, 0, 10, 5))
+        show_debug_win_frame = ttk.Frame(self.config_window, padding=(10, 0, 10, 5))
         show_debug_win_frame.pack(fill=tk.X)
-        self.show_debug_window_var = tk.BooleanVar(value=config.get("show_debug_window", True))
-        show_debug_win_check = ttk.Checkbutton(show_debug_win_frame, text=lang.get("config_show_debug_window_label"), variable=self.show_debug_window_var)
-        show_debug_win_check.pack(side=tk.LEFT, padx=10)
+        self.show_debug_window_var = tk.BooleanVar()
+        self.config_widgets['show_debug_win_check'] = ttk.Checkbutton(show_debug_win_frame, text=lang.get("config_show_debug_window_label"), variable=self.show_debug_window_var)
+        self.config_widgets['show_debug_win_check'].pack(side=tk.LEFT, padx=10)
 
         # --- Widgets for Log Folder Path ---
-        log_path_frame = ttk.LabelFrame(config_window, text=lang.get("config_log_path_label"), padding=10)
-        log_path_frame.pack(fill=tk.X, padx=10, pady=10)
-
-        self.log_path_var = tk.StringVar(value=get_log_dir())
-        
-        log_path_entry = ttk.Entry(log_path_frame, textvariable=self.log_path_var, width=50)
+        self.config_widgets['log_path_frame'] = ttk.LabelFrame(self.config_window, text=lang.get("config_log_path_label"), padding=10)
+        self.config_widgets['log_path_frame'].pack(fill=tk.X, padx=10, pady=10)
+        self.log_path_var = tk.StringVar()
+        log_path_entry = ttk.Entry(self.config_widgets['log_path_frame'], textvariable=self.log_path_var, width=50)
         log_path_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5))
-
-        log_browse_button = ttk.Button(log_path_frame, text=lang.get("browse_button"), command=self.browse_log_folder)
-        log_browse_button.pack(side=tk.LEFT)
+        self.config_widgets['log_browse_button'] = ttk.Button(self.config_widgets['log_path_frame'], text=lang.get("browse_button"), command=self.browse_log_folder)
+        self.config_widgets['log_browse_button'].pack(side=tk.LEFT)
 
         # --- Save Button ---
-        button_frame = ttk.Frame(config_window, padding=10)
+        button_frame = ttk.Frame(self.config_window, padding=10)
         button_frame.pack(fill=tk.X, side=tk.BOTTOM)
+        self.config_widgets['save_button'] = ttk.Button(button_frame, text=lang.get("save_button"), command=self.save_configuration)
+        self.config_widgets['save_button'].pack(side=tk.RIGHT)
 
-        save_button = ttk.Button(button_frame, text=lang.get("save_button"), command=lambda: self.save_configuration(config_window))
-        save_button.pack(side=tk.RIGHT)
+    def _update_configuration_fields(self):
+        """Refreshes the values in the configuration window from the config."""
+        current_lang_code = config.get("language")
+        self.language_var.set(self.available_languages.get(current_lang_code))
+        self.config_path_var.set(get_config_dir())
+        self.char_path_var.set(get_character_dir())
+        self.debug_mode_var.set(config.get("debug_mode", True))
+        self.show_debug_window_var.set(config.get("show_debug_window", True))
+        self.log_path_var.set(get_log_dir())
+
+    def _retranslate_configuration_window(self):
+        """Updates the text of all widgets in the configuration window."""
+        if not self.config_window:
+            return
+        self.config_window.title(lang.get("configuration_window_title"))
+        self.config_widgets['language_label'].config(text=lang.get("config_language_label") + ":")
+        self.config_widgets['config_path_frame'].config(text=lang.get("config_file_path_label"))
+        self.config_widgets['config_browse_button'].config(text=lang.get("browse_button"))
+        self.config_widgets['path_frame'].config(text=lang.get("config_path_label"))
+        self.config_widgets['browse_button'].config(text=lang.get("browse_button"))
+        self.config_widgets['debug_check'].config(text=lang.get("config_debug_mode_label"))
+        self.config_widgets['show_debug_win_check'].config(text=lang.get("config_show_debug_window_label"))
+        self.config_widgets['log_path_frame'].config(text=lang.get("config_log_path_label"))
+        self.config_widgets['log_browse_button'].config(text=lang.get("browse_button"))
+        self.config_widgets['save_button'].config(text=lang.get("save_button"))
+
+    def hide_configuration_window(self):
+        """Hides the configuration window."""
+        if self.config_window:
+            self.config_window.grab_release()
+            self.config_window.withdraw()
+
+    def open_configuration_window(self):
+        """Opens the configuration window."""
+        logging.debug("Opening configuration window.")
+        if self.config_window is None or not self.config_window.winfo_exists():
+            self._create_configuration_window()
+        
+        # Refresh fields and show the window
+        self._update_configuration_fields()
+        self.config_window.deiconify()
+        self.config_window.lift()
+        self.config_window.grab_set()
 
     def browse_config_folder(self):
         """Opens a dialog to select a directory for the configuration file."""
@@ -522,7 +567,7 @@ class CharacterApp:
         if directory:
             self.log_path_var.set(directory)
 
-    def save_configuration(self, window):
+    def save_configuration(self):
         """Saves the configuration and closes the window."""
         # Get old and new debug mode states for comparison
         old_debug_mode = config.get("debug_mode", True)
@@ -532,17 +577,6 @@ class CharacterApp:
         if not new_debug_mode and old_debug_mode:
             logging.info("Debug mode has been DEACTIVATED. This is the last log entry.")
 
-        # Check if language has changed
-        selected_lang_name = self.language_var.get()
-        # Find the code corresponding to the selected name
-        new_lang_code = None
-        for code, name in self.available_languages.items():
-            if name == selected_lang_name:
-                new_lang_code = code
-                break
-        if new_lang_code and new_lang_code != config.get("language"):
-            self.change_language(new_lang_code)
-
         # Save all settings
         config.set("config_folder", self.config_path_var.get())
         config.set("character_folder", self.char_path_var.get())
@@ -551,6 +585,18 @@ class CharacterApp:
         
         show_debug = self.show_debug_window_var.get()
         config.set("show_debug_window", show_debug)
+
+        # Determine if language needs to change, but don't apply it yet
+        selected_lang_name = self.language_var.get()
+        new_lang_code = None
+        for code, name in self.available_languages.items():
+            if name == selected_lang_name:
+                new_lang_code = code
+                break
+        
+        language_changed = new_lang_code and new_lang_code != config.get("language")
+        if language_changed:
+            config.set("language", new_lang_code)
         
         # Re-apply logging settings immediately after saving debug mode
         # Pass the debug handler if it exists
@@ -567,8 +613,12 @@ class CharacterApp:
             logging.info("Debug mode has been ACTIVATED.")
 
         self.refresh_character_list() # Refresh list in case path changed
-        messagebox.showinfo(lang.get("success_title"), lang.get("config_saved_success"), parent=window)
-        window.destroy()
+        self.hide_configuration_window() # Hide window BEFORE showing messagebox
+        messagebox.showinfo(lang.get("success_title"), lang.get("config_saved_success"), parent=self.master)
+
+        # Apply language change AFTER all windows are closed/hidden
+        if language_changed:
+            self.change_language(new_lang_code)
 
 
 def main():
@@ -581,9 +631,9 @@ def main():
     # Calculate and store loading time
     end_time = time.perf_counter()
     load_duration = end_time - start_time
+    logging.info(f"Application loaded in {load_duration:.4f} seconds.")
     root.load_time = load_duration # Store it on the root window
     app.update_status_bar(lang.get("status_bar_loaded", duration=load_duration))
-    logging.info(f"Application loaded in {load_duration:.4f} seconds.")
 
     root.mainloop()
 

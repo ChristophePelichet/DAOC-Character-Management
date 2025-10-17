@@ -44,7 +44,7 @@
     "debug_level_menu": "Stufe",
     "debug_level_all": "Alle",
     "status_bar_loaded": "Bereit. Geladen in {duration:.2f} Sekunden.",
-    "debug_font_size_menu": "Schriftgröße",
+    "debug_font_size_menu": "Schrift",
     "font_size_small": "Klein",
     "font_size_medium": "Mittel",
     "font_size_large": "Groß"

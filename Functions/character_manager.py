@@ -24,13 +24,6 @@ def get_character_dir():
         return path
     return os.path.join(get_base_path(), 'Characters')
 
-def _ensure_character_directory_exists():
-    """Checks and creates the 'Characters' directory if it does not exist."""
-    character_dir = get_character_dir()
-    if not os.path.exists(character_dir):
-        os.makedirs(character_dir)
-        logger.info(f"Directory created: {character_dir}")
-
 def create_character_data(name, realm):
     """
     Creates a basic data dictionary for a new character.
@@ -63,16 +56,14 @@ def save_character(character_data):
     os.makedirs(realm_dir, exist_ok=True)
     
     # Check for name uniqueness before sanitizing for filename
-    existing_characters = get_all_characters()
-    if character_data['name'].lower() in [c.lower() for c in existing_characters]:
-        # Use the pre-translated string for this specific, common error
-        from .language_manager import lang
-        return False, lang.get("char_exists_error", name=character_data['name'])
+    existing_characters_lower = {c.lower() for c in get_all_characters()}
+    if character_data['name'].lower() in existing_characters_lower:
+        # Return a specific error key for the UI to handle translation
+        return False, "char_exists_error"
 
-    # Sanitize the name for the filename. This should be robust.
-    # We use the original name for the check, but a sanitized one for the file.
-    sanitized_for_filename = "".join(c for c in character_data['name'] if c.isalnum() or c in (' ', '_')).rstrip()
-    filename = os.path.join(realm_dir, f"{sanitized_for_filename}.json")
+    # Use the unique character ID as the filename to avoid sanitization issues.
+    character_id = character_data.get("id")
+    filename = os.path.join(realm_dir, f"{character_id}.json")
 
     try:
         with open(filename, 'w', encoding='utf-8') as f:
@@ -86,13 +77,12 @@ def get_all_characters():
     Scans the 'Characters' directory and its realm subdirectories,
     and returns a list of character names.
     """
-    realms = ["Albion", "Hibernia", "Midgard"]
     character_dir = get_character_dir()
     if not os.path.exists(character_dir):
         return []  # Return an empty list if the directory does not exist
 
     character_names = []
-    for realm in realms:
+    for realm in REALM_ICONS.keys():
         realm_dir = os.path.join(character_dir, realm)
         if os.path.isdir(realm_dir):
             for filename in os.listdir(realm_dir):

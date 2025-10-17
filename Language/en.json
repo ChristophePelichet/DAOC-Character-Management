@@ -43,7 +43,7 @@
     "debug_level_menu": "Level",
     "debug_level_all": "All",
     "status_bar_loaded": "Ready. Loaded in {duration:.2f} seconds.",
-    "debug_font_size_menu": "Font Size",
+    "debug_font_size_menu": "Font",
     "font_size_small": "Small",
     "font_size_medium": "Medium",
     "font_size_large": "Large"

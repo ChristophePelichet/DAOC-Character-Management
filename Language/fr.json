@@ -44,7 +44,7 @@
     "debug_level_menu": "Niveau",
     "debug_level_all": "Tous",
     "status_bar_loaded": "Prêt. Chargé en {duration:.2f} secondes.",
-    "debug_font_size_menu": "Taille police",
+    "debug_font_size_menu": "Police",
     "font_size_small": "Petite",
     "font_size_medium": "Moyenne",
     "font_size_large": "Grande"

@@ -37,6 +37,5 @@
     "config_log_path_label": "Log Directory",
     "select_log_folder_dialog_title": "Select Log Folder",
     "config_language_label": "Application Language",
-    "language_name": "English",
-    "import_from_web_button": "Import from web..."
+    "language_name": "English"
 }

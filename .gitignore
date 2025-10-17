@@ -1,6 +1,7 @@
 # Ignore Folder
 Characters
 .venv
+requirements.txt
 Logs
 Configuration
 main.spec

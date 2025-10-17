@@ -38,6 +38,5 @@
     "config_log_path_label": "Répertoire des logs",
     "select_log_folder_dialog_title": "Sélectionner le dossier des logs",
     "config_language_label": "Langue de l'application",
-    "language_name": "Français",
-    "import_from_web_button": "Importer depuis le web..."
+    "language_name": "Français"
 }

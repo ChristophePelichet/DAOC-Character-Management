@@ -3,26 +3,37 @@ import sys
 import tkinter as tk
 import logging
 from tkinter import ttk, simpledialog, messagebox, Menu, filedialog
-from PIL import Image, ImageTk # type: ignore
 from Functions.character_manager import create_character_data, save_character, get_all_characters, get_character_dir, REALM_ICONS
 from Functions.language_manager import lang, get_available_languages
 from Functions.config_manager import config, get_config_dir
 from Functions.logging_manager import setup_logging, get_log_dir, get_img_dir
 from Functions.path_manager import get_base_path
+from PIL import Image, ImageTk # type: ignore
 
 # Setup logging at the very beginning
 setup_logging()
 # --- Application Constants ---
 APP_NAME = "Character Manager"
 APP_VERSION = "0.1"
-
-class NewCharacterDialog(simpledialog.Dialog):
+class NewCharacterDialog(tk.Toplevel):
     """Custom dialog to create a new character with a name and a realm."""
     def __init__(self, parent, title=None):
+        super().__init__(parent)
+        self.transient(parent)
+        if title:
+            self.title(title)
+
         self.realms = REALM_ICONS
         self.result = None
         self.icon_images = {} # To hold PhotoImage objects
-        super().__init__(parent, title)
+
+        self.body_frame = ttk.Frame(self, padding="10 10 10 10")
+        self.body_frame.pack(fill="both", expand=True)
+
+        self.body(self.body_frame)
+        self.buttonbox()
+
+        self.grab_set() # Modal behavior
 
     def _load_icons(self):
         """Load realm icons and store them as PhotoImage objects."""
@@ -63,33 +74,35 @@ class NewCharacterDialog(simpledialog.Dialog):
         self.realm_combo.grid(row=4, columnspan=2, padx=5, pady=2)
         self.realm_combo.bind("<<ComboboxSelected>>", self.update_realm_icon)
 
-        # --- Separator and Import button ---
-        separator = ttk.Separator(master, orient='horizontal')
-        separator.grid(row=5, columnspan=2, sticky='ew', pady=10)
-
-        self.import_button = ttk.Button(master, text=lang.get("import_from_web_button"), command=self.import_from_web)
-        self.import_button.grid(row=6, columnspan=2, pady=5)
-
         self.update_realm_icon() # Set initial icon
 
         return self.name_entry # initial focus
 
-    def import_from_web(self):
-        """Placeholder for web import functionality."""
-        # This will be implemented later
-        messagebox.showinfo(lang.get("info_title"), "Fonctionnalité d'importation en cours de développement.", parent=self)
+    def buttonbox(self):
+        """Creates OK and Cancel buttons."""
+        box = ttk.Frame(self)
 
-    def validate(self):
+        ok_button = ttk.Button(box, text="OK", width=10, command=self.ok, default=tk.ACTIVE)
+        ok_button.pack(side=tk.LEFT, padx=5, pady=5)
+        cancel_button = ttk.Button(box, text=lang.get("warning_title"), width=10, command=self.cancel)
+        cancel_button.pack(side=tk.LEFT, padx=5, pady=5)
+
+        self.bind("<Return>", self.ok)
+        self.bind("<Escape>", self.cancel)
+
+        box.pack()
+
+    def ok(self, event=None):
         name = self.name_entry.get().strip()
         if not name:
             messagebox.showwarning(lang.get("error_title"), lang.get("char_name_empty_error"), parent=self)
-            return 0
-        return 1
+            return
 
-    def apply(self):
-        name = self.name_entry.get().strip()
-        realm = self.realm_var.get()
-        self.result = (name, realm)
+        self.result = (name, self.realm_var.get())
+        self.destroy()
+
+    def cancel(self, event=None):
+        self.destroy()
     
     def update_realm_icon(self, event=None):
         """Updates the displayed icon based on the selected realm."""
@@ -102,6 +115,7 @@ def create_new_character_dialog(parent):
     Returns a tuple (name, realm) or None if cancelled.
     """
     dialog = NewCharacterDialog(parent, title=lang.get("new_char_dialog_title"))
+    parent.wait_window(dialog)
     return dialog.result
 
 class CharacterApp:
@@ -122,6 +136,7 @@ class CharacterApp:
         # --- Create "File" dropdown menu ---
         self.file_menu_button = ttk.Menubutton(toolbar, text=lang.get("file_menu_label"))
         self.file_menu = Menu(self.file_menu_button, tearoff=0)
+        
         self.file_menu_button["menu"] = self.file_menu
         self.file_menu.add_command(label=lang.get("create_button_text"), command=self.create_new_character)
         self.file_menu.add_command(label=lang.get("configuration_menu_label"), command=self.open_configuration_window)
@@ -160,17 +175,16 @@ class CharacterApp:
 
     def create_new_character(self):
         """
-        Handles the action of creating a new character.
+        Handles the action of creating a new character manually.
         """
-        result = create_new_character_dialog(self.master)
+        result = create_new_character_dialog(self.master) # This now opens the clean dialog
 
         if result:
             character_name, realm = result
             character_data = create_character_data(character_name, realm)
-            success, response = save_character(character_data)            
-            
+            success, response = save_character(character_data)
             if success:
-                self.refresh_character_list() # Update the list after creation
+                self.refresh_character_list()
                 logging.info(f"Successfully created character '{character_name}'.")
                 messagebox.showinfo(lang.get("success_title"), lang.get("char_saved_success", name=character_name))
             else:
@@ -385,6 +399,7 @@ class CharacterApp:
 def main():
     """Main function to launch the application."""
     root = tk.Tk()
+    # Attach app instance to root to make it accessible from Toplevel windows
     app = CharacterApp(root)
     root.mainloop()
 

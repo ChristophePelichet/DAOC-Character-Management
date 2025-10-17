@@ -1,6 +1,6 @@
 {
-    "window_title": "DAOC – Charakterverwaltung",
-    "welcome_message": "Willkommen im Charakter-Manager!",
+    "window_title": "DAOC - Charakterverwaltung",
+    "welcome_message": "Willkommen bei der Charakterverwaltung!",
     "existing_character_label": "Bestehender Charakter:",
     "file_menu_label": "Datei",
     "view_menu_label": "Ansicht",
@@ -12,7 +12,7 @@
     "exit_button_text": "Beenden",
     "new_char_dialog_title": "Neuer Charakter",
     "new_char_dialog_prompt": "Geben Sie den Namen des Charakters ein:",
-    "new_char_realm_prompt": "Wähle ein Reich:",
+    "new_char_realm_prompt": "Wählen Sie ein Reich:",
     "char_name_empty_error": "Der Charaktername darf nicht leer sein.",
     "success_title": "Erfolg",
     "error_title": "Fehler",
@@ -21,10 +21,11 @@
     "creation_cancelled_message": "Charaktererstellung abgebrochen.",
     "char_exists_error": "Ein Charakter mit dem Namen '{name}' existiert bereits.",
     "char_saved_success": "Charakter '{name}' erfolgreich gespeichert.",
+    "create_char_tooltip": "Einen neuen Charakter erstellen",
     "about_message_title": "Über {app_name}",
     "about_message_content": "Version: {version}",
     "configuration_menu_label": "Einstellungen",
-    "configuration_window_title": "Einstellungsfenster",
+    "configuration_window_title": "Konfigurationsfenster",
     "config_window_content": "Konfigurationsoptionen werden hier sein.",
     "config_path_label": "Charakterverzeichnis",
     "browse_button": "Durchsuchen...",
@@ -37,6 +38,5 @@
     "config_log_path_label": "Log-Verzeichnis",
     "select_log_folder_dialog_title": "Log-Ordner auswählen",
     "config_language_label": "Anwendungssprache",
-    "language_name": "Deutsch",
-    "import_from_web_button": "Aus dem Web importieren..."
+    "language_name": "Deutsch"
 }

@@ -3,6 +3,7 @@ import sys
 import traceback
 import tkinter as tk
 import logging
+from tkinter import font as tkfont
 import time
 import threading
 from tkinter import ttk, simpledialog, messagebox, Menu, filedialog
@@ -90,7 +91,7 @@ class DebugWindow(tk.Toplevel):
         self.level_menu.add_radiobutton(
             label=lang.get("debug_level_all"),
             variable=self.log_level_var,
-            value="DEBUG", # "All" is equivalent to the DEBUG level
+            value="DEBUG",  # "All" is equivalent to the DEBUG level
             command=self.set_log_level
         )
         self.level_menu.add_separator()
@@ -105,11 +106,14 @@ class DebugWindow(tk.Toplevel):
 
         # Font Size Menu Items
         self.font_size_menu.add_radiobutton(
-            label=lang.get("font_size_small"), variable=self.font_size_var, value="small", command=self.set_font_size)
+            label=lang.get("font_size_small"), variable=self.font_size_var, value="small", command=self.set_font_size
+        )
         self.font_size_menu.add_radiobutton(
-            label=lang.get("font_size_medium"), variable=self.font_size_var, value="medium", command=self.set_font_size)
+            label=lang.get("font_size_medium"), variable=self.font_size_var, value="medium", command=self.set_font_size
+        )
         self.font_size_menu.add_radiobutton(
-            label=lang.get("font_size_large"), variable=self.font_size_var, value="large", command=self.set_font_size)
+            label=lang.get("font_size_large"), variable=self.font_size_var, value="large", command=self.set_font_size
+        )
 
         # --- Button Bar ---
         button_bar_frame = ttk.Frame(self)
@@ -119,11 +123,11 @@ class DebugWindow(tk.Toplevel):
 
         # --- Main horizontal Paned Window ---
         main_paned_window = ttk.PanedWindow(self, orient=tk.HORIZONTAL)
-        main_paned_window.pack(expand=True, fill="both")
+        main_paned_window.pack(expand=True, fill="both", padx=5, pady=5)
 
         # --- Left vertical Paned Window (for logs and errors) ---
         left_paned_window = ttk.PanedWindow(main_paned_window, orient=tk.VERTICAL)
-        main_paned_window.add(left_paned_window, weight=2) # Give more space to the left side
+        main_paned_window.add(left_paned_window, weight=2)  # Give more space to the left side
 
         # --- Top-left pane for general logs ---
         log_frame = ttk.LabelFrame(left_paned_window, text=lang.get("debug_log_pane_title"), name="log_frame")
@@ -152,7 +156,7 @@ class DebugWindow(tk.Toplevel):
 
         self.log_reader_widget = tk.Text(self.log_reader_frame, wrap="word", state="disabled")
         self.log_reader_widget.pack(expand=True, fill="both")
-        main_paned_window.add(self.log_reader_frame, weight=1)
+        main_paned_window.add(self.log_reader_frame, weight=2)
 
         # Configure color tags
         for widget in (self.log_widget, self.error_widget, self.log_reader_widget):
@@ -160,8 +164,8 @@ class DebugWindow(tk.Toplevel):
             widget.tag_config("INFO", foreground="black")
             widget.tag_config("WARNING", foreground="orange")
 
-        self.log_handler = None # For general logs
-        self.error_handler = None # For errors and tracebacks
+        self.log_handler = None  # For general logs
+        self.error_handler = None  # For errors and tracebacks
 
         self.monitoring_thread = None
         self.monitoring_active = False
@@ -179,7 +183,7 @@ class DebugWindow(tk.Toplevel):
     def set_font_size(self):
         """Sets the font size for the text widget and its tags."""
         size_key = self.font_size_var.get()
-        size_value = self.font_sizes.get(size_key, 9) # Default to 9 if not found
+        size_value = self.font_sizes.get(size_key, 9)  # Default to 9 if not found
         
         for widget in (self.log_widget, self.error_widget, self.log_reader_widget):
             widget.config(font=("Courier New", size_value))
@@ -193,18 +197,18 @@ class DebugWindow(tk.Toplevel):
         self.menu_bar.entryconfig(self.level_cascade_index, label=lang.get("debug_level_menu"))
         self.menu_bar.entryconfig(self.font_cascade_index, label=lang.get("debug_font_size_menu"))
         
-        self.test_debug_button.config(text=lang.get("test_debug_button"))
         # Retranslate pane titles
-        self.log_widget.master.config(text=lang.get("debug_log_pane_title")) # master is the LabelFrame
+        self.log_widget.master.config(text=lang.get("debug_log_pane_title"))  # master is the LabelFrame
         self.error_widget.master.config(text=lang.get("debug_errors_pane_title"))
         self.log_reader_frame.config(text=lang.get("debug_log_reader_pane_title"))
         self.browse_log_reader_button.config(text=lang.get("browse_button"))
         self.clear_log_reader_button.config(text=lang.get("clear_button_text"))
+        self.test_debug_button.config(text=lang.get("test_debug_button"))
         # Retranslate font size menu items
         self.level_menu.entryconfig(0, label=lang.get("debug_level_all"))
-        self.font_size_menu.entryconfig(0, label=lang.get("font_size_small"))
-        self.font_size_menu.entryconfig(1, label=lang.get("font_size_medium"))
-        self.font_size_menu.entryconfig(2, label=lang.get("font_size_large"))
+        self.font_size_menu.entryconfig(self.font_menu_items['small'], label=lang.get("font_size_small"))
+        self.font_size_menu.entryconfig(self.font_menu_items['medium'], label=lang.get("font_size_medium"))
+        self.font_size_menu.entryconfig(self.font_menu_items['large'], label=lang.get("font_size_large"))
 
     def raise_test_exception(self):
         """Raises a test exception to verify the handler."""
@@ -218,7 +222,7 @@ class DebugWindow(tk.Toplevel):
             logging.getLogger().removeHandler(self.log_handler)
         if self.error_handler:
             logging.getLogger().removeHandler(self.error_handler)
-        self.destroy()
+        self.destroy() # type: ignore
 
     def set_default_log_file(self, filepath):
         """Sets and tries to monitor the default log file."""
@@ -231,7 +235,7 @@ class DebugWindow(tk.Toplevel):
     def browse_log_file(self):
         """Opens a file dialog to select a log file to monitor."""
         filepath = filedialog.askopenfilename(
-            title="Select a log file to monitor",
+            title=lang.get("debug_log_reader_pane_title"),
             filetypes=[("Log files", "*.log"), ("Text files", "*.txt"), ("All files", "*.*")]
         )
         if filepath:
@@ -246,7 +250,7 @@ class DebugWindow(tk.Toplevel):
 
     def start_log_monitoring(self, filepath):
         """Starts a thread to monitor the selected log file."""
-        self.stop_log_monitoring() # Stop any previous monitoring
+        self.stop_log_monitoring()  # Stop any previous monitoring
         self.clear_log_reader()
 
         self.monitoring_active = True
@@ -257,7 +261,7 @@ class DebugWindow(tk.Toplevel):
         """Stops the file monitoring thread."""
         if self.monitoring_thread and self.monitoring_thread.is_alive():
             self.monitoring_active = False
-            self.monitoring_thread.join(timeout=1) # Wait a bit for the thread to exit
+            self.monitoring_thread.join(timeout=1)  # Wait a bit for the thread to exit
 
     def _monitor_log_file(self, filepath):
         """The actual file monitoring logic that runs in a separate thread."""
@@ -270,7 +274,7 @@ class DebugWindow(tk.Toplevel):
                     if line:
                         self.log_reader_widget.after(0, self._append_to_log_reader, line)
                     else:
-                        time.sleep(0.1) # Wait for new lines
+                        time.sleep(0.1)  # Wait for new lines
         except Exception as e:
             error_message = f"Error monitoring file {filepath}: {e}\n"
             self.log_reader_widget.after(0, self._append_to_log_reader, error_message)
@@ -297,7 +301,7 @@ class NewCharacterDialog(tk.Toplevel):
         self.body_frame.pack(fill="both", expand=True)
 
         self.body(self.body_frame)
-        self.buttonbox()
+        self.buttonbox() # type: ignore
 
         self.grab_set() # Modal behavior
 
@@ -322,7 +326,7 @@ class NewCharacterDialog(tk.Toplevel):
 
         self.update_realm_icon() # Set initial icon
 
-        return self.name_entry # initial focus
+        return self.name_entry  # initial focus
 
     def buttonbox(self):
         """Creates OK and Cancel buttons."""
@@ -360,7 +364,7 @@ def create_new_character_dialog(parent):
     Wrapper function to launch the custom dialog and return the result.
     Returns a tuple (name, realm) or None if cancelled.
     """
-    dialog = NewCharacterDialog(parent, title=lang.get("new_char_dialog_title"), icon_images=parent.app.realm_icons)
+    dialog = NewCharacterDialog(parent, title=lang.get("new_char_dialog_title"), icon_images=parent.app.dialog_realm_icons)
     parent.wait_window(dialog)
     return dialog.result
 
@@ -373,17 +377,17 @@ class CharacterApp:
         logging.info("Application starting...")
         self.master = master
         master.title(lang.get("window_title"))
-        master.geometry("450x300")
+        master.geometry("550x400")
         master.app = self # Make app instance accessible
 
         # --- Pre-load resources for performance ---
-        self.realm_icons = self._load_realm_icons()
+        self.dialog_realm_icons, self.tree_realm_icons = self._load_realm_icons()
         self.available_languages = get_available_languages()
         self.config_window = None
 
         # --- Debug Window ---
         self.debug_window = None
-        self.debug_log_handler = None
+        self.debug_log_handler = None # type: ignore
         self.debug_error_handler = None
         # For development, we set the default to True
         if config.get("show_debug_window", True):
@@ -401,13 +405,13 @@ class CharacterApp:
         self.menu_items = {}
 
         self.file_menu_button["menu"] = self.file_menu
-        self.file_menu.add_command(label=lang.get("create_button_text"), command=self.create_new_character)
+        self.file_menu.add_command(label=lang.get("create_button_text"), command=self.create_new_character) # type: ignore
         self.menu_items['create_index'] = self.file_menu.index('end')
-        self.file_menu.add_command(label=lang.get("configuration_menu_label"), command=self.open_configuration_window)
+        self.file_menu.add_command(label=lang.get("configuration_menu_label"), command=self.open_configuration_window) # type: ignore
         self.menu_items['config_index'] = self.file_menu.index('end')
         self.file_menu.add_separator()
-        self.file_menu.add_command(label=lang.get("exit_button_text"), command=master.quit)
-        self.menu_items['exit_index'] = self.file_menu.index('end')
+        self.file_menu.add_command(label=lang.get("exit_button_text"), command=master.quit) # type: ignore
+        self.menu_items['exit_index'] = self.file_menu.index('end') # type: ignore
         self.file_menu_button.pack(side=tk.LEFT)
 
         # --- Create "Help" menu (?) ---
@@ -415,27 +419,43 @@ class CharacterApp:
         self.help_menu = Menu(self.help_menu_button, tearoff=0)
         self.help_menu_button["menu"] = self.help_menu
         self.help_menu.add_command(label=lang.get("about_menu_label"), command=self.show_about_dialog)
-        self.menu_items['about_index'] = self.help_menu.index('end')
+        self.menu_items['about_index'] = self.help_menu.index('end') # type: ignore
         # Place the help button on the right side of the toolbar
         self.help_menu_button.pack(side=tk.RIGHT)
 
         # --- Main content ---
-        main_frame = ttk.Frame(master)
-        main_frame.pack(pady=10, padx=10, fill="both", expand=True)
+        main_frame = ttk.Frame(master, padding=10)
+        main_frame.pack(fill="both", expand=True)
 
-        self.label = ttk.Label(main_frame, text=lang.get("welcome_message"), font=("Segoe UI", 12))
-        self.label.pack(pady=10)
+        # --- Treeview Style Configuration ---
+        # We need to set a custom row height to prevent icons from overlapping.
+        style = ttk.Style()
+        # Add vertical separators (grid lines)
+        style.layout("Treeview.Treeitem", # type: ignore
+            [('Treeitem.padding', {'sticky': 'nswe', 'children': 
+                [('Treeitem.indicator', {'side': 'left', 'sticky': ''}),
+                   ('Treeitem.image', {'side': 'left', 'sticky': ''}),
+                   ('Treeitem.text', {'side': 'left', 'sticky': ''})]})])
+        style.configure("Treeview", rowheight=22) # 18px icon + 4px padding
 
-        # --- Frame for character selection ---
-        selection_frame = ttk.Frame(main_frame)
-        selection_frame.pack(pady=5)
+        # --- Character List (Treeview) ---
+        columns = ('name', 'level')
+        self.character_tree = ttk.Treeview(main_frame, columns=columns, show='tree headings')
+        
+        # Configure the special '#' column to act as our Realm column
+        self.character_tree.column("#0", width=120, stretch=tk.NO, anchor='w')
+        self.character_tree.heading("#0", text=lang.get("column_realm"))
 
-        self.char_label = ttk.Label(selection_frame, text=lang.get("existing_character_label"))
-        self.char_label.pack(side=tk.LEFT, padx=5)
+        self.character_tree.heading('name', text=lang.get("column_name"))
+        self.character_tree.heading('level', text=lang.get("column_level"))
 
-        self.selected_character = tk.StringVar(master)
-        self.character_menu = ttk.Combobox(selection_frame, textvariable=self.selected_character, state="readonly")
-        self.character_menu.pack(side=tk.LEFT, padx=5)
+        self.character_tree.column('level', width=80, anchor=tk.CENTER)
+
+        self.character_tree.pack(fill="both", expand=True)
+
+        # Configure tags for alternating row colors
+        self.character_tree.tag_configure('oddrow', background='white')
+        self.character_tree.tag_configure('evenrow', background='#f0f0f0')
 
         # Load the character list on application startup
         self.refresh_character_list()
@@ -446,27 +466,29 @@ class CharacterApp:
         self.status_label = ttk.Label(self.status_bar, text="Initialisation...")
         self.status_label.pack(side=tk.LEFT)
 
-    def _load_realm_icons(self):
+    def _load_realm_icons(self) -> tuple[dict, dict]:
         """Loads and resizes realm icons once at startup."""
         logging.debug("Pre-loading realm icons.")
-        icon_images = {}
+        dialog_icons = {}
+        tree_icons = {}
         img_dir = get_img_dir() # Use the centralized function
         for realm, icon_path in REALM_ICONS.items():
             try:
                 full_path = os.path.join(img_dir, icon_path)
                 img = Image.open(full_path)
-                img = img.resize((32, 32), Image.Resampling.LANCZOS)
-                icon_images[realm] = ImageTk.PhotoImage(img)
+                dialog_icons[realm] = ImageTk.PhotoImage(img.resize((32, 32), Image.Resampling.LANCZOS)) # type: ignore
+                tree_icons[realm] = ImageTk.PhotoImage(img.resize((18, 18), Image.Resampling.LANCZOS)) # type: ignore
             except FileNotFoundError:
                 logging.warning(f"Icon not found for {realm} at {full_path}")
-                icon_images[realm] = None
-        return icon_images
+                dialog_icons[realm] = None
+                tree_icons[realm] = None
+        return dialog_icons, tree_icons
 
     def create_new_character(self):
         """
         Handles the action of creating a new character manually.
         """
-        result = create_new_character_dialog(self.master) # This now opens the clean dialog
+        result = create_new_character_dialog(self.master)  # This now opens the clean dialog
 
         if result:
             character_name, realm = result
@@ -481,7 +503,7 @@ class CharacterApp:
                 if response == "char_exists_error":
                     error_message = lang.get(response, name=character_name)
                 else:
-                    error_message = response # For other potential errors
+                    error_message = response  # For other potential errors
                 logging.error(f"Failed to create character '{character_name}': {error_message}")
                 messagebox.showerror(lang.get("error_title"), error_message)
         else:
@@ -490,14 +512,70 @@ class CharacterApp:
     def refresh_character_list(self):
         """Updates the character list in the dropdown menu."""
         logging.debug("Refreshing character list.")
-        characters = get_all_characters()
+        
+        # Clear existing items
+        for i in self.character_tree.get_children():
+            self.character_tree.delete(i)
 
-        if characters:
-            self.character_menu['values'] = characters
-            self.selected_character.set(characters[0]) # Select the first one by default
-        else:
-            self.character_menu['values'] = []
-            self.selected_character.set(lang.get("none_option"))
+        characters = get_all_characters()
+        for i, char in enumerate(characters):
+            realm = char.get('realm', 'N/A')
+            icon = self.tree_realm_icons.get(realm)
+            
+            # Determine tag for alternating color
+            row_tag = 'evenrow' if i % 2 == 0 else 'oddrow'
+
+            # Add a few spaces before the realm name for padding
+            self.character_tree.insert('', tk.END, text=f"  {realm}", values=(
+                char.get('name', 'N/A'),
+                char.get('level', 'N/A')
+            ), image=icon, tags=(realm, row_tag))
+
+        # Schedule the autofit to run after the UI has had a chance to update
+        self.master.after(50, self.autofit_treeview_columns)
+
+    def autofit_treeview_columns(self):
+        """Auto-adjusts the width of the columns in the character Treeview."""
+        logging.debug("Autofitting Treeview columns.")
+        cols = self.character_tree['columns']
+        col_widths = {}
+        
+        style = ttk.Style()
+        heading_font_details = style.lookup("Treeview.Heading", "font")
+        heading_font = tkfont.Font(font=heading_font_details)
+
+        row_font_details = style.lookup("Treeview", "font")
+        row_font = tkfont.Font(font=row_font_details)
+
+        # --- New Strategy: Only autofit fixed-size columns ---
+        # The 'name' column will stretch to fill the rest of the space.
+        fixed_cols = ['level']
+        for col in fixed_cols:
+            self.character_tree.column(col, stretch=tk.NO) # type: ignore
+        
+        # Measure header widths
+        for col in cols:
+            header_text = self.character_tree.heading(col, 'text')
+            col_widths[col] = heading_font.measure(header_text)
+
+        # Measure content widths
+        for item in self.character_tree.get_children():
+            # Measure the text in the #0 column
+            text = self.character_tree.item(item, 'text')
+            # We don't have a col_id for #0, so we just update its width directly # type: ignore
+            # The icon width (24px) is added as padding
+            new_width = max(self.character_tree.column("#0", "width"), row_font.measure(text) + 24) # type: ignore
+            self.character_tree.column("#0", width=new_width)
+
+            values = self.character_tree.item(item, 'values')
+            for i, val in enumerate(values):
+                col = cols[i]
+                col_widths[col] = max(col_widths[col], row_font.measure(str(val)))
+
+        # Apply new widths to fixed-size columns
+        for col in fixed_cols:
+            new_width = max(col_widths.get(col, 0) + 20, 80)
+            self.character_tree.column(col, width=new_width, anchor='center')
     
     def change_language(self, lang_code):
         """Changes the application language and updates the UI."""
@@ -509,8 +587,6 @@ class CharacterApp:
     def retranslate_ui(self):
         """Updates the text of all UI widgets."""
         self.master.title(lang.get("window_title"))
-        self.label.config(text=lang.get("welcome_message"))
-        self.char_label.config(text=lang.get("existing_character_label"))
         
         # Rebuild File Menu
         self.file_menu_button.config(text=lang.get("file_menu_label"))
@@ -519,10 +595,14 @@ class CharacterApp:
         self.file_menu.entryconfig(self.menu_items['exit_index'], label=lang.get("exit_button_text"))
         self.help_menu.entryconfig(self.menu_items['about_index'], label=lang.get("about_menu_label"))
 
-        # Update the combobox if it's empty
-        if not self.character_menu['values']:
-            self.selected_character.set(lang.get("none_option"))
+        # Retranslate Treeview headers
+        self.character_tree.heading('#0', text=lang.get("column_realm"))
+        self.character_tree.heading('name', text=lang.get("column_name"))
+        self.character_tree.heading('level', text=lang.get("column_level"))
         
+        # Re-fit columns after re-translating headers
+        self.master.after(50, self.autofit_treeview_columns)
+
         # Update status bar if it exists
         self.update_status_bar(lang.get("status_bar_loaded", duration=self.master.load_time))
         
@@ -555,12 +635,12 @@ class CharacterApp:
             # Create handler for general logs
             self.debug_log_handler = TextHandler(self.debug_window.log_widget)
             formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-            self.debug_log_handler.setFormatter(formatter)
-            self.debug_window.log_handler = self.debug_log_handler # Give handler to window
+            self.debug_log_handler.setFormatter(formatter) # type: ignore
+            self.debug_window.log_handler = self.debug_log_handler  # Give handler to window
 
             # Create handler for errors/tracebacks
             self.debug_error_handler = TextHandler(self.debug_window.error_widget)
-            error_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(pathname)s:%(lineno)d\n%(message)s')
+            error_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(pathname)s:%(lineno)d\n%(message)s') # type: ignore
             self.debug_error_handler.setFormatter(error_formatter)
             self.debug_error_handler.setLevel(logging.ERROR) # This handler only cares about errors
             self.debug_window.error_handler = self.debug_error_handler
@@ -569,7 +649,7 @@ class CharacterApp:
             self.debug_window.set_font_size() # Set initial font size
 
             # Re-run setup_logging to include the new handler
-            setup_logging(extra_handlers=[self.debug_log_handler, self.debug_error_handler])
+            setup_logging(extra_handlers=[self.debug_log_handler, self.debug_error_handler]) # type: ignore
             logging.info("Fenêtre de débogage initialisée.")
 
             # Set default log file for the reader
@@ -611,7 +691,7 @@ class CharacterApp:
         language_frame.pack(fill=tk.X)
         
         self.config_widgets['language_label'] = ttk.Label(language_frame, text=lang.get("config_language_label") + ":")
-        self.config_widgets['language_label'].pack(side=tk.LEFT, padx=(0, 5))
+        self.config_widgets['language_label'].pack(side=tk.LEFT, padx=(0, 5)) # type: ignore
 
         self.language_var = tk.StringVar()
         language_combo = ttk.Combobox(language_frame, textvariable=self.language_var, state="readonly")
@@ -627,9 +707,9 @@ class CharacterApp:
         self.config_widgets['config_path_frame'].pack(fill=tk.X, padx=10, pady=5)
         self.config_path_var = tk.StringVar()
         config_path_entry = ttk.Entry(self.config_widgets['config_path_frame'], textvariable=self.config_path_var, width=50)
-        config_path_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5))
+        config_path_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5)) # type: ignore
         self.config_widgets['config_browse_button'] = ttk.Button(self.config_widgets['config_path_frame'], text=lang.get("browse_button"), command=self.browse_config_folder)
-        self.config_widgets['config_browse_button'].pack(side=tk.LEFT)
+        self.config_widgets['config_browse_button'].pack(side=tk.LEFT) # type: ignore
 
         # --- Separator for future options ---
         separator = ttk.Separator(self.config_window, orient='horizontal')
@@ -641,8 +721,8 @@ class CharacterApp:
         self.char_path_var = tk.StringVar()
         path_entry = ttk.Entry(self.config_widgets['path_frame'], textvariable=self.char_path_var, width=50)
         path_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5))
-        self.config_widgets['browse_button'] = ttk.Button(self.config_widgets['path_frame'], text=lang.get("browse_button"), command=self.browse_character_folder)
-        self.config_widgets['browse_button'].pack(side=tk.LEFT)
+        self.config_widgets['char_browse_button'] = ttk.Button(self.config_widgets['path_frame'], text=lang.get("browse_button"), command=self.browse_character_folder)
+        self.config_widgets['char_browse_button'].pack(side=tk.LEFT)
 
         # --- Separator for directory sections ---
         dir_separator = ttk.Separator(self.config_window, orient='horizontal')
@@ -653,29 +733,29 @@ class CharacterApp:
         debug_frame.pack(fill=tk.X)
         self.debug_mode_var = tk.BooleanVar()
         self.config_widgets['debug_check'] = ttk.Checkbutton(debug_frame, text=lang.get("config_debug_mode_label"), variable=self.debug_mode_var)
-        self.config_widgets['debug_check'].pack(side=tk.LEFT, padx=10)
+        self.config_widgets['debug_check'].pack(side=tk.LEFT, padx=10) # type: ignore
 
         # --- Show Debug Window Checkbox ---
         show_debug_win_frame = ttk.Frame(self.config_window, padding=(10, 0, 10, 5))
         show_debug_win_frame.pack(fill=tk.X)
         self.show_debug_window_var = tk.BooleanVar()
         self.config_widgets['show_debug_win_check'] = ttk.Checkbutton(show_debug_win_frame, text=lang.get("config_show_debug_window_label"), variable=self.show_debug_window_var)
-        self.config_widgets['show_debug_win_check'].pack(side=tk.LEFT, padx=10)
+        self.config_widgets['show_debug_win_check'].pack(side=tk.LEFT, padx=10) # type: ignore
 
         # --- Widgets for Log Folder Path ---
         self.config_widgets['log_path_frame'] = ttk.LabelFrame(self.config_window, text=lang.get("config_log_path_label"), padding=10)
         self.config_widgets['log_path_frame'].pack(fill=tk.X, padx=10, pady=10)
         self.log_path_var = tk.StringVar()
         log_path_entry = ttk.Entry(self.config_widgets['log_path_frame'], textvariable=self.log_path_var, width=50)
-        log_path_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5))
+        log_path_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5)) # type: ignore
         self.config_widgets['log_browse_button'] = ttk.Button(self.config_widgets['log_path_frame'], text=lang.get("browse_button"), command=self.browse_log_folder)
-        self.config_widgets['log_browse_button'].pack(side=tk.LEFT)
+        self.config_widgets['log_browse_button'].pack(side=tk.LEFT) # type: ignore
 
         # --- Save Button ---
         button_frame = ttk.Frame(self.config_window, padding=10)
         button_frame.pack(fill=tk.X, side=tk.BOTTOM)
         self.config_widgets['save_button'] = ttk.Button(button_frame, text=lang.get("save_button"), command=self.save_configuration)
-        self.config_widgets['save_button'].pack(side=tk.RIGHT)
+        self.config_widgets['save_button'].pack(side=tk.RIGHT) # type: ignore
 
     def _update_configuration_fields(self):
         """Refreshes the values in the configuration window from the config."""
@@ -696,7 +776,7 @@ class CharacterApp:
         self.config_widgets['config_path_frame'].config(text=lang.get("config_file_path_label"))
         self.config_widgets['config_browse_button'].config(text=lang.get("browse_button"))
         self.config_widgets['path_frame'].config(text=lang.get("config_path_label"))
-        self.config_widgets['browse_button'].config(text=lang.get("browse_button"))
+        self.config_widgets['char_browse_button'].config(text=lang.get("browse_button"))
         self.config_widgets['debug_check'].config(text=lang.get("config_debug_mode_label"))
         self.config_widgets['show_debug_win_check'].config(text=lang.get("config_show_debug_window_label"))
         self.config_widgets['log_path_frame'].config(text=lang.get("config_log_path_label"))
@@ -816,7 +896,7 @@ def main():
     # Calculate and store loading time
     end_time = time.perf_counter()
     load_duration = end_time - start_time
-    logging.info(f"Application loaded in {load_duration:.4f} seconds.")
+    logging.info(f"Application loaded in {load_duration:.4f} seconds.") # type: ignore
     root.load_time = load_duration # Store it on the root window
     app.update_status_bar(lang.get("status_bar_loaded", duration=load_duration))
 

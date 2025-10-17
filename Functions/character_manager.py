@@ -75,13 +75,13 @@ def save_character(character_data):
 def get_all_characters():
     """
     Scans the 'Characters' directory and its realm subdirectories,
-    and returns a list of character names.
+    and returns a list of dictionaries, each containing character details.
     """
     character_dir = get_character_dir()
     if not os.path.exists(character_dir):
         return []  # Return an empty list if the directory does not exist
 
-    character_names = []
+    characters = []
     for realm in REALM_ICONS.keys():
         realm_dir = os.path.join(character_dir, realm)
         if os.path.isdir(realm_dir):
@@ -90,9 +90,9 @@ def get_all_characters():
                     try:
                         with open(os.path.join(realm_dir, filename), 'r', encoding='utf-8') as f:
                             data = json.load(f)
-                            if 'name' in data:
-                                character_names.append(data['name'])
+                            # Add essential data for the list view
+                            characters.append(data)
                     except (json.JSONDecodeError, IOError) as e:
                         logger.warning(f"Could not read or parse character file {filename}: {e}")
                         continue
-    return sorted(character_names)
+    return sorted(characters, key=lambda x: (x.get('realm', ''), x.get('name', '').lower()))

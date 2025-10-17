@@ -54,5 +54,8 @@
     "debug_details_pane_title": "Détails",
     "debug_log_reader_pane_title": "Lecture des fichiers de logs",
     "clear_button_text": "Effacer",
-    "log_reader_file_not_found": "Le fichier debug.log n'existe pas. Activez le mode débogage dans la configuration pour le créer."
+    "log_reader_file_not_found": "Le fichier debug.log n'existe pas. Activez le mode débogage dans la configuration pour le créer.",
+    "column_name": "Nom",
+    "column_realm": "Royaume",
+    "column_level": "Niveau"
 }

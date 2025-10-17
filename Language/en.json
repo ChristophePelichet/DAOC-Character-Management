@@ -53,5 +53,8 @@
     "debug_details_pane_title": "Details",
     "debug_log_reader_pane_title": "Log File Reading",
     "clear_button_text": "Clear",
-    "log_reader_file_not_found": "debug.log file does not exist. Enable debug mode in the settings to create it."
+    "log_reader_file_not_found": "debug.log file does not exist. Enable debug mode in the settings to create it.",
+    "column_name": "Name",
+    "column_realm": "Realm",
+    "column_level": "Level"
 }

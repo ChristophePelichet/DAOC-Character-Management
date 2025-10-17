@@ -24,11 +24,11 @@ def get_img_dir():
         return path
     return os.path.join(get_base_path(), "Img")
 
-def setup_logging(extra_handler=None):
+def setup_logging(extra_handlers=None):
     """
     Configures the application's logger based on settings in config.json.
     If debug mode is off, all logging is disabled.
-    An optional extra_handler (like for a GUI window) can be provided.
+    An optional list of extra_handlers (like for a GUI window) can be provided.
     """
     # Get the root logger
     logger = logging.getLogger()
@@ -36,9 +36,10 @@ def setup_logging(extra_handler=None):
     # Clear existing handlers to avoid duplicate logs on re-configuration
     logger.handlers.clear()
 
-    # If a special handler (like for the debug window) is provided, add it first.
-    if extra_handler:
-        logger.addHandler(extra_handler)
+    # If special handlers (like for the debug window) are provided, add them first.
+    if extra_handlers:
+        for handler in extra_handlers:
+            logger.addHandler(handler)
 
     # Determine logging level from config
     is_debug_mode = config.get("debug_mode", True)

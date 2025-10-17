@@ -1,8 +1,10 @@
 import os
 import sys
+import traceback
 import tkinter as tk
 import logging
 import time
+import threading
 from tkinter import ttk, simpledialog, messagebox, Menu, filedialog
 from Functions.character_manager import create_character_data, save_character, get_all_characters, get_character_dir, REALM_ICONS
 from Functions.language_manager import lang, get_available_languages
@@ -16,6 +18,13 @@ setup_logging()
 # --- Application Constants ---
 APP_NAME = "Character Manager"
 APP_VERSION = "0.1"
+
+def global_exception_handler(exc_type, exc_value, exc_traceback):
+    """Catches unhandled exceptions and logs them with full traceback."""
+    # Format the traceback
+    tb_lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+    tb_string = "".join(tb_lines)
+    logging.critical(f"Unhandled exception caught:\n{tb_string}")
 
 class TextHandler(logging.Handler):
     """A custom logging handler that sends records to a Tkinter Text widget."""
@@ -46,25 +55,27 @@ class DebugWindow(tk.Toplevel):
     def __init__(self, parent):
         super().__init__(parent)
         self.title(lang.get("debug_window_title"))
-        self.geometry("800x400")
+        self.geometry("1200x700")
 
         # --- Menu Bar ---
         self.menu_bar = Menu(self)
         self.config(menu=self.menu_bar)
 
         self.level_menu = Menu(self.menu_bar, tearoff=0)
-        self.menu_bar.add_cascade(label=lang.get("debug_level_menu"), menu=self.level_menu)
+        self.menu_bar.add_cascade(label=lang.get("debug_level_menu"), menu=self.level_menu, underline=0)
+        self.level_cascade_index = self.menu_bar.index('end')
 
         # --- Font Size Menu ---
         self.font_size_menu = Menu(self.menu_bar, tearoff=0)
-        self.menu_bar.add_cascade(label=lang.get("debug_font_size_menu"), menu=self.font_size_menu)
+        self.menu_bar.add_cascade(label=lang.get("debug_font_size_menu"), menu=self.font_size_menu, underline=0)
+        self.font_cascade_index = self.menu_bar.index('end')
         
         self.font_sizes = {
-            lang.get("font_size_small"): 8,
-            lang.get("font_size_medium"): 9,
-            lang.get("font_size_large"): 11
+            "small": 8,
+            "medium": 9,
+            "large": 11
         }
-        self.font_size_var = tk.StringVar(value=lang.get("font_size_medium"))
+        self.font_size_var = tk.StringVar(value="medium")
 
         self.log_level_var = tk.StringVar(value="DEBUG")
         self.log_levels = {
@@ -75,6 +86,7 @@ class DebugWindow(tk.Toplevel):
             "CRITICAL": logging.CRITICAL
         }
 
+        # Level Menu Items
         self.level_menu.add_radiobutton(
             label=lang.get("debug_level_all"),
             variable=self.log_level_var,
@@ -91,23 +103,68 @@ class DebugWindow(tk.Toplevel):
                 command=self.set_log_level
             )
 
-        for size_name in self.font_sizes.keys():
-            self.font_size_menu.add_radiobutton(
-                label=size_name,
-                variable=self.font_size_var,
-                value=size_name,
-                command=self.set_font_size
-            )
+        # Font Size Menu Items
+        self.font_size_menu.add_radiobutton(
+            label=lang.get("font_size_small"), variable=self.font_size_var, value="small", command=self.set_font_size)
+        self.font_size_menu.add_radiobutton(
+            label=lang.get("font_size_medium"), variable=self.font_size_var, value="medium", command=self.set_font_size)
+        self.font_size_menu.add_radiobutton(
+            label=lang.get("font_size_large"), variable=self.font_size_var, value="large", command=self.set_font_size)
 
-        self.text_widget = tk.Text(self, wrap="word", state="disabled")
-        self.text_widget.pack(expand=True, fill="both")
+        # --- Button Bar ---
+        button_bar_frame = ttk.Frame(self)
+        button_bar_frame.pack(fill='x', padx=5, pady=2)
+        self.test_debug_button = ttk.Button(button_bar_frame, text=lang.get("test_debug_button"), command=self.raise_test_exception)
+        self.test_debug_button.pack(side='left')
+
+        # --- Main horizontal Paned Window ---
+        main_paned_window = ttk.PanedWindow(self, orient=tk.HORIZONTAL)
+        main_paned_window.pack(expand=True, fill="both")
+
+        # --- Left vertical Paned Window (for logs and errors) ---
+        left_paned_window = ttk.PanedWindow(main_paned_window, orient=tk.VERTICAL)
+        main_paned_window.add(left_paned_window, weight=2) # Give more space to the left side
+
+        # --- Top-left pane for general logs ---
+        log_frame = ttk.LabelFrame(left_paned_window, text=lang.get("debug_log_pane_title"), name="log_frame")
+        self.log_widget = tk.Text(log_frame, wrap="word", state="disabled")
+        self.log_widget.pack(expand=True, fill="both")
+        left_paned_window.add(log_frame, weight=3) # Give more space to logs
+
+        # --- Bottom-left pane for errors ---
+        error_frame = ttk.LabelFrame(left_paned_window, text=lang.get("debug_errors_pane_title"), name="error_frame")
+        self.error_widget = tk.Text(error_frame, wrap="word", state="disabled")
+        self.error_widget.pack(expand=True, fill="both")
+        left_paned_window.add(error_frame, weight=1)
+
+        # --- Right pane for details ---
+        self.log_reader_frame = ttk.LabelFrame(main_paned_window, text=lang.get("debug_log_reader_pane_title"), name="log_reader_frame")
+        
+        # --- File selection bar for log reader ---
+        file_bar = ttk.Frame(self.log_reader_frame)
+        file_bar.pack(fill='x', padx=5, pady=5)
+        self.log_file_path_var = tk.StringVar()
+        ttk.Entry(file_bar, textvariable=self.log_file_path_var, state="readonly").pack(side='left', fill='x', expand=True)
+        self.browse_log_reader_button = ttk.Button(file_bar, text=lang.get("browse_button"), command=self.browse_log_file)
+        self.browse_log_reader_button.pack(side='left', padx=(5, 0))
+        self.clear_log_reader_button = ttk.Button(file_bar, text=lang.get("clear_button_text"), command=self.clear_log_reader)
+        self.clear_log_reader_button.pack(side='left', padx=(5, 0))
+
+        self.log_reader_widget = tk.Text(self.log_reader_frame, wrap="word", state="disabled")
+        self.log_reader_widget.pack(expand=True, fill="both")
+        main_paned_window.add(self.log_reader_frame, weight=1)
 
         # Configure color tags
-        self.text_widget.tag_config("DEBUG", foreground="grey")
-        self.text_widget.tag_config("INFO", foreground="black")
-        self.text_widget.tag_config("WARNING", foreground="orange")
+        for widget in (self.log_widget, self.error_widget, self.log_reader_widget):
+            widget.tag_config("DEBUG", foreground="grey")
+            widget.tag_config("INFO", foreground="black")
+            widget.tag_config("WARNING", foreground="orange")
 
-        self.text_handler = None # Will be created and managed by CharacterApp
+        self.log_handler = None # For general logs
+        self.error_handler = None # For errors and tracebacks
+
+        self.monitoring_thread = None
+        self.monitoring_active = False
 
         self.protocol("WM_DELETE_WINDOW", self.on_close)
 
@@ -115,24 +172,115 @@ class DebugWindow(tk.Toplevel):
         """Sets the logging level for the text handler based on menu selection."""
         level_name = self.log_level_var.get()
         level = self.log_levels.get(level_name, logging.INFO)
-        if self.text_handler:
-            self.text_handler.setLevel(level)
+        if self.log_handler:
+            self.log_handler.setLevel(level)
             logging.info(f"Niveau de log de la console de débogage réglé sur {level_name}")
 
     def set_font_size(self):
         """Sets the font size for the text widget and its tags."""
-        size_name = self.font_size_var.get()
-        size_value = self.font_sizes.get(size_name, 9) # Default to 9 if not found
+        size_key = self.font_size_var.get()
+        size_value = self.font_sizes.get(size_key, 9) # Default to 9 if not found
         
-        self.text_widget.config(font=("Courier New", size_value))
-        # Re-apply tag fonts to update their size
-        self.text_widget.tag_config("ERROR", foreground="red", font=("Courier New", size_value, "bold"))
-        self.text_widget.tag_config("CRITICAL", foreground="red", font=("Courier New", size_value, "bold", "underline"))
+        for widget in (self.log_widget, self.error_widget, self.log_reader_widget):
+            widget.config(font=("Courier New", size_value))
+            # Re-apply tag fonts to update their size
+            widget.tag_config("ERROR", foreground="red", font=("Courier New", size_value, "bold"))
+            widget.tag_config("CRITICAL", foreground="red", font=("Courier New", size_value, "bold", "underline"))
+
+    def retranslate(self):
+        """Updates the text of the window and its menus."""
+        self.title(lang.get("debug_window_title"))
+        self.menu_bar.entryconfig(self.level_cascade_index, label=lang.get("debug_level_menu"))
+        self.menu_bar.entryconfig(self.font_cascade_index, label=lang.get("debug_font_size_menu"))
+        
+        self.test_debug_button.config(text=lang.get("test_debug_button"))
+        # Retranslate pane titles
+        self.log_widget.master.config(text=lang.get("debug_log_pane_title")) # master is the LabelFrame
+        self.error_widget.master.config(text=lang.get("debug_errors_pane_title"))
+        self.log_reader_frame.config(text=lang.get("debug_log_reader_pane_title"))
+        self.browse_log_reader_button.config(text=lang.get("browse_button"))
+        self.clear_log_reader_button.config(text=lang.get("clear_button_text"))
+        # Retranslate font size menu items
+        self.level_menu.entryconfig(0, label=lang.get("debug_level_all"))
+        self.font_size_menu.entryconfig(0, label=lang.get("font_size_small"))
+        self.font_size_menu.entryconfig(1, label=lang.get("font_size_medium"))
+        self.font_size_menu.entryconfig(2, label=lang.get("font_size_large"))
+
+    def raise_test_exception(self):
+        """Raises a test exception to verify the handler."""
+        logging.info("Raising a test exception...")
+        1 / 0
 
     def on_close(self):
         """Remove the handler and destroy the window."""
-        logging.getLogger().removeHandler(self.text_handler)
+        self.stop_log_monitoring()
+        if self.log_handler:
+            logging.getLogger().removeHandler(self.log_handler)
+        if self.error_handler:
+            logging.getLogger().removeHandler(self.error_handler)
         self.destroy()
+
+    def set_default_log_file(self, filepath):
+        """Sets and tries to monitor the default log file."""
+        if os.path.exists(filepath):
+            self.log_file_path_var.set(filepath)
+            self.start_log_monitoring(filepath)
+        else:
+            self._append_to_log_reader(lang.get("log_reader_file_not_found") + "\n")
+
+    def browse_log_file(self):
+        """Opens a file dialog to select a log file to monitor."""
+        filepath = filedialog.askopenfilename(
+            title="Select a log file to monitor",
+            filetypes=[("Log files", "*.log"), ("Text files", "*.txt"), ("All files", "*.*")]
+        )
+        if filepath:
+            self.log_file_path_var.set(filepath)
+            self.start_log_monitoring(filepath)
+
+    def clear_log_reader(self):
+        """Clears the content of the log reader widget."""
+        self.log_reader_widget.config(state='normal')
+        self.log_reader_widget.delete('1.0', tk.END)
+        self.log_reader_widget.config(state='disabled')
+
+    def start_log_monitoring(self, filepath):
+        """Starts a thread to monitor the selected log file."""
+        self.stop_log_monitoring() # Stop any previous monitoring
+        self.clear_log_reader()
+
+        self.monitoring_active = True
+        self.monitoring_thread = threading.Thread(target=self._monitor_log_file, args=(filepath,), daemon=True)
+        self.monitoring_thread.start()
+
+    def stop_log_monitoring(self):
+        """Stops the file monitoring thread."""
+        if self.monitoring_thread and self.monitoring_thread.is_alive():
+            self.monitoring_active = False
+            self.monitoring_thread.join(timeout=1) # Wait a bit for the thread to exit
+
+    def _monitor_log_file(self, filepath):
+        """The actual file monitoring logic that runs in a separate thread."""
+        try:
+            with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+                # Go to the end of the file
+                f.seek(0, 2)
+                while self.monitoring_active:
+                    line = f.readline()
+                    if line:
+                        self.log_reader_widget.after(0, self._append_to_log_reader, line)
+                    else:
+                        time.sleep(0.1) # Wait for new lines
+        except Exception as e:
+            error_message = f"Error monitoring file {filepath}: {e}\n"
+            self.log_reader_widget.after(0, self._append_to_log_reader, error_message)
+
+    def _append_to_log_reader(self, text):
+        """Safely appends text to the log reader widget from the main thread."""
+        self.log_reader_widget.config(state='normal')
+        self.log_reader_widget.insert(tk.END, text)
+        self.log_reader_widget.config(state='disabled')
+        self.log_reader_widget.see(tk.END)
 class NewCharacterDialog(tk.Toplevel):
     """Custom dialog to create a new character with a name and a realm."""
     def __init__(self, parent, title=None, icon_images=None):
@@ -235,7 +383,8 @@ class CharacterApp:
 
         # --- Debug Window ---
         self.debug_window = None
-        self.debug_window_handler = None
+        self.debug_log_handler = None
+        self.debug_error_handler = None
         # For development, we set the default to True
         if config.get("show_debug_window", True):
             self.show_debug_window()
@@ -380,20 +529,52 @@ class CharacterApp:
         # Retranslate the config window if it exists
         if self.config_window:
             self._retranslate_configuration_window()
+        
+        # Retranslate the debug window if it exists
+        if self.debug_window:
+            self.debug_window.retranslate()
 
     def show_debug_window(self):
         """Creates and shows the debug window."""
         if self.debug_window is None or not self.debug_window.winfo_exists():
+            # Force the main window to update its geometry info
+            self.master.update_idletasks()
+
+            # Get main window position and size
+            main_x = self.master.winfo_x()
+            main_y = self.master.winfo_y()
+            main_width = self.master.winfo_width()
+
+            # Calculate position for the debug window (to the right of the main window)
+            offset_x = main_x + main_width + 10
+            offset_y = main_y
+
             self.debug_window = DebugWindow(self.master)
-            self.debug_window_handler = TextHandler(self.debug_window.text_widget)
+            self.debug_window.geometry(f"+{offset_x}+{offset_y}")
+
+            # Create handler for general logs
+            self.debug_log_handler = TextHandler(self.debug_window.log_widget)
             formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-            self.debug_window_handler.setFormatter(formatter)
-            self.debug_window.text_handler = self.debug_window_handler # Give handler to window
+            self.debug_log_handler.setFormatter(formatter)
+            self.debug_window.log_handler = self.debug_log_handler # Give handler to window
+
+            # Create handler for errors/tracebacks
+            self.debug_error_handler = TextHandler(self.debug_window.error_widget)
+            error_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(pathname)s:%(lineno)d\n%(message)s')
+            self.debug_error_handler.setFormatter(error_formatter)
+            self.debug_error_handler.setLevel(logging.ERROR) # This handler only cares about errors
+            self.debug_window.error_handler = self.debug_error_handler
+
             self.debug_window.set_log_level() # Set initial level
             self.debug_window.set_font_size() # Set initial font size
+
             # Re-run setup_logging to include the new handler
-            setup_logging(extra_handler=self.debug_window_handler)
+            setup_logging(extra_handlers=[self.debug_log_handler, self.debug_error_handler])
             logging.info("Fenêtre de débogage initialisée.")
+
+            # Set default log file for the reader
+            default_log_path = os.path.join(get_log_dir(), "debug.log")
+            self.debug_window.set_default_log_file(default_log_path)
 
     def hide_debug_window(self):
         if self.debug_window and self.debug_window.winfo_exists():
@@ -600,13 +781,13 @@ class CharacterApp:
         
         # Re-apply logging settings immediately after saving debug mode
         # Pass the debug handler if it exists
-        setup_logging(extra_handler=self.master.app.debug_window_handler)
+        setup_logging(extra_handlers=[self.debug_log_handler, self.debug_error_handler])
         
         # Show or hide the debug window based on the new setting
         if show_debug:
-            self.master.app.show_debug_window()
+            self.show_debug_window()
         else:
-            self.master.app.hide_debug_window()
+            self.hide_debug_window()
 
         # Log activation now that logging is configured
         if new_debug_mode and not old_debug_mode:
@@ -626,6 +807,10 @@ def main():
     start_time = time.perf_counter()
     root = tk.Tk()
     # Attach app instance to root to make it accessible from Toplevel windows
+
+    # Set up global exception handling
+    sys.excepthook = global_exception_handler
+    root.report_callback_exception = global_exception_handler
     app = CharacterApp(root)
 
     # Calculate and store loading time

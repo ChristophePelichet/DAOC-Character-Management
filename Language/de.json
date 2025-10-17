@@ -47,5 +47,12 @@
     "debug_font_size_menu": "Schrift",
     "font_size_small": "Klein",
     "font_size_medium": "Mittel",
-    "font_size_large": "Groß"
+    "font_size_large": "Groß",
+    "debug_log_pane_title": "Logs",
+    "debug_errors_pane_title": "Fehler & Tracebacks",
+    "test_debug_button": "Debug testen",
+    "debug_details_pane_title": "Details",
+    "debug_log_reader_pane_title": "Logdatei lesen",
+    "clear_button_text": "Löschen",
+    "log_reader_file_not_found": "debug.log-Datei existiert nicht. Aktivieren Sie den Debug-Modus in den Einstellungen, um sie zu erstellen."
 }

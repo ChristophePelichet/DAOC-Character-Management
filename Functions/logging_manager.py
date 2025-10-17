@@ -24,10 +24,11 @@ def get_img_dir():
         return path
     return os.path.join(get_base_path(), "Img")
 
-def setup_logging():
+def setup_logging(extra_handler=None):
     """
     Configures the application's logger based on settings in config.json.
     If debug mode is off, all logging is disabled.
+    An optional extra_handler (like for a GUI window) can be provided.
     """
     # Get the root logger
     logger = logging.getLogger()
@@ -35,31 +36,33 @@ def setup_logging():
     # Clear existing handlers to avoid duplicate logs on re-configuration
     logger.handlers.clear()
 
-    # Determine logging level from config
-    is_debug_mode = config.get("debug_mode", False)
+    # If a special handler (like for the debug window) is provided, add it first.
+    if extra_handler:
+        logger.addHandler(extra_handler)
 
-    if not is_debug_mode:
-        # If debug mode is off, disable logging completely by adding a NullHandler
-        logger.addHandler(logging.NullHandler())
-        logger.setLevel(logging.CRITICAL + 1) # Set level higher than any possible log
-        return
+    # Determine logging level from config
+    is_debug_mode = config.get("debug_mode", True)
+
+    # Set the root logger's level to the lowest possible level.
+    # This allows individual handlers to control what they display.
+    logger.setLevel(logging.DEBUG)
 
     # If debug mode is ON, configure file and console handlers
-    logger.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    if is_debug_mode:
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-    log_dir = get_log_dir()
-    if not os.path.exists(log_dir):
-        os.makedirs(log_dir)
-    log_file_path = os.path.join(log_dir, "debug.log")
+        log_dir = get_log_dir()
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
+        log_file_path = os.path.join(log_dir, "debug.log")
 
-    # Rotates logs: 5 files of 1MB each
-    fh = RotatingFileHandler(log_file_path, maxBytes=1024*1024, backupCount=5, encoding='utf-8')
-    fh.setLevel(logging.DEBUG)
-    fh.setFormatter(formatter)
-    logger.addHandler(fh)
+        # Rotates logs: 5 files of 1MB each
+        fh = RotatingFileHandler(log_file_path, maxBytes=1024*1024, backupCount=5, encoding='utf-8')
+        fh.setLevel(logging.DEBUG)
+        fh.setFormatter(formatter)
+        logger.addHandler(fh)
 
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.DEBUG)
-    ch.setFormatter(formatter)
-    logger.addHandler(ch)
+        ch = logging.StreamHandler()
+        ch.setLevel(logging.DEBUG)
+        ch.setFormatter(formatter)
+        logger.addHandler(ch)

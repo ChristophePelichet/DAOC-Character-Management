@@ -38,5 +38,14 @@
     "config_log_path_label": "Log-Verzeichnis",
     "select_log_folder_dialog_title": "Log-Ordner auswählen",
     "config_language_label": "Anwendungssprache",
-    "language_name": "Deutsch"
+    "language_name": "Deutsch",
+    "config_show_debug_window_label": "Debug-Fenster beim Start anzeigen",
+    "debug_window_title": "Debug-Konsole",
+    "debug_level_menu": "Stufe",
+    "debug_level_all": "Alle",
+    "status_bar_loaded": "Bereit. Geladen in {duration:.2f} Sekunden.",
+    "debug_font_size_menu": "Schriftgröße",
+    "font_size_small": "Klein",
+    "font_size_medium": "Mittel",
+    "font_size_large": "Groß"
 }

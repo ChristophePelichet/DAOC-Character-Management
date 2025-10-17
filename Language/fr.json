@@ -38,5 +38,14 @@
     "config_log_path_label": "Répertoire des logs",
     "select_log_folder_dialog_title": "Sélectionner le dossier des logs",
     "config_language_label": "Langue de l'application",
-    "language_name": "Français"
+    "language_name": "Français",
+    "config_show_debug_window_label": "Afficher la fenêtre de débogage au démarrage",
+    "debug_window_title": "Console de débogage",
+    "debug_level_menu": "Niveau",
+    "debug_level_all": "Tous",
+    "status_bar_loaded": "Prêt. Chargé en {duration:.2f} secondes.",
+    "debug_font_size_menu": "Taille police",
+    "font_size_small": "Petite",
+    "font_size_medium": "Moyenne",
+    "font_size_large": "Grande"
 }

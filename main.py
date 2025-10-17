@@ -2,6 +2,7 @@ import os
 import sys
 import tkinter as tk
 import logging
+import time
 from tkinter import ttk, simpledialog, messagebox, Menu, filedialog
 from Functions.character_manager import create_character_data, save_character, get_all_characters, get_character_dir, REALM_ICONS
 from Functions.language_manager import lang, get_available_languages
@@ -15,6 +16,123 @@ setup_logging()
 # --- Application Constants ---
 APP_NAME = "Character Manager"
 APP_VERSION = "0.1"
+
+class TextHandler(logging.Handler):
+    """A custom logging handler that sends records to a Tkinter Text widget."""
+    def __init__(self, text_widget):
+        super().__init__()
+        self.text_widget = text_widget
+        # Define colors for different log levels
+        self.level_colors = {
+            'DEBUG': 'grey',
+            'INFO': 'black',
+            'WARNING': 'orange',
+            'ERROR': 'red',
+            'CRITICAL': 'red'
+        }
+
+    def emit(self, record):
+        msg = self.format(record)
+        def append():
+            self.text_widget.configure(state='normal')
+            self.text_widget.insert(tk.END, msg + '\n', record.levelname)
+            self.text_widget.configure(state='disabled')
+            self.text_widget.see(tk.END)
+        # This is important to avoid threading issues with Tkinter
+        self.text_widget.after(0, append)
+
+class DebugWindow(tk.Toplevel):
+    """A Toplevel window that displays log messages."""
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.title(lang.get("debug_window_title"))
+        self.geometry("800x400")
+
+        # --- Menu Bar ---
+        self.menu_bar = Menu(self)
+        self.config(menu=self.menu_bar)
+
+        self.level_menu = Menu(self.menu_bar, tearoff=0)
+        self.menu_bar.add_cascade(label=lang.get("debug_level_menu"), menu=self.level_menu)
+
+        # --- Font Size Menu ---
+        self.font_size_menu = Menu(self.menu_bar, tearoff=0)
+        self.menu_bar.add_cascade(label=lang.get("debug_font_size_menu"), menu=self.font_size_menu)
+        
+        self.font_sizes = {
+            lang.get("font_size_small"): 8,
+            lang.get("font_size_medium"): 9,
+            lang.get("font_size_large"): 11
+        }
+        self.font_size_var = tk.StringVar(value=lang.get("font_size_medium"))
+
+        self.log_level_var = tk.StringVar(value="DEBUG")
+        self.log_levels = {
+            "DEBUG": logging.DEBUG,
+            "INFO": logging.INFO,
+            "WARNING": logging.WARNING,
+            "ERROR": logging.ERROR,
+            "CRITICAL": logging.CRITICAL
+        }
+
+        self.level_menu.add_radiobutton(
+            label=lang.get("debug_level_all"),
+            variable=self.log_level_var,
+            value="DEBUG", # "All" is equivalent to the DEBUG level
+            command=self.set_log_level
+        )
+        self.level_menu.add_separator()
+
+        for level_name in self.log_levels.keys():
+            self.level_menu.add_radiobutton(
+                label=level_name,
+                variable=self.log_level_var,
+                value=level_name,
+                command=self.set_log_level
+            )
+
+        for size_name in self.font_sizes.keys():
+            self.font_size_menu.add_radiobutton(
+                label=size_name,
+                variable=self.font_size_var,
+                value=size_name,
+                command=self.set_font_size
+            )
+
+        self.text_widget = tk.Text(self, wrap="word", state="disabled")
+        self.text_widget.pack(expand=True, fill="both")
+
+        # Configure color tags
+        self.text_widget.tag_config("DEBUG", foreground="grey")
+        self.text_widget.tag_config("INFO", foreground="black")
+        self.text_widget.tag_config("WARNING", foreground="orange")
+
+        self.text_handler = None # Will be created and managed by CharacterApp
+
+        self.protocol("WM_DELETE_WINDOW", self.on_close)
+
+    def set_log_level(self):
+        """Sets the logging level for the text handler based on menu selection."""
+        level_name = self.log_level_var.get()
+        level = self.log_levels.get(level_name, logging.INFO)
+        if self.text_handler:
+            self.text_handler.setLevel(level)
+            logging.info(f"Niveau de log de la console de débogage réglé sur {level_name}")
+
+    def set_font_size(self):
+        """Sets the font size for the text widget and its tags."""
+        size_name = self.font_size_var.get()
+        size_value = self.font_sizes.get(size_name, 9) # Default to 9 if not found
+        
+        self.text_widget.config(font=("Courier New", size_value))
+        # Re-apply tag fonts to update their size
+        self.text_widget.tag_config("ERROR", foreground="red", font=("Courier New", size_value, "bold"))
+        self.text_widget.tag_config("CRITICAL", foreground="red", font=("Courier New", size_value, "bold", "underline"))
+
+    def on_close(self):
+        """Remove the handler and destroy the window."""
+        logging.getLogger().removeHandler(self.text_handler)
+        self.destroy()
 class NewCharacterDialog(tk.Toplevel):
     """Custom dialog to create a new character with a name and a realm."""
     def __init__(self, parent, title=None):
@@ -128,6 +246,14 @@ class CharacterApp:
         self.master = master
         master.title(lang.get("window_title"))
         master.geometry("450x300")
+        master.app = self # Make app instance accessible
+
+        # --- Debug Window ---
+        self.debug_window = None
+        self.debug_window_handler = None
+        # For development, we set the default to True
+        if config.get("show_debug_window", True):
+            self.show_debug_window()
         
         # --- Toolbar ---
         toolbar = ttk.Frame(master, padding=(2, 2))
@@ -173,6 +299,12 @@ class CharacterApp:
         # Load the character list on application startup
         self.refresh_character_list()
 
+        # --- Status Bar ---
+        self.status_bar = ttk.Frame(master, relief=tk.SUNKEN, padding=(2, 2))
+        self.status_bar.pack(side=tk.BOTTOM, fill=tk.X)
+        self.status_label = ttk.Label(self.status_bar, text="Initialisation...")
+        self.status_label.pack(side=tk.LEFT)
+
     def create_new_character(self):
         """
         Handles the action of creating a new character manually.
@@ -188,8 +320,8 @@ class CharacterApp:
                 logging.info(f"Successfully created character '{character_name}'.")
                 messagebox.showinfo(lang.get("success_title"), lang.get("char_saved_success", name=character_name))
             else:
-                # The error message from save_character is already translated
-                messagebox.showerror(lang.get("error_title"), lang.get("char_exists_error", name=character_name))
+                logging.error(f"Failed to create character '{character_name}': {response}")
+                messagebox.showerror(lang.get("error_title"), response) # Display the actual error from save_character
         else:
             messagebox.showwarning(lang.get("warning_title"), lang.get("creation_cancelled_message"))
 
@@ -229,6 +361,27 @@ class CharacterApp:
         # Update the combobox if it's empty
         if not self.character_menu['values']:
             self.selected_character.set(lang.get("none_option"))
+        
+        # Update status bar if it exists
+        self.update_status_bar(lang.get("status_bar_loaded", duration=self.master.load_time))
+
+    def show_debug_window(self):
+        """Creates and shows the debug window."""
+        if self.debug_window is None or not self.debug_window.winfo_exists():
+            self.debug_window = DebugWindow(self.master)
+            self.debug_window_handler = TextHandler(self.debug_window.text_widget)
+            formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+            self.debug_window_handler.setFormatter(formatter)
+            self.debug_window.text_handler = self.debug_window_handler # Give handler to window
+            self.debug_window.set_log_level() # Set initial level
+            self.debug_window.set_font_size() # Set initial font size
+            # Re-run setup_logging to include the new handler
+            setup_logging(extra_handler=self.debug_window_handler)
+            logging.info("Fenêtre de débogage initialisée.")
+
+    def hide_debug_window(self):
+        if self.debug_window and self.debug_window.winfo_exists():
+            self.debug_window.on_close()
 
     def show_about_dialog(self):
         """Displays the 'About' dialog box."""
@@ -238,6 +391,11 @@ class CharacterApp:
             version=APP_VERSION
         )
         messagebox.showinfo(title, message, parent=self.master)
+
+    def update_status_bar(self, message):
+        """Updates the text in the status bar."""
+        if hasattr(self, 'status_label'):
+            self.status_label.config(text=message)
 
     def open_configuration_window(self):
         """Opens the configuration window."""
@@ -307,9 +465,16 @@ class CharacterApp:
         debug_frame = ttk.Frame(config_window, padding=(10, 0, 10, 5))
         debug_frame.pack(fill=tk.X)
 
-        self.debug_mode_var = tk.BooleanVar(value=config.get("debug_mode", False))
+        self.debug_mode_var = tk.BooleanVar(value=config.get("debug_mode", True))
         debug_check = ttk.Checkbutton(debug_frame, text=lang.get("config_debug_mode_label"), variable=self.debug_mode_var)
         debug_check.pack(side=tk.LEFT, padx=10)
+
+        # --- Show Debug Window Checkbox ---
+        show_debug_win_frame = ttk.Frame(config_window, padding=(10, 0, 10, 5))
+        show_debug_win_frame.pack(fill=tk.X)
+        self.show_debug_window_var = tk.BooleanVar(value=config.get("show_debug_window", True))
+        show_debug_win_check = ttk.Checkbutton(show_debug_win_frame, text=lang.get("config_show_debug_window_label"), variable=self.show_debug_window_var)
+        show_debug_win_check.pack(side=tk.LEFT, padx=10)
 
         # --- Widgets for Log Folder Path ---
         log_path_frame = ttk.LabelFrame(config_window, text=lang.get("config_log_path_label"), padding=10)
@@ -360,7 +525,7 @@ class CharacterApp:
     def save_configuration(self, window):
         """Saves the configuration and closes the window."""
         # Get old and new debug mode states for comparison
-        old_debug_mode = config.get("debug_mode", False)
+        old_debug_mode = config.get("debug_mode", True)
         new_debug_mode = self.debug_mode_var.get()
 
         # Log deactivation while logging is still active
@@ -384,9 +549,19 @@ class CharacterApp:
         config.set("log_folder", self.log_path_var.get())
         config.set("debug_mode", new_debug_mode)
         
-        # Re-apply logging settings immediately after saving debug mode
-        setup_logging()
+        show_debug = self.show_debug_window_var.get()
+        config.set("show_debug_window", show_debug)
         
+        # Re-apply logging settings immediately after saving debug mode
+        # Pass the debug handler if it exists
+        setup_logging(extra_handler=self.master.app.debug_window_handler)
+        
+        # Show or hide the debug window based on the new setting
+        if show_debug:
+            self.master.app.show_debug_window()
+        else:
+            self.master.app.hide_debug_window()
+
         # Log activation now that logging is configured
         if new_debug_mode and not old_debug_mode:
             logging.info("Debug mode has been ACTIVATED.")
@@ -398,9 +573,18 @@ class CharacterApp:
 
 def main():
     """Main function to launch the application."""
+    start_time = time.perf_counter()
     root = tk.Tk()
     # Attach app instance to root to make it accessible from Toplevel windows
     app = CharacterApp(root)
+
+    # Calculate and store loading time
+    end_time = time.perf_counter()
+    load_duration = end_time - start_time
+    root.load_time = load_duration # Store it on the root window
+    app.update_status_bar(lang.get("status_bar_loaded", duration=load_duration))
+    logging.info(f"Application loaded in {load_duration:.4f} seconds.")
+
     root.mainloop()
 
 if __name__ == "__main__":

@@ -62,22 +62,24 @@ def save_character(character_data):
     realm_dir = os.path.join(main_character_dir, realm)
     os.makedirs(realm_dir, exist_ok=True)
     
-    # Sanitize the name: convert to lowercase, replace spaces with underscores,
-    # and remove all non-alphanumeric characters (except underscore).
-    base_name = character_data['name'].lower().replace(' ', '_')
-    sanitized_name = "".join(c for c in base_name if c.isalnum() or c == '_')
-    filename = os.path.join(realm_dir, f"{sanitized_name}.json")
+    # Check for name uniqueness before sanitizing for filename
+    existing_characters = get_all_characters()
+    if character_data['name'].lower() in [c.lower() for c in existing_characters]:
+        # Use the pre-translated string for this specific, common error
+        from .language_manager import lang
+        return False, lang.get("char_exists_error", name=character_data['name'])
 
-    # Check if the file already exists to ensure name uniqueness
-    if os.path.exists(filename):
-        return False, f"A character named '{character_data['name']}' already exists in this realm."
+    # Sanitize the name for the filename. This should be robust.
+    # We use the original name for the check, but a sanitized one for the file.
+    sanitized_for_filename = "".join(c for c in character_data['name'] if c.isalnum() or c in (' ', '_')).rstrip()
+    filename = os.path.join(realm_dir, f"{sanitized_for_filename}.json")
 
     try:
         with open(filename, 'w', encoding='utf-8') as f:
             json.dump(character_data, f, indent=4, ensure_ascii=False)
-        return True, f"Personnage '{character_data['name']}' sauvegardé dans {filename}"
+        return True, f"Character '{character_data['name']}' saved to {filename}"
     except (IOError, OSError) as e:
-        return False, f"Erreur lors de la sauvegarde du personnage : {e}"
+        return False, f"Error while saving character: {e}"
 
 def get_all_characters():
     """

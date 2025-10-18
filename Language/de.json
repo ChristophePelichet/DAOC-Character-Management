@@ -57,5 +57,11 @@
     "log_reader_file_not_found": "debug.log-Datei existiert nicht. Aktivieren Sie den Debug-Modus in den Einstellungen, um sie zu erstellen.",
     "column_name": "Name",
     "column_realm": "Reich",
-    "column_level": "Stufe"
+    "column_level": "Stufe",
+    "character_sheet_title": "Charakterbogen - {name}",
+    "delete_char_confirm_title": "Löschen bestätigen",
+    "delete_char_confirm_message": "Sind Sie sicher, dass Sie den Charakter '{name}' endgültig löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "column_action": "Aktion",
+    "context_menu_delete": "Löschen",
+    "column_selection": "Auswahl"
 }

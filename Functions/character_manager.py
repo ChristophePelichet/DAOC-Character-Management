@@ -56,8 +56,8 @@ def save_character(character_data):
     os.makedirs(realm_dir, exist_ok=True)
     
     # Check for name uniqueness before sanitizing for filename
-    existing_characters_lower = {c.lower() for c in get_all_characters()}
-    if character_data['name'].lower() in existing_characters_lower:
+    existing_names_lower = {char['name'].lower() for char in get_all_characters()}
+    if character_data['name'].lower() in existing_names_lower:
         # Return a specific error key for the UI to handle translation
         return False, "char_exists_error"
 
@@ -96,3 +96,27 @@ def get_all_characters():
                         logger.warning(f"Could not read or parse character file {filename}: {e}")
                         continue
     return sorted(characters, key=lambda x: (x.get('realm', ''), x.get('name', '').lower()))
+
+def delete_character(character_id, realm):
+    """
+    Deletes a character's JSON file based on their ID and realm.
+    Returns True on success, False on failure.
+    """
+    if not character_id or not realm:
+        logger.error("Attempted to delete a character with missing ID or realm.")
+        return False, "Missing character ID or realm."
+
+    character_dir = get_character_dir()
+    file_path = os.path.join(character_dir, realm, f"{character_id}.json")
+
+    if os.path.exists(file_path):
+        try:
+            os.remove(file_path)
+            logger.info(f"Successfully deleted character file: {file_path}")
+            return True, "Character deleted successfully."
+        except OSError as e:
+            logger.error(f"Error deleting character file {file_path}: {e}")
+            return False, f"OS error while deleting file: {e}"
+    else:
+        logger.warning(f"Attempted to delete a non-existent character file: {file_path}")
+        return False, "Character file not found."

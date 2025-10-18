@@ -7,7 +7,7 @@ from tkinter import font as tkfont
 import time
 import threading
 from tkinter import ttk, simpledialog, messagebox, Menu, filedialog
-from Functions.character_manager import create_character_data, save_character, get_all_characters, get_character_dir, REALM_ICONS
+from Functions.character_manager import create_character_data, save_character, get_all_characters, get_character_dir, REALM_ICONS, delete_character
 from Functions.language_manager import lang, get_available_languages
 from Functions.config_manager import config, get_config_dir
 from Functions.logging_manager import setup_logging, get_log_dir, get_img_dir
@@ -44,10 +44,12 @@ class TextHandler(logging.Handler):
     def emit(self, record):
         msg = self.format(record)
         def append():
-            self.text_widget.configure(state='normal')
-            self.text_widget.insert(tk.END, msg + '\n', record.levelname)
-            self.text_widget.configure(state='disabled')
-            self.text_widget.see(tk.END)
+            # Check if the widget still exists before trying to write to it
+            if self.text_widget.winfo_exists():
+                self.text_widget.configure(state='normal')
+                self.text_widget.insert(tk.END, msg + '\n', record.levelname)
+                self.text_widget.configure(state='disabled')
+                self.text_widget.see(tk.END)
         # This is important to avoid threading issues with Tkinter
         self.text_widget.after(0, append)
 
@@ -77,6 +79,7 @@ class DebugWindow(tk.Toplevel):
             "large": 11
         }
         self.font_size_var = tk.StringVar(value="medium")
+        self.font_menu_items = {} # To store font menu item indices
 
         self.log_level_var = tk.StringVar(value="DEBUG")
         self.log_levels = {
@@ -108,12 +111,15 @@ class DebugWindow(tk.Toplevel):
         self.font_size_menu.add_radiobutton(
             label=lang.get("font_size_small"), variable=self.font_size_var, value="small", command=self.set_font_size
         )
+        self.font_menu_items['small'] = self.font_size_menu.index('end')
         self.font_size_menu.add_radiobutton(
             label=lang.get("font_size_medium"), variable=self.font_size_var, value="medium", command=self.set_font_size
         )
+        self.font_menu_items['medium'] = self.font_size_menu.index('end')
         self.font_size_menu.add_radiobutton(
             label=lang.get("font_size_large"), variable=self.font_size_var, value="large", command=self.set_font_size
         )
+        self.font_menu_items['large'] = self.font_size_menu.index('end')
 
         # --- Button Bar ---
         button_bar_frame = ttk.Frame(self)
@@ -359,6 +365,25 @@ class NewCharacterDialog(tk.Toplevel):
         selected_realm = self.realm_var.get()
         self.realm_icon_label.config(image=self.icon_images.get(selected_realm))
 
+class CharacterSheetWindow(tk.Toplevel):
+    """Fenêtre pour afficher les détails d'un personnage."""
+    def __init__(self, parent, character_data):
+        super().__init__(parent)
+        self.character_data = character_data
+        char_name = self.character_data.get('name', 'N/A')
+
+        self.title(lang.get("character_sheet_title", name=char_name))
+        self.geometry("400x500")
+
+        # Contenu de la feuille de personnage (pour l'instant, des labels)
+        ttk.Label(self, text=f"Feuille pour : {char_name}", font=("Helvetica", 14, "bold")).pack(pady=10)
+        ttk.Label(self, text=f"Royaume : {self.character_data.get('realm', 'N/A')}").pack(pady=5, anchor='w', padx=10)
+        ttk.Label(self, text=f"Niveau : {self.character_data.get('level', 'N/A')}").pack(pady=5, anchor='w', padx=10)
+
+        # Comportement modal
+        self.transient(parent)
+        self.grab_set()
+
 def create_new_character_dialog(parent):
     """
     Wrapper function to launch the custom dialog and return the result.
@@ -381,8 +406,12 @@ class CharacterApp:
         master.app = self # Make app instance accessible
 
         # --- Pre-load resources for performance ---
-        self.dialog_realm_icons, self.tree_realm_icons = self._load_realm_icons()
+        self.dialog_realm_icons, self.tree_realm_icons, self.trash_icon = self._load_icons()
         self.available_languages = get_available_languages()
+        self.characters_by_id = {} # For quick access to character data
+        self.checked_states = {} # To store the checked state of each character
+        self.overlay_widgets = [] # To keep track of overlay widgets like checkboxes
+
         self.config_window = None
 
         # --- Debug Window ---
@@ -430,32 +459,45 @@ class CharacterApp:
         # --- Treeview Style Configuration ---
         # We need to set a custom row height to prevent icons from overlapping.
         style = ttk.Style()
-        # Add vertical separators (grid lines)
-        style.layout("Treeview.Treeitem", # type: ignore
-            [('Treeitem.padding', {'sticky': 'nswe', 'children': 
-                [('Treeitem.indicator', {'side': 'left', 'sticky': ''}),
-                   ('Treeitem.image', {'side': 'left', 'sticky': ''}),
-                   ('Treeitem.text', {'side': 'left', 'sticky': ''})]})])
         style.configure("Treeview", rowheight=22) # 18px icon + 4px padding
 
         # --- Character List (Treeview) ---
-        columns = ('name', 'level')
+        columns = ('name', 'level', 'selection')
         self.character_tree = ttk.Treeview(main_frame, columns=columns, show='tree headings')
         
-        # Configure the special '#' column to act as our Realm column
-        self.character_tree.column("#0", width=120, stretch=tk.NO, anchor='w')
+        # Configure the special '#' column to act as our Realm column (icon + text)
+        self.character_tree.column("#0", width=80, stretch=tk.NO, anchor='center', minwidth=60)
         self.character_tree.heading("#0", text=lang.get("column_realm"))
 
+        # Configure other columns
         self.character_tree.heading('name', text=lang.get("column_name"))
         self.character_tree.heading('level', text=lang.get("column_level"))
-
         self.character_tree.column('level', width=80, anchor=tk.CENTER)
 
-        self.character_tree.pack(fill="both", expand=True)
+        # Configure the 'selection' column as a placeholder for the real Checkbutton
+        self.character_tree.column('selection', width=70, stretch=tk.NO, anchor='center')
+        self.character_tree.heading('selection', text=lang.get("column_selection"))
+
+        # --- Scrollbar ---
+        scrollbar = ttk.Scrollbar(main_frame, orient="vertical", command=self.on_tree_scroll)
+        self.character_tree.configure(yscrollcommand=scrollbar.set)
+
+        # --- Packing ---
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.character_tree.pack(side=tk.LEFT, fill="both", expand=True)
+
+        # --- Bindings ---
+        self.character_tree.bind("<Button-3>", self.on_tree_right_click) # Right-click
+        self.character_tree.bind("<Double-1>", self.on_character_double_click)
+        main_frame.bind("<Configure>", self.on_resize) # Handle window resizing
 
         # Configure tags for alternating row colors
         self.character_tree.tag_configure('oddrow', background='white')
         self.character_tree.tag_configure('evenrow', background='#f0f0f0')
+
+        # --- Context Menu ---
+        self.context_menu = Menu(self.character_tree, tearoff=0)
+        self.context_menu.add_command(label=lang.get("context_menu_delete"), command=self.delete_selected_character)
 
         # Load the character list on application startup
         self.refresh_character_list()
@@ -466,11 +508,12 @@ class CharacterApp:
         self.status_label = ttk.Label(self.status_bar, text="Initialisation...")
         self.status_label.pack(side=tk.LEFT)
 
-    def _load_realm_icons(self) -> tuple[dict, dict]:
-        """Loads and resizes realm icons once at startup."""
-        logging.debug("Pre-loading realm icons.")
+    def _load_icons(self) -> tuple[dict, dict, tk.PhotoImage | None]:
+        """Loads and resizes all required icons once at startup."""
+        logging.debug("Pre-loading UI icons.")
         dialog_icons = {}
         tree_icons = {}
+        trash_icon = None
         img_dir = get_img_dir() # Use the centralized function
         for realm, icon_path in REALM_ICONS.items():
             try:
@@ -482,7 +525,16 @@ class CharacterApp:
                 logging.warning(f"Icon not found for {realm} at {full_path}")
                 dialog_icons[realm] = None
                 tree_icons[realm] = None
-        return dialog_icons, tree_icons
+        
+        # Load trash icon
+        try:
+            trash_path = os.path.join(img_dir, "bin.png")
+            trash_img = Image.open(trash_path)
+            trash_icon = ImageTk.PhotoImage(trash_img.resize((16, 16), Image.Resampling.LANCZOS)) # type: ignore
+        except FileNotFoundError:
+            logging.error(f"Delete icon 'bin.png' not found at {trash_path}")
+
+        return dialog_icons, tree_icons, trash_icon # type: ignore
 
     def create_new_character(self):
         """
@@ -517,65 +569,173 @@ class CharacterApp:
         for i in self.character_tree.get_children():
             self.character_tree.delete(i)
 
+        # Clear old overlay widgets
+        for widget in self.overlay_widgets:
+            widget.destroy()
+        self.overlay_widgets.clear()
+
+        self.characters_by_id.clear()
         characters = get_all_characters()
         for i, char in enumerate(characters):
-            realm = char.get('realm', 'N/A')
-            icon = self.tree_realm_icons.get(realm)
+            realm_name = char.get('realm', 'N/A')
+            realm_icon = self.tree_realm_icons.get(realm_name)
+            char_id = char.get('id') # type: ignore
+            self.characters_by_id[char_id] = char # Stocker les données par ID
             
             # Determine tag for alternating color
             row_tag = 'evenrow' if i % 2 == 0 else 'oddrow'
 
-            # Add a few spaces before the realm name for padding
-            self.character_tree.insert('', tk.END, text=f"  {realm}", values=(
-                char.get('name', 'N/A'),
-                char.get('level', 'N/A')
-            ), image=icon, tags=(realm, row_tag))
+            # Ensure a BooleanVar exists for this character's checked state
+            if char_id not in self.checked_states:
+                self.checked_states[char_id] = tk.BooleanVar(value=False)
 
+            # Values for the columns ('name', 'level', 'selection')
+            item_values = (
+                "   " + char.get('name', 'N/A'), # Add padding spaces
+                char.get('level', 1),
+                "" # Placeholder for the Checkbutton
+            )
+
+            # Insert the item. The #0 column gets the realm icon and text.
+            self.character_tree.insert('', tk.END, iid=char_id, text="", image=realm_icon, values=item_values, tags=(char_id, realm_name, row_tag))
+            
         # Schedule the autofit to run after the UI has had a chance to update
-        self.master.after(50, self.autofit_treeview_columns)
+        self.master.after(50, self.place_checkboxes)
+
+    def on_tree_scroll(self, *args):
+        """Handles treeview scrolling to reposition widgets."""
+        self.character_tree.yview(*args)
+        self.place_checkboxes()
+
+    def place_checkboxes(self):
+        """Place Checkbutton widgets over the treeview cells."""
+        # Clear old overlay widgets first
+        for widget in self.overlay_widgets:
+            widget.destroy()
+        self.overlay_widgets.clear()
+
+        for item_id in self.character_tree.get_children():
+            # Get the bounding box of the cell in the 'selection' column
+            try:
+                x, y, w, h = self.character_tree.bbox(item_id, "selection")
+            except ValueError:
+                # This can happen if the item is not visible
+                continue
+
+            # Only place the widget if the row is visible
+            if y > 0 and y < self.character_tree.winfo_height():
+                var = self.checked_states.get(item_id)
+                if var:
+                    cb = ttk.Checkbutton(self.character_tree, variable=var, command=lambda i=item_id: self.on_checkbox_toggle(i))
+                    cb.place(x=x + w//2, y=y + h//2, anchor='center')
+                    self.overlay_widgets.append(cb)
+
+    def on_checkbox_toggle(self, item_id):
+        """Callback when a checkbox is toggled."""
+        is_checked = self.checked_states[item_id].get()
+        logging.debug(f"Checkbox for character {item_id} toggled to {is_checked}")
+
+    def on_tree_right_click(self, event):
+        """Shows a context menu on right-click."""
+        item_id = self.character_tree.identify_row(event.y)
+        if item_id:
+            self.character_tree.selection_set(item_id) # Select the item under the cursor
+            self.context_menu.post(event.x_root, event.y_root)
+
+    def delete_selected_character(self):
+        """Deletes the character currently selected in the treeview."""
+        selection = self.character_tree.selection()
+        if selection:
+            item_id = selection[0]
+            self.delete_character(item_id)
+
+    def delete_character(self, char_id):
+        """Handles the character deletion process."""
+        char_data = self.characters_by_id.get(char_id)
+        if not char_data:
+            logging.warning(f"Attempted to delete character with unknown ID: {char_id}")
+            return
+
+        char_name = char_data.get('name', 'N/A')
+        char_realm = char_data.get('realm')
+
+        if messagebox.askyesno(
+            title=lang.get("delete_char_confirm_title"),
+            message=lang.get("delete_char_confirm_message", name=char_name),
+            icon='warning',
+            parent=self.master
+        ):
+            success, msg = delete_character(char_id, char_realm)
+            if success:
+                logging.info(f"Character '{char_name}' (ID: {char_id}) deleted by user.")
+                self.refresh_character_list()
+            else:
+                logging.error(f"Failed to delete character '{char_name}': {msg}")
+                messagebox.showerror(lang.get("error_title"), msg, parent=self.master)
+
+    def on_character_double_click(self, event):
+        """Gère le double-clic sur un personnage dans la liste."""
+        item_id = self.character_tree.focus() # Obtenir l'élément sélectionné
+        if not item_id:
+            return # Aucun élément sélectionné
+
+        # Prevent sheet from opening when clicking the checkbox
+        column_id = self.character_tree.identify_column(event.x)
+        if column_id == '#3': # Column #3 is 'selection'
+            return
+
+        item = self.character_tree.item(item_id)
+        
+        char_id = item_id # The iid is the character id
+
+        character_data = self.characters_by_id.get(char_id)
+        if character_data:
+            char_name = character_data.get('name', 'N/A')
+            logging.info(f"Ouverture de la feuille du personnage '{char_name}'.")
+            CharacterSheetWindow(self.master, character_data)
+        else:
+            logging.warning(f"Impossible de trouver les données pour le personnage avec l'ID '{char_id}' lors du double-clic.")
+
+    def on_resize(self, event=None):
+        """Callback function to handle window resize events."""
+        self.autofit_treeview_columns()
+        self.master.after_idle(self.place_checkboxes)
 
     def autofit_treeview_columns(self):
         """Auto-adjusts the width of the columns in the character Treeview."""
         logging.debug("Autofitting Treeview columns.")
-        cols = self.character_tree['columns']
-        col_widths = {}
-        
+
         style = ttk.Style()
         heading_font_details = style.lookup("Treeview.Heading", "font")
         heading_font = tkfont.Font(font=heading_font_details)
-
         row_font_details = style.lookup("Treeview", "font")
         row_font = tkfont.Font(font=row_font_details)
 
-        # --- New Strategy: Only autofit fixed-size columns ---
-        # The 'name' column will stretch to fill the rest of the space.
-        fixed_cols = ['level']
-        for col in fixed_cols:
-            self.character_tree.column(col, stretch=tk.NO) # type: ignore
-        
-        # Measure header widths
-        for col in cols:
+        # Combine #0 column and data columns for iteration
+        all_cols = ['#0'] + list(self.character_tree['columns'])
+
+        for col in all_cols:
+            # Start with the header width
             header_text = self.character_tree.heading(col, 'text')
-            col_widths[col] = heading_font.measure(header_text)
+            max_width = heading_font.measure(header_text)
 
-        # Measure content widths
-        for item in self.character_tree.get_children():
-            # Measure the text in the #0 column
-            text = self.character_tree.item(item, 'text')
-            # We don't have a col_id for #0, so we just update its width directly # type: ignore
-            # The icon width (24px) is added as padding
-            new_width = max(self.character_tree.column("#0", "width"), row_font.measure(text) + 24) # type: ignore
-            self.character_tree.column("#0", width=new_width)
-
-            values = self.character_tree.item(item, 'values')
-            for i, val in enumerate(values):
-                col = cols[i]
-                col_widths[col] = max(col_widths[col], row_font.measure(str(val)))
-
-        # Apply new widths to fixed-size columns
-        for col in fixed_cols:
-            new_width = max(col_widths.get(col, 0) + 20, 80)
-            self.character_tree.column(col, width=new_width, anchor='center')
+            # For data columns, measure the content as well
+            if col != '#0':
+                for item_id in self.character_tree.get_children():
+                    cell_value = self.character_tree.set(item_id, col)
+                    max_width = max(max_width, row_font.measure(cell_value))
+            
+            # Set column width, with a minimum, and prevent stretching for all but the 'name' column
+            is_stretch_col = (col == 'name')
+            
+            # Add padding
+            if col == '#0':
+                # For the realm column, add enough padding for the icon
+                padding = 25
+            else:
+                padding = 20
+                
+            self.character_tree.column(col, width=max_width + padding, minwidth=40, stretch=is_stretch_col)
     
     def change_language(self, lang_code):
         """Changes the application language and updates the UI."""
@@ -596,9 +756,11 @@ class CharacterApp:
         self.help_menu.entryconfig(self.menu_items['about_index'], label=lang.get("about_menu_label"))
 
         # Retranslate Treeview headers
+        self.context_menu.entryconfig(0, label=lang.get("context_menu_delete"))
         self.character_tree.heading('#0', text=lang.get("column_realm"))
         self.character_tree.heading('name', text=lang.get("column_name"))
         self.character_tree.heading('level', text=lang.get("column_level"))
+        self.character_tree.heading('selection', text=lang.get("column_selection"))
         
         # Re-fit columns after re-translating headers
         self.master.after(50, self.autofit_treeview_columns)

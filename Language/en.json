@@ -56,5 +56,11 @@
     "log_reader_file_not_found": "debug.log file does not exist. Enable debug mode in the settings to create it.",
     "column_name": "Name",
     "column_realm": "Realm",
-    "column_level": "Level"
+    "column_level": "Level",
+    "character_sheet_title": "Character Sheet - {name}",
+    "delete_char_confirm_title": "Confirm Deletion",
+    "delete_char_confirm_message": "Are you sure you want to permanently delete the character '{name}'? This action cannot be undone.",
+    "column_action": "Action",
+    "context_menu_delete": "Delete",
+    "column_selection": "Selection"
 }

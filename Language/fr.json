@@ -57,5 +57,11 @@
     "log_reader_file_not_found": "Le fichier debug.log n'existe pas. Activez le mode débogage dans la configuration pour le créer.",
     "column_name": "Nom",
     "column_realm": "Royaume",
-    "column_level": "Niveau"
+    "column_level": "Niveau",
+    "character_sheet_title": "Feuille de personnage - {name}",
+    "column_action": "Action",
+    "delete_char_confirm_title": "Confirmer la suppression",
+    "delete_char_confirm_message": "Êtes-vous sûr de vouloir supprimer définitivement le personnage '{name}' ? Cette action est irréversible.",
+    "context_menu_delete": "Supprimer",
+    "column_selection": "Sélection"
 }

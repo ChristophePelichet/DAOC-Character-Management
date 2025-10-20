@@ -9,3 +9,4 @@ Configuration
 main.spec
 build
 dist
+.env

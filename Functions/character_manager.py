@@ -24,13 +24,6 @@ def get_character_dir():
         return path
     return os.path.join(get_base_path(), 'Characters')
 
-def _ensure_character_directory_exists():
-    """Checks and creates the 'Characters' directory if it does not exist."""
-    character_dir = get_character_dir()
-    if not os.path.exists(character_dir):
-        os.makedirs(character_dir)
-        logger.info(f"Directory created: {character_dir}")
-
 def create_character_data(name, realm):
     """
     Creates a basic data dictionary for a new character.
@@ -62,35 +55,34 @@ def save_character(character_data):
     realm_dir = os.path.join(main_character_dir, realm)
     os.makedirs(realm_dir, exist_ok=True)
     
-    # Sanitize the name: convert to lowercase, replace spaces with underscores,
-    # and remove all non-alphanumeric characters (except underscore).
-    base_name = character_data['name'].lower().replace(' ', '_')
-    sanitized_name = "".join(c for c in base_name if c.isalnum() or c == '_')
-    filename = os.path.join(realm_dir, f"{sanitized_name}.json")
+    # Check for name uniqueness before sanitizing for filename
+    existing_characters_lower = {c.lower() for c in get_all_characters()}
+    if character_data['name'].lower() in existing_characters_lower:
+        # Return a specific error key for the UI to handle translation
+        return False, "char_exists_error"
 
-    # Check if the file already exists to ensure name uniqueness
-    if os.path.exists(filename):
-        return False, f"A character named '{character_data['name']}' already exists in this realm."
+    # Use the unique character ID as the filename to avoid sanitization issues.
+    character_id = character_data.get("id")
+    filename = os.path.join(realm_dir, f"{character_id}.json")
 
     try:
         with open(filename, 'w', encoding='utf-8') as f:
             json.dump(character_data, f, indent=4, ensure_ascii=False)
-        return True, f"Personnage '{character_data['name']}' sauvegardé dans {filename}"
+        return True, f"Character '{character_data['name']}' saved to {filename}"
     except (IOError, OSError) as e:
-        return False, f"Erreur lors de la sauvegarde du personnage : {e}"
+        return False, f"Error while saving character: {e}"
 
 def get_all_characters():
     """
     Scans the 'Characters' directory and its realm subdirectories,
     and returns a list of character names.
     """
-    realms = ["Albion", "Hibernia", "Midgard"]
     character_dir = get_character_dir()
     if not os.path.exists(character_dir):
         return []  # Return an empty list if the directory does not exist
 
     character_names = []
-    for realm in realms:
+    for realm in REALM_ICONS.keys():
         realm_dir = os.path.join(character_dir, realm)
         if os.path.isdir(realm_dir):
             for filename in os.listdir(realm_dir):

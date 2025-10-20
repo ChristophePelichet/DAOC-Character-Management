@@ -2,7 +2,6 @@
 __pycache__/
 
 # Ignore Folder
-requirements.txt
 .venv
 Characters 
 Logs

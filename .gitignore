@@ -1,6 +1,10 @@
+# Byte-compiled / optimized files
+__pycache__/
+
 # Ignore Folder
-Characters
+requirements.txt
 .venv
+Characters 
 Logs
 Configuration
 main.spec

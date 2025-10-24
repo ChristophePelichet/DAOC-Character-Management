@@ -454,6 +454,7 @@ class CharacterApp(QMainWindow):
         self.refresh_character_list()
 
     def _create_menu_bar(self):
+        # Menu Bar
         menu_bar = self.menuBar()
 
         # File Menu
@@ -468,17 +469,6 @@ class CharacterApp(QMainWindow):
         file_menu.addAction(config_action)
 
         file_menu.addSeparator()
-
-        exit_action = QAction(lang.get("exit_button_text"), self)
-        exit_action.triggered.connect(self.close)
-        file_menu.addAction(exit_action)
-
-        # Action Menu
-        bulk_actions_menu = menu_bar.addMenu(lang.get("action_button_label"))
-        
-        delete_checked_action = QAction(lang.get("delete_checked_action_label"), self)
-        delete_checked_action.triggered.connect(self.delete_checked_characters)
-        bulk_actions_menu.addAction(delete_checked_action)
 
         # Help Menu
         help_menu = menu_bar.addMenu(lang.get("help_menu_label", default="?"))

@@ -11,3 +11,4 @@ main.spec
 build
 dist
 .env
+requirements.txt

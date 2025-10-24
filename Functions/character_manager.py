@@ -82,15 +82,16 @@ def get_all_characters():
         return []  # Return an empty list if the directory does not exist
 
     characters = []
-    for realm in REALM_ICONS.keys():
-        realm_dir = os.path.join(character_dir, realm)
-        if os.path.isdir(realm_dir):
-            for filename in os.listdir(realm_dir):
+    # Iterate through all subdirectories (realms) in the character directory
+    for root, _, files in os.walk(character_dir):
+        for filename in files:
+            # Process only JSON files
+            if filename.endswith('.json'):
+                file_path = os.path.join(root, filename)
                 if filename.endswith('.json'):
                     try:
-                        with open(os.path.join(realm_dir, filename), 'r', encoding='utf-8') as f:
+                        with open(file_path, 'r', encoding='utf-8') as f:
                             data = json.load(f)
-                            # Add essential data for the list view
                             characters.append(data)
                     except (json.JSONDecodeError, IOError) as e:
                         logger.warning(f"Could not read or parse character file {filename}: {e}")

@@ -73,5 +73,8 @@
     "delete_checked_action_label": "Multi Suppression",
     "bulk_delete_confirm_message": "Êtes-vous sûr de vouloir supprimer définitivement les {count} personnages sélectionnés ? Cette action est irréversible.",
     "no_characters_selected_warning": "Aucun personnage n'est sélectionné.",
-    "action_button_label": "Action"
+    "action_button_label": "Action",
+    "realm_albion": "Albion",
+    "realm_hibernia": "Hibernia",
+    "realm_midgard": "Midgard"
 }

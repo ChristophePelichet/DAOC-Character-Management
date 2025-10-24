@@ -9,9 +9,9 @@ try:
 except ImportError:
     QDARKSTYLE_AVAILABLE = False
 
-from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QTreeView, QStatusBar, QLabel, QMessageBox, QMenu, QFileDialog, QHeaderView, QDialog, QFormLayout, QLineEdit, QComboBox, QDialogButtonBox, QPushButton, QHBoxLayout, QCheckBox, QTextEdit, QSplitter, QGroupBox, QMenuBar, QToolButton, QSizePolicy, QStyleFactory
+from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QTreeView, QStatusBar, QLabel, QMessageBox, QMenu, QFileDialog, QHeaderView, QDialog, QFormLayout, QLineEdit, QComboBox, QDialogButtonBox, QPushButton, QHBoxLayout, QCheckBox, QTextEdit, QSplitter, QGroupBox, QMenuBar, QToolButton, QSizePolicy, QStyleFactory, QStyledItemDelegate
 from PySide6.QtGui import QFont, QStandardItemModel, QStandardItem, QIcon, QAction, QActionGroup
-from PySide6.QtCore import Qt, QSize, Signal, QObject, QThread, Slot
+from PySide6.QtCore import Qt, QSize, Signal, QObject, QThread, Slot, QRect
 
 from Functions.character_manager import create_character_data, save_character, get_all_characters, get_character_dir, REALM_ICONS, delete_character
 from Functions.language_manager import lang, get_available_languages
@@ -397,6 +397,29 @@ class ConfigurationDialog(QDialog):
     def browse_log_folder(self):
         self.browse_folder(self.log_path_edit, "select_log_folder_dialog_title")
 
+class CenterIconDelegate(QStyledItemDelegate):
+    """Delegate personnalisé pour centrer les icônes dans les cellules du TreeView"""
+    
+    def paint(self, painter, option, index):
+        """Dessine l'icône centrée dans la cellule"""
+        # Si la cellule contient une icône
+        icon = index.data(Qt.DecorationRole)
+        if icon and isinstance(icon, QIcon) and not icon.isNull():
+            # Calculer la position centrée
+            icon_size = option.decorationSize
+            if icon_size.width() == -1:  # Taille par défaut
+                icon_size = QSize(16, 16)
+            
+            # Centrer l'icône dans la cellule
+            x = option.rect.x() + (option.rect.width() - icon_size.width()) // 2
+            y = option.rect.y() + (option.rect.height() - icon_size.height()) // 2
+            
+            # Dessiner l'icône
+            icon.paint(painter, QRect(x, y, icon_size.width(), icon_size.height()))
+        else:
+            # Pour les autres cellules, utiliser le comportement par défaut
+            super().paint(painter, option, index)
+
 class CharacterApp(QMainWindow):
     """
     Main class for the character management application.
@@ -409,7 +432,7 @@ class CharacterApp(QMainWindow):
         self.resize(550, 400)
 
         # --- Pre-load resources for performance ---
-        self.dialog_realm_icons, self.tree_realm_icons, self.trash_icon = self._load_icons()
+        self._load_icons() # This method now populates self.tree_realm_icons etc. directly
         self.available_languages = get_available_languages()
         self.characters_by_id = {} # For quick access to character data
 
@@ -421,8 +444,10 @@ class CharacterApp(QMainWindow):
         self.setCentralWidget(central_widget)
         main_layout = QVBoxLayout(central_widget)
 
+        # --- Actions, Menus, and Toolbars ---
+        self._create_actions()
         # --- Menu Bar ---
-        self._create_menu_bar()
+        self._create_menus_and_toolbars()
 
         # --- Main content ---
         # --- Character List (Treeview) ---
@@ -433,16 +458,15 @@ class CharacterApp(QMainWindow):
 
         self.tree_model = QStandardItemModel()
         self.character_tree.setModel(self.tree_model)
+        
+        # Apply custom delegate to center icons in the realm column (column 0)
+        self.center_icon_delegate = CenterIconDelegate(self.character_tree)
+        self.character_tree.setItemDelegateForColumn(0, self.center_icon_delegate)
 
         # --- Bindings ---
         self.character_tree.setContextMenuPolicy(Qt.CustomContextMenu)
         self.character_tree.customContextMenuRequested.connect(self.on_tree_right_click)
         self.character_tree.doubleClicked.connect(self.on_character_double_click)
-
-        # --- Context Menu ---
-        self.context_menu = QMenu(self)
-        delete_action = self.context_menu.addAction(lang.get("context_menu_delete"))
-        delete_action.triggered.connect(self.delete_selected_character)
 
         # --- Status Bar ---
         self.status_bar = QStatusBar()
@@ -453,17 +477,28 @@ class CharacterApp(QMainWindow):
         # Load the character list on application startup
         self.refresh_character_list()
 
-    def _create_menu_bar(self):
+        # Create menus that might need re-translation
+        self._create_context_menu()
+
+    def _create_actions(self):
+        """Create all QAction objects for the application."""
+        self.create_action = QAction(self.add_char_icon, lang.get("create_button_text"), self)
+        self.create_action.setToolTip(lang.get("create_char_tooltip"))
+        self.create_action.triggered.connect(self.create_new_character)
+
+    def _create_menus_and_toolbars(self):
+        """Setup the menu bar and toolbars."""
+        # Toolbar
+        toolbar = self.addToolBar("Main Toolbar")
+        toolbar.addAction(self.create_action)
+
         # Menu Bar
-        menu_bar = self.menuBar()
+        # We must create a new menu bar and set it to replace the old one on re-translation
+        menu_bar = QMenuBar(self)
 
         # File Menu
         file_menu = menu_bar.addMenu(lang.get("file_menu_label"))
-
-        create_action = QAction(lang.get("create_button_text"), self)
-        create_action.triggered.connect(self.create_new_character)
-        file_menu.addAction(create_action)
-
+        file_menu.addAction(self.create_action)
         config_action = QAction(lang.get("configuration_menu_label"), self)
         config_action.triggered.connect(self.open_configuration_window)
         file_menu.addAction(config_action)
@@ -476,33 +511,70 @@ class CharacterApp(QMainWindow):
         about_action.triggered.connect(self.show_about_dialog)
         help_menu.addAction(about_action)
 
-    def _load_icons(self) -> tuple[dict, dict, QIcon | None]:
+        # Set the new menu bar as the main window's menu bar
+        self.setMenuBar(menu_bar)
+
+    def _create_context_menu(self):
+        """Creates or updates the right-click context menu for the tree view."""
+        self.context_menu = QMenu(self)
+        delete_action = self.context_menu.addAction(lang.get("context_menu_delete"))
+        delete_action.triggered.connect(self.delete_selected_character)
+
+    def _load_icons(self):
         """Loads and resizes all required icons once at startup."""
         logging.debug("Pre-loading UI icons.")
-        dialog_icons = {}
-        tree_icons = {}
-        trash_icon = None
+        logging.debug(f"REALM_ICONS type: {type(REALM_ICONS)}, content: {REALM_ICONS}, is_empty: {not REALM_ICONS}, bool: {bool(REALM_ICONS)}")
+        self.dialog_realm_icons = {}
+        self.tree_realm_icons = {}
+        self.trash_icon = None
+        self.add_char_icon = None
         img_dir = get_img_dir() # Use the centralized function
-        
-        for realm, icon_path in REALM_ICONS.items():
-            try:
-                full_path = os.path.join(img_dir, icon_path)
-                # For PySide, we just need the QIcon object
-                dialog_icons[realm] = QIcon(full_path)
-                tree_icons[realm] = QIcon(full_path)
-            except FileNotFoundError:
-                logging.warning(f"Icon not found for {realm} at {full_path}")
-                dialog_icons[realm] = None
-                tree_icons[realm] = None
+
+        if not REALM_ICONS:
+            logging.warning(f"REALM_ICONS dictionary is empty. No realm icons will be loaded. Type: {type(REALM_ICONS)}, Content: {REALM_ICONS}")
+            # DO NOT return here - continue loading other icons
+        else:
+            logging.debug("--- Verification des icônes de royaume ---")
+            for realm, icon_path in REALM_ICONS.items():
+                logging.debug(f"Royaume: '{realm}' -> Fichier icône attendu: '{icon_path}'")
+                try:
+                    full_path = os.path.join(img_dir, icon_path)
+                    logging.debug(f"Chemin complet: '{full_path}', Existe: {os.path.exists(full_path)}")
+                    # For PySide, we just need the QIcon object
+                    icon = QIcon(full_path)
+                    self.dialog_realm_icons[realm] = icon
+                    self.tree_realm_icons[realm] = icon
+                    logging.debug(f"Icône créée pour {realm}. isNull: {icon.isNull()}")
+                except Exception as e:
+                    logging.warning(f"Error loading icon for {realm} at {full_path}: {e}")
+                    self.dialog_realm_icons[realm] = None
+                    self.tree_realm_icons[realm] = None
+            logging.debug("--- Fin de la vérification ---")
+            logging.debug(f"Icônes chargées dans tree_realm_icons: {list(self.tree_realm_icons.keys())}")
 
         # Load trash icon
         try:
             trash_path = os.path.join(img_dir, "bin.png")
-            trash_icon = QIcon(trash_path)
-        except FileNotFoundError:
-            logging.error(f"Delete icon 'bin.png' not found at {trash_path}")
+            if os.path.exists(trash_path):
+                self.trash_icon = QIcon(trash_path)
+                logging.debug(f"Trash icon loaded from {trash_path}")
+            else:
+                logging.error(f"Delete icon 'bin.png' not found at {trash_path}")
+        except Exception as e:
+            logging.error(f"Error loading trash icon: {e}")
 
-        return dialog_icons, tree_icons, trash_icon
+        # Load add character icon
+        try:
+            add_char_path = os.path.join(img_dir, "icon-plus-50.png")
+            if os.path.exists(add_char_path):
+                self.add_char_icon = QIcon(add_char_path)
+                logging.debug(f"Add character icon loaded from {add_char_path}")
+            else:
+                logging.error(f"Add character icon 'icon-plus-50.png' not found at {add_char_path}")
+        except Exception as e:
+            logging.error(f"Error loading add character icon: {e}")
+        
+        logging.debug(f"Icon loading complete. Realm icons loaded: {len(self.tree_realm_icons)}, Trash icon: {self.trash_icon is not None}, Add icon: {self.add_char_icon is not None}")
 
     def create_new_character(self):
         """
@@ -540,19 +612,29 @@ class CharacterApp(QMainWindow):
         # Set headers
         headers = [lang.get("column_realm"), lang.get("column_name"), lang.get("column_level"), lang.get("column_selection")]
         self.tree_model.setHorizontalHeaderLabels(headers)
+        
+        # Center align the realm column header
+        realm_header = self.tree_model.horizontalHeaderItem(0)
+        if realm_header:
+            realm_header.setTextAlignment(Qt.AlignCenter)
 
         characters = get_all_characters()
+        # Add a detailed log to check the state of the icons dictionary just before the loop
+        logging.debug(f"Populating tree with {len(characters)} character(s). tree_realm_icons contains {len(self.tree_realm_icons)} icon(s): {list(self.tree_realm_icons.keys())}")
+
         for i, char in enumerate(characters):
             realm_name = char.get('realm', 'N/A')
             realm_icon = self.tree_realm_icons.get(realm_name)
             char_id = char.get('id')
             self.characters_by_id[char_id] = char
 
+            logging.debug(f"Character {i+1}/{len(characters)}: '{char.get('name')}' (realm='{realm_name}') - icon found: {realm_icon is not None}, isNull: {realm_icon.isNull() if realm_icon else 'N/A'}")
             # Create items for each column in the row
             item_realm = QStandardItem() # On ne met que l'icône, pas de texte.
             if realm_icon:
                 item_realm.setIcon(realm_icon)
             item_realm.setData(char_id, Qt.UserRole) # Store char_id in the item
+            item_realm.setTextAlignment(Qt.AlignCenter) # Centrer l'icône
             item_realm.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled) # Make non-editable
 
             item_name = QStandardItem(char.get('name', 'N/A'))
@@ -688,9 +770,11 @@ class CharacterApp(QMainWindow):
     def retranslate_ui(self):
         """Updates the text of all UI widgets."""
         self.setWindowTitle(lang.get("window_title"))
-        self.setMenuBar(QMenuBar(self)) # Replace the old menu bar entirely
-        self._create_menu_bar() # The easiest way is to just recreate it
+        self._load_icons() # Reload icons as part of UI retranslation
+        self._create_actions()
+        self._create_menus_and_toolbars()
         self.refresh_character_list() # This will update headers
+        self._create_context_menu() # Retranslate context menu
 
         # Update status bar if it exists
         if hasattr(self, 'load_time'):

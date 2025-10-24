@@ -97,26 +97,37 @@ def get_all_characters():
                         continue
     return sorted(characters, key=lambda x: (x.get('realm', ''), x.get('name', '').lower()))
 
-def delete_character(character_id, realm):
+def delete_character(character_id, realm, character_name=None):
     """
-    Deletes a character's JSON file based on their ID and realm.
+    Deletes a character's JSON file. It first tries to delete by ID,
+    and as a fallback, tries to delete by the character name for backward compatibility.
     Returns True on success, False on failure.
     """
-    if not character_id or not realm:
-        logger.error("Attempted to delete a character with missing ID or realm.")
-        return False, "Missing character ID or realm."
+    if not realm:
+        logger.error("Attempted to delete a character with missing realm.")
+        return False, "Missing character realm."
 
     character_dir = get_character_dir()
-    file_path = os.path.join(character_dir, realm, f"{character_id}.json")
+    
+    # Primary strategy: delete by ID
+    file_path_by_id = os.path.join(character_dir, realm, f"{character_id}.json")
+    # Fallback strategy: delete by name (for older files)
+    file_path_by_name = os.path.join(character_dir, realm, f"{character_name}.json") if character_name else None
 
-    if os.path.exists(file_path):
+    path_to_delete = None
+    if os.path.exists(file_path_by_id):
+        path_to_delete = file_path_by_id
+    elif file_path_by_name and os.path.exists(file_path_by_name):
+        path_to_delete = file_path_by_name
+
+    if path_to_delete:
         try:
-            os.remove(file_path)
-            logger.info(f"Successfully deleted character file: {file_path}")
+            os.remove(path_to_delete)
+            logger.info(f"Successfully deleted character file: {path_to_delete}")
             return True, "Character deleted successfully."
         except OSError as e:
-            logger.error(f"Error deleting character file {file_path}: {e}")
+            logger.error(f"Error deleting character file {path_to_delete}: {e}")
             return False, f"OS error while deleting file: {e}"
     else:
-        logger.warning(f"Attempted to delete a non-existent character file: {file_path}")
+        logger.warning(f"Attempted to delete a non-existent character file. Tried: {file_path_by_id} and {file_path_by_name}")
         return False, "Character file not found."

@@ -41,8 +41,11 @@
     "config_show_debug_window_label": "Show debug window on startup",
     "debug_window_title": "Debug Console",
     "debug_level_menu": "Level",
-    "debug_level_all": "All",
+    "debug_level_all": "DEBUG",
     "status_bar_loaded": "Ready. Loaded in {duration:.2f} seconds.",
+    "config_theme_label": "Theme",
+    "theme_light": "Light",
+    "theme_dark": "Dark",
     "debug_font_size_menu": "Font",
     "font_size_small": "Small",
     "font_size_medium": "Medium",
@@ -62,5 +65,12 @@
     "delete_char_confirm_message": "Are you sure you want to permanently delete the character '{name}'? This action cannot be undone.",
     "column_action": "Action",
     "context_menu_delete": "Delete",
-    "column_selection": "Selection"
+    "column_selection": "Selection",
+    "theme_change_restart_message": "The theme has been changed. Please restart the application for the changes to take effect.",
+    "qdarkstyle_not_found_tooltip": "Module 'qdarkstyle' not found. Run 'pip install qdarkstyle' to enable the dark theme.",
+    "bulk_actions_menu_label": "Bulk Actions",
+    "delete_checked_action_label": "Bulk Delete",
+    "bulk_delete_confirm_message": "Are you sure you want to permanently delete the {count} selected characters? This action cannot be undone.",
+    "no_characters_selected_warning": "No characters are selected.",
+    "action_button_label": "Action"
 }

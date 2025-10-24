@@ -42,8 +42,11 @@
     "config_show_debug_window_label": "Debug-Fenster beim Start anzeigen",
     "debug_window_title": "Debug-Konsole",
     "debug_level_menu": "Stufe",
-    "debug_level_all": "Alle",
+    "debug_level_all": "DEBUG",
     "status_bar_loaded": "Bereit. Geladen in {duration:.2f} Sekunden.",
+    "config_theme_label": "Thema",
+    "theme_light": "Hell",
+    "theme_dark": "Dunkel",
     "debug_font_size_menu": "Schrift",
     "font_size_small": "Klein",
     "font_size_medium": "Mittel",
@@ -63,5 +66,12 @@
     "delete_char_confirm_message": "Sind Sie sicher, dass Sie den Charakter '{name}' endgültig löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
     "column_action": "Aktion",
     "context_menu_delete": "Löschen",
-    "column_selection": "Auswahl"
+    "column_selection": "Auswahl",
+    "theme_change_restart_message": "Das Thema wurde geändert. Bitte starten Sie die Anwendung neu, damit die Änderungen wirksam werden.",
+    "qdarkstyle_not_found_tooltip": "Modul 'qdarkstyle' nicht gefunden. Führen Sie 'pip install qdarkstyle' aus, um das dunkle Thema zu aktivieren.",
+    "bulk_actions_menu_label": "Massenaktionen",
+    "delete_checked_action_label": "Massenlöschung",
+    "bulk_delete_confirm_message": "Sind Sie sicher, dass Sie die {count} ausgewählten Charaktere endgültig löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "no_characters_selected_warning": "Keine Charaktere ausgewählt.",
+    "action_button_label": "Aktion"
 }

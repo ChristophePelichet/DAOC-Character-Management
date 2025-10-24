@@ -1,21 +1,28 @@
 import os
 import sys
 import traceback
-import tkinter as tk
 import logging
-from tkinter import font as tkfont
-import time
-import threading
-from tkinter import ttk, simpledialog, messagebox, Menu, filedialog
+
+try:
+    import qdarkstyle
+    QDARKSTYLE_AVAILABLE = True
+except ImportError:
+    QDARKSTYLE_AVAILABLE = False
+
+from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QTreeView, QStatusBar, QLabel, QMessageBox, QMenu, QFileDialog, QHeaderView, QDialog, QFormLayout, QLineEdit, QComboBox, QDialogButtonBox, QPushButton, QHBoxLayout, QCheckBox, QTextEdit, QSplitter, QGroupBox, QMenuBar, QToolButton, QSizePolicy
+from PySide6.QtGui import QFont, QStandardItemModel, QStandardItem, QIcon, QAction, QActionGroup
+from PySide6.QtCore import Qt, QSize, Signal, QObject, QThread, Slot
+
 from Functions.character_manager import create_character_data, save_character, get_all_characters, get_character_dir, REALM_ICONS, delete_character
 from Functions.language_manager import lang, get_available_languages
 from Functions.config_manager import config, get_config_dir
 from Functions.logging_manager import setup_logging, get_log_dir, get_img_dir
-from Functions.path_manager import get_base_path
-from PIL import Image, ImageTk # type: ignore
 
 # Setup logging at the very beginning
 setup_logging()
+if not QDARKSTYLE_AVAILABLE:
+    logging.warning("qdarkstyle not found. Dark theme will be unavailable. Run 'pip install qdarkstyle' to enable it.")
+
 # --- Application Constants ---
 APP_NAME = "Character Manager"
 APP_VERSION = "0.1"
@@ -27,345 +34,222 @@ def global_exception_handler(exc_type, exc_value, exc_traceback):
     tb_string = "".join(tb_lines)
     logging.critical(f"Unhandled exception caught:\n{tb_string}")
 
-class TextHandler(logging.Handler):
-    """A custom logging handler that sends records to a Tkinter Text widget."""
-    def __init__(self, text_widget):
+class QTextEditHandler(logging.Handler, QObject):
+    """A custom logging handler that sends records to a QTextEdit widget."""
+    log_updated = Signal(str)
+
+    def __init__(self, parent):
         super().__init__()
-        self.text_widget = text_widget
-        # Define colors for different log levels
-        self.level_colors = {
-            'DEBUG': 'grey',
-            'INFO': 'black',
-            'WARNING': 'orange',
-            'ERROR': 'red',
-            'CRITICAL': 'red'
-        }
+        QObject.__init__(self, parent)
 
     def emit(self, record):
         msg = self.format(record)
-        def append():
-            # Check if the widget still exists before trying to write to it
-            if self.text_widget.winfo_exists():
-                self.text_widget.configure(state='normal')
-                self.text_widget.insert(tk.END, msg + '\n', record.levelname)
-                self.text_widget.configure(state='disabled')
-                self.text_widget.see(tk.END)
-        # This is important to avoid threading issues with Tkinter
-        self.text_widget.after(0, append)
+        self.log_updated.emit(msg)
 
-class DebugWindow(tk.Toplevel):
-    """A Toplevel window that displays log messages."""
-    def __init__(self, parent):
+class LogLevelFilter(logging.Filter):
+    """Filters log records based on a minimum and maximum level."""
+    def __init__(self, min_level, max_level):
+        super().__init__()
+        self.min_level = min_level
+        self.max_level = max_level
+
+    def filter(self, record):
+        return self.min_level <= record.levelno <= self.max_level
+
+class LogFileReaderThread(QThread):
+    """A QThread to monitor a log file without blocking the GUI."""
+    new_line = Signal(str)
+
+    def __init__(self, filepath, parent=None):
         super().__init__(parent)
-        self.title(lang.get("debug_window_title"))
-        self.geometry("1200x700")
+        self.filepath = filepath
+        self._is_running = True
+
+    def run(self):
+        try:
+            with open(self.filepath, 'r', encoding='utf-8', errors='ignore') as f:
+                f.seek(0, 2)  # Go to the end of the file
+                while self._is_running:
+                    line = f.readline()
+                    if line:
+                        self.new_line.emit(line)
+                    else:
+                        self.msleep(100)  # Wait for new lines
+        except Exception as e:
+            error_message = f"Error monitoring file {self.filepath}: {e}\n"
+            self.new_line.emit(error_message)
+
+    def stop(self):
+        self._is_running = False
+
+class DebugWindow(QMainWindow):
+    """A window that displays log messages."""
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle(lang.get("debug_window_title"))
+        self.setGeometry(100, 100, 1200, 700)
+        self.monitoring_thread = None
+        self.current_log_level = logging.DEBUG
+
+        # --- Central Widget and Layout ---
+        central_widget = QWidget()
+        self.setCentralWidget(central_widget)
+        main_layout = QVBoxLayout(central_widget)
 
         # --- Menu Bar ---
-        self.menu_bar = Menu(self)
-        self.config(menu=self.menu_bar)
-
-        self.level_menu = Menu(self.menu_bar, tearoff=0)
-        self.menu_bar.add_cascade(label=lang.get("debug_level_menu"), menu=self.level_menu, underline=0)
-        self.level_cascade_index = self.menu_bar.index('end')
-
-        # --- Font Size Menu ---
-        self.font_size_menu = Menu(self.menu_bar, tearoff=0)
-        self.menu_bar.add_cascade(label=lang.get("debug_font_size_menu"), menu=self.font_size_menu, underline=0)
-        self.font_cascade_index = self.menu_bar.index('end')
+        self._create_menus()
         
-        self.font_sizes = {
-            "small": 8,
-            "medium": 9,
-            "large": 11
-        }
-        self.font_size_var = tk.StringVar(value="medium")
-        self.font_menu_items = {} # To store font menu item indices
+        # --- Button Bar ---
+        button_bar_layout = QHBoxLayout()
+        test_debug_button = QPushButton(lang.get("test_debug_button"))
+        test_debug_button.clicked.connect(self.raise_test_exception)
+        button_bar_layout.addWidget(test_debug_button)
+        button_bar_layout.addStretch()  # Pushes the button to the left
+        main_layout.addLayout(button_bar_layout)
 
-        self.log_level_var = tk.StringVar(value="DEBUG")
-        self.log_levels = {
-            "DEBUG": logging.DEBUG,
+        # --- Main Splitter ---
+        main_splitter = QSplitter(Qt.Horizontal)
+        main_layout.addWidget(main_splitter)
+
+        # --- Left Pane (Logs & Errors) ---
+        left_splitter = QSplitter(Qt.Vertical)
+        
+        log_group = QGroupBox(lang.get("debug_log_pane_title"))
+        log_layout = QVBoxLayout()
+        self.log_widget = QTextEdit()
+        self.log_widget.setReadOnly(True)
+        log_layout.addWidget(self.log_widget)
+        log_group.setLayout(log_layout)
+        left_splitter.addWidget(log_group)
+
+        error_group = QGroupBox(lang.get("debug_errors_pane_title"))
+        error_layout = QVBoxLayout()
+        self.error_widget = QTextEdit()
+        self.error_widget.setReadOnly(True)
+        error_layout.addWidget(self.error_widget)
+        error_group.setLayout(error_layout)
+        left_splitter.addWidget(error_group)
+        
+        left_splitter.setSizes([400, 200]) # Initial sizes
+        main_splitter.addWidget(left_splitter)
+
+        # --- Right Pane (Log Reader) ---
+        reader_group = QGroupBox(lang.get("debug_log_reader_pane_title"))
+        reader_layout = QVBoxLayout()
+        
+        file_bar_layout = QHBoxLayout()
+        self.log_file_path_edit = QLineEdit()
+        self.log_file_path_edit.setReadOnly(True)
+        browse_button = QPushButton(lang.get("browse_button"))
+        browse_button.clicked.connect(self.browse_log_file)
+        clear_button = QPushButton(lang.get("clear_button_text"))
+        clear_button.clicked.connect(self.clear_log_reader)
+        file_bar_layout.addWidget(self.log_file_path_edit)
+        file_bar_layout.addWidget(browse_button)
+        file_bar_layout.addWidget(clear_button)
+        reader_layout.addLayout(file_bar_layout)
+
+        self.log_reader_widget = QTextEdit()
+        self.log_reader_widget.setReadOnly(True)
+        reader_layout.addWidget(self.log_reader_widget)
+        reader_group.setLayout(reader_layout)
+        main_splitter.addWidget(reader_group)
+
+        main_splitter.setSizes([700, 500])
+
+        # --- Setup Logging Handlers ---
+        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+        
+        # General log handler (INFO and below)
+        self.log_filter = LogLevelFilter(logging.DEBUG, logging.INFO)
+        self.log_handler = QTextEditHandler(self)
+        self.log_handler.setFormatter(formatter)
+        self.log_handler.addFilter(self.log_filter)
+        self.log_handler.log_updated.connect(self.log_widget.append)
+        logging.getLogger().addHandler(self.log_handler)
+
+        # Error log handler (WARNING and above)
+        self.error_filter = LogLevelFilter(logging.WARNING, logging.CRITICAL)
+        self.error_handler = QTextEditHandler(self)
+        self.error_handler.setFormatter(formatter)
+        self.error_handler.addFilter(self.error_filter)
+        self.error_handler.log_updated.connect(self.error_widget.append)
+        logging.getLogger().addHandler(self.error_handler)
+
+    def _create_menus(self):
+        menu_bar = self.menuBar()
+
+        # --- Level Menu ---
+        level_menu = menu_bar.addMenu(lang.get("debug_level_menu"))
+        level_action_group = QActionGroup(self)
+        level_action_group.setExclusive(True)
+        level_action_group.triggered.connect(self.set_log_level)
+
+        log_levels_map = {
+            lang.get("debug_level_all"): logging.DEBUG,
             "INFO": logging.INFO,
             "WARNING": logging.WARNING,
             "ERROR": logging.ERROR,
             "CRITICAL": logging.CRITICAL
         }
 
-        # Level Menu Items
-        self.level_menu.add_radiobutton(
-            label=lang.get("debug_level_all"),
-            variable=self.log_level_var,
-            value="DEBUG",  # "All" is equivalent to the DEBUG level
-            command=self.set_log_level
-        )
-        self.level_menu.add_separator()
+        for name, level in log_levels_map.items():
+            action = QAction(name, self)
+            action.setData(level)
+            action.setCheckable(True)
+            level_menu.addAction(action)
+            level_action_group.addAction(action)
+            if level == self.current_log_level:
+                action.setChecked(True)
 
-        for level_name in self.log_levels.keys():
-            self.level_menu.add_radiobutton(
-                label=level_name,
-                variable=self.log_level_var,
-                value=level_name,
-                command=self.set_log_level
-            )
+    @Slot(QAction)
+    def set_log_level(self, action):
+        """Sets the minimum logging level for the handlers."""
+        level = action.data()
+        self.current_log_level = level
+        logging.info(f"Debug window log level set to {logging.getLevelName(level)}")
 
-        # Font Size Menu Items
-        self.font_size_menu.add_radiobutton(
-            label=lang.get("font_size_small"), variable=self.font_size_var, value="small", command=self.set_font_size
-        )
-        self.font_menu_items['small'] = self.font_size_menu.index('end')
-        self.font_size_menu.add_radiobutton(
-            label=lang.get("font_size_medium"), variable=self.font_size_var, value="medium", command=self.set_font_size
-        )
-        self.font_menu_items['medium'] = self.font_size_menu.index('end')
-        self.font_size_menu.add_radiobutton(
-            label=lang.get("font_size_large"), variable=self.font_size_var, value="large", command=self.set_font_size
-        )
-        self.font_menu_items['large'] = self.font_size_menu.index('end')
-
-        # --- Button Bar ---
-        button_bar_frame = ttk.Frame(self)
-        button_bar_frame.pack(fill='x', padx=5, pady=2)
-        self.test_debug_button = ttk.Button(button_bar_frame, text=lang.get("test_debug_button"), command=self.raise_test_exception)
-        self.test_debug_button.pack(side='left')
-
-        # --- Main horizontal Paned Window ---
-        main_paned_window = ttk.PanedWindow(self, orient=tk.HORIZONTAL)
-        main_paned_window.pack(expand=True, fill="both", padx=5, pady=5)
-
-        # --- Left vertical Paned Window (for logs and errors) ---
-        left_paned_window = ttk.PanedWindow(main_paned_window, orient=tk.VERTICAL)
-        main_paned_window.add(left_paned_window, weight=2)  # Give more space to the left side
-
-        # --- Top-left pane for general logs ---
-        log_frame = ttk.LabelFrame(left_paned_window, text=lang.get("debug_log_pane_title"), name="log_frame")
-        self.log_widget = tk.Text(log_frame, wrap="word", state="disabled")
-        self.log_widget.pack(expand=True, fill="both")
-        left_paned_window.add(log_frame, weight=3) # Give more space to logs
-
-        # --- Bottom-left pane for errors ---
-        error_frame = ttk.LabelFrame(left_paned_window, text=lang.get("debug_errors_pane_title"), name="error_frame")
-        self.error_widget = tk.Text(error_frame, wrap="word", state="disabled")
-        self.error_widget.pack(expand=True, fill="both")
-        left_paned_window.add(error_frame, weight=1)
-
-        # --- Right pane for details ---
-        self.log_reader_frame = ttk.LabelFrame(main_paned_window, text=lang.get("debug_log_reader_pane_title"), name="log_reader_frame")
+        # Update filters
+        self.log_filter.min_level = level
+        self.error_filter.min_level = level
         
-        # --- File selection bar for log reader ---
-        file_bar = ttk.Frame(self.log_reader_frame)
-        file_bar.pack(fill='x', padx=5, pady=5)
-        self.log_file_path_var = tk.StringVar()
-        ttk.Entry(file_bar, textvariable=self.log_file_path_var, state="readonly").pack(side='left', fill='x', expand=True)
-        self.browse_log_reader_button = ttk.Button(file_bar, text=lang.get("browse_button"), command=self.browse_log_file)
-        self.browse_log_reader_button.pack(side='left', padx=(5, 0))
-        self.clear_log_reader_button = ttk.Button(file_bar, text=lang.get("clear_button_text"), command=self.clear_log_reader)
-        self.clear_log_reader_button.pack(side='left', padx=(5, 0))
-
-        self.log_reader_widget = tk.Text(self.log_reader_frame, wrap="word", state="disabled")
-        self.log_reader_widget.pack(expand=True, fill="both")
-        main_paned_window.add(self.log_reader_frame, weight=2)
-
-        # Configure color tags
-        for widget in (self.log_widget, self.error_widget, self.log_reader_widget):
-            widget.tag_config("DEBUG", foreground="grey")
-            widget.tag_config("INFO", foreground="black")
-            widget.tag_config("WARNING", foreground="orange")
-
-        self.log_handler = None  # For general logs
-        self.error_handler = None  # For errors and tracebacks
-
-        self.monitoring_thread = None
-        self.monitoring_active = False
-
-        self.protocol("WM_DELETE_WINDOW", self.on_close)
-
-    def set_log_level(self):
-        """Sets the logging level for the text handler based on menu selection."""
-        level_name = self.log_level_var.get()
-        level = self.log_levels.get(level_name, logging.INFO)
-        if self.log_handler:
-            self.log_handler.setLevel(level)
-            logging.info(f"Niveau de log de la console de débogage réglé sur {level_name}")
-
-    def set_font_size(self):
-        """Sets the font size for the text widget and its tags."""
-        size_key = self.font_size_var.get()
-        size_value = self.font_sizes.get(size_key, 9)  # Default to 9 if not found
+        # The handlers will now only receive messages at or above the new level.
+        # No need to clear the widgets, as new messages will be filtered.
         
-        for widget in (self.log_widget, self.error_widget, self.log_reader_widget):
-            widget.config(font=("Courier New", size_value))
-            # Re-apply tag fonts to update their size
-            widget.tag_config("ERROR", foreground="red", font=("Courier New", size_value, "bold"))
-            widget.tag_config("CRITICAL", foreground="red", font=("Courier New", size_value, "bold", "underline"))
-
-    def retranslate(self):
-        """Updates the text of the window and its menus."""
-        self.title(lang.get("debug_window_title"))
-        self.menu_bar.entryconfig(self.level_cascade_index, label=lang.get("debug_level_menu"))
-        self.menu_bar.entryconfig(self.font_cascade_index, label=lang.get("debug_font_size_menu"))
-        
-        # Retranslate pane titles
-        self.log_widget.master.config(text=lang.get("debug_log_pane_title"))  # master is the LabelFrame
-        self.error_widget.master.config(text=lang.get("debug_errors_pane_title"))
-        self.log_reader_frame.config(text=lang.get("debug_log_reader_pane_title"))
-        self.browse_log_reader_button.config(text=lang.get("browse_button"))
-        self.clear_log_reader_button.config(text=lang.get("clear_button_text"))
-        self.test_debug_button.config(text=lang.get("test_debug_button"))
-        # Retranslate font size menu items
-        self.level_menu.entryconfig(0, label=lang.get("debug_level_all"))
-        self.font_size_menu.entryconfig(self.font_menu_items['small'], label=lang.get("font_size_small"))
-        self.font_size_menu.entryconfig(self.font_menu_items['medium'], label=lang.get("font_size_medium"))
-        self.font_size_menu.entryconfig(self.font_menu_items['large'], label=lang.get("font_size_large"))
-
     def raise_test_exception(self):
         """Raises a test exception to verify the handler."""
         logging.info("Raising a test exception...")
         1 / 0
 
-    def on_close(self):
-        """Remove the handler and destroy the window."""
-        self.stop_log_monitoring()
-        if self.log_handler:
-            logging.getLogger().removeHandler(self.log_handler)
-        if self.error_handler:
-            logging.getLogger().removeHandler(self.error_handler)
-        self.destroy() # type: ignore
-
-    def set_default_log_file(self, filepath):
-        """Sets and tries to monitor the default log file."""
-        if os.path.exists(filepath):
-            self.log_file_path_var.set(filepath)
-            self.start_log_monitoring(filepath)
-        else:
-            self._append_to_log_reader(lang.get("log_reader_file_not_found") + "\n")
-
     def browse_log_file(self):
-        """Opens a file dialog to select a log file to monitor."""
-        filepath = filedialog.askopenfilename(
-            title=lang.get("debug_log_reader_pane_title"),
-            filetypes=[("Log files", "*.log"), ("Text files", "*.txt"), ("All files", "*.*")]
-        )
+        filepath, _ = QFileDialog.getOpenFileName(self, lang.get("debug_log_reader_pane_title"), "", "Log files (*.log);;All files (*.*)")
         if filepath:
-            self.log_file_path_var.set(filepath)
+            self.log_file_path_edit.setText(filepath)
             self.start_log_monitoring(filepath)
 
     def clear_log_reader(self):
-        """Clears the content of the log reader widget."""
-        self.log_reader_widget.config(state='normal')
-        self.log_reader_widget.delete('1.0', tk.END)
-        self.log_reader_widget.config(state='disabled')
+        self.log_reader_widget.clear()
 
     def start_log_monitoring(self, filepath):
-        """Starts a thread to monitor the selected log file."""
-        self.stop_log_monitoring()  # Stop any previous monitoring
+        self.stop_log_monitoring()
         self.clear_log_reader()
-
-        self.monitoring_active = True
-        self.monitoring_thread = threading.Thread(target=self._monitor_log_file, args=(filepath,), daemon=True)
+        self.monitoring_thread = LogFileReaderThread(filepath, self)
+        self.monitoring_thread.new_line.connect(self.log_reader_widget.append)
         self.monitoring_thread.start()
 
     def stop_log_monitoring(self):
-        """Stops the file monitoring thread."""
-        if self.monitoring_thread and self.monitoring_thread.is_alive():
-            self.monitoring_active = False
-            self.monitoring_thread.join(timeout=1)  # Wait a bit for the thread to exit
+        if self.monitoring_thread and self.monitoring_thread.isRunning():
+            self.monitoring_thread.stop()
+            self.monitoring_thread.wait() # Wait for thread to finish
 
-    def _monitor_log_file(self, filepath):
-        """The actual file monitoring logic that runs in a separate thread."""
-        try:
-            with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
-                # Go to the end of the file
-                f.seek(0, 2)
-                while self.monitoring_active:
-                    line = f.readline()
-                    if line:
-                        self.log_reader_widget.after(0, self._append_to_log_reader, line)
-                    else:
-                        time.sleep(0.1)  # Wait for new lines
-        except Exception as e:
-            error_message = f"Error monitoring file {filepath}: {e}\n"
-            self.log_reader_widget.after(0, self._append_to_log_reader, error_message)
+    def closeEvent(self, event):
+        """Remove the handler when the window is closed."""
+        self.stop_log_monitoring()
+        logging.getLogger().removeHandler(self.log_handler)
+        logging.getLogger().removeHandler(self.error_handler)
+        super().closeEvent(event)
 
-    def _append_to_log_reader(self, text):
-        """Safely appends text to the log reader widget from the main thread."""
-        self.log_reader_widget.config(state='normal')
-        self.log_reader_widget.insert(tk.END, text)
-        self.log_reader_widget.config(state='disabled')
-        self.log_reader_widget.see(tk.END)
-class NewCharacterDialog(tk.Toplevel):
-    """Custom dialog to create a new character with a name and a realm."""
-    def __init__(self, parent, title=None, icon_images=None):
-        super().__init__(parent)
-        self.transient(parent)
-        if title:
-            self.title(title)
-
-        self.realms = REALM_ICONS
-        self.result = None
-        self.icon_images = icon_images or {} # Use pre-loaded icons
-
-        self.body_frame = ttk.Frame(self, padding="10 10 10 10")
-        self.body_frame.pack(fill="both", expand=True)
-
-        self.body(self.body_frame)
-        self.buttonbox() # type: ignore
-
-        self.grab_set() # Modal behavior
-
-    def body(self, master):
-        # --- Realm Icon Display ---
-        self.realm_icon_label = ttk.Label(master)
-        self.realm_icon_label.grid(row=0, columnspan=2, padx=5, pady=(5, 10)) # Centered at the top
-
-        # --- Name entry ---
-        ttk.Label(master, text=lang.get("new_char_dialog_prompt")).grid(row=1, columnspan=2, sticky=tk.W, padx=5, pady=2)
-        self.name_entry = ttk.Entry(master, width=30)
-        self.name_entry.grid(row=2, columnspan=2, padx=5, pady=2)
-        self.name_entry.focus_set()
-
-        # --- Realm selection ---
-        ttk.Label(master, text=lang.get("new_char_realm_prompt")).grid(row=3, columnspan=2, sticky=tk.W, padx=5, pady=2)
-
-        self.realm_var = tk.StringVar(value=list(self.realms.keys())[0])
-        self.realm_combo = ttk.Combobox(master, textvariable=self.realm_var, values=list(self.realms.keys()), state="readonly")
-        self.realm_combo.grid(row=4, columnspan=2, padx=5, pady=2)
-        self.realm_combo.bind("<<ComboboxSelected>>", self.update_realm_icon)
-
-        self.update_realm_icon() # Set initial icon
-
-        return self.name_entry  # initial focus
-
-    def buttonbox(self):
-        """Creates OK and Cancel buttons."""
-        box = ttk.Frame(self)
-
-        ok_button = ttk.Button(box, text="OK", width=10, command=self.ok, default=tk.ACTIVE)
-        ok_button.pack(side=tk.LEFT, padx=5, pady=5)
-        cancel_button = ttk.Button(box, text=lang.get("warning_title"), width=10, command=self.cancel)
-        cancel_button.pack(side=tk.LEFT, padx=5, pady=5)
-
-        self.bind("<Return>", self.ok)
-        self.bind("<Escape>", self.cancel)
-
-        box.pack()
-
-    def ok(self, event=None):
-        name = self.name_entry.get().strip()
-        if not name:
-            messagebox.showwarning(lang.get("error_title"), lang.get("char_name_empty_error"), parent=self)
-            return
-
-        self.result = (name, self.realm_var.get())
-        self.destroy()
-
-    def cancel(self, event=None):
-        self.destroy()
-    
-    def update_realm_icon(self, event=None):
-        """Updates the displayed icon based on the selected realm."""
-        selected_realm = self.realm_var.get()
-        self.realm_icon_label.config(image=self.icon_images.get(selected_realm))
-
-class CharacterSheetWindow(tk.Toplevel):
+class CharacterSheetWindow(QWidget):
     """Fenêtre pour afficher les détails d'un personnage."""
     def __init__(self, parent, character_data):
         super().__init__(parent)
@@ -375,172 +259,267 @@ class CharacterSheetWindow(tk.Toplevel):
         self.title(lang.get("character_sheet_title", name=char_name))
         self.geometry("400x500")
 
-        # Contenu de la feuille de personnage (pour l'instant, des labels)
-        ttk.Label(self, text=f"Feuille pour : {char_name}", font=("Helvetica", 14, "bold")).pack(pady=10)
-        ttk.Label(self, text=f"Royaume : {self.character_data.get('realm', 'N/A')}").pack(pady=5, anchor='w', padx=10)
-        ttk.Label(self, text=f"Niveau : {self.character_data.get('level', 'N/A')}").pack(pady=5, anchor='w', padx=10)
+        # TODO: PySide Migration
+        # layout = QVBoxLayout(self)
+        # layout.addWidget(QLabel(f"Feuille pour : {char_name}"))
+        # layout.addWidget(QLabel(f"Royaume : {self.character_data.get('realm', 'N/A')}"))
+        # layout.addWidget(QLabel(f"Niveau : {self.character_data.get('level', 'N/A')}"))
 
         # Comportement modal
-        self.transient(parent)
-        self.grab_set()
 
-def create_new_character_dialog(parent):
-    """
-    Wrapper function to launch the custom dialog and return the result.
-    Returns a tuple (name, realm) or None if cancelled.
-    """
-    dialog = NewCharacterDialog(parent, title=lang.get("new_char_dialog_title"), icon_images=parent.app.dialog_realm_icons)
-    parent.wait_window(dialog)
-    return dialog.result
+class NewCharacterDialog(QDialog):
+    """A dialog to create a new character with a name and a realm."""
+    def __init__(self, parent=None, realms=None):
+        super().__init__(parent)
+        self.setWindowTitle(lang.get("new_char_dialog_title"))
 
-class CharacterApp:
+        self.realms = realms if realms else []
+        
+        layout = QFormLayout(self)
+
+        self.name_edit = QLineEdit(self)
+        layout.addRow(lang.get("new_char_dialog_prompt"), self.name_edit)
+
+        self.realm_combo = QComboBox(self)
+        self.realm_combo.addItems(self.realms)
+        layout.addRow(lang.get("new_char_realm_prompt"), self.realm_combo)
+
+        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        button_box.accepted.connect(self.accept)
+        button_box.rejected.connect(self.reject)
+        layout.addWidget(button_box)
+
+    def get_data(self):
+        """Returns the entered data if valid."""
+        name = self.name_edit.text().strip()
+        if not name:
+            QMessageBox.warning(self, lang.get("error_title"), lang.get("char_name_empty_error"))
+            return None
+        realm = self.realm_combo.currentText()
+        return name, realm
+
+class ConfigurationDialog(QDialog):
+    """Configuration window for the application."""
+    def __init__(self, parent=None, available_languages=None):
+        super().__init__(parent)
+        self.setWindowTitle(lang.get("configuration_window_title"))
+        self.setMinimumSize(500, 250)
+        self.parent_app = parent
+        self.available_languages = available_languages or {}
+
+        layout = QFormLayout(self)
+
+        # Character Path
+        self.char_path_edit = QLineEdit()
+        browse_char_button = QPushButton(lang.get("browse_button"))
+        browse_char_button.clicked.connect(self.browse_character_folder)
+        char_path_layout = QHBoxLayout()
+        char_path_layout.addWidget(self.char_path_edit)
+        char_path_layout.addWidget(browse_char_button)
+        layout.addRow(lang.get("config_path_label"), char_path_layout)
+
+        # Config Path
+        self.config_path_edit = QLineEdit()
+        browse_config_button = QPushButton(lang.get("browse_button"))
+        browse_config_button.clicked.connect(self.browse_config_folder)
+        config_path_layout = QHBoxLayout()
+        config_path_layout.addWidget(self.config_path_edit)
+        config_path_layout.addWidget(browse_config_button)
+        layout.addRow(lang.get("config_file_path_label"), config_path_layout)
+
+        # Log Path
+        self.log_path_edit = QLineEdit()
+        browse_log_button = QPushButton(lang.get("browse_button"))
+        browse_log_button.clicked.connect(self.browse_log_folder)
+        log_path_layout = QHBoxLayout()
+        log_path_layout.addWidget(self.log_path_edit)
+        log_path_layout.addWidget(browse_log_button)
+        layout.addRow(lang.get("config_log_path_label"), log_path_layout)
+
+        # Language
+        self.language_combo = QComboBox()
+        self.language_combo.addItems(self.available_languages.values())
+        layout.addRow(lang.get("config_language_label"), self.language_combo)
+
+        # Theme
+        self.theme_combo = QComboBox()
+        self.theme_combo.addItems([lang.get("theme_light"), lang.get("theme_dark")])
+        layout.addRow(lang.get("config_theme_label"), self.theme_combo)
+        if not QDARKSTYLE_AVAILABLE:
+            self.theme_combo.setDisabled(True)
+            self.theme_combo.setToolTip(lang.get("qdarkstyle_not_found_tooltip"))
+
+
+        # Debug Mode
+        self.debug_mode_check = QCheckBox(lang.get("config_debug_mode_label"))
+        layout.addRow(self.debug_mode_check)
+
+        # Show Debug Window
+        self.show_debug_window_check = QCheckBox(lang.get("config_show_debug_window_label"))
+        layout.addRow(self.show_debug_window_check)
+
+        # Buttons
+        button_box = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel)
+        button_box.accepted.connect(self.accept)
+        button_box.rejected.connect(self.reject)
+        layout.addWidget(button_box)
+
+        self.update_fields()
+
+    def update_fields(self):
+        """Fills the fields with current configuration values."""
+        self.char_path_edit.setText(config.get("character_folder", get_character_dir()))
+        self.config_path_edit.setText(config.get("config_folder", get_config_dir()))
+        self.log_path_edit.setText(config.get("log_folder", get_log_dir()))
+        self.debug_mode_check.setChecked(config.get("debug_mode", False))
+        self.show_debug_window_check.setChecked(config.get("show_debug_window", False))
+        
+        current_lang_code = config.get("language", "fr")
+        current_lang_name = self.available_languages.get(current_lang_code, "Français")
+        self.language_combo.setCurrentText(current_lang_name)
+
+        default_theme = "Dark" if QDARKSTYLE_AVAILABLE else "Light"
+        current_theme_value = config.get("theme", default_theme)
+        current_theme_text = lang.get("theme_light") if current_theme_value == "Light" else lang.get("theme_dark")
+        self.theme_combo.setCurrentText(current_theme_text)
+
+    def browse_folder(self, line_edit, title_key):
+        directory = QFileDialog.getExistingDirectory(self, lang.get(title_key))
+        if directory:
+            line_edit.setText(directory)
+
+    def browse_character_folder(self):
+        self.browse_folder(self.char_path_edit, "select_folder_dialog_title")
+
+    def browse_config_folder(self):
+        self.browse_folder(self.config_path_edit, "select_config_folder_dialog_title")
+
+    def browse_log_folder(self):
+        self.browse_folder(self.log_path_edit, "select_log_folder_dialog_title")
+
+class CharacterApp(QMainWindow):
     """
     Main class for the character management application.
     Manages the user interface and interactions.
     """
-    def __init__(self, master):
+    def __init__(self):
         logging.info("Application starting...")
-        self.master = master
-        master.title(lang.get("window_title"))
-        master.geometry("550x400")
-        master.app = self # Make app instance accessible
+        super().__init__()
+        self.setWindowTitle(lang.get("window_title"))
+        self.resize(550, 400)
 
         # --- Pre-load resources for performance ---
         self.dialog_realm_icons, self.tree_realm_icons, self.trash_icon = self._load_icons()
         self.available_languages = get_available_languages()
         self.characters_by_id = {} # For quick access to character data
-        self.checked_states = {} # To store the checked state of each character
-        self.overlay_widgets = [] # To keep track of overlay widgets like checkboxes
 
         self.config_window = None
-
-        # --- Debug Window ---
         self.debug_window = None
-        self.debug_log_handler = None # type: ignore
-        self.debug_error_handler = None
-        # For development, we set the default to True
-        if config.get("show_debug_window", True):
-            self.show_debug_window()
-        
-        # --- Toolbar ---
-        toolbar = ttk.Frame(master, padding=(2, 2))
-        toolbar.pack(side=tk.TOP, fill=tk.X)
 
-        # --- Create "File" dropdown menu ---
-        self.file_menu_button = ttk.Menubutton(toolbar, text=lang.get("file_menu_label"))
-        self.file_menu = Menu(self.file_menu_button, tearoff=0)
-        
-        # Store references to menu items for easier re-translation
-        self.menu_items = {}
+        # --- Central Widget and Layout ---
+        central_widget = QWidget()
+        self.setCentralWidget(central_widget)
+        main_layout = QVBoxLayout(central_widget)
 
-        self.file_menu_button["menu"] = self.file_menu
-        self.file_menu.add_command(label=lang.get("create_button_text"), command=self.create_new_character) # type: ignore
-        self.menu_items['create_index'] = self.file_menu.index('end')
-        self.file_menu.add_command(label=lang.get("configuration_menu_label"), command=self.open_configuration_window) # type: ignore
-        self.menu_items['config_index'] = self.file_menu.index('end')
-        self.file_menu.add_separator()
-        self.file_menu.add_command(label=lang.get("exit_button_text"), command=master.quit) # type: ignore
-        self.menu_items['exit_index'] = self.file_menu.index('end') # type: ignore
-        self.file_menu_button.pack(side=tk.LEFT)
-
-        # --- Create "Help" menu (?) ---
-        self.help_menu_button = ttk.Menubutton(toolbar, text="?")
-        self.help_menu = Menu(self.help_menu_button, tearoff=0)
-        self.help_menu_button["menu"] = self.help_menu
-        self.help_menu.add_command(label=lang.get("about_menu_label"), command=self.show_about_dialog)
-        self.menu_items['about_index'] = self.help_menu.index('end') # type: ignore
-        # Place the help button on the right side of the toolbar
-        self.help_menu_button.pack(side=tk.RIGHT)
+        # --- Menu Bar ---
+        self._create_menu_bar()
 
         # --- Main content ---
-        main_frame = ttk.Frame(master, padding=10)
-        main_frame.pack(fill="both", expand=True)
-
-        # --- Treeview Style Configuration ---
-        # We need to set a custom row height to prevent icons from overlapping.
-        style = ttk.Style()
-        style.configure("Treeview", rowheight=22) # 18px icon + 4px padding
-
         # --- Character List (Treeview) ---
-        columns = ('name', 'level', 'selection')
-        self.character_tree = ttk.Treeview(main_frame, columns=columns, show='tree headings')
-        
-        # Configure the special '#' column to act as our Realm column (icon + text)
-        self.character_tree.column("#0", width=80, stretch=tk.NO, anchor='center', minwidth=60)
-        self.character_tree.heading("#0", text=lang.get("column_realm"))
+        self.character_tree = QTreeView()
+        self.character_tree.setAlternatingRowColors(True)
+        self.character_tree.setRootIsDecorated(False) # To make it look like a table
+        main_layout.addWidget(self.character_tree)
 
-        # Configure other columns
-        self.character_tree.heading('name', text=lang.get("column_name"))
-        self.character_tree.heading('level', text=lang.get("column_level"))
-        self.character_tree.column('level', width=80, anchor=tk.CENTER)
-
-        # Configure the 'selection' column as a placeholder for the real Checkbutton
-        self.character_tree.column('selection', width=70, stretch=tk.NO, anchor='center')
-        self.character_tree.heading('selection', text=lang.get("column_selection"))
-
-        # --- Scrollbar ---
-        scrollbar = ttk.Scrollbar(main_frame, orient="vertical", command=self.on_tree_scroll)
-        self.character_tree.configure(yscrollcommand=scrollbar.set)
-
-        # --- Packing ---
-        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-        self.character_tree.pack(side=tk.LEFT, fill="both", expand=True)
+        self.tree_model = QStandardItemModel()
+        self.character_tree.setModel(self.tree_model)
 
         # --- Bindings ---
-        self.character_tree.bind("<Button-3>", self.on_tree_right_click) # Right-click
-        self.character_tree.bind("<Double-1>", self.on_character_double_click)
-        main_frame.bind("<Configure>", self.on_resize) # Handle window resizing
-
-        # Configure tags for alternating row colors
-        self.character_tree.tag_configure('oddrow', background='white')
-        self.character_tree.tag_configure('evenrow', background='#f0f0f0')
+        self.character_tree.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.character_tree.customContextMenuRequested.connect(self.on_tree_right_click)
+        self.character_tree.doubleClicked.connect(self.on_character_double_click)
 
         # --- Context Menu ---
-        self.context_menu = Menu(self.character_tree, tearoff=0)
-        self.context_menu.add_command(label=lang.get("context_menu_delete"), command=self.delete_selected_character)
+        self.context_menu = QMenu(self)
+        delete_action = self.context_menu.addAction(lang.get("context_menu_delete"))
+        delete_action.triggered.connect(self.delete_selected_character)
+
+        # --- Status Bar ---
+        self.status_bar = QStatusBar()
+        self.setStatusBar(self.status_bar)
+        self.status_label = QLabel("Initialisation...")
+        self.status_bar.addWidget(self.status_label)
 
         # Load the character list on application startup
         self.refresh_character_list()
 
-        # --- Status Bar ---
-        self.status_bar = ttk.Frame(master, relief=tk.SUNKEN, padding=(2, 2))
-        self.status_bar.pack(side=tk.BOTTOM, fill=tk.X)
-        self.status_label = ttk.Label(self.status_bar, text="Initialisation...")
-        self.status_label.pack(side=tk.LEFT)
+    def _create_menu_bar(self):
+        menu_bar = self.menuBar()
 
-    def _load_icons(self) -> tuple[dict, dict, tk.PhotoImage | None]:
+        # File Menu
+        file_menu = menu_bar.addMenu(lang.get("file_menu_label"))
+
+        create_action = QAction(lang.get("create_button_text"), self)
+        create_action.triggered.connect(self.create_new_character)
+        file_menu.addAction(create_action)
+
+        config_action = QAction(lang.get("configuration_menu_label"), self)
+        config_action.triggered.connect(self.open_configuration_window)
+        file_menu.addAction(config_action)
+
+        file_menu.addSeparator()
+
+        exit_action = QAction(lang.get("exit_button_text"), self)
+        exit_action.triggered.connect(self.close)
+        file_menu.addAction(exit_action)
+
+        # Action Menu
+        bulk_actions_menu = menu_bar.addMenu(lang.get("action_button_label"))
+        
+        delete_checked_action = QAction(lang.get("delete_checked_action_label"), self)
+        delete_checked_action.triggered.connect(self.delete_checked_characters)
+        bulk_actions_menu.addAction(delete_checked_action)
+
+        # Help Menu
+        help_menu = menu_bar.addMenu(lang.get("help_menu_label", default="?"))
+        about_action = QAction(lang.get("about_menu_label"), self)
+        about_action.triggered.connect(self.show_about_dialog)
+        help_menu.addAction(about_action)
+
+    def _load_icons(self) -> tuple[dict, dict, QIcon | None]:
         """Loads and resizes all required icons once at startup."""
         logging.debug("Pre-loading UI icons.")
         dialog_icons = {}
         tree_icons = {}
         trash_icon = None
         img_dir = get_img_dir() # Use the centralized function
+        
         for realm, icon_path in REALM_ICONS.items():
             try:
                 full_path = os.path.join(img_dir, icon_path)
-                img = Image.open(full_path)
-                dialog_icons[realm] = ImageTk.PhotoImage(img.resize((32, 32), Image.Resampling.LANCZOS)) # type: ignore
-                tree_icons[realm] = ImageTk.PhotoImage(img.resize((18, 18), Image.Resampling.LANCZOS)) # type: ignore
+                # For PySide, we just need the QIcon object
+                dialog_icons[realm] = QIcon(full_path)
+                tree_icons[realm] = QIcon(full_path)
             except FileNotFoundError:
                 logging.warning(f"Icon not found for {realm} at {full_path}")
                 dialog_icons[realm] = None
                 tree_icons[realm] = None
-        
+
         # Load trash icon
         try:
             trash_path = os.path.join(img_dir, "bin.png")
-            trash_img = Image.open(trash_path)
-            trash_icon = ImageTk.PhotoImage(trash_img.resize((16, 16), Image.Resampling.LANCZOS)) # type: ignore
+            trash_icon = QIcon(trash_path)
         except FileNotFoundError:
             logging.error(f"Delete icon 'bin.png' not found at {trash_path}")
 
-        return dialog_icons, tree_icons, trash_icon # type: ignore
+        return dialog_icons, tree_icons, trash_icon
 
     def create_new_character(self):
         """
         Handles the action of creating a new character manually.
         """
-        result = create_new_character_dialog(self.master)  # This now opens the clean dialog
+        dialog = NewCharacterDialog(self, realms=list(REALM_ICONS.keys()))
+        result = dialog.get_data() if dialog.exec() == QDialog.Accepted else None
 
         if result:
             character_name, realm = result
@@ -549,7 +528,7 @@ class CharacterApp:
             if success:
                 self.refresh_character_list()
                 logging.info(f"Successfully created character '{character_name}'.")
-                messagebox.showinfo(lang.get("success_title"), lang.get("char_saved_success", name=character_name))
+                QMessageBox.information(self, lang.get("success_title"), lang.get("char_saved_success", name=character_name))
             else:
                 # If the response is a known error key, translate it. Otherwise, display as is.
                 if response == "char_exists_error":
@@ -557,186 +536,158 @@ class CharacterApp:
                 else:
                     error_message = response  # For other potential errors
                 logging.error(f"Failed to create character '{character_name}': {error_message}")
-                messagebox.showerror(lang.get("error_title"), error_message)
+                QMessageBox.critical(self, lang.get("error_title"), error_message)
         else:
-            messagebox.showwarning(lang.get("warning_title"), lang.get("creation_cancelled_message"))
+            logging.info("Character creation cancelled by user.")
 
     def refresh_character_list(self):
         """Updates the character list in the dropdown menu."""
         logging.debug("Refreshing character list.")
         
-        # Clear existing items
-        for i in self.character_tree.get_children():
-            self.character_tree.delete(i)
-
-        # Clear old overlay widgets
-        for widget in self.overlay_widgets:
-            widget.destroy()
-        self.overlay_widgets.clear()
-
+        self.tree_model.clear()
         self.characters_by_id.clear()
+
+        # Set headers
+        headers = [lang.get("column_realm"), lang.get("column_name"), lang.get("column_level"), lang.get("column_selection")]
+        self.tree_model.setHorizontalHeaderLabels(headers)
+
         characters = get_all_characters()
         for i, char in enumerate(characters):
             realm_name = char.get('realm', 'N/A')
             realm_icon = self.tree_realm_icons.get(realm_name)
-            char_id = char.get('id') # type: ignore
-            self.characters_by_id[char_id] = char # Stocker les données par ID
+            char_id = char.get('id')
+            self.characters_by_id[char_id] = char
+
+            # Create items for each column in the row
+            item_realm = QStandardItem() # On ne met que l'icône, pas de texte.
+            if realm_icon:
+                item_realm.setIcon(realm_icon)
+            item_realm.setData(char_id, Qt.UserRole) # Store char_id in the item
+            item_realm.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled) # Make non-editable
+
+            item_name = QStandardItem(char.get('name', 'N/A'))
+            item_name.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled) # Make non-editable
+            item_level = QStandardItem(str(char.get('level', 1)))
+            item_level.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled) # Make non-editable
             
-            # Determine tag for alternating color
-            row_tag = 'evenrow' if i % 2 == 0 else 'oddrow'
+            item_selection = QStandardItem()
+            item_selection.setCheckable(True)
+            item_selection.setCheckState(Qt.Unchecked)
+            # Allow checking but not direct text editing
+            item_selection.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled | Qt.ItemIsUserCheckable)
 
-            # Ensure a BooleanVar exists for this character's checked state
-            if char_id not in self.checked_states:
-                self.checked_states[char_id] = tk.BooleanVar(value=False)
+            row_items = [item_realm, item_name, item_level, item_selection]
+            self.tree_model.appendRow(row_items)
 
-            # Values for the columns ('name', 'level', 'selection')
-            item_values = (
-                "   " + char.get('name', 'N/A'), # Add padding spaces
-                char.get('level', 1),
-                "" # Placeholder for the Checkbutton
-            )
+        self.character_tree.resizeColumnToContents(0)
+        self.character_tree.resizeColumnToContents(2)
+        self.character_tree.resizeColumnToContents(3)
+        self.character_tree.header().setStretchLastSection(False)
+        self.character_tree.header().setSectionResizeMode(1, QHeaderView.Stretch)
 
-            # Insert the item. The #0 column gets the realm icon and text.
-            self.character_tree.insert('', tk.END, iid=char_id, text="", image=realm_icon, values=item_values, tags=(char_id, realm_name, row_tag))
-            
-        # Schedule the autofit to run after the UI has had a chance to update
-        self.master.after(50, self.place_checkboxes)
-
-    def on_tree_scroll(self, *args):
-        """Handles treeview scrolling to reposition widgets."""
-        self.character_tree.yview(*args)
-        self.place_checkboxes()
-
-    def place_checkboxes(self):
-        """Place Checkbutton widgets over the treeview cells."""
-        # Clear old overlay widgets first
-        for widget in self.overlay_widgets:
-            widget.destroy()
-        self.overlay_widgets.clear()
-
-        for item_id in self.character_tree.get_children():
-            # Get the bounding box of the cell in the 'selection' column
-            try:
-                x, y, w, h = self.character_tree.bbox(item_id, "selection")
-            except ValueError:
-                # This can happen if the item is not visible
-                continue
-
-            # Only place the widget if the row is visible
-            if y > 0 and y < self.character_tree.winfo_height():
-                var = self.checked_states.get(item_id)
-                if var:
-                    cb = ttk.Checkbutton(self.character_tree, variable=var, command=lambda i=item_id: self.on_checkbox_toggle(i))
-                    cb.place(x=x + w//2, y=y + h//2, anchor='center')
-                    self.overlay_widgets.append(cb)
-
-    def on_checkbox_toggle(self, item_id):
-        """Callback when a checkbox is toggled."""
-        is_checked = self.checked_states[item_id].get()
-        logging.debug(f"Checkbox for character {item_id} toggled to {is_checked}")
-
-    def on_tree_right_click(self, event):
+    def on_tree_right_click(self, position):
         """Shows a context menu on right-click."""
-        item_id = self.character_tree.identify_row(event.y)
-        if item_id:
-            self.character_tree.selection_set(item_id) # Select the item under the cursor
-            self.context_menu.post(event.x_root, event.y_root)
+        index = self.character_tree.indexAt(position)
+        if index.isValid():
+            self.context_menu.exec_(self.character_tree.viewport().mapToGlobal(position))
 
     def delete_selected_character(self):
         """Deletes the character currently selected in the treeview."""
-        selection = self.character_tree.selection()
-        if selection:
-            item_id = selection[0]
-            self.delete_character(item_id)
+        indexes = self.character_tree.selectedIndexes()
+        if indexes:
+            # Get the item from the first column of the selected row
+            row = indexes[0].row()
+            first_column_item = self.tree_model.item(row, 0)
+            char_id = first_column_item.data(Qt.UserRole) # Retrieve the stored character ID
+            if char_id:
+                self.delete_character(char_id)
 
-    def delete_character(self, char_id):
+    def get_checked_character_ids(self):
+        """Returns a list of character IDs for all checked rows."""
+        checked_ids = []
+        for row in range(self.tree_model.rowCount()):
+            # The checkbox is in the last column (index 3)
+            selection_item = self.tree_model.item(row, 3)
+            if selection_item and selection_item.checkState() == Qt.Checked:
+                # The ID is stored in the first item of the row (index 0)
+                id_item = self.tree_model.item(row, 0)
+                char_id = id_item.data(Qt.UserRole)
+                if char_id:
+                    checked_ids.append(char_id)
+        return checked_ids
+
+    def delete_checked_characters(self):
+        """Deletes all characters that are checked in the tree view."""
+        checked_ids = self.get_checked_character_ids()
+
+        if not checked_ids:
+            QMessageBox.warning(self, lang.get("info_title"), lang.get("no_characters_selected_warning"))
+            return
+
+        reply = QMessageBox.question(self,
+                                     lang.get("delete_char_confirm_title"),
+                                     lang.get("bulk_delete_confirm_message", count=len(checked_ids)),
+                                     QMessageBox.Yes | QMessageBox.No,
+                                     QMessageBox.No)
+
+        if reply == QMessageBox.Yes:
+            logging.info(f"User initiated bulk deletion of {len(checked_ids)} characters.")
+            for char_id in checked_ids:
+                # We skip the individual confirmation dialog by directly calling the backend function
+                self.delete_character(char_id, confirm=False)
+            self.refresh_character_list()
+
+    def delete_character(self, char_id, confirm=True):
         """Handles the character deletion process."""
-        char_data = self.characters_by_id.get(char_id)
+        char_data = self.characters_by_id.get(str(char_id))
         if not char_data:
             logging.warning(f"Attempted to delete character with unknown ID: {char_id}")
             return
 
-        char_name = char_data.get('name', 'N/A')
-        char_realm = char_data.get('realm')
+        reply = QMessageBox.Yes
+        if confirm:
+            char_name = char_data.get('name', 'N/A')
+            reply = QMessageBox.question(self,
+                                         lang.get("delete_char_confirm_title"),
+                                         lang.get("delete_char_confirm_message", name=char_name),
+                                         QMessageBox.Yes | QMessageBox.No,
+                                         QMessageBox.No)
 
-        if messagebox.askyesno(
-            title=lang.get("delete_char_confirm_title"),
-            message=lang.get("delete_char_confirm_message", name=char_name),
-            icon='warning',
-            parent=self.master
-        ):
-            success, msg = delete_character(char_id, char_realm)
+        if reply == QMessageBox.Yes:
+            char_name = char_data.get('name', 'N/A')
+            char_realm = char_data.get('realm')
+            success, msg = delete_character(char_id, char_realm, character_name=char_name)
             if success:
                 logging.info(f"Character '{char_name}' (ID: {char_id}) deleted by user.")
-                self.refresh_character_list()
+                if confirm: # Refresh only if it's a single delete action
+                    self.refresh_character_list()
             else:
                 logging.error(f"Failed to delete character '{char_name}': {msg}")
-                messagebox.showerror(lang.get("error_title"), msg, parent=self.master)
+                QMessageBox.critical(self, lang.get("error_title"), msg)
 
-    def on_character_double_click(self, event):
+    def on_character_double_click(self, index): # Renamed from delete_character_by_id
         """Gère le double-clic sur un personnage dans la liste."""
-        item_id = self.character_tree.focus() # Obtenir l'élément sélectionné
-        if not item_id:
-            return # Aucun élément sélectionné
-
-        # Prevent sheet from opening when clicking the checkbox
-        column_id = self.character_tree.identify_column(event.x)
-        if column_id == '#3': # Column #3 is 'selection'
+        if not index.isValid():
             return
 
-        item = self.character_tree.item(item_id)
-        
-        char_id = item_id # The iid is the character id
+        # Prevent sheet from opening when clicking the checkbox column (index 3)
+        if index.column() == 3:
+            return
+
+        # Get the item from the first column to retrieve the ID
+        item = self.tree_model.item(index.row(), 0)
+        char_id = item.data(Qt.UserRole)
 
         character_data = self.characters_by_id.get(char_id)
         if character_data:
             char_name = character_data.get('name', 'N/A')
             logging.info(f"Ouverture de la feuille du personnage '{char_name}'.")
-            CharacterSheetWindow(self.master, character_data)
+            # TODO: PySide Migration: CharacterSheetWindow needs to be a QDialog
+            # sheet = CharacterSheetWindow(self, character_data)
+            # sheet.show()
         else:
             logging.warning(f"Impossible de trouver les données pour le personnage avec l'ID '{char_id}' lors du double-clic.")
 
-    def on_resize(self, event=None):
-        """Callback function to handle window resize events."""
-        self.autofit_treeview_columns()
-        self.master.after_idle(self.place_checkboxes)
-
-    def autofit_treeview_columns(self):
-        """Auto-adjusts the width of the columns in the character Treeview."""
-        logging.debug("Autofitting Treeview columns.")
-
-        style = ttk.Style()
-        heading_font_details = style.lookup("Treeview.Heading", "font")
-        heading_font = tkfont.Font(font=heading_font_details)
-        row_font_details = style.lookup("Treeview", "font")
-        row_font = tkfont.Font(font=row_font_details)
-
-        # Combine #0 column and data columns for iteration
-        all_cols = ['#0'] + list(self.character_tree['columns'])
-
-        for col in all_cols:
-            # Start with the header width
-            header_text = self.character_tree.heading(col, 'text')
-            max_width = heading_font.measure(header_text)
-
-            # For data columns, measure the content as well
-            if col != '#0':
-                for item_id in self.character_tree.get_children():
-                    cell_value = self.character_tree.set(item_id, col)
-                    max_width = max(max_width, row_font.measure(cell_value))
-            
-            # Set column width, with a minimum, and prevent stretching for all but the 'name' column
-            is_stretch_col = (col == 'name')
-            
-            # Add padding
-            if col == '#0':
-                # For the realm column, add enough padding for the icon
-                padding = 25
-            else:
-                padding = 20
-                
-            self.character_tree.column(col, width=max_width + padding, minwidth=40, stretch=is_stretch_col)
-    
     def change_language(self, lang_code):
         """Changes the application language and updates the UI."""
         logging.info(f"Changing language to {lang_code}.")
@@ -746,27 +697,14 @@ class CharacterApp:
 
     def retranslate_ui(self):
         """Updates the text of all UI widgets."""
-        self.master.title(lang.get("window_title"))
-        
-        # Rebuild File Menu
-        self.file_menu_button.config(text=lang.get("file_menu_label"))
-        self.file_menu.entryconfig(self.menu_items['create_index'], label=lang.get("create_button_text"))
-        self.file_menu.entryconfig(self.menu_items['config_index'], label=lang.get("configuration_menu_label"))
-        self.file_menu.entryconfig(self.menu_items['exit_index'], label=lang.get("exit_button_text"))
-        self.help_menu.entryconfig(self.menu_items['about_index'], label=lang.get("about_menu_label"))
-
-        # Retranslate Treeview headers
-        self.context_menu.entryconfig(0, label=lang.get("context_menu_delete"))
-        self.character_tree.heading('#0', text=lang.get("column_realm"))
-        self.character_tree.heading('name', text=lang.get("column_name"))
-        self.character_tree.heading('level', text=lang.get("column_level"))
-        self.character_tree.heading('selection', text=lang.get("column_selection"))
-        
-        # Re-fit columns after re-translating headers
-        self.master.after(50, self.autofit_treeview_columns)
+        self.setWindowTitle(lang.get("window_title"))
+        self.setMenuBar(QMenuBar(self)) # Replace the old menu bar entirely
+        self._create_menu_bar() # The easiest way is to just recreate it
+        self.refresh_character_list() # This will update headers
 
         # Update status bar if it exists
-        self.update_status_bar(lang.get("status_bar_loaded", duration=self.master.load_time))
+        if hasattr(self, 'load_time'):
+            self.update_status_bar(lang.get("status_bar_loaded", duration=self.load_time))
         
         # Retranslate the config window if it exists
         if self.config_window:
@@ -774,53 +712,23 @@ class CharacterApp:
         
         # Retranslate the debug window if it exists
         if self.debug_window:
-            self.debug_window.retranslate()
+            pass # self.debug_window.retranslate() # TODO
 
     def show_debug_window(self):
-        """Creates and shows the debug window."""
-        if self.debug_window is None or not self.debug_window.winfo_exists():
-            # Force the main window to update its geometry info
-            self.master.update_idletasks()
+        """Creates and shows the debug window, positioning it next to the main window."""
+        if not self.debug_window:
+            self.debug_window = DebugWindow()
+        
+        # Position the debug window to the right of the main window
+        main_window_geom = self.geometry()
+        self.debug_window.move(main_window_geom.right() + 10, main_window_geom.top())
+        self.debug_window.show()
 
-            # Get main window position and size
-            main_x = self.master.winfo_x()
-            main_y = self.master.winfo_y()
-            main_width = self.master.winfo_width()
-
-            # Calculate position for the debug window (to the right of the main window)
-            offset_x = main_x + main_width + 10
-            offset_y = main_y
-
-            self.debug_window = DebugWindow(self.master)
-            self.debug_window.geometry(f"+{offset_x}+{offset_y}")
-
-            # Create handler for general logs
-            self.debug_log_handler = TextHandler(self.debug_window.log_widget)
-            formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-            self.debug_log_handler.setFormatter(formatter) # type: ignore
-            self.debug_window.log_handler = self.debug_log_handler  # Give handler to window
-
-            # Create handler for errors/tracebacks
-            self.debug_error_handler = TextHandler(self.debug_window.error_widget)
-            error_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(pathname)s:%(lineno)d\n%(message)s') # type: ignore
-            self.debug_error_handler.setFormatter(error_formatter)
-            self.debug_error_handler.setLevel(logging.ERROR) # This handler only cares about errors
-            self.debug_window.error_handler = self.debug_error_handler
-
-            self.debug_window.set_log_level() # Set initial level
-            self.debug_window.set_font_size() # Set initial font size
-
-            # Re-run setup_logging to include the new handler
-            setup_logging(extra_handlers=[self.debug_log_handler, self.debug_error_handler]) # type: ignore
-            logging.info("Fenêtre de débogage initialisée.")
-
-            # Set default log file for the reader
-            default_log_path = os.path.join(get_log_dir(), "debug.log")
-            self.debug_window.set_default_log_file(default_log_path)
 
     def hide_debug_window(self):
-        if self.debug_window and self.debug_window.winfo_exists():
-            self.debug_window.on_close()
+        if self.debug_window:
+            self.debug_window.close()
+            self.debug_window = None
 
     def show_about_dialog(self):
         """Displays the 'About' dialog box."""
@@ -829,188 +737,52 @@ class CharacterApp:
             "about_message_content",
             version=APP_VERSION
         )
-        messagebox.showinfo(title, message, parent=self.master)
+        QMessageBox.about(self, title, message)
 
     def update_status_bar(self, message):
         """Updates the text in the status bar."""
         if hasattr(self, 'status_label'):
-            self.status_label.config(text=message)
+            self.status_label.setText(message)
 
     def _create_configuration_window(self):
         """Creates the configuration window widgets. Called only once."""
         logging.debug("Creating configuration window for the first time.")
-        self.config_window = tk.Toplevel(self.master)
-        self.config_window.title(lang.get("configuration_window_title"))
-        self.config_window.geometry("500x440")
-        self.config_window.resizable(True, True)
-        
-        self.config_widgets = {} # To store widgets that need re-translation
-        # Instead of destroying, hide the window
-        self.config_window.protocol("WM_DELETE_WINDOW", self.hide_configuration_window)
-
-        # --- Language Selection ---
-        language_frame = ttk.Frame(self.config_window, padding=(10, 10, 10, 0))
-        language_frame.pack(fill=tk.X)
-        
-        self.config_widgets['language_label'] = ttk.Label(language_frame, text=lang.get("config_language_label") + ":")
-        self.config_widgets['language_label'].pack(side=tk.LEFT, padx=(0, 5)) # type: ignore
-
-        self.language_var = tk.StringVar()
-        language_combo = ttk.Combobox(language_frame, textvariable=self.language_var, state="readonly")
-        language_combo['values'] = list(self.available_languages.values())
-        language_combo.pack(side=tk.LEFT)
-
-        # --- Separator ---
-        separator_conf = ttk.Separator(self.config_window, orient='horizontal')
-        separator_conf.pack(fill='x', padx=10, pady=10)
-
-        # --- Widgets for Config Folder Path ---
-        self.config_widgets['config_path_frame'] = ttk.LabelFrame(self.config_window, text=lang.get("config_file_path_label"), padding=10)
-        self.config_widgets['config_path_frame'].pack(fill=tk.X, padx=10, pady=5)
-        self.config_path_var = tk.StringVar()
-        config_path_entry = ttk.Entry(self.config_widgets['config_path_frame'], textvariable=self.config_path_var, width=50)
-        config_path_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5)) # type: ignore
-        self.config_widgets['config_browse_button'] = ttk.Button(self.config_widgets['config_path_frame'], text=lang.get("browse_button"), command=self.browse_config_folder)
-        self.config_widgets['config_browse_button'].pack(side=tk.LEFT) # type: ignore
-
-        # --- Separator for future options ---
-        separator = ttk.Separator(self.config_window, orient='horizontal')
-        separator.pack(fill='x', padx=10, pady=10)
-
-        # --- Widgets for Character Folder Path ---
-        self.config_widgets['path_frame'] = ttk.LabelFrame(self.config_window, text=lang.get("config_path_label"), padding=10)
-        self.config_widgets['path_frame'].pack(fill=tk.X, padx=10, pady=10)
-        self.char_path_var = tk.StringVar()
-        path_entry = ttk.Entry(self.config_widgets['path_frame'], textvariable=self.char_path_var, width=50)
-        path_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5))
-        self.config_widgets['char_browse_button'] = ttk.Button(self.config_widgets['path_frame'], text=lang.get("browse_button"), command=self.browse_character_folder)
-        self.config_widgets['char_browse_button'].pack(side=tk.LEFT)
-
-        # --- Separator for directory sections ---
-        dir_separator = ttk.Separator(self.config_window, orient='horizontal')
-        dir_separator.pack(fill='x', padx=20, pady=5)
-
-        # --- Debugging Mode Checkbox ---
-        debug_frame = ttk.Frame(self.config_window, padding=(10, 0, 10, 5))
-        debug_frame.pack(fill=tk.X)
-        self.debug_mode_var = tk.BooleanVar()
-        self.config_widgets['debug_check'] = ttk.Checkbutton(debug_frame, text=lang.get("config_debug_mode_label"), variable=self.debug_mode_var)
-        self.config_widgets['debug_check'].pack(side=tk.LEFT, padx=10) # type: ignore
-
-        # --- Show Debug Window Checkbox ---
-        show_debug_win_frame = ttk.Frame(self.config_window, padding=(10, 0, 10, 5))
-        show_debug_win_frame.pack(fill=tk.X)
-        self.show_debug_window_var = tk.BooleanVar()
-        self.config_widgets['show_debug_win_check'] = ttk.Checkbutton(show_debug_win_frame, text=lang.get("config_show_debug_window_label"), variable=self.show_debug_window_var)
-        self.config_widgets['show_debug_win_check'].pack(side=tk.LEFT, padx=10) # type: ignore
-
-        # --- Widgets for Log Folder Path ---
-        self.config_widgets['log_path_frame'] = ttk.LabelFrame(self.config_window, text=lang.get("config_log_path_label"), padding=10)
-        self.config_widgets['log_path_frame'].pack(fill=tk.X, padx=10, pady=10)
-        self.log_path_var = tk.StringVar()
-        log_path_entry = ttk.Entry(self.config_widgets['log_path_frame'], textvariable=self.log_path_var, width=50)
-        log_path_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5)) # type: ignore
-        self.config_widgets['log_browse_button'] = ttk.Button(self.config_widgets['log_path_frame'], text=lang.get("browse_button"), command=self.browse_log_folder)
-        self.config_widgets['log_browse_button'].pack(side=tk.LEFT) # type: ignore
-
-        # --- Save Button ---
-        button_frame = ttk.Frame(self.config_window, padding=10)
-        button_frame.pack(fill=tk.X, side=tk.BOTTOM)
-        self.config_widgets['save_button'] = ttk.Button(button_frame, text=lang.get("save_button"), command=self.save_configuration)
-        self.config_widgets['save_button'].pack(side=tk.RIGHT) # type: ignore
+        # TODO: PySide Migration
+        pass
 
     def _update_configuration_fields(self):
         """Refreshes the values in the configuration window from the config."""
-        current_lang_code = config.get("language")
-        self.language_var.set(self.available_languages.get(current_lang_code))
-        self.config_path_var.set(get_config_dir())
-        self.char_path_var.set(get_character_dir())
-        self.debug_mode_var.set(config.get("debug_mode", True))
-        self.show_debug_window_var.set(config.get("show_debug_window", True))
-        self.log_path_var.set(get_log_dir())
+        # TODO: PySide Migration
+        pass
 
     def _retranslate_configuration_window(self):
         """Updates the text of all widgets in the configuration window."""
-        if not self.config_window:
-            return
-        self.config_window.title(lang.get("configuration_window_title"))
-        self.config_widgets['language_label'].config(text=lang.get("config_language_label") + ":")
-        self.config_widgets['config_path_frame'].config(text=lang.get("config_file_path_label"))
-        self.config_widgets['config_browse_button'].config(text=lang.get("browse_button"))
-        self.config_widgets['path_frame'].config(text=lang.get("config_path_label"))
-        self.config_widgets['char_browse_button'].config(text=lang.get("browse_button"))
-        self.config_widgets['debug_check'].config(text=lang.get("config_debug_mode_label"))
-        self.config_widgets['show_debug_win_check'].config(text=lang.get("config_show_debug_window_label"))
-        self.config_widgets['log_path_frame'].config(text=lang.get("config_log_path_label"))
-        self.config_widgets['log_browse_button'].config(text=lang.get("browse_button"))
-        self.config_widgets['save_button'].config(text=lang.get("save_button"))
-
-    def hide_configuration_window(self):
-        """Hides the configuration window."""
-        if self.config_window:
-            self.config_window.grab_release()
-            self.config_window.withdraw()
+        # TODO: PySide Migration
+        pass
 
     def open_configuration_window(self):
         """Opens the configuration window."""
         logging.debug("Opening configuration window.")
-        if self.config_window is None or not self.config_window.winfo_exists():
-            self._create_configuration_window()
-        
-        # Refresh fields and show the window
-        self._update_configuration_fields()
-        self.config_window.deiconify()
-        self.config_window.lift()
-        self.config_window.grab_set()
+        dialog = ConfigurationDialog(self, self.available_languages)
+        if dialog.exec() == QDialog.Accepted:
+            self.save_configuration(dialog)
 
-    def browse_config_folder(self):
-        """Opens a dialog to select a directory for the configuration file."""
-        directory = filedialog.askdirectory(
-            title=lang.get("select_config_folder_dialog_title"),
-            initialdir=self.config_path_var.get() or os.path.expanduser("~")
-        )
-        if directory:
-            self.config_path_var.set(directory)
-
-    def browse_character_folder(self):
-        """Opens a dialog to select a directory."""
-        directory = filedialog.askdirectory(
-            title=lang.get("select_folder_dialog_title"),
-            initialdir=self.char_path_var.get() or os.path.expanduser("~")
-        )
-        if directory:
-            self.char_path_var.set(directory)
-
-    def browse_log_folder(self):
-        """Opens a dialog to select a directory for logs."""
-        directory = filedialog.askdirectory(
-            title=lang.get("select_log_folder_dialog_title"),
-            initialdir=self.log_path_var.get() or os.path.expanduser("~")
-        )
-        if directory:
-            self.log_path_var.set(directory)
-
-    def save_configuration(self):
+    def save_configuration(self, dialog):
         """Saves the configuration and closes the window."""
-        # Get old and new debug mode states for comparison
-        old_debug_mode = config.get("debug_mode", True)
-        new_debug_mode = self.debug_mode_var.get()
+        old_theme = config.get("theme", "Dark")
+        old_debug_mode = config.get("debug_mode", False)
+        new_debug_mode = dialog.debug_mode_check.isChecked()
 
-        # Log deactivation while logging is still active
         if not new_debug_mode and old_debug_mode:
             logging.info("Debug mode has been DEACTIVATED. This is the last log entry.")
 
-        # Save all settings
-        config.set("config_folder", self.config_path_var.get())
-        config.set("character_folder", self.char_path_var.get())
-        config.set("log_folder", self.log_path_var.get())
+        config.set("character_folder", dialog.char_path_edit.text())
+        config.set("config_folder", dialog.config_path_edit.text())
+        config.set("log_folder", dialog.log_path_edit.text())
         config.set("debug_mode", new_debug_mode)
-        
-        show_debug = self.show_debug_window_var.get()
-        config.set("show_debug_window", show_debug)
+        config.set("show_debug_window", dialog.show_debug_window_check.isChecked())
 
-        # Determine if language needs to change, but don't apply it yet
-        selected_lang_name = self.language_var.get()
+        selected_lang_name = dialog.language_combo.currentText()
         new_lang_code = None
         for code, name in self.available_languages.items():
             if name == selected_lang_name:
@@ -1020,49 +792,74 @@ class CharacterApp:
         language_changed = new_lang_code and new_lang_code != config.get("language")
         if language_changed:
             config.set("language", new_lang_code)
-        
-        # Re-apply logging settings immediately after saving debug mode
-        # Pass the debug handler if it exists
-        setup_logging(extra_handlers=[self.debug_log_handler, self.debug_error_handler])
-        
-        # Show or hide the debug window based on the new setting
-        if show_debug:
-            self.show_debug_window()
-        else:
-            self.hide_debug_window()
 
-        # Log activation now that logging is configured
+        selected_theme_name = dialog.theme_combo.currentText()
+        new_theme = "Dark" if selected_theme_name == lang.get("theme_dark") else "Light"
+        theme_changed = new_theme != old_theme
+        if theme_changed:
+            config.set("theme", new_theme)
+
+
+        setup_logging()
+
         if new_debug_mode and not old_debug_mode:
             logging.info("Debug mode has been ACTIVATED.")
 
-        self.refresh_character_list() # Refresh list in case path changed
-        self.hide_configuration_window() # Hide window BEFORE showing messagebox
-        messagebox.showinfo(lang.get("success_title"), lang.get("config_saved_success"), parent=self.master)
+        QMessageBox.information(self, lang.get("success_title"), lang.get("config_saved_success"))
 
-        # Apply language change AFTER all windows are closed/hidden
         if language_changed:
             self.change_language(new_lang_code)
+        
+        if theme_changed:
+            QMessageBox.information(self, lang.get("info_title"), lang.get("theme_change_restart_message"))
 
+    def closeEvent(self, event):
+        """Ensures all child windows are closed when the main window is closed."""
+        logging.info("Main window closing. Shutting down application.")
+        if self.debug_window:
+            self.debug_window.close()
+        super().closeEvent(event)
+
+
+def apply_theme(app):
+    """Applies the configured theme to the application."""
+    # Default to 'Dark' if available, otherwise 'Light'
+    default_theme = "Dark" if QDARKSTYLE_AVAILABLE else "Light"
+    theme = config.get("theme", default_theme)
+
+    if theme == "Dark" and QDARKSTYLE_AVAILABLE:
+        logging.info("Applying Dark theme using 'qdarkstyle' library.")
+        app.setStyleSheet(qdarkstyle.load_stylesheet()) # type: ignore
+    else: # Fallback to light theme
+        if theme == "Dark" and not QDARKSTYLE_AVAILABLE:
+            logging.warning("Dark theme selected but 'qdarkstyle' is not installed. Falling back to Light theme.")
+        logging.info("Applying Light theme (default system style).")
+        app.setStyleSheet("")
 
 def main():
     """Main function to launch the application."""
-    start_time = time.perf_counter()
-    root = tk.Tk()
-    # Attach app instance to root to make it accessible from Toplevel windows
-
+    import time
+    start_time = time.perf_counter() # Keep time import local to main
+    app = QApplication(sys.argv)
+    apply_theme(app)
     # Set up global exception handling
     sys.excepthook = global_exception_handler
-    root.report_callback_exception = global_exception_handler
-    app = CharacterApp(root)
+    
+    main_window = CharacterApp()
 
     # Calculate and store loading time
     end_time = time.perf_counter()
     load_duration = end_time - start_time
     logging.info(f"Application loaded in {load_duration:.4f} seconds.") # type: ignore
-    root.load_time = load_duration # Store it on the root window
-    app.update_status_bar(lang.get("status_bar_loaded", duration=load_duration))
+    main_window.load_time = load_duration # Store it on the window instance
+    main_window.update_status_bar(lang.get("status_bar_loaded", duration=load_duration))
+    main_window.show()
 
-    root.mainloop()
+    # Show debug window if configured, after the main window is shown and positioned
+    if config.get("show_debug_window", False):
+        main_window.show_debug_window()
+
+    sys.exit(app.exec())
 
 if __name__ == "__main__":
     main()

@@ -42,8 +42,11 @@
     "config_show_debug_window_label": "Afficher la fenêtre de débogage au démarrage",
     "debug_window_title": "Console de débogage",
     "debug_level_menu": "Niveau",
-    "debug_level_all": "Tous",
+    "debug_level_all": "DEBUG",
     "status_bar_loaded": "Prêt. Chargé en {duration:.2f} secondes.",
+    "config_theme_label": "Thème",
+    "theme_light": "Clair",
+    "theme_dark": "Sombre",
     "debug_font_size_menu": "Police",
     "font_size_small": "Petite",
     "font_size_medium": "Moyenne",
@@ -63,5 +66,12 @@
     "delete_char_confirm_title": "Confirmer la suppression",
     "delete_char_confirm_message": "Êtes-vous sûr de vouloir supprimer définitivement le personnage '{name}' ? Cette action est irréversible.",
     "context_menu_delete": "Supprimer",
-    "column_selection": "Sélection"
+    "column_selection": "Sélection",
+    "theme_change_restart_message": "Le thème a été changé. Veuillez redémarrer l'application pour que les changements prennent effet.",
+    "qdarkstyle_not_found_tooltip": "Module 'qdarkstyle' non trouvé. Exécutez 'pip install qdarkstyle' pour activer le thème sombre.",
+    "bulk_actions_menu_label": "Actions en masse",
+    "delete_checked_action_label": "Multi Suppression",
+    "bulk_delete_confirm_message": "Êtes-vous sûr de vouloir supprimer définitivement les {count} personnages sélectionnés ? Cette action est irréversible.",
+    "no_characters_selected_warning": "Aucun personnage n'est sélectionné.",
+    "action_button_label": "Action"
 }

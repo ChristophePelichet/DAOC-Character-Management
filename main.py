@@ -9,7 +9,7 @@ try:
 except ImportError:
     QDARKSTYLE_AVAILABLE = False
 
-from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QTreeView, QStatusBar, QLabel, QMessageBox, QMenu, QFileDialog, QHeaderView, QDialog, QFormLayout, QLineEdit, QComboBox, QDialogButtonBox, QPushButton, QHBoxLayout, QCheckBox, QTextEdit, QSplitter, QGroupBox, QMenuBar, QToolButton, QSizePolicy
+from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QTreeView, QStatusBar, QLabel, QMessageBox, QMenu, QFileDialog, QHeaderView, QDialog, QFormLayout, QLineEdit, QComboBox, QDialogButtonBox, QPushButton, QHBoxLayout, QCheckBox, QTextEdit, QSplitter, QGroupBox, QMenuBar, QToolButton, QSizePolicy, QStyleFactory
 from PySide6.QtGui import QFont, QStandardItemModel, QStandardItem, QIcon, QAction, QActionGroup
 from PySide6.QtCore import Qt, QSize, Signal, QObject, QThread, Slot
 
@@ -821,10 +821,16 @@ def apply_theme(app):
         logging.info("Applying Dark theme using 'qdarkstyle' library.")
         app.setStyleSheet(qdarkstyle.load_stylesheet()) # type: ignore
     else: # Fallback to light theme
+        # Clear any previous stylesheet (like from the dark theme)
+        app.setStyleSheet("")
+        # Try to apply a native Windows look
+        if "windowsvista" in QStyleFactory.keys():
+            logging.info("Applying 'windowsvista' style for a native Windows look.")
+            app.setStyle("windowsvista")
+        else:
+            logging.info("Applying Light theme (default system style).")
         if theme == "Dark" and not QDARKSTYLE_AVAILABLE:
             logging.warning("Dark theme selected but 'qdarkstyle' is not installed. Falling back to Light theme.")
-        logging.info("Applying Light theme (default system style).")
-        app.setStyleSheet("")
 
 def main():
     """Main function to launch the application."""

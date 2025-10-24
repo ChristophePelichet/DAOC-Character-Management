@@ -3,15 +3,9 @@ import sys
 import traceback
 import logging
 
-try:
-    import qdarkstyle
-    QDARKSTYLE_AVAILABLE = True
-except ImportError:
-    QDARKSTYLE_AVAILABLE = False
-
-from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QTreeView, QStatusBar, QLabel, QMessageBox, QMenu, QFileDialog, QHeaderView, QDialog, QFormLayout, QLineEdit, QComboBox, QDialogButtonBox, QPushButton, QHBoxLayout, QCheckBox, QTextEdit, QSplitter, QGroupBox, QMenuBar, QToolButton, QSizePolicy, QStyleFactory, QStyledItemDelegate
-from PySide6.QtGui import QFont, QStandardItemModel, QStandardItem, QIcon, QAction, QActionGroup
-from PySide6.QtCore import Qt, QSize, Signal, QObject, QThread, Slot, QRect
+from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QTreeView, QStatusBar, QLabel, QMessageBox, QMenu, QFileDialog, QHeaderView, QDialog, QFormLayout, QLineEdit, QComboBox, QDialogButtonBox, QPushButton, QHBoxLayout, QCheckBox, QTextEdit, QSplitter, QGroupBox, QMenuBar, QToolButton, QSizePolicy, QStyleFactory, QStyledItemDelegate, QStyleOptionButton, QStyleOptionViewItem, QStyle
+from PySide6.QtGui import QFont, QStandardItemModel, QStandardItem, QIcon, QAction, QActionGroup, QPainter
+from PySide6.QtCore import Qt, QSize, Signal, QObject, QThread, Slot, QRect, QEvent
 
 from Functions.character_manager import create_character_data, save_character, get_all_characters, get_character_dir, REALM_ICONS, delete_character
 from Functions.language_manager import lang, get_available_languages
@@ -20,8 +14,6 @@ from Functions.logging_manager import setup_logging, get_log_dir, get_img_dir
 
 # Setup logging at the very beginning
 setup_logging()
-if not QDARKSTYLE_AVAILABLE:
-    logging.warning("qdarkstyle not found. Dark theme will be unavailable. Run 'pip install qdarkstyle' to enable it.")
 
 # --- Application Constants ---
 APP_NAME = "Character Manager"
@@ -249,23 +241,27 @@ class DebugWindow(QMainWindow):
         logging.getLogger().removeHandler(self.error_handler)
         super().closeEvent(event)
 
-class CharacterSheetWindow(QWidget):
+class CharacterSheetWindow(QDialog): # Changed from QWidget to QDialog
     """Fenêtre pour afficher les détails d'un personnage."""
     def __init__(self, parent, character_data):
         super().__init__(parent)
         self.character_data = character_data
         char_name = self.character_data.get('name', 'N/A')
 
-        self.title(lang.get("character_sheet_title", name=char_name))
-        self.geometry("400x500")
+        self.setWindowTitle(lang.get("character_sheet_title", name=char_name)) # Use setWindowTitle
+        self.resize(400, 500) # Use resize for initial size
 
-        # TODO: PySide Migration
-        # layout = QVBoxLayout(self)
-        # layout.addWidget(QLabel(f"Feuille pour : {char_name}"))
-        # layout.addWidget(QLabel(f"Royaume : {self.character_data.get('realm', 'N/A')}"))
-        # layout.addWidget(QLabel(f"Niveau : {self.character_data.get('level', 'N/A')}"))
+        layout = QVBoxLayout(self)
+        layout.addWidget(QLabel(f"Nom : {char_name}"))
+        layout.addWidget(QLabel(f"Royaume : {self.character_data.get('realm', 'N/A')}"))
+        layout.addWidget(QLabel(f"Niveau : {self.character_data.get('level', 'N/A')}"))
+        # Add more character details here as needed
+        layout.addStretch() # Pushes content to the top
 
-        # Comportement modal
+        # Add a close button
+        button_box = QDialogButtonBox(QDialogButtonBox.Close)
+        button_box.rejected.connect(self.reject) # Connect Close button to reject
+        layout.addWidget(button_box)
 
 class NewCharacterDialog(QDialog):
     """A dialog to create a new character with a name and a realm."""
@@ -341,15 +337,6 @@ class ConfigurationDialog(QDialog):
         self.language_combo.addItems(self.available_languages.values())
         layout.addRow(lang.get("config_language_label"), self.language_combo)
 
-        # Theme
-        self.theme_combo = QComboBox()
-        self.theme_combo.addItems([lang.get("theme_light"), lang.get("theme_dark")])
-        layout.addRow(lang.get("config_theme_label"), self.theme_combo)
-        if not QDARKSTYLE_AVAILABLE:
-            self.theme_combo.setDisabled(True)
-            self.theme_combo.setToolTip(lang.get("qdarkstyle_not_found_tooltip"))
-
-
         # Debug Mode
         self.debug_mode_check = QCheckBox(lang.get("config_debug_mode_label"))
         layout.addRow(self.debug_mode_check)
@@ -378,11 +365,6 @@ class ConfigurationDialog(QDialog):
         current_lang_name = self.available_languages.get(current_lang_code, "Français")
         self.language_combo.setCurrentText(current_lang_name)
 
-        default_theme = "Dark" if QDARKSTYLE_AVAILABLE else "Light"
-        current_theme_value = config.get("theme", default_theme)
-        current_theme_text = lang.get("theme_light") if current_theme_value == "Light" else lang.get("theme_dark")
-        self.theme_combo.setCurrentText(current_theme_text)
-
     def browse_folder(self, line_edit, title_key):
         directory = QFileDialog.getExistingDirectory(self, lang.get(title_key))
         if directory:
@@ -405,6 +387,23 @@ class CenterIconDelegate(QStyledItemDelegate):
         # Si la cellule contient une icône
         icon = index.data(Qt.DecorationRole)
         if icon and isinstance(icon, QIcon) and not icon.isNull():
+            # Draw only the background, not the icon or text
+            opt = QStyleOptionViewItem(option)
+            self.initStyleOption(opt, index)
+            
+            # Remove the decoration AND text so super().paint() won't draw them
+            opt.features &= ~QStyleOptionViewItem.HasDecoration
+            opt.features &= ~QStyleOptionViewItem.HasDisplay  # This removes the text
+            opt.icon = QIcon()  # Remove icon
+            opt.text = ""  # Remove text
+            opt.decorationSize = QSize(0, 0)
+            
+            # Draw background only (selection highlight, etc.)
+            super().paint(painter, opt, index)
+            
+            # Now draw the centered icon
+            painter.save()
+            
             # Calculer la position centrée
             icon_size = option.decorationSize
             if icon_size.width() == -1:  # Taille par défaut
@@ -416,9 +415,55 @@ class CenterIconDelegate(QStyledItemDelegate):
             
             # Dessiner l'icône
             icon.paint(painter, QRect(x, y, icon_size.width(), icon_size.height()))
+            
+            painter.restore()
         else:
             # Pour les autres cellules, utiliser le comportement par défaut
             super().paint(painter, option, index)
+
+class CenterCheckboxDelegate(QStyledItemDelegate):
+    """Delegate to draw a checkbox in the center of a cell and handle clicks."""
+    def paint(self, painter, option, index):
+        # Create a modified option without the checkbox decoration
+        opt = QStyleOptionViewItem(option)
+        self.initStyleOption(opt, index)
+        
+        # Draw only the background (selection, hover, etc.) without the checkbox
+        style = option.widget.style() if option.widget else QApplication.style()
+        style.drawPrimitive(QStyle.PE_PanelItemViewItem, opt, painter, option.widget)
+        
+        # Now draw our custom centered checkbox
+        painter.save()
+        
+        # Create checkbox option
+        check_option = QStyleOptionButton()
+        
+        # Set the check state from the model data
+        check_state = index.data(Qt.CheckStateRole)
+        if check_state == Qt.Checked:
+            check_option.state = QStyle.State_On | QStyle.State_Enabled
+        else:
+            check_option.state = QStyle.State_Off | QStyle.State_Enabled
+        
+        # Make the checkbox bigger (2x size for better visibility)
+        indicator_size = int(style.pixelMetric(QStyle.PM_IndicatorWidth) * 2)
+        x = option.rect.center().x() - indicator_size // 2
+        y = option.rect.center().y() - indicator_size // 2
+        check_option.rect = QRect(x, y, indicator_size, indicator_size)
+
+        # Draw the checkbox with better quality
+        style.drawControl(QStyle.CE_CheckBox, check_option, painter, option.widget)
+        
+        painter.restore()
+
+    def editorEvent(self, event, model, option, index):
+        """Handle user interaction to toggle the checkbox."""
+        if event.type() == QEvent.MouseButtonRelease and event.button() == Qt.LeftButton:
+            # When the cell is clicked, toggle the check state
+            new_state = Qt.Unchecked if index.data(Qt.CheckStateRole) == Qt.Checked else Qt.Checked
+            model.setData(index, new_state, Qt.CheckStateRole)
+            return True # We've handled the event
+        return False
 
 class CharacterApp(QMainWindow):
     """
@@ -444,24 +489,57 @@ class CharacterApp(QMainWindow):
         self.setCentralWidget(central_widget)
         main_layout = QVBoxLayout(central_widget)
 
+        # --- Create persistent UI elements ---
+        # Create the toolbar once to avoid duplication on language change
+        self.main_toolbar = self.addToolBar("Main Toolbar")
+        self.main_toolbar.setMovable(False) # Make the toolbar non-movable
+
         # --- Actions, Menus, and Toolbars ---
         self._create_actions()
         # --- Menu Bar ---
         self._create_menus_and_toolbars()
+
+        # --- Bulk Actions Bar ---
+        self._create_bulk_actions_bar(main_layout)
 
         # --- Main content ---
         # --- Character List (Treeview) ---
         self.character_tree = QTreeView()
         self.character_tree.setAlternatingRowColors(True)
         self.character_tree.setRootIsDecorated(False) # To make it look like a table
+        self.character_tree.setSortingEnabled(True) # Enable column sorting
         main_layout.addWidget(self.character_tree)
+
+        # Apply a stylesheet to show grid lines, as QTreeView doesn't have setShowGrid
+        grid_color = "#d6d6d6"
+        text_color = "#000000"
+        selected_text_color = "#ffffff"
+        selected_bg_color = "#0078d4"
+        
+        self.character_tree.setStyleSheet(f"""
+            QTreeView::item {{
+                border-right: 1px solid {grid_color};
+                color: {text_color};
+            }}
+            QTreeView::item:selected {{
+                color: {selected_text_color};
+                background-color: {selected_bg_color};
+            }}
+            QTreeView {{
+                border-bottom: 1px solid {grid_color};
+            }}
+        """)
 
         self.tree_model = QStandardItemModel()
         self.character_tree.setModel(self.tree_model)
         
         # Apply custom delegate to center icons in the realm column (column 0)
-        self.center_icon_delegate = CenterIconDelegate(self.character_tree)
-        self.character_tree.setItemDelegateForColumn(0, self.center_icon_delegate)
+        self.center_icon_delegate = CenterIconDelegate(self)
+        self.character_tree.setItemDelegateForColumn(1, self.center_icon_delegate) # Realm column is now at index 1
+
+        # Apply custom delegate to center the checkbox in the selection column
+        self.center_checkbox_delegate = CenterCheckboxDelegate(self)
+        self.character_tree.setItemDelegateForColumn(0, self.center_checkbox_delegate) # Selection column is at index 0
 
         # --- Bindings ---
         self.character_tree.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -485,40 +563,62 @@ class CharacterApp(QMainWindow):
         self.create_action = QAction(self.add_char_icon, lang.get("create_button_text"), self)
         self.create_action.setToolTip(lang.get("create_char_tooltip"))
         self.create_action.triggered.connect(self.create_new_character)
+        
+        self.config_action = QAction(self.config_icon, lang.get("configuration_menu_label"), self)
+        self.config_action.setToolTip(lang.get("configuration_menu_label")) # Tooltip can be the same as label for now
+        self.config_action.triggered.connect(self.open_configuration_window)
 
     def _create_menus_and_toolbars(self):
         """Setup the menu bar and toolbars."""
-        # Toolbar
-        toolbar = self.addToolBar("Main Toolbar")
-        toolbar.addAction(self.create_action)
+        # Clear and repopulate the existing toolbar
+        self.main_toolbar.clear()
+        self.main_toolbar.addAction(self.create_action)
+        self.main_toolbar.addAction(self.config_action)
 
-        # Menu Bar
-        # We must create a new menu bar and set it to replace the old one on re-translation
-        menu_bar = QMenuBar(self)
-
-        # File Menu
-        file_menu = menu_bar.addMenu(lang.get("file_menu_label"))
-        file_menu.addAction(self.create_action)
-        config_action = QAction(lang.get("configuration_menu_label"), self)
-        config_action.triggered.connect(self.open_configuration_window)
-        file_menu.addAction(config_action)
-
-        file_menu.addSeparator()
-
-        # Help Menu
-        help_menu = menu_bar.addMenu(lang.get("help_menu_label", default="?"))
-        about_action = QAction(lang.get("about_menu_label"), self)
-        about_action.triggered.connect(self.show_about_dialog)
-        help_menu.addAction(about_action)
-
-        # Set the new menu bar as the main window's menu bar
-        self.setMenuBar(menu_bar)
+        self.setMenuBar(None) # Explicitly remove the menu bar
 
     def _create_context_menu(self):
         """Creates or updates the right-click context menu for the tree view."""
         self.context_menu = QMenu(self)
+        
+        # Selection actions
+        select_all_action = self.context_menu.addAction(lang.get("context_menu_select_all", default="Sélectionner tout"))
+        select_all_action.triggered.connect(self.select_all_characters)
+        
+        deselect_all_action = self.context_menu.addAction(lang.get("context_menu_deselect_all", default="Désélectionner tout"))
+        deselect_all_action.triggered.connect(self.deselect_all_characters)
+        
+        self.context_menu.addSeparator()
+        
+        # Delete actions
         delete_action = self.context_menu.addAction(lang.get("context_menu_delete"))
         delete_action.triggered.connect(self.delete_selected_character)
+        
+        delete_selected_action = self.context_menu.addAction(lang.get("context_menu_delete_selected", default="Supprimer les sélectionnés"))
+        delete_selected_action.triggered.connect(self.delete_checked_characters)
+
+    def _create_bulk_actions_bar(self, parent_layout):
+        """Creates the bar for bulk actions above the character list."""
+        bulk_actions_group = QGroupBox(lang.get("bulk_actions_group_title", default="Actions sur la sélection"))
+        bulk_actions_layout = QHBoxLayout()
+
+        self.bulk_action_combo = QComboBox()
+        self.bulk_action_combo.addItem(lang.get("bulk_action_delete", default="Supprimer la sélection"))
+        # Add more actions here in the future
+        bulk_actions_layout.addWidget(self.bulk_action_combo)
+
+        execute_button = QPushButton(lang.get("bulk_action_execute_button", default="Exécuter"))
+        execute_button.clicked.connect(self.execute_bulk_action)
+        bulk_actions_layout.addWidget(execute_button)
+
+        bulk_actions_group.setLayout(bulk_actions_layout)
+        parent_layout.addWidget(bulk_actions_group)
+
+    def execute_bulk_action(self):
+        """Executes the selected bulk action on checked characters."""
+        selected_action = self.bulk_action_combo.currentText()
+        if selected_action == lang.get("bulk_action_delete"):
+            self.delete_checked_characters()
 
     def _load_icons(self):
         """Loads and resizes all required icons once at startup."""
@@ -528,6 +628,7 @@ class CharacterApp(QMainWindow):
         self.tree_realm_icons = {}
         self.trash_icon = None
         self.add_char_icon = None
+        self.config_icon = None
         img_dir = get_img_dir() # Use the centralized function
 
         if not REALM_ICONS:
@@ -573,6 +674,17 @@ class CharacterApp(QMainWindow):
                 logging.error(f"Add character icon 'icon-plus-50.png' not found at {add_char_path}")
         except Exception as e:
             logging.error(f"Error loading add character icon: {e}")
+
+        # Load config icon
+        try:
+            config_icon_path = os.path.join(img_dir, "reglage.png")
+            if os.path.exists(config_icon_path):
+                self.config_icon = QIcon(config_icon_path)
+                logging.debug(f"Config icon loaded from {config_icon_path}")
+            else:
+                logging.error(f"Config icon 'reglage.png' not found at {config_icon_path}")
+        except Exception as e:
+            logging.error(f"Error loading config icon: {e}")
         
         logging.debug(f"Icon loading complete. Realm icons loaded: {len(self.tree_realm_icons)}, Trash icon: {self.trash_icon is not None}, Add icon: {self.add_char_icon is not None}")
 
@@ -610,21 +722,21 @@ class CharacterApp(QMainWindow):
         self.characters_by_id.clear()
 
         # Set headers
-        headers = [lang.get("column_realm"), lang.get("column_name"), lang.get("column_level"), lang.get("column_selection")]
+        headers = [lang.get("column_selection"), lang.get("column_realm"), lang.get("column_name"), lang.get("column_level")]
         self.tree_model.setHorizontalHeaderLabels(headers)
         
         # Center align the realm column header
-        realm_header = self.tree_model.horizontalHeaderItem(0)
+        realm_header = self.tree_model.horizontalHeaderItem(1) # Realm is now at index 1
         if realm_header:
             realm_header.setTextAlignment(Qt.AlignCenter)
 
         characters = get_all_characters()
         # Add a detailed log to check the state of the icons dictionary just before the loop
-        logging.debug(f"Populating tree with {len(characters)} character(s). tree_realm_icons contains {len(self.tree_realm_icons)} icon(s): {list(self.tree_realm_icons.keys())}")
+        logging.debug(f"Populating tree with {len(characters)} character(s). tree_realm_icons contains {len(self.tree_realm_icons)} icon(s): {list(self.tree_realm_icons.keys()) if self.tree_realm_icons else 'None'}")
 
         for i, char in enumerate(characters):
             realm_name = char.get('realm', 'N/A')
-            realm_icon = self.tree_realm_icons.get(realm_name)
+            realm_icon = self.tree_realm_icons.get(realm_name) if self.tree_realm_icons else None
             char_id = char.get('id')
             self.characters_by_id[char_id] = char
 
@@ -632,7 +744,10 @@ class CharacterApp(QMainWindow):
             # Create items for each column in the row
             item_realm = QStandardItem() # On ne met que l'icône, pas de texte.
             if realm_icon:
+                # Store realm name in UserRole+1 for sorting, but don't display it as text
+                item_realm.setData(realm_name, Qt.UserRole + 1)  # For sorting
                 item_realm.setIcon(realm_icon)
+                # Don't call setText() - we only want the icon, no text
             item_realm.setData(char_id, Qt.UserRole) # Store char_id in the item
             item_realm.setTextAlignment(Qt.AlignCenter) # Centrer l'icône
             item_realm.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled) # Make non-editable
@@ -648,14 +763,17 @@ class CharacterApp(QMainWindow):
             # Allow checking but not direct text editing
             item_selection.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled | Qt.ItemIsUserCheckable)
 
-            row_items = [item_realm, item_name, item_level, item_selection]
+            row_items = [item_selection, item_realm, item_name, item_level]
             self.tree_model.appendRow(row_items)
 
         self.character_tree.resizeColumnToContents(0)
-        self.character_tree.resizeColumnToContents(2)
+        self.character_tree.resizeColumnToContents(1)
         self.character_tree.resizeColumnToContents(3)
         self.character_tree.header().setStretchLastSection(False)
-        self.character_tree.header().setSectionResizeMode(1, QHeaderView.Stretch)
+        self.character_tree.header().setSectionResizeMode(2, QHeaderView.Stretch) # Name column is now at index 2
+        
+        # Connect the model's dataChanged signal to update selection count
+        self.tree_model.dataChanged.connect(self.update_selection_count)
 
     def on_tree_right_click(self, position):
         """Shows a context menu on right-click."""
@@ -669,7 +787,7 @@ class CharacterApp(QMainWindow):
         if indexes:
             # Get the item from the first column of the selected row
             row = indexes[0].row()
-            first_column_item = self.tree_model.item(row, 0)
+            first_column_item = self.tree_model.item(row, 1) # ID is on the realm item, now at index 1
             char_id = first_column_item.data(Qt.UserRole) # Retrieve the stored character ID
             if char_id:
                 self.delete_character(char_id)
@@ -678,11 +796,11 @@ class CharacterApp(QMainWindow):
         """Returns a list of character IDs for all checked rows."""
         checked_ids = []
         for row in range(self.tree_model.rowCount()):
-            # The checkbox is in the last column (index 3)
-            selection_item = self.tree_model.item(row, 3)
+            # The checkbox is in the first column (index 0)
+            selection_item = self.tree_model.item(row, 0)
             if selection_item and selection_item.checkState() == Qt.Checked:
-                # The ID is stored in the first item of the row (index 0)
-                id_item = self.tree_model.item(row, 0)
+                # The ID is stored in the realm item of the row (index 1)
+                id_item = self.tree_model.item(row, 1)
                 char_id = id_item.data(Qt.UserRole)
                 if char_id:
                     checked_ids.append(char_id)
@@ -708,6 +826,38 @@ class CharacterApp(QMainWindow):
                 # We skip the individual confirmation dialog by directly calling the backend function
                 self.delete_character(char_id, confirm=False)
             self.refresh_character_list()
+
+    def select_all_characters(self):
+        """Selects all characters in the tree view."""
+        for row in range(self.tree_model.rowCount()):
+            selection_item = self.tree_model.item(row, 0)
+            if selection_item:
+                selection_item.setCheckState(Qt.Checked)
+        self.update_selection_count()
+        logging.debug(f"All {self.tree_model.rowCount()} characters selected")
+
+    def deselect_all_characters(self):
+        """Deselects all characters in the tree view."""
+        for row in range(self.tree_model.rowCount()):
+            selection_item = self.tree_model.item(row, 0)
+            if selection_item:
+                selection_item.setCheckState(Qt.Unchecked)
+        self.update_selection_count()
+        logging.debug("All characters deselected")
+
+    def update_selection_count(self):
+        """Updates the status bar with the count of selected characters."""
+        checked_ids = self.get_checked_character_ids()
+        total = self.tree_model.rowCount()
+        
+        if len(checked_ids) > 0:
+            self.update_status_bar(lang.get("status_bar_selection_count", count=len(checked_ids), total=total))
+        else:
+            # Restore the default status message
+            if hasattr(self, 'load_time'):
+                self.update_status_bar(lang.get("status_bar_loaded", duration=self.load_time))
+            else:
+                self.update_status_bar("")
 
     def delete_character(self, char_id, confirm=True):
         """Handles the character deletion process."""
@@ -743,20 +893,19 @@ class CharacterApp(QMainWindow):
             return
 
         # Prevent sheet from opening when clicking the checkbox column (index 3)
-        if index.column() == 3:
+        if index.column() == 0: # Selection column is now at index 0
             return
 
         # Get the item from the first column to retrieve the ID
-        item = self.tree_model.item(index.row(), 0)
+        item = self.tree_model.item(index.row(), 1) # ID is on the realm item, now at index 1
         char_id = item.data(Qt.UserRole)
 
         character_data = self.characters_by_id.get(char_id)
         if character_data:
             char_name = character_data.get('name', 'N/A')
             logging.info(f"Ouverture de la feuille du personnage '{char_name}'.")
-            # TODO: PySide Migration: CharacterSheetWindow needs to be a QDialog
-            # sheet = CharacterSheetWindow(self, character_data)
-            # sheet.show()
+            sheet = CharacterSheetWindow(self, character_data)
+            sheet.exec() # Show the dialog modally
         else:
             logging.warning(f"Impossible de trouver les données pour le personnage avec l'ID '{char_id}' lors du double-clic.")
 
@@ -843,7 +992,6 @@ class CharacterApp(QMainWindow):
 
     def save_configuration(self, dialog):
         """Saves the configuration and closes the window."""
-        old_theme = config.get("theme", "Dark")
         old_debug_mode = config.get("debug_mode", False)
         new_debug_mode = dialog.debug_mode_check.isChecked()
 
@@ -867,13 +1015,6 @@ class CharacterApp(QMainWindow):
         if language_changed:
             config.set("language", new_lang_code)
 
-        selected_theme_name = dialog.theme_combo.currentText()
-        new_theme = "Dark" if selected_theme_name == lang.get("theme_dark") else "Light"
-        theme_changed = new_theme != old_theme
-        if theme_changed:
-            config.set("theme", new_theme)
-
-
         setup_logging()
 
         if new_debug_mode and not old_debug_mode:
@@ -883,9 +1024,6 @@ class CharacterApp(QMainWindow):
 
         if language_changed:
             self.change_language(new_lang_code)
-        
-        if theme_changed:
-            QMessageBox.information(self, lang.get("info_title"), lang.get("theme_change_restart_message"))
 
     def closeEvent(self, event):
         """Ensures all child windows are closed when the main window is closed."""
@@ -897,24 +1035,14 @@ class CharacterApp(QMainWindow):
 
 def apply_theme(app):
     """Applies the configured theme to the application."""
-    # Default to 'Dark' if available, otherwise 'Light'
-    default_theme = "Dark" if QDARKSTYLE_AVAILABLE else "Light"
-    theme = config.get("theme", default_theme)
-
-    if theme == "Dark" and QDARKSTYLE_AVAILABLE:
-        logging.info("Applying Dark theme using 'qdarkstyle' library.")
-        app.setStyleSheet(qdarkstyle.load_stylesheet()) # type: ignore
+    # Clear any previous stylesheet
+    app.setStyleSheet("")
+    # Try to apply a native Windows look
+    if "windowsvista" in QStyleFactory.keys():
+        logging.info("Applying 'windowsvista' style for a native Windows look.")
+        app.setStyle("windowsvista")
     else: # Fallback to light theme
-        # Clear any previous stylesheet (like from the dark theme)
-        app.setStyleSheet("")
-        # Try to apply a native Windows look
-        if "windowsvista" in QStyleFactory.keys():
-            logging.info("Applying 'windowsvista' style for a native Windows look.")
-            app.setStyle("windowsvista")
-        else:
-            logging.info("Applying Light theme (default system style).")
-        if theme == "Dark" and not QDARKSTYLE_AVAILABLE:
-            logging.warning("Dark theme selected but 'qdarkstyle' is not installed. Falling back to Light theme.")
+        logging.info("Applying Light theme (default system style).")
 
 def main():
     """Main function to launch the application."""

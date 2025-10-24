@@ -76,5 +76,8 @@
     "action_button_label": "Action",
     "realm_albion": "Albion",
     "realm_hibernia": "Hibernia",
-    "realm_midgard": "Midgard"
+    "realm_midgard": "Midgard",
+    "bulk_actions_group_title": "Actions sur la sélection",
+    "bulk_action_delete": "Supprimer la sélection",
+    "bulk_action_execute_button": "Exécuter"
 }

@@ -1,13 +1,10 @@
-import json
 import os
-import uuid # To generate unique identifiers
+import json
+import uuid
 import logging
-from .config_manager import config
-from .path_manager import get_base_path
+from Functions.config_manager import config
 
-logger = logging.getLogger(__name__)
-
-# --- Realm to Icon Mapping ---
+REALMS = ["Albion", "Hibernia", "Midgard"]
 REALM_ICONS = {
     "Albion": "albion_logo.png",
     "Hibernia": "hibernia_logo.png",
@@ -15,120 +12,108 @@ REALM_ICONS = {
 }
 
 def get_character_dir():
-    """
-    Gets the character directory from the config.
-    If not set, defaults to a 'Characters' folder in the project root.
-    """
-    path = config.get("character_folder")
-    if path and os.path.isdir(path):
-        return path
-    return os.path.join(get_base_path(), 'Characters')
+    """Returns the configured character directory."""
+    return config.get("character_folder", os.path.join(os.getcwd(), "Characters"))
 
 def create_character_data(name, realm):
     """
-    Creates a basic data dictionary for a new character.
+    Creates a dictionary for a new character.
+    The 'id' is now the character name for file system identification.
+    A separate 'uuid' is kept for internal robustness if needed.
     """
-    icon_filename = REALM_ICONS.get(realm, "default.png") # Get icon filename, with a fallback
-    character_id = str(uuid.uuid4()) # Generate a unique ID
     return {
-        "id": character_id,
-        "name": name,
-        "realm": realm,
-        # We store only the filename, not the full path.
-        "icon": icon_filename,
-        "level": 1,
-        "health": 100,
-        "inventory": []
+        'id': name, # The main identifier is now the name
+        'uuid': str(uuid.uuid4()), # Still keep a unique ID internally
+        'name': name,
+        'realm': realm,
+        'level': 1,
+        # Add other default character attributes here
     }
 
 def save_character(character_data):
     """
-    Saves a character's data to a JSON file.
-    First, it checks if a character with the same name already exists.
+    Saves character data to a JSON file named after the character,
+    inside a subfolder corresponding to its realm.
+    e.g., 'Characters/Albion/Merlin.json'
     """
-    main_character_dir = get_character_dir()
-    realm = character_data.get("realm")
+    base_char_dir = get_character_dir()
 
-    if not realm:
-        return False, "Realm information is missing."
+    character_name = character_data.get('name')
+    character_realm = character_data.get('realm')
 
-    realm_dir = os.path.join(main_character_dir, realm)
-    os.makedirs(realm_dir, exist_ok=True)
-    
-    # Check for name uniqueness before sanitizing for filename
-    existing_names_lower = {char['name'].lower() for char in get_all_characters()}
-    if character_data['name'].lower() in existing_names_lower:
-        # Return a specific error key for the UI to handle translation
+    if not character_name:
+        return False, "Character data must contain a 'name'."
+    if not character_realm or character_realm not in REALMS:
+        return False, f"Invalid or missing realm for character '{character_name}'."
+
+    # Create the realm-specific directory
+    char_dir = os.path.join(base_char_dir, character_realm)
+    os.makedirs(char_dir, exist_ok=True)
+
+    file_path = os.path.join(char_dir, f"{character_name}.json")
+
+    if os.path.exists(file_path):
         return False, "char_exists_error"
 
-    # Use the unique character ID as the filename to avoid sanitization issues.
-    character_id = character_data.get("id")
-    filename = os.path.join(realm_dir, f"{character_id}.json")
-
     try:
-        with open(filename, 'w', encoding='utf-8') as f:
-            json.dump(character_data, f, indent=4, ensure_ascii=False)
-        return True, f"Character '{character_data['name']}' saved to {filename}"
-    except (IOError, OSError) as e:
-        return False, f"Error while saving character: {e}"
+        with open(file_path, 'w', encoding='utf-8') as f:
+            json.dump(character_data, f, indent=4)
+        logging.info(f"Character '{character_name}' saved to {file_path}")
+        return True, "Character saved successfully."
+    except Exception as e:
+        logging.error(f"Error saving character '{character_name}': {e}")
+        return False, f"Failed to save character file: {e}"
 
 def get_all_characters():
     """
-    Scans the 'Characters' directory and its realm subdirectories,
-    and returns a list of dictionaries, each containing character details.
+    Loads all characters from .json files by walking through realm subdirectories.
+    The character 'id' is derived from the filename.
     """
-    character_dir = get_character_dir()
-    if not os.path.exists(character_dir):
-        return []  # Return an empty list if the directory does not exist
+    base_char_dir = get_character_dir()
+    if not os.path.exists(base_char_dir):
+        return []
 
     characters = []
-    # Iterate through all subdirectories (realms) in the character directory
-    for root, _, files in os.walk(character_dir):
+    # os.walk will traverse the root and all subdirectories
+    for root, _, files in os.walk(base_char_dir):
         for filename in files:
-            # Process only JSON files
             if filename.endswith('.json'):
                 file_path = os.path.join(root, filename)
-                if filename.endswith('.json'):
-                    try:
-                        with open(file_path, 'r', encoding='utf-8') as f:
-                            data = json.load(f)
-                            characters.append(data)
-                    except (json.JSONDecodeError, IOError) as e:
-                        logger.warning(f"Could not read or parse character file {filename}: {e}")
-                        continue
-    return sorted(characters, key=lambda x: (x.get('realm', ''), x.get('name', '').lower()))
+                try:
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        char_data = json.load(f)
+                        # Ensure the 'id' in the app matches the filename (without extension)
+                        char_data['id'] = os.path.splitext(filename)[0]
+                        characters.append(char_data)
+                except (json.JSONDecodeError, KeyError) as e:
+                    logging.warning(f"Could not load or parse {file_path}: {e}")
+    return sorted(characters, key=lambda c: c.get('name', '').lower())
 
-def delete_character(character_id, realm, character_name=None):
+def delete_character(character_name):
     """
-    Deletes a character's JSON file. It first tries to delete by ID,
-    and as a fallback, tries to delete by the character name for backward compatibility.
-    Returns True on success, False on failure.
+    Deletes a character's JSON file based on their name.
     """
-    if not realm:
-        logger.error("Attempted to delete a character with missing realm.")
-        return False, "Missing character realm."
+    if not character_name:
+        return False, "Character name not provided."
 
-    character_dir = get_character_dir()
-    
-    # Primary strategy: delete by ID
-    file_path_by_id = os.path.join(character_dir, realm, f"{character_id}.json")
-    # Fallback strategy: delete by name (for older files)
-    file_path_by_name = os.path.join(character_dir, realm, f"{character_name}.json") if character_name else None
+    base_char_dir = get_character_dir()
+    file_to_delete = None
 
-    path_to_delete = None
-    if os.path.exists(file_path_by_id):
-        path_to_delete = file_path_by_id
-    elif file_path_by_name and os.path.exists(file_path_by_name):
-        path_to_delete = file_path_by_name
+    # Search for the character file in all realm subdirectories
+    for realm in REALMS:
+        potential_path = os.path.join(base_char_dir, realm, f"{character_name}.json")
+        if os.path.exists(potential_path):
+            file_to_delete = potential_path
+            break
 
-    if path_to_delete:
+    if file_to_delete:
         try:
-            os.remove(path_to_delete)
-            logger.info(f"Successfully deleted character file: {path_to_delete}")
+            os.remove(file_to_delete)
+            logging.info(f"Deleted character file: {file_to_delete}")
             return True, "Character deleted successfully."
         except OSError as e:
-            logger.error(f"Error deleting character file {path_to_delete}: {e}")
-            return False, f"OS error while deleting file: {e}"
+            logging.error(f"Error deleting file {file_to_delete}: {e}")
+            return False, f"Could not delete character file: {e}"
     else:
-        logger.warning(f"Attempted to delete a non-existent character file. Tried: {file_path_by_id} and {file_path_by_name}")
+        logging.warning(f"Attempted to delete non-existent character file for '{character_name}'.")
         return False, "Character file not found."

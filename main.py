@@ -7,7 +7,7 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, Q
 from PySide6.QtGui import QFont, QStandardItemModel, QStandardItem, QIcon, QAction, QActionGroup, QPainter
 from PySide6.QtCore import Qt, QSize, Signal, QObject, QThread, Slot, QRect, QEvent
 
-from Functions.character_manager import create_character_data, save_character, get_all_characters, get_character_dir, REALM_ICONS, delete_character
+from Functions.character_manager import create_character_data, save_character, get_all_characters, get_character_dir, REALM_ICONS, delete_character, REALMS
 from Functions.language_manager import lang, get_available_languages
 from Functions.config_manager import config, get_config_dir
 from Functions.logging_manager import setup_logging, get_log_dir, get_img_dir
@@ -692,7 +692,7 @@ class CharacterApp(QMainWindow):
         """
         Handles the action of creating a new character manually.
         """
-        dialog = NewCharacterDialog(self, realms=list(REALM_ICONS.keys()))
+        dialog = NewCharacterDialog(self, realms=REALMS)
         result = dialog.get_data() if dialog.exec() == QDialog.Accepted else None
 
         if result:
@@ -787,10 +787,10 @@ class CharacterApp(QMainWindow):
         if indexes:
             # Get the item from the first column of the selected row
             row = indexes[0].row()
-            first_column_item = self.tree_model.item(row, 1) # ID is on the realm item, now at index 1
-            char_id = first_column_item.data(Qt.UserRole) # Retrieve the stored character ID
-            if char_id:
-                self.delete_character(char_id)
+            name_item = self.tree_model.item(row, 2) # Name is at index 2
+            char_name = name_item.text()
+            if char_name:
+                self.delete_character(char_name)
 
     def get_checked_character_ids(self):
         """Returns a list of character IDs for all checked rows."""
@@ -800,10 +800,10 @@ class CharacterApp(QMainWindow):
             selection_item = self.tree_model.item(row, 0)
             if selection_item and selection_item.checkState() == Qt.Checked:
                 # The ID is stored in the realm item of the row (index 1)
-                id_item = self.tree_model.item(row, 1)
-                char_id = id_item.data(Qt.UserRole)
-                if char_id:
-                    checked_ids.append(char_id)
+                name_item = self.tree_model.item(row, 2) # Name is at index 2
+                char_name = name_item.text()
+                if char_name:
+                    checked_ids.append(char_name)
         return checked_ids
 
     def delete_checked_characters(self):
@@ -822,9 +822,9 @@ class CharacterApp(QMainWindow):
 
         if reply == QMessageBox.Yes:
             logging.info(f"User initiated bulk deletion of {len(checked_ids)} characters.")
-            for char_id in checked_ids:
+            for char_name in checked_ids:
                 # We skip the individual confirmation dialog by directly calling the backend function
-                self.delete_character(char_id, confirm=False)
+                self.delete_character(char_name, confirm=False)
             self.refresh_character_list()
 
     def select_all_characters(self):
@@ -859,16 +859,14 @@ class CharacterApp(QMainWindow):
             else:
                 self.update_status_bar("")
 
-    def delete_character(self, char_id, confirm=True):
+    def delete_character(self, char_name, confirm=True):
         """Handles the character deletion process."""
-        char_data = self.characters_by_id.get(str(char_id))
-        if not char_data:
-            logging.warning(f"Attempted to delete character with unknown ID: {char_id}")
+        if not char_name:
+            logging.warning(f"Attempted to delete character with empty name.")
             return
 
         reply = QMessageBox.Yes
         if confirm:
-            char_name = char_data.get('name', 'N/A')
             reply = QMessageBox.question(self,
                                          lang.get("delete_char_confirm_title"),
                                          lang.get("delete_char_confirm_message", name=char_name),
@@ -876,15 +874,13 @@ class CharacterApp(QMainWindow):
                                          QMessageBox.No)
 
         if reply == QMessageBox.Yes:
-            char_name = char_data.get('name', 'N/A')
-            char_realm = char_data.get('realm')
-            success, msg = delete_character(char_id, char_realm, character_name=char_name)
+            success, msg = delete_character(char_name)
             if success:
-                logging.info(f"Character '{char_name}' (ID: {char_id}) deleted by user.")
+                logging.info(f"Character '{char_name}' deleted by user.")
                 if confirm: # Refresh only if it's a single delete action
                     self.refresh_character_list()
             else:
-                logging.error(f"Failed to delete character '{char_name}': {msg}")
+                logging.error(f"Failed to delete character '{char_name}' from UI: {msg}")
                 QMessageBox.critical(self, lang.get("error_title"), msg)
 
     def on_character_double_click(self, index): # Renamed from delete_character_by_id
@@ -897,17 +893,17 @@ class CharacterApp(QMainWindow):
             return
 
         # Get the item from the first column to retrieve the ID
-        item = self.tree_model.item(index.row(), 1) # ID is on the realm item, now at index 1
-        char_id = item.data(Qt.UserRole)
+        name_item = self.tree_model.item(index.row(), 2) # Name is at index 2
+        char_name = name_item.text()
 
-        character_data = self.characters_by_id.get(char_id)
+        character_data = self.characters_by_id.get(char_name)
         if character_data:
             char_name = character_data.get('name', 'N/A')
             logging.info(f"Ouverture de la feuille du personnage '{char_name}'.")
             sheet = CharacterSheetWindow(self, character_data)
             sheet.exec() # Show the dialog modally
         else:
-            logging.warning(f"Impossible de trouver les données pour le personnage avec l'ID '{char_id}' lors du double-clic.")
+            logging.warning(f"Impossible de trouver les données pour le personnage avec le nom '{char_name}' lors du double-clic.")
 
     def change_language(self, lang_code):
         """Changes the application language and updates the UI."""

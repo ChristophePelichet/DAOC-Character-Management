@@ -46,7 +46,8 @@ class ConfigManager:
                 "servers": ["Eden", "Blackthorn"],
                 "default_server": "Eden",
                 "seasons": ["S1", "S2", "S3"],
-                "default_season": "S1"
+                "default_season": "S1",
+                "tree_view_header_state": None
             }
             self.save_config()
 

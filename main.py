@@ -5,7 +5,7 @@ import logging
 
 from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QTreeView, QStatusBar, QLabel, QMessageBox, QMenu, QFileDialog, QHeaderView, QDialog, QFormLayout, QLineEdit, QComboBox, QDialogButtonBox, QPushButton, QHBoxLayout, QCheckBox, QTextEdit, QSplitter, QGroupBox, QMenuBar, QToolButton, QSizePolicy, QStyleFactory, QStyledItemDelegate, QStyleOptionButton, QStyleOptionViewItem, QStyle, QInputDialog
 from PySide6.QtGui import QFont, QStandardItemModel, QStandardItem, QIcon, QAction, QActionGroup, QPainter, QGuiApplication
-from PySide6.QtCore import Qt, QSize, Signal, QObject, QThread, Slot, QRect, QEvent
+from PySide6.QtCore import Qt, QSize, Signal, QObject, QThread, Slot, QRect, QEvent, QByteArray
 
 from Functions.character_manager import create_character_data, save_character, get_all_characters, get_character_dir, REALM_ICONS, delete_character, REALMS, rename_character
 from Functions.language_manager import lang, get_available_languages
@@ -602,6 +602,8 @@ class CharacterApp(QMainWindow):
         self.character_tree.setContextMenuPolicy(Qt.CustomContextMenu)
         self.character_tree.customContextMenuRequested.connect(self.on_tree_right_click)
         self.character_tree.doubleClicked.connect(self.on_character_double_click)
+        # Log column movements
+        self.character_tree.header().sectionMoved.connect(self.on_section_moved)
 
         # --- Status Bar ---
         self.status_bar = QStatusBar()
@@ -790,6 +792,21 @@ class CharacterApp(QMainWindow):
         if realm_header:
             realm_header.setTextAlignment(Qt.AlignCenter)
 
+        # Center align the season column header
+        season_header = self.tree_model.horizontalHeaderItem(2) # Season is at index 2
+        if season_header:
+            season_header.setTextAlignment(Qt.AlignCenter)
+
+        # Center align the level column header
+        level_header = self.tree_model.horizontalHeaderItem(5) # Level is at index 5
+        if level_header:
+            level_header.setTextAlignment(Qt.AlignCenter)
+
+        # Center align the realm rank column header
+        realm_rank_header = self.tree_model.horizontalHeaderItem(6) # Realm Rank is at index 6
+        if realm_rank_header:
+            realm_rank_header.setTextAlignment(Qt.AlignCenter)
+
         characters = get_all_characters()
         # Add a detailed log to check the state of the icons dictionary just before the loop
         logging.debug(f"Populating tree with {len(characters)} character(s). tree_realm_icons contains {len(self.tree_realm_icons)} icon(s): {list(self.tree_realm_icons.keys()) if self.tree_realm_icons else 'None'}")
@@ -816,10 +833,13 @@ class CharacterApp(QMainWindow):
             item_name.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled) # Make non-editable
             item_level = QStandardItem(str(char.get('level', 1)))
             item_level.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled) # Make non-editable
+            item_level.setTextAlignment(Qt.AlignCenter)
             item_season = QStandardItem(char.get('season', ''))
             item_season.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+            item_season.setTextAlignment(Qt.AlignCenter)
             item_realm_rank = QStandardItem(str(char.get('realm_rank', '1L1')))
             item_realm_rank.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+            item_realm_rank.setTextAlignment(Qt.AlignCenter)
             item_server = QStandardItem(char.get('server', ''))
             item_server.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
             
@@ -843,6 +863,20 @@ class CharacterApp(QMainWindow):
         
         # Connect the model's dataChanged signal to update selection count
         self.tree_model.dataChanged.connect(self.update_selection_count)
+
+        # Restore header state AFTER the model and headers are set
+        header_state_b64 = config.get("tree_view_header_state")
+        if header_state_b64:
+            logging.debug(f"Attempting to restore header state from config: {header_state_b64}")
+            try:
+                header_state = QByteArray.fromBase64(header_state_b64.encode('ascii'))
+                if self.character_tree.header().restoreState(header_state):
+                    logging.info("Successfully restored QTreeView header state.")
+                else:
+                    logging.warning("Could not restore QTreeView header state. It might be invalid or for a different column setup.")
+            except Exception as e:
+                logging.error(f"Error restoring header state: {e}")
+
 
     def on_tree_right_click(self, position):
         """Shows a context menu on right-click."""
@@ -1010,6 +1044,13 @@ class CharacterApp(QMainWindow):
         else:
             logging.warning(f"Impossible de trouver les données pour le personnage avec le nom '{char_name}' lors du double-clic.")
 
+    @Slot(int, int, int)
+    def on_section_moved(self, logical_index, old_visual_index, new_visual_index):
+        """Logs when a column is moved by the user."""
+        header_item = self.tree_model.horizontalHeaderItem(logical_index)
+        column_name = header_item.text() if header_item else f"Column with logical index {logical_index}"
+        logging.debug(f"Column '{column_name}' moved from visual position {old_visual_index} to {new_visual_index}.")
+
     def change_language(self, lang_code):
         """Changes the application language and updates the UI."""
         logging.info(f"Changing language to {lang_code}.")
@@ -1148,10 +1189,18 @@ class CharacterApp(QMainWindow):
             self.change_language(new_lang_code)
 
     def closeEvent(self, event):
-        """Ensures all child windows are closed when the main window is closed."""
+        """Saves application state and ensures all child windows are closed."""
         logging.info("Main window closing. Shutting down application.")
+        
+        # Save the header state
+        header_state = self.character_tree.header().saveState()
+        header_state_b64 = header_state.toBase64().data().decode('ascii')
+        logging.debug(f"Saving header state: {header_state_b64}")
+        config.set("tree_view_header_state", header_state_b64)
+        
         if self.debug_window:
             self.debug_window.close()
+            
         super().closeEvent(event)
 
 

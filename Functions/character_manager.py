@@ -67,6 +67,26 @@ def save_character(character_data):
         logging.error(f"Error saving character '{character_name}': {e}")
         return False, f"Failed to save character file: {e}"
 
+def duplicate_character(original_char_data, new_name):
+    """
+    Duplicates a character with a new name.
+    """
+    if not original_char_data or not new_name:
+        return False, "Original character data and new name must be provided."
+
+    original_name = original_char_data.get('name', 'N/A')
+    logging.debug(f"Duplicating character '{original_name}' to new character '{new_name}'.")
+
+    # Create a deep copy to avoid modifying the original data
+    new_char_data = original_char_data.copy()
+
+    # Update essential fields for the new character
+    new_char_data['name'] = new_name
+    new_char_data['id'] = new_name
+    new_char_data['uuid'] = str(uuid.uuid4()) # Assign a new unique ID
+
+    return save_character(new_char_data)
+
 def get_all_characters():
     """
     Loads all characters from .json files by walking through realm subdirectories.

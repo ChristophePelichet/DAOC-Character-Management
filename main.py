@@ -7,7 +7,7 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, Q
 from PySide6.QtGui import QFont, QStandardItemModel, QStandardItem, QIcon, QAction, QActionGroup, QPainter, QGuiApplication
 from PySide6.QtCore import Qt, QSize, Signal, QObject, QThread, Slot, QRect, QEvent, QByteArray
 
-from Functions.character_manager import create_character_data, save_character, get_all_characters, get_character_dir, REALM_ICONS, delete_character, REALMS, rename_character
+from Functions.character_manager import create_character_data, save_character, get_all_characters, get_character_dir, REALM_ICONS, delete_character, REALMS, rename_character, duplicate_character
 from Functions.language_manager import lang, get_available_languages
 from Functions.config_manager import config, get_config_dir
 from Functions.logging_manager import setup_logging, get_log_dir, get_img_dir
@@ -644,6 +644,10 @@ class CharacterApp(QMainWindow):
         rename_action = self.context_menu.addAction(lang.get("context_menu_rename", default="Renommer"))
         rename_action.triggered.connect(self.rename_selected_character)
 
+        # Add duplicate action
+        duplicate_action = self.context_menu.addAction(lang.get("context_menu_duplicate", default="Dupliquer"))
+        duplicate_action.triggered.connect(self.duplicate_selected_character)
+
         self.context_menu.addSeparator()
 
         # Only keep the action to delete the right-clicked character
@@ -925,6 +929,44 @@ class CharacterApp(QMainWindow):
                 return
 
             success, msg = rename_character(old_name, new_name)
+            if success:
+                self.refresh_character_list()
+            else:
+                error_msg = lang.get(msg, name=new_name) if msg == "char_exists_error" else msg
+                QMessageBox.critical(self, lang.get("error_title"), error_msg)
+
+    def duplicate_selected_character(self):
+        """Duplicates the currently selected character."""
+        indexes = self.character_tree.selectedIndexes()
+        if not indexes:
+            return
+
+        row = indexes[0].row()
+        name_item = self.tree_model.item(row, 4) # Name is at index 4
+        original_name = name_item.text()
+
+        if not original_name:
+            return
+
+        original_char_data = self.characters_by_id.get(original_name)
+        if not original_char_data:
+            logging.error(f"Could not find data for character '{original_name}' to duplicate.")
+            return
+
+        # Ask for a new name
+        new_name, ok = QInputDialog.getText(self,
+                                            lang.get("duplicate_char_dialog_title", default="Dupliquer le personnage"),
+                                            lang.get("duplicate_char_dialog_prompt", default="Nom du nouveau personnage :"),
+                                            QLineEdit.Normal,
+                                            f"{original_name}_copy") # Suggest a default new name
+
+        if ok and new_name:
+            new_name = new_name.strip()
+            if not new_name:
+                QMessageBox.warning(self, lang.get("error_title"), lang.get("char_name_empty_error"))
+                return
+
+            success, msg = duplicate_character(original_char_data, new_name)
             if success:
                 self.refresh_character_list()
             else:

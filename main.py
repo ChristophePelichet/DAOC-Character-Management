@@ -3,11 +3,11 @@ import sys
 import traceback
 import logging
 
-from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QTreeView, QStatusBar, QLabel, QMessageBox, QMenu, QFileDialog, QHeaderView, QDialog, QFormLayout, QLineEdit, QComboBox, QDialogButtonBox, QPushButton, QHBoxLayout, QCheckBox, QTextEdit, QSplitter, QGroupBox, QMenuBar, QToolButton, QSizePolicy, QStyleFactory, QStyledItemDelegate, QStyleOptionButton, QStyleOptionViewItem, QStyle
-from PySide6.QtGui import QFont, QStandardItemModel, QStandardItem, QIcon, QAction, QActionGroup, QPainter
+from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QTreeView, QStatusBar, QLabel, QMessageBox, QMenu, QFileDialog, QHeaderView, QDialog, QFormLayout, QLineEdit, QComboBox, QDialogButtonBox, QPushButton, QHBoxLayout, QCheckBox, QTextEdit, QSplitter, QGroupBox, QMenuBar, QToolButton, QSizePolicy, QStyleFactory, QStyledItemDelegate, QStyleOptionButton, QStyleOptionViewItem, QStyle, QInputDialog
+from PySide6.QtGui import QFont, QStandardItemModel, QStandardItem, QIcon, QAction, QActionGroup, QPainter, QGuiApplication
 from PySide6.QtCore import Qt, QSize, Signal, QObject, QThread, Slot, QRect, QEvent
 
-from Functions.character_manager import create_character_data, save_character, get_all_characters, get_character_dir, REALM_ICONS, delete_character, REALMS
+from Functions.character_manager import create_character_data, save_character, get_all_characters, get_character_dir, REALM_ICONS, delete_character, REALMS, rename_character
 from Functions.language_manager import lang, get_available_languages
 from Functions.config_manager import config, get_config_dir
 from Functions.logging_manager import setup_logging, get_log_dir, get_img_dir
@@ -255,6 +255,9 @@ class CharacterSheetWindow(QDialog): # Changed from QWidget to QDialog
         layout.addWidget(QLabel(f"Nom : {char_name}"))
         layout.addWidget(QLabel(f"Royaume : {self.character_data.get('realm', 'N/A')}"))
         layout.addWidget(QLabel(f"Niveau : {self.character_data.get('level', 'N/A')}"))
+        layout.addWidget(QLabel(f"{lang.get('char_sheet_realm_rank', default='Rang de Royaume :')} {self.character_data.get('realm_rank', 'N/A')}"))
+        layout.addWidget(QLabel(f"Saison : {self.character_data.get('season', 'N/A')}"))
+        layout.addWidget(QLabel(f"Serveur : {self.character_data.get('server', 'N/A')}"))
         # Add more character details here as needed
         layout.addStretch() # Pushes content to the top
 
@@ -265,11 +268,15 @@ class CharacterSheetWindow(QDialog): # Changed from QWidget to QDialog
 
 class NewCharacterDialog(QDialog):
     """A dialog to create a new character with a name and a realm."""
-    def __init__(self, parent=None, realms=None):
+    def __init__(self, parent=None, realms=None, servers=None, default_server=None, seasons=None, default_season=None):
         super().__init__(parent)
         self.setWindowTitle(lang.get("new_char_dialog_title"))
 
         self.realms = realms if realms else []
+        self.servers = servers if servers else []
+        self.seasons = seasons if seasons else []
+        self.default_server = default_server
+        self.default_season = default_season
         
         layout = QFormLayout(self)
 
@@ -279,6 +286,20 @@ class NewCharacterDialog(QDialog):
         self.realm_combo = QComboBox(self)
         self.realm_combo.addItems(self.realms)
         layout.addRow(lang.get("new_char_realm_prompt"), self.realm_combo)
+        
+        # Serveur avant Saison
+        self.server_combo = QComboBox(self)
+        self.server_combo.addItems(self.servers)
+        self.server_combo.setCurrentText(self.default_server)
+        layout.addRow(lang.get("new_char_server_prompt", default="Serveur :"), self.server_combo)
+
+        # Saison
+        self.season_combo = QComboBox(self)
+        self.season_combo.addItems(self.seasons)
+        self.season_combo.setCurrentText(self.default_season)
+        layout.addRow(lang.get("new_char_season_prompt", default="Saison :"), self.season_combo)
+        # Connecter le signal pour le débogage
+        self.season_combo.currentTextChanged.connect(self._on_season_changed)
 
         button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         button_box.accepted.connect(self.accept)
@@ -292,18 +313,28 @@ class NewCharacterDialog(QDialog):
             QMessageBox.warning(self, lang.get("error_title"), lang.get("char_name_empty_error"))
             return None
         realm = self.realm_combo.currentText()
-        return name, realm
+        season = self.season_combo.currentText()
+        server = self.server_combo.currentText()
+        return name, realm, season, server
+    
+    def _on_season_changed(self, new_season):
+        logging.debug(f"New character dialog: Season changed to '{new_season}'")
 
 class ConfigurationDialog(QDialog):
     """Configuration window for the application."""
-    def __init__(self, parent=None, available_languages=None):
+    def __init__(self, parent=None, available_languages=None, available_servers=None, available_seasons=None):
         super().__init__(parent)
         self.setWindowTitle(lang.get("configuration_window_title"))
         self.setMinimumSize(500, 250)
         self.parent_app = parent
         self.available_languages = available_languages or {}
+        self.available_servers = available_servers or []
+        self.available_seasons = available_seasons or []
 
-        layout = QFormLayout(self)
+        main_layout = QVBoxLayout(self)
+
+        # --- General Settings ---
+        form_layout = QFormLayout()
 
         # Character Path
         self.char_path_edit = QLineEdit()
@@ -312,7 +343,7 @@ class ConfigurationDialog(QDialog):
         char_path_layout = QHBoxLayout()
         char_path_layout.addWidget(self.char_path_edit)
         char_path_layout.addWidget(browse_char_button)
-        layout.addRow(lang.get("config_path_label"), char_path_layout)
+        form_layout.addRow(lang.get("config_path_label"), char_path_layout)
 
         # Config Path
         self.config_path_edit = QLineEdit()
@@ -321,7 +352,7 @@ class ConfigurationDialog(QDialog):
         config_path_layout = QHBoxLayout()
         config_path_layout.addWidget(self.config_path_edit)
         config_path_layout.addWidget(browse_config_button)
-        layout.addRow(lang.get("config_file_path_label"), config_path_layout)
+        form_layout.addRow(lang.get("config_file_path_label"), config_path_layout)
 
         # Log Path
         self.log_path_edit = QLineEdit()
@@ -330,26 +361,46 @@ class ConfigurationDialog(QDialog):
         log_path_layout = QHBoxLayout()
         log_path_layout.addWidget(self.log_path_edit)
         log_path_layout.addWidget(browse_log_button)
-        layout.addRow(lang.get("config_log_path_label"), log_path_layout)
+        form_layout.addRow(lang.get("config_log_path_label"), log_path_layout)
 
         # Language
         self.language_combo = QComboBox()
         self.language_combo.addItems(self.available_languages.values())
-        layout.addRow(lang.get("config_language_label"), self.language_combo)
+        form_layout.addRow(lang.get("config_language_label"), self.language_combo)
 
         # Debug Mode
         self.debug_mode_check = QCheckBox(lang.get("config_debug_mode_label"))
-        layout.addRow(self.debug_mode_check)
+        form_layout.addRow(self.debug_mode_check)
 
         # Show Debug Window
         self.show_debug_window_check = QCheckBox(lang.get("config_show_debug_window_label"))
-        layout.addRow(self.show_debug_window_check)
+        form_layout.addRow(self.show_debug_window_check)
+        main_layout.addLayout(form_layout)
+
+        # --- Server & Season Settings ---
+        server_season_group = QGroupBox(lang.get("config_server_season_group_title", default="Serveur & Saison"))
+        server_season_layout = QFormLayout()
+
+        # Default Server
+        self.default_server_combo = QComboBox()
+        self.default_server_combo.addItems(self.available_servers)
+        server_season_layout.addRow(lang.get("config_default_server_label", default="Serveur par défaut"), self.default_server_combo)
+
+        # Default Season
+        self.default_season_combo = QComboBox()
+        self.default_season_combo.addItems(self.available_seasons)
+        server_season_layout.addRow(lang.get("config_default_season_label", default="Saison par défaut"), self.default_season_combo)
+
+        server_season_group.setLayout(server_season_layout)
+        main_layout.addWidget(server_season_group)
+
+        main_layout.addStretch() # Push settings to the top
 
         # Buttons
         button_box = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel)
         button_box.accepted.connect(self.accept)
         button_box.rejected.connect(self.reject)
-        layout.addWidget(button_box)
+        main_layout.addWidget(button_box)
 
         self.update_fields()
 
@@ -364,6 +415,12 @@ class ConfigurationDialog(QDialog):
         current_lang_code = config.get("language", "fr")
         current_lang_name = self.available_languages.get(current_lang_code, "Français")
         self.language_combo.setCurrentText(current_lang_name)
+
+        current_default_server = config.get("default_server", "")
+        self.default_server_combo.setCurrentText(current_default_server)
+
+        current_default_season = config.get("default_season", "")
+        self.default_season_combo.setCurrentText(current_default_season)
 
     def browse_folder(self, line_edit, title_key):
         directory = QFileDialog.getExistingDirectory(self, lang.get(title_key))
@@ -580,22 +637,16 @@ class CharacterApp(QMainWindow):
     def _create_context_menu(self):
         """Creates or updates the right-click context menu for the tree view."""
         self.context_menu = QMenu(self)
-        
-        # Selection actions
-        select_all_action = self.context_menu.addAction(lang.get("context_menu_select_all", default="Sélectionner tout"))
-        select_all_action.triggered.connect(self.select_all_characters)
-        
-        deselect_all_action = self.context_menu.addAction(lang.get("context_menu_deselect_all", default="Désélectionner tout"))
-        deselect_all_action.triggered.connect(self.deselect_all_characters)
-        
+
+        # Add rename action
+        rename_action = self.context_menu.addAction(lang.get("context_menu_rename", default="Renommer"))
+        rename_action.triggered.connect(self.rename_selected_character)
+
         self.context_menu.addSeparator()
-        
-        # Delete actions
-        delete_action = self.context_menu.addAction(lang.get("context_menu_delete"))
+
+        # Only keep the action to delete the right-clicked character
+        delete_action = self.context_menu.addAction(lang.get("context_menu_delete", default="Supprimer"))
         delete_action.triggered.connect(self.delete_selected_character)
-        
-        delete_selected_action = self.context_menu.addAction(lang.get("context_menu_delete_selected", default="Supprimer les sélectionnés"))
-        delete_selected_action.triggered.connect(self.delete_checked_characters)
 
     def _create_bulk_actions_bar(self, parent_layout):
         """Creates the bar for bulk actions above the character list."""
@@ -624,7 +675,6 @@ class CharacterApp(QMainWindow):
         """Loads and resizes all required icons once at startup."""
         logging.debug("Pre-loading UI icons.")
         logging.debug(f"REALM_ICONS type: {type(REALM_ICONS)}, content: {REALM_ICONS}, is_empty: {not REALM_ICONS}, bool: {bool(REALM_ICONS)}")
-        self.dialog_realm_icons = {}
         self.tree_realm_icons = {}
         self.trash_icon = None
         self.add_char_icon = None
@@ -643,7 +693,6 @@ class CharacterApp(QMainWindow):
                     logging.debug(f"Chemin complet: '{full_path}', Existe: {os.path.exists(full_path)}")
                     # For PySide, we just need the QIcon object
                     icon = QIcon(full_path)
-                    self.dialog_realm_icons[realm] = icon
                     self.tree_realm_icons[realm] = icon
                     logging.debug(f"Icône créée pour {realm}. isNull: {icon.isNull()}")
                 except Exception as e:
@@ -692,12 +741,16 @@ class CharacterApp(QMainWindow):
         """
         Handles the action of creating a new character manually.
         """
-        dialog = NewCharacterDialog(self, realms=REALMS)
+        servers = config.get("servers", ["Eden", "Blackthorn"])
+        default_server = config.get("default_server", "Eden")
+        seasons = config.get("seasons", ["S1", "S2", "S3"])
+        default_season = config.get("default_season", "S1")
+        dialog = NewCharacterDialog(self, realms=REALMS, servers=servers, default_server=default_server, seasons=seasons, default_season=default_season)
         result = dialog.get_data() if dialog.exec() == QDialog.Accepted else None
 
         if result:
-            character_name, realm = result
-            character_data = create_character_data(character_name, realm)
+            character_name, realm, season, server = result
+            character_data = create_character_data(character_name, realm, season, server)
             success, response = save_character(character_data)
             if success:
                 self.refresh_character_list()
@@ -722,7 +775,14 @@ class CharacterApp(QMainWindow):
         self.characters_by_id.clear()
 
         # Set headers
-        headers = [lang.get("column_selection"), lang.get("column_realm"), lang.get("column_name"), lang.get("column_level")]
+        headers = [
+            lang.get("column_selection"), 
+            lang.get("column_realm"),
+            lang.get("column_season", default="Saison"),
+            lang.get("column_server", default="Serveur"),
+            lang.get("column_name"), 
+            lang.get("column_level"),
+            lang.get("column_realm_rank", default="Rang Royaume")]
         self.tree_model.setHorizontalHeaderLabels(headers)
         
         # Center align the realm column header
@@ -756,6 +816,12 @@ class CharacterApp(QMainWindow):
             item_name.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled) # Make non-editable
             item_level = QStandardItem(str(char.get('level', 1)))
             item_level.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled) # Make non-editable
+            item_season = QStandardItem(char.get('season', ''))
+            item_season.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+            item_realm_rank = QStandardItem(str(char.get('realm_rank', '1L1')))
+            item_realm_rank.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+            item_server = QStandardItem(char.get('server', ''))
+            item_server.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
             
             item_selection = QStandardItem()
             item_selection.setCheckable(True)
@@ -763,14 +829,17 @@ class CharacterApp(QMainWindow):
             # Allow checking but not direct text editing
             item_selection.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled | Qt.ItemIsUserCheckable)
 
-            row_items = [item_selection, item_realm, item_name, item_level]
+            row_items = [item_selection, item_realm, item_season, item_server, item_name, item_level, item_realm_rank]
             self.tree_model.appendRow(row_items)
 
         self.character_tree.resizeColumnToContents(0)
         self.character_tree.resizeColumnToContents(1)
+        self.character_tree.resizeColumnToContents(2)
         self.character_tree.resizeColumnToContents(3)
+        self.character_tree.resizeColumnToContents(6)
+        self.character_tree.resizeColumnToContents(5)
         self.character_tree.header().setStretchLastSection(False)
-        self.character_tree.header().setSectionResizeMode(2, QHeaderView.Stretch) # Name column is now at index 2
+        self.character_tree.header().setSectionResizeMode(4, QHeaderView.Stretch) # Name column is now at index 4
         
         # Connect the model's dataChanged signal to update selection count
         self.tree_model.dataChanged.connect(self.update_selection_count)
@@ -779,7 +848,7 @@ class CharacterApp(QMainWindow):
         """Shows a context menu on right-click."""
         index = self.character_tree.indexAt(position)
         if index.isValid():
-            self.context_menu.exec_(self.character_tree.viewport().mapToGlobal(position))
+            self.context_menu.exec(self.character_tree.viewport().mapToGlobal(position))
 
     def delete_selected_character(self):
         """Deletes the character currently selected in the treeview."""
@@ -787,10 +856,46 @@ class CharacterApp(QMainWindow):
         if indexes:
             # Get the item from the first column of the selected row
             row = indexes[0].row()
-            name_item = self.tree_model.item(row, 2) # Name is at index 2
+            name_item = self.tree_model.item(row, 4) # Name is at index 4
             char_name = name_item.text()
             if char_name:
                 self.delete_character(char_name)
+
+    def rename_selected_character(self):
+        """Renames the character currently selected in the treeview."""
+        indexes = self.character_tree.selectedIndexes()
+        if not indexes:
+            return
+
+        row = indexes[0].row()
+        name_item = self.tree_model.item(row, 4) # Name is at index 4
+        old_name = name_item.text()
+
+        if not old_name:
+            return
+
+        # Use QInputDialog to get the new name
+        new_name, ok = QInputDialog.getText(self,
+                                            lang.get("rename_char_dialog_title", default="Renommer le personnage"),
+                                            lang.get("rename_char_dialog_prompt", default="Nouveau nom :"),
+                                            QLineEdit.Normal,
+                                            old_name)
+
+        if ok and new_name:
+            new_name = new_name.strip()
+            if new_name == old_name:
+                return # No change
+
+            if not new_name:
+                QMessageBox.warning(self, lang.get("error_title"), lang.get("char_name_empty_error"))
+                return
+
+            success, msg = rename_character(old_name, new_name)
+            if success:
+                self.refresh_character_list()
+            else:
+                error_msg = lang.get(msg, name=new_name) if msg == "char_exists_error" else msg
+                QMessageBox.critical(self, lang.get("error_title"), error_msg)
 
     def get_checked_character_ids(self):
         """Returns a list of character IDs for all checked rows."""
@@ -800,7 +905,7 @@ class CharacterApp(QMainWindow):
             selection_item = self.tree_model.item(row, 0)
             if selection_item and selection_item.checkState() == Qt.Checked:
                 # The ID is stored in the realm item of the row (index 1)
-                name_item = self.tree_model.item(row, 2) # Name is at index 2
+                name_item = self.tree_model.item(row, 4) # Name is at index 4
                 char_name = name_item.text()
                 if char_name:
                     checked_ids.append(char_name)
@@ -893,7 +998,7 @@ class CharacterApp(QMainWindow):
             return
 
         # Get the item from the first column to retrieve the ID
-        name_item = self.tree_model.item(index.row(), 2) # Name is at index 2
+        name_item = self.tree_model.item(index.row(), 4) # Name is at index 4
         char_name = name_item.text()
 
         character_data = self.characters_by_id.get(char_name)
@@ -915,9 +1020,8 @@ class CharacterApp(QMainWindow):
     def retranslate_ui(self):
         """Updates the text of all UI widgets."""
         self.setWindowTitle(lang.get("window_title"))
-        self._load_icons() # Reload icons as part of UI retranslation
-        self._create_actions()
-        self._create_menus_and_toolbars()
+        self.create_action.setText(lang.get("create_button_text"))
+        self.config_action.setText(lang.get("configuration_menu_label"))
         self.refresh_character_list() # This will update headers
         self._create_context_menu() # Retranslate context menu
 
@@ -982,7 +1086,14 @@ class CharacterApp(QMainWindow):
     def open_configuration_window(self):
         """Opens the configuration window."""
         logging.debug("Opening configuration window.")
-        dialog = ConfigurationDialog(self, self.available_languages)
+        servers = config.get("servers", ["Eden", "Blackthorn"])
+        seasons = config.get("seasons", ["S1", "S2", "S3"])
+        # Si la liste est vide, utiliser les serveurs par défaut
+        if not servers:
+            servers = ["Eden", "Blackthorn"]
+        if not seasons:
+            seasons = ["S1", "S2", "S3"]
+        dialog = ConfigurationDialog(self, self.available_languages, available_servers=servers, available_seasons=seasons)
         if dialog.exec() == QDialog.Accepted:
             self.save_configuration(dialog)
 
@@ -999,6 +1110,21 @@ class CharacterApp(QMainWindow):
         config.set("log_folder", dialog.log_path_edit.text())
         config.set("debug_mode", new_debug_mode)
         config.set("show_debug_window", dialog.show_debug_window_check.isChecked())
+        config.set("servers", dialog.available_servers) # Preserve the server list
+        config.set("seasons", dialog.available_seasons) # Preserve the season list
+        
+        # Log server and season changes
+        new_default_server = dialog.default_server_combo.currentText()
+        old_default_server = config.get("default_server", "")
+        config.set("default_server", new_default_server)
+        if new_default_server != old_default_server:
+            logging.debug(f"Default server changed from '{old_default_server}' to '{new_default_server}'")
+        
+        new_default_season = dialog.default_season_combo.currentText()
+        old_default_season = config.get("default_season", "")
+        config.set("default_season", new_default_season)
+        if new_default_season != old_default_season:
+            logging.debug(f"Default season changed from '{old_default_season}' to '{new_default_season}'")
 
         selected_lang_name = dialog.language_combo.currentText()
         new_lang_code = None

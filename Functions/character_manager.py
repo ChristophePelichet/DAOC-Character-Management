@@ -15,18 +15,21 @@ def get_character_dir():
     """Returns the configured character directory."""
     return config.get("character_folder", os.path.join(os.getcwd(), "Characters"))
 
-def create_character_data(name, realm):
+def create_character_data(name, realm, season, server):
     """
     Creates a dictionary for a new character.
     The 'id' is now the character name for file system identification.
     A separate 'uuid' is kept for internal robustness if needed.
     """
     return {
-        'id': name, # The main identifier is now the name
-        'uuid': str(uuid.uuid4()), # Still keep a unique ID internally
+        'id': name,  # The main identifier is now the name
+        'uuid': str(uuid.uuid4()),  # Still keep a unique ID internally
         'name': name,
         'realm': realm,
         'level': 1,
+        'season': season,
+        'server': server,
+        'realm_rank': '1L1',
         # Add other default character attributes here
     }
 
@@ -88,6 +91,60 @@ def get_all_characters():
                 except (json.JSONDecodeError, KeyError) as e:
                     logging.warning(f"Could not load or parse {file_path}: {e}")
     return sorted(characters, key=lambda c: c.get('name', '').lower())
+
+def rename_character(old_name, new_name):
+    """
+    Renames a character, which involves renaming the file and updating its content.
+    """
+    if not old_name or not new_name:
+        return False, "Old and new names must be provided."
+
+    if old_name == new_name:
+        return True, "Names are the same, no action taken."
+
+    base_char_dir = get_character_dir()
+    old_file_path = None
+    character_realm = None
+
+    # Find the old character file and its realm
+    for realm in REALMS:
+        potential_path = os.path.join(base_char_dir, realm, f"{old_name}.json")
+        if os.path.exists(potential_path):
+            old_file_path = potential_path
+            character_realm = realm
+            break
+    
+    if not old_file_path:
+        return False, f"Character '{old_name}' not found."
+
+    # Check if the new name already exists in the same realm
+    new_file_path = os.path.join(base_char_dir, character_realm, f"{new_name}.json")
+    if os.path.exists(new_file_path):
+        return False, "char_exists_error"
+
+    try:
+        # Read the content of the old file
+        with open(old_file_path, 'r', encoding='utf-8') as f:
+            char_data = json.load(f)
+
+        # Update the name and id inside the data
+        char_data['name'] = new_name
+        char_data['id'] = new_name
+
+        # Write the updated data to the new file
+        with open(new_file_path, 'w', encoding='utf-8') as f:
+            json.dump(char_data, f, indent=4)
+
+        # Remove the old file
+        os.remove(old_file_path)
+        logging.info(f"Character '{old_name}' renamed to '{new_name}'.")
+        return True, "Character renamed successfully."
+    except (IOError, json.JSONDecodeError, OSError) as e:
+        logging.error(f"Error renaming character from '{old_name}' to '{new_name}': {e}")
+        # Clean up the new file if it was created
+        if os.path.exists(new_file_path):
+            os.remove(new_file_path)
+        return False, f"Failed to rename character: {e}"
 
 def delete_character(character_name):
     """

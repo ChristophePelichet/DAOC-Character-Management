@@ -42,7 +42,11 @@ class ConfigManager:
                 "character_folder": None,
                 "debug_mode": False,
                 "log_folder": None,
-                "language": "fr"
+                "language": "fr",
+                "servers": ["Eden", "Blackthorn"],
+                "default_server": "Eden",
+                "seasons": ["S1", "S2", "S3"],
+                "default_season": "S1"
             }
             self.save_config()
 
@@ -66,5 +70,14 @@ class ConfigManager:
         self.config[key] = value
         self.save_config()
 
-# Global instance to be easily accessible throughout the application
-config = ConfigManager()
+class SingletonConfig:
+    _instance = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = ConfigManager()
+        return cls._instance
+
+# Global instance using the singleton pattern.
+# This ensures that only one ConfigManager is ever created.
+config = SingletonConfig()

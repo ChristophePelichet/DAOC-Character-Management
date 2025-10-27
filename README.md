@@ -187,17 +187,8 @@ Pour activer le mode debug :
 - ✅ Interface multilingue (FR/EN/DE)
 - ✅ Configuration des colonnes visibles
 - ✅ Mode debug avec console intégrée
-- ✅ Thèmes clair/sombre
 - ✅ Actions en masse
 
-## 🔮 Fonctionnalités Futures
-
-- 🎨 Icônes personnalisées pour chaque action
-- 📊 Statistiques et graphiques de progression
-- 🔄 Import/Export de personnages
-- 🌐 Synchronisation cloud
-- 🎯 Gestion des builds et équipements
-- 📱 Version mobile
 
 ## 🤝 Contribution
 
@@ -210,9 +201,3 @@ Les contributions sont les bienvenues ! N'hésitez pas à :
 ## 📄 Licence
 
 Ce projet est un outil personnel de gestion de personnages DAOC.
-
----
-
-**Auteur** : Christophe Pelichet  
-**Repository** : DAOC---Gestion-des-personnages  
-**Branch** : Main_Windows

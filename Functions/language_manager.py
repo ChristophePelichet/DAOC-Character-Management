@@ -3,6 +3,7 @@ import os
 import sys
 import logging
 from .config_manager import config
+from .path_manager import get_resource_path
 
 logger = logging.getLogger(__name__)
 
@@ -21,14 +22,7 @@ class LanguageManager:
 
     def load_language(self, lang_code):
         """Loads a JSON language file."""
-        try:
-            # PyInstaller creates a temp folder and stores path in _MEIPASS
-            base_path = sys._MEIPASS
-        except Exception:
-            # In development, use the relative path
-            base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-
-        lang_dir = os.path.join(base_path, 'Language')
+        lang_dir = get_resource_path('Language')
         lang_file = os.path.join(lang_dir, f'{lang_code}.json')
 
         logger.debug(f"Attempting to load language file from: {lang_file}")
@@ -50,13 +44,7 @@ def get_available_languages():
     Scans the 'Language' folder and returns a dictionary mapping language codes to full names.
     Sorts languages with a specific order: 'fr', 'en', then alphabetically.
     """
-    try:
-        # PyInstaller creates a temp folder and stores path in _MEIPASS
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-
-    lang_dir = os.path.join(base_path, 'Language')
+    lang_dir = get_resource_path('Language')
     if not os.path.exists(lang_dir):
         return {}
     

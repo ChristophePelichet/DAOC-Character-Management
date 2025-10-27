@@ -3,6 +3,7 @@ import json
 import uuid
 import logging
 from Functions.config_manager import config
+from Functions.path_manager import get_base_path
 
 REALMS = ["Albion", "Hibernia", "Midgard"]
 REALM_ICONS = {
@@ -13,7 +14,8 @@ REALM_ICONS = {
 
 def get_character_dir():
     """Returns the configured character directory."""
-    return config.get("character_folder", os.path.join(os.getcwd(), "Characters"))
+    default_path = os.path.join(get_base_path(), "Characters")
+    return config.get("character_folder") or default_path
 
 def create_character_data(name, realm, season, server):
     """

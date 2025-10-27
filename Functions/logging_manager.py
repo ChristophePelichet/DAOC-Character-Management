@@ -2,7 +2,7 @@ import logging
 import os
 from logging.handlers import RotatingFileHandler
 from .config_manager import config
-from .path_manager import get_base_path
+from .path_manager import get_base_path, get_resource_path
 
 def get_log_dir():
     """
@@ -16,13 +16,16 @@ def get_log_dir():
 
 def get_img_dir():
     """
-    Gets the image directory from the config.
-    If not set, defaults to an 'Img' folder next to the executable.
+    Gets the image directory.
+    For bundled resources in PyInstaller, uses sys._MEIPASS.
+    For development, uses the project's Img folder.
     """
+    # Check if user has configured a custom img folder
     path = config.get("img_folder")
     if path and os.path.isdir(path):
         return path
-    return os.path.join(get_base_path(), "Img")
+    # Use resource path which handles both dev and frozen modes
+    return get_resource_path("Img")
 
 def setup_logging(extra_handlers=None):
     """

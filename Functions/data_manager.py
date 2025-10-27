@@ -5,18 +5,24 @@ Charge et fournit un accès facile aux Realm Ranks et autres données du jeu
 import json
 import os
 from typing import Dict, List, Optional
+from .path_manager import get_resource_path
 
 class DataManager:
     """Gestionnaire des données statiques du jeu DAOC"""
     
-    def __init__(self, data_folder: str = "Data"):
+    def __init__(self, data_folder: str = None):
         """
         Initialise le Data Manager
         
         Args:
             data_folder: Chemin vers le dossier contenant les fichiers de données
+                        Si None, utilise le dossier Data bundlé avec l'application
         """
-        self.data_folder = data_folder
+        if data_folder is None:
+            # Use bundled Data folder (works in both dev and frozen mode)
+            self.data_folder = get_resource_path("Data")
+        else:
+            self.data_folder = data_folder
         self.realm_ranks = None
         
     def load_realm_ranks(self) -> Dict[str, List[Dict]]:

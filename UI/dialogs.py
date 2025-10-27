@@ -468,9 +468,14 @@ class ConfigurationDialog(QDialog):
 
     def update_fields(self):
         """Fills the fields with current configuration values."""
-        self.char_path_edit.setText(config.get("character_folder", get_character_dir()))
-        self.config_path_edit.setText(config.get("config_folder", get_config_dir()))
-        self.log_path_edit.setText(config.get("log_folder", get_log_dir()))
+        # Use 'or' to handle None or empty string values and fallback to default paths
+        char_folder = config.get("character_folder") or get_character_dir()
+        config_folder = config.get("config_folder") or get_config_dir()
+        log_folder = config.get("log_folder") or get_log_dir()
+        
+        self.char_path_edit.setText(char_folder)
+        self.config_path_edit.setText(config_folder)
+        self.log_path_edit.setText(log_folder)
         self.debug_mode_check.setChecked(config.get("debug_mode", False))
         self.show_debug_window_check.setChecked(config.get("show_debug_window", False))
         

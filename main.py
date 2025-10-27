@@ -39,9 +39,19 @@ from UI import (
 # Setup logging at the very beginning
 setup_logging()
 
+# ============================================================================
+# APPLICATION CONFIGURATION
+# ============================================================================
+
 # Application Constants
 APP_NAME = "Character Manager"
 APP_VERSION = "0.1"
+
+# Disclaimer Configuration
+# Set to True to show alpha disclaimer on startup, False to disable
+SHOW_ALPHA_DISCLAIMER = True
+
+# ============================================================================
 
 
 def global_exception_handler(exc_type, exc_value, exc_traceback):
@@ -881,6 +891,38 @@ def apply_theme(app):
     else: # Fallback to light theme
         logging.info("Applying Light theme (default system style).")
 
+def show_alpha_disclaimer():
+    """
+    Display a trilingual alpha version disclaimer message.
+    Shows a message box informing users that this is an alpha version under development.
+    The message appears in French, English, and German simultaneously.
+    """
+    disclaimer_title = "Alpha Version / Version Alpha / Alpha-Version"
+    
+    # Trilingual disclaimer message
+    disclaimer_message = (
+        "🇫🇷 FRANÇAIS :\n"
+        "Ce logiciel est une version Alpha en cours de programmation.\n"
+        "Il est donc soumis à des changements.\n\n"
+        
+        "🇬🇧 ENGLISH:\n"
+        "This software is an Alpha version currently under development.\n"
+        "It is therefore subject to changes.\n\n"
+        
+        "🇩🇪 DEUTSCH:\n"
+        "Diese Software ist eine Alpha-Version, die sich derzeit in der Entwicklung befindet.\n"
+        "Sie unterliegt daher Änderungen."
+    )
+    
+    msg_box = QMessageBox()
+    msg_box.setWindowTitle(disclaimer_title)
+    msg_box.setIcon(QMessageBox.Information)
+    msg_box.setText(disclaimer_message)
+    msg_box.setStandardButtons(QMessageBox.Ok)
+    msg_box.exec()
+    
+    logging.info("Alpha disclaimer displayed to user.")
+
 def main():
     """Main function to launch the application."""
     import time
@@ -899,6 +941,10 @@ def main():
     main_window.load_time = load_duration # Store it on the window instance
     main_window.update_status_bar(lang.get("status_bar_loaded", duration=load_duration))
     main_window.show()
+
+    # Show alpha disclaimer if enabled
+    if SHOW_ALPHA_DISCLAIMER:
+        show_alpha_disclaimer()
 
     # Show debug window if configured, after the main window is shown and positioned
     if config.get("show_debug_window", False):

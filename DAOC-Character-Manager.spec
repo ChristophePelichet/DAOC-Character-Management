@@ -5,7 +5,11 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[('Language', 'Language'), ('Img', 'Img')],
+    datas=[
+        ('Language', 'Language'),
+        ('Img', 'Img'),
+        ('Data', 'Data'),  # Include Data folder with realm ranks and other static game data
+    ],
     hiddenimports=['UI.delegates', 'UI.dialogs', 'UI.debug_window'],
     hookspath=[],
     hooksconfig={},
@@ -31,7 +35,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='DAOC-Character-Manager',
+    name='DAOC Character Manager',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

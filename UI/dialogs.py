@@ -34,11 +34,58 @@ class CharacterSheetWindow(QDialog):
         # Basic Information Section
         info_group = QGroupBox("Informations générales")
         info_layout = QFormLayout()
-        info_layout.addRow("Nom :", QLabel(char_name))
-        info_layout.addRow("Royaume :", QLabel(self.realm))
-        info_layout.addRow("Niveau :", QLabel(str(self.character_data.get('level', 'N/A'))))
-        info_layout.addRow("Saison :", QLabel(self.character_data.get('season', 'N/A')))
-        info_layout.addRow("Serveur :", QLabel(self.character_data.get('server', 'N/A')))
+        
+        # Editable name field with Enter key support
+        self.name_edit = QLineEdit()
+        self.name_edit.setText(char_name)
+        self.name_edit.setPlaceholderText("Nom du personnage (Appuyez sur Entrée pour renommer)")
+        self.name_edit.returnPressed.connect(self.rename_character)  # Rename on Enter key
+        info_layout.addRow("Nom :", self.name_edit)
+        
+        # Editable realm dropdown
+        self.realm_combo = QComboBox()
+        from Functions.character_manager import REALMS
+        self.realm_combo.addItems(REALMS)
+        self.realm_combo.setCurrentText(self.realm)
+        info_layout.addRow("Royaume :", self.realm_combo)
+        
+        # Editable level dropdown (1-50)
+        self.level_combo = QComboBox()
+        self.level_combo.addItems([str(i) for i in range(1, 51)])
+        current_level = self.character_data.get('level', 1)
+        self.level_combo.setCurrentText(str(current_level))
+        info_layout.addRow("Niveau :", self.level_combo)
+        
+        # Editable season dropdown
+        self.season_combo = QComboBox()
+        from Functions.config_manager import config
+        seasons = config.get("seasons", ["S1", "S2", "S3"])
+        self.season_combo.addItems(seasons)
+        current_season = self.character_data.get('season', 'S1')
+        self.season_combo.setCurrentText(current_season)
+        info_layout.addRow("Saison :", self.season_combo)
+        
+        # Editable server dropdown
+        self.server_combo = QComboBox()
+        servers = config.get("servers", ["Eden", "Blackthorn"])
+        self.server_combo.addItems(servers)
+        current_server = self.character_data.get('server', 'Eden')
+        self.server_combo.setCurrentText(current_server)
+        info_layout.addRow("Serveur :", self.server_combo)
+        
+        # Editable page dropdown (1-5)
+        self.page_combo = QComboBox()
+        self.page_combo.addItems([str(i) for i in range(1, 6)])
+        current_page = self.character_data.get('page', 1)
+        self.page_combo.setCurrentText(str(current_page))
+        info_layout.addRow("Page :", self.page_combo)
+        
+        # Editable guild text field
+        self.guild_edit = QLineEdit()
+        self.guild_edit.setText(self.character_data.get('guild', ''))
+        self.guild_edit.setPlaceholderText("Nom de la guilde")
+        info_layout.addRow("Guilde :", self.guild_edit)
+        
         info_group.setLayout(info_layout)
         layout.addWidget(info_group)
         
@@ -143,7 +190,8 @@ class CharacterSheetWindow(QDialog):
         layout.addStretch()
 
         # Buttons
-        button_box = QDialogButtonBox(QDialogButtonBox.Close)
+        button_box = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Close)
+        button_box.accepted.connect(self.save_basic_info)
         button_box.rejected.connect(self.reject)
         layout.addWidget(button_box)
     
@@ -243,6 +291,114 @@ class CharacterSheetWindow(QDialog):
             else:
                 QMessageBox.critical(self, "Erreur", f"Échec de la sauvegarde : {msg}")
 
+    def save_basic_info(self):
+        """Saves the basic character information (realm, level, season, server, page and guild)."""
+        try:
+            # Get current values
+            new_realm = self.realm_combo.currentText()
+            new_level = int(self.level_combo.currentText())
+            new_season = self.season_combo.currentText()
+            new_server = self.server_combo.currentText()
+            new_page = int(self.page_combo.currentText())
+            new_guild = self.guild_edit.text().strip()
+            
+            old_realm = self.character_data.get('realm', self.realm)
+            
+            # Handle realm change if needed
+            if old_realm != new_realm:
+                from Functions.character_manager import move_character_to_realm
+                success, msg = move_character_to_realm(self.character_data, old_realm, new_realm)
+                if not success:
+                    QMessageBox.critical(self, "Erreur", f"Échec du changement de royaume : {msg}")
+                    return
+                
+                # Update local realm reference for color updates
+                self.realm = new_realm
+                
+                # Update rank title color
+                realm_colors = {
+                    "Albion": "#CC0000",
+                    "Hibernia": "#00AA00",
+                    "Midgard": "#0066CC"
+                }
+                color = realm_colors.get(self.realm, "#000000")
+                self.rank_title_label.setStyleSheet(f"font-size: 16pt; font-weight: bold; color: {color};")
+            
+            # Update character data
+            self.character_data['realm'] = new_realm
+            self.character_data['level'] = new_level
+            self.character_data['season'] = new_season
+            self.character_data['server'] = new_server
+            self.character_data['page'] = new_page
+            self.character_data['guild'] = new_guild
+            
+            # Save character (it's already moved if realm changed)
+            if old_realm == new_realm:
+                from Functions.character_manager import save_character
+                success, msg = save_character(self.character_data, allow_overwrite=True)
+                if not success:
+                    QMessageBox.critical(self, "Erreur", f"Échec de la sauvegarde : {msg}")
+                    return
+            
+            QMessageBox.information(self, "Succès", "Informations du personnage mises à jour avec succès !")
+            # Refresh list in parent
+            if hasattr(self.parent_app, 'refresh_character_list'):
+                self.parent_app.refresh_character_list()
+            self.accept()  # Close dialog
+                
+        except Exception as e:
+            QMessageBox.critical(self, "Erreur", f"Erreur lors de la sauvegarde : {str(e)}")
+
+    def rename_character(self):
+        """Renames the character with validation."""
+        try:
+            old_name = self.character_data.get('name', '')
+            new_name = self.name_edit.text().strip()
+            
+            if not new_name:
+                QMessageBox.warning(self, "Erreur", "Le nom du personnage ne peut pas être vide.")
+                self.name_edit.setText(old_name)  # Reset to original name
+                return
+            
+            if old_name == new_name:
+                QMessageBox.information(self, "Information", "Le nom n'a pas changé.")
+                return
+            
+            # Confirm rename
+            reply = QMessageBox.question(
+                self,
+                "Confirmer le renommage",
+                f"Renommer '{old_name}' en '{new_name}' ?",
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.Yes
+            )
+            
+            if reply == QMessageBox.Yes:
+                from Functions.character_manager import rename_character
+                success, msg = rename_character(old_name, new_name)
+                
+                if success:
+                    # Update character data
+                    self.character_data['name'] = new_name
+                    self.character_data['id'] = new_name
+                    
+                    # Update window title
+                    self.setWindowTitle(f"Fiche personnage - {new_name}")
+                    
+                    # Refresh list in parent
+                    if hasattr(self.parent_app, 'refresh_character_list'):
+                        self.parent_app.refresh_character_list()
+                else:
+                    error_msg = "Un personnage avec ce nom existe déjà." if msg == "char_exists_error" else msg
+                    QMessageBox.critical(self, "Erreur", f"Échec du renommage : {error_msg}")
+                    self.name_edit.setText(old_name)  # Reset to original name
+                    
+        except Exception as e:
+            QMessageBox.critical(self, "Erreur", f"Erreur lors du renommage : {str(e)}")
+            # Reset to original name in case of error
+            if hasattr(self, 'character_data'):
+                self.name_edit.setText(self.character_data.get('name', ''))
+
 
 class ColumnsConfigDialog(QDialog):
     """Dialog to configure which columns are visible in the character list."""
@@ -251,12 +407,13 @@ class ColumnsConfigDialog(QDialog):
     COLUMNS_CONFIG = [
         {"key": "selection", "name_key": "column_selection", "default": True},
         {"key": "realm", "name_key": "column_realm", "default": True},
-        {"key": "season", "name_key": "column_season", "default": True},
-        {"key": "server", "name_key": "column_server", "default": True},
         {"key": "name", "name_key": "column_name", "default": True},
         {"key": "level", "name_key": "column_level", "default": True},
         {"key": "realm_rank", "name_key": "column_realm_rank", "default": True},
         {"key": "realm_title", "name_key": "column_realm_title", "default": True},
+        {"key": "guild", "name_key": "column_guild", "default": True},
+        {"key": "page", "name_key": "column_page", "default": True},
+        {"key": "server", "name_key": "column_server", "default": False},  # Server hidden by default
     ]
     
     def __init__(self, parent=None):
@@ -321,15 +478,12 @@ class ColumnsConfigDialog(QDialog):
 class NewCharacterDialog(QDialog):
     """A dialog to create a new character with a name and a realm."""
     
-    def __init__(self, parent=None, realms=None, servers=None, default_server=None, 
-                 seasons=None, default_season=None):
+    def __init__(self, parent=None, realms=None, seasons=None, default_season=None):
         super().__init__(parent)
         self.setWindowTitle(lang.get("new_char_dialog_title"))
 
         self.realms = realms if realms else []
-        self.servers = servers if servers else []
         self.seasons = seasons if seasons else []
-        self.default_server = default_server
         self.default_season = default_season
         
         layout = QFormLayout(self)
@@ -341,12 +495,6 @@ class NewCharacterDialog(QDialog):
         self.realm_combo.addItems(self.realms)
         layout.addRow(lang.get("new_char_realm_prompt"), self.realm_combo)
         
-        # Server before Season
-        self.server_combo = QComboBox(self)
-        self.server_combo.addItems(self.servers)
-        self.server_combo.setCurrentText(self.default_server)
-        layout.addRow(lang.get("new_char_server_prompt", default="Serveur :"), self.server_combo)
-
         # Season
         self.season_combo = QComboBox(self)
         self.season_combo.addItems(self.seasons)
@@ -354,6 +502,22 @@ class NewCharacterDialog(QDialog):
         layout.addRow(lang.get("new_char_season_prompt", default="Saison :"), self.season_combo)
         # Connect signal for debugging
         self.season_combo.currentTextChanged.connect(self._on_season_changed)
+
+        # Level dropdown (1-50)
+        self.level_combo = QComboBox(self)
+        for i in range(1, 51):
+            self.level_combo.addItem(str(i))
+        layout.addRow(lang.get("new_char_level_prompt", default="Niveau :"), self.level_combo)
+
+        # Page dropdown (1-5)
+        self.page_combo = QComboBox(self)
+        for i in range(1, 6):
+            self.page_combo.addItem(str(i))
+        layout.addRow(lang.get("new_char_page_prompt", default="Page :"), self.page_combo)
+
+        # Guild text input
+        self.guild_edit = QLineEdit(self)
+        layout.addRow(lang.get("new_char_guild_prompt", default="Guilde :"), self.guild_edit)
 
         button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         button_box.accepted.connect(self.accept)
@@ -368,8 +532,10 @@ class NewCharacterDialog(QDialog):
             return None
         realm = self.realm_combo.currentText()
         season = self.season_combo.currentText()
-        server = self.server_combo.currentText()
-        return name, realm, season, server
+        level = int(self.level_combo.currentText())
+        page = int(self.page_combo.currentText())
+        guild = self.guild_edit.text().strip()
+        return name, realm, season, level, page, guild
     
     def _on_season_changed(self, new_season):
         logging.debug(f"New character dialog: Season changed to '{new_season}'")
@@ -378,14 +544,12 @@ class NewCharacterDialog(QDialog):
 class ConfigurationDialog(QDialog):
     """Configuration window for the application."""
     
-    def __init__(self, parent=None, available_languages=None, available_servers=None, 
-                 available_seasons=None):
+    def __init__(self, parent=None, available_languages=None, available_seasons=None):
         super().__init__(parent)
         self.setWindowTitle(lang.get("configuration_window_title"))
         self.setMinimumSize(500, 250)
         self.parent_app = parent
         self.available_languages = available_languages or {}
-        self.available_servers = available_servers or []
         self.available_seasons = available_seasons or []
 
         main_layout = QVBoxLayout(self)
@@ -434,27 +598,20 @@ class ConfigurationDialog(QDialog):
         form_layout.addRow(self.show_debug_window_check)
         main_layout.addLayout(form_layout)
 
-        # Server & Season Settings
-        server_season_group = QGroupBox(lang.get("config_server_season_group_title", 
-                                                  default="Serveur & Saison"))
-        server_season_layout = QFormLayout()
-
-        # Default Server
-        self.default_server_combo = QComboBox()
-        self.default_server_combo.addItems(self.available_servers)
-        server_season_layout.addRow(lang.get("config_default_server_label", 
-                                             default="Serveur par défaut"), 
-                                    self.default_server_combo)
+        # Season Settings
+        season_group = QGroupBox(lang.get("config_season_group_title", 
+                                          default="Saison"))
+        season_layout = QFormLayout()
 
         # Default Season
         self.default_season_combo = QComboBox()
         self.default_season_combo.addItems(self.available_seasons)
-        server_season_layout.addRow(lang.get("config_default_season_label", 
-                                             default="Saison par défaut"), 
-                                    self.default_season_combo)
+        season_layout.addRow(lang.get("config_default_season_label", 
+                                     default="Saison par défaut"), 
+                            self.default_season_combo)
 
-        server_season_group.setLayout(server_season_layout)
-        main_layout.addWidget(server_season_group)
+        season_group.setLayout(season_layout)
+        main_layout.addWidget(season_group)
 
         main_layout.addStretch()
 
@@ -482,9 +639,6 @@ class ConfigurationDialog(QDialog):
         current_lang_code = config.get("language", "fr")
         current_lang_name = self.available_languages.get(current_lang_code, "Français")
         self.language_combo.setCurrentText(current_lang_name)
-
-        current_default_server = config.get("default_server", "")
-        self.default_server_combo.setCurrentText(current_default_server)
 
         current_default_season = config.get("default_season", "")
         self.default_season_combo.setCurrentText(current_default_season)

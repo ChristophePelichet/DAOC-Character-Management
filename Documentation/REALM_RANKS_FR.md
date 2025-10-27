@@ -217,6 +217,6 @@ Les données de personnage incluent maintenant :
 
 ---
 
-**Version** : 0.1  
+**Version** : 0.101  
 **Date** : Octobre 2025  
 **Auteur** : DAOC Character Manager Team

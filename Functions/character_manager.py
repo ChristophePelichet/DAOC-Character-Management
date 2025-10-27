@@ -17,7 +17,7 @@ def get_character_dir():
     default_path = os.path.join(get_base_path(), "Characters")
     return config.get("character_folder") or default_path
 
-def create_character_data(name, realm, season, server):
+def create_character_data(name, realm, season, server, level=1, page=1, guild=""):
     """
     Creates a dictionary for a new character.
     The 'id' is now the character name for file system identification.
@@ -28,9 +28,11 @@ def create_character_data(name, realm, season, server):
         'uuid': str(uuid.uuid4()),  # Still keep a unique ID internally
         'name': name,
         'realm': realm,
-        'level': 1,
+        'level': level,
         'season': season,
         'server': server,
+        'page': page,
+        'guild': guild,
         'realm_rank': '1L1',
         # Add other default character attributes here
     }
@@ -201,3 +203,68 @@ def delete_character(character_name):
     else:
         logging.warning(f"Attempted to delete non-existent character file for '{character_name}'.")
         return False, "Character file not found."
+
+def move_character_to_realm(character_data, old_realm, new_realm):
+    """
+    Moves a character from one realm directory to another.
+    
+    Args:
+        character_data (dict): The character data
+        old_realm (str): The current realm
+        new_realm (str): The new realm
+        
+    Returns:
+        tuple: (success, message)
+    """
+    if old_realm == new_realm:
+        return True, "No realm change needed."
+    
+    if new_realm not in REALMS:
+        return False, f"Invalid realm: {new_realm}"
+    
+    character_name = character_data.get('name')
+    if not character_name:
+        return False, "Character name not found in data."
+    
+    # Get base character directory
+    base_char_dir = get_character_dir()
+    
+    # Old and new file paths
+    old_file_path = os.path.join(base_char_dir, old_realm, f"{character_name}.json")
+    new_file_path = os.path.join(base_char_dir, new_realm, f"{character_name}.json")
+    
+    try:
+        # Check if old file exists
+        if not os.path.exists(old_file_path):
+            return False, f"Original character file not found: {old_file_path}"
+        
+        # Create new realm directory if it doesn't exist
+        new_realm_dir = os.path.join(base_char_dir, new_realm)
+        os.makedirs(new_realm_dir, exist_ok=True)
+        
+        # Check if new file already exists
+        if os.path.exists(new_file_path):
+            return False, f"Character with same name already exists in {new_realm}."
+        
+        # Update character data with new realm
+        character_data['realm'] = new_realm
+        
+        # Save to new location
+        with open(new_file_path, 'w', encoding='utf-8') as f:
+            json.dump(character_data, f, indent=4)
+        
+        # Remove old file
+        os.remove(old_file_path)
+        
+        logging.info(f"Character '{character_name}' moved from {old_realm} to {new_realm}.")
+        return True, f"Character moved to {new_realm} successfully."
+        
+    except Exception as e:
+        logging.error(f"Error moving character '{character_name}' from {old_realm} to {new_realm}: {e}")
+        # Try to clean up if new file was created but old wasn't deleted
+        if os.path.exists(new_file_path) and os.path.exists(old_file_path):
+            try:
+                os.remove(new_file_path)
+            except:
+                pass
+        return False, f"Failed to move character: {e}"

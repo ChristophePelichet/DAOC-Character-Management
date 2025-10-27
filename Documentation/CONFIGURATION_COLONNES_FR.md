@@ -6,10 +6,10 @@ Cette fonctionnalité vous permet de personnaliser quelles colonnes sont affich�
 
 ## 🎯 Accès à la Configuration
 
-### Via la Barre d'Outils
+### Via le Menu
 
-1. Cliquez sur le bouton **Colonnes** (icône `colonnes.png`) dans la barre d'outils
-2. Le bouton se trouve entre le bouton **+** (Nouveau personnage) et l'icône de configuration (roue dentée)
+1. Accédez au menu **Affichage > Colonnes**
+2. Une fenêtre de configuration s'ouvre
 
 ### Interface de Configuration
 
@@ -108,6 +108,6 @@ Cette fonctionnalité pourra être étendue pour :
 
 ---
 
-**Version** : 0.1  
+**Version** : 0.101  
 **Date** : Octobre 2025  
 **Auteur** : DAOC Character Manager Team

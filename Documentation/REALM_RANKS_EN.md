@@ -217,6 +217,6 @@ Character data now includes:
 
 ---
 
-**Version**: 0.1  
+**Version**: 0.101  
 **Date**: October 2025  
 **Author**: DAOC Character Manager Team

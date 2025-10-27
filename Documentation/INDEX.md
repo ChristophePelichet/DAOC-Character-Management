@@ -6,24 +6,30 @@ Bienvenue dans la documentation complète du gestionnaire de personnages DAOC.
 
 ### 🇫🇷 Documentation Française
 
-1. **[Configuration des Colonnes](CONFIGURATION_COLONNES_FR.md)**
+1. **[Interface Menu Windows](INTERFACE_MENU_FR.md)**
+   - Structure des menus (Fichier, Affichage, Aide)
+   - Utilisation de l'interface
+   - Support multilingue
+   - Avantages par rapport à une toolbar
+
+2. **[Configuration des Colonnes](CONFIGURATION_COLONNES_FR.md)**
    - Personnalisation de l'affichage des colonnes
    - Masquer/afficher les colonnes souhaitées
    - Gestion de la persistance
 
-2. **[Système Realm Ranks](REALM_RANKS_FR.md)**
+3. **[Système Realm Ranks](REALM_RANKS_FR.md)**
    - Affichage des rangs et titres de royaume
    - Ajustement manuel via sliders
    - Calcul automatique basé sur les RP
    - Titres colorés par royaume
 
-3. **[Gestionnaire de Données](DATA_MANAGER_FR.md)**
+4. **[Gestionnaire de Données](DATA_MANAGER_FR.md)**
    - Structure des données
    - Extraction depuis le site officiel DAOC
    - API du Data Manager
    - Exemples d'utilisation
 
-4. **[Dossier Data](DATA_FOLDER_FR.md)**
+5. **[Dossier Data](DATA_FOLDER_FR.md)**
    - Description du contenu du dossier Data
    - Format des fichiers JSON
    - Maintenance et mise à jour
@@ -31,24 +37,30 @@ Bienvenue dans la documentation complète du gestionnaire de personnages DAOC.
 
 ### 🇬🇧 English Documentation
 
-1. **[Column Configuration](COLUMN_CONFIGURATION_EN.md)**
+1. **[Windows Menu Interface](INTERFACE_MENU_EN.md)**
+   - Menu structure (File, View, Help)
+   - Interface usage
+   - Multilingual support
+   - Advantages over toolbar
+
+2. **[Column Configuration](COLUMN_CONFIGURATION_EN.md)**
    - Customize column display
    - Show/hide desired columns
    - Persistence management
 
-2. **[Realm Ranks System](REALM_RANKS_EN.md)**
+3. **[Realm Ranks System](REALM_RANKS_EN.md)**
    - Display realm ranks and titles
    - Manual adjustment via sliders
    - Automatic calculation based on RP
    - Colored titles by realm
 
-3. **[Data Manager](DATA_MANAGER_EN.md)**
+4. **[Data Manager](DATA_MANAGER_EN.md)**
    - Data structure
    - Extraction from official DAOC website
    - Data Manager API
    - Usage examples
 
-4. **[Data Folder](DATA_FOLDER_EN.md)**
+5. **[Data Folder](DATA_FOLDER_EN.md)**
    - Data folder content description
    - JSON file format
    - Maintenance and updates
@@ -115,6 +127,6 @@ If you encounter issues, check:
 
 ---
 
-**Version** : 0.1  
+**Version** : 0.101  
 **Date** : Octobre 2025 / October 2025  
 **Auteur / Author** : DAOC Character Manager Team

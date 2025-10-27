@@ -94,5 +94,20 @@
     "columns_select_all": "Alle auswählen",
     "columns_deselect_all": "Alle abwählen",
     "columns_config_saved": "Spaltenkonfiguration gespeichert.",
-    "column_realm_title": "Reichstitel"
+    "column_realm_title": "Reichstitel",
+    "column_page": "Seite",
+    "column_guild": "Gilde",
+    "menu_file": "Datei",
+    "menu_file_new_character": "Neuer Charakter",
+    "menu_file_settings": "Einstellungen",
+    "menu_view": "Ansicht",
+    "menu_view_columns": "Spalten",
+    "menu_help": "Hilfe",
+    "menu_help_about": "Über",
+    "about_dialog_title": "Über {app_name}",
+    "about_dialog_content": "Anwendung: {app_name}\nVersion: {version}\nErsteller: Ewoline\n\nCharakterverwaltung für Dark Age of Camelot",
+    "status_bar_selection_count": "{count} von {total} Charakter(e) ausgewählt",
+    "new_char_page_prompt": "Seite:",
+    "new_char_guild_prompt": "Gilde:",
+    "new_char_level_prompt": "Stufe:"
 }

@@ -93,5 +93,20 @@
     "columns_select_all": "Select all",
     "columns_deselect_all": "Deselect all",
     "columns_config_saved": "Column configuration saved.",
-    "column_realm_title": "Realm Title"
+    "column_realm_title": "Realm Title",
+    "column_page": "Page",
+    "column_guild": "Guild",
+    "menu_file": "File",
+    "menu_file_new_character": "New Character",
+    "menu_file_settings": "Settings",
+    "menu_view": "View",
+    "menu_view_columns": "Columns",
+    "menu_help": "Help",
+    "menu_help_about": "About",
+    "about_dialog_title": "About {app_name}",
+    "about_dialog_content": "Application: {app_name}\nVersion: {version}\nCreator: Ewoline\n\nCharacter manager for Dark Age of Camelot",
+    "status_bar_selection_count": "{count} of {total} character(s) selected",
+    "new_char_page_prompt": "Page:",
+    "new_char_guild_prompt": "Guild:",
+    "new_char_level_prompt": "Level:"
 }

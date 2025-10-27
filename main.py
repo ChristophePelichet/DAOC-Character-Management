@@ -44,8 +44,8 @@ setup_logging()
 # ============================================================================
 
 # Application Constants
-APP_NAME = "Character Manager"
-APP_VERSION = "0.1"
+APP_NAME = "DAOC Character Manager"
+APP_VERSION = "0.102"
 
 # Disclaimer Configuration
 # Set to True to show alpha disclaimer on startup, False to disable
@@ -88,15 +88,10 @@ class CharacterApp(QMainWindow):
         self.setCentralWidget(central_widget)
         main_layout = QVBoxLayout(central_widget)
 
-        # --- Create persistent UI elements ---
-        # Create the toolbar once to avoid duplication on language change
-        self.main_toolbar = self.addToolBar("Main Toolbar")
-        self.main_toolbar.setMovable(False) # Make the toolbar non-movable
-
         # --- Actions, Menus, and Toolbars ---
         self._create_actions()
         # --- Menu Bar ---
-        self._create_menus_and_toolbars()
+        self._create_menu_bar()
 
         # --- Bulk Actions Bar ---
         self._create_bulk_actions_bar(main_layout)
@@ -140,9 +135,9 @@ class CharacterApp(QMainWindow):
         self.center_checkbox_delegate = CenterCheckboxDelegate(self)
         self.character_tree.setItemDelegateForColumn(0, self.center_checkbox_delegate) # Selection column is at index 0
         
-        # Apply custom delegate for realm title (column 7)
+        # Apply custom delegate for realm title (column 9)
         self.realm_title_delegate = RealmTitleDelegate(self)
-        self.character_tree.setItemDelegateForColumn(7, self.realm_title_delegate)
+        self.character_tree.setItemDelegateForColumn(9, self.realm_title_delegate)
 
         # --- Bindings ---
         self.character_tree.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -165,30 +160,44 @@ class CharacterApp(QMainWindow):
 
     def _create_actions(self):
         """Create all QAction objects for the application."""
-        self.create_action = QAction(self.add_char_icon, lang.get("create_button_text"), self)
-        self.create_action.setToolTip(lang.get("create_char_tooltip"))
-        self.create_action.triggered.connect(self.create_new_character)
-        
-        # Load columns icon
-        columns_icon_path = os.path.join(get_img_dir(), "colonnes.png")
-        self.columns_icon = QIcon(columns_icon_path)
-        self.columns_action = QAction(self.columns_icon, lang.get("columns_config_text", default="Colonnes"), self)
-        self.columns_action.setToolTip(lang.get("columns_config_tooltip", default="Configurer les colonnes visibles"))
-        self.columns_action.triggered.connect(self.open_columns_configuration)
-        
-        self.config_action = QAction(self.config_icon, lang.get("configuration_menu_label"), self)
-        self.config_action.setToolTip(lang.get("configuration_menu_label")) # Tooltip can be the same as label for now
-        self.config_action.triggered.connect(self.open_configuration_window)
+        # Actions are now created directly in the menu bar method
+        pass
 
-    def _create_menus_and_toolbars(self):
-        """Setup the menu bar and toolbars."""
-        # Clear and repopulate the existing toolbar
-        self.main_toolbar.clear()
-        self.main_toolbar.addAction(self.create_action)
-        self.main_toolbar.addAction(self.config_action)
-        self.main_toolbar.addAction(self.columns_action)
-
-        self.setMenuBar(None) # Explicitly remove the menu bar
+    def _create_menu_bar(self):
+        """Setup the menu bar with File, View, and Help menus."""
+        menubar = self.menuBar()
+        menubar.clear()  # Clear existing menus
+        
+        # File Menu
+        file_menu = menubar.addMenu(lang.get("menu_file"))
+        
+        # File -> New Character
+        new_char_action = QAction(lang.get("menu_file_new_character"), self)
+        new_char_action.triggered.connect(self.create_new_character)
+        file_menu.addAction(new_char_action)
+        
+        file_menu.addSeparator()
+        
+        # File -> Settings
+        settings_action = QAction(lang.get("menu_file_settings"), self)
+        settings_action.triggered.connect(self.open_configuration)
+        file_menu.addAction(settings_action)
+        
+        # View Menu
+        view_menu = menubar.addMenu(lang.get("menu_view"))
+        
+        # View -> Columns
+        columns_action = QAction(lang.get("menu_view_columns"), self)
+        columns_action.triggered.connect(self.open_columns_configuration)
+        view_menu.addAction(columns_action)
+        
+        # Help Menu
+        help_menu = menubar.addMenu(lang.get("menu_help"))
+        
+        # Help -> About
+        about_action = QAction(lang.get("menu_help_about"), self)
+        about_action.triggered.connect(self.show_about_dialog)
+        help_menu.addAction(about_action)
 
     def _create_context_menu(self):
         """Creates or updates the right-click context menu for the tree view."""
@@ -236,9 +245,6 @@ class CharacterApp(QMainWindow):
         logging.debug("Pre-loading UI icons.")
         logging.debug(f"REALM_ICONS type: {type(REALM_ICONS)}, content: {REALM_ICONS}, is_empty: {not REALM_ICONS}, bool: {bool(REALM_ICONS)}")
         self.tree_realm_icons = {}
-        self.trash_icon = None
-        self.add_char_icon = None
-        self.config_icon = None
         img_dir = get_img_dir() # Use the centralized function
 
         if not REALM_ICONS:
@@ -257,60 +263,24 @@ class CharacterApp(QMainWindow):
                     logging.debug(f"Icône créée pour {realm}. isNull: {icon.isNull()}")
                 except Exception as e:
                     logging.warning(f"Error loading icon for {realm} at {full_path}: {e}")
-                    self.dialog_realm_icons[realm] = None
                     self.tree_realm_icons[realm] = None
             logging.debug("--- Fin de la vérification ---")
             logging.debug(f"Icônes chargées dans tree_realm_icons: {list(self.tree_realm_icons.keys())}")
-
-        # Load trash icon
-        try:
-            trash_path = os.path.join(img_dir, "bin.png")
-            if os.path.exists(trash_path):
-                self.trash_icon = QIcon(trash_path)
-                logging.debug(f"Trash icon loaded from {trash_path}")
-            else:
-                logging.error(f"Delete icon 'bin.png' not found at {trash_path}")
-        except Exception as e:
-            logging.error(f"Error loading trash icon: {e}")
-
-        # Load add character icon
-        try:
-            add_char_path = os.path.join(img_dir, "icon-plus-50.png")
-            if os.path.exists(add_char_path):
-                self.add_char_icon = QIcon(add_char_path)
-                logging.debug(f"Add character icon loaded from {add_char_path}")
-            else:
-                logging.error(f"Add character icon 'icon-plus-50.png' not found at {add_char_path}")
-        except Exception as e:
-            logging.error(f"Error loading add character icon: {e}")
-
-        # Load config icon
-        try:
-            config_icon_path = os.path.join(img_dir, "reglage.png")
-            if os.path.exists(config_icon_path):
-                self.config_icon = QIcon(config_icon_path)
-                logging.debug(f"Config icon loaded from {config_icon_path}")
-            else:
-                logging.error(f"Config icon 'reglage.png' not found at {config_icon_path}")
-        except Exception as e:
-            logging.error(f"Error loading config icon: {e}")
         
-        logging.debug(f"Icon loading complete. Realm icons loaded: {len(self.tree_realm_icons)}, Trash icon: {self.trash_icon is not None}, Add icon: {self.add_char_icon is not None}")
+        logging.debug(f"Icon loading complete. Realm icons loaded: {len(self.tree_realm_icons)}")
 
     def create_new_character(self):
         """
         Handles the action of creating a new character manually.
         """
-        servers = config.get("servers", ["Eden", "Blackthorn"])
-        default_server = config.get("default_server", "Eden")
         seasons = config.get("seasons", ["S1", "S2", "S3"])
         default_season = config.get("default_season", "S1")
-        dialog = NewCharacterDialog(self, realms=REALMS, servers=servers, default_server=default_server, seasons=seasons, default_season=default_season)
+        dialog = NewCharacterDialog(self, realms=REALMS, seasons=seasons, default_season=default_season)
         result = dialog.get_data() if dialog.exec() == QDialog.Accepted else None
 
         if result:
-            character_name, realm, season, server = result
-            character_data = create_character_data(character_name, realm, season, server)
+            character_name, realm, season, level, page, guild = result
+            character_data = create_character_data(character_name, realm, season, "Eden", level, page, guild)
             success, response = save_character(character_data)
             if success:
                 self.refresh_character_list()
@@ -334,16 +304,17 @@ class CharacterApp(QMainWindow):
         self.tree_model.clear()
         self.characters_by_id.clear()
 
-        # Set headers
+        # Set headers in new order: Selection, Realm, Name, Level, Rank, Title, Guild, Page, Server
         headers = [
             lang.get("column_selection"), 
             lang.get("column_realm"),
-            lang.get("column_season", default="Saison"),
-            lang.get("column_server", default="Serveur"),
             lang.get("column_name"), 
             lang.get("column_level"),
             lang.get("column_realm_rank", default="Rang"),
-            lang.get("column_realm_title", default="Titre")]
+            lang.get("column_realm_title", default="Titre"),
+            lang.get("column_guild", default="Guilde"),
+            lang.get("column_page", default="Page"),
+            lang.get("column_server", default="Serveur")]
         self.tree_model.setHorizontalHeaderLabels(headers)
         
         # Center align the realm column header
@@ -361,13 +332,18 @@ class CharacterApp(QMainWindow):
         if level_header:
             level_header.setTextAlignment(Qt.AlignCenter)
 
+        # Center align the page column header
+        page_header = self.tree_model.horizontalHeaderItem(6) # Page is at index 6
+        if page_header:
+            page_header.setTextAlignment(Qt.AlignCenter)
+
         # Center align the realm rank column header
-        realm_rank_header = self.tree_model.horizontalHeaderItem(6) # Realm Rank is at index 6
+        realm_rank_header = self.tree_model.horizontalHeaderItem(8) # Realm Rank is at index 8
         if realm_rank_header:
             realm_rank_header.setTextAlignment(Qt.AlignCenter)
 
         # Center align the realm title column header
-        realm_title_header = self.tree_model.horizontalHeaderItem(7) # Realm Title is at index 7
+        realm_title_header = self.tree_model.horizontalHeaderItem(9) # Realm Title is at index 9
         if realm_title_header:
             realm_title_header.setTextAlignment(Qt.AlignCenter)
 
@@ -398,9 +374,15 @@ class CharacterApp(QMainWindow):
             item_level = QStandardItem(str(char.get('level', 1)))
             item_level.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled) # Make non-editable
             item_level.setTextAlignment(Qt.AlignCenter)
-            item_season = QStandardItem(char.get('season', ''))
-            item_season.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
-            item_season.setTextAlignment(Qt.AlignCenter)
+            item_page = QStandardItem(str(char.get('page', 1)))
+            item_page.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+            item_page.setTextAlignment(Qt.AlignCenter)
+            item_guild = QStandardItem(char.get('guild', ''))
+            item_guild.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+            
+            item_server = QStandardItem(char.get('server', 'Eden'))
+            item_server.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+            item_server.setTextAlignment(Qt.AlignCenter)
             
             # Calculate realm rank and title from realm points
             realm_points = char.get('realm_points', 0)
@@ -422,27 +404,23 @@ class CharacterApp(QMainWindow):
             item_realm_title.setTextAlignment(Qt.AlignCenter)
             item_realm_title.setData(realm_name, Qt.UserRole)  # Stocker le royaume pour le delegate
             
-            item_server = QStandardItem(char.get('server', ''))
-            item_server.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
-            
             item_selection = QStandardItem()
             item_selection.setCheckable(True)
             item_selection.setCheckState(Qt.Unchecked)
             # Allow checking but not direct text editing
             item_selection.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled | Qt.ItemIsUserCheckable)
 
-            row_items = [item_selection, item_realm, item_season, item_server, item_name, item_level, item_realm_rank, item_realm_title]
+            # New order: Selection, Realm, Name, Level, Rank, Title, Guild, Page, Server
+            row_items = [item_selection, item_realm, item_name, item_level, item_realm_rank, item_realm_title, item_guild, item_page, item_server]
             self.tree_model.appendRow(row_items)
 
-        self.character_tree.resizeColumnToContents(0)
-        self.character_tree.resizeColumnToContents(1)
-        self.character_tree.resizeColumnToContents(2)
-        self.character_tree.resizeColumnToContents(3)
-        self.character_tree.resizeColumnToContents(5)
-        self.character_tree.resizeColumnToContents(6)
-        self.character_tree.resizeColumnToContents(7)
+        # Auto-resize all columns to content
+        for i in range(9):  # We have 9 columns now: Selection, Realm, Name, Level, Rank, Title, Guild, Page, Server
+            self.character_tree.resizeColumnToContents(i)
+        
         self.character_tree.header().setStretchLastSection(False)
-        self.character_tree.header().setSectionResizeMode(4, QHeaderView.Stretch) # Name column is now at index 4
+        # Make Name column (index 2) stretch to fill remaining space
+        self.character_tree.header().setSectionResizeMode(2, QHeaderView.Stretch)
         
         # Connect the model's dataChanged signal to update selection count
         self.tree_model.dataChanged.connect(self.update_selection_count)
@@ -467,36 +445,46 @@ class CharacterApp(QMainWindow):
         """Apply column visibility settings from configuration."""
         visibility_config = config.get("column_visibility", {})
         
-        # If no config exists, show all columns by default
-        if not visibility_config:
-            return
+        # Default visibility settings (server is hidden by default)
+        default_visibility = {
+            "selection": True,
+            "realm": True,
+            "name": True,
+            "level": True,
+            "page": True,
+            "guild": True,
+            "realm_rank": True,
+            "realm_title": True,
+            "server": False,  # Server column hidden by default
+        }
         
-        # Map column keys to their indices
+        # Map column keys to their indices with new order: Selection, Realm, Name, Level, Rank, Title, Guild, Page, Server
         column_map = {
             "selection": 0,
             "realm": 1,
-            "season": 2,
-            "server": 3,
-            "name": 4,
-            "level": 5,
-            "realm_rank": 6,
-            "realm_title": 7,
+            "name": 2,
+            "level": 3,
+            "realm_rank": 4,
+            "realm_title": 5,
+            "guild": 6,
+            "page": 7,
+            "server": 8,
         }
         
         # Apply visibility to each column
         for key, index in column_map.items():
-            is_visible = visibility_config.get(key, True)  # Default to visible
+            is_visible = visibility_config.get(key, default_visibility.get(key, True))
             self.character_tree.setColumnHidden(index, not is_visible)
         
         # Redimensionner les colonnes visibles
         for key, index in column_map.items():
             is_visible = visibility_config.get(key, True)
-            if is_visible and index != 4:  # Ne pas redimensionner la colonne Nom (elle est en Stretch)
+            if is_visible and index != 2:  # Ne pas redimensionner la colonne Nom (elle est en Stretch) - index 2 maintenant
                 self.character_tree.resizeColumnToContents(index)
         
         # Réappliquer le mode Stretch sur la colonne Nom si elle est visible
         if visibility_config.get("name", True):
-            self.character_tree.header().setSectionResizeMode(4, QHeaderView.Stretch)
+            self.character_tree.header().setSectionResizeMode(2, QHeaderView.Stretch)  # Name column is now at index 2
 
 
     def on_tree_right_click(self, position):
@@ -511,7 +499,7 @@ class CharacterApp(QMainWindow):
         if indexes:
             # Get the item from the first column of the selected row
             row = indexes[0].row()
-            name_item = self.tree_model.item(row, 4) # Name is at index 4
+            name_item = self.tree_model.item(row, 2) # Name is at index 2
             char_name = name_item.text()
             if char_name:
                 self.delete_character(char_name)
@@ -523,7 +511,7 @@ class CharacterApp(QMainWindow):
             return
 
         row = indexes[0].row()
-        name_item = self.tree_model.item(row, 4) # Name is at index 4
+        name_item = self.tree_model.item(row, 2) # Name is at index 2
         old_name = name_item.text()
 
         if not old_name:
@@ -559,7 +547,7 @@ class CharacterApp(QMainWindow):
             return
 
         row = indexes[0].row()
-        name_item = self.tree_model.item(row, 4) # Name is at index 4
+        name_item = self.tree_model.item(row, 2) # Name is at index 2
         original_name = name_item.text()
 
         if not original_name:
@@ -598,7 +586,7 @@ class CharacterApp(QMainWindow):
             selection_item = self.tree_model.item(row, 0)
             if selection_item and selection_item.checkState() == Qt.Checked:
                 # The ID is stored in the realm item of the row (index 1)
-                name_item = self.tree_model.item(row, 4) # Name is at index 4
+                name_item = self.tree_model.item(row, 2) # Name is at index 2
                 char_name = name_item.text()
                 if char_name:
                     checked_ids.append(char_name)
@@ -691,7 +679,7 @@ class CharacterApp(QMainWindow):
             return
 
         # Get the item from the first column to retrieve the ID
-        name_item = self.tree_model.item(index.row(), 4) # Name is at index 4
+        name_item = self.tree_model.item(index.row(), 2) # Name is at index 2
         char_name = name_item.text()
 
         character_data = self.characters_by_id.get(char_name)
@@ -720,8 +708,7 @@ class CharacterApp(QMainWindow):
     def retranslate_ui(self):
         """Updates the text of all UI widgets."""
         self.setWindowTitle(lang.get("window_title"))
-        self.create_action.setText(lang.get("create_button_text"))
-        self.config_action.setText(lang.get("configuration_menu_label"))
+        self._create_menu_bar()  # Recreate menu bar with new translations
         self.refresh_character_list() # This will update headers
         self._create_context_menu() # Retranslate context menu
 
@@ -754,12 +741,9 @@ class CharacterApp(QMainWindow):
             self.debug_window = None
 
     def show_about_dialog(self):
-        """Displays the 'About' dialog box."""
-        title = lang.get("about_message_title", app_name=APP_NAME)
-        message = lang.get(
-            "about_message_content",
-            version=APP_VERSION
-        )
+        """Displays the 'About' dialog box with application information."""
+        title = lang.get("about_dialog_title", app_name=APP_NAME)
+        message = lang.get("about_dialog_content", app_name=APP_NAME, version=APP_VERSION)
         QMessageBox.about(self, title, message)
 
     def update_status_bar(self, message):
@@ -800,17 +784,13 @@ class CharacterApp(QMainWindow):
                 lang.get("success_title", default="Succès"), 
                 lang.get("columns_config_saved", default="Configuration des colonnes sauvegardée."))
 
-    def open_configuration_window(self):
+    def open_configuration(self):
         """Opens the configuration window."""
         logging.debug("Opening configuration window.")
-        servers = config.get("servers", ["Eden", "Blackthorn"])
         seasons = config.get("seasons", ["S1", "S2", "S3"])
-        # Si la liste est vide, utiliser les serveurs par défaut
-        if not servers:
-            servers = ["Eden", "Blackthorn"]
         if not seasons:
             seasons = ["S1", "S2", "S3"]
-        dialog = ConfigurationDialog(self, self.available_languages, available_servers=servers, available_seasons=seasons)
+        dialog = ConfigurationDialog(self, self.available_languages, available_seasons=seasons)
         if dialog.exec() == QDialog.Accepted:
             self.save_configuration(dialog)
 
@@ -827,15 +807,7 @@ class CharacterApp(QMainWindow):
         config.set("log_folder", dialog.log_path_edit.text())
         config.set("debug_mode", new_debug_mode)
         config.set("show_debug_window", dialog.show_debug_window_check.isChecked())
-        config.set("servers", dialog.available_servers) # Preserve the server list
         config.set("seasons", dialog.available_seasons) # Preserve the season list
-        
-        # Log server and season changes
-        new_default_server = dialog.default_server_combo.currentText()
-        old_default_server = config.get("default_server", "")
-        config.set("default_server", new_default_server)
-        if new_default_server != old_default_server:
-            logging.debug(f"Default server changed from '{old_default_server}' to '{new_default_server}'")
         
         new_default_season = dialog.default_season_combo.currentText()
         old_default_season = config.get("default_season", "")

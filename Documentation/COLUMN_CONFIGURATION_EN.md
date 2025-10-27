@@ -6,10 +6,10 @@ This feature allows you to customize which columns are displayed in the main cha
 
 ## 🎯 Accessing Configuration
 
-### Via the Toolbar
+### Via the Menu
 
-1. Click the **Columns** button (`colonnes.png` icon) in the toolbar
-2. The button is located between the **+** button (New character) and the configuration icon (gear)
+1. Go to **View > Columns** menu
+2. A configuration window opens
 
 ### Configuration Interface
 
@@ -108,6 +108,6 @@ This feature could be extended to:
 
 ---
 
-**Version**: 0.1  
+**Version**: 0.101  
 **Date**: October 2025  
 **Author**: DAOC Character Manager Team

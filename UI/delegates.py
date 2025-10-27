@@ -114,7 +114,7 @@ class RealmTitleDelegate(QStyledItemDelegate):
         opt.text = ""
         
         # Draw background only
-        style = opt.widget.style() if opt.widget else self.parent().style()
+        style = opt.widget.style() if opt.widget else QApplication.style()
         style.drawControl(QStyle.CE_ItemViewItem, opt, painter, opt.widget)
         
         # Draw custom text

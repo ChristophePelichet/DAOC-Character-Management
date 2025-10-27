@@ -2,6 +2,8 @@
 
 Application de gestion de personnages pour Dark Age of Camelot (DAOC), développée en Python avec PySide6.
 
+**🌍 Disponible en :** **Français** | [English](README_EN.md) | [Deutsch](README_DE.md)
+
 ## 🎮 Fonctionnalités
 
 ### Gestion des Personnages
@@ -14,7 +16,7 @@ Application de gestion de personnages pour Dark Age of Camelot (DAOC), développ
 ### Organisation
 - 📁 Organisation par **Royaume** (Albion, Hibernia, Midgard)
 - 🏷️ Filtrage par **Saison** (S1, S2, S3, etc.)
-- 🖥️ Gestion multi-**Serveur** (Eden, Blackthorn, etc.)
+- 🖥️ Gestion multi-**Serveur** (Eden, Blackthorn)
 - 📊 Tableau avec tri par colonnes
 
 ### Realm Ranks (Rangs de Royaume)
@@ -31,17 +33,19 @@ Application de gestion de personnages pour Dark Age of Camelot (DAOC), développ
 
 ## 📋 Colonnes Configurables
 
-Vous pouvez personnaliser l'affichage des colonnes via le bouton **Colonnes** dans la barre d'outils.
+Vous pouvez personnaliser l'affichage des colonnes via le menu **Affichage > Colonnes**.
 
 Colonnes disponibles :
 - **Sélection** : Case à cocher pour les actions en masse
 - **Royaume** : Icône du royaume
 - **Saison** : Saison du personnage
-- **Serveur** : Serveur du personnage
+- **Serveur** : Serveur du personnage (cachée par défaut)
 - **Nom** : Nom du personnage
 - **Niveau** : Niveau du personnage
 - **Rang** : Rang de royaume (ex: 5L7)
 - **Titre** : Titre du rang (ex: Challenger)
+- **Page** : Page du personnage (1-5)
+- **Guilde** : Nom de la guilde
 
 Voir [Documentation/COLUMN_CONFIGURATION_FR.md](Documentation/CONFIGURATION_COLONNES_FR.md) (FR) ou [Documentation/COLUMN_CONFIGURATION_EN.md](Documentation/COLUMN_CONFIGURATION_EN.md) (EN) pour plus de détails.
 
@@ -90,12 +94,14 @@ Documentation complète disponible dans le dossier `Documentation/` :
 - [Système Realm Ranks](Documentation/REALM_RANKS_FR.md)
 - [Gestionnaire de Données](Documentation/DATA_MANAGER_FR.md)
 - [Dossier Data](Documentation/DATA_FOLDER_FR.md)
+- [Menu Interface](Documentation/INTERFACE_MENU_FR.md)
 
 ### English 🇬🇧
 - [Column Configuration](Documentation/COLUMN_CONFIGURATION_EN.md)
 - [Realm Ranks System](Documentation/REALM_RANKS_EN.md)
 - [Data Manager](Documentation/DATA_MANAGER_EN.md)
 - [Data Folder](Documentation/DATA_FOLDER_EN.md)
+- [Menu Interface](Documentation/INTERFACE_MENU_EN.md)
 
 ## �🗂️ Structure du Projet
 
@@ -139,22 +145,28 @@ DAOC---Gestion-des-personnages/
 
 ## ⚙️ Configuration
 
-La configuration est accessible via le bouton ⚙️ dans la barre d'outils.
+La configuration est accessible via le menu **Fichier > Paramètres**.
 
 ### Options disponibles :
 - 📁 **Répertoires** : Personnages, Configuration, Logs
 - 🌍 **Langue** : Français, English, Deutsch
 - 🎨 **Thème** : Clair / Sombre
-- 🖥️ **Serveur par défaut** : Eden, Blackthorn, etc.
+- 🖥️ **Serveur par défaut** : Eden, Blackthorn
 - 📅 **Saison par défaut** : S1, S2, S3, etc.
 - 🐛 **Mode Debug** : Activer/désactiver les logs détaillés
 
 ## 🎯 Utilisation
 
 ### Créer un Personnage
-1. Cliquez sur le bouton **+** (Nouveau personnage)
+1. Accédez au menu **Fichier > Nouveau Personnage**
 2. Entrez le nom, choisissez le royaume, la saison et le serveur
 3. Cliquez sur "OK"
+
+### Renommer un Personnage
+1. Double-cliquez sur un personnage pour ouvrir sa feuille
+2. Modifiez le nom dans le champ "Nom"
+3. Appuyez sur **Entrée** pour renommer
+4. Confirmez le renommage dans la boîte de dialogue
 
 ### Ajuster le Rang de Royaume
 1. Double-cliquez sur un personnage pour ouvrir sa feuille
@@ -162,8 +174,8 @@ La configuration est accessible via le bouton ⚙️ dans la barre d'outils.
 3. Cliquez sur "Appliquer ce rang" pour sauvegarder
 
 ### Configurer les Colonnes Visibles
-1. Cliquez sur le bouton **Colonnes** (icône de liste)
-2. Cochez/décochez les colonnes à afficher
+1. Accédez au menu **Affichage > Colonnes**
+2. Cochez/décochez les colonnes à afficher (y compris la colonne Serveur)
 3. Cliquez sur "OK" pour sauvegarder
 
 ### Actions en Masse
@@ -174,12 +186,36 @@ La configuration est accessible via le bouton ⚙️ dans la barre d'outils.
 ## 🐛 Débogage
 
 Pour activer le mode debug :
-1. Ouvrez la configuration (⚙️)
+1. Ouvrez la configuration via **Fichier > Paramètres**
 2. Cochez "Activer le mode débogage"
 3. Redémarrez l'application
 4. Consultez les logs dans `Logs/debug.log`
 
 ## 📝 Notes de Version
+
+Consultez le [journal des modifications](CHANGELOG_FR.md) pour l'historique complet.  
+**🌍 Disponible en :** [Français](CHANGELOG_FR.md) | [English](CHANGELOG_EN.md) | [Deutsch](CHANGELOG_DE.md)
+
+### Version 0.102 (27 Octobre 2025)
+- ✅ **Colonne Serveur** : Restauration de la colonne serveur (Eden/Blackthorn)
+- ✅ **Configuration serveur** : Serveur par défaut configuré sur "Eden"
+- ✅ **Fiche personnage** : Ajout d'un dropdown pour sélectionner le serveur
+- ✅ **Visibilité** : Colonne serveur cachée par défaut (affichable via Affichage > Colonnes)
+- ✅ **Réorganisation colonnes** : Nouvel ordre : Sélection, Royaume, Nom, Niveau, Rang, Titre, Guilde, Page, Serveur
+- ✅ **Support multi-serveur** : Possibilité de gérer des personnages sur Eden et Blackthorn
+- ✅ **Menu Colonnes** : Correction de la liste des colonnes (ajout serveur, suppression season)
+- ✅ **Renommage rapide** : Appuyez sur Entrée dans le champ "Nom" pour renommer directement
+- ✅ **Interface épurée** : Suppression du bouton "Renommer" et des popups inutiles
+- ✅ **Correction bug** : Résolution d'une erreur critique dans l'affichage des titres colorés
+
+### Version 0.101 (27 Octobre 2025)
+- ✅ **Interface Windows** : Remplacement de la toolbar par une barre de menu traditionnelle
+- ✅ **Menu Fichier** : Nouveau Personnage, Paramètres
+- ✅ **Menu Affichage** : Configuration des colonnes
+- ✅ **Menu Aide** : À propos avec informations complètes
+- ✅ **Traductions** : Support complet des menus dans les 3 langues
+- ✅ **Documentation** : Mise à jour complète avec guides d'interface menu
+- ✅ **Créateur** : Mise à jour vers "Ewoline"
 
 ### Version 0.1 (Octobre 2025)
 - ✅ Gestion complète des personnages (CRUD)
@@ -201,3 +237,9 @@ Les contributions sont les bienvenues ! N'hésitez pas à :
 ## 📄 Licence
 
 Ce projet est un outil personnel de gestion de personnages DAOC.
+
+---
+
+**Créé par :** Ewoline  
+**Version :** 0.102  
+**Dernière mise à jour :** 27 octobre 2025

@@ -4,6 +4,16 @@ Application de gestion de personnages pour Dark Age of Camelot (DAOC), développ
 
 **🌍 Disponible en :** **Français** | [English](README_EN.md) | [Deutsch](README_DE.md)
 
+## 📦 Téléchargement
+
+**Version actuelle : v0.102**
+
+[![Télécharger l'exécutable](https://img.shields.io/badge/T%C3%A9l%C3%A9charger-EXE-blue?style=for-the-badge&logo=windows)](https://github.com/ChristophePelichet/DAOC-Character-Management/releases/latest)
+
+➡️ [Télécharger DAOC-Character-Manager.exe](https://github.com/ChristophePelichet/DAOC-Character-Management/releases/latest)
+
+*Aucune installation requise - exécutable portable Windows*
+
 ## 🎮 Fonctionnalités
 
 ### Gestion des Personnages

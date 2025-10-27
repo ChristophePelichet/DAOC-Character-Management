@@ -4,6 +4,16 @@ Character management application for Dark Age of Camelot (DAOC), developed in Py
 
 **🌍 Available in:** [Français](README.md) | **English** | [Deutsch](README_DE.md)
 
+## 📦 Download
+
+**Current Version: v0.102**
+
+[![Download Executable](https://img.shields.io/badge/Download-EXE-blue?style=for-the-badge&logo=windows)](https://github.com/ChristophePelichet/DAOC-Character-Management/releases/latest)
+
+➡️ [Download DAOC-Character-Manager.exe](https://github.com/ChristophePelichet/DAOC-Character-Management/releases/latest)
+
+*No installation required - portable Windows executable*
+
 ## 🎮 Features
 
 ### Character Management

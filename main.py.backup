@@ -11,14 +11,13 @@ import logging
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QTreeView, QStatusBar, 
     QLabel, QMessageBox, QMenu, QFileDialog, QHeaderView, QInputDialog,
-    QToolButton, QSizePolicy, QStyleFactory, QGroupBox, QHBoxLayout,
-    QComboBox, QPushButton, QLineEdit, QDialog
+    QToolButton, QSizePolicy, QStyleFactory
 )
 from PySide6.QtGui import (
     QFont, QStandardItemModel, QStandardItem, QIcon, QAction, 
     QGuiApplication, QPalette
 )
-from PySide6.QtCore import Qt, QSize, QByteArray, Slot
+from PySide6.QtCore import Qt, QSize, QByteArray
 
 from Functions.character_manager import (
     create_character_data, save_character, get_all_characters, get_character_dir, 
@@ -29,7 +28,7 @@ from Functions.config_manager import config, get_config_dir
 from Functions.logging_manager import setup_logging, get_log_dir, get_img_dir
 from Functions.data_manager import DataManager
 
-# Import UI components from modular UI package
+# Import UI components
 from UI import (
     DebugWindow, QTextEditHandler, LogLevelFilter, LogFileReaderThread,
     CharacterSheetWindow, ColumnsConfigDialog, NewCharacterDialog, ConfigurationDialog,
@@ -39,17 +38,841 @@ from UI import (
 # Setup logging at the very beginning
 setup_logging()
 
-# Application Constants
+# --- Application Constants ---
 APP_NAME = "Character Manager"
 APP_VERSION = "0.1"
 
-
 def global_exception_handler(exc_type, exc_value, exc_traceback):
     """Catches unhandled exceptions and logs them with full traceback."""
+    # Format the traceback
     tb_lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
     tb_string = "".join(tb_lines)
     logging.critical(f"Unhandled exception caught:\n{tb_string}")
 
+class QTextEditHandler(logging.Handler, QObject):
+    """A custom logging handler that sends records to a QTextEdit widget."""
+    log_updated = Signal(str)
+
+    def __init__(self, parent):
+        super().__init__()
+        QObject.__init__(self, parent)
+
+    def emit(self, record):
+        msg = self.format(record)
+        self.log_updated.emit(msg)
+
+class LogLevelFilter(logging.Filter):
+    """Filters log records based on a minimum and maximum level."""
+    def __init__(self, min_level, max_level):
+        super().__init__()
+        self.min_level = min_level
+        self.max_level = max_level
+
+    def filter(self, record):
+        return self.min_level <= record.levelno <= self.max_level
+
+class LogFileReaderThread(QThread):
+    """A QThread to monitor a log file without blocking the GUI."""
+    new_line = Signal(str)
+
+    def __init__(self, filepath, parent=None):
+        super().__init__(parent)
+        self.filepath = filepath
+        self._is_running = True
+
+    def run(self):
+        try:
+            with open(self.filepath, 'r', encoding='utf-8', errors='ignore') as f:
+                f.seek(0, 2)  # Go to the end of the file
+                while self._is_running:
+                    line = f.readline()
+                    if line:
+                        self.new_line.emit(line)
+                    else:
+                        self.msleep(100)  # Wait for new lines
+        except Exception as e:
+            error_message = f"Error monitoring file {self.filepath}: {e}\n"
+            self.new_line.emit(error_message)
+
+    def stop(self):
+        self._is_running = False
+
+class DebugWindow(QMainWindow):
+    """A window that displays log messages."""
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle(lang.get("debug_window_title"))
+        self.setGeometry(100, 100, 1200, 700)
+        self.monitoring_thread = None
+        self.current_log_level = logging.DEBUG
+
+        # --- Central Widget and Layout ---
+        central_widget = QWidget()
+        self.setCentralWidget(central_widget)
+        main_layout = QVBoxLayout(central_widget)
+
+        # --- Menu Bar ---
+        self._create_menus()
+        
+        # --- Button Bar ---
+        button_bar_layout = QHBoxLayout()
+        test_debug_button = QPushButton(lang.get("test_debug_button"))
+        test_debug_button.clicked.connect(self.raise_test_exception)
+        button_bar_layout.addWidget(test_debug_button)
+        button_bar_layout.addStretch()  # Pushes the button to the left
+        main_layout.addLayout(button_bar_layout)
+
+        # --- Main Splitter ---
+        main_splitter = QSplitter(Qt.Horizontal)
+        main_layout.addWidget(main_splitter)
+
+        # --- Left Pane (Logs & Errors) ---
+        left_splitter = QSplitter(Qt.Vertical)
+        
+        log_group = QGroupBox(lang.get("debug_log_pane_title"))
+        log_layout = QVBoxLayout()
+        self.log_widget = QTextEdit()
+        self.log_widget.setReadOnly(True)
+        log_layout.addWidget(self.log_widget)
+        log_group.setLayout(log_layout)
+        left_splitter.addWidget(log_group)
+
+        error_group = QGroupBox(lang.get("debug_errors_pane_title"))
+        error_layout = QVBoxLayout()
+        self.error_widget = QTextEdit()
+        self.error_widget.setReadOnly(True)
+        error_layout.addWidget(self.error_widget)
+        error_group.setLayout(error_layout)
+        left_splitter.addWidget(error_group)
+        
+        left_splitter.setSizes([400, 200]) # Initial sizes
+        main_splitter.addWidget(left_splitter)
+
+        # --- Right Pane (Log Reader) ---
+        reader_group = QGroupBox(lang.get("debug_log_reader_pane_title"))
+        reader_layout = QVBoxLayout()
+        
+        file_bar_layout = QHBoxLayout()
+        self.log_file_path_edit = QLineEdit()
+        self.log_file_path_edit.setReadOnly(True)
+        browse_button = QPushButton(lang.get("browse_button"))
+        browse_button.clicked.connect(self.browse_log_file)
+        clear_button = QPushButton(lang.get("clear_button_text"))
+        clear_button.clicked.connect(self.clear_log_reader)
+        file_bar_layout.addWidget(self.log_file_path_edit)
+        file_bar_layout.addWidget(browse_button)
+        file_bar_layout.addWidget(clear_button)
+        reader_layout.addLayout(file_bar_layout)
+
+        self.log_reader_widget = QTextEdit()
+        self.log_reader_widget.setReadOnly(True)
+        reader_layout.addWidget(self.log_reader_widget)
+        reader_group.setLayout(reader_layout)
+        main_splitter.addWidget(reader_group)
+
+        main_splitter.setSizes([700, 500])
+
+        # --- Setup Logging Handlers ---
+        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+        
+        # General log handler (INFO and below)
+        self.log_filter = LogLevelFilter(logging.DEBUG, logging.INFO)
+        self.log_handler = QTextEditHandler(self)
+        self.log_handler.setFormatter(formatter)
+        self.log_handler.addFilter(self.log_filter)
+        self.log_handler.log_updated.connect(self.log_widget.append)
+        logging.getLogger().addHandler(self.log_handler)
+
+        # Error log handler (WARNING and above)
+        self.error_filter = LogLevelFilter(logging.WARNING, logging.CRITICAL)
+        self.error_handler = QTextEditHandler(self)
+        self.error_handler.setFormatter(formatter)
+        self.error_handler.addFilter(self.error_filter)
+        self.error_handler.log_updated.connect(self.error_widget.append)
+        logging.getLogger().addHandler(self.error_handler)
+
+    def _create_menus(self):
+        menu_bar = self.menuBar()
+
+        # --- Level Menu ---
+        level_menu = menu_bar.addMenu(lang.get("debug_level_menu"))
+        level_action_group = QActionGroup(self)
+        level_action_group.setExclusive(True)
+        level_action_group.triggered.connect(self.set_log_level)
+
+        log_levels_map = {
+            lang.get("debug_level_all"): logging.DEBUG,
+            "INFO": logging.INFO,
+            "WARNING": logging.WARNING,
+            "ERROR": logging.ERROR,
+            "CRITICAL": logging.CRITICAL
+        }
+
+        for name, level in log_levels_map.items():
+            action = QAction(name, self)
+            action.setData(level)
+            action.setCheckable(True)
+            level_menu.addAction(action)
+            level_action_group.addAction(action)
+            if level == self.current_log_level:
+                action.setChecked(True)
+
+    @Slot(QAction)
+    def set_log_level(self, action):
+        """Sets the minimum logging level for the handlers."""
+        level = action.data()
+        self.current_log_level = level
+        logging.info(f"Debug window log level set to {logging.getLevelName(level)}")
+
+        # Update filters
+        self.log_filter.min_level = level
+        self.error_filter.min_level = level
+        
+        # The handlers will now only receive messages at or above the new level.
+        # No need to clear the widgets, as new messages will be filtered.
+        
+    def raise_test_exception(self):
+        """Raises a test exception to verify the handler."""
+        logging.info("Raising a test exception...")
+        1 / 0
+
+    def browse_log_file(self):
+        filepath, _ = QFileDialog.getOpenFileName(self, lang.get("debug_log_reader_pane_title"), "", "Log files (*.log);;All files (*.*)")
+        if filepath:
+            self.log_file_path_edit.setText(filepath)
+            self.start_log_monitoring(filepath)
+
+    def clear_log_reader(self):
+        self.log_reader_widget.clear()
+
+    def start_log_monitoring(self, filepath):
+        self.stop_log_monitoring()
+        self.clear_log_reader()
+        self.monitoring_thread = LogFileReaderThread(filepath, self)
+        self.monitoring_thread.new_line.connect(self.log_reader_widget.append)
+        self.monitoring_thread.start()
+
+    def stop_log_monitoring(self):
+        if self.monitoring_thread and self.monitoring_thread.isRunning():
+            self.monitoring_thread.stop()
+            self.monitoring_thread.wait() # Wait for thread to finish
+
+    def closeEvent(self, event):
+        """Remove the handler when the window is closed."""
+        self.stop_log_monitoring()
+        logging.getLogger().removeHandler(self.log_handler)
+        logging.getLogger().removeHandler(self.error_handler)
+        super().closeEvent(event)
+
+class CharacterSheetWindow(QDialog):
+    """Fenêtre pour afficher les détails d'un personnage."""
+    def __init__(self, parent, character_data):
+        super().__init__(parent)
+        self.character_data = character_data
+        self.parent_app = parent
+        char_name = self.character_data.get('name', 'N/A')
+        self.realm = self.character_data.get('realm', 'Albion')
+
+        self.setWindowTitle(lang.get("character_sheet_title", name=char_name))
+        self.resize(500, 400)
+
+        layout = QVBoxLayout(self)
+        
+        # --- Informations de base ---
+        info_group = QGroupBox("Informations générales")
+        info_layout = QFormLayout()
+        info_layout.addRow("Nom :", QLabel(char_name))
+        info_layout.addRow("Royaume :", QLabel(self.realm))
+        info_layout.addRow("Niveau :", QLabel(str(self.character_data.get('level', 'N/A'))))
+        info_layout.addRow("Saison :", QLabel(self.character_data.get('season', 'N/A')))
+        info_layout.addRow("Serveur :", QLabel(self.character_data.get('server', 'N/A')))
+        info_group.setLayout(info_layout)
+        layout.addWidget(info_group)
+        
+        # --- Realm Rank Section ---
+        realm_rank_group = QGroupBox("Rang de Royaume")
+        realm_rank_layout = QVBoxLayout()
+        
+        realm_points = self.character_data.get('realm_points', 0)
+        
+        # Affichage du rang et titre actuel
+        self.rank_title_label = QLabel()
+        self.rank_title_label.setAlignment(Qt.AlignCenter)
+        self.update_rank_display(realm_points)
+        
+        # Style pour le label du titre (gras et coloré)
+        realm_colors = {
+            "Albion": "#CC0000",
+            "Hibernia": "#00AA00",
+            "Midgard": "#0066CC"
+        }
+        color = realm_colors.get(self.realm, "#000000")
+        self.rank_title_label.setStyleSheet(f"font-size: 16pt; font-weight: bold; color: {color};")
+        realm_rank_layout.addWidget(self.rank_title_label)
+        
+        # Séparateur
+        realm_rank_layout.addWidget(QLabel(""))
+        
+        # --- Contrôle manuel du rang ---
+        control_group = QGroupBox("Ajustement du Rang")
+        control_layout = QVBoxLayout()
+        
+        # Slider pour les rangs (1-14)
+        rank_slider_layout = QHBoxLayout()
+        rank_slider_layout.addWidget(QLabel("Rang :"))
+        
+        self.rank_slider = QSlider(Qt.Horizontal)
+        self.rank_slider.setMinimum(1)
+        self.rank_slider.setMaximum(14)
+        self.rank_slider.setTickPosition(QSlider.TicksBelow)
+        self.rank_slider.setTickInterval(1)
+        
+        # Obtenir le rang actuel
+        current_rank = 1
+        if hasattr(parent, 'data_manager'):
+            rank_info = parent.data_manager.get_realm_rank_info(self.realm, realm_points)
+            if rank_info:
+                current_rank = rank_info['rank']
+        
+        self.rank_slider.setValue(current_rank)
+        self.rank_slider.valueChanged.connect(self.on_rank_changed)
+        rank_slider_layout.addWidget(self.rank_slider)
+        
+        self.rank_value_label = QLabel(f"Rank {current_rank}")
+        self.rank_value_label.setMinimumWidth(60)
+        rank_slider_layout.addWidget(self.rank_value_label)
+        control_layout.addLayout(rank_slider_layout)
+        
+        # Slider pour les niveaux (1-10 par rang, sauf rank 1 qui a 9 niveaux)
+        level_slider_layout = QHBoxLayout()
+        level_slider_layout.addWidget(QLabel("Niveau :"))
+        
+        self.level_slider = QSlider(Qt.Horizontal)
+        self.level_slider.setMinimum(1)
+        self.level_slider.setMaximum(10)
+        self.level_slider.setTickPosition(QSlider.TicksBelow)
+        self.level_slider.setTickInterval(1)
+        
+        # Obtenir le niveau actuel
+        current_level = 1
+        if hasattr(parent, 'data_manager') and rank_info:
+            level_str = rank_info['level']  # Format "XLY"
+            import re
+            level_match = re.search(r'L(\d+)', level_str)
+            if level_match:
+                current_level = int(level_match.group(1))
+        
+        self.level_slider.setValue(current_level)
+        self.level_slider.valueChanged.connect(self.on_level_changed)
+        level_slider_layout.addWidget(self.level_slider)
+        
+        self.level_value_label = QLabel(f"L{current_level}")
+        self.level_value_label.setMinimumWidth(40)
+        level_slider_layout.addWidget(self.level_value_label)
+        control_layout.addLayout(level_slider_layout)
+        
+        # Affichage des RP pour ce rang/niveau
+        self.rp_info_label = QLabel()
+        self.rp_info_label.setAlignment(Qt.AlignCenter)
+        self.update_rp_info()
+        control_layout.addWidget(self.rp_info_label)
+        
+        # Bouton pour appliquer
+        apply_button = QPushButton("Appliquer ce rang")
+        apply_button.clicked.connect(self.apply_rank)
+        control_layout.addWidget(apply_button)
+        
+        control_group.setLayout(control_layout)
+        realm_rank_layout.addWidget(control_group)
+        
+        realm_rank_group.setLayout(realm_rank_layout)
+        layout.addWidget(realm_rank_group)
+        
+        layout.addStretch()
+
+        # Boutons
+        button_box = QDialogButtonBox(QDialogButtonBox.Close)
+        button_box.rejected.connect(self.reject)
+        layout.addWidget(button_box)
+    
+    def on_rank_changed(self, value):
+        """Appelé quand le slider de rang change"""
+        self.rank_value_label.setText(f"Rank {value}")
+        # Ajuster le max du slider de niveau (rank 1 = 9 niveaux, autres = 10)
+        max_level = 9 if value == 1 else 10
+        self.level_slider.setMaximum(max_level)
+        if self.level_slider.value() > max_level:
+            self.level_slider.setValue(max_level)
+        self.update_rp_info()
+    
+    def on_level_changed(self, value):
+        """Appelé quand le slider de niveau change"""
+        self.level_value_label.setText(f"L{value}")
+        self.update_rp_info()
+    
+    def update_rp_info(self):
+        """Met à jour l'affichage des RP pour le rang/niveau sélectionné"""
+        if not hasattr(self.parent_app, 'data_manager'):
+            return
+        
+        rank = self.rank_slider.value()
+        level = self.level_slider.value()
+        level_str = f"{rank}L{level}"
+        
+        # Trouver les RP pour ce niveau
+        rank_info = self.parent_app.data_manager.get_rank_by_level(self.realm, level_str)
+        if rank_info:
+            self.rp_info_label.setText(
+                f"Ce rang nécessite : {rank_info['realm_points']:,} RP\n"
+                f"Titre : {rank_info['title']}"
+            )
+        else:
+            self.rp_info_label.setText("Informations non disponibles")
+    
+    def update_rank_display(self, realm_points):
+        """Met à jour l'affichage du rang et titre actuel"""
+        if hasattr(self.parent_app, 'data_manager'):
+            rank_info = self.parent_app.data_manager.get_realm_rank_info(self.realm, realm_points)
+            if rank_info:
+                self.rank_title_label.setText(
+                    f"Rank {rank_info['rank']} - {rank_info['title']}\n"
+                    f"({rank_info['level']} - {realm_points:,} RP)"
+                )
+            else:
+                self.rank_title_label.setText(f"Rank 1 - Guardian\n(1L1 - 0 RP)")
+        else:
+            realm_rank = self.character_data.get('realm_rank', '1L1')
+            self.rank_title_label.setText(f"{realm_rank} - {realm_points:,} RP")
+    
+    def apply_rank(self):
+        """Applique le rang sélectionné au personnage"""
+        rank = self.rank_slider.value()
+        level = self.level_slider.value()
+        level_str = f"{rank}L{level}"
+        
+        if not hasattr(self.parent_app, 'data_manager'):
+            QMessageBox.warning(self, "Erreur", "Data Manager non disponible")
+            return
+        
+        # Obtenir les RP pour ce niveau
+        rank_info = self.parent_app.data_manager.get_rank_by_level(self.realm, level_str)
+        if not rank_info:
+            QMessageBox.warning(self, "Erreur", f"Impossible de trouver les données pour {level_str}")
+            return
+        
+        new_rp = rank_info['realm_points']
+        
+        # Confirmer
+        reply = QMessageBox.question(
+            self,
+            "Confirmer",
+            f"Définir le rang à {level_str} ({rank_info['title']}) ?\n"
+            f"Cela définira les Realm Points à {new_rp:,}.",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.Yes
+        )
+        
+        if reply == QMessageBox.Yes:
+            # Mettre à jour les données
+            self.character_data['realm_points'] = new_rp
+            self.character_data['realm_rank'] = level_str
+            
+            # Sauvegarder (permettre l'écrasement car on met à jour un personnage existant)
+            from Functions.character_manager import save_character
+            success, msg = save_character(self.character_data, allow_overwrite=True)
+            
+            if success:
+                QMessageBox.information(self, "Succès", f"Rang mis à jour : {level_str}\nRealm Points : {new_rp:,}")
+                # Mettre à jour l'affichage
+                self.update_rank_display(new_rp)
+                # Rafraîchir la liste
+                if hasattr(self.parent_app, 'refresh_character_list'):
+                    self.parent_app.refresh_character_list()
+            else:
+                QMessageBox.critical(self, "Erreur", f"Échec de la sauvegarde : {msg}")
+
+class ColumnsConfigDialog(QDialog):
+    """Dialog to configure which columns are visible in the character list."""
+    
+    # Define all available columns with their default visibility
+    COLUMNS_CONFIG = [
+        {"key": "selection", "name_key": "column_selection", "default": True},
+        {"key": "realm", "name_key": "column_realm", "default": True},
+        {"key": "season", "name_key": "column_season", "default": True},
+        {"key": "server", "name_key": "column_server", "default": True},
+        {"key": "name", "name_key": "column_name", "default": True},
+        {"key": "level", "name_key": "column_level", "default": True},
+        {"key": "realm_rank", "name_key": "column_realm_rank", "default": True},
+        {"key": "realm_title", "name_key": "column_realm_title", "default": True},
+    ]
+    
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle(lang.get("columns_config_title", default="Configuration des colonnes"))
+        self.resize(400, 300)
+        
+        layout = QVBoxLayout(self)
+        
+        # Description
+        desc_label = QLabel(lang.get("columns_config_desc", default="Sélectionnez les colonnes à afficher :"))
+        layout.addWidget(desc_label)
+        
+        # Checkboxes for each column
+        self.checkboxes = {}
+        current_visibility = config.get("column_visibility", {})
+        
+        for col in self.COLUMNS_CONFIG:
+            checkbox = QCheckBox(lang.get(col["name_key"], default=col["key"]))
+            # Get visibility from config, or use default
+            is_visible = current_visibility.get(col["key"], col["default"])
+            checkbox.setChecked(is_visible)
+            self.checkboxes[col["key"]] = checkbox
+            layout.addWidget(checkbox)
+        
+        # Buttons
+        button_layout = QHBoxLayout()
+        
+        select_all_btn = QPushButton(lang.get("columns_select_all", default="Tout sélectionner"))
+        select_all_btn.clicked.connect(self.select_all)
+        button_layout.addWidget(select_all_btn)
+        
+        deselect_all_btn = QPushButton(lang.get("columns_deselect_all", default="Tout désélectionner"))
+        deselect_all_btn.clicked.connect(self.deselect_all)
+        button_layout.addWidget(deselect_all_btn)
+        
+        layout.addLayout(button_layout)
+        
+        layout.addStretch()
+        
+        # OK/Cancel buttons
+        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        button_box.accepted.connect(self.accept)
+        button_box.rejected.connect(self.reject)
+        layout.addWidget(button_box)
+    
+    def select_all(self):
+        """Check all checkboxes."""
+        for checkbox in self.checkboxes.values():
+            checkbox.setChecked(True)
+    
+    def deselect_all(self):
+        """Uncheck all checkboxes."""
+        for checkbox in self.checkboxes.values():
+            checkbox.setChecked(False)
+    
+    def get_visibility_config(self):
+        """Returns a dictionary with the visibility state of each column."""
+        return {key: checkbox.isChecked() for key, checkbox in self.checkboxes.items()}
+
+class NewCharacterDialog(QDialog):
+    """A dialog to create a new character with a name and a realm."""
+    def __init__(self, parent=None, realms=None, servers=None, default_server=None, seasons=None, default_season=None):
+        super().__init__(parent)
+        self.setWindowTitle(lang.get("new_char_dialog_title"))
+
+        self.realms = realms if realms else []
+        self.servers = servers if servers else []
+        self.seasons = seasons if seasons else []
+        self.default_server = default_server
+        self.default_season = default_season
+        
+        layout = QFormLayout(self)
+
+        self.name_edit = QLineEdit(self)
+        layout.addRow(lang.get("new_char_dialog_prompt"), self.name_edit)
+
+        self.realm_combo = QComboBox(self)
+        self.realm_combo.addItems(self.realms)
+        layout.addRow(lang.get("new_char_realm_prompt"), self.realm_combo)
+        
+        # Serveur avant Saison
+        self.server_combo = QComboBox(self)
+        self.server_combo.addItems(self.servers)
+        self.server_combo.setCurrentText(self.default_server)
+        layout.addRow(lang.get("new_char_server_prompt", default="Serveur :"), self.server_combo)
+
+        # Saison
+        self.season_combo = QComboBox(self)
+        self.season_combo.addItems(self.seasons)
+        self.season_combo.setCurrentText(self.default_season)
+        layout.addRow(lang.get("new_char_season_prompt", default="Saison :"), self.season_combo)
+        # Connecter le signal pour le débogage
+        self.season_combo.currentTextChanged.connect(self._on_season_changed)
+
+        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        button_box.accepted.connect(self.accept)
+        button_box.rejected.connect(self.reject)
+        layout.addWidget(button_box)
+
+    def get_data(self):
+        """Returns the entered data if valid."""
+        name = self.name_edit.text().strip()
+        if not name:
+            QMessageBox.warning(self, lang.get("error_title"), lang.get("char_name_empty_error"))
+            return None
+        realm = self.realm_combo.currentText()
+        season = self.season_combo.currentText()
+        server = self.server_combo.currentText()
+        return name, realm, season, server
+    
+    def _on_season_changed(self, new_season):
+        logging.debug(f"New character dialog: Season changed to '{new_season}'")
+
+class ConfigurationDialog(QDialog):
+    """Configuration window for the application."""
+    def __init__(self, parent=None, available_languages=None, available_servers=None, available_seasons=None):
+        super().__init__(parent)
+        self.setWindowTitle(lang.get("configuration_window_title"))
+        self.setMinimumSize(500, 250)
+        self.parent_app = parent
+        self.available_languages = available_languages or {}
+        self.available_servers = available_servers or []
+        self.available_seasons = available_seasons or []
+
+        main_layout = QVBoxLayout(self)
+
+        # --- General Settings ---
+        form_layout = QFormLayout()
+
+        # Character Path
+        self.char_path_edit = QLineEdit()
+        browse_char_button = QPushButton(lang.get("browse_button"))
+        browse_char_button.clicked.connect(self.browse_character_folder)
+        char_path_layout = QHBoxLayout()
+        char_path_layout.addWidget(self.char_path_edit)
+        char_path_layout.addWidget(browse_char_button)
+        form_layout.addRow(lang.get("config_path_label"), char_path_layout)
+
+        # Config Path
+        self.config_path_edit = QLineEdit()
+        browse_config_button = QPushButton(lang.get("browse_button"))
+        browse_config_button.clicked.connect(self.browse_config_folder)
+        config_path_layout = QHBoxLayout()
+        config_path_layout.addWidget(self.config_path_edit)
+        config_path_layout.addWidget(browse_config_button)
+        form_layout.addRow(lang.get("config_file_path_label"), config_path_layout)
+
+        # Log Path
+        self.log_path_edit = QLineEdit()
+        browse_log_button = QPushButton(lang.get("browse_button"))
+        browse_log_button.clicked.connect(self.browse_log_folder)
+        log_path_layout = QHBoxLayout()
+        log_path_layout.addWidget(self.log_path_edit)
+        log_path_layout.addWidget(browse_log_button)
+        form_layout.addRow(lang.get("config_log_path_label"), log_path_layout)
+
+        # Language
+        self.language_combo = QComboBox()
+        self.language_combo.addItems(self.available_languages.values())
+        form_layout.addRow(lang.get("config_language_label"), self.language_combo)
+
+        # Debug Mode
+        self.debug_mode_check = QCheckBox(lang.get("config_debug_mode_label"))
+        form_layout.addRow(self.debug_mode_check)
+
+        # Show Debug Window
+        self.show_debug_window_check = QCheckBox(lang.get("config_show_debug_window_label"))
+        form_layout.addRow(self.show_debug_window_check)
+        main_layout.addLayout(form_layout)
+
+        # --- Server & Season Settings ---
+        server_season_group = QGroupBox(lang.get("config_server_season_group_title", default="Serveur & Saison"))
+        server_season_layout = QFormLayout()
+
+        # Default Server
+        self.default_server_combo = QComboBox()
+        self.default_server_combo.addItems(self.available_servers)
+        server_season_layout.addRow(lang.get("config_default_server_label", default="Serveur par défaut"), self.default_server_combo)
+
+        # Default Season
+        self.default_season_combo = QComboBox()
+        self.default_season_combo.addItems(self.available_seasons)
+        server_season_layout.addRow(lang.get("config_default_season_label", default="Saison par défaut"), self.default_season_combo)
+
+        server_season_group.setLayout(server_season_layout)
+        main_layout.addWidget(server_season_group)
+
+        main_layout.addStretch() # Push settings to the top
+
+        # Buttons
+        button_box = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel)
+        button_box.accepted.connect(self.accept)
+        button_box.rejected.connect(self.reject)
+        main_layout.addWidget(button_box)
+
+        self.update_fields()
+
+    def update_fields(self):
+        """Fills the fields with current configuration values."""
+        self.char_path_edit.setText(config.get("character_folder", get_character_dir()))
+        self.config_path_edit.setText(config.get("config_folder", get_config_dir()))
+        self.log_path_edit.setText(config.get("log_folder", get_log_dir()))
+        self.debug_mode_check.setChecked(config.get("debug_mode", False))
+        self.show_debug_window_check.setChecked(config.get("show_debug_window", False))
+        
+        current_lang_code = config.get("language", "fr")
+        current_lang_name = self.available_languages.get(current_lang_code, "Français")
+        self.language_combo.setCurrentText(current_lang_name)
+
+        current_default_server = config.get("default_server", "")
+        self.default_server_combo.setCurrentText(current_default_server)
+
+        current_default_season = config.get("default_season", "")
+        self.default_season_combo.setCurrentText(current_default_season)
+
+    def browse_folder(self, line_edit, title_key):
+        directory = QFileDialog.getExistingDirectory(self, lang.get(title_key))
+        if directory:
+            line_edit.setText(directory)
+
+    def browse_character_folder(self):
+        self.browse_folder(self.char_path_edit, "select_folder_dialog_title")
+
+    def browse_config_folder(self):
+        self.browse_folder(self.config_path_edit, "select_config_folder_dialog_title")
+
+    def browse_log_folder(self):
+        self.browse_folder(self.log_path_edit, "select_log_folder_dialog_title")
+
+class CenterIconDelegate(QStyledItemDelegate):
+    """Delegate personnalisé pour centrer les icônes dans les cellules du TreeView"""
+    
+    def paint(self, painter, option, index):
+        """Dessine l'icône centrée dans la cellule"""
+        # Si la cellule contient une icône
+        icon = index.data(Qt.DecorationRole)
+        if icon and isinstance(icon, QIcon) and not icon.isNull():
+            # Draw only the background, not the icon or text
+            opt = QStyleOptionViewItem(option)
+            self.initStyleOption(opt, index)
+            
+            # Remove the decoration AND text so super().paint() won't draw them
+            opt.features &= ~QStyleOptionViewItem.HasDecoration
+            opt.features &= ~QStyleOptionViewItem.HasDisplay  # This removes the text
+            opt.icon = QIcon()  # Remove icon
+            opt.text = ""  # Remove text
+            opt.decorationSize = QSize(0, 0)
+            
+            # Draw background only (selection highlight, etc.)
+            super().paint(painter, opt, index)
+            
+            # Now draw the centered icon
+            painter.save()
+            
+            # Calculer la position centrée
+            icon_size = option.decorationSize
+            if icon_size.width() == -1:  # Taille par défaut
+                icon_size = QSize(16, 16)
+            
+            # Centrer l'icône dans la cellule
+            x = option.rect.x() + (option.rect.width() - icon_size.width()) // 2
+            y = option.rect.y() + (option.rect.height() - icon_size.height()) // 2
+            
+            # Dessiner l'icône
+            icon.paint(painter, QRect(x, y, icon_size.width(), icon_size.height()))
+            
+            painter.restore()
+        else:
+            # Pour les autres cellules, utiliser le comportement par défaut
+            super().paint(painter, option, index)
+
+class CenterCheckboxDelegate(QStyledItemDelegate):
+    """Delegate to draw a checkbox in the center of a cell and handle clicks."""
+    def paint(self, painter, option, index):
+        # Create a modified option without the checkbox decoration
+        opt = QStyleOptionViewItem(option)
+        self.initStyleOption(opt, index)
+        
+        # Draw only the background (selection, hover, etc.) without the checkbox
+        style = option.widget.style() if option.widget else QApplication.style()
+        style.drawPrimitive(QStyle.PE_PanelItemViewItem, opt, painter, option.widget)
+        
+        # Now draw our custom centered checkbox
+        painter.save()
+        
+        # Create checkbox option
+        check_option = QStyleOptionButton()
+        
+        # Set the check state from the model data
+        check_state = index.data(Qt.CheckStateRole)
+        if check_state == Qt.Checked:
+            check_option.state = QStyle.State_On | QStyle.State_Enabled
+        else:
+            check_option.state = QStyle.State_Off | QStyle.State_Enabled
+        
+        # Make the checkbox bigger (2x size for better visibility)
+        indicator_size = int(style.pixelMetric(QStyle.PM_IndicatorWidth) * 2)
+        x = option.rect.center().x() - indicator_size // 2
+        y = option.rect.center().y() - indicator_size // 2
+        check_option.rect = QRect(x, y, indicator_size, indicator_size)
+
+        # Draw the checkbox with better quality
+        style.drawControl(QStyle.CE_CheckBox, check_option, painter, option.widget)
+        
+        painter.restore()
+
+    def editorEvent(self, event, model, option, index):
+        """Handle user interaction to toggle the checkbox."""
+        if event.type() == QEvent.MouseButtonRelease and event.button() == Qt.LeftButton:
+            # When the cell is clicked, toggle the check state
+            new_state = Qt.Unchecked if index.data(Qt.CheckStateRole) == Qt.Checked else Qt.Checked
+            model.setData(index, new_state, Qt.CheckStateRole)
+            return True # We've handled the event
+        return False
+
+class RealmTitleDelegate(QStyledItemDelegate):
+    """Delegate pour afficher les titres de royaume en couleur et en gras"""
+    
+    # Couleurs par royaume
+    REALM_COLORS = {
+        "Albion": "#CC0000",      # Rouge
+        "Hibernia": "#00AA00",    # Vert
+        "Midgard": "#0066CC"      # Bleu
+    }
+    
+    def paint(self, painter, option, index):
+        """Dessine le titre en couleur et en gras"""
+        # Récupérer le texte et le royaume
+        text = index.data(Qt.DisplayRole)
+        realm = index.data(Qt.UserRole)  # Le royaume sera stocké dans UserRole
+        
+        if not text:
+            super().paint(painter, option, index)
+            return
+        
+        # Dessiner seulement le background (sans le texte)
+        opt = QStyleOptionViewItem(option)
+        self.initStyleOption(opt, index)
+        opt.text = ""  # Ne pas dessiner le texte par défaut
+        
+        # Dessiner uniquement le background
+        style = opt.widget.style() if opt.widget else self.parent().style()
+        style.drawControl(QStyle.CE_ItemViewItem, opt, painter, opt.widget)
+        
+        # Dessiner le texte personnalisé
+        painter.save()
+        
+        # Définir la police en gras
+        font = option.font
+        font.setBold(True)
+        painter.setFont(font)
+        
+        # Définir la couleur selon le royaume
+        if realm in self.REALM_COLORS:
+            from PySide6.QtGui import QColor
+            if option.state & QStyle.State_Selected:
+                # Si sélectionné, utiliser la couleur de texte de sélection
+                painter.setPen(option.palette.color(QPalette.HighlightedText))
+            else:
+                # Sinon, utiliser la couleur du royaume
+                painter.setPen(QColor(self.REALM_COLORS[realm]))
+        else:
+            painter.setPen(option.palette.color(QPalette.Text))
+        
+        # Dessiner le texte centré
+        painter.drawText(option.rect, Qt.AlignCenter, text)
+        
+        painter.restore()
 
 class CharacterApp(QMainWindow):
     """

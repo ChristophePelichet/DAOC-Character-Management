@@ -6,11 +6,20 @@ a = Analysis(
     pathex=[],
     binaries=[],
     datas=[('Language', 'Language'), ('Img', 'Img')],
-    hiddenimports=[],
+    hiddenimports=['UI.delegates', 'UI.dialogs', 'UI.debug_window'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=[],
+    excludes=[
+        'Documentation',  # Exclude documentation folder from build
+        'pytest',         # Exclude test framework
+        'unittest',       # Exclude unittest
+        'test',           # Exclude any test modules
+        'tkinter',        # Exclude tkinter if not needed
+        '_tkinter',
+        'matplotlib',     # Exclude matplotlib if not needed
+        'PIL',            # Exclude Pillow if not needed
+    ],
     noarchive=False,
     optimize=0,
 )

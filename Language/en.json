@@ -85,5 +85,13 @@
     "delete_checked_action_label": "Bulk Delete",
     "bulk_delete_confirm_message": "Are you sure you want to permanently delete the {count} selected characters? This action cannot be undone.",
     "no_characters_selected_warning": "No characters are selected.",
-    "action_button_label": "Action"
+    "action_button_label": "Action",
+    "columns_config_text": "Columns",
+    "columns_config_tooltip": "Configure visible columns",
+    "columns_config_title": "Column Configuration",
+    "columns_config_desc": "Select the columns to display:",
+    "columns_select_all": "Select all",
+    "columns_deselect_all": "Deselect all",
+    "columns_config_saved": "Column configuration saved.",
+    "column_realm_title": "Realm Title"
 }

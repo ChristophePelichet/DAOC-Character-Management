@@ -68,7 +68,8 @@
     "column_level": "Niveau",
     "column_season": "Saison",
     "column_server": "Serveur",
-    "column_realm_rank": "Rang Royaume",
+    "column_realm_rank": "Rang",
+    "column_realm_title": "Titre",
     "char_sheet_realm_rank": "Rang de Royaume :",
     "character_sheet_title": "Feuille de personnage - {name}",
     "column_action": "Action",
@@ -93,5 +94,12 @@
     "realm_midgard": "Midgard",
     "bulk_actions_group_title": "Actions sur la sélection",
     "bulk_action_delete": "Supprimer la sélection",
-    "bulk_action_execute_button": "Exécuter"
+    "bulk_action_execute_button": "Exécuter",
+    "columns_config_text": "Colonnes",
+    "columns_config_tooltip": "Configurer les colonnes visibles",
+    "columns_config_title": "Configuration des colonnes",
+    "columns_config_desc": "Sélectionnez les colonnes à afficher :",
+    "columns_select_all": "Tout sélectionner",
+    "columns_deselect_all": "Tout désélectionner",
+    "columns_config_saved": "Configuration des colonnes sauvegardée."
 }

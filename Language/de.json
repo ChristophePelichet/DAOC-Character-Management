@@ -86,5 +86,13 @@
     "delete_checked_action_label": "Massenlöschung",
     "bulk_delete_confirm_message": "Sind Sie sicher, dass Sie die {count} ausgewählten Charaktere endgültig löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
     "no_characters_selected_warning": "Keine Charaktere ausgewählt.",
-    "action_button_label": "Aktion"
+    "action_button_label": "Aktion",
+    "columns_config_text": "Spalten",
+    "columns_config_tooltip": "Sichtbare Spalten konfigurieren",
+    "columns_config_title": "Spaltenkonfiguration",
+    "columns_config_desc": "Wählen Sie die anzuzeigenden Spalten:",
+    "columns_select_all": "Alle auswählen",
+    "columns_deselect_all": "Alle abwählen",
+    "columns_config_saved": "Spaltenkonfiguration gespeichert.",
+    "column_realm_title": "Reichstitel"
 }

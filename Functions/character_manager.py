@@ -33,11 +33,15 @@ def create_character_data(name, realm, season, server):
         # Add other default character attributes here
     }
 
-def save_character(character_data):
+def save_character(character_data, allow_overwrite=False):
     """
     Saves character data to a JSON file named after the character,
     inside a subfolder corresponding to its realm.
     e.g., 'Characters/Albion/Merlin.json'
+    
+    Args:
+        character_data: The character data to save
+        allow_overwrite: If True, allows overwriting existing files (for updates)
     """
     base_char_dir = get_character_dir()
 
@@ -55,7 +59,8 @@ def save_character(character_data):
 
     file_path = os.path.join(char_dir, f"{character_name}.json")
 
-    if os.path.exists(file_path):
+    # Only check for existing file if we're not allowing overwrites
+    if not allow_overwrite and os.path.exists(file_path):
         return False, "char_exists_error"
 
     try:

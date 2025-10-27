@@ -1,0 +1,3128 @@
+{
+  "Albion": [
+    {
+      "rank": 1,
+      "skill_bonus": 0,
+      "title": "Guardian",
+      "level": "1L1",
+      "realm_points": 0,
+      "realm_ability_points": 1
+    },
+    {
+      "rank": 1,
+      "skill_bonus": 0,
+      "title": "Guardian",
+      "level": "1L2",
+      "realm_points": 25,
+      "realm_ability_points": 2
+    },
+    {
+      "rank": 1,
+      "skill_bonus": 0,
+      "title": "Guardian",
+      "level": "1L3",
+      "realm_points": 125,
+      "realm_ability_points": 3
+    },
+    {
+      "rank": 1,
+      "skill_bonus": 0,
+      "title": "Guardian",
+      "level": "1L4",
+      "realm_points": 350,
+      "realm_ability_points": 4
+    },
+    {
+      "rank": 1,
+      "skill_bonus": 0,
+      "title": "Guardian",
+      "level": "1L5",
+      "realm_points": 750,
+      "realm_ability_points": 5
+    },
+    {
+      "rank": 1,
+      "skill_bonus": 0,
+      "title": "Guardian",
+      "level": "1L6",
+      "realm_points": 1375,
+      "realm_ability_points": 6
+    },
+    {
+      "rank": 1,
+      "skill_bonus": 0,
+      "title": "Guardian",
+      "level": "1L7",
+      "realm_points": 2275,
+      "realm_ability_points": 7
+    },
+    {
+      "rank": 1,
+      "skill_bonus": 0,
+      "title": "Guardian",
+      "level": "1L8",
+      "realm_points": 3500,
+      "realm_ability_points": 8
+    },
+    {
+      "rank": 1,
+      "skill_bonus": 0,
+      "title": "Guardian",
+      "level": "1L9",
+      "realm_points": 5100,
+      "realm_ability_points": 9
+    },
+    {
+      "rank": 2,
+      "skill_bonus": 1,
+      "title": "Warder",
+      "level": "2L0",
+      "realm_points": 7125,
+      "realm_ability_points": 10
+    },
+    {
+      "rank": 2,
+      "skill_bonus": 1,
+      "title": "Warder",
+      "level": "2L1",
+      "realm_points": 9625,
+      "realm_ability_points": 11
+    },
+    {
+      "rank": 2,
+      "skill_bonus": 1,
+      "title": "Warder",
+      "level": "2L2",
+      "realm_points": 12650,
+      "realm_ability_points": 12
+    },
+    {
+      "rank": 2,
+      "skill_bonus": 1,
+      "title": "Warder",
+      "level": "2L3",
+      "realm_points": 16250,
+      "realm_ability_points": 13
+    },
+    {
+      "rank": 2,
+      "skill_bonus": 1,
+      "title": "Warder",
+      "level": "2L4",
+      "realm_points": 20475,
+      "realm_ability_points": 14
+    },
+    {
+      "rank": 2,
+      "skill_bonus": 1,
+      "title": "Warder",
+      "level": "2L5",
+      "realm_points": 25375,
+      "realm_ability_points": 15
+    },
+    {
+      "rank": 2,
+      "skill_bonus": 1,
+      "title": "Warder",
+      "level": "2L6",
+      "realm_points": 31000,
+      "realm_ability_points": 16
+    },
+    {
+      "rank": 2,
+      "skill_bonus": 1,
+      "title": "Warder",
+      "level": "2L7",
+      "realm_points": 37400,
+      "realm_ability_points": 17
+    },
+    {
+      "rank": 2,
+      "skill_bonus": 1,
+      "title": "Warder",
+      "level": "2L8",
+      "realm_points": 44625,
+      "realm_ability_points": 18
+    },
+    {
+      "rank": 2,
+      "skill_bonus": 1,
+      "title": "Warder",
+      "level": "2L9",
+      "realm_points": 52725,
+      "realm_ability_points": 19
+    },
+    {
+      "rank": 3,
+      "skill_bonus": 2,
+      "title": "Myrmidon",
+      "level": "3L0",
+      "realm_points": 61750,
+      "realm_ability_points": 20
+    },
+    {
+      "rank": 3,
+      "skill_bonus": 2,
+      "title": "Myrmidon",
+      "level": "3L1",
+      "realm_points": 71750,
+      "realm_ability_points": 21
+    },
+    {
+      "rank": 3,
+      "skill_bonus": 2,
+      "title": "Myrmidon",
+      "level": "3L2",
+      "realm_points": 82775,
+      "realm_ability_points": 22
+    },
+    {
+      "rank": 3,
+      "skill_bonus": 2,
+      "title": "Myrmidon",
+      "level": "3L3",
+      "realm_points": 94875,
+      "realm_ability_points": 23
+    },
+    {
+      "rank": 3,
+      "skill_bonus": 2,
+      "title": "Myrmidon",
+      "level": "3L4",
+      "realm_points": 108100,
+      "realm_ability_points": 24
+    },
+    {
+      "rank": 3,
+      "skill_bonus": 2,
+      "title": "Myrmidon",
+      "level": "3L5",
+      "realm_points": 122500,
+      "realm_ability_points": 25
+    },
+    {
+      "rank": 3,
+      "skill_bonus": 2,
+      "title": "Myrmidon",
+      "level": "3L6",
+      "realm_points": 138125,
+      "realm_ability_points": 26
+    },
+    {
+      "rank": 3,
+      "skill_bonus": 2,
+      "title": "Myrmidon",
+      "level": "3L7",
+      "realm_points": 155025,
+      "realm_ability_points": 27
+    },
+    {
+      "rank": 3,
+      "skill_bonus": 2,
+      "title": "Myrmidon",
+      "level": "3L8",
+      "realm_points": 173250,
+      "realm_ability_points": 28
+    },
+    {
+      "rank": 3,
+      "skill_bonus": 2,
+      "title": "Myrmidon",
+      "level": "3L9",
+      "realm_points": 192850,
+      "realm_ability_points": 29
+    },
+    {
+      "rank": 4,
+      "skill_bonus": 3,
+      "title": "Gryphon Knight",
+      "level": "4L0",
+      "realm_points": 213875,
+      "realm_ability_points": 30
+    },
+    {
+      "rank": 4,
+      "skill_bonus": 3,
+      "title": "Gryphon Knight",
+      "level": "4L1",
+      "realm_points": 236375,
+      "realm_ability_points": 31
+    },
+    {
+      "rank": 4,
+      "skill_bonus": 3,
+      "title": "Gryphon Knight",
+      "level": "4L2",
+      "realm_points": 260400,
+      "realm_ability_points": 32
+    },
+    {
+      "rank": 4,
+      "skill_bonus": 3,
+      "title": "Gryphon Knight",
+      "level": "4L3",
+      "realm_points": 286000,
+      "realm_ability_points": 33
+    },
+    {
+      "rank": 4,
+      "skill_bonus": 3,
+      "title": "Gryphon Knight",
+      "level": "4L4",
+      "realm_points": 313225,
+      "realm_ability_points": 34
+    },
+    {
+      "rank": 4,
+      "skill_bonus": 3,
+      "title": "Gryphon Knight",
+      "level": "4L5",
+      "realm_points": 342125,
+      "realm_ability_points": 35
+    },
+    {
+      "rank": 4,
+      "skill_bonus": 3,
+      "title": "Gryphon Knight",
+      "level": "4L6",
+      "realm_points": 372750,
+      "realm_ability_points": 36
+    },
+    {
+      "rank": 4,
+      "skill_bonus": 3,
+      "title": "Gryphon Knight",
+      "level": "4L7",
+      "realm_points": 405150,
+      "realm_ability_points": 37
+    },
+    {
+      "rank": 4,
+      "skill_bonus": 3,
+      "title": "Gryphon Knight",
+      "level": "4L8",
+      "realm_points": 439375,
+      "realm_ability_points": 38
+    },
+    {
+      "rank": 4,
+      "skill_bonus": 3,
+      "title": "Gryphon Knight",
+      "level": "4L9",
+      "realm_points": 475475,
+      "realm_ability_points": 39
+    },
+    {
+      "rank": 5,
+      "skill_bonus": 4,
+      "title": "Eagle Knight",
+      "level": "5L0",
+      "realm_points": 513500,
+      "realm_ability_points": 40
+    },
+    {
+      "rank": 5,
+      "skill_bonus": 4,
+      "title": "Eagle Knight",
+      "level": "5L1",
+      "realm_points": 553500,
+      "realm_ability_points": 41
+    },
+    {
+      "rank": 5,
+      "skill_bonus": 4,
+      "title": "Eagle Knight",
+      "level": "5L2",
+      "realm_points": 595525,
+      "realm_ability_points": 42
+    },
+    {
+      "rank": 5,
+      "skill_bonus": 4,
+      "title": "Eagle Knight",
+      "level": "5L3",
+      "realm_points": 639625,
+      "realm_ability_points": 43
+    },
+    {
+      "rank": 5,
+      "skill_bonus": 4,
+      "title": "Eagle Knight",
+      "level": "5L4",
+      "realm_points": 685850,
+      "realm_ability_points": 44
+    },
+    {
+      "rank": 5,
+      "skill_bonus": 4,
+      "title": "Eagle Knight",
+      "level": "5L5",
+      "realm_points": 734250,
+      "realm_ability_points": 45
+    },
+    {
+      "rank": 5,
+      "skill_bonus": 4,
+      "title": "Eagle Knight",
+      "level": "5L6",
+      "realm_points": 784875,
+      "realm_ability_points": 46
+    },
+    {
+      "rank": 5,
+      "skill_bonus": 4,
+      "title": "Eagle Knight",
+      "level": "5L7",
+      "realm_points": 837775,
+      "realm_ability_points": 47
+    },
+    {
+      "rank": 5,
+      "skill_bonus": 4,
+      "title": "Eagle Knight",
+      "level": "5L8",
+      "realm_points": 893000,
+      "realm_ability_points": 48
+    },
+    {
+      "rank": 5,
+      "skill_bonus": 4,
+      "title": "Eagle Knight",
+      "level": "5L9",
+      "realm_points": 950600,
+      "realm_ability_points": 49
+    },
+    {
+      "rank": 6,
+      "skill_bonus": 5,
+      "title": "Phoenix Knight",
+      "level": "6L0",
+      "realm_points": 1010625,
+      "realm_ability_points": 50
+    },
+    {
+      "rank": 6,
+      "skill_bonus": 5,
+      "title": "Phoenix Knight",
+      "level": "6L1",
+      "realm_points": 1073125,
+      "realm_ability_points": 51
+    },
+    {
+      "rank": 6,
+      "skill_bonus": 5,
+      "title": "Phoenix Knight",
+      "level": "6L2",
+      "realm_points": 1138150,
+      "realm_ability_points": 52
+    },
+    {
+      "rank": 6,
+      "skill_bonus": 5,
+      "title": "Phoenix Knight",
+      "level": "6L3",
+      "realm_points": 1205750,
+      "realm_ability_points": 53
+    },
+    {
+      "rank": 6,
+      "skill_bonus": 5,
+      "title": "Phoenix Knight",
+      "level": "6L4",
+      "realm_points": 1275975,
+      "realm_ability_points": 54
+    },
+    {
+      "rank": 6,
+      "skill_bonus": 5,
+      "title": "Phoenix Knight",
+      "level": "6L5",
+      "realm_points": 1348875,
+      "realm_ability_points": 55
+    },
+    {
+      "rank": 6,
+      "skill_bonus": 5,
+      "title": "Phoenix Knight",
+      "level": "6L6",
+      "realm_points": 1424500,
+      "realm_ability_points": 56
+    },
+    {
+      "rank": 6,
+      "skill_bonus": 5,
+      "title": "Phoenix Knight",
+      "level": "6L7",
+      "realm_points": 1502900,
+      "realm_ability_points": 57
+    },
+    {
+      "rank": 6,
+      "skill_bonus": 5,
+      "title": "Phoenix Knight",
+      "level": "6L8",
+      "realm_points": 1584125,
+      "realm_ability_points": 58
+    },
+    {
+      "rank": 6,
+      "skill_bonus": 5,
+      "title": "Phoenix Knight",
+      "level": "6L9",
+      "realm_points": 1668225,
+      "realm_ability_points": 59
+    },
+    {
+      "rank": 7,
+      "skill_bonus": 6,
+      "title": "Alerion Knight",
+      "level": "7L0",
+      "realm_points": 1755250,
+      "realm_ability_points": 60
+    },
+    {
+      "rank": 7,
+      "skill_bonus": 6,
+      "title": "Alerion Knight",
+      "level": "7L1",
+      "realm_points": 1845250,
+      "realm_ability_points": 61
+    },
+    {
+      "rank": 7,
+      "skill_bonus": 6,
+      "title": "Alerion Knight",
+      "level": "7L2",
+      "realm_points": 1938275,
+      "realm_ability_points": 62
+    },
+    {
+      "rank": 7,
+      "skill_bonus": 6,
+      "title": "Alerion Knight",
+      "level": "7L3",
+      "realm_points": 2034375,
+      "realm_ability_points": 63
+    },
+    {
+      "rank": 7,
+      "skill_bonus": 6,
+      "title": "Alerion Knight",
+      "level": "7L4",
+      "realm_points": 2133600,
+      "realm_ability_points": 64
+    },
+    {
+      "rank": 7,
+      "skill_bonus": 6,
+      "title": "Alerion Knight",
+      "level": "7L5",
+      "realm_points": 2236000,
+      "realm_ability_points": 65
+    },
+    {
+      "rank": 7,
+      "skill_bonus": 6,
+      "title": "Alerion Knight",
+      "level": "7L6",
+      "realm_points": 2341625,
+      "realm_ability_points": 66
+    },
+    {
+      "rank": 7,
+      "skill_bonus": 6,
+      "title": "Alerion Knight",
+      "level": "7L7",
+      "realm_points": 2450525,
+      "realm_ability_points": 67
+    },
+    {
+      "rank": 7,
+      "skill_bonus": 6,
+      "title": "Alerion Knight",
+      "level": "7L8",
+      "realm_points": 2562750,
+      "realm_ability_points": 68
+    },
+    {
+      "rank": 7,
+      "skill_bonus": 6,
+      "title": "Alerion Knight",
+      "level": "7L9",
+      "realm_points": 2678350,
+      "realm_ability_points": 69
+    },
+    {
+      "rank": 8,
+      "skill_bonus": 7,
+      "title": "Unicorn Knight",
+      "level": "8L0",
+      "realm_points": 2797375,
+      "realm_ability_points": 70
+    },
+    {
+      "rank": 8,
+      "skill_bonus": 7,
+      "title": "Unicorn Knight",
+      "level": "8L1",
+      "realm_points": 2919875,
+      "realm_ability_points": 71
+    },
+    {
+      "rank": 8,
+      "skill_bonus": 7,
+      "title": "Unicorn Knight",
+      "level": "8L2",
+      "realm_points": 3045900,
+      "realm_ability_points": 72
+    },
+    {
+      "rank": 8,
+      "skill_bonus": 7,
+      "title": "Unicorn Knight",
+      "level": "8L3",
+      "realm_points": 3175500,
+      "realm_ability_points": 73
+    },
+    {
+      "rank": 8,
+      "skill_bonus": 7,
+      "title": "Unicorn Knight",
+      "level": "8L4",
+      "realm_points": 3308725,
+      "realm_ability_points": 74
+    },
+    {
+      "rank": 8,
+      "skill_bonus": 7,
+      "title": "Unicorn Knight",
+      "level": "8L5",
+      "realm_points": 3445625,
+      "realm_ability_points": 75
+    },
+    {
+      "rank": 8,
+      "skill_bonus": 7,
+      "title": "Unicorn Knight",
+      "level": "8L6",
+      "realm_points": 3586250,
+      "realm_ability_points": 76
+    },
+    {
+      "rank": 8,
+      "skill_bonus": 7,
+      "title": "Unicorn Knight",
+      "level": "8L7",
+      "realm_points": 3730650,
+      "realm_ability_points": 77
+    },
+    {
+      "rank": 8,
+      "skill_bonus": 7,
+      "title": "Unicorn Knight",
+      "level": "8L8",
+      "realm_points": 3878875,
+      "realm_ability_points": 78
+    },
+    {
+      "rank": 8,
+      "skill_bonus": 7,
+      "title": "Unicorn Knight",
+      "level": "8L9",
+      "realm_points": 4030975,
+      "realm_ability_points": 79
+    },
+    {
+      "rank": 9,
+      "skill_bonus": 8,
+      "title": "Lion Knight",
+      "level": "9L0",
+      "realm_points": 4187000,
+      "realm_ability_points": 80
+    },
+    {
+      "rank": 9,
+      "skill_bonus": 8,
+      "title": "Lion Knight",
+      "level": "9L1",
+      "realm_points": 4347000,
+      "realm_ability_points": 81
+    },
+    {
+      "rank": 9,
+      "skill_bonus": 8,
+      "title": "Lion Knight",
+      "level": "9L2",
+      "realm_points": 4511025,
+      "realm_ability_points": 82
+    },
+    {
+      "rank": 9,
+      "skill_bonus": 8,
+      "title": "Lion Knight",
+      "level": "9L3",
+      "realm_points": 4679125,
+      "realm_ability_points": 83
+    },
+    {
+      "rank": 9,
+      "skill_bonus": 8,
+      "title": "Lion Knight",
+      "level": "9L4",
+      "realm_points": 4851350,
+      "realm_ability_points": 84
+    },
+    {
+      "rank": 9,
+      "skill_bonus": 8,
+      "title": "Lion Knight",
+      "level": "9L5",
+      "realm_points": 5027750,
+      "realm_ability_points": 85
+    },
+    {
+      "rank": 9,
+      "skill_bonus": 8,
+      "title": "Lion Knight",
+      "level": "9L6",
+      "realm_points": 5208375,
+      "realm_ability_points": 86
+    },
+    {
+      "rank": 9,
+      "skill_bonus": 8,
+      "title": "Lion Knight",
+      "level": "9L7",
+      "realm_points": 5393275,
+      "realm_ability_points": 87
+    },
+    {
+      "rank": 9,
+      "skill_bonus": 8,
+      "title": "Lion Knight",
+      "level": "9L8",
+      "realm_points": 5582500,
+      "realm_ability_points": 88
+    },
+    {
+      "rank": 9,
+      "skill_bonus": 8,
+      "title": "Lion Knight",
+      "level": "9L9",
+      "realm_points": 5776100,
+      "realm_ability_points": 89
+    },
+    {
+      "rank": 10,
+      "skill_bonus": 9,
+      "title": "Dragon Knight",
+      "level": "10L0",
+      "realm_points": 5974125,
+      "realm_ability_points": 90
+    },
+    {
+      "rank": 10,
+      "skill_bonus": 9,
+      "title": "Dragon Knight",
+      "level": "10L1",
+      "realm_points": 6176625,
+      "realm_ability_points": 91
+    },
+    {
+      "rank": 10,
+      "skill_bonus": 9,
+      "title": "Dragon Knight",
+      "level": "10L2",
+      "realm_points": 6383650,
+      "realm_ability_points": 92
+    },
+    {
+      "rank": 10,
+      "skill_bonus": 9,
+      "title": "Dragon Knight",
+      "level": "10L3",
+      "realm_points": 6595250,
+      "realm_ability_points": 93
+    },
+    {
+      "rank": 10,
+      "skill_bonus": 9,
+      "title": "Dragon Knight",
+      "level": "10L4",
+      "realm_points": 6811475,
+      "realm_ability_points": 94
+    },
+    {
+      "rank": 10,
+      "skill_bonus": 9,
+      "title": "Dragon Knight",
+      "level": "10L5",
+      "realm_points": 7032375,
+      "realm_ability_points": 95
+    },
+    {
+      "rank": 10,
+      "skill_bonus": 9,
+      "title": "Dragon Knight",
+      "level": "10L6",
+      "realm_points": 7258000,
+      "realm_ability_points": 96
+    },
+    {
+      "rank": 10,
+      "skill_bonus": 9,
+      "title": "Dragon Knight",
+      "level": "10L7",
+      "realm_points": 7488400,
+      "realm_ability_points": 97
+    },
+    {
+      "rank": 10,
+      "skill_bonus": 9,
+      "title": "Dragon Knight",
+      "level": "10L8",
+      "realm_points": 7723625,
+      "realm_ability_points": 98
+    },
+    {
+      "rank": 10,
+      "skill_bonus": 9,
+      "title": "Dragon Knight",
+      "level": "10L9",
+      "realm_points": 7963725,
+      "realm_ability_points": 99
+    },
+    {
+      "rank": 11,
+      "skill_bonus": 10,
+      "title": "Lord/Lady",
+      "level": "11L0",
+      "realm_points": 8208750,
+      "realm_ability_points": 100
+    },
+    {
+      "rank": 11,
+      "skill_bonus": 10,
+      "title": "Lord/Lady",
+      "level": "11L1",
+      "realm_points": 9111713,
+      "realm_ability_points": 101
+    },
+    {
+      "rank": 11,
+      "skill_bonus": 10,
+      "title": "Lord/Lady",
+      "level": "11L2",
+      "realm_points": 10114001,
+      "realm_ability_points": 102
+    },
+    {
+      "rank": 11,
+      "skill_bonus": 10,
+      "title": "Lord/Lady",
+      "level": "11L3",
+      "realm_points": 11226541,
+      "realm_ability_points": 103
+    },
+    {
+      "rank": 11,
+      "skill_bonus": 10,
+      "title": "Lord/Lady",
+      "level": "11L4",
+      "realm_points": 12461460,
+      "realm_ability_points": 104
+    },
+    {
+      "rank": 11,
+      "skill_bonus": 10,
+      "title": "Lord/Lady",
+      "level": "11L5",
+      "realm_points": 13832221,
+      "realm_ability_points": 105
+    },
+    {
+      "rank": 11,
+      "skill_bonus": 10,
+      "title": "Lord/Lady",
+      "level": "11L6",
+      "realm_points": 15353765,
+      "realm_ability_points": 106
+    },
+    {
+      "rank": 11,
+      "skill_bonus": 10,
+      "title": "Lord/Lady",
+      "level": "11L7",
+      "realm_points": 17042680,
+      "realm_ability_points": 107
+    },
+    {
+      "rank": 11,
+      "skill_bonus": 10,
+      "title": "Lord/Lady",
+      "level": "11L8",
+      "realm_points": 18917374,
+      "realm_ability_points": 108
+    },
+    {
+      "rank": 11,
+      "skill_bonus": 10,
+      "title": "Lord/Lady",
+      "level": "11L9",
+      "realm_points": 20998286,
+      "realm_ability_points": 109
+    },
+    {
+      "rank": 12,
+      "skill_bonus": 11,
+      "title": "Baronet/Baronetess",
+      "level": "12L0",
+      "realm_points": 23308097,
+      "realm_ability_points": 110
+    },
+    {
+      "rank": 12,
+      "skill_bonus": 11,
+      "title": "Baronet/Baronetess",
+      "level": "12L1",
+      "realm_points": 25871988,
+      "realm_ability_points": 111
+    },
+    {
+      "rank": 12,
+      "skill_bonus": 11,
+      "title": "Baronet/Baronetess",
+      "level": "12L2",
+      "realm_points": 28717906,
+      "realm_ability_points": 112
+    },
+    {
+      "rank": 12,
+      "skill_bonus": 11,
+      "title": "Baronet/Baronetess",
+      "level": "12L3",
+      "realm_points": 31876876,
+      "realm_ability_points": 113
+    },
+    {
+      "rank": 12,
+      "skill_bonus": 11,
+      "title": "Baronet/Baronetess",
+      "level": "12L4",
+      "realm_points": 35383333,
+      "realm_ability_points": 114
+    },
+    {
+      "rank": 12,
+      "skill_bonus": 11,
+      "title": "Baronet/Baronetess",
+      "level": "12L5",
+      "realm_points": 39275499,
+      "realm_ability_points": 115
+    },
+    {
+      "rank": 12,
+      "skill_bonus": 11,
+      "title": "Baronet/Baronetess",
+      "level": "12L6",
+      "realm_points": 43595804,
+      "realm_ability_points": 116
+    },
+    {
+      "rank": 12,
+      "skill_bonus": 11,
+      "title": "Baronet/Baronetess",
+      "level": "12L7",
+      "realm_points": 48391343,
+      "realm_ability_points": 117
+    },
+    {
+      "rank": 12,
+      "skill_bonus": 11,
+      "title": "Baronet/Baronetess",
+      "level": "12L8",
+      "realm_points": 53714390,
+      "realm_ability_points": 118
+    },
+    {
+      "rank": 12,
+      "skill_bonus": 11,
+      "title": "Baronet/Baronetess",
+      "level": "12L9",
+      "realm_points": 59622973,
+      "realm_ability_points": 119
+    },
+    {
+      "rank": 13,
+      "skill_bonus": 12,
+      "title": "Baron/Baroness",
+      "level": "13L0",
+      "realm_points": 66181501,
+      "realm_ability_points": 120
+    },
+    {
+      "rank": 13,
+      "skill_bonus": 12,
+      "title": "Baron/Baroness",
+      "level": "13L1",
+      "realm_points": 73461466,
+      "realm_ability_points": 121
+    },
+    {
+      "rank": 13,
+      "skill_bonus": 12,
+      "title": "Baron/Baroness",
+      "level": "13L2",
+      "realm_points": 81542227,
+      "realm_ability_points": 122
+    },
+    {
+      "rank": 13,
+      "skill_bonus": 12,
+      "title": "Baron/Baroness",
+      "level": "13L3",
+      "realm_points": 90511872,
+      "realm_ability_points": 123
+    },
+    {
+      "rank": 13,
+      "skill_bonus": 12,
+      "title": "Baron/Baroness",
+      "level": "13L4",
+      "realm_points": 100468178,
+      "realm_ability_points": 124
+    },
+    {
+      "rank": 13,
+      "skill_bonus": 12,
+      "title": "Baron/Baroness",
+      "level": "13L5",
+      "realm_points": 111519678,
+      "realm_ability_points": 125
+    },
+    {
+      "rank": 13,
+      "skill_bonus": 12,
+      "title": "Baron/Baroness",
+      "level": "13L6",
+      "realm_points": 123786843,
+      "realm_ability_points": 126
+    },
+    {
+      "rank": 13,
+      "skill_bonus": 12,
+      "title": "Baron/Baroness",
+      "level": "13L7",
+      "realm_points": 137403395,
+      "realm_ability_points": 127
+    },
+    {
+      "rank": 13,
+      "skill_bonus": 12,
+      "title": "Baron/Baroness",
+      "level": "13L8",
+      "realm_points": 152517769,
+      "realm_ability_points": 128
+    },
+    {
+      "rank": 13,
+      "skill_bonus": 12,
+      "title": "Baron/Baroness",
+      "level": "13L9",
+      "realm_points": 169294723,
+      "realm_ability_points": 129
+    },
+    {
+      "rank": 14,
+      "skill_bonus": 13,
+      "title": "Arch Duke/Arch Duchess",
+      "level": "14L0",
+      "realm_points": 187917143,
+      "realm_ability_points": 130
+    }
+  ],
+  "Hibernia": [
+    {
+      "rank": 1,
+      "skill_bonus": 0,
+      "title": "Savant",
+      "level": "1L1",
+      "realm_points": 0,
+      "realm_ability_points": 1
+    },
+    {
+      "rank": 1,
+      "skill_bonus": 0,
+      "title": "Savant",
+      "level": "1L2",
+      "realm_points": 25,
+      "realm_ability_points": 2
+    },
+    {
+      "rank": 1,
+      "skill_bonus": 0,
+      "title": "Savant",
+      "level": "1L3",
+      "realm_points": 125,
+      "realm_ability_points": 3
+    },
+    {
+      "rank": 1,
+      "skill_bonus": 0,
+      "title": "Savant",
+      "level": "1L4",
+      "realm_points": 350,
+      "realm_ability_points": 4
+    },
+    {
+      "rank": 1,
+      "skill_bonus": 0,
+      "title": "Savant",
+      "level": "1L5",
+      "realm_points": 750,
+      "realm_ability_points": 5
+    },
+    {
+      "rank": 1,
+      "skill_bonus": 0,
+      "title": "Savant",
+      "level": "1L6",
+      "realm_points": 1375,
+      "realm_ability_points": 6
+    },
+    {
+      "rank": 1,
+      "skill_bonus": 0,
+      "title": "Savant",
+      "level": "1L7",
+      "realm_points": 2275,
+      "realm_ability_points": 7
+    },
+    {
+      "rank": 1,
+      "skill_bonus": 0,
+      "title": "Savant",
+      "level": "1L8",
+      "realm_points": 3500,
+      "realm_ability_points": 8
+    },
+    {
+      "rank": 1,
+      "skill_bonus": 0,
+      "title": "Savant",
+      "level": "1L9",
+      "realm_points": 5100,
+      "realm_ability_points": 9
+    },
+    {
+      "rank": 2,
+      "skill_bonus": 1,
+      "title": "Consantoir",
+      "level": "2L0",
+      "realm_points": 7125,
+      "realm_ability_points": 10
+    },
+    {
+      "rank": 2,
+      "skill_bonus": 1,
+      "title": "Consantoir",
+      "level": "2L1",
+      "realm_points": 9625,
+      "realm_ability_points": 11
+    },
+    {
+      "rank": 2,
+      "skill_bonus": 1,
+      "title": "Consantoir",
+      "level": "2L2",
+      "realm_points": 12650,
+      "realm_ability_points": 12
+    },
+    {
+      "rank": 2,
+      "skill_bonus": 1,
+      "title": "Consantoir",
+      "level": "2L3",
+      "realm_points": 16250,
+      "realm_ability_points": 13
+    },
+    {
+      "rank": 2,
+      "skill_bonus": 1,
+      "title": "Consantoir",
+      "level": "2L4",
+      "realm_points": 20475,
+      "realm_ability_points": 14
+    },
+    {
+      "rank": 2,
+      "skill_bonus": 1,
+      "title": "Consantoir",
+      "level": "2L5",
+      "realm_points": 25375,
+      "realm_ability_points": 15
+    },
+    {
+      "rank": 2,
+      "skill_bonus": 1,
+      "title": "Consantoir",
+      "level": "2L6",
+      "realm_points": 31000,
+      "realm_ability_points": 16
+    },
+    {
+      "rank": 2,
+      "skill_bonus": 1,
+      "title": "Consantoir",
+      "level": "2L7",
+      "realm_points": 37400,
+      "realm_ability_points": 17
+    },
+    {
+      "rank": 2,
+      "skill_bonus": 1,
+      "title": "Consantoir",
+      "level": "2L8",
+      "realm_points": 44625,
+      "realm_ability_points": 18
+    },
+    {
+      "rank": 2,
+      "skill_bonus": 1,
+      "title": "Consantoir",
+      "level": "2L9",
+      "realm_points": 52725,
+      "realm_ability_points": 19
+    },
+    {
+      "rank": 3,
+      "skill_bonus": 2,
+      "title": "Brehon",
+      "level": "3L0",
+      "realm_points": 61750,
+      "realm_ability_points": 20
+    },
+    {
+      "rank": 3,
+      "skill_bonus": 2,
+      "title": "Brehon",
+      "level": "3L1",
+      "realm_points": 71750,
+      "realm_ability_points": 21
+    },
+    {
+      "rank": 3,
+      "skill_bonus": 2,
+      "title": "Brehon",
+      "level": "3L2",
+      "realm_points": 82775,
+      "realm_ability_points": 22
+    },
+    {
+      "rank": 3,
+      "skill_bonus": 2,
+      "title": "Brehon",
+      "level": "3L3",
+      "realm_points": 94875,
+      "realm_ability_points": 23
+    },
+    {
+      "rank": 3,
+      "skill_bonus": 2,
+      "title": "Brehon",
+      "level": "3L4",
+      "realm_points": 108100,
+      "realm_ability_points": 24
+    },
+    {
+      "rank": 3,
+      "skill_bonus": 2,
+      "title": "Brehon",
+      "level": "3L5",
+      "realm_points": 122500,
+      "realm_ability_points": 25
+    },
+    {
+      "rank": 3,
+      "skill_bonus": 2,
+      "title": "Brehon",
+      "level": "3L6",
+      "realm_points": 138125,
+      "realm_ability_points": 26
+    },
+    {
+      "rank": 3,
+      "skill_bonus": 2,
+      "title": "Brehon",
+      "level": "3L7",
+      "realm_points": 155025,
+      "realm_ability_points": 27
+    },
+    {
+      "rank": 3,
+      "skill_bonus": 2,
+      "title": "Brehon",
+      "level": "3L8",
+      "realm_points": 173250,
+      "realm_ability_points": 28
+    },
+    {
+      "rank": 3,
+      "skill_bonus": 2,
+      "title": "Brehon",
+      "level": "3L9",
+      "realm_points": 192850,
+      "realm_ability_points": 29
+    },
+    {
+      "rank": 4,
+      "skill_bonus": 3,
+      "title": "Grove Protector",
+      "level": "4L0",
+      "realm_points": 213875,
+      "realm_ability_points": 30
+    },
+    {
+      "rank": 4,
+      "skill_bonus": 3,
+      "title": "Grove Protector",
+      "level": "4L1",
+      "realm_points": 236375,
+      "realm_ability_points": 31
+    },
+    {
+      "rank": 4,
+      "skill_bonus": 3,
+      "title": "Grove Protector",
+      "level": "4L2",
+      "realm_points": 260400,
+      "realm_ability_points": 32
+    },
+    {
+      "rank": 4,
+      "skill_bonus": 3,
+      "title": "Grove Protector",
+      "level": "4L3",
+      "realm_points": 286000,
+      "realm_ability_points": 33
+    },
+    {
+      "rank": 4,
+      "skill_bonus": 3,
+      "title": "Grove Protector",
+      "level": "4L4",
+      "realm_points": 313225,
+      "realm_ability_points": 34
+    },
+    {
+      "rank": 4,
+      "skill_bonus": 3,
+      "title": "Grove Protector",
+      "level": "4L5",
+      "realm_points": 342125,
+      "realm_ability_points": 35
+    },
+    {
+      "rank": 4,
+      "skill_bonus": 3,
+      "title": "Grove Protector",
+      "level": "4L6",
+      "realm_points": 372750,
+      "realm_ability_points": 36
+    },
+    {
+      "rank": 4,
+      "skill_bonus": 3,
+      "title": "Grove Protector",
+      "level": "4L7",
+      "realm_points": 405150,
+      "realm_ability_points": 37
+    },
+    {
+      "rank": 4,
+      "skill_bonus": 3,
+      "title": "Grove Protector",
+      "level": "4L8",
+      "realm_points": 439375,
+      "realm_ability_points": 38
+    },
+    {
+      "rank": 4,
+      "skill_bonus": 3,
+      "title": "Grove Protector",
+      "level": "4L9",
+      "realm_points": 475475,
+      "realm_ability_points": 39
+    },
+    {
+      "rank": 5,
+      "skill_bonus": 4,
+      "title": "Raven Ardent",
+      "level": "5L0",
+      "realm_points": 513500,
+      "realm_ability_points": 40
+    },
+    {
+      "rank": 5,
+      "skill_bonus": 4,
+      "title": "Raven Ardent",
+      "level": "5L1",
+      "realm_points": 553500,
+      "realm_ability_points": 41
+    },
+    {
+      "rank": 5,
+      "skill_bonus": 4,
+      "title": "Raven Ardent",
+      "level": "5L2",
+      "realm_points": 595525,
+      "realm_ability_points": 42
+    },
+    {
+      "rank": 5,
+      "skill_bonus": 4,
+      "title": "Raven Ardent",
+      "level": "5L3",
+      "realm_points": 639625,
+      "realm_ability_points": 43
+    },
+    {
+      "rank": 5,
+      "skill_bonus": 4,
+      "title": "Raven Ardent",
+      "level": "5L4",
+      "realm_points": 685850,
+      "realm_ability_points": 44
+    },
+    {
+      "rank": 5,
+      "skill_bonus": 4,
+      "title": "Raven Ardent",
+      "level": "5L5",
+      "realm_points": 734250,
+      "realm_ability_points": 45
+    },
+    {
+      "rank": 5,
+      "skill_bonus": 4,
+      "title": "Raven Ardent",
+      "level": "5L6",
+      "realm_points": 784875,
+      "realm_ability_points": 46
+    },
+    {
+      "rank": 5,
+      "skill_bonus": 4,
+      "title": "Raven Ardent",
+      "level": "5L7",
+      "realm_points": 837775,
+      "realm_ability_points": 47
+    },
+    {
+      "rank": 5,
+      "skill_bonus": 4,
+      "title": "Raven Ardent",
+      "level": "5L8",
+      "realm_points": 893000,
+      "realm_ability_points": 48
+    },
+    {
+      "rank": 5,
+      "skill_bonus": 4,
+      "title": "Raven Ardent",
+      "level": "5L9",
+      "realm_points": 950600,
+      "realm_ability_points": 49
+    },
+    {
+      "rank": 6,
+      "skill_bonus": 5,
+      "title": "Silver Hand",
+      "level": "6L0",
+      "realm_points": 1010625,
+      "realm_ability_points": 50
+    },
+    {
+      "rank": 6,
+      "skill_bonus": 5,
+      "title": "Silver Hand",
+      "level": "6L1",
+      "realm_points": 1073125,
+      "realm_ability_points": 51
+    },
+    {
+      "rank": 6,
+      "skill_bonus": 5,
+      "title": "Silver Hand",
+      "level": "6L2",
+      "realm_points": 1138150,
+      "realm_ability_points": 52
+    },
+    {
+      "rank": 6,
+      "skill_bonus": 5,
+      "title": "Silver Hand",
+      "level": "6L3",
+      "realm_points": 1205750,
+      "realm_ability_points": 53
+    },
+    {
+      "rank": 6,
+      "skill_bonus": 5,
+      "title": "Silver Hand",
+      "level": "6L4",
+      "realm_points": 1275975,
+      "realm_ability_points": 54
+    },
+    {
+      "rank": 6,
+      "skill_bonus": 5,
+      "title": "Silver Hand",
+      "level": "6L5",
+      "realm_points": 1348875,
+      "realm_ability_points": 55
+    },
+    {
+      "rank": 6,
+      "skill_bonus": 5,
+      "title": "Silver Hand",
+      "level": "6L6",
+      "realm_points": 1424500,
+      "realm_ability_points": 56
+    },
+    {
+      "rank": 6,
+      "skill_bonus": 5,
+      "title": "Silver Hand",
+      "level": "6L7",
+      "realm_points": 1502900,
+      "realm_ability_points": 57
+    },
+    {
+      "rank": 6,
+      "skill_bonus": 5,
+      "title": "Silver Hand",
+      "level": "6L8",
+      "realm_points": 1584125,
+      "realm_ability_points": 58
+    },
+    {
+      "rank": 6,
+      "skill_bonus": 5,
+      "title": "Silver Hand",
+      "level": "6L9",
+      "realm_points": 1668225,
+      "realm_ability_points": 59
+    },
+    {
+      "rank": 7,
+      "skill_bonus": 6,
+      "title": "Thunderer",
+      "level": "7L0",
+      "realm_points": 1755250,
+      "realm_ability_points": 60
+    },
+    {
+      "rank": 7,
+      "skill_bonus": 6,
+      "title": "Thunderer",
+      "level": "7L1",
+      "realm_points": 1845250,
+      "realm_ability_points": 61
+    },
+    {
+      "rank": 7,
+      "skill_bonus": 6,
+      "title": "Thunderer",
+      "level": "7L2",
+      "realm_points": 1938275,
+      "realm_ability_points": 62
+    },
+    {
+      "rank": 7,
+      "skill_bonus": 6,
+      "title": "Thunderer",
+      "level": "7L3",
+      "realm_points": 2034375,
+      "realm_ability_points": 63
+    },
+    {
+      "rank": 7,
+      "skill_bonus": 6,
+      "title": "Thunderer",
+      "level": "7L4",
+      "realm_points": 2133600,
+      "realm_ability_points": 64
+    },
+    {
+      "rank": 7,
+      "skill_bonus": 6,
+      "title": "Thunderer",
+      "level": "7L5",
+      "realm_points": 2236000,
+      "realm_ability_points": 65
+    },
+    {
+      "rank": 7,
+      "skill_bonus": 6,
+      "title": "Thunderer",
+      "level": "7L6",
+      "realm_points": 2341625,
+      "realm_ability_points": 66
+    },
+    {
+      "rank": 7,
+      "skill_bonus": 6,
+      "title": "Thunderer",
+      "level": "7L7",
+      "realm_points": 2450525,
+      "realm_ability_points": 67
+    },
+    {
+      "rank": 7,
+      "skill_bonus": 6,
+      "title": "Thunderer",
+      "level": "7L8",
+      "realm_points": 2562750,
+      "realm_ability_points": 68
+    },
+    {
+      "rank": 7,
+      "skill_bonus": 6,
+      "title": "Thunderer",
+      "level": "7L9",
+      "realm_points": 2678350,
+      "realm_ability_points": 69
+    },
+    {
+      "rank": 8,
+      "skill_bonus": 7,
+      "title": "Gilded Spear",
+      "level": "8L0",
+      "realm_points": 2797375,
+      "realm_ability_points": 70
+    },
+    {
+      "rank": 8,
+      "skill_bonus": 7,
+      "title": "Gilded Spear",
+      "level": "8L1",
+      "realm_points": 2919875,
+      "realm_ability_points": 71
+    },
+    {
+      "rank": 8,
+      "skill_bonus": 7,
+      "title": "Gilded Spear",
+      "level": "8L2",
+      "realm_points": 3045900,
+      "realm_ability_points": 72
+    },
+    {
+      "rank": 8,
+      "skill_bonus": 7,
+      "title": "Gilded Spear",
+      "level": "8L3",
+      "realm_points": 3175500,
+      "realm_ability_points": 73
+    },
+    {
+      "rank": 8,
+      "skill_bonus": 7,
+      "title": "Gilded Spear",
+      "level": "8L4",
+      "realm_points": 3308725,
+      "realm_ability_points": 74
+    },
+    {
+      "rank": 8,
+      "skill_bonus": 7,
+      "title": "Gilded Spear",
+      "level": "8L5",
+      "realm_points": 3445625,
+      "realm_ability_points": 75
+    },
+    {
+      "rank": 8,
+      "skill_bonus": 7,
+      "title": "Gilded Spear",
+      "level": "8L6",
+      "realm_points": 3586250,
+      "realm_ability_points": 76
+    },
+    {
+      "rank": 8,
+      "skill_bonus": 7,
+      "title": "Gilded Spear",
+      "level": "8L7",
+      "realm_points": 3730650,
+      "realm_ability_points": 77
+    },
+    {
+      "rank": 8,
+      "skill_bonus": 7,
+      "title": "Gilded Spear",
+      "level": "8L8",
+      "realm_points": 3878875,
+      "realm_ability_points": 78
+    },
+    {
+      "rank": 8,
+      "skill_bonus": 7,
+      "title": "Gilded Spear",
+      "level": "8L9",
+      "realm_points": 4030975,
+      "realm_ability_points": 79
+    },
+    {
+      "rank": 9,
+      "skill_bonus": 8,
+      "title": "Tiarna/Bantiarna",
+      "level": "9L0",
+      "realm_points": 4187000,
+      "realm_ability_points": 80
+    },
+    {
+      "rank": 9,
+      "skill_bonus": 8,
+      "title": "Tiarna/Bantiarna",
+      "level": "9L1",
+      "realm_points": 4347000,
+      "realm_ability_points": 81
+    },
+    {
+      "rank": 9,
+      "skill_bonus": 8,
+      "title": "Tiarna/Bantiarna",
+      "level": "9L2",
+      "realm_points": 4511025,
+      "realm_ability_points": 82
+    },
+    {
+      "rank": 9,
+      "skill_bonus": 8,
+      "title": "Tiarna/Bantiarna",
+      "level": "9L3",
+      "realm_points": 4679125,
+      "realm_ability_points": 83
+    },
+    {
+      "rank": 9,
+      "skill_bonus": 8,
+      "title": "Tiarna/Bantiarna",
+      "level": "9L4",
+      "realm_points": 4851350,
+      "realm_ability_points": 84
+    },
+    {
+      "rank": 9,
+      "skill_bonus": 8,
+      "title": "Tiarna/Bantiarna",
+      "level": "9L5",
+      "realm_points": 5027750,
+      "realm_ability_points": 85
+    },
+    {
+      "rank": 9,
+      "skill_bonus": 8,
+      "title": "Tiarna/Bantiarna",
+      "level": "9L6",
+      "realm_points": 5208375,
+      "realm_ability_points": 86
+    },
+    {
+      "rank": 9,
+      "skill_bonus": 8,
+      "title": "Tiarna/Bantiarna",
+      "level": "9L7",
+      "realm_points": 5393275,
+      "realm_ability_points": 87
+    },
+    {
+      "rank": 9,
+      "skill_bonus": 8,
+      "title": "Tiarna/Bantiarna",
+      "level": "9L8",
+      "realm_points": 5582500,
+      "realm_ability_points": 88
+    },
+    {
+      "rank": 9,
+      "skill_bonus": 8,
+      "title": "Tiarna/Bantiarna",
+      "level": "9L9",
+      "realm_points": 5776100,
+      "realm_ability_points": 89
+    },
+    {
+      "rank": 10,
+      "skill_bonus": 9,
+      "title": "Emerald Ridere",
+      "level": "10L0",
+      "realm_points": 5974125,
+      "realm_ability_points": 90
+    },
+    {
+      "rank": 10,
+      "skill_bonus": 9,
+      "title": "Emerald Ridere",
+      "level": "10L1",
+      "realm_points": 6176625,
+      "realm_ability_points": 91
+    },
+    {
+      "rank": 10,
+      "skill_bonus": 9,
+      "title": "Emerald Ridere",
+      "level": "10L2",
+      "realm_points": 6383650,
+      "realm_ability_points": 92
+    },
+    {
+      "rank": 10,
+      "skill_bonus": 9,
+      "title": "Emerald Ridere",
+      "level": "10L3",
+      "realm_points": 6595250,
+      "realm_ability_points": 93
+    },
+    {
+      "rank": 10,
+      "skill_bonus": 9,
+      "title": "Emerald Ridere",
+      "level": "10L4",
+      "realm_points": 6811475,
+      "realm_ability_points": 94
+    },
+    {
+      "rank": 10,
+      "skill_bonus": 9,
+      "title": "Emerald Ridere",
+      "level": "10L5",
+      "realm_points": 7032375,
+      "realm_ability_points": 95
+    },
+    {
+      "rank": 10,
+      "skill_bonus": 9,
+      "title": "Emerald Ridere",
+      "level": "10L6",
+      "realm_points": 7258000,
+      "realm_ability_points": 96
+    },
+    {
+      "rank": 10,
+      "skill_bonus": 9,
+      "title": "Emerald Ridere",
+      "level": "10L7",
+      "realm_points": 7488400,
+      "realm_ability_points": 97
+    },
+    {
+      "rank": 10,
+      "skill_bonus": 9,
+      "title": "Emerald Ridere",
+      "level": "10L8",
+      "realm_points": 7723625,
+      "realm_ability_points": 98
+    },
+    {
+      "rank": 10,
+      "skill_bonus": 9,
+      "title": "Emerald Ridere",
+      "level": "10L9",
+      "realm_points": 7963725,
+      "realm_ability_points": 99
+    },
+    {
+      "rank": 11,
+      "skill_bonus": 10,
+      "title": "Barun/Banbharun",
+      "level": "11L0",
+      "realm_points": 8208750,
+      "realm_ability_points": 100
+    },
+    {
+      "rank": 11,
+      "skill_bonus": 10,
+      "title": "Barun/Banbharun",
+      "level": "11L1",
+      "realm_points": 9111713,
+      "realm_ability_points": 101
+    },
+    {
+      "rank": 11,
+      "skill_bonus": 10,
+      "title": "Barun/Banbharun",
+      "level": "11L2",
+      "realm_points": 10114001,
+      "realm_ability_points": 102
+    },
+    {
+      "rank": 11,
+      "skill_bonus": 10,
+      "title": "Barun/Banbharun",
+      "level": "11L3",
+      "realm_points": 11226541,
+      "realm_ability_points": 103
+    },
+    {
+      "rank": 11,
+      "skill_bonus": 10,
+      "title": "Barun/Banbharun",
+      "level": "11L4",
+      "realm_points": 12461460,
+      "realm_ability_points": 104
+    },
+    {
+      "rank": 11,
+      "skill_bonus": 10,
+      "title": "Barun/Banbharun",
+      "level": "11L5",
+      "realm_points": 13832221,
+      "realm_ability_points": 105
+    },
+    {
+      "rank": 11,
+      "skill_bonus": 10,
+      "title": "Barun/Banbharun",
+      "level": "11L6",
+      "realm_points": 15353765,
+      "realm_ability_points": 106
+    },
+    {
+      "rank": 11,
+      "skill_bonus": 10,
+      "title": "Barun/Banbharun",
+      "level": "11L7",
+      "realm_points": 17042680,
+      "realm_ability_points": 107
+    },
+    {
+      "rank": 11,
+      "skill_bonus": 10,
+      "title": "Barun/Banbharun",
+      "level": "11L8",
+      "realm_points": 18917374,
+      "realm_ability_points": 108
+    },
+    {
+      "rank": 11,
+      "skill_bonus": 10,
+      "title": "Barun/Banbharun",
+      "level": "11L9",
+      "realm_points": 20998286,
+      "realm_ability_points": 109
+    },
+    {
+      "rank": 12,
+      "skill_bonus": 11,
+      "title": "Ard Tiarna/Ard Bantiarna",
+      "level": "12L0",
+      "realm_points": 23308097,
+      "realm_ability_points": 110
+    },
+    {
+      "rank": 12,
+      "skill_bonus": 11,
+      "title": "Ard Tiarna/Ard Bantiarna",
+      "level": "12L1",
+      "realm_points": 25871988,
+      "realm_ability_points": 111
+    },
+    {
+      "rank": 12,
+      "skill_bonus": 11,
+      "title": "Ard Tiarna/Ard Bantiarna",
+      "level": "12L2",
+      "realm_points": 28717906,
+      "realm_ability_points": 112
+    },
+    {
+      "rank": 12,
+      "skill_bonus": 11,
+      "title": "Ard Tiarna/Ard Bantiarna",
+      "level": "12L3",
+      "realm_points": 31876876,
+      "realm_ability_points": 113
+    },
+    {
+      "rank": 12,
+      "skill_bonus": 11,
+      "title": "Ard Tiarna/Ard Bantiarna",
+      "level": "12L4",
+      "realm_points": 35383333,
+      "realm_ability_points": 114
+    },
+    {
+      "rank": 12,
+      "skill_bonus": 11,
+      "title": "Ard Tiarna/Ard Bantiarna",
+      "level": "12L5",
+      "realm_points": 39275499,
+      "realm_ability_points": 115
+    },
+    {
+      "rank": 12,
+      "skill_bonus": 11,
+      "title": "Ard Tiarna/Ard Bantiarna",
+      "level": "12L6",
+      "realm_points": 43595804,
+      "realm_ability_points": 116
+    },
+    {
+      "rank": 12,
+      "skill_bonus": 11,
+      "title": "Ard Tiarna/Ard Bantiarna",
+      "level": "12L7",
+      "realm_points": 48391343,
+      "realm_ability_points": 117
+    },
+    {
+      "rank": 12,
+      "skill_bonus": 11,
+      "title": "Ard Tiarna/Ard Bantiarna",
+      "level": "12L8",
+      "realm_points": 53714390,
+      "realm_ability_points": 118
+    },
+    {
+      "rank": 12,
+      "skill_bonus": 11,
+      "title": "Ard Tiarna/Ard Bantiarna",
+      "level": "12L9",
+      "realm_points": 59622973,
+      "realm_ability_points": 119
+    },
+    {
+      "rank": 13,
+      "skill_bonus": 12,
+      "title": "Ciann/Cath",
+      "level": "13L0",
+      "realm_points": 66181501,
+      "realm_ability_points": 120
+    },
+    {
+      "rank": 13,
+      "skill_bonus": 12,
+      "title": "Ciann/Cath",
+      "level": "13L1",
+      "realm_points": 73461466,
+      "realm_ability_points": 121
+    },
+    {
+      "rank": 13,
+      "skill_bonus": 12,
+      "title": "Ciann/Cath",
+      "level": "13L2",
+      "realm_points": 81542227,
+      "realm_ability_points": 122
+    },
+    {
+      "rank": 13,
+      "skill_bonus": 12,
+      "title": "Ciann/Cath",
+      "level": "13L3",
+      "realm_points": 90511872,
+      "realm_ability_points": 123
+    },
+    {
+      "rank": 13,
+      "skill_bonus": 12,
+      "title": "Ciann/Cath",
+      "level": "13L4",
+      "realm_points": 100468178,
+      "realm_ability_points": 124
+    },
+    {
+      "rank": 13,
+      "skill_bonus": 12,
+      "title": "Ciann/Cath",
+      "level": "13L5",
+      "realm_points": 111519678,
+      "realm_ability_points": 125
+    },
+    {
+      "rank": 13,
+      "skill_bonus": 12,
+      "title": "Ciann/Cath",
+      "level": "13L6",
+      "realm_points": 123786843,
+      "realm_ability_points": 126
+    },
+    {
+      "rank": 13,
+      "skill_bonus": 12,
+      "title": "Ciann/Cath",
+      "level": "13L7",
+      "realm_points": 137403395,
+      "realm_ability_points": 127
+    },
+    {
+      "rank": 13,
+      "skill_bonus": 12,
+      "title": "Ciann/Cath",
+      "level": "13L8",
+      "realm_points": 152517769,
+      "realm_ability_points": 128
+    },
+    {
+      "rank": 13,
+      "skill_bonus": 12,
+      "title": "Ciann/Cath",
+      "level": "13L9",
+      "realm_points": 169294723,
+      "realm_ability_points": 129
+    },
+    {
+      "rank": 14,
+      "skill_bonus": 13,
+      "title": "Ard Diuc/Ard Bandiuc",
+      "level": "14L0",
+      "realm_points": 187917143,
+      "realm_ability_points": 130
+    }
+  ],
+  "Midgard": [
+    {
+      "rank": 1,
+      "skill_bonus": 0,
+      "title": "Skiltvakten",
+      "level": "1L1",
+      "realm_points": 0,
+      "realm_ability_points": 1
+    },
+    {
+      "rank": 1,
+      "skill_bonus": 0,
+      "title": "Skiltvakten",
+      "level": "1L2",
+      "realm_points": 25,
+      "realm_ability_points": 2
+    },
+    {
+      "rank": 1,
+      "skill_bonus": 0,
+      "title": "Skiltvakten",
+      "level": "1L3",
+      "realm_points": 125,
+      "realm_ability_points": 3
+    },
+    {
+      "rank": 1,
+      "skill_bonus": 0,
+      "title": "Skiltvakten",
+      "level": "1L4",
+      "realm_points": 350,
+      "realm_ability_points": 4
+    },
+    {
+      "rank": 1,
+      "skill_bonus": 0,
+      "title": "Skiltvakten",
+      "level": "1L5",
+      "realm_points": 750,
+      "realm_ability_points": 5
+    },
+    {
+      "rank": 1,
+      "skill_bonus": 0,
+      "title": "Skiltvakten",
+      "level": "1L6",
+      "realm_points": 1375,
+      "realm_ability_points": 6
+    },
+    {
+      "rank": 1,
+      "skill_bonus": 0,
+      "title": "Skiltvakten",
+      "level": "1L7",
+      "realm_points": 2275,
+      "realm_ability_points": 7
+    },
+    {
+      "rank": 1,
+      "skill_bonus": 0,
+      "title": "Skiltvakten",
+      "level": "1L8",
+      "realm_points": 3500,
+      "realm_ability_points": 8
+    },
+    {
+      "rank": 1,
+      "skill_bonus": 0,
+      "title": "Skiltvakten",
+      "level": "1L9",
+      "realm_points": 5100,
+      "realm_ability_points": 9
+    },
+    {
+      "rank": 2,
+      "skill_bonus": 1,
+      "title": "Isen Vakten",
+      "level": "2L0",
+      "realm_points": 7125,
+      "realm_ability_points": 10
+    },
+    {
+      "rank": 2,
+      "skill_bonus": 1,
+      "title": "Isen Vakten",
+      "level": "2L1",
+      "realm_points": 9625,
+      "realm_ability_points": 11
+    },
+    {
+      "rank": 2,
+      "skill_bonus": 1,
+      "title": "Isen Vakten",
+      "level": "2L2",
+      "realm_points": 12650,
+      "realm_ability_points": 12
+    },
+    {
+      "rank": 2,
+      "skill_bonus": 1,
+      "title": "Isen Vakten",
+      "level": "2L3",
+      "realm_points": 16250,
+      "realm_ability_points": 13
+    },
+    {
+      "rank": 2,
+      "skill_bonus": 1,
+      "title": "Isen Vakten",
+      "level": "2L4",
+      "realm_points": 20475,
+      "realm_ability_points": 14
+    },
+    {
+      "rank": 2,
+      "skill_bonus": 1,
+      "title": "Isen Vakten",
+      "level": "2L5",
+      "realm_points": 25375,
+      "realm_ability_points": 15
+    },
+    {
+      "rank": 2,
+      "skill_bonus": 1,
+      "title": "Isen Vakten",
+      "level": "2L6",
+      "realm_points": 31000,
+      "realm_ability_points": 16
+    },
+    {
+      "rank": 2,
+      "skill_bonus": 1,
+      "title": "Isen Vakten",
+      "level": "2L7",
+      "realm_points": 37400,
+      "realm_ability_points": 17
+    },
+    {
+      "rank": 2,
+      "skill_bonus": 1,
+      "title": "Isen Vakten",
+      "level": "2L8",
+      "realm_points": 44625,
+      "realm_ability_points": 18
+    },
+    {
+      "rank": 2,
+      "skill_bonus": 1,
+      "title": "Isen Vakten",
+      "level": "2L9",
+      "realm_points": 52725,
+      "realm_ability_points": 19
+    },
+    {
+      "rank": 3,
+      "skill_bonus": 2,
+      "title": "Flammen Vakten",
+      "level": "3L0",
+      "realm_points": 61750,
+      "realm_ability_points": 20
+    },
+    {
+      "rank": 3,
+      "skill_bonus": 2,
+      "title": "Flammen Vakten",
+      "level": "3L1",
+      "realm_points": 71750,
+      "realm_ability_points": 21
+    },
+    {
+      "rank": 3,
+      "skill_bonus": 2,
+      "title": "Flammen Vakten",
+      "level": "3L2",
+      "realm_points": 82775,
+      "realm_ability_points": 22
+    },
+    {
+      "rank": 3,
+      "skill_bonus": 2,
+      "title": "Flammen Vakten",
+      "level": "3L3",
+      "realm_points": 94875,
+      "realm_ability_points": 23
+    },
+    {
+      "rank": 3,
+      "skill_bonus": 2,
+      "title": "Flammen Vakten",
+      "level": "3L4",
+      "realm_points": 108100,
+      "realm_ability_points": 24
+    },
+    {
+      "rank": 3,
+      "skill_bonus": 2,
+      "title": "Flammen Vakten",
+      "level": "3L5",
+      "realm_points": 122500,
+      "realm_ability_points": 25
+    },
+    {
+      "rank": 3,
+      "skill_bonus": 2,
+      "title": "Flammen Vakten",
+      "level": "3L6",
+      "realm_points": 138125,
+      "realm_ability_points": 26
+    },
+    {
+      "rank": 3,
+      "skill_bonus": 2,
+      "title": "Flammen Vakten",
+      "level": "3L7",
+      "realm_points": 155025,
+      "realm_ability_points": 27
+    },
+    {
+      "rank": 3,
+      "skill_bonus": 2,
+      "title": "Flammen Vakten",
+      "level": "3L8",
+      "realm_points": 173250,
+      "realm_ability_points": 28
+    },
+    {
+      "rank": 3,
+      "skill_bonus": 2,
+      "title": "Flammen Vakten",
+      "level": "3L9",
+      "realm_points": 192850,
+      "realm_ability_points": 29
+    },
+    {
+      "rank": 4,
+      "skill_bonus": 3,
+      "title": "Elding Vakten",
+      "level": "4L0",
+      "realm_points": 213875,
+      "realm_ability_points": 30
+    },
+    {
+      "rank": 4,
+      "skill_bonus": 3,
+      "title": "Elding Vakten",
+      "level": "4L1",
+      "realm_points": 236375,
+      "realm_ability_points": 31
+    },
+    {
+      "rank": 4,
+      "skill_bonus": 3,
+      "title": "Elding Vakten",
+      "level": "4L2",
+      "realm_points": 260400,
+      "realm_ability_points": 32
+    },
+    {
+      "rank": 4,
+      "skill_bonus": 3,
+      "title": "Elding Vakten",
+      "level": "4L3",
+      "realm_points": 286000,
+      "realm_ability_points": 33
+    },
+    {
+      "rank": 4,
+      "skill_bonus": 3,
+      "title": "Elding Vakten",
+      "level": "4L4",
+      "realm_points": 313225,
+      "realm_ability_points": 34
+    },
+    {
+      "rank": 4,
+      "skill_bonus": 3,
+      "title": "Elding Vakten",
+      "level": "4L5",
+      "realm_points": 342125,
+      "realm_ability_points": 35
+    },
+    {
+      "rank": 4,
+      "skill_bonus": 3,
+      "title": "Elding Vakten",
+      "level": "4L6",
+      "realm_points": 372750,
+      "realm_ability_points": 36
+    },
+    {
+      "rank": 4,
+      "skill_bonus": 3,
+      "title": "Elding Vakten",
+      "level": "4L7",
+      "realm_points": 405150,
+      "realm_ability_points": 37
+    },
+    {
+      "rank": 4,
+      "skill_bonus": 3,
+      "title": "Elding Vakten",
+      "level": "4L8",
+      "realm_points": 439375,
+      "realm_ability_points": 38
+    },
+    {
+      "rank": 4,
+      "skill_bonus": 3,
+      "title": "Elding Vakten",
+      "level": "4L9",
+      "realm_points": 475475,
+      "realm_ability_points": 39
+    },
+    {
+      "rank": 5,
+      "skill_bonus": 4,
+      "title": "Stormur Vakten",
+      "level": "5L0",
+      "realm_points": 513500,
+      "realm_ability_points": 40
+    },
+    {
+      "rank": 5,
+      "skill_bonus": 4,
+      "title": "Stormur Vakten",
+      "level": "5L1",
+      "realm_points": 553500,
+      "realm_ability_points": 41
+    },
+    {
+      "rank": 5,
+      "skill_bonus": 4,
+      "title": "Stormur Vakten",
+      "level": "5L2",
+      "realm_points": 595525,
+      "realm_ability_points": 42
+    },
+    {
+      "rank": 5,
+      "skill_bonus": 4,
+      "title": "Stormur Vakten",
+      "level": "5L3",
+      "realm_points": 639625,
+      "realm_ability_points": 43
+    },
+    {
+      "rank": 5,
+      "skill_bonus": 4,
+      "title": "Stormur Vakten",
+      "level": "5L4",
+      "realm_points": 685850,
+      "realm_ability_points": 44
+    },
+    {
+      "rank": 5,
+      "skill_bonus": 4,
+      "title": "Stormur Vakten",
+      "level": "5L5",
+      "realm_points": 734250,
+      "realm_ability_points": 45
+    },
+    {
+      "rank": 5,
+      "skill_bonus": 4,
+      "title": "Stormur Vakten",
+      "level": "5L6",
+      "realm_points": 784875,
+      "realm_ability_points": 46
+    },
+    {
+      "rank": 5,
+      "skill_bonus": 4,
+      "title": "Stormur Vakten",
+      "level": "5L7",
+      "realm_points": 837775,
+      "realm_ability_points": 47
+    },
+    {
+      "rank": 5,
+      "skill_bonus": 4,
+      "title": "Stormur Vakten",
+      "level": "5L8",
+      "realm_points": 893000,
+      "realm_ability_points": 48
+    },
+    {
+      "rank": 5,
+      "skill_bonus": 4,
+      "title": "Stormur Vakten",
+      "level": "5L9",
+      "realm_points": 950600,
+      "realm_ability_points": 49
+    },
+    {
+      "rank": 6,
+      "skill_bonus": 5,
+      "title": "Isen Herra",
+      "level": "6L0",
+      "realm_points": 1010625,
+      "realm_ability_points": 50
+    },
+    {
+      "rank": 6,
+      "skill_bonus": 5,
+      "title": "Isen Herra",
+      "level": "6L1",
+      "realm_points": 1073125,
+      "realm_ability_points": 51
+    },
+    {
+      "rank": 6,
+      "skill_bonus": 5,
+      "title": "Isen Herra",
+      "level": "6L2",
+      "realm_points": 1138150,
+      "realm_ability_points": 52
+    },
+    {
+      "rank": 6,
+      "skill_bonus": 5,
+      "title": "Isen Herra",
+      "level": "6L3",
+      "realm_points": 1205750,
+      "realm_ability_points": 53
+    },
+    {
+      "rank": 6,
+      "skill_bonus": 5,
+      "title": "Isen Herra",
+      "level": "6L4",
+      "realm_points": 1275975,
+      "realm_ability_points": 54
+    },
+    {
+      "rank": 6,
+      "skill_bonus": 5,
+      "title": "Isen Herra",
+      "level": "6L5",
+      "realm_points": 1348875,
+      "realm_ability_points": 55
+    },
+    {
+      "rank": 6,
+      "skill_bonus": 5,
+      "title": "Isen Herra",
+      "level": "6L6",
+      "realm_points": 1424500,
+      "realm_ability_points": 56
+    },
+    {
+      "rank": 6,
+      "skill_bonus": 5,
+      "title": "Isen Herra",
+      "level": "6L7",
+      "realm_points": 1502900,
+      "realm_ability_points": 57
+    },
+    {
+      "rank": 6,
+      "skill_bonus": 5,
+      "title": "Isen Herra",
+      "level": "6L8",
+      "realm_points": 1584125,
+      "realm_ability_points": 58
+    },
+    {
+      "rank": 6,
+      "skill_bonus": 5,
+      "title": "Isen Herra",
+      "level": "6L9",
+      "realm_points": 1668225,
+      "realm_ability_points": 59
+    },
+    {
+      "rank": 7,
+      "skill_bonus": 6,
+      "title": "Flammen Herra",
+      "level": "7L0",
+      "realm_points": 1755250,
+      "realm_ability_points": 60
+    },
+    {
+      "rank": 7,
+      "skill_bonus": 6,
+      "title": "Flammen Herra",
+      "level": "7L1",
+      "realm_points": 1845250,
+      "realm_ability_points": 61
+    },
+    {
+      "rank": 7,
+      "skill_bonus": 6,
+      "title": "Flammen Herra",
+      "level": "7L2",
+      "realm_points": 1938275,
+      "realm_ability_points": 62
+    },
+    {
+      "rank": 7,
+      "skill_bonus": 6,
+      "title": "Flammen Herra",
+      "level": "7L3",
+      "realm_points": 2034375,
+      "realm_ability_points": 63
+    },
+    {
+      "rank": 7,
+      "skill_bonus": 6,
+      "title": "Flammen Herra",
+      "level": "7L4",
+      "realm_points": 2133600,
+      "realm_ability_points": 64
+    },
+    {
+      "rank": 7,
+      "skill_bonus": 6,
+      "title": "Flammen Herra",
+      "level": "7L5",
+      "realm_points": 2236000,
+      "realm_ability_points": 65
+    },
+    {
+      "rank": 7,
+      "skill_bonus": 6,
+      "title": "Flammen Herra",
+      "level": "7L6",
+      "realm_points": 2341625,
+      "realm_ability_points": 66
+    },
+    {
+      "rank": 7,
+      "skill_bonus": 6,
+      "title": "Flammen Herra",
+      "level": "7L7",
+      "realm_points": 2450525,
+      "realm_ability_points": 67
+    },
+    {
+      "rank": 7,
+      "skill_bonus": 6,
+      "title": "Flammen Herra",
+      "level": "7L8",
+      "realm_points": 2562750,
+      "realm_ability_points": 68
+    },
+    {
+      "rank": 7,
+      "skill_bonus": 6,
+      "title": "Flammen Herra",
+      "level": "7L9",
+      "realm_points": 2678350,
+      "realm_ability_points": 69
+    },
+    {
+      "rank": 8,
+      "skill_bonus": 7,
+      "title": "Elding Herra",
+      "level": "8L0",
+      "realm_points": 2797375,
+      "realm_ability_points": 70
+    },
+    {
+      "rank": 8,
+      "skill_bonus": 7,
+      "title": "Elding Herra",
+      "level": "8L1",
+      "realm_points": 2919875,
+      "realm_ability_points": 71
+    },
+    {
+      "rank": 8,
+      "skill_bonus": 7,
+      "title": "Elding Herra",
+      "level": "8L2",
+      "realm_points": 3045900,
+      "realm_ability_points": 72
+    },
+    {
+      "rank": 8,
+      "skill_bonus": 7,
+      "title": "Elding Herra",
+      "level": "8L3",
+      "realm_points": 3175500,
+      "realm_ability_points": 73
+    },
+    {
+      "rank": 8,
+      "skill_bonus": 7,
+      "title": "Elding Herra",
+      "level": "8L4",
+      "realm_points": 3308725,
+      "realm_ability_points": 74
+    },
+    {
+      "rank": 8,
+      "skill_bonus": 7,
+      "title": "Elding Herra",
+      "level": "8L5",
+      "realm_points": 3445625,
+      "realm_ability_points": 75
+    },
+    {
+      "rank": 8,
+      "skill_bonus": 7,
+      "title": "Elding Herra",
+      "level": "8L6",
+      "realm_points": 3586250,
+      "realm_ability_points": 76
+    },
+    {
+      "rank": 8,
+      "skill_bonus": 7,
+      "title": "Elding Herra",
+      "level": "8L7",
+      "realm_points": 3730650,
+      "realm_ability_points": 77
+    },
+    {
+      "rank": 8,
+      "skill_bonus": 7,
+      "title": "Elding Herra",
+      "level": "8L8",
+      "realm_points": 3878875,
+      "realm_ability_points": 78
+    },
+    {
+      "rank": 8,
+      "skill_bonus": 7,
+      "title": "Elding Herra",
+      "level": "8L9",
+      "realm_points": 4030975,
+      "realm_ability_points": 79
+    },
+    {
+      "rank": 9,
+      "skill_bonus": 8,
+      "title": "Stormur Herra",
+      "level": "9L0",
+      "realm_points": 4187000,
+      "realm_ability_points": 80
+    },
+    {
+      "rank": 9,
+      "skill_bonus": 8,
+      "title": "Stormur Herra",
+      "level": "9L1",
+      "realm_points": 4347000,
+      "realm_ability_points": 81
+    },
+    {
+      "rank": 9,
+      "skill_bonus": 8,
+      "title": "Stormur Herra",
+      "level": "9L2",
+      "realm_points": 4511025,
+      "realm_ability_points": 82
+    },
+    {
+      "rank": 9,
+      "skill_bonus": 8,
+      "title": "Stormur Herra",
+      "level": "9L3",
+      "realm_points": 4679125,
+      "realm_ability_points": 83
+    },
+    {
+      "rank": 9,
+      "skill_bonus": 8,
+      "title": "Stormur Herra",
+      "level": "9L4",
+      "realm_points": 4851350,
+      "realm_ability_points": 84
+    },
+    {
+      "rank": 9,
+      "skill_bonus": 8,
+      "title": "Stormur Herra",
+      "level": "9L5",
+      "realm_points": 5027750,
+      "realm_ability_points": 85
+    },
+    {
+      "rank": 9,
+      "skill_bonus": 8,
+      "title": "Stormur Herra",
+      "level": "9L6",
+      "realm_points": 5208375,
+      "realm_ability_points": 86
+    },
+    {
+      "rank": 9,
+      "skill_bonus": 8,
+      "title": "Stormur Herra",
+      "level": "9L7",
+      "realm_points": 5393275,
+      "realm_ability_points": 87
+    },
+    {
+      "rank": 9,
+      "skill_bonus": 8,
+      "title": "Stormur Herra",
+      "level": "9L8",
+      "realm_points": 5582500,
+      "realm_ability_points": 88
+    },
+    {
+      "rank": 9,
+      "skill_bonus": 8,
+      "title": "Stormur Herra",
+      "level": "9L9",
+      "realm_points": 5776100,
+      "realm_ability_points": 89
+    },
+    {
+      "rank": 10,
+      "skill_bonus": 9,
+      "title": "Einherjar",
+      "level": "10L0",
+      "realm_points": 5974125,
+      "realm_ability_points": 90
+    },
+    {
+      "rank": 10,
+      "skill_bonus": 9,
+      "title": "Einherjar",
+      "level": "10L1",
+      "realm_points": 6176625,
+      "realm_ability_points": 91
+    },
+    {
+      "rank": 10,
+      "skill_bonus": 9,
+      "title": "Einherjar",
+      "level": "10L2",
+      "realm_points": 6383650,
+      "realm_ability_points": 92
+    },
+    {
+      "rank": 10,
+      "skill_bonus": 9,
+      "title": "Einherjar",
+      "level": "10L3",
+      "realm_points": 6595250,
+      "realm_ability_points": 93
+    },
+    {
+      "rank": 10,
+      "skill_bonus": 9,
+      "title": "Einherjar",
+      "level": "10L4",
+      "realm_points": 6811475,
+      "realm_ability_points": 94
+    },
+    {
+      "rank": 10,
+      "skill_bonus": 9,
+      "title": "Einherjar",
+      "level": "10L5",
+      "realm_points": 7032375,
+      "realm_ability_points": 95
+    },
+    {
+      "rank": 10,
+      "skill_bonus": 9,
+      "title": "Einherjar",
+      "level": "10L6",
+      "realm_points": 7258000,
+      "realm_ability_points": 96
+    },
+    {
+      "rank": 10,
+      "skill_bonus": 9,
+      "title": "Einherjar",
+      "level": "10L7",
+      "realm_points": 7488400,
+      "realm_ability_points": 97
+    },
+    {
+      "rank": 10,
+      "skill_bonus": 9,
+      "title": "Einherjar",
+      "level": "10L8",
+      "realm_points": 7723625,
+      "realm_ability_points": 98
+    },
+    {
+      "rank": 10,
+      "skill_bonus": 9,
+      "title": "Einherjar",
+      "level": "10L9",
+      "realm_points": 7963725,
+      "realm_ability_points": 99
+    },
+    {
+      "rank": 11,
+      "skill_bonus": 10,
+      "title": "Herra/Fru",
+      "level": "11L0",
+      "realm_points": 8208750,
+      "realm_ability_points": 100
+    },
+    {
+      "rank": 11,
+      "skill_bonus": 10,
+      "title": "Herra/Fru",
+      "level": "11L1",
+      "realm_points": 9111713,
+      "realm_ability_points": 101
+    },
+    {
+      "rank": 11,
+      "skill_bonus": 10,
+      "title": "Herra/Fru",
+      "level": "11L2",
+      "realm_points": 10114001,
+      "realm_ability_points": 102
+    },
+    {
+      "rank": 11,
+      "skill_bonus": 10,
+      "title": "Herra/Fru",
+      "level": "11L3",
+      "realm_points": 11226541,
+      "realm_ability_points": 103
+    },
+    {
+      "rank": 11,
+      "skill_bonus": 10,
+      "title": "Herra/Fru",
+      "level": "11L4",
+      "realm_points": 12461460,
+      "realm_ability_points": 104
+    },
+    {
+      "rank": 11,
+      "skill_bonus": 10,
+      "title": "Herra/Fru",
+      "level": "11L5",
+      "realm_points": 13832221,
+      "realm_ability_points": 105
+    },
+    {
+      "rank": 11,
+      "skill_bonus": 10,
+      "title": "Herra/Fru",
+      "level": "11L6",
+      "realm_points": 15353765,
+      "realm_ability_points": 106
+    },
+    {
+      "rank": 11,
+      "skill_bonus": 10,
+      "title": "Herra/Fru",
+      "level": "11L7",
+      "realm_points": 17042680,
+      "realm_ability_points": 107
+    },
+    {
+      "rank": 11,
+      "skill_bonus": 10,
+      "title": "Herra/Fru",
+      "level": "11L8",
+      "realm_points": 18917374,
+      "realm_ability_points": 108
+    },
+    {
+      "rank": 11,
+      "skill_bonus": 10,
+      "title": "Herra/Fru",
+      "level": "11L9",
+      "realm_points": 20998286,
+      "realm_ability_points": 109
+    },
+    {
+      "rank": 12,
+      "skill_bonus": 11,
+      "title": "Hersir/Baronsfru",
+      "level": "12L0",
+      "realm_points": 23308097,
+      "realm_ability_points": 110
+    },
+    {
+      "rank": 12,
+      "skill_bonus": 11,
+      "title": "Hersir/Baronsfru",
+      "level": "12L1",
+      "realm_points": 25871988,
+      "realm_ability_points": 111
+    },
+    {
+      "rank": 12,
+      "skill_bonus": 11,
+      "title": "Hersir/Baronsfru",
+      "level": "12L2",
+      "realm_points": 28717906,
+      "realm_ability_points": 112
+    },
+    {
+      "rank": 12,
+      "skill_bonus": 11,
+      "title": "Hersir/Baronsfru",
+      "level": "12L3",
+      "realm_points": 31876876,
+      "realm_ability_points": 113
+    },
+    {
+      "rank": 12,
+      "skill_bonus": 11,
+      "title": "Hersir/Baronsfru",
+      "level": "12L4",
+      "realm_points": 35383333,
+      "realm_ability_points": 114
+    },
+    {
+      "rank": 12,
+      "skill_bonus": 11,
+      "title": "Hersir/Baronsfru",
+      "level": "12L5",
+      "realm_points": 39275499,
+      "realm_ability_points": 115
+    },
+    {
+      "rank": 12,
+      "skill_bonus": 11,
+      "title": "Hersir/Baronsfru",
+      "level": "12L6",
+      "realm_points": 43595804,
+      "realm_ability_points": 116
+    },
+    {
+      "rank": 12,
+      "skill_bonus": 11,
+      "title": "Hersir/Baronsfru",
+      "level": "12L7",
+      "realm_points": 48391343,
+      "realm_ability_points": 117
+    },
+    {
+      "rank": 12,
+      "skill_bonus": 11,
+      "title": "Hersir/Baronsfru",
+      "level": "12L8",
+      "realm_points": 53714390,
+      "realm_ability_points": 118
+    },
+    {
+      "rank": 12,
+      "skill_bonus": 11,
+      "title": "Hersir/Baronsfru",
+      "level": "12L9",
+      "realm_points": 59622973,
+      "realm_ability_points": 119
+    },
+    {
+      "rank": 13,
+      "skill_bonus": 12,
+      "title": "Vicomte/Vicomtessa",
+      "level": "13L0",
+      "realm_points": 66181501,
+      "realm_ability_points": 120
+    },
+    {
+      "rank": 13,
+      "skill_bonus": 12,
+      "title": "Vicomte/Vicomtessa",
+      "level": "13L1",
+      "realm_points": 73461466,
+      "realm_ability_points": 121
+    },
+    {
+      "rank": 13,
+      "skill_bonus": 12,
+      "title": "Vicomte/Vicomtessa",
+      "level": "13L2",
+      "realm_points": 81542227,
+      "realm_ability_points": 122
+    },
+    {
+      "rank": 13,
+      "skill_bonus": 12,
+      "title": "Vicomte/Vicomtessa",
+      "level": "13L3",
+      "realm_points": 90511872,
+      "realm_ability_points": 123
+    },
+    {
+      "rank": 13,
+      "skill_bonus": 12,
+      "title": "Vicomte/Vicomtessa",
+      "level": "13L4",
+      "realm_points": 100468178,
+      "realm_ability_points": 124
+    },
+    {
+      "rank": 13,
+      "skill_bonus": 12,
+      "title": "Vicomte/Vicomtessa",
+      "level": "13L5",
+      "realm_points": 111519678,
+      "realm_ability_points": 125
+    },
+    {
+      "rank": 13,
+      "skill_bonus": 12,
+      "title": "Vicomte/Vicomtessa",
+      "level": "13L6",
+      "realm_points": 123786843,
+      "realm_ability_points": 126
+    },
+    {
+      "rank": 13,
+      "skill_bonus": 12,
+      "title": "Vicomte/Vicomtessa",
+      "level": "13L7",
+      "realm_points": 137403395,
+      "realm_ability_points": 127
+    },
+    {
+      "rank": 13,
+      "skill_bonus": 12,
+      "title": "Vicomte/Vicomtessa",
+      "level": "13L8",
+      "realm_points": 152517769,
+      "realm_ability_points": 128
+    },
+    {
+      "rank": 13,
+      "skill_bonus": 12,
+      "title": "Vicomte/Vicomtessa",
+      "level": "13L9",
+      "realm_points": 169294723,
+      "realm_ability_points": 129
+    },
+    {
+      "rank": 14,
+      "skill_bonus": 13,
+      "title": "Stor Jarl/Stor Hurfru",
+      "level": "14L0",
+      "realm_points": 187917143,
+      "realm_ability_points": 130
+    }
+  ]
+}

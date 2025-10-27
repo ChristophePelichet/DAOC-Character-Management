@@ -18,3 +18,4 @@ shadowcopy==0.0.4
 urllib3==2.5.0
 wheel==0.45.1
 WMI==1.5.1
+PySide6

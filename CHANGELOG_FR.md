@@ -7,26 +7,6 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
-## [0.104] - 2025-10-28
-
-### Ajouté
-- **Éditeur de données** : Nouvelle application `data_editor.py` pour éditer visuellement les fichiers JSON
-  - Éditeur de classes & races avec interface graphique
-  - Éditeur de realm ranks avec tableau éditable
-  - Gestion des traductions FR/EN/DE
-  - Validation et sauvegarde automatique
-- **Documentation éditeur** : `DATA_EDITOR_README.md` avec guide complet d'utilisation
-- **Script de lancement** : `launch_data_editor.bat` pour lancer facilement l'éditeur
-
-### Modifié
-- **Ordre classe/race inversé** : La classe est maintenant sélectionnée AVANT la race
-- **Filtrage race par classe** : Les races disponibles sont filtrées selon la classe sélectionnée
-- **DataManager** : Ajout de `get_available_races_for_class()` pour le filtrage inversé
-
-### Amélioré
-- **Expérience utilisateur** : Ordre plus logique (classe → race)
-- **Cohérence** : Ordre identique dans création et édition de personnage
-
 ## [0.103] - 2025-10-28
 
 ### Ajouté
@@ -37,12 +17,21 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 - **Traductions des spécialisations** : Toutes les spécialisations sont maintenant traduites en FR/EN/DE
 - **Système de données complet** : Ajout de `Data/classes_races.json` avec 44 classes, 18 races et 188 spécialisations
 - **Documentation complète** : Ajout de guides d'utilisation et de documentation technique
+- **Gestion de la largeur des colonnes** : Option pour basculer entre mode automatique et manuel
+  - Mode automatique : Ajustement automatique au contenu avec colonne Nom extensible
+  - Mode manuel : Redimensionnement libre de toutes les colonnes par l'utilisateur
 
 ### Modifié
+- **Ordre classe/race inversé** : La classe est maintenant sélectionnée AVANT la race
+- **Filtrage race par classe** : Les races disponibles sont filtrées selon la classe sélectionnée
 - **Suppression de Mauler** : Classe Mauler supprimée (non implémentée sur serveur Eden)
 - **Support Eden** : Données ajustées pour correspondre aux classes disponibles sur Eden
 - **Structure des spécialisations** : Format multilingue `{"name": "EN", "name_fr": "FR", "name_de": "DE"}`
-- **DataManager enrichi** : Ajout de 11 nouvelles fonctions pour gérer races/classes/spécialisations
+- **DataManager enrichi** : Ajout de 11 nouvelles fonctions pour gérer races/classes/spécialisations et de `get_available_races_for_class()` pour le filtrage inversé
+
+### Amélioré
+- **Expérience utilisateur** : Ordre plus logique (classe → race)
+- **Cohérence** : Ordre identique dans création et édition de personnage
 
 ### Fichiers ajoutés
 - `Data/classes_races.json` : Données complètes des races, classes et spécialisations

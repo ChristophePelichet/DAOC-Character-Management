@@ -202,6 +202,14 @@ Die Konfiguration ist über das Menü **Datei > Einstellungen** zugänglich.
 2. Aktivieren/deaktivieren Sie Spalten zur Anzeige (einschließlich Server-Spalte)
 3. Klicken Sie auf "OK" zum Speichern
 
+### Spaltenbreite verwalten
+Um zwischen automatischem und manuellem Modus zu wählen:
+1. Öffnen Sie die Konfiguration über **Datei > Einstellungen**
+2. Aktivieren/deaktivieren Sie unter "Allgemeine Einstellungen" die Option "Manuelle Spaltengrößenanpassung"
+3. Automatischer Modus (Standard): Spalten passen sich automatisch dem Inhalt an
+4. Manueller Modus: Sie können jede Spalte frei durch Ziehen der Trennlinien anpassen
+5. Klicken Sie auf "Speichern" und starten Sie die Anwendung neu
+
 ### Massenaktionen
 1. Markieren Sie Charaktere in der "Auswahl"-Spalte
 2. Verwenden Sie das Dropdown-Menü "Massenaktionen"
@@ -219,6 +227,17 @@ Um den Debug-Modus zu aktivieren:
 
 Siehe das [Änderungsprotokoll](CHANGELOG_DE.md) für vollständige Historie.  
 **🌍 Verfügbar in:** [Français](CHANGELOG_FR.md) | [English](CHANGELOG_EN.md) | [Deutsch](CHANGELOG_DE.md)
+
+### Version 0.103 (28. Oktober 2025)
+- ✅ **Rassen-Auswahl**: Rassen-Feld in der Charaktererstellung hinzugefügt
+- ✅ **Klassen-Auswahl**: Klassen-Feld in der Charaktererstellung hinzugefügt
+- ✅ **Dynamische Filterung**: Verfügbare Klassen nach ausgewählter Rasse gefiltert (und umgekehrt)
+- ✅ **Rassen/Klassen-Validierung**: Automatische Überprüfung der Rassen/Klassen-Kompatibilität
+- ✅ **Spezialisierungs-Übersetzungen**: Alle Spezialisierungen in FR/EN/DE übersetzt
+- ✅ **Vollständiges Datensystem**: 44 Klassen, 18 Rassen und 188 Spezialisierungen
+- ✅ **Optimierte Reihenfolge**: Klasse VOR Rasse ausgewählt für logischeren Workflow
+- ✅ **Eden-Unterstützung**: Daten für Eden-Server angepasst (ohne Mauler)
+- ✅ **Spaltenbreiten-Verwaltung**: Automatischer oder manueller Modus für Spaltengrößenanpassung
 
 ### Version 0.102 (27. Oktober 2025)
 - ✅ **Server-Spalte**: Server-Spalte wiederhergestellt (Eden/Blackthorn)

@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - **Specialization Translations**: All specializations now translated in FR/EN/DE
 - **Complete Data System**: Added `Data/classes_races.json` with 44 classes, 18 races and 188 specializations
 - **Complete Documentation**: Added usage guides and technical documentation
+- **Column Width Management**: Option to switch between automatic and manual resize modes
+  - Automatic mode: Content-based resizing with expandable Name column
+  - Manual mode: Free resizing of all columns by user
 
 ### Changed
 - **Mauler Removal**: Mauler class removed (not implemented on Eden server)

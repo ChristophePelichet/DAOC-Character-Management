@@ -17,6 +17,9 @@ und dieses Projekt folgt dem [Semantic Versioning](https://semver.org/lang/de/).
 - **Spezialisierungs-Übersetzungen**: Alle Spezialisierungen jetzt in FR/EN/DE übersetzt
 - **Vollständiges Datensystem**: `Data/classes_races.json` mit 44 Klassen, 18 Rassen und 188 Spezialisierungen hinzugefügt
 - **Vollständige Dokumentation**: Nutzungsanleitungen und technische Dokumentation hinzugefügt
+- **Spaltenbreiten-Verwaltung**: Option zum Umschalten zwischen automatischem und manuellem Modus
+  - Automatischer Modus: Inhaltsbasierte Größenanpassung mit erweiterbarer Name-Spalte
+  - Manueller Modus: Freie Größenanpassung aller Spalten durch Benutzer
 
 ### Geändert
 - **Mauler-Entfernung**: Mauler-Klasse entfernt (nicht auf Eden-Server implementiert)

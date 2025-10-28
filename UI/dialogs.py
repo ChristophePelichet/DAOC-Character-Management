@@ -733,18 +733,22 @@ class NewCharacterDialog(QDialog):
 class ConfigurationDialog(QDialog):
     """Configuration window for the application."""
     
-    def __init__(self, parent=None, available_languages=None, available_seasons=None):
+    def __init__(self, parent=None, available_languages=None, available_seasons=None, available_servers=None, available_realms=None):
         super().__init__(parent)
         self.setWindowTitle(lang.get("configuration_window_title"))
-        self.setMinimumSize(500, 250)
+        self.setMinimumSize(500, 400)
         self.parent_app = parent
         self.available_languages = available_languages or {}
         self.available_seasons = available_seasons or []
+        self.available_servers = available_servers or []
+        self.available_realms = available_realms or []
 
         main_layout = QVBoxLayout(self)
 
-        # General Settings
-        form_layout = QFormLayout()
+        # Paths Settings Group (Position 1)
+        paths_group = QGroupBox(lang.get("config_paths_group_title", 
+                                         default="Chemins des dossiers"))
+        paths_layout = QFormLayout()
 
         # Character Path
         self.char_path_edit = QLineEdit()
@@ -753,7 +757,7 @@ class ConfigurationDialog(QDialog):
         char_path_layout = QHBoxLayout()
         char_path_layout.addWidget(self.char_path_edit)
         char_path_layout.addWidget(browse_char_button)
-        form_layout.addRow(lang.get("config_path_label"), char_path_layout)
+        paths_layout.addRow(lang.get("config_path_label"), char_path_layout)
 
         # Config Path
         self.config_path_edit = QLineEdit()
@@ -762,7 +766,7 @@ class ConfigurationDialog(QDialog):
         config_path_layout = QHBoxLayout()
         config_path_layout.addWidget(self.config_path_edit)
         config_path_layout.addWidget(browse_config_button)
-        form_layout.addRow(lang.get("config_file_path_label"), config_path_layout)
+        paths_layout.addRow(lang.get("config_file_path_label"), config_path_layout)
 
         # Log Path
         self.log_path_edit = QLineEdit()
@@ -771,36 +775,73 @@ class ConfigurationDialog(QDialog):
         log_path_layout = QHBoxLayout()
         log_path_layout.addWidget(self.log_path_edit)
         log_path_layout.addWidget(browse_log_button)
-        form_layout.addRow(lang.get("config_log_path_label"), log_path_layout)
+        paths_layout.addRow(lang.get("config_log_path_label"), log_path_layout)
+
+        paths_group.setLayout(paths_layout)
+        main_layout.addWidget(paths_group)
+
+        # General Settings (Position 2)
+        general_group = QGroupBox(lang.get("config_general_group_title", 
+                                           default="Paramètres généraux"))
+        general_layout = QFormLayout()
 
         # Language
         self.language_combo = QComboBox()
         self.language_combo.addItems(self.available_languages.values())
-        form_layout.addRow(lang.get("config_language_label"), self.language_combo)
+        general_layout.addRow(lang.get("config_language_label"), self.language_combo)
+        
+        # Column resize mode
+        self.manual_column_resize_check = QCheckBox(lang.get("config_manual_column_resize_label", 
+                                                              default="Gestion manuelle de la taille des colonnes"))
+        general_layout.addRow(self.manual_column_resize_check)
+        
+        general_group.setLayout(general_layout)
+        main_layout.addWidget(general_group)
 
-        # Debug Mode
-        self.debug_mode_check = QCheckBox(lang.get("config_debug_mode_label"))
-        form_layout.addRow(self.debug_mode_check)
+        # Server Settings (Position 3)
+        server_group = QGroupBox(lang.get("config_season_group_title", 
+                                          default="Configuration Serveur"))
+        server_layout = QFormLayout()
 
-        # Show Debug Window
-        self.show_debug_window_check = QCheckBox(lang.get("config_show_debug_window_label"))
-        form_layout.addRow(self.show_debug_window_check)
-        main_layout.addLayout(form_layout)
-
-        # Season Settings
-        season_group = QGroupBox(lang.get("config_season_group_title", 
-                                          default="Saison"))
-        season_layout = QFormLayout()
+        # Default Server
+        self.default_server_combo = QComboBox()
+        self.default_server_combo.addItems(self.available_servers)
+        server_layout.addRow(lang.get("config_default_server_label", 
+                                      default="Serveur par défaut"), 
+                            self.default_server_combo)
 
         # Default Season
         self.default_season_combo = QComboBox()
         self.default_season_combo.addItems(self.available_seasons)
-        season_layout.addRow(lang.get("config_default_season_label", 
+        server_layout.addRow(lang.get("config_default_season_label", 
                                      default="Saison par défaut"), 
                             self.default_season_combo)
 
-        season_group.setLayout(season_layout)
-        main_layout.addWidget(season_group)
+        # Default Realm
+        self.default_realm_combo = QComboBox()
+        self.default_realm_combo.addItems(self.available_realms)
+        server_layout.addRow(lang.get("config_default_realm_label", 
+                                      default="Royaume par défaut"), 
+                            self.default_realm_combo)
+
+        server_group.setLayout(server_layout)
+        main_layout.addWidget(server_group)
+
+        # Debug Settings (Position 4 - Last)
+        debug_group = QGroupBox(lang.get("config_debug_group_title", 
+                                         default="Debug"))
+        debug_layout = QFormLayout()
+
+        # Debug Mode
+        self.debug_mode_check = QCheckBox(lang.get("config_debug_mode_label"))
+        debug_layout.addRow(self.debug_mode_check)
+
+        # Show Debug Window
+        self.show_debug_window_check = QCheckBox(lang.get("config_show_debug_window_label"))
+        debug_layout.addRow(self.show_debug_window_check)
+        
+        debug_group.setLayout(debug_layout)
+        main_layout.addWidget(debug_group)
 
         main_layout.addStretch()
 
@@ -829,8 +870,17 @@ class ConfigurationDialog(QDialog):
         current_lang_name = self.available_languages.get(current_lang_code, "Français")
         self.language_combo.setCurrentText(current_lang_name)
 
+        current_default_server = config.get("default_server", "")
+        self.default_server_combo.setCurrentText(current_default_server)
+
         current_default_season = config.get("default_season", "")
         self.default_season_combo.setCurrentText(current_default_season)
+
+        current_default_realm = config.get("default_realm", "")
+        self.default_realm_combo.setCurrentText(current_default_realm)
+
+        manual_resize = config.get("manual_column_resize", False)
+        self.manual_column_resize_check.setChecked(manual_resize)
 
     def browse_folder(self, line_edit, title_key):
         """Generic folder browser."""

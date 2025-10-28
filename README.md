@@ -70,23 +70,7 @@ Colonnes disponibles :
 
 Voir [Documentation/COLUMN_CONFIGURATION_FR.md](Documentation/CONFIGURATION_COLONNES_FR.md) (FR) ou [Documentation/COLUMN_CONFIGURATION_EN.md](Documentation/COLUMN_CONFIGURATION_EN.md) (EN) pour plus de détails.
 
-## �️ Éditeur de Données
-
-Une application séparée permet d'éditer facilement les fichiers JSON :
-
-```bash
-python data_editor.py
-```
-
-**Fonctionnalités de l'éditeur** :
-- 🎭 **Classes & Races** : Édition visuelle avec interface graphique
-- 🏆 **Realm Ranks** : Tableau éditable pour tous les rangs
-- 🌍 **Traductions** : Gestion des noms FR/EN/DE
-- 💾 **Sauvegarde** : Validation et sauvegarde automatique
-
-Voir [DATA_EDITOR_README.md](DATA_EDITOR_README.md) pour le guide complet.
-
-## �🚀 Installation
+## � Installation
 
 ### Prérequis
 - Python 3.13 ou supérieur (⚠️ PySide6 n'est pas compatible avec Python 3.14+)
@@ -102,13 +86,6 @@ pip install -r requirements.txt
 
 ```bash
 python main.py
-```
-
-### Lancement de l'éditeur de données
-
-```bash
-python data_editor.py
-# ou double-cliquer sur launch_data_editor.bat
 ```
 
 ## 📦 Dépendances
@@ -221,6 +198,14 @@ La configuration est accessible via le menu **Fichier > Paramètres**.
 2. Cochez/décochez les colonnes à afficher (y compris la colonne Serveur)
 3. Cliquez sur "OK" pour sauvegarder
 
+### Gérer la Largeur des Colonnes
+Pour choisir entre le mode automatique et manuel :
+1. Ouvrez la configuration via **Fichier > Paramètres**
+2. Dans "Paramètres généraux", cochez/décochez "Gestion manuelle de la taille des colonnes"
+3. Mode automatique (par défaut) : Les colonnes s'ajustent automatiquement au contenu
+4. Mode manuel : Vous pouvez redimensionner librement chaque colonne en glissant les séparateurs
+5. Cliquez sur "Enregistrer" et redémarrez l'application
+
 ### Actions en Masse
 1. Cochez les personnages dans la colonne "Sélection"
 2. Utilisez le menu déroulant "Actions en masse"
@@ -238,6 +223,17 @@ Pour activer le mode debug :
 
 Consultez le [journal des modifications](CHANGELOG_FR.md) pour l'historique complet.  
 **🌍 Disponible en :** [Français](CHANGELOG_FR.md) | [English](CHANGELOG_EN.md) | [Deutsch](CHANGELOG_DE.md)
+
+### Version 0.103 (28 Octobre 2025)
+- ✅ **Sélection de race** : Ajout d'un champ race dans la création de personnage
+- ✅ **Sélection de classe** : Ajout d'un champ classe dans la création de personnage
+- ✅ **Filtrage dynamique** : Les classes disponibles sont filtrées selon la race sélectionnée (et inversement)
+- ✅ **Validation race/classe** : Vérification automatique de la compatibilité race/classe
+- ✅ **Traductions des spécialisations** : Toutes les spécialisations traduites en FR/EN/DE
+- ✅ **Système de données complet** : 44 classes, 18 races et 188 spécialisations
+- ✅ **Ordre optimisé** : Classe sélectionnée AVANT la race pour un workflow plus logique
+- ✅ **Support Eden** : Données ajustées pour le serveur Eden (sans Mauler)
+- ✅ **Gestion largeur des colonnes** : Mode automatique ou manuel pour le redimensionnement des colonnes
 
 ### Version 0.102 (27 Octobre 2025)
 - ✅ **Colonne Serveur** : Restauration de la colonne serveur (Eden/Blackthorn)

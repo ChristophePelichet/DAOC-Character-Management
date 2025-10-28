@@ -202,6 +202,14 @@ Configuration is accessible via **File > Settings** menu.
 2. Check/uncheck columns to display (including Server column)
 3. Click "OK" to save
 
+### Manage Column Width
+To choose between automatic and manual mode:
+1. Open configuration via **File > Settings**
+2. In "General Settings", check/uncheck "Manual column resize mode"
+3. Automatic mode (default): Columns automatically adjust to content
+4. Manual mode: You can freely resize each column by dragging separators
+5. Click "Save" and restart the application
+
 ### Bulk Actions
 1. Check characters in the "Selection" column
 2. Use the "Bulk Actions" dropdown menu
@@ -219,6 +227,17 @@ To enable debug mode:
 
 See the [changelog](CHANGELOG_EN.md) for complete history.  
 **🌍 Available in:** [Français](CHANGELOG_FR.md) | [English](CHANGELOG_EN.md) | [Deutsch](CHANGELOG_DE.md)
+
+### Version 0.103 (October 28, 2025)
+- ✅ **Race Selection**: Added race field in character creation
+- ✅ **Class Selection**: Added class field in character creation
+- ✅ **Dynamic Filtering**: Available classes filtered by selected race (and vice versa)
+- ✅ **Race/Class Validation**: Automatic verification of race/class compatibility
+- ✅ **Specialization Translations**: All specializations translated in FR/EN/DE
+- ✅ **Complete Data System**: 44 classes, 18 races and 188 specializations
+- ✅ **Optimized Order**: Class selected BEFORE race for more logical workflow
+- ✅ **Eden Support**: Data adjusted for Eden server (without Mauler)
+- ✅ **Column Width Management**: Automatic or manual mode for column resizing
 
 ### Version 0.102 (October 27, 2025)
 - ✅ **Server Column**: Restored server column (Eden/Blackthorn)

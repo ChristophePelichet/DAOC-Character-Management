@@ -45,7 +45,7 @@ setup_logging()
 
 # Application Constants
 APP_NAME = "DAOC Character Manager"
-APP_VERSION = "0.104"
+APP_VERSION = "0.103"
 
 # Disclaimer Configuration
 # Set to True to show alpha disclaimer on startup, False to disable
@@ -414,13 +414,7 @@ class CharacterApp(QMainWindow):
             row_items = [item_selection, item_realm, item_name, item_level, item_realm_rank, item_realm_title, item_guild, item_page, item_server]
             self.tree_model.appendRow(row_items)
 
-        # Auto-resize all columns to content
-        for i in range(9):  # We have 9 columns now: Selection, Realm, Name, Level, Rank, Title, Guild, Page, Server
-            self.character_tree.resizeColumnToContents(i)
-        
         self.character_tree.header().setStretchLastSection(False)
-        # Make Name column (index 2) stretch to fill remaining space
-        self.character_tree.header().setSectionResizeMode(2, QHeaderView.Stretch)
         
         # Connect the model's dataChanged signal to update selection count
         self.tree_model.dataChanged.connect(self.update_selection_count)
@@ -440,6 +434,34 @@ class CharacterApp(QMainWindow):
         
         # Apply column visibility settings
         self.apply_column_visibility()
+        
+        # Apply column resize mode
+        manual_resize = config.get("manual_column_resize", False)
+        self.apply_column_resize_mode(manual_resize)
+        # Apply column resize mode
+        manual_resize = config.get("manual_column_resize", False)
+        self.apply_column_resize_mode(manual_resize)
+
+    def apply_column_resize_mode(self, manual_mode=False):
+        """Apply column resize mode (automatic or manual).
+        
+        Args:
+            manual_mode: If True, enables manual resizing. If False, uses automatic sizing.
+        """
+        header = self.character_tree.header()
+        
+        if manual_mode:
+            # Manual mode: Allow user to resize columns freely
+            header.setSectionResizeMode(QHeaderView.Interactive)
+            logging.debug("Column resize mode: Manual (Interactive)")
+        else:
+            # Automatic mode: Auto-resize columns with Name column stretching
+            for i in range(9):  # 9 columns: Selection, Realm, Name, Level, Rank, Title, Guild, Page, Server
+                if i == 2:  # Name column (index 2)
+                    header.setSectionResizeMode(i, QHeaderView.Stretch)
+                else:
+                    header.setSectionResizeMode(i, QHeaderView.ResizeToContents)
+            logging.debug("Column resize mode: Automatic (ResizeToContents + Stretch for Name)")
 
     def apply_column_visibility(self):
         """Apply column visibility settings from configuration."""
@@ -790,7 +812,15 @@ class CharacterApp(QMainWindow):
         seasons = config.get("seasons", ["S1", "S2", "S3"])
         if not seasons:
             seasons = ["S1", "S2", "S3"]
-        dialog = ConfigurationDialog(self, self.available_languages, available_seasons=seasons)
+        servers = config.get("servers", ["Eden", "Blackthorn"])
+        if not servers:
+            servers = ["Eden", "Blackthorn"]
+        # Get realms dynamically from DataManager
+        realms = self.data_manager.get_realms() if hasattr(self, 'data_manager') else ["Albion", "Hibernia", "Midgard"]
+        dialog = ConfigurationDialog(self, self.available_languages, 
+                                     available_seasons=seasons,
+                                     available_servers=servers,
+                                     available_realms=realms)
         if dialog.exec() == QDialog.Accepted:
             self.save_configuration(dialog)
 
@@ -808,12 +838,34 @@ class CharacterApp(QMainWindow):
         config.set("debug_mode", new_debug_mode)
         config.set("show_debug_window", dialog.show_debug_window_check.isChecked())
         config.set("seasons", dialog.available_seasons) # Preserve the season list
+        config.set("servers", dialog.available_servers) # Preserve the server list
         
         new_default_season = dialog.default_season_combo.currentText()
         old_default_season = config.get("default_season", "")
         config.set("default_season", new_default_season)
         if new_default_season != old_default_season:
             logging.debug(f"Default season changed from '{old_default_season}' to '{new_default_season}'")
+
+        new_default_server = dialog.default_server_combo.currentText()
+        old_default_server = config.get("default_server", "")
+        config.set("default_server", new_default_server)
+        if new_default_server != old_default_server:
+            logging.debug(f"Default server changed from '{old_default_server}' to '{new_default_server}'")
+
+        new_default_realm = dialog.default_realm_combo.currentText()
+        old_default_realm = config.get("default_realm", "")
+        config.set("default_realm", new_default_realm)
+        if new_default_realm != old_default_realm:
+            logging.debug(f"Default realm changed from '{old_default_realm}' to '{new_default_realm}'")
+
+        # Column resize mode
+        new_manual_resize = dialog.manual_column_resize_check.isChecked()
+        old_manual_resize = config.get("manual_column_resize", False)
+        config.set("manual_column_resize", new_manual_resize)
+        if new_manual_resize != old_manual_resize:
+            logging.debug(f"Column resize mode changed to: {'manual' if new_manual_resize else 'automatic'}")
+            # Apply the new resize mode immediately
+            self.apply_column_resize_mode(new_manual_resize)
 
         selected_lang_name = dialog.language_combo.currentText()
         new_lang_code = None

@@ -29,8 +29,17 @@ class DataEditor(QMainWindow):
         # Data storage
         self.classes_races_data = {}
         self.realm_ranks_data = {}
+        self.armor_resists_data = {}
         self.data_modified = False
         self.realms_list = []  # Will be populated from JSON
+        
+        # Mapping between realm names and armor table keys
+        self.armor_table_mapping = {
+            "Albion": "table_1",
+            "Hibernia": "table_2",
+            "Midgard": "table_3"
+        }
+        self.armor_table_reverse_mapping = {v: k for k, v in self.armor_table_mapping.items()}
         
         # Track currently edited class
         self.current_editing_realm = None
@@ -38,7 +47,8 @@ class DataEditor(QMainWindow):
         
         # File paths
         self.classes_races_file = Path("Data/classes_races.json")
-        self.realm_ranks_files = {}  # Will be populated dynamically
+        self.realm_ranks_file = Path("Data/realm_ranks.json")
+        self.armor_resists_file = Path("Data/armor_resists.json")
         
         self.setup_ui()
         self.load_data()
@@ -66,6 +76,7 @@ class DataEditor(QMainWindow):
         # Create tabs
         self.create_classes_races_tab()
         self.create_realm_ranks_tab()
+        self.create_armor_resists_tab()
         
         # Bottom buttons
         button_layout = QHBoxLayout()
@@ -225,6 +236,99 @@ class DataEditor(QMainWindow):
         
         self.tabs.addTab(tab, "🏆 Realm Ranks")
     
+    def create_armor_resists_tab(self):
+        """Create the Armor Resistances editor tab"""
+        tab = QWidget()
+        layout = QVBoxLayout(tab)
+        
+        # Info label
+        info_label = QLabel("📊 Résistances d'armure par classe (EN / FR / DE)")
+        info_label.setStyleSheet("font-weight: bold; font-size: 12pt; padding: 10px;")
+        layout.addWidget(info_label)
+        
+        # Controls layout
+        controls_layout = QHBoxLayout()
+        
+        # Realm selector
+        controls_layout.addWidget(QLabel("Royaume :"))
+        self.armor_table_combo = QComboBox()
+        self.armor_table_combo.currentTextChanged.connect(self.on_armor_table_changed)
+        controls_layout.addWidget(self.armor_table_combo)
+        
+        controls_layout.addStretch()
+        
+        # Language filter
+        controls_layout.addWidget(QLabel("Afficher :"))
+        self.armor_lang_filter = QComboBox()
+        self.armor_lang_filter.addItems(["Toutes les langues", "EN seulement", "FR seulement", "DE seulement"])
+        self.armor_lang_filter.currentTextChanged.connect(self.on_armor_lang_filter_changed)
+        controls_layout.addWidget(self.armor_lang_filter)
+        
+        layout.addLayout(controls_layout)
+        
+        # Table for armor resists with all languages
+        self.armor_table = QTableWidget()
+        # 3 columns per field (EN, FR, DE) for Class and Armor Type
+        # 3 columns per resist type (EN, FR, DE) for 9 resist types
+        # Total: Class(3) + Armor Type(3) + 9 resists * 3 = 33 columns
+        self.armor_table.setColumnCount(33)
+        
+        headers = []
+        # Class columns
+        headers.extend(["Class (EN)", "Classe (FR)", "Klasse (DE)"])
+        # Armor Type columns
+        headers.extend(["Armor Type (EN)", "Type d'armure (FR)", "Rüstungstyp (DE)"])
+        # Resist columns (9 types x 3 languages)
+        resist_types = [
+            ("Thrust", "Perforation", "Stoß"),
+            ("Crush", "Contondant", "Wucht"),
+            ("Slash", "Tranchant", "Hieb"),
+            ("Cold", "Froid", "Kälte"),
+            ("Energy", "Énergie", "Energie"),
+            ("Heat", "Chaleur", "Hitze"),
+            ("Matter", "Matière", "Materie"),
+            ("Spirit", "Esprit", "Geist"),
+            ("Body", "Corps", "Körper")
+        ]
+        for en, fr, de in resist_types:
+            headers.extend([f"{en} (EN)", f"{fr} (FR)", f"{de} (DE)"])
+        
+        self.armor_table.setHorizontalHeaderLabels(headers)
+        self.armor_table.horizontalHeader().setSectionResizeMode(QHeaderView.Interactive)
+        self.armor_table.itemChanged.connect(self.on_armor_item_changed)
+        layout.addWidget(self.armor_table)
+        
+        # Store column indices for easy access
+        self.armor_column_mapping = {
+            'Class': 0, 'Class_fr': 1, 'Class_de': 2,
+            'Armor Type': 3, 'Armor Type_fr': 4, 'Armor Type_de': 5,
+            'Thrust': 6, 'Thrust_fr': 7, 'Thrust_de': 8,
+            'Crush': 9, 'Crush_fr': 10, 'Crush_de': 11,
+            'Slash': 12, 'Slash_fr': 13, 'Slash_de': 14,
+            'Cold': 15, 'Cold_fr': 16, 'Cold_de': 17,
+            'Energy': 18, 'Energy_fr': 19, 'Energy_de': 20,
+            'Heat': 21, 'Heat_fr': 22, 'Heat_de': 23,
+            'Matter': 24, 'Matter_fr': 25, 'Matter_de': 26,
+            'Spirit': 27, 'Spirit_fr': 28, 'Spirit_de': 29,
+            'Body': 30, 'Body_fr': 31, 'Body_de': 32
+        }
+        
+        # Buttons
+        armor_buttons = QHBoxLayout()
+        
+        add_armor_btn = QPushButton("➕ Ajouter classe")
+        add_armor_btn.clicked.connect(self.add_armor_class)
+        armor_buttons.addWidget(add_armor_btn)
+        
+        remove_armor_btn = QPushButton("➖ Supprimer classe")
+        remove_armor_btn.clicked.connect(self.remove_armor_class)
+        armor_buttons.addWidget(remove_armor_btn)
+        
+        armor_buttons.addStretch()
+        layout.addLayout(armor_buttons)
+        
+        self.tabs.addTab(tab, "🛡️ Résistances d'Armure")
+    
     def load_data(self):
         """Load all data from JSON files"""
         try:
@@ -236,22 +340,12 @@ class DataEditor(QMainWindow):
                 
                 # Extract realms from JSON data
                 self.realms_list = list(self.classes_races_data.keys())
-                
-                # Build realm_ranks_files dynamically based on realms found
-                self.realm_ranks_files = {
-                    realm: Path(f"Data/realm_ranks_{realm.lower()}.json")
-                    for realm in self.realms_list
-                }
             else:
                 QMessageBox.warning(self, "Fichier manquant", 
                                     f"Le fichier {self.classes_races_file} n'existe pas.")
                 # Fallback to default structure
                 self.realms_list = ["Albion", "Hibernia", "Midgard"]
                 self.classes_races_data = {realm: {"classes": [], "races": []} for realm in self.realms_list}
-                self.realm_ranks_files = {
-                    realm: Path(f"Data/realm_ranks_{realm.lower()}.json")
-                    for realm in self.realms_list
-                }
             
             # Update combo boxes with dynamic realms
             self.realm_combo.clear()
@@ -259,14 +353,34 @@ class DataEditor(QMainWindow):
             self.ranks_realm_combo.clear()
             self.ranks_realm_combo.addItems(self.realms_list)
             
-            # Load realm ranks
-            for realm, file_path in self.realm_ranks_files.items():
-                if file_path.exists():
-                    with open(file_path, 'r', encoding='utf-8') as f:
-                        self.realm_ranks_data[realm] = json.load(f)
-                    logging.info(f"Loaded realm ranks for {realm}")
-                else:
-                    self.realm_ranks_data[realm] = []
+            # Load realm ranks from single file
+            if self.realm_ranks_file.exists():
+                with open(self.realm_ranks_file, 'r', encoding='utf-8') as f:
+                    self.realm_ranks_data = json.load(f)
+                logging.info(f"Loaded realm ranks from {self.realm_ranks_file}")
+            else:
+                self.realm_ranks_data = {realm: [] for realm in self.realms_list}
+                QMessageBox.warning(self, "Fichier manquant", 
+                                    f"Le fichier {self.realm_ranks_file} n'existe pas.")
+            
+            # Load armor resistances
+            if self.armor_resists_file.exists():
+                with open(self.armor_resists_file, 'r', encoding='utf-8') as f:
+                    self.armor_resists_data = json.load(f)
+                logging.info(f"Loaded armor resists from {self.armor_resists_file}")
+                
+                # Populate armor table combo with realm names instead of table keys
+                self.armor_table_combo.clear()
+                if 'tables' in self.armor_resists_data:
+                    # Add realms in order: Albion, Hibernia, Midgard
+                    for realm in ["Albion", "Hibernia", "Midgard"]:
+                        table_key = self.armor_table_mapping.get(realm)
+                        if table_key and table_key in self.armor_resists_data['tables']:
+                            self.armor_table_combo.addItem(realm)
+            else:
+                self.armor_resists_data = {"armor_types": [], "resist_types": [], "tables": {}}
+                QMessageBox.warning(self, "Fichier manquant", 
+                                    f"Le fichier {self.armor_resists_file} n'existe pas.")
             
             # Populate races checkboxes dynamically
             self.populate_races_checkboxes()
@@ -274,6 +388,8 @@ class DataEditor(QMainWindow):
             # Refresh UI
             self.on_realm_changed(self.realm_combo.currentText())
             self.on_ranks_realm_changed(self.ranks_realm_combo.currentText())
+            if self.armor_table_combo.count() > 0:
+                self.on_armor_table_changed(self.armor_table_combo.currentText())
             
             self.data_modified = False
             self.statusBar().showMessage("Données chargées avec succès")
@@ -315,12 +431,15 @@ class DataEditor(QMainWindow):
                 json.dump(self.classes_races_data, f, ensure_ascii=False, indent=2)
             logging.info(f"Saved classes & races to {self.classes_races_file}")
             
-            # Save realm ranks
-            for realm, file_path in self.realm_ranks_files.items():
-                if realm in self.realm_ranks_data:
-                    with open(file_path, 'w', encoding='utf-8') as f:
-                        json.dump(self.realm_ranks_data[realm], f, ensure_ascii=False, indent=2)
-                    logging.info(f"Saved realm ranks for {realm}")
+            # Save realm ranks to single file
+            with open(self.realm_ranks_file, 'w', encoding='utf-8') as f:
+                json.dump(self.realm_ranks_data, f, ensure_ascii=False, indent=2)
+            logging.info(f"Saved realm ranks to {self.realm_ranks_file}")
+            
+            # Save armor resistances
+            with open(self.armor_resists_file, 'w', encoding='utf-8') as f:
+                json.dump(self.armor_resists_data, f, ensure_ascii=False, indent=2)
+            logging.info(f"Saved armor resists to {self.armor_resists_file}")
             
             self.data_modified = False
             self.statusBar().showMessage("✅ Toutes les données ont été sauvegardées")
@@ -633,6 +752,200 @@ class DataEditor(QMainWindow):
         if not self.data_modified:
             self.data_modified = True
             self.statusBar().showMessage("⚠️ Données modifiées (non sauvegardées)")
+    
+    def on_armor_table_changed(self, realm_name):
+        """Called when armor realm selection changes"""
+        if not realm_name or 'tables' not in self.armor_resists_data:
+            return
+        
+        # Convert realm name to table key
+        table_key = self.armor_table_mapping.get(realm_name)
+        if not table_key or table_key not in self.armor_resists_data['tables']:
+            return
+        
+        table_data = self.armor_resists_data['tables'][table_key]
+        data_rows = table_data.get('data', [])
+        
+        self.armor_table.blockSignals(True)
+        self.armor_table.setRowCount(len(data_rows))
+        
+        for i, row_data in enumerate(data_rows):
+            # Class (EN, FR, DE)
+            self.armor_table.setItem(i, 0, QTableWidgetItem(row_data.get("Class", "")))
+            self.armor_table.setItem(i, 1, QTableWidgetItem(row_data.get("Class_fr", "")))
+            self.armor_table.setItem(i, 2, QTableWidgetItem(row_data.get("Class_de", "")))
+            
+            # Armor Type (EN, FR, DE)
+            self.armor_table.setItem(i, 3, QTableWidgetItem(row_data.get("Armor Type", "")))
+            self.armor_table.setItem(i, 4, QTableWidgetItem(row_data.get("Armor Type_fr", "")))
+            self.armor_table.setItem(i, 5, QTableWidgetItem(row_data.get("Armor Type_de", "")))
+            
+            # Resist types (EN, FR, DE for each)
+            resist_keys = ['Thrust', 'Crush', 'Slash', 'Cold', 'Energy', 'Heat', 'Matter', 'Spirit', 'Body']
+            col = 6
+            for key in resist_keys:
+                self.armor_table.setItem(i, col, QTableWidgetItem(row_data.get(key, "")))
+                self.armor_table.setItem(i, col + 1, QTableWidgetItem(row_data.get(f"{key}_fr", "")))
+                self.armor_table.setItem(i, col + 2, QTableWidgetItem(row_data.get(f"{key}_de", "")))
+                col += 3
+        
+        self.armor_table.blockSignals(False)
+        
+        # Apply language filter if any
+        self.on_armor_lang_filter_changed(self.armor_lang_filter.currentText())
+    
+    def on_armor_lang_filter_changed(self, filter_text):
+        """Called when language filter changes"""
+        if not hasattr(self, 'armor_table'):
+            return
+        
+        # Show/hide columns based on filter
+        if filter_text == "EN seulement":
+            # Show only EN columns (0, 3, 6, 9, 12, ...)
+            for col in range(self.armor_table.columnCount()):
+                if col % 3 == 0:  # EN columns
+                    self.armor_table.setColumnHidden(col, False)
+                else:  # FR and DE columns
+                    self.armor_table.setColumnHidden(col, True)
+        elif filter_text == "FR seulement":
+            # Show only FR columns (1, 4, 7, 10, 13, ...)
+            for col in range(self.armor_table.columnCount()):
+                if col % 3 == 1:  # FR columns
+                    self.armor_table.setColumnHidden(col, False)
+                else:  # EN and DE columns
+                    self.armor_table.setColumnHidden(col, True)
+        elif filter_text == "DE seulement":
+            # Show only DE columns (2, 5, 8, 11, 14, ...)
+            for col in range(self.armor_table.columnCount()):
+                if col % 3 == 2:  # DE columns
+                    self.armor_table.setColumnHidden(col, False)
+                else:  # EN and FR columns
+                    self.armor_table.setColumnHidden(col, True)
+        else:  # "Toutes les langues"
+            # Show all columns
+            for col in range(self.armor_table.columnCount()):
+                self.armor_table.setColumnHidden(col, False)
+    
+    def on_armor_item_changed(self, item):
+        """Called when an armor table item is changed"""
+        row = item.row()
+        col = item.column()
+        realm_name = self.armor_table_combo.currentText()
+        
+        # Convert realm name to table key
+        table_key = self.armor_table_mapping.get(realm_name)
+        if not table_key or 'tables' not in self.armor_resists_data:
+            return
+        
+        if table_key not in self.armor_resists_data['tables']:
+            return
+        
+        table_data = self.armor_resists_data['tables'][table_key]
+        data_rows = table_data.get('data', [])
+        
+        if row >= len(data_rows):
+            return
+        
+        row_data = data_rows[row]
+        
+        # Find which field was changed using reverse mapping
+        field_name = None
+        for key, col_idx in self.armor_column_mapping.items():
+            if col_idx == col:
+                field_name = key
+                break
+        
+        if field_name:
+            row_data[field_name] = item.text()
+            self.mark_modified()
+    
+    def add_armor_class(self):
+        """Add a new armor class entry"""
+        realm_name = self.armor_table_combo.currentText()
+        
+        # Convert realm name to table key
+        table_key = self.armor_table_mapping.get(realm_name)
+        if not table_key or 'tables' not in self.armor_resists_data:
+            QMessageBox.warning(self, "Erreur", "Aucun royaume sélectionné")
+            return
+        
+        if table_key not in self.armor_resists_data['tables']:
+            return
+        
+        new_entry = {
+            "Class": "NewClass",
+            "Class_fr": "NouvelleClasse",
+            "Class_de": "NeueKlasse",
+            "Armor Type": "Unknown",
+            "Armor Type_fr": "Inconnu",
+            "Armor Type_de": "Unbekannt",
+            "Thrust": "Neutral",
+            "Thrust_fr": "Neutre",
+            "Thrust_de": "Neutral",
+            "Crush": "Neutral",
+            "Crush_fr": "Neutre",
+            "Crush_de": "Neutral",
+            "Slash": "Neutral",
+            "Slash_fr": "Neutre",
+            "Slash_de": "Neutral",
+            "Cold": "Neutral",
+            "Cold_fr": "Neutre",
+            "Cold_de": "Neutral",
+            "Energy": "Neutral",
+            "Energy_fr": "Neutre",
+            "Energy_de": "Neutral",
+            "Heat": "Neutral",
+            "Heat_fr": "Neutre",
+            "Heat_de": "Neutral",
+            "Matter": "Neutral",
+            "Matter_fr": "Neutre",
+            "Matter_de": "Neutral",
+            "Spirit": "Neutral",
+            "Spirit_fr": "Neutre",
+            "Spirit_de": "Neutral",
+            "Body": "Neutral",
+            "Body_fr": "Neutre",
+            "Body_de": "Neutral"
+        }
+        
+        self.armor_resists_data['tables'][table_key]['data'].append(new_entry)
+        self.on_armor_table_changed(realm_name)
+        self.mark_modified()
+    
+    def remove_armor_class(self):
+        """Remove selected armor class entry"""
+        row = self.armor_table.currentRow()
+        if row < 0:
+            return
+        
+        realm_name = self.armor_table_combo.currentText()
+        
+        # Convert realm name to table key
+        table_key = self.armor_table_mapping.get(realm_name)
+        if not table_key or 'tables' not in self.armor_resists_data:
+            return
+        
+        if table_key not in self.armor_resists_data['tables']:
+            return
+        
+        table_data = self.armor_resists_data['tables'][table_key]
+        data_rows = table_data.get('data', [])
+        
+        if row >= len(data_rows):
+            return
+        
+        class_name = data_rows[row].get("Class", "")
+        
+        reply = QMessageBox.question(
+            self, "Confirmer",
+            f"Supprimer la classe '{class_name}' de {realm_name} ?",
+            QMessageBox.Yes | QMessageBox.No
+        )
+        
+        if reply == QMessageBox.Yes:
+            del data_rows[row]
+            self.on_armor_table_changed(realm_name)
+            self.mark_modified()
     
     def closeEvent(self, event):
         """Called when window is closing"""

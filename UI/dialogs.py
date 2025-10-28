@@ -3,11 +3,14 @@ Dialog windows for the DAOC Character Manager application.
 """
 
 import re
+import os
 import logging
+from datetime import datetime
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QFormLayout, QGroupBox, QLabel, 
     QPushButton, QLineEdit, QComboBox, QCheckBox, QSlider, QMessageBox,
-    QDialogButtonBox, QFileDialog
+    QDialogButtonBox, QFileDialog, QTableWidget, QTableWidgetItem, QHeaderView,
+    QWidget
 )
 from PySide6.QtCore import Qt
 from Functions.language_manager import lang
@@ -110,7 +113,30 @@ class CharacterSheetWindow(QDialog):
         info_layout.addRow("Guilde :", self.guild_edit)
         
         info_group.setLayout(info_layout)
-        layout.addWidget(info_group)
+        
+        # Armor Section (new)
+        armor_group = QGroupBox(lang.get("armor_group_title"))
+        armor_layout = QVBoxLayout()
+        
+        # Resistances button (placeholder for now)
+        resistances_button = QPushButton(lang.get("resistances_button"))
+        resistances_button.setEnabled(False)  # Disabled until functionality is added
+        resistances_button.setToolTip("Fonctionnalité à venir : gérer les résistances du personnage")
+        armor_layout.addWidget(resistances_button)
+        
+        # Armor Manager button
+        armor_manager_button = QPushButton("📁 Gérer les armures")
+        armor_manager_button.clicked.connect(self.open_armor_manager)
+        armor_manager_button.setToolTip("Upload et gestion des fichiers d'armure créés avec des logiciels tiers")
+        armor_layout.addWidget(armor_manager_button)
+        
+        armor_group.setLayout(armor_layout)
+        
+        # Horizontal layout for Info and Armor groups side by side
+        top_layout = QHBoxLayout()
+        top_layout.addWidget(info_group)
+        top_layout.addWidget(armor_group)
+        layout.addLayout(top_layout)
         
         # Realm Rank Section
         realm_rank_group = QGroupBox("Rang de Royaume")
@@ -118,94 +144,56 @@ class CharacterSheetWindow(QDialog):
         
         realm_points = self.character_data.get('realm_points', 0)
         
-        # Current rank and title display
+        # Get current rank and level
+        current_rank = 1
+        current_level = 1
+        rank_info = None
+        if hasattr(parent, 'data_manager'):
+            rank_info = parent.data_manager.get_realm_rank_info(self.realm, realm_points)
+            if rank_info:
+                current_rank = rank_info['rank']
+                level_str = rank_info['level']  # Format "XLY"
+                level_match = re.search(r'L(\d+)', level_str)
+                if level_match:
+                    current_level = int(level_match.group(1))
+        
+        # Current rank and title display at the top with realm color
         self.rank_title_label = QLabel()
-        self.rank_title_label.setAlignment(Qt.AlignCenter)
+        self.rank_title_label.setAlignment(Qt.AlignLeft)
         self.update_rank_display(realm_points)
         
-        # Styling for title label (bold and colored)
+        # Styling for title label (same size as controls)
         realm_colors = {
             "Albion": "#CC0000",
             "Hibernia": "#00AA00",
             "Midgard": "#0066CC"
         }
         color = realm_colors.get(self.realm, "#000000")
-        self.rank_title_label.setStyleSheet(f"font-size: 16pt; font-weight: bold; color: {color};")
+        self.rank_title_label.setStyleSheet(f"font-weight: bold; color: {color};")
         realm_rank_layout.addWidget(self.rank_title_label)
         
-        # Separator
-        realm_rank_layout.addWidget(QLabel(""))
+        # Rank and Level dropdowns on a single line below the title
+        rank_dropdown_layout = QHBoxLayout()
+        rank_dropdown_layout.addWidget(QLabel("Rang :"))
         
-        # Manual Rank Control Section
-        control_group = QGroupBox("Ajustement du Rang")
-        control_layout = QVBoxLayout()
+        self.rank_combo = QComboBox()
+        for i in range(1, 15):  # Ranks 1-14
+            self.rank_combo.addItem(str(i), i)
+        self.rank_combo.setCurrentIndex(current_rank - 1)
+        self.rank_combo.currentIndexChanged.connect(self.on_rank_changed)
+        rank_dropdown_layout.addWidget(self.rank_combo)
         
-        # Rank slider (1-14)
-        rank_slider_layout = QHBoxLayout()
-        rank_slider_layout.addWidget(QLabel("Rang :"))
+        # Level dropdown (0-10 for rank 1, 0-9 for others)
+        rank_dropdown_layout.addWidget(QLabel("Niveau :"))
         
-        self.rank_slider = QSlider(Qt.Horizontal)
-        self.rank_slider.setMinimum(1)
-        self.rank_slider.setMaximum(14)
-        self.rank_slider.setTickPosition(QSlider.TicksBelow)
-        self.rank_slider.setTickInterval(1)
+        self.level_combo_rank = QComboBox()
+        self.update_level_dropdown(current_rank, current_level)
+        self.level_combo_rank.currentIndexChanged.connect(self.on_level_changed)
+        rank_dropdown_layout.addWidget(self.level_combo_rank)
         
-        # Get current rank
-        current_rank = 1
-        if hasattr(parent, 'data_manager'):
-            rank_info = parent.data_manager.get_realm_rank_info(self.realm, realm_points)
-            if rank_info:
-                current_rank = rank_info['rank']
+        rank_dropdown_layout.addStretch()  # Push controls to the left
         
-        self.rank_slider.setValue(current_rank)
-        self.rank_slider.valueChanged.connect(self.on_rank_changed)
-        rank_slider_layout.addWidget(self.rank_slider)
-        
-        self.rank_value_label = QLabel(f"Rank {current_rank}")
-        self.rank_value_label.setMinimumWidth(60)
-        rank_slider_layout.addWidget(self.rank_value_label)
-        control_layout.addLayout(rank_slider_layout)
-        
-        # Level slider (1-10 per rank, except rank 1 which has 9 levels)
-        level_slider_layout = QHBoxLayout()
-        level_slider_layout.addWidget(QLabel("Niveau :"))
-        
-        self.level_slider = QSlider(Qt.Horizontal)
-        self.level_slider.setMinimum(1)
-        self.level_slider.setMaximum(10)
-        self.level_slider.setTickPosition(QSlider.TicksBelow)
-        self.level_slider.setTickInterval(1)
-        
-        # Get current level
-        current_level = 1
-        if hasattr(parent, 'data_manager') and rank_info:
-            level_str = rank_info['level']  # Format "XLY"
-            level_match = re.search(r'L(\d+)', level_str)
-            if level_match:
-                current_level = int(level_match.group(1))
-        
-        self.level_slider.setValue(current_level)
-        self.level_slider.valueChanged.connect(self.on_level_changed)
-        level_slider_layout.addWidget(self.level_slider)
-        
-        self.level_value_label = QLabel(f"L{current_level}")
-        self.level_value_label.setMinimumWidth(40)
-        level_slider_layout.addWidget(self.level_value_label)
-        control_layout.addLayout(level_slider_layout)
-        
-        # Display RP info for this rank/level
-        self.rp_info_label = QLabel()
-        self.rp_info_label.setAlignment(Qt.AlignCenter)
-        self.update_rp_info()
-        control_layout.addWidget(self.rp_info_label)
-        
-        # Apply button
-        apply_button = QPushButton("Appliquer ce rang")
-        apply_button.clicked.connect(self.apply_rank)
-        control_layout.addWidget(apply_button)
-        
-        control_group.setLayout(control_layout)
-        realm_rank_layout.addWidget(control_group)
+        realm_rank_layout.addLayout(rank_dropdown_layout)
         
         realm_rank_group.setLayout(realm_rank_layout)
         layout.addWidget(realm_rank_group)
@@ -285,38 +273,56 @@ class CharacterSheetWindow(QDialog):
         pass
     
     def on_rank_changed(self, value):
-        """Called when rank slider changes."""
-        self.rank_value_label.setText(f"Rank {value}")
-        # Adjust max level slider (rank 1 = 9 levels, others = 10)
-        max_level = 9 if value == 1 else 10
-        self.level_slider.setMaximum(max_level)
-        if self.level_slider.value() > max_level:
-            self.level_slider.setValue(max_level)
+        """Called when rank dropdown changes."""
+        rank = self.rank_combo.currentData()
+        level = self.level_combo_rank.currentData()
+        
+        # Update level dropdown for new rank
+        self.update_level_dropdown(rank, level)
+        
+        # Update RP info and auto-save
         self.update_rp_info()
+        self.auto_apply_rank()
     
     def on_level_changed(self, value):
-        """Called when level slider changes."""
-        self.level_value_label.setText(f"L{value}")
+        """Called when level dropdown changes."""
+        # Update RP info and auto-save
         self.update_rp_info()
+        self.auto_apply_rank()
+    
+    def update_level_dropdown(self, rank, current_level=1):
+        """Updates level dropdown based on selected rank."""
+        self.level_combo_rank.blockSignals(True)  # Prevent triggering change event
+        self.level_combo_rank.clear()
+        
+        # Rank 1 has levels 0-10, others have 0-9
+        max_level = 10 if rank == 1 else 9
+        for i in range(0, max_level + 1):
+            self.level_combo_rank.addItem(f"L{i}", i)
+        
+        # Set current level
+        if current_level <= max_level:
+            self.level_combo_rank.setCurrentIndex(current_level)
+        else:
+            self.level_combo_rank.setCurrentIndex(0)
+        
+        self.level_combo_rank.blockSignals(False)
     
     def update_rp_info(self):
         """Updates RP display for the selected rank/level."""
         if not hasattr(self.parent_app, 'data_manager'):
             return
         
-        rank = self.rank_slider.value()
-        level = self.level_slider.value()
+        rank = self.rank_combo.currentData()
+        level = self.level_combo_rank.currentData()
         level_str = f"{rank}L{level}"
         
-        # Find RP for this level
+        # Find RP for this level and update the main display
         rank_info = self.parent_app.data_manager.get_rank_by_level(self.realm, level_str)
         if rank_info:
-            self.rp_info_label.setText(
-                f"Ce rang nécessite : {rank_info['realm_points']:,} RP\n"
-                f"Titre : {rank_info['title']}"
+            self.rank_title_label.setText(
+                f"Rank {rank_info['rank']} - {rank_info['title']} ({rank_info['level']} - {rank_info['realm_points']:,} RP)"
             )
-        else:
-            self.rp_info_label.setText("Informations non disponibles")
     
     def update_rank_display(self, realm_points):
         """Updates current rank and title display."""
@@ -324,17 +330,47 @@ class CharacterSheetWindow(QDialog):
             rank_info = self.parent_app.data_manager.get_realm_rank_info(self.realm, realm_points)
             if rank_info:
                 self.rank_title_label.setText(
-                    f"Rank {rank_info['rank']} - {rank_info['title']}\n"
-                    f"({rank_info['level']} - {realm_points:,} RP)"
+                    f"Rank {rank_info['rank']} - {rank_info['title']} ({rank_info['level']} - {realm_points:,} RP)"
                 )
             else:
-                self.rank_title_label.setText(f"Rank 1 - Guardian\n(1L1 - 0 RP)")
+                self.rank_title_label.setText(f"Rank 1 - Guardian (1L1 - 0 RP)")
         else:
             realm_rank = self.character_data.get('realm_rank', '1L1')
             self.rank_title_label.setText(f"{realm_rank} - {realm_points:,} RP")
     
+    def auto_apply_rank(self):
+        """Automatically applies the selected rank to the character (no confirmation)."""
+        rank = self.rank_combo.currentData()
+        level = self.level_combo_rank.currentData()
+        level_str = f"{rank}L{level}"
+        
+        if not hasattr(self.parent_app, 'data_manager'):
+            return
+        
+        # Get RP for this level
+        rank_info = self.parent_app.data_manager.get_rank_by_level(self.realm, level_str)
+        if not rank_info:
+            return
+        
+        new_rp = rank_info['realm_points']
+        
+        # Update data silently (no confirmation dialog)
+        self.character_data['realm_points'] = new_rp
+        self.character_data['realm_rank'] = level_str
+        
+        # Save (allow overwrite since we're updating an existing character)
+        from Functions.character_manager import save_character
+        success, msg = save_character(self.character_data, allow_overwrite=True)
+        
+        if success:
+            # Update display
+            self.update_rank_display(new_rp)
+            # Refresh list
+            if hasattr(self.parent_app, 'refresh_character_list'):
+                self.parent_app.refresh_character_list()
+    
     def apply_rank(self):
-        """Applies the selected rank to the character."""
+        """Old apply_rank method - kept for backwards compatibility but not used anymore."""
         rank = self.rank_slider.value()
         level = self.level_slider.value()
         level_str = f"{rank}L{level}"
@@ -457,6 +493,16 @@ class CharacterSheetWindow(QDialog):
         except Exception as e:
             QMessageBox.critical(self, "Erreur", f"Erreur lors de la sauvegarde : {str(e)}")
 
+    def open_armor_manager(self):
+        """Opens the armor management dialog."""
+        character_id = self.character_data.get('id', '')
+        if not character_id:
+            QMessageBox.warning(self, "Erreur", "Impossible de déterminer l'ID du personnage.")
+            return
+        
+        dialog = ArmorManagementDialog(self, character_id)
+        dialog.exec()
+    
     def rename_character(self):
         """Renames the character with validation."""
         try:
@@ -777,6 +823,15 @@ class ConfigurationDialog(QDialog):
         log_path_layout.addWidget(browse_log_button)
         paths_layout.addRow(lang.get("config_log_path_label"), log_path_layout)
 
+        # Armor Path
+        self.armor_path_edit = QLineEdit()
+        browse_armor_button = QPushButton(lang.get("browse_button"))
+        browse_armor_button.clicked.connect(self.browse_armor_folder)
+        armor_path_layout = QHBoxLayout()
+        armor_path_layout.addWidget(self.armor_path_edit)
+        armor_path_layout.addWidget(browse_armor_button)
+        paths_layout.addRow("Dossier des armures :", armor_path_layout)
+
         paths_group.setLayout(paths_layout)
         main_layout.addWidget(paths_group)
 
@@ -843,6 +898,19 @@ class ConfigurationDialog(QDialog):
         debug_group.setLayout(debug_layout)
         main_layout.addWidget(debug_group)
 
+        # Miscellaneous Settings Group (Position 5)
+        misc_group = QGroupBox(lang.get("config_misc_group_title", 
+                                        default="Divers"))
+        misc_layout = QFormLayout()
+
+        # Disable Disclaimer on Startup
+        self.disable_disclaimer_check = QCheckBox(lang.get("config_disable_disclaimer_label", 
+                                                            default="Désactiver le message d'avertissement au démarrage"))
+        misc_layout.addRow(self.disable_disclaimer_check)
+        
+        misc_group.setLayout(misc_layout)
+        main_layout.addWidget(misc_group)
+
         main_layout.addStretch()
 
         # Buttons
@@ -856,15 +924,20 @@ class ConfigurationDialog(QDialog):
     def update_fields(self):
         """Fills the fields with current configuration values."""
         # Use 'or' to handle None or empty string values and fallback to default paths
+        from Functions.path_manager import get_armor_dir
+        
         char_folder = config.get("character_folder") or get_character_dir()
         config_folder = config.get("config_folder") or get_config_dir()
         log_folder = config.get("log_folder") or get_log_dir()
+        armor_folder = config.get("armor_folder") or get_armor_dir()
         
         self.char_path_edit.setText(char_folder)
         self.config_path_edit.setText(config_folder)
         self.log_path_edit.setText(log_folder)
+        self.armor_path_edit.setText(armor_folder)
         self.debug_mode_check.setChecked(config.get("debug_mode", False))
         self.show_debug_window_check.setChecked(config.get("show_debug_window", False))
+        self.disable_disclaimer_check.setChecked(config.get("disable_disclaimer", False))
         
         current_lang_code = config.get("language", "fr")
         current_lang_name = self.available_languages.get(current_lang_code, "Français")
@@ -896,3 +969,155 @@ class ConfigurationDialog(QDialog):
 
     def browse_log_folder(self):
         self.browse_folder(self.log_path_edit, "select_log_folder_dialog_title")
+    
+    def browse_armor_folder(self):
+        """Browse for armor folder."""
+        self.browse_folder(self.armor_path_edit, "select_folder_dialog_title")
+
+
+class ArmorManagementDialog(QDialog):
+    """Dialog for managing armor files for a specific character."""
+    
+    def __init__(self, parent, character_id):
+        super().__init__(parent)
+        self.character_id = character_id
+        
+        from Functions.armor_manager import ArmorManager
+        self.armor_manager = ArmorManager(character_id)
+        
+        self.setWindowTitle(f"Gestion des armures - Personnage {character_id}")
+        self.resize(700, 450)
+        
+        layout = QVBoxLayout(self)
+        
+        # Info label
+        info_label = QLabel("Gérez les fichiers d'armure créés avec des logiciels tiers (formats : .png, .jpg, .pdf, .txt, etc.)")
+        info_label.setWordWrap(True)
+        layout.addWidget(info_label)
+        
+        # Armor files table
+        self.table = QTableWidget()
+        self.table.setColumnCount(4)
+        self.table.setHorizontalHeaderLabels(["Nom du fichier", "Taille", "Date de modification", "Actions"])
+        self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
+        self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
+        self.table.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeToContents)
+        self.table.setSelectionBehavior(QTableWidget.SelectRows)
+        self.table.setEditTriggers(QTableWidget.NoEditTriggers)
+        layout.addWidget(self.table)
+        
+        # Buttons
+        button_layout = QHBoxLayout()
+        
+        upload_button = QPushButton("📤 Uploader un fichier")
+        upload_button.clicked.connect(self.upload_armor)
+        button_layout.addWidget(upload_button)
+        
+        refresh_button = QPushButton("🔄 Actualiser")
+        refresh_button.clicked.connect(self.refresh_list)
+        button_layout.addWidget(refresh_button)
+        
+        button_layout.addStretch()
+        
+        close_button = QPushButton("Fermer")
+        close_button.clicked.connect(self.close)
+        button_layout.addWidget(close_button)
+        
+        layout.addLayout(button_layout)
+        
+        # Load initial data
+        self.refresh_list()
+    
+    def refresh_list(self):
+        """Refreshes the armor files list."""
+        try:
+            armors = self.armor_manager.list_armors()
+            self.table.setRowCount(len(armors))
+            
+            for row, armor in enumerate(armors):
+                # Filename
+                filename_item = QTableWidgetItem(armor['filename'])
+                self.table.setItem(row, 0, filename_item)
+                
+                # Size
+                size_mb = armor['size'] / (1024 * 1024)
+                size_text = f"{size_mb:.2f} MB" if size_mb >= 1 else f"{armor['size'] / 1024:.2f} KB"
+                size_item = QTableWidgetItem(size_text)
+                self.table.setItem(row, 1, size_item)
+                
+                # Modified date
+                modified_date = datetime.fromtimestamp(armor['modified']).strftime("%d/%m/%Y %H:%M")
+                date_item = QTableWidgetItem(modified_date)
+                self.table.setItem(row, 2, date_item)
+                
+                # Actions buttons
+                actions_widget = QWidget()
+                actions_layout = QHBoxLayout(actions_widget)
+                actions_layout.setContentsMargins(4, 2, 4, 2)
+                
+                open_button = QPushButton("🔍 Ouvrir")
+                open_button.setToolTip("Ouvrir le fichier avec l'application par défaut")
+                open_button.clicked.connect(lambda checked, f=armor['filename']: self.open_armor(f))
+                actions_layout.addWidget(open_button)
+                
+                delete_button = QPushButton("🗑️ Supprimer")
+                delete_button.setToolTip("Supprimer ce fichier d'armure")
+                delete_button.clicked.connect(lambda checked, f=armor['filename']: self.delete_armor(f))
+                actions_layout.addWidget(delete_button)
+                
+                self.table.setCellWidget(row, 3, actions_widget)
+            
+            logging.info(f"Liste des armures actualisée : {len(armors)} fichier(s)")
+            
+        except Exception as e:
+            logging.error(f"Erreur lors du rafraîchissement de la liste des armures : {e}")
+            QMessageBox.critical(self, "Erreur", f"Impossible de charger la liste des armures :\n{str(e)}")
+    
+    def upload_armor(self):
+        """Opens file dialog to upload an armor file."""
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Sélectionner un fichier d'armure",
+            "",
+            "Tous les fichiers (*.*)"
+        )
+        
+        if file_path:
+            try:
+                result_path = self.armor_manager.upload_armor(file_path)
+                QMessageBox.information(self, "Succès", f"Fichier uploadé avec succès :\n{os.path.basename(result_path)}")
+                self.refresh_list()
+                logging.info(f"Fichier d'armure uploadé : {result_path}")
+            except Exception as e:
+                logging.error(f"Erreur lors de l'upload du fichier d'armure : {e}")
+                QMessageBox.critical(self, "Erreur", f"Impossible d'uploader le fichier :\n{str(e)}")
+    
+    def open_armor(self, filename):
+        """Opens an armor file with the default application."""
+        try:
+            self.armor_manager.open_armor(filename)
+            logging.info(f"Ouverture du fichier d'armure : {filename}")
+        except Exception as e:
+            logging.error(f"Erreur lors de l'ouverture du fichier d'armure : {e}")
+            QMessageBox.critical(self, "Erreur", f"Impossible d'ouvrir le fichier :\n{str(e)}")
+    
+    def delete_armor(self, filename):
+        """Deletes an armor file after confirmation."""
+        reply = QMessageBox.question(
+            self,
+            "Confirmer la suppression",
+            f"Êtes-vous sûr de vouloir supprimer le fichier '{filename}' ?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+        
+        if reply == QMessageBox.Yes:
+            try:
+                self.armor_manager.delete_armor(filename)
+                QMessageBox.information(self, "Succès", f"Fichier '{filename}' supprimé avec succès.")
+                self.refresh_list()
+                logging.info(f"Fichier d'armure supprimé : {filename}")
+            except Exception as e:
+                logging.error(f"Erreur lors de la suppression du fichier d'armure : {e}")
+                QMessageBox.critical(self, "Erreur", f"Impossible de supprimer le fichier :\n{str(e)}")

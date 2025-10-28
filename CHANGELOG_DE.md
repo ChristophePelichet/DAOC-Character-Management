@@ -7,6 +7,30 @@ und dieses Projekt folgt dem [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unveröffentlicht]
 
+## [0.104] - 2025-10-29
+
+### Geändert
+- **Reichsrang-Schnittstelle**: Schieberegler durch Dropdown-Menüs ersetzt
+  - Dropdown-Menü für Rang (1-14)
+  - Dropdown-Menü für Level (L0-L10 für Rang 1, L0-L9 für andere)
+  - Rangtitel wird jetzt oben im Bereich in Reichsfarbe angezeigt
+- **Auto-Speichern**: "Diesen Rang anwenden"-Button entfernt
+  - Rang/Level-Änderungen werden jetzt automatisch angewendet
+  - Bestätigung von Änderungen nicht mehr erforderlich
+- **Visuelle Organisation**: "Reichsrang"-Bereich neu organisiert
+  - Rangtitel mit Farbe (rot für Albion, grün für Hibernia, blau für Midgard) oben platziert
+  - Rang/Level-Steuerung unter dem Titel
+
+### Hinzugefügt
+- **Rüstungsbereich**: Neuer Bereich neben "Allgemeine Informationen"
+  - "Widerstände"-Button (vorübergehend deaktiviert, demnächst verfügbar)
+  - Vorbereitung für Integration des Widerstandssystems
+- **Übersetzungen**: `armor_group_title` und `resistances_button` Schlüssel in FR/EN/DE hinzugefügt
+
+### Entwicklungshinweise
+- Widerstandsverwaltungsfunktion wird in einer späteren Version implementiert
+- URL zum Scraping von Widerstandsdaten muss noch bereitgestellt werden
+
 ## [0.103] - 2025-10-28
 
 ### Hinzugefügt

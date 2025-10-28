@@ -6,7 +6,7 @@ Charakterverwaltungsanwendung für Dark Age of Camelot (DAOC), entwickelt in Pyt
 
 ## 📦 Download
 
-**Aktuelle Version: v0.103**
+**Aktuelle Version: v0.104**
 
 [![Download Ausführbare Datei](https://img.shields.io/badge/Download-EXE-blue?style=for-the-badge&logo=windows)](https://github.com/ChristophePelichet/DAOC-Character-Management/releases/latest)
 
@@ -41,9 +41,14 @@ Charakterverwaltungsanwendung für Dark Age of Camelot (DAOC), entwickelt in Pyt
 
 ### Reichsränge
 - 🏆 **Anzeige** von Reichsrang und Titel
-- 📈 **Manuelle Anpassung** des Ranges (Rang 1-14, Level 1-9/10)
-- 🎨 **Farbige Titel** nach Reich
+- 📈 **Dropdown-Anpassung** des Ranges (Rang 1-14, Level 0-9/10)
+- 💾 **Auto-Speichern** von Rang/Level-Änderungen
+- 🎨 **Farbige Titel** nach Reich (rot für Albion, grün für Hibernia, blau für Midgard)
 - 📊 **Automatische Berechnung** basierend auf Reichspunkten
+
+### Rüstung & Widerstände *(Demnächst)*
+- 🛡️ **Rüstungsbereich** für Ausrüstungsverwaltung
+- ⚔️ **Widerstände**: Funktion in Vorbereitung
 
 ### Erweiterte Konfiguration
 - 🌍 **Mehrsprachig**: Français, English, Deutsch
@@ -227,6 +232,13 @@ Um den Debug-Modus zu aktivieren:
 
 Siehe das [Änderungsprotokoll](CHANGELOG_DE.md) für vollständige Historie.  
 **🌍 Verfügbar in:** [Français](CHANGELOG_FR.md) | [English](CHANGELOG_EN.md) | [Deutsch](CHANGELOG_DE.md)
+
+### Version 0.104 (29. Oktober 2025)
+- ✅ **Verbesserte Reichsrang-Schnittstelle**: Schieberegler durch Dropdown-Menüs ersetzt
+- ✅ **Auto-Speichern**: Kein Klick auf "Diesen Rang anwenden" mehr erforderlich
+- ✅ **Visuelle Organisation**: Rangtitel oben in Reichsfarbe angezeigt
+- ✅ **Rüstungsbereich**: Neuer Bereich neben "Allgemeine Informationen"
+- ✅ **Widerstände-Button**: Vorbereitung für Widerstandsverwaltungsfunktion (demnächst)
 
 ### Version 0.103 (28. Oktober 2025)
 - ✅ **Rassen-Auswahl**: Rassen-Feld in der Charaktererstellung hinzugefügt

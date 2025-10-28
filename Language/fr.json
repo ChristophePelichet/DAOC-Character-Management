@@ -85,6 +85,7 @@
     "context_menu_delete": "Supprimer",
     "context_menu_rename": "Renommer",
     "context_menu_duplicate": "Dupliquer",
+    "context_menu_armor_management": "📁 Gestion des armures",
     "duplicate_char_dialog_title": "Dupliquer le personnage",
     "duplicate_char_dialog_prompt": "Nom du nouveau personnage :",
     "rename_char_dialog_title": "Renommer le personnage",
@@ -112,6 +113,9 @@
     "menu_file": "Fichier",
     "menu_file_new_character": "Nouveau Personnage",
     "menu_file_settings": "Paramètres",
+    "menu_action": "Action",
+    "menu_action_resistances": "📊 Résistances",
+    "menu_action_armor_management": "📁 Gestion des armures",
     "menu_view": "Affichage",
     "menu_view_columns": "Colonnes",
     "menu_help": "Aide",
@@ -125,5 +129,11 @@
     "new_char_level_prompt": "Niveau :",
     "new_char_race_prompt": "Race :",
     "new_char_class_prompt": "Classe :",
-    "invalid_race_class_combo": "La race {race} ne peut pas jouer la classe {class}"
+    "invalid_race_class_combo": "La race {race} ne peut pas jouer la classe {class}",
+    "armor_group_title": "Armure",
+    "resistances_button": "Résistances",
+    "config_misc_group_title": "Divers",
+    "config_disable_disclaimer_label": "Désactiver le message d'avertissement au démarrage",
+    "disclaimer_title": "Alpha Version / Version Alpha / Alpha-Version",
+    "disclaimer_message": "🇫🇷 FRANÇAIS :\nCe logiciel est une version Alpha en cours de programmation.\nIl est donc soumis à des changements.\n\nCette application est un outil de gestion de personnages pour Dark Age of Camelot.\nLes données sont stockées localement sur votre machine.\n\n🇬🇧 ENGLISH:\nThis software is an Alpha version currently under development.\nIt is therefore subject to changes.\n\nThis application is a character management tool for Dark Age of Camelot.\nData is stored locally on your machine.\n\n🇩🇪 DEUTSCH:\nDiese Software ist eine Alpha-Version, die sich derzeit in der Entwicklung befindet.\nSie unterliegt daher Änderungen.\n\nDiese Anwendung ist ein Charakterverwaltungstool für Dark Age of Camelot.\nDaten werden lokal auf Ihrem Computer gespeichert.\n\n───────────────────────────────\nVous pouvez désactiver ce message dans Paramètres > Divers.\nYou can disable this message in Settings > Miscellaneous.\nSie können diese Meldung in Einstellungen > Verschiedenes deaktivieren."
 }

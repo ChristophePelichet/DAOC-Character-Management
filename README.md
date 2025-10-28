@@ -6,7 +6,7 @@ Application de gestion de personnages pour Dark Age of Camelot (DAOC), développ
 
 ## 📦 Téléchargement
 
-**Version actuelle : v0.103**
+**Version actuelle : v0.105**
 
 [![Télécharger l'exécutable](https://img.shields.io/badge/T%C3%A9l%C3%A9charger-EXE-blue?style=for-the-badge&logo=windows)](https://github.com/ChristophePelichet/DAOC-Character-Management/releases/latest)
 
@@ -40,15 +40,34 @@ Application de gestion de personnages pour Dark Age of Camelot (DAOC), développ
 
 ### Realm Ranks (Rangs de Royaume)
 - 🏆 **Affichage** du rang et du titre de royaume
-- 📈 **Ajustement manuel** du rang (Rank 1-14, Levels 1-9/10)
-- 🎨 **Titres colorés** selon le royaume
+- 📈 **Ajustement par menus déroulants** du rang (Rank 1-14, Levels 0-9/10)
+- 💾 **Sauvegarde automatique** des changements de rang/niveau
+- 🎨 **Titres colorés** selon le royaume (rouge pour Albion, vert pour Hibernia, bleu pour Midgard)
 - 📊 **Calcul automatique** basé sur les Realm Points
+
+### Armure & Résistances
+- 🛡️ **Système complet de résistances d'armure** avec support multilingue
+- 📊 **47 classes** avec leurs résistances par type d'armure
+- ⚔️ **9 types de résistances** : Thrust, Crush, Slash, Cold, Energy, Heat, Matter, Spirit, Body
+- 🌍 **Données traduites** en EN/FR/DE pour toutes les classes et résistances
+- 🏰 **Organisation par royaume** : Albion (16 classes), Hibernia (16 classes), Midgard (15 classes)
+- 🔄 **Données scrapées** automatiquement depuis le site officiel DAOC
+
+### Gestion des Armures
+- 📁 **Upload de fichiers d'armure** de tous formats (PNG, JPG, PDF, TXT, etc.)
+- 🗂️ **Organisation automatique** par ID de personnage dans des sous-dossiers
+- 📋 **Liste des armures** avec métadonnées (nom, taille, date de modification)
+- 🔍 **Ouverture rapide** des fichiers avec l'application par défaut
+- 🗑️ **Suppression** de fichiers avec confirmation
+- ⚙️ **Configuration** du chemin du dossier d'armures
+- 🔄 **Gestion des doublons** automatique (suffixes _1, _2, etc.)
 
 ### Configuration Avancée
 - 🌍 **Multi-langue** : Français, English, Deutsch
-- 🔧 **Personnalisation** des chemins (personnages, logs, config)
+- 🔧 **Personnalisation** des chemins (personnages, logs, config, armures)
 - 📋 **Colonnes configurables** : Masquer/afficher les colonnes souhaitées
 - 🐛 **Mode Debug** avec console intégrée
+- ℹ️ **Disclaimer configurable** : Message d'avertissement au démarrage (désactivable)
 
 ## 📋 Colonnes Configurables
 
@@ -211,7 +230,33 @@ Pour choisir entre le mode automatique et manuel :
 2. Utilisez le menu déroulant "Actions en masse"
 3. Sélectionnez "Supprimer la sélection" et cliquez sur "Exécuter"
 
-## 🐛 Débogage
+## �️ Outils de Développement
+
+### Générateur de Personnages de Test
+Pour tester l'application avec des données variées :
+```bash
+python Tools/generate_test_characters.py
+```
+- Génère 20 personnages avec attributs aléatoires
+- Distribution réaliste des Realm Points
+- Validation automatique des combinaisons classe/race
+
+### Éditeur de Données (Data Editor)
+Outil visuel pour éditer les fichiers JSON de données :
+```bash
+python Tools/data_editor.py
+```
+- **Onglet Classes & Races** : Éditer les classes, races et spécialisations
+- **Onglet Realm Ranks** : Gérer les rangs de royaume
+- **Onglet Résistances d'Armure** : Éditer les résistances avec support multilingue (EN/FR/DE)
+- Voir [Tools/DATA_EDITOR_README.md](Tools/DATA_EDITOR_README.md) pour plus de détails
+
+### Scripts de Scraping
+- `Scripts/scrape_realm_ranks.py` : Extraire les rangs de royaume
+- `Scripts/scrape_armor_resists.py` : Extraire les résistances d'armure
+- `Scripts/add_armor_translations.py` : Ajouter les traductions FR/DE automatiquement
+
+## �🐛 Débogage
 
 Pour activer le mode debug :
 1. Ouvrez la configuration via **Fichier > Paramètres**
@@ -223,6 +268,21 @@ Pour activer le mode debug :
 
 Consultez le [journal des modifications](CHANGELOG_FR.md) pour l'historique complet.  
 **🌍 Disponible en :** [Français](CHANGELOG_FR.md) | [English](CHANGELOG_EN.md) | [Deutsch](CHANGELOG_DE.md)
+
+### Version 0.104 (29 Octobre 2025)
+- ✅ **Système de Résistances d'Armure** : Nouvelle fonctionnalité complète
+  - 47 classes avec leurs résistances par type d'armure
+  - 9 types de résistances : Thrust, Crush, Slash, Cold, Energy, Heat, Matter, Spirit, Body
+  - Support multilingue complet (EN/FR/DE)
+  - Organisation par royaume (Albion, Hibernia, Midgard)
+  - Scraping automatique depuis darkageofcamelot.com
+- ✅ **Outil de génération de test** : Script `generate_test_characters.py`
+  - Génère 20 personnages avec attributs aléatoires pour tester l'application
+- ✅ **Interface Rang de Royaume améliorée** : Remplacement des curseurs par des menus déroulants
+- ✅ **Sauvegarde automatique** : Plus besoin de cliquer sur "Appliquer ce rang"
+- ✅ **Organisation visuelle** : Titre du rang affiché en haut avec couleur du royaume
+- ✅ **Section Armure** : Nouvelle section à côté de "Informations générales"
+- ✅ **Corrections** : Résolution d'erreurs LanguageManager et AttributeError
 
 ### Version 0.103 (28 Octobre 2025)
 - ✅ **Sélection de race** : Ajout d'un champ race dans la création de personnage

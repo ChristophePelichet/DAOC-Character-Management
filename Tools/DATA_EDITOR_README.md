@@ -17,6 +17,14 @@ Application d'édition visuelle des fichiers de données JSON pour DAOC Characte
 - ✅ **Éditer** Rank, Level, Realm Points, Title
 - ✅ **Gérer** les 3 royaumes séparément
 
+### 🛡️ Éditeur Résistances d'Armure (NOUVEAU)
+- ✅ **Visualiser** les résistances d'armure par classe et royaume
+- ✅ **Support multilingue** : EN / FR / DE (33 colonnes)
+- ✅ **Filtre de langue** : Afficher toutes les langues ou une seule
+- ✅ **Éditer** les types d'armure et résistances
+- ✅ **Ajouter/Supprimer** des classes
+- ✅ **9 types de résistances** : Thrust, Crush, Slash, Cold, Energy, Heat, Matter, Spirit, Body
+
 ## 🚀 Lancement
 
 ### Depuis Python
@@ -88,14 +96,33 @@ python data_editor.py
 - **Ajouter** : Cliquer sur "➕ Ajouter rang"
 - **Supprimer** : Sélectionner une ligne et cliquer sur "➖ Supprimer rang"
 
+### Éditer les Résistances d'Armure
+
+1. **Aller dans l'onglet "🛡️ Résistances d'Armure"**
+2. **Sélectionner le royaume** (Albion, Hibernia, Midgard)
+3. **Choisir l'affichage** :
+   - **Toutes les langues** : Voir les 33 colonnes (EN/FR/DE)
+   - **EN seulement** : Afficher uniquement l'anglais
+   - **FR seulement** : Afficher uniquement le français
+   - **DE seulement** : Afficher uniquement l'allemand
+4. **Modifier directement** dans le tableau :
+   - **Class** : Nom de la classe (3 langues)
+   - **Armor Type** : Type d'armure (Plate, Chain, Studded, Leather, Cloth, Scale, Reinforced)
+   - **Résistances** : Resistant, Vulnerable ou Neutral pour chaque type
+5. **Sauvegarder**
+
+### Ajouter/Supprimer une classe d'armure
+
+- **Ajouter** : Cliquer sur "➕ Ajouter classe" (crée une entrée avec toutes les traductions)
+- **Supprimer** : Sélectionner une ligne et cliquer sur "➖ Supprimer classe"
+
 ## 📁 Fichiers édités
 
 L'éditeur modifie directement les fichiers suivants :
 
 - `Data/classes_races.json` - Classes, races et spécialisations
-- `Data/realm_ranks_albion.json` - Rangs de royaume Albion
-- `Data/realm_ranks_hibernia.json` - Rangs de royaume Hibernia
-- `Data/realm_ranks_midgard.json` - Rangs de royaume Midgard
+- `Data/realm_ranks.json` - Rangs de royaume pour les 3 royaumes
+- `Data/armor_resists.json` - Résistances d'armure par classe et royaume
 
 ## ⚠️ Avertissements
 
@@ -128,7 +155,8 @@ Les spécialisations doivent être au format JSON valide :
 ## 🎨 Interface
 
 - **Onglet Classes & Races** : Éditeur visuel avec liste et formulaire
-- **Onglet Realm Ranks** : Tableau éditable
+- **Onglet Realm Ranks** : Tableau éditable pour les rangs de royaume
+- **Onglet Résistances d'Armure** : Tableau multilingue avec filtre de langue
 - **Boutons principaux** :
   - 💾 **Sauvegarder tout** : Sauvegarde toutes les modifications
   - 🔄 **Recharger** : Recharge les données depuis les fichiers
@@ -140,6 +168,8 @@ Les spécialisations doivent être au format JSON valide :
 2. **Validation JSON** : Utilisez un validateur JSON en ligne si vous avez un doute
 3. **Copier-coller** : Vous pouvez copier-coller des blocs de spécialisations
 4. **Format cohérent** : Gardez la même structure pour toutes les spécialisations
+5. **Filtre de langue** : Utilisez le filtre dans l'onglet Résistances pour simplifier l'édition d'une seule langue
+6. **Résistances** : Les valeurs possibles sont "Resistant", "Vulnerable" ou "Neutral" (avec traductions automatiques)
 
 ## 🐛 Dépannage
 
@@ -160,6 +190,7 @@ Pour toute question ou problème, consultez la documentation principale du DAOC 
 
 ---
 
-**Version** : 1.0  
+**Version** : 1.1  
+**Dernière mise à jour** : 28 octobre 2025  
 **Auteur** : GitHub Copilot  
 **Licence** : Même licence que DAOC Character Manager

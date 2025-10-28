@@ -81,6 +81,7 @@
     "context_menu_delete": "Delete",
     "context_menu_rename": "Rename",
     "context_menu_duplicate": "Duplicate",
+    "context_menu_armor_management": "📁 Armor Management",
     "duplicate_char_dialog_title": "Duplicate Character",
     "duplicate_char_dialog_prompt": "New character name:",
     "column_selection": "Selection",
@@ -104,6 +105,9 @@
     "menu_file": "File",
     "menu_file_new_character": "New Character",
     "menu_file_settings": "Settings",
+    "menu_action": "Action",
+    "menu_action_resistances": "📊 Resistances",
+    "menu_action_armor_management": "📁 Armor Management",
     "menu_view": "View",
     "menu_view_columns": "Columns",
     "menu_help": "Help",
@@ -125,5 +129,11 @@
     "bulk_actions_group_title": "Bulk Actions",
     "bulk_action_delete": "Delete Selection",
     "bulk_action_execute_button": "Execute",
-    "create_char_tooltip": "Create a new character"
+    "create_char_tooltip": "Create a new character",
+    "armor_group_title": "Armor",
+    "resistances_button": "Resistances",
+    "config_misc_group_title": "Miscellaneous",
+    "config_disable_disclaimer_label": "Disable startup warning message",
+    "disclaimer_title": "Alpha Version / Version Alpha / Alpha-Version",
+    "disclaimer_message": "🇫🇷 FRANÇAIS :\nCe logiciel est une version Alpha en cours de programmation.\nIl est donc soumis à des changements.\n\nCette application est un outil de gestion de personnages pour Dark Age of Camelot.\nLes données sont stockées localement sur votre machine.\n\n🇬🇧 ENGLISH:\nThis software is an Alpha version currently under development.\nIt is therefore subject to changes.\n\nThis application is a character management tool for Dark Age of Camelot.\nData is stored locally on your machine.\n\n🇩🇪 DEUTSCH:\nDiese Software ist eine Alpha-Version, die sich derzeit in der Entwicklung befindet.\nSie unterliegt daher Änderungen.\n\nDiese Anwendung ist ein Charakterverwaltungstool für Dark Age of Camelot.\nDaten werden lokal auf Ihrem Computer gespeichert.\n\n───────────────────────────────\nVous pouvez désactiver ce message dans Paramètres > Divers.\nYou can disable this message in Settings > Miscellaneous.\nSie können diese Meldung in Einstellungen > Verschiedenes deaktivieren."
 }

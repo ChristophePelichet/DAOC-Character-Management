@@ -7,6 +7,103 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [Unreleased]
+
+## [0.105] - 2024-12-XX
+
+### Added
+- **Action Menu**: New menu between "File" and "View"
+  - Action "📊 Resistances": Opens armor resistance table (launches data_editor.py)
+  - Full multilingual support (FR/EN/DE)
+  - Error handling with user messages
+  - Logging of all actions
+- **Enhanced Context Menu**:
+  - Added "📁 Armor Management" to right-click on character
+  - Placed between "Duplicate" and "Delete"
+- **Armor Management System**: Complete new feature
+  - Module `Functions/armor_manager.py` with `ArmorManager` class
+  - Upload armor files (all formats: PNG, JPG, PDF, TXT, etc.)
+  - Automatic duplicate handling (suffixes _1, _2, etc.)
+  - Organization by character ID in subfolders
+  - Armor list with metadata (name, size, modification date)
+  - Open files with system default application
+  - File deletion with confirmation
+  - `ArmorManagementDialog` with complete user interface
+  - "📁 Manage armors" button in character sheet (Armor section)
+  - Armor folder path configuration in Settings
+  - Complete documentation: `Documentation/ARMOR_MANAGEMENT_FR.md`
+  - Test script: `Scripts/test_armor_manager.py`
+- **Path Manager**: New functions for path management
+  - `get_armor_dir()`: Returns armor folder path
+  - `ensure_armor_dir()`: Creates armor folder automatically
+
+### Changed
+- **Configuration**: Added "Armor folder" field in configuration dialog
+  - New field with browse button
+  - Saved in `config.json` under `armor_folder` key
+  - Default value: `<app_dir>/Armures`
+- **Architecture**: "Drive-in" approach with configurable paths
+  - All paths stored in configuration
+  - Automatic creation of necessary directories
+  - No hardcoded paths
+
+### Technical
+- Support for all file formats
+- Metadata preservation during copy (shutil.copy2)
+- Detailed logging of all operations
+- Complete error handling with user messages
+- Windows compatible (tested with os.startfile)
+
+## [0.104] - 2025-10-29
+
+### Added
+- **Armor Resistance System**: Complete new feature
+  - File `Data/armor_resists.json` with resistances for all classes (47 classes)
+  - Full multilingual support (EN/FR/DE) for all fields
+  - 9 resistance types: Thrust, Crush, Slash, Cold, Energy, Heat, Matter, Spirit, Body
+  - 3 tables organized by realm (Albion: 16 classes, Hibernia: 16 classes, Midgard: 15 classes)
+  - Scraping script `scrape_armor_resists.py` to extract data from darkageofcamelot.com
+  - Script `add_armor_translations.py` to automatically add FR/DE translations
+- **Test Generation Tool**: Script `generate_test_characters.py`
+  - Generates 20 characters with random attributes
+  - Realistic Realm Points distribution
+  - Automatic validation of class/race combinations
+  - Ideal for testing the application with varied data
+
+### Added (continued)
+- **Startup Disclaimer**: Trilingual information message (FR/EN/DE)
+  - Warns that software is in Alpha version
+  - Informs about local data storage
+  - Option to disable message in Settings > Miscellaneous
+  - Replaces old hard-coded disclaimer system
+
+### Changed
+- **Realm Rank Interface**: Replaced sliders with dropdown menus
+  - Dropdown menu for rank (1-14)
+  - Dropdown menu for level (L0-L10 for rank 1, L0-L9 for others)
+  - Rank title now displays at the top of the section in realm color
+- **Auto-save**: Removed "Apply this rank" button
+  - Rank/level changes are now applied automatically
+  - No need to confirm changes
+- **Settings**: Added "Miscellaneous" group
+  - Checkbox to disable startup disclaimer
+  - Persistent save in config.json
+- **Visual Organization**: Reorganized "Realm Rank" section
+  - Rank title with color (red for Albion, green for Hibernia, blue for Midgard) placed at top
+  - Rank/level controls below the title
+- **Armor Section**: Positioned next to "General Information"
+  - "Resistances" button (temporarily disabled, coming soon)
+  - Preparation for resistance system integration
+
+### Fixed
+- **LanguageManager Error**: Fixed `lang.get()` calls with incorrect default values
+- **AttributeError**: Fixed method names for rank/level callbacks
+  - `on_rank_dropdown_changed` → `on_rank_changed`
+  - `on_level_dropdown_changed` → `on_level_changed`
+
+### Translations
+- Added `armor_group_title` and `resistances_button` keys in FR/EN/DE
+
 ## [0.103] - 2025-10-28
 
 ### Added

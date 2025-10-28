@@ -7,6 +7,103 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [Non publié]
+
+## [0.105] - 2024-12-XX
+
+### Ajouté
+- **Menu Action** : Nouveau menu entre "Fichier" et "Affichage"
+  - Action "📊 Résistances" : Ouvre le tableau des résistances d'armure (lance data_editor.py)
+  - Support multilingue complet (FR/EN/DE)
+  - Gestion des erreurs avec messages utilisateur
+  - Logging de toutes les actions
+- **Menu contextuel amélioré** : 
+  - Ajout de "📁 Gestion des armures" au clic droit sur un personnage
+  - Placé entre "Dupliquer" et "Supprimer"
+- **Système de Gestion des Armures** : Nouvelle fonctionnalité complète
+  - Module `Functions/armor_manager.py` avec la classe `ArmorManager`
+  - Upload de fichiers d'armure (tous formats : PNG, JPG, PDF, TXT, etc.)
+  - Gestion automatique des doublons (suffixes _1, _2, etc.)
+  - Organisation par ID de personnage dans des sous-dossiers
+  - Liste des armures avec métadonnées (nom, taille, date de modification)
+  - Ouverture des fichiers avec l'application par défaut du système
+  - Suppression de fichiers avec confirmation
+  - Dialog `ArmorManagementDialog` avec interface utilisateur complète
+  - Bouton "📁 Gérer les armures" dans la fiche de personnage (section Armure)
+  - Configuration du chemin du dossier d'armures dans Paramètres
+  - Documentation complète : `Documentation/ARMOR_MANAGEMENT_FR.md`
+  - Script de test : `Scripts/test_armor_manager.py`
+- **Path Manager** : Nouvelles fonctions pour la gestion des chemins
+  - `get_armor_dir()` : Retourne le chemin du dossier d'armures
+  - `ensure_armor_dir()` : Crée le dossier d'armures automatiquement
+
+### Modifié
+- **Configuration** : Ajout du champ "Dossier des armures" dans le dialogue de configuration
+  - Nouveau champ avec bouton de navigation
+  - Sauvegarde dans `config.json` sous la clé `armor_folder`
+  - Valeur par défaut : `<app_dir>/Armures`
+- **Architecture** : Approche "drive-in" avec chemins configurables
+  - Tous les chemins stockés dans la configuration
+  - Création automatique des répertoires nécessaires
+  - Aucun chemin codé en dur
+
+### Technique
+- Support de tous les formats de fichiers
+- Préservation des métadonnées lors de la copie (shutil.copy2)
+- Logging détaillé de toutes les opérations
+- Gestion complète des erreurs avec messages utilisateur
+- Compatible Windows (testé avec os.startfile)
+
+## [0.104] - 2025-10-29
+
+### Ajouté
+- **Système de Résistances d'Armure** : Nouvelle fonctionnalité complète
+  - Fichier `Data/armor_resists.json` avec les résistances de toutes les classes (47 classes)
+  - Support multilingue complet (EN/FR/DE) pour tous les champs
+  - 9 types de résistances : Thrust, Crush, Slash, Cold, Energy, Heat, Matter, Spirit, Body
+  - 3 tableaux organisés par royaume (Albion: 16 classes, Hibernia: 16 classes, Midgard: 15 classes)
+  - Script de scraping `scrape_armor_resists.py` pour extraire les données depuis darkageofcamelot.com
+  - Script `add_armor_translations.py` pour ajouter les traductions FR/DE automatiquement
+- **Outil de génération de test** : Script `generate_test_characters.py`
+  - Génère 20 personnages avec attributs aléatoires
+  - Distribution réaliste des Realm Points
+  - Validation automatique des combinaisons classe/race
+  - Idéal pour tester l'application avec des données variées
+
+### Ajouté (suite)
+- **Disclaimer au démarrage** : Message d'information trilingue (FR/EN/DE)
+  - Avertit que le logiciel est en version Alpha
+  - Informe sur le stockage local des données
+  - Option pour désactiver le message dans Paramètres > Divers
+  - Remplace l'ancien système de disclaimer codé en dur
+
+### Modifié
+- **Interface Rang de Royaume** : Remplacement des curseurs par des menus déroulants
+  - Menu déroulant pour le rang (1-14)
+  - Menu déroulant pour le niveau (L0-L10 pour rang 1, L0-L9 pour les autres)
+  - Le titre du rang s'affiche maintenant en haut de la section avec la couleur du royaume
+- **Sauvegarde automatique** : Suppression du bouton "Appliquer ce rang"
+  - Les modifications de rang/niveau sont maintenant appliquées automatiquement
+  - Plus besoin de confirmer les changements
+- **Paramètres** : Ajout du groupe "Divers"
+  - Case à cocher pour désactiver le disclaimer au démarrage
+  - Sauvegarde persistante dans config.json
+- **Organisation visuelle** : Réorganisation de la section "Rang de Royaume"
+  - Titre du rang avec couleur (rouge pour Albion, vert pour Hibernia, bleu pour Midgard) placé en haut
+  - Contrôles de rang/niveau en dessous du titre
+- **Section Armure** : Positionnée à côté de "Informations générales"
+  - Bouton "Résistances" (désactivé temporairement, fonctionnalité à venir)
+  - Préparation pour l'intégration du système de résistances
+
+### Corrigé
+- **Erreur LanguageManager** : Correction des appels `lang.get()` avec valeurs par défaut incorrectes
+- **Erreur AttributeError** : Correction des noms de méthodes pour les callbacks de rang/niveau
+  - `on_rank_dropdown_changed` → `on_rank_changed`
+  - `on_level_dropdown_changed` → `on_level_changed`
+
+### Traductions
+- Ajout des clés `armor_group_title` et `resistances_button` en FR/EN/DE
+
 ## [0.103] - 2025-10-28
 
 ### Ajouté

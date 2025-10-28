@@ -15,7 +15,13 @@ a = Analysis(
     hooksconfig={},
     runtime_hooks=[],
     excludes=[
-        'Documentation',  # Exclude documentation folder from build
+        'Documentation',  # Exclude Documentation folder from build
+        'Scripts',        # Exclude Scripts folder from build
+        'Tools',          # Exclude Tools folder from build
+        'Configuration',  # Exclude Configuration folder from build
+        'Characters',     # Exclude Characters folder from build
+        'Logs',           # Exclude Logs folder from build
+        'Armures',        # Exclude Armures folder from build
         'pytest',         # Exclude test framework
         'unittest',       # Exclude unittest
         'test',           # Exclude any test modules

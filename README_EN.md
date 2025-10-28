@@ -6,7 +6,7 @@ Character management application for Dark Age of Camelot (DAOC), developed in Py
 
 ## 📦 Download
 
-**Current Version: v0.103**
+**Current Version: v0.104**
 
 [![Download Executable](https://img.shields.io/badge/Download-EXE-blue?style=for-the-badge&logo=windows)](https://github.com/ChristophePelichet/DAOC-Character-Management/releases/latest)
 
@@ -41,9 +41,14 @@ Character management application for Dark Age of Camelot (DAOC), developed in Py
 
 ### Realm Ranks
 - 🏆 **Display** realm rank and title
-- 📈 **Manual adjustment** of rank (Rank 1-14, Levels 1-9/10)
-- 🎨 **Colored titles** by realm
+- 📈 **Dropdown adjustment** of rank (Rank 1-14, Levels 0-9/10)
+- 💾 **Auto-save** rank/level changes
+- 🎨 **Colored titles** by realm (red for Albion, green for Hibernia, blue for Midgard)
 - 📊 **Automatic calculation** based on Realm Points
+
+### Armor & Resistances *(Coming Soon)*
+- 🛡️ **Armor Section** for equipment management
+- ⚔️ **Resistances**: feature in preparation
 
 ### Advanced Configuration
 - 🌍 **Multi-language**: Français, English, Deutsch
@@ -227,6 +232,13 @@ To enable debug mode:
 
 See the [changelog](CHANGELOG_EN.md) for complete history.  
 **🌍 Available in:** [Français](CHANGELOG_FR.md) | [English](CHANGELOG_EN.md) | [Deutsch](CHANGELOG_DE.md)
+
+### Version 0.104 (October 29, 2025)
+- ✅ **Improved Realm Rank Interface**: Replaced sliders with dropdown menus
+- ✅ **Auto-save**: No need to click "Apply this rank" anymore
+- ✅ **Visual Organization**: Rank title displayed at top in realm color
+- ✅ **Armor Section**: New section next to "General Information"
+- ✅ **Resistances Button**: Preparation for resistance management feature (coming soon)
 
 ### Version 0.103 (October 28, 2025)
 - ✅ **Race Selection**: Added race field in character creation

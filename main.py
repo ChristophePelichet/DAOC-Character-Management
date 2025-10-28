@@ -27,6 +27,7 @@ from Functions.character_manager import (
 from Functions.language_manager import lang, get_available_languages
 from Functions.config_manager import config, get_config_dir
 from Functions.logging_manager import setup_logging, get_log_dir, get_img_dir
+from Functions.path_manager import get_base_path
 from Functions.data_manager import DataManager
 
 # Import UI components from modular UI package
@@ -45,11 +46,7 @@ setup_logging()
 
 # Application Constants
 APP_NAME = "DAOC Character Manager"
-APP_VERSION = "0.103"
-
-# Disclaimer Configuration
-# Set to True to show alpha disclaimer on startup, False to disable
-SHOW_ALPHA_DISCLAIMER = True
+APP_VERSION = "0.104"
 
 # ============================================================================
 
@@ -158,6 +155,19 @@ class CharacterApp(QMainWindow):
         # Create menus that might need re-translation
         self._create_context_menu()
 
+        # Show disclaimer on startup if not disabled
+        self.show_startup_disclaimer()
+
+    def show_startup_disclaimer(self):
+        """Shows a disclaimer message on startup if not disabled in settings."""
+        if not config.get("disable_disclaimer", False):
+            msg_box = QMessageBox(self)
+            msg_box.setWindowTitle(lang.get("disclaimer_title", default="Alpha Version - Information"))
+            msg_box.setIcon(QMessageBox.Information)
+            msg_box.setText(lang.get("disclaimer_message", default="Version Alpha"))
+            msg_box.setStandardButtons(QMessageBox.Ok)
+            msg_box.exec()
+
     def _create_actions(self):
         """Create all QAction objects for the application."""
         # Actions are now created directly in the menu bar method
@@ -182,6 +192,14 @@ class CharacterApp(QMainWindow):
         settings_action = QAction(lang.get("menu_file_settings"), self)
         settings_action.triggered.connect(self.open_configuration)
         file_menu.addAction(settings_action)
+        
+        # Action Menu
+        action_menu = menubar.addMenu(lang.get("menu_action", default="Action"))
+        
+        # Action -> Resistances
+        resistances_action = QAction(lang.get("menu_action_resistances", default="📊 Résistances"), self)
+        resistances_action.triggered.connect(self.open_resistances_table)
+        action_menu.addAction(resistances_action)
         
         # View Menu
         view_menu = menubar.addMenu(lang.get("menu_view"))
@@ -210,6 +228,12 @@ class CharacterApp(QMainWindow):
         # Add duplicate action
         duplicate_action = self.context_menu.addAction(lang.get("context_menu_duplicate", default="Dupliquer"))
         duplicate_action.triggered.connect(self.duplicate_selected_character)
+
+        self.context_menu.addSeparator()
+
+        # Add armor management action
+        armor_action = self.context_menu.addAction(lang.get("context_menu_armor_management", default="📁 Gestion des armures"))
+        armor_action.triggered.connect(self.open_armor_management_global)
 
         self.context_menu.addSeparator()
 
@@ -835,8 +859,10 @@ class CharacterApp(QMainWindow):
         config.set("character_folder", dialog.char_path_edit.text())
         config.set("config_folder", dialog.config_path_edit.text())
         config.set("log_folder", dialog.log_path_edit.text())
+        config.set("armor_folder", dialog.armor_path_edit.text())
         config.set("debug_mode", new_debug_mode)
         config.set("show_debug_window", dialog.show_debug_window_check.isChecked())
+        config.set("disable_disclaimer", dialog.disable_disclaimer_check.isChecked())
         config.set("seasons", dialog.available_seasons) # Preserve the season list
         config.set("servers", dialog.available_servers) # Preserve the server list
         
@@ -887,6 +913,96 @@ class CharacterApp(QMainWindow):
 
         if language_changed:
             self.change_language(new_lang_code)
+    
+    def open_resistances_table(self):
+        """Opens the armor resistances table using the data editor."""
+        logging.info("Opening armor resistances table from menu.")
+        try:
+            import subprocess
+            import sys
+            
+            # Get the path to data_editor.py
+            tools_dir = os.path.join(get_base_path(), "Tools")
+            data_editor_path = os.path.join(tools_dir, "data_editor.py")
+            
+            if not os.path.exists(data_editor_path):
+                QMessageBox.warning(
+                    self,
+                    "Erreur",
+                    f"Le fichier data_editor.py est introuvable à l'emplacement :\n{data_editor_path}"
+                )
+                return
+            
+            # Launch data_editor.py in a separate process
+            if sys.platform == "win32":
+                # Windows: use pythonw to avoid console window
+                subprocess.Popen([sys.executable, data_editor_path], 
+                               creationflags=subprocess.CREATE_NO_WINDOW)
+            else:
+                subprocess.Popen([sys.executable, data_editor_path])
+            
+            logging.info("Data editor launched successfully.")
+            
+        except Exception as e:
+            logging.error(f"Error launching data editor: {e}")
+            QMessageBox.critical(
+                self,
+                "Erreur",
+                f"Impossible de lancer l'éditeur de données :\n{str(e)}"
+            )
+    
+    def open_armor_management_global(self):
+        """Opens the armor management dialog (requires character selection)."""
+        logging.info("Armor management requested from menu.")
+        
+        # Check if a character is selected
+        indexes = self.character_tree.selectedIndexes()
+        if not indexes:
+            QMessageBox.information(
+                self,
+                lang.get("info_title", default="Information"),
+                "Veuillez sélectionner un personnage dans la liste pour accéder à la gestion de ses armures.\n\n"
+                "Vous pouvez aussi ouvrir la fiche du personnage et cliquer sur '📁 Gérer les armures'."
+            )
+            return
+        
+        # Get character data
+        row = indexes[0].row()
+        name_item = self.tree_model.item(row, 2)  # Name is at index 2
+        character_name = name_item.text()
+        
+        if not character_name:
+            QMessageBox.warning(
+                self,
+                "Erreur",
+                "Impossible de déterminer le nom du personnage."
+            )
+            return
+        
+        character_data = self.characters_by_id.get(character_name)
+        
+        if not character_data:
+            QMessageBox.warning(
+                self,
+                "Erreur",
+                f"Impossible de trouver les données du personnage '{character_name}'."
+            )
+            return
+        
+        # Get character ID
+        character_id = character_data.get('id', '')
+        if not character_id:
+            QMessageBox.warning(
+                self,
+                "Erreur",
+                "Impossible de déterminer l'ID du personnage."
+            )
+            return
+        
+        # Open armor management dialog
+        from UI.dialogs import ArmorManagementDialog
+        dialog = ArmorManagementDialog(self, character_id)
+        dialog.exec()
 
     def closeEvent(self, event):
         """Saves application state and ensures all child windows are closed."""
@@ -915,37 +1031,6 @@ def apply_theme(app):
     else: # Fallback to light theme
         logging.info("Applying Light theme (default system style).")
 
-def show_alpha_disclaimer():
-    """
-    Display a trilingual alpha version disclaimer message.
-    Shows a message box informing users that this is an alpha version under development.
-    The message appears in French, English, and German simultaneously.
-    """
-    disclaimer_title = "Alpha Version / Version Alpha / Alpha-Version"
-    
-    # Trilingual disclaimer message
-    disclaimer_message = (
-        "🇫🇷 FRANÇAIS :\n"
-        "Ce logiciel est une version Alpha en cours de programmation.\n"
-        "Il est donc soumis à des changements.\n\n"
-        
-        "🇬🇧 ENGLISH:\n"
-        "This software is an Alpha version currently under development.\n"
-        "It is therefore subject to changes.\n\n"
-        
-        "🇩🇪 DEUTSCH:\n"
-        "Diese Software ist eine Alpha-Version, die sich derzeit in der Entwicklung befindet.\n"
-        "Sie unterliegt daher Änderungen."
-    )
-    
-    msg_box = QMessageBox()
-    msg_box.setWindowTitle(disclaimer_title)
-    msg_box.setIcon(QMessageBox.Information)
-    msg_box.setText(disclaimer_message)
-    msg_box.setStandardButtons(QMessageBox.Ok)
-    msg_box.exec()
-    
-    logging.info("Alpha disclaimer displayed to user.")
 
 def main():
     """Main function to launch the application."""
@@ -965,10 +1050,6 @@ def main():
     main_window.load_time = load_duration # Store it on the window instance
     main_window.update_status_bar(lang.get("status_bar_loaded", duration=load_duration))
     main_window.show()
-
-    # Show alpha disclaimer if enabled
-    if SHOW_ALPHA_DISCLAIMER:
-        show_alpha_disclaimer()
 
     # Show debug window if configured, after the main window is shown and positioned
     if config.get("show_debug_window", False):

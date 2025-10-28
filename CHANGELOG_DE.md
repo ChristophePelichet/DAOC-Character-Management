@@ -7,6 +7,36 @@ und dieses Projekt folgt dem [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unveröffentlicht]
 
+## [0.103] - 2025-10-28
+
+### Hinzugefügt
+- **Rassen-Auswahl**: Rassen-Feld in der Charaktererstellung hinzugefügt
+- **Klassen-Auswahl**: Klassen-Feld in der Charaktererstellung hinzugefügt
+- **Dynamische Filterung**: Verfügbare Klassen werden nach ausgewählter Rasse gefiltert
+- **Rassen/Klassen-Validierung**: Automatische Überprüfung der Rassen/Klassen-Kompatibilität
+- **Spezialisierungs-Übersetzungen**: Alle Spezialisierungen jetzt in FR/EN/DE übersetzt
+- **Vollständiges Datensystem**: `Data/classes_races.json` mit 44 Klassen, 18 Rassen und 188 Spezialisierungen hinzugefügt
+- **Vollständige Dokumentation**: Nutzungsanleitungen und technische Dokumentation hinzugefügt
+
+### Geändert
+- **Mauler-Entfernung**: Mauler-Klasse entfernt (nicht auf Eden-Server implementiert)
+- **Eden-Unterstützung**: Daten angepasst, um verfügbare Klassen auf Eden zu entsprechen
+- **Spezialisierungs-Struktur**: Mehrsprachiges Format `{"name": "EN", "name_fr": "FR", "name_de": "DE"}`
+- **Erweiterter DataManager**: 11 neue Funktionen zur Verwaltung von Rassen/Klassen/Spezialisierungen hinzugefügt
+
+### Hinzugefügte Dateien
+- `Data/classes_races.json`: Vollständige Rassen-, Klassen- und Spezialisierungsdaten
+- `Data/classes_races_stats.json`: Detaillierte Statistiken
+- `Documentation/CLASSES_RACES_USAGE.md`: Vollständige Nutzungsanleitung
+- `Documentation/CLASSES_RACES_IMPLEMENTATION.md`: Technische Dokumentation
+- `validate_classes_races.py`: Datenvalidierungs-Skript
+- `example_classes_usage.py`: Praktische Nutzungsbeispiele
+
+### Statistiken
+- **44 Klassen** über 3 Reiche (Albion: 15, Midgard: 14, Hibernia: 15)
+- **18 Rassen** insgesamt (6 pro Reich)
+- **188 Spezialisierungen** in 3 Sprachen übersetzt
+
 ## [0.102] - 2025-10-27
 
 ### Geändert

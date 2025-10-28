@@ -4,7 +4,8 @@
 
 ```
 Data/
-└── realm_ranks.json    # Realm ranks for all 3 realms / Rangs de royaume pour les 3 royaumes (390 entries)
+├── realm_ranks.json      # Realm ranks for all 3 realms / Rangs de royaume pour les 3 royaumes (390 entries)
+└── classes_races.json    # Classes, races & specializations / Classes, races et spécialisations
 ```
 
 ## 📚 Complete Documentation / Documentation Complète

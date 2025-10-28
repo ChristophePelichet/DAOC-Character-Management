@@ -1,0 +1,1595 @@
+{
+  "Albion": {
+    "races": [
+      {
+        "name": "Avalonian",
+        "name_fr": "Avalonien",
+        "name_de": "Avalonianer"
+      },
+      {
+        "name": "Briton",
+        "name_fr": "Briton",
+        "name_de": "Brite"
+      },
+      {
+        "name": "Half Ogre",
+        "name_fr": "Demi-Ogre",
+        "name_de": "Halbogre"
+      },
+      {
+        "name": "Highlander",
+        "name_fr": "Highlander",
+        "name_de": "Hochländer"
+      },
+      {
+        "name": "Inconnu",
+        "name_fr": "Inconnu",
+        "name_de": "Inkonu"
+      },
+      {
+        "name": "Saracen",
+        "name_fr": "Sarrasin",
+        "name_de": "Sarazene"
+      }
+    ],
+    "classes": [
+      {
+        "name": "Armsman",
+        "name_fr": "Maitres d'armes",
+        "name_de": "Waffenmeister",
+        "races": [
+          "Briton",
+          "Avalonian",
+          "Highlander",
+          "Saracen",
+          "Half Ogre",
+          "Inconnu"
+        ],
+        "specializations": [
+          {
+            "name": "Crossbow",
+            "name_fr": "Arbalète",
+            "name_de": "Armbrust"
+          },
+          {
+            "name": "Polearm",
+            "name_fr": "Arme d'hast",
+            "name_de": "Stangenwaffe"
+          },
+          {
+            "name": "Slash",
+            "name_fr": "Tranchant",
+            "name_de": "Hieb"
+          },
+          {
+            "name": "Thrust",
+            "name_fr": "Estoc",
+            "name_de": "Stoß"
+          },
+          {
+            "name": "Two Handed",
+            "name_fr": "Deux mains",
+            "name_de": "Zweihändig"
+          },
+          {
+            "name": "Parry",
+            "name_fr": "Parade",
+            "name_de": "Parieren"
+          },
+          {
+            "name": "Shield",
+            "name_fr": "Bouclier",
+            "name_de": "Schild"
+          }
+        ]
+      },
+      {
+        "name": "Cabalist",
+        "name_fr": "Cabaliste",
+        "name_de": "Kabalist",
+        "races": [
+          "Briton",
+          "Avalonian",
+          "Saracen",
+          "Inconnu"
+        ],
+        "specializations": [
+          {
+            "name": "Body Magic",
+            "name_fr": "Magie du corps",
+            "name_de": "Körpermagie"
+          },
+          {
+            "name": "Matter Magic",
+            "name_fr": "Magie de la matière",
+            "name_de": "Materiemagie"
+          },
+          {
+            "name": "Spirit Magic",
+            "name_fr": "Magie de l'esprit",
+            "name_de": "Geistmagie"
+          }
+        ]
+      },
+      {
+        "name": "Cleric",
+        "name_fr": "Clerc",
+        "name_de": "Kleriker",
+        "races": [
+          "Briton",
+          "Avalonian",
+          "Highlander"
+        ],
+        "specializations": [
+          {
+            "name": "Rejuvenation",
+            "name_fr": "Rajeunissement",
+            "name_de": "Verjüngung"
+          },
+          {
+            "name": "Smiting",
+            "name_fr": "Châtiment",
+            "name_de": "Züchtigung"
+          },
+          {
+            "name": "Enhancement",
+            "name_fr": "Amélioration",
+            "name_de": "Verstärkung"
+          }
+        ]
+      },
+      {
+        "name": "Friar",
+        "name_fr": "Moine",
+        "name_de": "Mönch",
+        "races": [
+          "Briton"
+        ],
+        "specializations": [
+          {
+            "name": "Enhancement",
+            "name_fr": "Amélioration",
+            "name_de": "Verstärkung"
+          },
+          {
+            "name": "Parry",
+            "name_fr": "Parade",
+            "name_de": "Parieren"
+          },
+          {
+            "name": "Staff",
+            "name_fr": "Bâton",
+            "name_de": "Stab"
+          }
+        ]
+      },
+      {
+        "name": "Heretic",
+        "name_fr": "Hérétique",
+        "name_de": "Ketzer",
+        "races": [
+          "Briton",
+          "Avalonian",
+          "Inconnu"
+        ],
+        "specializations": [
+          {
+            "name": "Heresy",
+            "name_fr": "Hérésie",
+            "name_de": "Ketzerei"
+          },
+          {
+            "name": "Rejuvenation",
+            "name_fr": "Rajeunissement",
+            "name_de": "Verjüngung"
+          },
+          {
+            "name": "Enhancement",
+            "name_fr": "Amélioration",
+            "name_de": "Verstärkung"
+          },
+          {
+            "name": "Flexible",
+            "name_fr": "Flexible",
+            "name_de": "Flexibel"
+          },
+          {
+            "name": "Crush",
+            "name_fr": "Contondant",
+            "name_de": "Wucht"
+          }
+        ]
+      },
+      {
+        "name": "Infiltrator",
+        "name_fr": "Sicaire",
+        "name_de": "Infiltrator",
+        "races": [
+          "Briton",
+          "Saracen",
+          "Inconnu"
+        ],
+        "specializations": [
+          {
+            "name": "Critical Strike",
+            "name_fr": "Coup critique",
+            "name_de": "Kritischer Schlag"
+          },
+          {
+            "name": "Slash",
+            "name_fr": "Tranchant",
+            "name_de": "Hieb"
+          },
+          {
+            "name": "Thrust",
+            "name_fr": "Estoc",
+            "name_de": "Stoß"
+          },
+          {
+            "name": "Stealth",
+            "name_fr": "Furtivité",
+            "name_de": "Heimlichkeit"
+          }
+        ]
+      },
+      {
+        "name": "Mercenary",
+        "name_fr": "Mercenaire",
+        "name_de": "Söldner",
+        "races": [
+          "Briton",
+          "Avalonian",
+          "Highlander",
+          "Saracen",
+          "Half Ogre",
+          "Inconnu"
+        ],
+        "specializations": [
+          {
+            "name": "Crush",
+            "name_fr": "Contondant",
+            "name_de": "Wucht"
+          },
+          {
+            "name": "Slash",
+            "name_fr": "Tranchant",
+            "name_de": "Hieb"
+          },
+          {
+            "name": "Thrust",
+            "name_fr": "Estoc",
+            "name_de": "Stoß"
+          },
+          {
+            "name": "Parry",
+            "name_fr": "Parade",
+            "name_de": "Parieren"
+          },
+          {
+            "name": "Shield",
+            "name_fr": "Bouclier",
+            "name_de": "Schild"
+          }
+        ]
+      },
+      {
+        "name": "Minstrel",
+        "name_fr": "Ménestrel",
+        "name_de": "Spielmann",
+        "races": [
+          "Briton",
+          "Highlander",
+          "Saracen"
+        ],
+        "specializations": [
+          {
+            "name": "Instruments",
+            "name_fr": "Instruments",
+            "name_de": "Instrumente"
+          },
+          {
+            "name": "Slash",
+            "name_fr": "Tranchant",
+            "name_de": "Hieb"
+          },
+          {
+            "name": "Thrust",
+            "name_fr": "Estoc",
+            "name_de": "Stoß"
+          },
+          {
+            "name": "Stealth",
+            "name_fr": "Furtivité",
+            "name_de": "Heimlichkeit"
+          }
+        ]
+      },
+      {
+        "name": "Necromancer",
+        "name_fr": "Nécromancien",
+        "name_de": "Nekromant",
+        "races": [
+          "Briton",
+          "Avalonian",
+          "Saracen",
+          "Inconnu"
+        ],
+        "specializations": [
+          {
+            "name": "Death Servant",
+            "name_fr": "Serviteur de la mort",
+            "name_de": "Todesdiener"
+          },
+          {
+            "name": "Deathsight",
+            "name_fr": "Vision de la mort",
+            "name_de": "Todessicht"
+          },
+          {
+            "name": "Painworking",
+            "name_fr": "Travail de la douleur",
+            "name_de": "Schmerzarbeit"
+          }
+        ]
+      },
+      {
+        "name": "Paladin",
+        "name_fr": "Paladin",
+        "name_de": "Paladin",
+        "races": [
+          "Briton",
+          "Avalonian",
+          "Highlander",
+          "Saracen"
+        ],
+        "specializations": [
+          {
+            "name": "Chants",
+            "name_fr": "Chants",
+            "name_de": "Gesänge"
+          },
+          {
+            "name": "Crush",
+            "name_fr": "Contondant",
+            "name_de": "Wucht"
+          },
+          {
+            "name": "Slash",
+            "name_fr": "Tranchant",
+            "name_de": "Hieb"
+          },
+          {
+            "name": "Thrust",
+            "name_fr": "Estoc",
+            "name_de": "Stoß"
+          },
+          {
+            "name": "Two Handed",
+            "name_fr": "Deux mains",
+            "name_de": "Zweihändig"
+          },
+          {
+            "name": "Parry",
+            "name_fr": "Parade",
+            "name_de": "Parieren"
+          },
+          {
+            "name": "Shield",
+            "name_fr": "Bouclier",
+            "name_de": "Schild"
+          }
+        ]
+      },
+      {
+        "name": "Reaver",
+        "name_fr": "Fléau d'Arawn ",
+        "name_de": "Räuber",
+        "races": [
+          "Briton",
+          "Saracen",
+          "Inconnu"
+        ],
+        "specializations": [
+          {
+            "name": "Crush",
+            "name_fr": "Contondant",
+            "name_de": "Wucht"
+          },
+          {
+            "name": "Flexible",
+            "name_fr": "Flexible",
+            "name_de": "Flexibel"
+          },
+          {
+            "name": "Slash",
+            "name_fr": "Tranchant",
+            "name_de": "Hieb"
+          },
+          {
+            "name": "Soulrending",
+            "name_fr": "Déchirement d'âme",
+            "name_de": "Seelenzerreißen"
+          },
+          {
+            "name": "Shield",
+            "name_fr": "Bouclier",
+            "name_de": "Schild"
+          }
+        ]
+      },
+      {
+        "name": "Scout",
+        "name_fr": "Éclaireur",
+        "name_de": "Späher",
+        "races": [
+          "Briton",
+          "Highlander",
+          "Saracen"
+        ],
+        "specializations": [
+          {
+            "name": "Longbow",
+            "name_fr": "Arc long",
+            "name_de": "Langbogen"
+          },
+          {
+            "name": "Shield",
+            "name_fr": "Bouclier",
+            "name_de": "Schild"
+          },
+          {
+            "name": "Slash",
+            "name_fr": "Tranchant",
+            "name_de": "Hieb"
+          },
+          {
+            "name": "Thrust",
+            "name_fr": "Estoc",
+            "name_de": "Stoß"
+          },
+          {
+            "name": "Stealth",
+            "name_fr": "Furtivité",
+            "name_de": "Heimlichkeit"
+          }
+        ]
+      },
+      {
+        "name": "Sorcerer",
+        "name_fr": "Sorcier",
+        "name_de": "Zauberer",
+        "races": [
+          "Briton",
+          "Avalonian",
+          "Saracen",
+          "Inconnu"
+        ],
+        "specializations": [
+          {
+            "name": "Body Magic",
+            "name_fr": "Magie du corps",
+            "name_de": "Körpermagie"
+          },
+          {
+            "name": "Matter Magic",
+            "name_fr": "Magie de la matière",
+            "name_de": "Materiemagie"
+          },
+          {
+            "name": "Mind Magic",
+            "name_fr": "Magie de l'esprit",
+            "name_de": "Gedankenmagie"
+          }
+        ]
+      },
+      {
+        "name": "Theurgist",
+        "name_fr": "Théurgiste",
+        "name_de": "Theurgist",
+        "races": [
+          "Briton",
+          "Avalonian"
+        ],
+        "specializations": [
+          {
+            "name": "Earth Magic",
+            "name_fr": "Magie de la terre",
+            "name_de": "Erdmagie"
+          },
+          {
+            "name": "Cold Magic",
+            "name_fr": "Magie du froid",
+            "name_de": "Kältemagie"
+          },
+          {
+            "name": "Wind Magic",
+            "name_fr": "Magie du vent",
+            "name_de": "Windmagie"
+          }
+        ]
+      },
+      {
+        "name": "Wizard",
+        "name_fr": "Thaumaturge",
+        "name_de": "Magier",
+        "races": [
+          "Briton",
+          "Avalonian"
+        ],
+        "specializations": [
+          {
+            "name": "Earth Magic",
+            "name_fr": "Magie de la terre",
+            "name_de": "Erdmagie"
+          },
+          {
+            "name": "Cold Magic",
+            "name_fr": "Magie du froid",
+            "name_de": "Kältemagie"
+          },
+          {
+            "name": "Fire Magic",
+            "name_fr": "Magie du feu",
+            "name_de": "Feuermagie"
+          }
+        ]
+      }
+    ]
+  },
+  "Midgard": {
+    "races": [
+      {
+        "name": "Dwarf",
+        "name_fr": "Nain",
+        "name_de": "Zwerg"
+      },
+      {
+        "name": "Frostalf",
+        "name_fr": "Frostalf",
+        "name_de": "Frostalf"
+      },
+      {
+        "name": "Kobold",
+        "name_fr": "Kobold",
+        "name_de": "Kobold"
+      },
+      {
+        "name": "Norseman",
+        "name_fr": "Nordique",
+        "name_de": "Nordmann"
+      },
+      {
+        "name": "Troll",
+        "name_fr": "Troll",
+        "name_de": "Troll"
+      },
+      {
+        "name": "Valkyn",
+        "name_fr": "Valkyn",
+        "name_de": "Valkyn"
+      }
+    ],
+    "classes": [
+      {
+        "name": "Berserker",
+        "name_fr": "Berserker",
+        "name_de": "Berserker",
+        "races": [
+          "Norseman",
+          "Troll",
+          "Dwarf",
+          "Valkyn"
+        ],
+        "specializations": [
+          {
+            "name": "Axe",
+            "name_fr": "Hache",
+            "name_de": "Axt"
+          },
+          {
+            "name": "Hammer",
+            "name_fr": "Marteau",
+            "name_de": "Hammer"
+          },
+          {
+            "name": "Left Axe",
+            "name_fr": "Hache gauche",
+            "name_de": "Linke Axt"
+          },
+          {
+            "name": "Sword",
+            "name_fr": "Épée",
+            "name_de": "Schwert"
+          },
+          {
+            "name": "Parry",
+            "name_fr": "Parade",
+            "name_de": "Parieren"
+          }
+        ]
+      },
+      {
+        "name": "Bonedancer",
+        "name_fr": "Prêtre de Bodgar",
+        "name_de": "Knochentänzer",
+        "races": [
+          "Troll",
+          "Kobold",
+          "Valkyn"
+        ],
+        "specializations": [
+          {
+            "name": "Bone Army",
+            "name_fr": "Armée d'os",
+            "name_de": "Knochenarmee"
+          },
+          {
+            "name": "Darkness",
+            "name_fr": "Ténèbres",
+            "name_de": "Dunkelheit"
+          },
+          {
+            "name": "Suppression",
+            "name_fr": "Suppression",
+            "name_de": "Unterdrückung"
+          }
+        ]
+      },
+      {
+        "name": "Healer",
+        "name_fr": "Guérisseur",
+        "name_de": "Heiler",
+        "races": [
+          "Norseman",
+          "Dwarf",
+          "Frostalf"
+        ],
+        "specializations": [
+          {
+            "name": "Augmentation",
+            "name_fr": "Augmentation",
+            "name_de": "Verstärkung"
+          },
+          {
+            "name": "Mending",
+            "name_fr": "Guérison",
+            "name_de": "Heilung"
+          },
+          {
+            "name": "Pacification",
+            "name_fr": "Pacification",
+            "name_de": "Besänftigung"
+          }
+        ]
+      },
+      {
+        "name": "Hunter",
+        "name_fr": "Chasseur",
+        "name_de": "Jäger",
+        "races": [
+          "Norseman",
+          "Dwarf",
+          "Kobold",
+          "Valkyn"
+        ],
+        "specializations": [
+          {
+            "name": "Beast Craft",
+            "name_fr": "Maîtrise des bêtes",
+            "name_de": "Tiermeisterschaft"
+          },
+          {
+            "name": "Composite Bow",
+            "name_fr": "Arc composite",
+            "name_de": "Kompositbogen"
+          },
+          {
+            "name": "Spear",
+            "name_fr": "Lance",
+            "name_de": "Speer"
+          },
+          {
+            "name": "Sword",
+            "name_fr": "Épée",
+            "name_de": "Schwert"
+          },
+          {
+            "name": "Stealth",
+            "name_fr": "Furtivité",
+            "name_de": "Heimlichkeit"
+          }
+        ]
+      },
+      {
+        "name": "Runemaster",
+        "name_fr": "Prêtre d'Odin",
+        "name_de": "Runenmeister",
+        "races": [
+          "Norseman",
+          "Dwarf",
+          "Kobold",
+          "Frostalf"
+        ],
+        "specializations": [
+          {
+            "name": "Darkness",
+            "name_fr": "Ténèbres",
+            "name_de": "Dunkelheit"
+          },
+          {
+            "name": "Runecarving",
+            "name_fr": "Gravure de runes",
+            "name_de": "Runenschnitzen"
+          },
+          {
+            "name": "Suppression",
+            "name_fr": "Suppression",
+            "name_de": "Unterdrückung"
+          }
+        ]
+      },
+      {
+        "name": "Savage",
+        "name_fr": "Sauvage",
+        "name_de": "Wilder",
+        "races": [
+          "Norseman",
+          "Troll",
+          "Dwarf",
+          "Kobold",
+          "Valkyn"
+        ],
+        "specializations": [
+          {
+            "name": "Hand to Hand",
+            "name_fr": "Main à main",
+            "name_de": "Waffenloser Kampf"
+          },
+          {
+            "name": "Parry",
+            "name_fr": "Parade",
+            "name_de": "Parieren"
+          },
+          {
+            "name": "Savagery",
+            "name_fr": "Sauvagerie",
+            "name_de": "Wildheit"
+          }
+        ]
+      },
+      {
+        "name": "Shadowblade",
+        "name_fr": "Assassin",
+        "name_de": "Schattenklinge",
+        "races": [
+          "Norseman",
+          "Kobold",
+          "Valkyn",
+          "Frostalf"
+        ],
+        "specializations": [
+          {
+            "name": "Axe",
+            "name_fr": "Hache",
+            "name_de": "Axt"
+          },
+          {
+            "name": "Critical Strike",
+            "name_fr": "Coup critique",
+            "name_de": "Kritischer Schlag"
+          },
+          {
+            "name": "Left Axe",
+            "name_fr": "Hache gauche",
+            "name_de": "Linke Axt"
+          },
+          {
+            "name": "Sword",
+            "name_fr": "Épée",
+            "name_de": "Schwert"
+          },
+          {
+            "name": "Stealth",
+            "name_fr": "Furtivité",
+            "name_de": "Heimlichkeit"
+          }
+        ]
+      },
+      {
+        "name": "Shaman",
+        "name_fr": "Chaman",
+        "name_de": "Schamane",
+        "races": [
+          "Troll",
+          "Kobold"
+        ],
+        "specializations": [
+          {
+            "name": "Augmentation",
+            "name_fr": "Augmentation",
+            "name_de": "Verstärkung"
+          },
+          {
+            "name": "Cave Magic",
+            "name_fr": "Magie des cavernes",
+            "name_de": "Höhlenmagie"
+          },
+          {
+            "name": "Mending",
+            "name_fr": "Guérison",
+            "name_de": "Heilung"
+          },
+          {
+            "name": "Subterranean",
+            "name_fr": "Souterrain",
+            "name_de": "Unterirdisch"
+          }
+        ]
+      },
+      {
+        "name": "Skald",
+        "name_fr": "Skalde",
+        "name_de": "Skalde",
+        "races": [
+          "Norseman",
+          "Troll",
+          "Dwarf",
+          "Kobold"
+        ],
+        "specializations": [
+          {
+            "name": "Axe",
+            "name_fr": "Hache",
+            "name_de": "Axt"
+          },
+          {
+            "name": "Battlesongs",
+            "name_fr": "Chants de bataille",
+            "name_de": "Kampflieder"
+          },
+          {
+            "name": "Hammer",
+            "name_fr": "Marteau",
+            "name_de": "Hammer"
+          },
+          {
+            "name": "Sword",
+            "name_fr": "Épée",
+            "name_de": "Schwert"
+          },
+          {
+            "name": "Parry",
+            "name_fr": "Parade",
+            "name_de": "Parieren"
+          }
+        ]
+      },
+      {
+        "name": "Spiritmaster",
+        "name_fr": "Prêtre de Hel",
+        "name_de": "Geisterbeschwörer",
+        "races": [
+          "Norseman",
+          "Kobold",
+          "Frostalf"
+        ],
+        "specializations": [
+          {
+            "name": "Darkness",
+            "name_fr": "Ténèbres",
+            "name_de": "Dunkelheit"
+          },
+          {
+            "name": "Spirit Animation",
+            "name_fr": "Animation d'esprit",
+            "name_de": "Geistbeschwörung"
+          },
+          {
+            "name": "Summoning",
+            "name_fr": "Invocation",
+            "name_de": "Beschwörung"
+          }
+        ]
+      },
+      {
+        "name": "Thane",
+        "name_fr": "Thane",
+        "name_de": "Than",
+        "races": [
+          "Norseman",
+          "Troll",
+          "Dwarf",
+          "Frostalf"
+        ],
+        "specializations": [
+          {
+            "name": "Axe",
+            "name_fr": "Hache",
+            "name_de": "Axt"
+          },
+          {
+            "name": "Hammer",
+            "name_fr": "Marteau",
+            "name_de": "Hammer"
+          },
+          {
+            "name": "Shield",
+            "name_fr": "Bouclier",
+            "name_de": "Schild"
+          },
+          {
+            "name": "Stormcalling",
+            "name_fr": "Appel de la tempête",
+            "name_de": "Sturmruf"
+          },
+          {
+            "name": "Sword",
+            "name_fr": "Épée",
+            "name_de": "Schwert"
+          },
+          {
+            "name": "Parry",
+            "name_fr": "Parade",
+            "name_de": "Parieren"
+          }
+        ]
+      },
+      {
+        "name": "Valkyrie",
+        "name_fr": "Valkyrie",
+        "name_de": "Walküre",
+        "races": [
+          "Norseman",
+          "Dwarf",
+          "Frostalf"
+        ],
+        "specializations": [
+          {
+            "name": "Mending",
+            "name_fr": "Guérison",
+            "name_de": "Heilung"
+          },
+          {
+            "name": "Odin's Will",
+            "name_fr": "Volonté d'Odin",
+            "name_de": "Odins Wille"
+          },
+          {
+            "name": "Shield",
+            "name_fr": "Bouclier",
+            "name_de": "Schild"
+          },
+          {
+            "name": "Spear",
+            "name_fr": "Lance",
+            "name_de": "Speer"
+          },
+          {
+            "name": "Sword",
+            "name_fr": "Épée",
+            "name_de": "Schwert"
+          },
+          {
+            "name": "Parry",
+            "name_fr": "Parade",
+            "name_de": "Parieren"
+          }
+        ]
+      },
+      {
+        "name": "Warlock",
+        "name_fr": "Warlock",
+        "name_de": "Hexenmeister",
+        "races": [
+          "Norseman",
+          "Kobold",
+          "Frostalf"
+        ],
+        "specializations": [
+          {
+            "name": "Cursing",
+            "name_fr": "Malédiction",
+            "name_de": "Verfluchung"
+          },
+          {
+            "name": "Hexing",
+            "name_fr": "Envoûtement",
+            "name_de": "Verhexung"
+          },
+          {
+            "name": "Witchcraft",
+            "name_fr": "Sorcellerie",
+            "name_de": "Hexerei"
+          }
+        ]
+      },
+      {
+        "name": "Warrior",
+        "name_fr": "Guerrier",
+        "name_de": "Krieger",
+        "races": [
+          "Norseman",
+          "Troll",
+          "Dwarf",
+          "Kobold",
+          "Valkyn"
+        ],
+        "specializations": [
+          {
+            "name": "Axe",
+            "name_fr": "Hache",
+            "name_de": "Axt"
+          },
+          {
+            "name": "Hammer",
+            "name_fr": "Marteau",
+            "name_de": "Hammer"
+          },
+          {
+            "name": "Shield",
+            "name_fr": "Bouclier",
+            "name_de": "Schild"
+          },
+          {
+            "name": "Sword",
+            "name_fr": "Épée",
+            "name_de": "Schwert"
+          },
+          {
+            "name": "Thrown Weapons",
+            "name_fr": "Armes de jet",
+            "name_de": "Wurfwaffen"
+          },
+          {
+            "name": "Parry",
+            "name_fr": "Parade",
+            "name_de": "Parieren"
+          }
+        ]
+      }
+    ]
+  },
+  "Hibernia": {
+    "races": [
+      {
+        "name": "Celt",
+        "name_fr": "Celte",
+        "name_de": "Kelte"
+      },
+      {
+        "name": "Elf",
+        "name_fr": "Elfe",
+        "name_de": "Elf"
+      },
+      {
+        "name": "Firbolg",
+        "name_fr": "Firbolg",
+        "name_de": "Firbolg"
+      },
+      {
+        "name": "Lurikeen",
+        "name_fr": "Lurikeen",
+        "name_de": "Lurikeen"
+      },
+      {
+        "name": "Shar",
+        "name_fr": "Shar",
+        "name_de": "Shar"
+      },
+      {
+        "name": "Sylvan",
+        "name_fr": "Sylvain",
+        "name_de": "Sylvane"
+      }
+    ],
+    "classes": [
+      {
+        "name": "Animist",
+        "name_fr": "Animiste",
+        "name_de": "Animist",
+        "races": [
+          "Celt",
+          "Firbolg",
+          "Sylvan"
+        ],
+        "specializations": [
+          {
+            "name": "Arboreal Path",
+            "name_fr": "Voie arboricole",
+            "name_de": "Baumpfad"
+          },
+          {
+            "name": "Creeping Path",
+            "name_fr": "Voie rampante",
+            "name_de": "Schleichpfad"
+          },
+          {
+            "name": "Verdant Path",
+            "name_fr": "Voie verdoyante",
+            "name_de": "Grüner Pfad"
+          }
+        ]
+      },
+      {
+        "name": "Bainshee",
+        "name_fr": "Banshee",
+        "name_de": "Banshee",
+        "races": [
+          "Celt",
+          "Lurikeen",
+          "Elf"
+        ],
+        "specializations": [
+          {
+            "name": "Ethereal Shriek",
+            "name_fr": "Cri éthéré",
+            "name_de": "Ätherischer Schrei"
+          },
+          {
+            "name": "Phantasmal Wail",
+            "name_fr": "Gémissement spectral",
+            "name_de": "Phantomgeheul"
+          },
+          {
+            "name": "Spectral Guard",
+            "name_fr": "Garde spectrale",
+            "name_de": "Spektralwache"
+          }
+        ]
+      },
+      {
+        "name": "Bard",
+        "name_fr": "Barde",
+        "name_de": "Barde",
+        "races": [
+          "Celt",
+          "Firbolg"
+        ],
+        "specializations": [
+          {
+            "name": "Blades",
+            "name_fr": "Lames",
+            "name_de": "Klingen"
+          },
+          {
+            "name": "Blunt",
+            "name_fr": "Contondant",
+            "name_de": "Stumpf"
+          },
+          {
+            "name": "Music",
+            "name_fr": "Musique",
+            "name_de": "Musik"
+          },
+          {
+            "name": "Nurture",
+            "name_fr": "Protection",
+            "name_de": "Pflege"
+          },
+          {
+            "name": "Regrowth",
+            "name_fr": "Régénération",
+            "name_de": "Nachwachsen"
+          }
+        ]
+      },
+      {
+        "name": "Blademaster",
+        "name_fr": "Finelame",
+        "name_de": "Klingenmeister",
+        "races": [
+          "Celt",
+          "Firbolg",
+          "Elf",
+          "Shar"
+        ],
+        "specializations": [
+          {
+            "name": "Blades",
+            "name_fr": "Lames",
+            "name_de": "Klingen"
+          },
+          {
+            "name": "Celtic Dual",
+            "name_fr": "Double celte",
+            "name_de": "Keltisch Dual"
+          },
+          {
+            "name": "Parry",
+            "name_fr": "Parade",
+            "name_de": "Parieren"
+          },
+          {
+            "name": "Piercing",
+            "name_fr": "Perforant",
+            "name_de": "Durchbohren"
+          }
+        ]
+      },
+      {
+        "name": "Champion",
+        "name_fr": "Champion",
+        "name_de": "Champion",
+        "races": [
+          "Celt",
+          "Lurikeen",
+          "Elf",
+          "Shar"
+        ],
+        "specializations": [
+          {
+            "name": "Blades",
+            "name_fr": "Lames",
+            "name_de": "Klingen"
+          },
+          {
+            "name": "Blunt",
+            "name_fr": "Contondant",
+            "name_de": "Stumpf"
+          },
+          {
+            "name": "Large Weapons",
+            "name_fr": "Grandes armes",
+            "name_de": "Große Waffen"
+          },
+          {
+            "name": "Parry",
+            "name_fr": "Parade",
+            "name_de": "Parieren"
+          },
+          {
+            "name": "Piercing",
+            "name_fr": "Perforant",
+            "name_de": "Durchbohren"
+          },
+          {
+            "name": "Shield",
+            "name_fr": "Bouclier",
+            "name_de": "Schild"
+          },
+          {
+            "name": "Valor",
+            "name_fr": "Vaillance",
+            "name_de": "Tapferkeit"
+          }
+        ]
+      },
+      {
+        "name": "Druid",
+        "name_fr": "Druide",
+        "name_de": "Druide",
+        "races": [
+          "Celt",
+          "Firbolg",
+          "Sylvan"
+        ],
+        "specializations": [
+          {
+            "name": "Nature Affinity",
+            "name_fr": "Affinité naturelle",
+            "name_de": "Naturverbundenheit"
+          },
+          {
+            "name": "Nurture",
+            "name_fr": "Protection",
+            "name_de": "Pflege"
+          },
+          {
+            "name": "Regrowth",
+            "name_fr": "Régénération",
+            "name_de": "Nachwachsen"
+          }
+        ]
+      },
+      {
+        "name": "Eldritch",
+        "name_fr": "Eldritch",
+        "name_de": "Eldritch",
+        "races": [
+          "Lurikeen",
+          "Elf"
+        ],
+        "specializations": [
+          {
+            "name": "Light Magic",
+            "name_fr": "Magie de la lumière",
+            "name_de": "Lichtmagie"
+          },
+          {
+            "name": "Mana Magic",
+            "name_fr": "Magie du mana",
+            "name_de": "Manamagie"
+          },
+          {
+            "name": "Void Magic",
+            "name_fr": "Magie du vide",
+            "name_de": "Leermagie"
+          }
+        ]
+      },
+      {
+        "name": "Enchanter",
+        "name_fr": "Enchanteur",
+        "name_de": "Verzauberer",
+        "races": [
+          "Lurikeen",
+          "Elf"
+        ],
+        "specializations": [
+          {
+            "name": "Enchantments",
+            "name_fr": "Enchantements",
+            "name_de": "Verzauberungen"
+          },
+          {
+            "name": "Light Magic",
+            "name_fr": "Magie de la lumière",
+            "name_de": "Lichtmagie"
+          },
+          {
+            "name": "Mana Magic",
+            "name_fr": "Magie du mana",
+            "name_de": "Manamagie"
+          }
+        ]
+      },
+      {
+        "name": "Hero",
+        "name_fr": "Protecteur",
+        "name_de": "Held",
+        "races": [
+          "Celt",
+          "Firbolg",
+          "Lurikeen",
+          "Shar",
+          "Sylvan"
+        ],
+        "specializations": [
+          {
+            "name": "Blades",
+            "name_fr": "Lames",
+            "name_de": "Klingen"
+          },
+          {
+            "name": "Blunt",
+            "name_fr": "Contondant",
+            "name_de": "Stumpf"
+          },
+          {
+            "name": "Celtic Dual",
+            "name_fr": "Double celte",
+            "name_de": "Keltisch Dual"
+          },
+          {
+            "name": "Large Weapons",
+            "name_fr": "Grandes armes",
+            "name_de": "Große Waffen"
+          },
+          {
+            "name": "Parry",
+            "name_fr": "Parade",
+            "name_de": "Parieren"
+          },
+          {
+            "name": "Piercing",
+            "name_fr": "Perforant",
+            "name_de": "Durchbohren"
+          },
+          {
+            "name": "Shield",
+            "name_fr": "Bouclier",
+            "name_de": "Schild"
+          }
+        ]
+      },
+      {
+        "name": "Mentalist",
+        "name_fr": "Empathe",
+        "name_de": "Mentalist",
+        "races": [
+          "Celt",
+          "Lurikeen",
+          "Elf"
+        ],
+        "specializations": [
+          {
+            "name": "Light Magic",
+            "name_fr": "Magie de la lumière",
+            "name_de": "Lichtmagie"
+          },
+          {
+            "name": "Mana Magic",
+            "name_fr": "Magie du mana",
+            "name_de": "Manamagie"
+          },
+          {
+            "name": "Mentalism",
+            "name_fr": "Mentalisme",
+            "name_de": "Mentalismus"
+          }
+        ]
+      },
+      {
+        "name": "Nightshade",
+        "name_fr": "Ombre",
+        "name_de": "Nachtschatten",
+        "races": [
+          "Celt",
+          "Lurikeen",
+          "Elf"
+        ],
+        "specializations": [
+          {
+            "name": "Blades",
+            "name_fr": "Lames",
+            "name_de": "Klingen"
+          },
+          {
+            "name": "Celtic Dual",
+            "name_fr": "Double celte",
+            "name_de": "Keltisch Dual"
+          },
+          {
+            "name": "Critical Strike",
+            "name_fr": "Coup critique",
+            "name_de": "Kritischer Schlag"
+          },
+          {
+            "name": "Piercing",
+            "name_fr": "Perforant",
+            "name_de": "Durchbohren"
+          },
+          {
+            "name": "Stealth",
+            "name_fr": "Furtivité",
+            "name_de": "Heimlichkeit"
+          }
+        ]
+      },
+      {
+        "name": "Ranger",
+        "name_fr": "Rôdeur",
+        "name_de": "Waldläufer",
+        "races": [
+          "Celt",
+          "Lurikeen",
+          "Elf",
+          "Shar"
+        ],
+        "specializations": [
+          {
+            "name": "Blades",
+            "name_fr": "Lames",
+            "name_de": "Klingen"
+          },
+          {
+            "name": "Celtic Dual",
+            "name_fr": "Double celte",
+            "name_de": "Keltisch Dual"
+          },
+          {
+            "name": "Parry",
+            "name_fr": "Parade",
+            "name_de": "Parieren"
+          },
+          {
+            "name": "Piercing",
+            "name_fr": "Perforant",
+            "name_de": "Durchbohren"
+          },
+          {
+            "name": "RecurveBow",
+            "name_fr": "Arc recourbé",
+            "name_de": "Recurvebogen"
+          },
+          {
+            "name": "Stealth",
+            "name_fr": "Furtivité",
+            "name_de": "Heimlichkeit"
+          }
+        ]
+      },
+      {
+        "name": "Valewalker",
+        "name_fr": "Faucheur",
+        "name_de": "Valewalker",
+        "races": [
+          "Celt",
+          "Firbolg",
+          "Sylvan"
+        ],
+        "specializations": [
+          {
+            "name": "Arborean Path",
+            "name_fr": "Voie arboréenne",
+            "name_de": "Baumlichtung"
+          },
+          {
+            "name": "Parry",
+            "name_fr": "Parade",
+            "name_de": "Parieren"
+          },
+          {
+            "name": "Scythe",
+            "name_fr": "Faux",
+            "name_de": "Sense"
+          }
+        ]
+      },
+      {
+        "name": "Vampiir",
+        "name_fr": "Vampire",
+        "name_de": "Vampir",
+        "races": [
+          "Celt",
+          "Lurikeen",
+          "Shar"
+        ],
+        "specializations": [
+          {
+            "name": "Dementia",
+            "name_fr": "Démence",
+            "name_de": "Demenz"
+          },
+          {
+            "name": "Piercing",
+            "name_fr": "Perforant",
+            "name_de": "Durchbohren"
+          },
+          {
+            "name": "Shadow Mastery",
+            "name_fr": "Maîtrise des ombres",
+            "name_de": "Schattenmeisterschaft"
+          }
+        ]
+      },
+      {
+        "name": "Warden",
+        "name_fr": "Gardien",
+        "name_de": "Wächter",
+        "races": [
+          "Celt",
+          "Firbolg",
+          "Sylvan"
+        ],
+        "specializations": [
+          {
+            "name": "Blades",
+            "name_fr": "Lames",
+            "name_de": "Klingen"
+          },
+          {
+            "name": "Blunt",
+            "name_fr": "Contondant",
+            "name_de": "Stumpf"
+          },
+          {
+            "name": "Nature Affinity",
+            "name_fr": "Affinité naturelle",
+            "name_de": "Naturverbundenheit"
+          },
+          {
+            "name": "Nurture",
+            "name_fr": "Protection",
+            "name_de": "Pflege"
+          },
+          {
+            "name": "Parry",
+            "name_fr": "Parade",
+            "name_de": "Parieren"
+          },
+          {
+            "name": "Regrowth",
+            "name_fr": "Régénération",
+            "name_de": "Nachwachsen"
+          },
+          {
+            "name": "Shield",
+            "name_fr": "Bouclier",
+            "name_de": "Schild"
+          }
+        ]
+      }
+    ]
+  }
+}

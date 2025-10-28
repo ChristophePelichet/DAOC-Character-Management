@@ -45,7 +45,7 @@ setup_logging()
 
 # Application Constants
 APP_NAME = "DAOC Character Manager"
-APP_VERSION = "0.102"
+APP_VERSION = "0.104"
 
 # Disclaimer Configuration
 # Set to True to show alpha disclaimer on startup, False to disable
@@ -279,12 +279,12 @@ class CharacterApp(QMainWindow):
         result = dialog.get_data() if dialog.exec() == QDialog.Accepted else None
 
         if result:
-            character_name, realm, season, level, page, guild = result
-            character_data = create_character_data(character_name, realm, season, "Eden", level, page, guild)
+            character_name, realm, season, level, page, guild, race, class_name = result
+            character_data = create_character_data(character_name, realm, season, "Eden", level, page, guild, race, class_name)
             success, response = save_character(character_data)
             if success:
                 self.refresh_character_list()
-                logging.info(f"Successfully created character '{character_name}'.")
+                logging.info(f"Successfully created character '{character_name}' ({race} {class_name}).")
                 QMessageBox.information(self, lang.get("success_title"), lang.get("char_saved_success", name=character_name))
             else:
                 # If the response is a known error key, translate it. Otherwise, display as is.

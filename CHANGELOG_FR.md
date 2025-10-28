@@ -7,6 +7,56 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [0.104] - 2025-10-28
+
+### Ajouté
+- **Éditeur de données** : Nouvelle application `data_editor.py` pour éditer visuellement les fichiers JSON
+  - Éditeur de classes & races avec interface graphique
+  - Éditeur de realm ranks avec tableau éditable
+  - Gestion des traductions FR/EN/DE
+  - Validation et sauvegarde automatique
+- **Documentation éditeur** : `DATA_EDITOR_README.md` avec guide complet d'utilisation
+- **Script de lancement** : `launch_data_editor.bat` pour lancer facilement l'éditeur
+
+### Modifié
+- **Ordre classe/race inversé** : La classe est maintenant sélectionnée AVANT la race
+- **Filtrage race par classe** : Les races disponibles sont filtrées selon la classe sélectionnée
+- **DataManager** : Ajout de `get_available_races_for_class()` pour le filtrage inversé
+
+### Amélioré
+- **Expérience utilisateur** : Ordre plus logique (classe → race)
+- **Cohérence** : Ordre identique dans création et édition de personnage
+
+## [0.103] - 2025-10-28
+
+### Ajouté
+- **Sélection de race** : Ajout d'un champ race dans la création de personnage
+- **Sélection de classe** : Ajout d'un champ classe dans la création de personnage
+- **Filtrage dynamique** : Les classes disponibles sont filtrées selon la race sélectionnée
+- **Validation race/classe** : Vérification automatique de la compatibilité race/classe
+- **Traductions des spécialisations** : Toutes les spécialisations sont maintenant traduites en FR/EN/DE
+- **Système de données complet** : Ajout de `Data/classes_races.json` avec 44 classes, 18 races et 188 spécialisations
+- **Documentation complète** : Ajout de guides d'utilisation et de documentation technique
+
+### Modifié
+- **Suppression de Mauler** : Classe Mauler supprimée (non implémentée sur serveur Eden)
+- **Support Eden** : Données ajustées pour correspondre aux classes disponibles sur Eden
+- **Structure des spécialisations** : Format multilingue `{"name": "EN", "name_fr": "FR", "name_de": "DE"}`
+- **DataManager enrichi** : Ajout de 11 nouvelles fonctions pour gérer races/classes/spécialisations
+
+### Fichiers ajoutés
+- `Data/classes_races.json` : Données complètes des races, classes et spécialisations
+- `Data/classes_races_stats.json` : Statistiques détaillées
+- `Documentation/CLASSES_RACES_USAGE.md` : Guide d'utilisation complet
+- `Documentation/CLASSES_RACES_IMPLEMENTATION.md` : Documentation technique
+- `validate_classes_races.py` : Script de validation des données
+- `example_classes_usage.py` : Exemples d'utilisation pratique
+
+### Statistiques
+- **44 classes** réparties sur 3 royaumes (Albion: 15, Midgard: 14, Hibernia: 15)
+- **18 races** au total (6 par royaume)
+- **188 spécialisations** traduites en 3 langues
+
 ## [0.102] - 2025-10-27
 
 ### Modifié

@@ -117,5 +117,8 @@
     "rename_char_dialog_prompt": "Nouveau nom :",
     "new_char_page_prompt": "Page :",
     "new_char_guild_prompt": "Guilde :",
-    "new_char_level_prompt": "Niveau :"
+    "new_char_level_prompt": "Niveau :",
+    "new_char_race_prompt": "Race :",
+    "new_char_class_prompt": "Classe :",
+    "invalid_race_class_combo": "La race {race} ne peut pas jouer la classe {class}"
 }

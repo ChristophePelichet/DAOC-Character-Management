@@ -109,5 +109,8 @@
     "status_bar_selection_count": "{count} von {total} Charakter(e) ausgewählt",
     "new_char_page_prompt": "Seite:",
     "new_char_guild_prompt": "Gilde:",
-    "new_char_level_prompt": "Stufe:"
+    "new_char_level_prompt": "Stufe:",
+    "new_char_race_prompt": "Rasse:",
+    "new_char_class_prompt": "Klasse:",
+    "invalid_race_class_combo": "Die Rasse {race} kann nicht die Klasse {class} spielen"
 }

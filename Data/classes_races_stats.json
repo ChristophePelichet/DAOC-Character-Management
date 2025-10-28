@@ -1,0 +1,74 @@
+{
+  "summary": {
+    "total_realms": 3,
+    "total_races": 18,
+    "total_classes": 47,
+    "total_specializations": 203
+  },
+  "by_realm": {
+    "Albion": {
+      "races_count": 6,
+      "classes_count": 16,
+      "unique_specializations": 36,
+      "races": [
+        "Avalonian",
+        "Briton",
+        "Half Ogre",
+        "Highlander",
+        "Inconnu",
+        "Saracen"
+      ],
+      "most_versatile_classes": [
+        "Armsman",
+        "Mauler",
+        "Mercenary"
+      ],
+      "most_exclusive_classes": [
+        "Friar"
+      ],
+      "most_exclusive_race_count": 1
+    },
+    "Midgard": {
+      "races_count": 6,
+      "classes_count": 15,
+      "unique_specializations": 36,
+      "races": [
+        "Dwarf",
+        "Frostalf",
+        "Kobold",
+        "Norseman",
+        "Troll",
+        "Valkyn"
+      ],
+      "most_versatile_classes": [
+        "Mauler"
+      ],
+      "most_exclusive_classes": [
+        "Shaman"
+      ],
+      "most_exclusive_race_count": 2
+    },
+    "Hibernia": {
+      "races_count": 6,
+      "classes_count": 16,
+      "unique_specializations": 35,
+      "races": [
+        "Celt",
+        "Elf",
+        "Firbolg",
+        "Lurikeen",
+        "Shar",
+        "Sylvan"
+      ],
+      "most_versatile_classes": [
+        "Mauler"
+      ],
+      "most_exclusive_classes": [
+        "Bard",
+        "Eldritch",
+        "Enchanter"
+      ],
+      "most_exclusive_race_count": 2
+    }
+  }
+}

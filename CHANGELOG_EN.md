@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.103] - 2025-10-28
+
+### Added
+- **Race Selection**: Added race field in character creation
+- **Class Selection**: Added class field in character creation
+- **Dynamic Filtering**: Available classes are filtered based on selected race
+- **Race/Class Validation**: Automatic verification of race/class compatibility
+- **Specialization Translations**: All specializations now translated in FR/EN/DE
+- **Complete Data System**: Added `Data/classes_races.json` with 44 classes, 18 races and 188 specializations
+- **Complete Documentation**: Added usage guides and technical documentation
+
+### Changed
+- **Mauler Removal**: Mauler class removed (not implemented on Eden server)
+- **Eden Support**: Data adjusted to match available classes on Eden
+- **Specialization Structure**: Multilingual format `{"name": "EN", "name_fr": "FR", "name_de": "DE"}`
+- **Enhanced DataManager**: Added 11 new functions to manage races/classes/specializations
+
+### Added Files
+- `Data/classes_races.json`: Complete race, class and specialization data
+- `Data/classes_races_stats.json`: Detailed statistics
+- `Documentation/CLASSES_RACES_USAGE.md`: Complete usage guide
+- `Documentation/CLASSES_RACES_IMPLEMENTATION.md`: Technical documentation
+- `validate_classes_races.py`: Data validation script
+- `example_classes_usage.py`: Practical usage examples
+
+### Statistics
+- **44 classes** across 3 realms (Albion: 15, Midgard: 14, Hibernia: 15)
+- **18 races** total (6 per realm)
+- **188 specializations** translated in 3 languages
+
 ## [0.102] - 2025-10-27
 
 ### Changed

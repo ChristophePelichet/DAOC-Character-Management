@@ -6,7 +6,7 @@ Charakterverwaltungsanwendung für Dark Age of Camelot (DAOC), entwickelt in Pyt
 
 ## 📦 Download
 
-**Aktuelle Version: v0.102**
+**Aktuelle Version: v0.103**
 
 [![Download Ausführbare Datei](https://img.shields.io/badge/Download-EXE-blue?style=for-the-badge&logo=windows)](https://github.com/ChristophePelichet/DAOC-Character-Management/releases/latest)
 
@@ -17,11 +17,21 @@ Charakterverwaltungsanwendung für Dark Age of Camelot (DAOC), entwickelt in Pyt
 ## 🎮 Funktionen
 
 ### Charakterverwaltung
-- ✅ **Erstellen** von neuen Charakteren
+- ✅ **Erstellen** von neuen Charakteren mit Rasse und Klasse
+- ✅ **Dynamische Auswahl** von Klassen basierend auf der Rasse
+- ✅ **Automatische Validierung** von Rassen-/Klassen-Kombinationen
+- ✅ **Bearbeiten** von Rasse und Klasse im Charakterbogen
 - ✅ **Umbenennen** von vorhandenen Charakteren
 - ✅ **Duplizieren** von Charakteren
 - ✅ **Löschen** von Charakteren (einzeln oder in Masse)
 - ✅ **Anzeigen** von vollständigen Details jedes Charakters
+
+### Rassen & Klassen
+- 🎭 **44 Klassen** verfügbar über 3 Reiche
+- 👤 **18 spielbare Rassen** (6 pro Reich)
+- 📚 **188 Spezialisierungen** übersetzt in DE/EN/FR
+- ✅ **Intelligente Filterung**: nur Klassen, die mit der gewählten Rasse kompatibel sind, werden angezeigt
+- 🌍 **Vollständige Übersetzungen**: Rassen, Klassen und Spezialisierungen in 3 Sprachen
 
 ### Organisation
 - 📁 Organisation nach **Reich** (Albion, Hibernia, Midgard)
@@ -51,6 +61,8 @@ Verfügbare Spalten:
 - **Saison**: Charakter-Saison
 - **Server**: Charakter-Server (standardmäßig ausgeblendet)
 - **Name**: Charaktername
+- **Rasse**: Charakter-Rasse (neu!)
+- **Klasse**: Charakter-Klasse (neu!)
 - **Level**: Charakter-Level
 - **Rang**: Reichsrang (z.B.: 5L7)
 - **Titel**: Rang-Titel (z.B.: Challenger)

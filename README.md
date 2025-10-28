@@ -6,7 +6,7 @@ Application de gestion de personnages pour Dark Age of Camelot (DAOC), développ
 
 ## 📦 Téléchargement
 
-**Version actuelle : v0.102**
+**Version actuelle : v0.103**
 
 [![Télécharger l'exécutable](https://img.shields.io/badge/T%C3%A9l%C3%A9charger-EXE-blue?style=for-the-badge&logo=windows)](https://github.com/ChristophePelichet/DAOC-Character-Management/releases/latest)
 
@@ -17,11 +17,20 @@ Application de gestion de personnages pour Dark Age of Camelot (DAOC), développ
 ## 🎮 Fonctionnalités
 
 ### Gestion des Personnages
-- ✅ **Créer** de nouveaux personnages
+- ✅ **Créer** de nouveaux personnages avec race et classe
+- ✅ **Sélection dynamique** des classes selon la race
+- ✅ **Validation automatique** des combinaisons race/classe
 - ✅ **Renommer** des personnages existants
 - ✅ **Dupliquer** des personnages
 - ✅ **Supprimer** des personnages (individuellement ou en masse)
 - ✅ **Afficher** les détails complets de chaque personnage
+
+### Races & Classes
+- 🎭 **44 classes** disponibles réparties sur 3 royaumes
+- 👤 **18 races** jouables (6 par royaume)
+- 📚 **188 spécialisations** traduites en FR/EN/DE
+- ✅ **Filtrage intelligent** : seules les classes compatibles avec la race sélectionnée sont affichées
+- 🌍 **Traductions complètes** : races, classes et spécialisations en 3 langues
 
 ### Organisation
 - 📁 Organisation par **Royaume** (Albion, Hibernia, Midgard)
@@ -51,6 +60,8 @@ Colonnes disponibles :
 - **Saison** : Saison du personnage
 - **Serveur** : Serveur du personnage (cachée par défaut)
 - **Nom** : Nom du personnage
+- **Race** : Race du personnage (nouveau !)
+- **Classe** : Classe du personnage (nouveau !)
 - **Niveau** : Niveau du personnage
 - **Rang** : Rang de royaume (ex: 5L7)
 - **Titre** : Titre du rang (ex: Challenger)
@@ -59,7 +70,23 @@ Colonnes disponibles :
 
 Voir [Documentation/COLUMN_CONFIGURATION_FR.md](Documentation/CONFIGURATION_COLONNES_FR.md) (FR) ou [Documentation/COLUMN_CONFIGURATION_EN.md](Documentation/COLUMN_CONFIGURATION_EN.md) (EN) pour plus de détails.
 
-## 🚀 Installation
+## �️ Éditeur de Données
+
+Une application séparée permet d'éditer facilement les fichiers JSON :
+
+```bash
+python data_editor.py
+```
+
+**Fonctionnalités de l'éditeur** :
+- 🎭 **Classes & Races** : Édition visuelle avec interface graphique
+- 🏆 **Realm Ranks** : Tableau éditable pour tous les rangs
+- 🌍 **Traductions** : Gestion des noms FR/EN/DE
+- 💾 **Sauvegarde** : Validation et sauvegarde automatique
+
+Voir [DATA_EDITOR_README.md](DATA_EDITOR_README.md) pour le guide complet.
+
+## �🚀 Installation
 
 ### Prérequis
 - Python 3.13 ou supérieur (⚠️ PySide6 n'est pas compatible avec Python 3.14+)
@@ -77,8 +104,14 @@ pip install -r requirements.txt
 python main.py
 ```
 
-## 📦 Dépendances
+### Lancement de l'éditeur de données
 
+```bash
+python data_editor.py
+# ou double-cliquer sur launch_data_editor.bat
+```
+
+## 📦 Dépendances
 - **PySide6** : Interface graphique Qt6
 - **requests** : Requêtes HTTP pour le web scraping
 - **beautifulsoup4** : Parsing HTML

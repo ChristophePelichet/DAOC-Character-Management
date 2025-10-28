@@ -108,5 +108,8 @@
     "status_bar_selection_count": "{count} of {total} character(s) selected",
     "new_char_page_prompt": "Page:",
     "new_char_guild_prompt": "Guild:",
-    "new_char_level_prompt": "Level:"
+    "new_char_level_prompt": "Level:",
+    "new_char_race_prompt": "Race:",
+    "new_char_class_prompt": "Class:",
+    "invalid_race_class_combo": "The {race} race cannot play the {class} class"
 }

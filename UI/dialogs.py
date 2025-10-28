@@ -14,6 +14,7 @@ from Functions.language_manager import lang
 from Functions.config_manager import config, get_config_dir
 from Functions.character_manager import get_character_dir
 from Functions.logging_manager import get_log_dir
+from Functions.data_manager import DataManager
 
 
 class CharacterSheetWindow(QDialog):
@@ -47,7 +48,29 @@ class CharacterSheetWindow(QDialog):
         from Functions.character_manager import REALMS
         self.realm_combo.addItems(REALMS)
         self.realm_combo.setCurrentText(self.realm)
+        self.realm_combo.currentTextChanged.connect(self._on_realm_changed_sheet)
         info_layout.addRow("Royaume :", self.realm_combo)
+        
+        # Initialize DataManager for race/class data
+        self.data_manager = DataManager()
+        
+        # Editable class dropdown (BEFORE race)
+        self.class_combo = QComboBox()
+        self._populate_classes_sheet()
+        current_class = self.character_data.get('class', '')
+        if current_class:
+            self.class_combo.setCurrentText(current_class)
+        self.class_combo.currentTextChanged.connect(self._on_class_changed_sheet)
+        info_layout.addRow(lang.get("new_char_class_prompt", default="Classe :"), self.class_combo)
+        
+        # Editable race dropdown (AFTER class)
+        self.race_combo = QComboBox()
+        self._populate_races_sheet()
+        current_race = self.character_data.get('race', '')
+        if current_race:
+            self.race_combo.setCurrentText(current_race)
+        self.race_combo.currentTextChanged.connect(self._on_race_changed_sheet)
+        info_layout.addRow(lang.get("new_char_race_prompt", default="Race :"), self.race_combo)
         
         # Editable level dropdown (1-50)
         self.level_combo = QComboBox()
@@ -195,6 +218,72 @@ class CharacterSheetWindow(QDialog):
         button_box.rejected.connect(self.reject)
         layout.addWidget(button_box)
     
+    def _populate_classes_sheet(self):
+        """Populates class dropdown based on selected realm."""
+        self.class_combo.clear()
+        realm = self.realm_combo.currentText()
+        
+        # Get all classes for the realm
+        classes = self.data_manager.get_classes(realm)
+        current_language = config.get("language", "en")
+        
+        for cls in classes:
+            # Get translated name
+            if current_language == "fr" and "name_fr" in cls:
+                display_name = cls["name_fr"]
+            elif current_language == "de" and "name_de" in cls:
+                display_name = cls["name_de"]
+            else:
+                display_name = cls["name"]
+            
+            # Store actual name as item data
+            self.class_combo.addItem(display_name, cls["name"])
+    
+    def _populate_races_sheet(self):
+        """Populates race dropdown based on selected class and realm."""
+        self.race_combo.clear()
+        realm = self.realm_combo.currentText()
+        
+        # Get selected class (actual name from item data)
+        class_index = self.class_combo.currentIndex()
+        if class_index < 0:
+            # If no class selected, show all races
+            races = self.data_manager.get_races(realm)
+        else:
+            class_name = self.class_combo.itemData(class_index)
+            if not class_name:
+                races = self.data_manager.get_races(realm)
+            else:
+                # Filter races that can be this class
+                races = self.data_manager.get_available_races_for_class(realm, class_name)
+        
+        current_language = config.get("language", "en")
+        
+        for race in races:
+            # Get translated name
+            if current_language == "fr" and "name_fr" in race:
+                display_name = race["name_fr"]
+            elif current_language == "de" and "name_de" in race:
+                display_name = race["name_de"]
+            else:
+                display_name = race["name"]
+            
+            # Store actual name as item data
+            self.race_combo.addItem(display_name, race["name"])
+    
+    def _on_realm_changed_sheet(self):
+        """Called when realm is changed in character sheet."""
+        self._populate_classes_sheet()
+        self._populate_races_sheet()
+    
+    def _on_class_changed_sheet(self):
+        """Called when class is changed in character sheet."""
+        self._populate_races_sheet()
+    
+    def _on_race_changed_sheet(self):
+        """Called when race is changed in character sheet (no action needed)."""
+        pass
+    
     def on_rank_changed(self, value):
         """Called when rank slider changes."""
         self.rank_value_label.setText(f"Rank {value}")
@@ -292,7 +381,7 @@ class CharacterSheetWindow(QDialog):
                 QMessageBox.critical(self, "Erreur", f"Échec de la sauvegarde : {msg}")
 
     def save_basic_info(self):
-        """Saves the basic character information (realm, level, season, server, page and guild)."""
+        """Saves the basic character information (realm, level, season, server, page, guild, race and class)."""
         try:
             # Get current values
             new_realm = self.realm_combo.currentText()
@@ -301,6 +390,23 @@ class CharacterSheetWindow(QDialog):
             new_server = self.server_combo.currentText()
             new_page = int(self.page_combo.currentText())
             new_guild = self.guild_edit.text().strip()
+            
+            # Get race and class (actual names from item data)
+            race_index = self.race_combo.currentIndex()
+            class_index = self.class_combo.currentIndex()
+            
+            new_race = self.race_combo.itemData(race_index) if race_index >= 0 else ""
+            new_class = self.class_combo.itemData(class_index) if class_index >= 0 else ""
+            
+            # Validate race/class combination
+            if new_race and new_class:
+                if not self.data_manager.is_race_class_compatible(new_realm, new_race, new_class):
+                    QMessageBox.critical(
+                        self, 
+                        "Erreur", 
+                        lang.get("invalid_race_class_combo", default="Cette combinaison de race et classe n'est pas valide.")
+                    )
+                    return
             
             old_realm = self.character_data.get('realm', self.realm)
             
@@ -331,6 +437,8 @@ class CharacterSheetWindow(QDialog):
             self.character_data['server'] = new_server
             self.character_data['page'] = new_page
             self.character_data['guild'] = new_guild
+            self.character_data['race'] = new_race
+            self.character_data['class'] = new_class
             
             # Save character (it's already moved if realm changed)
             if old_realm == new_realm:
@@ -485,6 +593,7 @@ class NewCharacterDialog(QDialog):
         self.realms = realms if realms else []
         self.seasons = seasons if seasons else []
         self.default_season = default_season
+        self.data_manager = DataManager()
         
         layout = QFormLayout(self)
 
@@ -493,7 +602,18 @@ class NewCharacterDialog(QDialog):
 
         self.realm_combo = QComboBox(self)
         self.realm_combo.addItems(self.realms)
+        self.realm_combo.currentTextChanged.connect(self._on_realm_changed)
         layout.addRow(lang.get("new_char_realm_prompt"), self.realm_combo)
+        
+        # Class selection (BEFORE race)
+        self.class_combo = QComboBox(self)
+        self.class_combo.currentTextChanged.connect(self._on_class_changed)
+        layout.addRow(lang.get("new_char_class_prompt", default="Classe :"), self.class_combo)
+        
+        # Race selection (AFTER class)
+        self.race_combo = QComboBox(self)
+        self.race_combo.currentTextChanged.connect(self._on_race_changed)
+        layout.addRow(lang.get("new_char_race_prompt", default="Race :"), self.race_combo)
         
         # Season
         self.season_combo = QComboBox(self)
@@ -523,6 +643,62 @@ class NewCharacterDialog(QDialog):
         button_box.accepted.connect(self.accept)
         button_box.rejected.connect(self.reject)
         layout.addWidget(button_box)
+        
+        # Initialize race and class combos with first realm
+        if self.realms:
+            self._on_realm_changed(self.realm_combo.currentText())
+
+    def _on_realm_changed(self, realm):
+        """Called when realm changes - updates available classes"""
+        if not realm:
+            return
+        
+        # Get current language
+        current_lang = config.get("language", "fr")
+        
+        # Update classes
+        self.class_combo.clear()
+        classes = self.data_manager.get_classes(realm)
+        
+        lang_key = "name_fr" if current_lang == "fr" else "name_de" if current_lang == "de" else "name"
+        for cls in classes:
+            self.class_combo.addItem(cls.get(lang_key, cls["name"]), cls["name"])
+        
+        # Trigger class change to update races
+        if classes:
+            self._on_class_changed(classes[0]["name"])
+    
+    def _on_class_changed(self, class_display_name):
+        """Called when class changes - filters available races"""
+        realm = self.realm_combo.currentText()
+        if not realm:
+            return
+        
+        # Get the actual class name (stored in itemData)
+        class_name = self.class_combo.currentData()
+        if not class_name:
+            return
+        
+        # Get current language
+        current_lang = config.get("language", "fr")
+        
+        # Update races available for this class
+        self.race_combo.clear()
+        available_races = self.data_manager.get_available_races_for_class(realm, class_name)
+        
+        lang_key = "name_fr" if current_lang == "fr" else "name_de" if current_lang == "de" else "name"
+        for race_info in available_races:
+            self.race_combo.addItem(race_info.get(lang_key, race_info["name"]), race_info["name"])
+    
+    def _on_race_changed(self, race_display_name):
+        """Called when race changes - validates the combination"""
+        realm = self.realm_combo.currentText()
+        race_name = self.race_combo.currentData()
+        class_name = self.class_combo.currentData()
+        
+        if realm and race_name and class_name:
+            if not self.data_manager.is_race_class_compatible(realm, race_name, class_name):
+                logging.warning(f"Invalid combination: {race_name} cannot be {class_name}")
 
     def get_data(self):
         """Returns the entered data if valid."""
@@ -531,11 +707,24 @@ class NewCharacterDialog(QDialog):
             QMessageBox.warning(self, lang.get("error_title"), lang.get("char_name_empty_error"))
             return None
         realm = self.realm_combo.currentText()
+        race = self.race_combo.currentData()  # Get actual race name
+        class_name = self.class_combo.currentData()  # Get actual class name
         season = self.season_combo.currentText()
         level = int(self.level_combo.currentText())
         page = int(self.page_combo.currentText())
         guild = self.guild_edit.text().strip()
-        return name, realm, season, level, page, guild
+        
+        # Validate race/class combination
+        if race and class_name:
+            if not self.data_manager.is_race_class_compatible(realm, race, class_name):
+                QMessageBox.warning(
+                    self,
+                    lang.get("error_title"),
+                    lang.get("invalid_race_class_combo", default=f"La race {race} ne peut pas jouer la classe {class_name}")
+                )
+                return None
+        
+        return name, realm, season, level, page, guild, race, class_name
     
     def _on_season_changed(self, new_season):
         logging.debug(f"New character dialog: Season changed to '{new_season}'")

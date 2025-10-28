@@ -6,7 +6,7 @@ Character management application for Dark Age of Camelot (DAOC), developed in Py
 
 ## 📦 Download
 
-**Current Version: v0.102**
+**Current Version: v0.103**
 
 [![Download Executable](https://img.shields.io/badge/Download-EXE-blue?style=for-the-badge&logo=windows)](https://github.com/ChristophePelichet/DAOC-Character-Management/releases/latest)
 
@@ -17,11 +17,21 @@ Character management application for Dark Age of Camelot (DAOC), developed in Py
 ## 🎮 Features
 
 ### Character Management
-- ✅ **Create** new characters
+- ✅ **Create** new characters with race and class
+- ✅ **Dynamic selection** of classes based on race
+- ✅ **Automatic validation** of race/class combinations
+- ✅ **Edit** race and class in character sheet
 - ✅ **Rename** existing characters
 - ✅ **Duplicate** characters
 - ✅ **Delete** characters (individually or in bulk)
 - ✅ **Display** complete details of each character
+
+### Races & Classes
+- 🎭 **44 classes** available across 3 realms
+- 👤 **18 playable races** (6 per realm)
+- 📚 **188 specializations** translated in EN/FR/DE
+- ✅ **Smart filtering**: only classes compatible with the selected race are shown
+- 🌍 **Complete translations**: races, classes and specializations in 3 languages
 
 ### Organization
 - 📁 Organization by **Realm** (Albion, Hibernia, Midgard)
@@ -51,6 +61,8 @@ Available columns:
 - **Season**: Character season
 - **Server**: Character server (hidden by default)
 - **Name**: Character name
+- **Race**: Character race (new!)
+- **Class**: Character class (new!)
 - **Level**: Character level
 - **Rank**: Realm rank (ex: 5L7)
 - **Title**: Rank title (ex: Challenger)

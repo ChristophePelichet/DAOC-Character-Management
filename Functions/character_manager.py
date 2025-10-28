@@ -5,7 +5,24 @@ import logging
 from Functions.config_manager import config
 from Functions.path_manager import get_base_path
 
-REALMS = ["Albion", "Hibernia", "Midgard"]
+# Lazy load to avoid circular imports
+_data_manager = None
+
+def _get_data_manager():
+    """Lazy initialization of DataManager to avoid circular imports"""
+    global _data_manager
+    if _data_manager is None:
+        from Functions.data_manager import DataManager
+        _data_manager = DataManager()
+    return _data_manager
+
+def get_realms():
+    """Returns the list of realms from JSON data"""
+    return _get_data_manager().get_realms()
+
+# Keep REALMS as a callable for backward compatibility
+REALMS = get_realms()
+
 REALM_ICONS = {
     "Albion": "albion_logo.png",
     "Hibernia": "hibernia_logo.png",
@@ -17,7 +34,7 @@ def get_character_dir():
     default_path = os.path.join(get_base_path(), "Characters")
     return config.get("character_folder") or default_path
 
-def create_character_data(name, realm, season, server, level=1, page=1, guild=""):
+def create_character_data(name, realm, season, server, level=1, page=1, guild="", race="", class_name=""):
     """
     Creates a dictionary for a new character.
     The 'id' is now the character name for file system identification.
@@ -28,6 +45,8 @@ def create_character_data(name, realm, season, server, level=1, page=1, guild=""
         'uuid': str(uuid.uuid4()),  # Still keep a unique ID internally
         'name': name,
         'realm': realm,
+        'race': race,
+        'class': class_name,
         'level': level,
         'season': season,
         'server': server,

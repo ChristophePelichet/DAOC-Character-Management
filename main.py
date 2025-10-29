@@ -155,8 +155,120 @@ class CharacterApp(QMainWindow):
         # Create menus that might need re-translation
         self._create_context_menu()
 
+        # Run automatic migration if needed (only once)
+        self.run_automatic_migration()
+
         # Show disclaimer on startup if not disabled
         self.show_startup_disclaimer()
+
+    def run_automatic_migration(self):
+        """Runs automatic migration at startup if needed with user confirmation."""
+        try:
+            from Functions.migration_manager import run_migration_if_needed, run_migration_with_backup, get_backup_path
+            
+            was_needed, success, message = run_migration_if_needed()
+            
+            if was_needed and not success:
+                # Get the backup path that will be used
+                backup_path = get_backup_path()
+                
+                # Build the complete message with all 3 languages and backup path
+                message_parts = [
+                    lang.get("migration_startup_message_fr", default=""),
+                    "",
+                    lang.get("migration_startup_message_en", default=""),
+                    "",
+                    lang.get("migration_startup_message_de", default=""),
+                    "",
+                    "─" * 60,
+                    "",
+                    lang.get("migration_backup_location", default="💾 Backup location:"),
+                    backup_path,
+                    "",
+                    "─" * 60,
+                    "",
+                    lang.get("migration_warning", default=""),
+                    "",
+                    lang.get("migration_question", default="")
+                ]
+                
+                complete_message = "\n".join(message_parts)
+                
+                # Migration is needed - show confirmation dialog with backup info
+                msg_box = QMessageBox(self)
+                msg_box.setWindowTitle(lang.get("migration_startup_title", default="Structure Migration Required"))
+                msg_box.setIcon(QMessageBox.Question)
+                msg_box.setText(complete_message)
+                
+                # Add OK and Cancel buttons
+                ok_button = msg_box.addButton(QMessageBox.Ok)
+                cancel_button = msg_box.addButton(QMessageBox.Cancel)
+                msg_box.setDefaultButton(ok_button)
+                
+                result = msg_box.exec()
+                
+                if result == QMessageBox.Cancel:
+                    # User cancelled - close application
+                    logging.info("User cancelled migration. Closing application.")
+                    QMessageBox.information(
+                        self,
+                        lang.get("migration_cancelled_title", default="Migration Cancelled"),
+                        lang.get("migration_cancelled_message", default="Migration cancelled, closing program.")
+                    )
+                    import sys
+                    sys.exit(0)
+                else:
+                    # User confirmed - run migration with backup
+                    logging.info("User confirmed migration. Starting backup and migration...")
+                    
+                    # Show progress message
+                    progress = QMessageBox(self)
+                    progress.setWindowTitle(lang.get("migration_in_progress", default="Migration in progress..."))
+                    progress.setText(lang.get("migration_backup_info", default="Creating backup..."))
+                    progress.setStandardButtons(QMessageBox.NoButton)
+                    progress.setModal(True)
+                    progress.show()
+                    QApplication.processEvents()
+                    
+                    try:
+                        # Run migration with backup
+                        success, migration_message, backup_path = run_migration_with_backup()
+                    finally:
+                        # Always close the progress dialog
+                        progress.close()
+                        progress.deleteLater()
+                    
+                    if success:
+                        logging.info(f"Migration completed successfully: {migration_message}")
+                        QMessageBox.information(
+                            self,
+                            lang.get("migration_success", default="Migration successful!"),
+                            migration_message
+                        )
+                        # Refresh character list to show migrated characters
+                        self.refresh_character_list()
+                    else:
+                        logging.error(f"Migration failed: {migration_message}")
+                        QMessageBox.critical(
+                            self,
+                            lang.get("migration_error", default="Migration error"),
+                            migration_message
+                        )
+                        # Close application on migration failure
+                        import sys
+                        sys.exit(1)
+                        
+        except Exception as e:
+            logging.error(f"Error during automatic migration: {e}")
+            QMessageBox.critical(
+                self,
+                lang.get("migration_error", default="Migration error"),
+                f"An error occurred during migration: {str(e)}"
+            )
+            import sys
+            sys.exit(1)
+            import sys
+            sys.exit(1)
 
     def show_startup_disclaimer(self):
         """Shows a disclaimer message on startup if not disabled in settings."""
@@ -203,6 +315,13 @@ class CharacterApp(QMainWindow):
         
         # Help Menu
         help_menu = menubar.addMenu(lang.get("menu_help"))
+        
+        # Help -> Migrate Folder Structure
+        migrate_action = QAction(lang.get("menu_help_migrate"), self)
+        migrate_action.triggered.connect(self.run_manual_migration)
+        help_menu.addAction(migrate_action)
+        
+        help_menu.addSeparator()
         
         # Help -> About
         about_action = QAction(lang.get("menu_help_about"), self)
@@ -801,6 +920,91 @@ class CharacterApp(QMainWindow):
         title = lang.get("about_dialog_title", app_name=APP_NAME)
         message = lang.get("about_dialog_content", app_name=APP_NAME, version=APP_VERSION)
         QMessageBox.about(self, title, message)
+
+    def run_manual_migration(self):
+        """Runs migration manually when user clicks the menu option."""
+        try:
+            from Functions.migration_manager import (
+                check_migration_needed, 
+                migrate_character_structure, 
+                is_migration_done
+            )
+            
+            # Check if migration was already done
+            if is_migration_done():
+                reply = QMessageBox.question(
+                    self,
+                    lang.get("migration_confirm_title", default="Confirm Migration"),
+                    lang.get("migration_already_done", default="Migration has already been completed.") + "\n\n" +
+                    lang.get("migration_confirm_message", default="Do you want to run it again?"),
+                    QMessageBox.Yes | QMessageBox.No,
+                    QMessageBox.No
+                )
+                if reply != QMessageBox.Yes:
+                    return
+            
+            # Check if migration is needed
+            if not check_migration_needed():
+                QMessageBox.information(
+                    self,
+                    lang.get("migration_dialog_title", default="Folder Structure Migration"),
+                    lang.get("migration_not_needed", default="No migration needed. Your folder structure is already correct.")
+                )
+                return
+            
+            # Confirm before migrating
+            reply = QMessageBox.question(
+                self,
+                lang.get("migration_confirm_title", default="Confirm Migration"),
+                lang.get("migration_confirm_message", default="This will reorganize your character folders. Continue?"),
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No
+            )
+            
+            if reply != QMessageBox.Yes:
+                return
+            
+            # Show progress (simple message since migration is fast)
+            QMessageBox.information(
+                self,
+                lang.get("migration_dialog_title", default="Folder Structure Migration"),
+                lang.get("migration_in_progress", default="Migration in progress...")
+            )
+            
+            # Run migration
+            success, message, stats = migrate_character_structure()
+            
+            if success:
+                result_message = f"{message}\n\n"
+                if stats.get("migrated", 0) > 0:
+                    result_message += f"Characters migrated: {stats['migrated']}\n"
+                    if stats.get("by_season"):
+                        result_message += "By season:\n"
+                        for season, count in sorted(stats["by_season"].items()):
+                            result_message += f"  {season}: {count}\n"
+                
+                QMessageBox.information(
+                    self,
+                    lang.get("migration_success", default="Migration successful!"),
+                    result_message
+                )
+                
+                # Refresh character list
+                self.refresh_character_list()
+            else:
+                QMessageBox.critical(
+                    self,
+                    lang.get("migration_error", default="Migration error"),
+                    message
+                )
+                
+        except Exception as e:
+            logging.error(f"Error during manual migration: {e}")
+            QMessageBox.critical(
+                self,
+                lang.get("migration_error", default="Migration error"),
+                f"An error occurred: {e}"
+            )
 
     def update_status_bar(self, message):
         """Updates the text in the status bar."""

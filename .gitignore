@@ -132,6 +132,8 @@ dmypy.json
 
 # Project specific folders
 Characters/
+Characters.old/
+Backup/
 Logs/
 #Tools/
 Configuration/

@@ -137,10 +137,19 @@ DAOC-Character-Management/
 ├── main.py                      # Hauptanwendung
 ├── requirements.txt             # Python-Abhängigkeiten
 ├── scrape_realm_ranks.py        # Rang-Extraktionsskript
-├── Characters/                  # Charakterdaten
-│   ├── Albion/
-│   ├── Hibernia/
-│   └── Midgard/
+├── Characters/                  # Charakterdaten (Season/Realm-Struktur)
+│   ├── S1/                      # Saison 1
+│   │   ├── Albion/
+│   │   ├── Hibernia/
+│   │   └── Midgard/
+│   ├── S2/                      # Saison 2
+│   │   ├── Albion/
+│   │   ├── Hibernia/
+│   │   └── Midgard/
+│   └── S3/                      # Saison 3
+│       ├── Albion/
+│       ├── Hibernia/
+│       └── Midgard/
 ├── Configuration/               # Konfigurationsdateien
 │   └── config.json
 ├── Data/                        # Spieldaten
@@ -163,6 +172,7 @@ DAOC-Character-Management/
 │   ├── data_manager.py
 │   ├── language_manager.py
 │   ├── logging_manager.py
+│   ├── migration_manager.py     # Migrationsmanager
 │   └── path_manager.py
 ├── Img/                         # Bilder und Symbole
 ├── Language/                    # Übersetzungsdateien
@@ -183,6 +193,29 @@ Die Konfiguration ist über das Menü **Datei > Einstellungen** zugänglich.
 - 🖥️ **Standard-Server**: Eden, Blackthorn, usw.
 - 📅 **Standard-Saison**: S1, S2, S3, usw.
 - 🐛 **Debug-Modus**: Detaillierte Logs aktivieren/deaktivieren
+
+## 🔄 Strukturmigration
+
+**Wichtig**: Ab Version 0.104 hat sich die Ordnerstruktur geändert, um Charaktere besser nach Saison zu organisieren.
+
+### Aktuelle Struktur (v0.104+)
+```
+Characters/
+└── Season/              # S1, S2, S3, usw.
+    └── Realm/           # Albion, Hibernia, Midgard
+        └── Character.json
+```
+
+### Automatische Migration
+- Die Migration erfolgt **automatisch beim ersten Start** der Anwendung
+- Ihre vorhandenen Charaktere bleiben **erhalten** und werden in die neue Struktur verschoben
+- Eine `.migration_done` Datei wird erstellt, um mehrfache Migrationen zu vermeiden
+
+### Manuelle Migration
+Wenn Sie die Migration erneut ausführen müssen:
+1. Gehen Sie zu **Hilfe > Ordnerstruktur migrieren**
+2. Bestätigen Sie den Vorgang
+3. Ein detaillierter Bericht mit der Anzahl der migrierten Charaktere wird angezeigt
 
 ## 🎯 Verwendung
 

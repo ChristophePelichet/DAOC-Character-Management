@@ -59,8 +59,8 @@ def create_character_data(name, realm, season, server, level=1, page=1, guild=""
 def save_character(character_data, allow_overwrite=False):
     """
     Saves character data to a JSON file named after the character,
-    inside a subfolder corresponding to its realm.
-    e.g., 'Characters/Albion/Merlin.json'
+    inside a subfolder corresponding to its season and realm.
+    e.g., 'Characters/S1/Albion/Merlin.json'
     
     Args:
         character_data: The character data to save
@@ -70,14 +70,19 @@ def save_character(character_data, allow_overwrite=False):
 
     character_name = character_data.get('name')
     character_realm = character_data.get('realm')
+    character_season = character_data.get('season', 'S1')  # Default to S1 if not specified
 
     if not character_name:
         return False, "Character data must contain a 'name'."
     if not character_realm or character_realm not in REALMS:
         return False, f"Invalid or missing realm for character '{character_name}'."
+    if not character_season:
+        character_season = 'S1'
+        logging.warning(f"Character '{character_name}' has no season, defaulting to S1")
 
-    # Create the realm-specific directory
-    char_dir = os.path.join(base_char_dir, character_realm)
+    # Create the season/realm-specific directory
+    season_dir = os.path.join(base_char_dir, character_season)
+    char_dir = os.path.join(season_dir, character_realm)
     os.makedirs(char_dir, exist_ok=True)
 
     file_path = os.path.join(char_dir, f"{character_name}.json")
@@ -143,6 +148,7 @@ def get_all_characters():
 def rename_character(old_name, new_name):
     """
     Renames a character, which involves renaming the file and updating its content.
+    Works with new Season/Realm structure.
     """
     if not old_name or not new_name:
         return False, "Old and new names must be provided."
@@ -153,20 +159,24 @@ def rename_character(old_name, new_name):
     base_char_dir = get_character_dir()
     old_file_path = None
     character_realm = None
+    character_season = None
 
-    # Find the old character file and its realm
-    for realm in REALMS:
-        potential_path = os.path.join(base_char_dir, realm, f"{old_name}.json")
-        if os.path.exists(potential_path):
-            old_file_path = potential_path
-            character_realm = realm
+    # Find the old character file by searching through Season/Realm folders
+    for root, dirs, files in os.walk(base_char_dir):
+        if f"{old_name}.json" in files:
+            old_file_path = os.path.join(root, f"{old_name}.json")
+            # Extract season and realm from path
+            path_parts = root.replace(base_char_dir, "").strip(os.sep).split(os.sep)
+            if len(path_parts) >= 2:
+                character_season = path_parts[0]
+                character_realm = path_parts[1]
             break
     
     if not old_file_path:
         return False, f"Character '{old_name}' not found."
 
-    # Check if the new name already exists in the same realm
-    new_file_path = os.path.join(base_char_dir, character_realm, f"{new_name}.json")
+    # Check if the new name already exists in the same season/realm
+    new_file_path = os.path.join(base_char_dir, character_season, character_realm, f"{new_name}.json")
     if os.path.exists(new_file_path):
         return False, "char_exists_error"
 
@@ -197,6 +207,7 @@ def rename_character(old_name, new_name):
 def delete_character(character_name):
     """
     Deletes a character's JSON file based on their name.
+    Works with new Season/Realm structure.
     """
     if not character_name:
         return False, "Character name not provided."
@@ -204,11 +215,10 @@ def delete_character(character_name):
     base_char_dir = get_character_dir()
     file_to_delete = None
 
-    # Search for the character file in all realm subdirectories
-    for realm in REALMS:
-        potential_path = os.path.join(base_char_dir, realm, f"{character_name}.json")
-        if os.path.exists(potential_path):
-            file_to_delete = potential_path
+    # Search for the character file by walking through Season/Realm folders
+    for root, dirs, files in os.walk(base_char_dir):
+        if f"{character_name}.json" in files:
+            file_to_delete = os.path.join(root, f"{character_name}.json")
             break
 
     if file_to_delete:
@@ -226,6 +236,7 @@ def delete_character(character_name):
 def move_character_to_realm(character_data, old_realm, new_realm):
     """
     Moves a character from one realm directory to another.
+    Works with new Season/Realm structure.
     
     Args:
         character_data (dict): The character data
@@ -242,23 +253,24 @@ def move_character_to_realm(character_data, old_realm, new_realm):
         return False, f"Invalid realm: {new_realm}"
     
     character_name = character_data.get('name')
+    character_season = character_data.get('season', 'S1')
     if not character_name:
         return False, "Character name not found in data."
     
     # Get base character directory
     base_char_dir = get_character_dir()
     
-    # Old and new file paths
-    old_file_path = os.path.join(base_char_dir, old_realm, f"{character_name}.json")
-    new_file_path = os.path.join(base_char_dir, new_realm, f"{character_name}.json")
+    # Old and new file paths (within same season)
+    old_file_path = os.path.join(base_char_dir, character_season, old_realm, f"{character_name}.json")
+    new_file_path = os.path.join(base_char_dir, character_season, new_realm, f"{character_name}.json")
     
     try:
         # Check if old file exists
         if not os.path.exists(old_file_path):
             return False, f"Original character file not found: {old_file_path}"
         
-        # Create new realm directory if it doesn't exist
-        new_realm_dir = os.path.join(base_char_dir, new_realm)
+        # Create new season/realm directory if it doesn't exist
+        new_realm_dir = os.path.join(base_char_dir, character_season, new_realm)
         os.makedirs(new_realm_dir, exist_ok=True)
         
         # Check if new file already exists

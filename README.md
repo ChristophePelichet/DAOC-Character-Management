@@ -149,10 +149,19 @@ DAOC---Gestion-des-personnages/
 ├── main.py                      # Application principale
 ├── requirements.txt             # Dépendances Python
 ├── scrape_realm_ranks.py        # Script d'extraction des rangs
-├── Characters/                  # Données des personnages
-│   ├── Albion/
-│   ├── Hibernia/
-│   └── Midgard/
+├── Characters/                  # Données des personnages (structure Season/Realm)
+│   ├── S1/                      # Saison 1
+│   │   ├── Albion/
+│   │   ├── Hibernia/
+│   │   └── Midgard/
+│   ├── S2/                      # Saison 2
+│   │   ├── Albion/
+│   │   ├── Hibernia/
+│   │   └── Midgard/
+│   └── S3/                      # Saison 3
+│       ├── Albion/
+│       ├── Hibernia/
+│       └── Midgard/
 ├── Configuration/               # Fichiers de configuration
 │   └── config.json
 ├── Data/                        # Données de jeu
@@ -173,6 +182,7 @@ DAOC---Gestion-des-personnages/
 │   ├── data_manager.py
 │   ├── language_manager.py
 │   ├── logging_manager.py
+│   ├── migration_manager.py     # Gestionnaire de migration
 │   └── path_manager.py
 ├── Img/                         # Images et icônes
 ├── Language/                    # Fichiers de traduction
@@ -193,6 +203,29 @@ La configuration est accessible via le menu **Fichier > Paramètres**.
 - 🖥️ **Serveur par défaut** : Eden, Blackthorn
 - 📅 **Saison par défaut** : S1, S2, S3, etc.
 - 🐛 **Mode Debug** : Activer/désactiver les logs détaillés
+
+## 🔄 Migration de Structure
+
+**Important** : À partir de la version 0.104, la structure des dossiers a changé pour mieux organiser les personnages par saison.
+
+### Structure actuelle (v0.104+)
+```
+Characters/
+└── Season/              # S1, S2, S3, etc.
+    └── Realm/           # Albion, Hibernia, Midgard
+        └── Character.json
+```
+
+### Migration automatique
+- La migration s'effectue **automatiquement au premier démarrage** de l'application
+- Vos personnages existants sont **préservés** et déplacés vers la nouvelle structure
+- Un fichier `.migration_done` est créé pour éviter les migrations multiples
+
+### Migration manuelle
+Si vous avez besoin de relancer la migration :
+1. Allez dans **Aide > Migrer la structure des dossiers**
+2. Confirmez l'opération
+3. Un rapport détaillé s'affiche avec le nombre de personnages migrés
 
 ## 🎯 Utilisation
 

@@ -7,7 +7,45 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
-## [Non publié]
+## [0.104.1] - 2025-10-29
+
+### Ajouté
+- **Popup de confirmation de migration** : Affichage d'une boîte de dialogue avant toute migration
+  - Explication détaillée de la modification de structure
+  - Comparaison visuelle : Ancienne structure → Nouvelle structure
+  - Information sur la sauvegarde automatique
+  - Bouton "OK" : Lance la sauvegarde et la migration
+  - Bouton "Annuler" : Ferme l'application sans modification
+  - Traduction complète en FR/EN/DE
+- **Sauvegarde automatique avant migration** : Protection des données
+  - Création d'une copie complète du dossier `Characters`
+  - Nom avec horodatage : `Characters_backup_YYYYMMDD_HHMMSS`
+  - Emplacement à côté du dossier `Characters`
+  - Vérification de succès avant de lancer la migration
+  - Message de confirmation avec emplacement de la sauvegarde
+- **Script de test** : `Scripts/simulate_old_structure.py`
+  - Simule l'ancienne structure pour tester la migration
+  - Sauvegarde automatique de la structure actuelle
+  - Création de personnages de test dans tous les royaumes
+
+### Modifié
+- **Migration automatique** : Nécessite maintenant confirmation utilisateur
+  - Ne se lance plus automatiquement sans demander
+  - Affiche le popup de confirmation au démarrage
+  - Ferme l'application si l'utilisateur annule
+- **Fonction `run_migration_if_needed()`** : Retour modifié
+  - Ne lance plus automatiquement la migration
+  - Retourne l'état "en attente de confirmation"
+  - Laisse l'UI gérer l'affichage du popup
+
+### Technique
+- Nouvelle fonction `backup_characters()` dans `migration_manager.py`
+- Nouvelle fonction `run_migration_with_backup()` dans `migration_manager.py`
+- Fonction `run_automatic_migration()` dans `main.py` entièrement refactorisée
+- Ajout de 3 nouvelles clés de traduction dans FR/EN/DE :
+  - `migration_startup_title`
+  - `migration_startup_message`
+  - `migration_backup_info`
 
 ## [0.105] - 2024-12-XX
 
@@ -57,6 +95,25 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 ## [0.104] - 2025-10-29
 
 ### Ajouté
+- **Nouvelle structure de dossiers** : Migration vers une organisation hiérarchique par saison
+  - Ancienne structure : `Characters/Royaume/Personnage.json`
+  - Nouvelle structure : `Characters/Saison/Royaume/Personnage.json`
+  - Prépare le terrain pour de futures saisons
+  - Migration automatique au démarrage (une seule fois)
+  - Fichier marqueur `.migration_done` pour éviter les migrations multiples
+- **Menu Aide > Migrer la structure des dossiers** : Option manuelle de migration
+  - Permet de relancer la migration manuellement si nécessaire
+  - Demande confirmation avant de procéder
+  - Affiche un rapport détaillé de la migration (nombre de personnages, répartition par saison)
+  - Actualise automatiquement la liste des personnages après migration
+- **Module migration_manager.py** : Gestionnaire de migration complet
+  - `check_migration_needed()` : Détecte si la migration est nécessaire
+  - `migrate_character_structure()` : Effectue la migration avec rapport détaillé
+  - `is_migration_done()` : Vérifie si la migration a déjà été effectuée
+  - `run_migration_if_needed()` : Lance la migration automatique au démarrage
+  - Gestion complète des erreurs avec logs détaillés
+  - Préservation des métadonnées des fichiers (dates, attributs)
+  - Nettoyage automatique des anciens dossiers vides
 - **Colonnes Classe et Race** : Nouvelles colonnes dans la vue principale
   - Colonne "Classe" affichée par défaut
   - Colonne "Race" masquée par défaut
@@ -65,6 +122,13 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
   - Données extraites automatiquement depuis les fichiers JSON de personnages
 
 ### Modifié
+- **Toutes les fonctions de gestion des personnages** : Adaptation à la nouvelle structure Season/Realm
+  - `save_character()` : Sauvegarde dans `Season/Realm/`
+  - `get_all_characters()` : Parcourt la structure Season/Realm avec `os.walk()`
+  - `rename_character()` : Recherche et renomme dans la nouvelle structure
+  - `delete_character()` : Supprime dans la nouvelle structure
+  - `move_character_to_realm()` : Déplace entre royaumes au sein de la même saison
+  - Valeur par défaut "S1" pour les personnages sans saison spécifiée
 - **Menu Action supprimé** : Le menu "Action" et toutes ses actions ont été retirés temporairement
   - Action "Résistances" retirée du menu (data_editor.py conservé)
   - Interface simplifiée
@@ -77,6 +141,11 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
   - Police normale pour une meilleure cohérence visuelle
 
 ### Technique
+- **Architecture améliorée** : Séparation des saisons au niveau du système de fichiers
+- **Compatibilité ascendante** : Migration automatique préserve tous les personnages existants
+- **Logging détaillé** : Toutes les opérations de migration sont enregistrées dans les logs
+- **Gestion d'erreurs robuste** : La migration gère les cas d'erreur sans perte de données
+- **Performance optimisée** : Utilisation de `shutil.copy2` pour préserver les métadonnées
 - Ajout de `font.setBold(False)` pour la colonne Classe
 - Mise à jour des traductions `context_menu_armor_management` (retrait de 📁)
 

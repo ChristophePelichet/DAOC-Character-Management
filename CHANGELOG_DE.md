@@ -7,9 +7,68 @@ und dieses Projekt folgt dem [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unveröffentlicht]
 
+## [0.104.1] - 2025-10-29
+
+### Hinzugefügt
+- **Migrationsbestätigungs-Popup**: Dialogfeld vor jeder Migration angezeigt
+  - Detaillierte Erklärung der Strukturänderung
+  - Visueller Vergleich: Alte Struktur → Neue Struktur
+  - Information über automatische Sicherung
+  - "OK"-Schaltfläche: Startet Sicherung und Migration
+  - "Abbrechen"-Schaltfläche: Schließt Anwendung ohne Änderungen
+  - Vollständige Übersetzung in FR/EN/DE
+- **Automatische Sicherung vor Migration**: Datenschutz
+  - Erstellt vollständige Kopie des `Characters`-Ordners
+  - Name mit Zeitstempel: `Characters_backup_JJJJMMTT_HHMMSS`
+  - Speicherort neben dem `Characters`-Ordner
+  - Erfolgsüberprüfung vor Start der Migration
+  - Bestätigungsnachricht mit Sicherungsort
+- **Test-Skript**: `Scripts/simulate_old_structure.py`
+  - Simuliert alte Struktur zum Testen der Migration
+  - Automatische Sicherung der aktuellen Struktur
+  - Erstellt Testcharaktere in allen Reichen
+
+### Geändert
+- **Automatische Migration**: Erfordert jetzt Benutzerbestätigung
+  - Startet nicht mehr automatisch ohne Nachfrage
+  - Zeigt Bestätigungs-Popup beim Start an
+  - Schließt Anwendung bei Abbruch durch Benutzer
+- **Funktion `run_migration_if_needed()`**: Geänderter Rückgabewert
+  - Startet Migration nicht mehr automatisch
+  - Gibt Status "Bestätigung ausstehend" zurück
+  - Lässt UI die Popup-Anzeige übernehmen
+
+### Technisch
+- Neue Funktion `backup_characters()` in `migration_manager.py`
+- Neue Funktion `run_migration_with_backup()` in `migration_manager.py`
+- Funktion `run_automatic_migration()` in `main.py` vollständig überarbeitet
+- 3 neue Übersetzungsschlüssel in FR/EN/DE hinzugefügt:
+  - `migration_startup_title`
+  - `migration_startup_message`
+  - `migration_backup_info`
+
 ## [0.104] - 2025-10-29
 
 ### Hinzugefügt
+- **Neue Ordnerstruktur**: Migration zu hierarchischer Organisation nach Saison
+  - Alte Struktur: `Characters/Realm/Character.json`
+  - Neue Struktur: `Characters/Season/Realm/Character.json`
+  - Bereitet auf zukünftige Saisons vor
+  - Automatische Migration beim Start (nur einmal)
+  - Markierungsdatei `.migration_done` zur Vermeidung mehrfacher Migrationen
+- **Hilfe-Menü > Ordnerstruktur migrieren**: Manuelle Migrationsoption
+  - Ermöglicht manuelles Wiederholen der Migration bei Bedarf
+  - Fragt vor dem Fortfahren nach Bestätigung
+  - Zeigt detaillierten Migrationsbericht (Anzahl Charaktere, Verteilung nach Saison)
+  - Aktualisiert Charakterliste automatisch nach Migration
+- **migration_manager.py Modul**: Vollständiger Migrationsmanager
+  - `check_migration_needed()`: Erkennt, ob Migration erforderlich ist
+  - `migrate_character_structure()`: Führt Migration mit detailliertem Bericht durch
+  - `is_migration_done()`: Prüft, ob Migration bereits durchgeführt wurde
+  - `run_migration_if_needed()`: Führt automatische Migration beim Start aus
+  - Vollständige Fehlerbehandlung mit detaillierten Logs
+  - Erhält Dateimetadaten (Daten, Attribute)
+  - Automatische Bereinigung leerer alter Ordner
 - **Klassen- und Rassen-Spalten**: Neue Spalten in der Hauptansicht
   - "Klasse"-Spalte standardmäßig angezeigt
   - "Rasse"-Spalte standardmäßig ausgeblendet
@@ -18,6 +77,13 @@ und dieses Projekt folgt dem [Semantic Versioning](https://semver.org/lang/de/).
   - Daten werden automatisch aus den Charakter-JSON-Dateien extrahiert
 
 ### Geändert
+- **Alle Charakterverwaltungsfunktionen**: Anpassung an neue Season/Realm-Struktur
+  - `save_character()`: Speichert in `Season/Realm/`
+  - `get_all_characters()`: Durchläuft Season/Realm-Struktur mit `os.walk()`
+  - `rename_character()`: Sucht und benennt in neuer Struktur um
+  - `delete_character()`: Löscht in neuer Struktur
+  - `move_character_to_realm()`: Verschiebt zwischen Reichen innerhalb derselben Saison
+  - Standardwert "S1" für Charaktere ohne angegebene Saison
 - **Aktion-Menü entfernt**: Das "Aktion"-Menü und alle seine Aktionen wurden vorübergehend entfernt
   - "Widerstände"-Aktion aus dem Menü entfernt (data_editor.py beibehalten)
   - Vereinfachte Benutzeroberfläche
@@ -30,6 +96,11 @@ und dieses Projekt folgt dem [Semantic Versioning](https://semver.org/lang/de/).
   - Normale Schrift für bessere visuelle Konsistenz
 
 ### Technisch
+- **Verbesserte Architektur**: Saisontrennung auf Dateisystemebene
+- **Rückwärtskompatibilität**: Automatische Migration bewahrt alle vorhandenen Charaktere
+- **Detaillierte Protokollierung**: Alle Migrationsoperationen werden in Logs aufgezeichnet
+- **Robuste Fehlerbehandlung**: Migration behandelt Fehlerfälle ohne Datenverlust
+- **Optimierte Leistung**: Verwendet `shutil.copy2` zur Erhaltung von Metadaten
 - `font.setBold(False)` für Klassen-Spalte hinzugefügt
 - `context_menu_armor_management` Übersetzungen aktualisiert (📁 entfernt)
 

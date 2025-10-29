@@ -137,10 +137,19 @@ DAOC-Character-Management/
 ├── main.py                      # Main application
 ├── requirements.txt             # Python dependencies
 ├── scrape_realm_ranks.py        # Rank extraction script
-├── Characters/                  # Character data
-│   ├── Albion/
-│   ├── Hibernia/
-│   └── Midgard/
+├── Characters/                  # Character data (Season/Realm structure)
+│   ├── S1/                      # Season 1
+│   │   ├── Albion/
+│   │   ├── Hibernia/
+│   │   └── Midgard/
+│   ├── S2/                      # Season 2
+│   │   ├── Albion/
+│   │   ├── Hibernia/
+│   │   └── Midgard/
+│   └── S3/                      # Season 3
+│       ├── Albion/
+│       ├── Hibernia/
+│       └── Midgard/
 ├── Configuration/               # Configuration files
 │   └── config.json
 ├── Data/                        # Game data
@@ -163,6 +172,7 @@ DAOC-Character-Management/
 │   ├── data_manager.py
 │   ├── language_manager.py
 │   ├── logging_manager.py
+│   ├── migration_manager.py     # Migration manager
 │   └── path_manager.py
 ├── Img/                         # Images and icons
 ├── Language/                    # Translation files
@@ -183,6 +193,29 @@ Configuration is accessible via **File > Settings** menu.
 - 🖥️ **Default Server**: Eden, Blackthorn, etc.
 - 📅 **Default Season**: S1, S2, S3, etc.
 - 🐛 **Debug Mode**: Enable/disable detailed logs
+
+## 🔄 Structure Migration
+
+**Important**: Starting from version 0.104, the folder structure has changed to better organize characters by season.
+
+### Current structure (v0.104+)
+```
+Characters/
+└── Season/              # S1, S2, S3, etc.
+    └── Realm/           # Albion, Hibernia, Midgard
+        └── Character.json
+```
+
+### Automatic migration
+- Migration is performed **automatically on first startup**
+- Your existing characters are **preserved** and moved to the new structure
+- A `.migration_done` file is created to prevent multiple migrations
+
+### Manual migration
+If you need to run the migration again:
+1. Go to **Help > Migrate folder structure**
+2. Confirm the operation
+3. A detailed report displays the number of migrated characters
 
 ## 🎯 Usage
 

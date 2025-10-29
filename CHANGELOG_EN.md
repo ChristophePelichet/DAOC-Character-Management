@@ -7,7 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-## [Unreleased]
+## [0.104.1] - 2025-10-29
+
+### Added
+- **Migration confirmation popup**: Dialog box displayed before any migration
+  - Detailed explanation of structure modification
+  - Visual comparison: Old structure → New structure
+  - Information about automatic backup
+  - "OK" button: Launches backup and migration
+  - "Cancel" button: Closes application without changes
+  - Complete translation in FR/EN/DE
+- **Automatic backup before migration**: Data protection
+  - Creates complete copy of `Characters` folder
+  - Timestamped name: `Characters_backup_YYYYMMDD_HHMMSS`
+  - Location next to `Characters` folder
+  - Success verification before launching migration
+  - Confirmation message with backup location
+- **Test script**: `Scripts/simulate_old_structure.py`
+  - Simulates old structure to test migration
+  - Automatic backup of current structure
+  - Creates test characters in all realms
+
+### Changed
+- **Automatic migration**: Now requires user confirmation
+  - No longer launches automatically without asking
+  - Displays confirmation popup at startup
+  - Closes application if user cancels
+- **Function `run_migration_if_needed()`**: Modified return
+  - No longer automatically launches migration
+  - Returns "awaiting confirmation" state
+  - Lets UI handle popup display
+
+### Technical
+- New function `backup_characters()` in `migration_manager.py`
+- New function `run_migration_with_backup()` in `migration_manager.py`
+- Function `run_automatic_migration()` in `main.py` completely refactored
+- Added 3 new translation keys in FR/EN/DE:
+  - `migration_startup_title`
+  - `migration_startup_message`
+  - `migration_backup_info`
 
 ## [0.105] - 2024-12-XX
 
@@ -57,6 +95,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [0.104] - 2025-10-29
 
 ### Added
+- **New folder structure**: Migration to hierarchical organization by season
+  - Old structure: `Characters/Realm/Character.json`
+  - New structure: `Characters/Season/Realm/Character.json`
+  - Prepares for future seasons
+  - Automatic migration at startup (only once)
+  - Marker file `.migration_done` to avoid multiple migrations
+- **Help Menu > Migrate folder structure**: Manual migration option
+  - Allows manual re-run of migration if needed
+  - Asks for confirmation before proceeding
+  - Displays detailed migration report (number of characters, distribution by season)
+  - Automatically refreshes character list after migration
+- **migration_manager.py module**: Complete migration manager
+  - `check_migration_needed()`: Detects if migration is needed
+  - `migrate_character_structure()`: Performs migration with detailed report
+  - `is_migration_done()`: Checks if migration was already completed
+  - `run_migration_if_needed()`: Runs automatic migration at startup
+  - Complete error handling with detailed logs
+  - Preserves file metadata (dates, attributes)
+  - Automatic cleanup of empty old folders
 - **Class and Race Columns**: New columns in main view
   - "Class" column displayed by default
   - "Race" column hidden by default
@@ -65,6 +122,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   - Data automatically extracted from character JSON files
 
 ### Changed
+- **All character management functions**: Adapted to new Season/Realm structure
+  - `save_character()`: Saves to `Season/Realm/`
+  - `get_all_characters()`: Walks through Season/Realm structure with `os.walk()`
+  - `rename_character()`: Searches and renames in new structure
+  - `delete_character()`: Deletes in new structure
+  - `move_character_to_realm()`: Moves between realms within same season
+  - Default value "S1" for characters without specified season
 - **Action Menu Removed**: The "Action" menu and all its actions have been temporarily removed
   - "Resistances" action removed from menu (data_editor.py preserved)
   - Simplified interface
@@ -77,6 +141,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   - Normal font for better visual consistency
 
 ### Technical
+- **Improved architecture**: Season separation at file system level
+- **Backward compatibility**: Automatic migration preserves all existing characters
+- **Detailed logging**: All migration operations are recorded in logs
+- **Robust error handling**: Migration handles error cases without data loss
+- **Optimized performance**: Uses `shutil.copy2` to preserve metadata
 - Added `font.setBold(False)` for Class column
 - Updated `context_menu_armor_management` translations (removed 📁)
 

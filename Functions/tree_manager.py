@@ -152,6 +152,7 @@ class TreeManager:
         # Autres colonnes
         item_name = QStandardItem(char.get('name', 'N/A'))
         item_name.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+        item_name.setTextAlignment(Qt.AlignCenter)  # Centrer le texte
         # S'assurer que le nom n'est pas en gras
         font_name = item_name.font()
         font_name.setBold(False)
@@ -191,6 +192,7 @@ class TreeManager:
         
         item_guild = QStandardItem(char.get('guild', ''))
         item_guild.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+        item_guild.setTextAlignment(Qt.AlignCenter)  # Centrer le texte
         font_guild = item_guild.font()
         font_guild.setBold(False)
         item_guild.setFont(font_guild)

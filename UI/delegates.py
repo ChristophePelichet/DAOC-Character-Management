@@ -188,15 +188,12 @@ class NormalTextDelegate(QStyledItemDelegate):
         """Draws text with explicitly non-bold font and realm-colored background."""
         # Get the text
         text = index.data(Qt.DisplayRole)
-        if not text:
-            super().paint(painter, option, index)
-            return
         
         # Get realm from row data (stored in column 1 - realm icon)
         realm_index = index.sibling(index.row(), 1)
         realm = realm_index.data(Qt.UserRole + 1)  # Realm name stored in UserRole + 1
         
-        # Draw background with realm color
+        # Draw background with realm color (même si pas de texte)
         painter.save()
         
         # Fill background with realm color if not selected
@@ -212,6 +209,10 @@ class NormalTextDelegate(QStyledItemDelegate):
         
         style = option.widget.style() if option.widget else QApplication.style()
         style.drawPrimitive(QStyle.PE_PanelItemViewItem, opt, painter, option.widget)
+        
+        # Si pas de texte, on s'arrête ici (mais le fond est déjà dessiné)
+        if not text:
+            return
         
         # Draw custom text with non-bold font
         painter.save()

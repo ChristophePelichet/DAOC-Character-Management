@@ -152,6 +152,12 @@ class UIManager:
         self.search_button.setEnabled(False)  # Désactivé pendant la vérification initiale
         status_layout.addWidget(self.search_button)
         
+        # Bouton pour gérer les cookies
+        manage_button = QPushButton("⚙️ Gérer")
+        manage_button.clicked.connect(self.main_window.open_cookie_manager)
+        manage_button.setMaximumWidth(100)
+        status_layout.addWidget(manage_button)
+        
         status_group.setLayout(status_layout)
         parent_layout.addWidget(status_group)
         

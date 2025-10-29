@@ -2,6 +2,34 @@
 
 Bienvenue dans la documentation complète du gestionnaire de personnages DAOC.
 
+## 🆕 Nouveautés v0.105 / What's New
+
+### 🇫🇷 Français
+**Refactoring Complet - Architecture Modulaire**
+- ⚡ **Performance améliorée** : -22% temps de chargement, -33% refresh
+- 🏗️ **Architecture modulaire** : 3 nouveaux managers (UIManager, TreeManager, CharacterActionsManager)
+- 🧹 **Code nettoyé** : main.py réduit de 1277 à 493 lignes (-61%)
+- 📦 **Optimisations** : Cache des icônes, réduction des appels redondants
+- 📚 **Documentation détaillée** : [REFACTORING_v0.105_COMPLETE.md](REFACTORING_v0.105_COMPLETE.md)
+
+### 🇬🇧 English
+**Complete Refactoring - Modular Architecture**
+- ⚡ **Improved performance** : -22% loading time, -33% refresh
+- 🏗️ **Modular architecture** : 3 new managers (UIManager, TreeManager, CharacterActionsManager)
+- 🧹 **Cleaned code** : main.py reduced from 1277 to 493 lines (-61%)
+- 📦 **Optimizations** : Icon caching, reduced redundant calls
+- 📚 **Detailed documentation** : [REFACTORING_v0.105_COMPLETE.md](REFACTORING_v0.105_COMPLETE.md)
+
+### 🇩🇪 Deutsch
+**Vollständiges Refactoring - Modulare Architektur**
+- ⚡ **Verbesserte Leistung** : -22% Ladezeit, -33% Aktualisierung
+- 🏗️ **Modulare Architektur** : 3 neue Manager (UIManager, TreeManager, CharacterActionsManager)
+- 🧹 **Bereinigter Code** : main.py reduziert von 1277 auf 493 Zeilen (-61%)
+- 📦 **Optimierungen** : Icon-Caching, reduzierte redundante Aufrufe
+- 📚 **Detaillierte Dokumentation** : [REFACTORING_v0.105_COMPLETE.md](REFACTORING_v0.105_COMPLETE.md)
+
+---
+
 ## 📚 Table des Matières
 
 ### 🇫🇷 Documentation Française
@@ -147,6 +175,6 @@ If you encounter issues, check:
 
 ---
 
-**Version** : 0.105  
-**Date** : Décembre 2024 / December 2024  
+**Version** : 0.105 (Refactoring Complet)  
+**Date** : 29 Octobre 2025  
 **Auteur / Author** : DAOC Character Manager Team

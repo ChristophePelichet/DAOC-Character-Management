@@ -66,13 +66,13 @@ Available columns:
 - **Season**: Character season
 - **Server**: Character server (hidden by default)
 - **Name**: Character name
-- **Race**: Character race (new!)
-- **Class**: Character class (new!)
 - **Level**: Character level
 - **Rank**: Realm rank (ex: 5L7)
 - **Title**: Rank title (ex: Challenger)
-- **Page**: Character page (1-5)
 - **Guild**: Guild name
+- **Page**: Character page (1-5)
+- **Class**: Character class (displayed by default)
+- **Race**: Character race (hidden by default)
 
 See [Documentation/COLUMN_CONFIGURATION_EN.md](Documentation/COLUMN_CONFIGURATION_EN.md) for more details.
 

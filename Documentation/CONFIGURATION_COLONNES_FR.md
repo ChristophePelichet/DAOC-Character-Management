@@ -27,11 +27,15 @@ La fenêtre de configuration affiche :
 | **Sélection** | `selection` | Case à cocher pour les actions en masse | ✅ Visible |
 | **Royaume** | `realm` | Icône du royaume (Albion/Hibernia/Midgard) | ✅ Visible |
 | **Saison** | `season` | Saison du personnage (S1, S2, S3, etc.) | ✅ Visible |
-| **Serveur** | `server` | Serveur du personnage (Eden, Blackthorn, etc.) | ✅ Visible |
+| **Serveur** | `server` | Serveur du personnage (Eden, Blackthorn, etc.) | ❌ Masquée |
 | **Nom** | `name` | Nom du personnage | ✅ Visible |
 | **Niveau** | `level` | Niveau du personnage | ✅ Visible |
 | **Rang** | `realm_rank` | Rang de royaume (ex: 5L7) | ✅ Visible |
 | **Titre** | `realm_title` | Titre du rang (ex: Challenger) | ✅ Visible |
+| **Guilde** | `guild` | Nom de la guilde du personnage | ✅ Visible |
+| **Page** | `page` | Numéro de page du personnage (1-5) | ✅ Visible |
+| **Classe** | `class` | Classe du personnage | ✅ Visible |
+| **Race** | `race` | Race du personnage | ❌ Masquée |
 
 ## 💾 Sauvegarde et Persistance
 
@@ -49,12 +53,16 @@ La fenêtre de configuration affiche :
   "column_visibility": {
     "selection": true,
     "realm": true,
-    "season": false,
+    "season": true,
     "server": false,
     "name": true,
     "level": true,
     "realm_rank": true,
-    "realm_title": true
+    "realm_title": true,
+    "guild": true,
+    "page": true,
+    "class": true,
+    "race": false
   }
 }
 ```

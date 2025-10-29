@@ -57,6 +57,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [0.104] - 2025-10-29
 
 ### Added
+- **Class and Race Columns**: New columns in main view
+  - "Class" column displayed by default
+  - "Race" column hidden by default
+  - Checkboxes in View > Columns menu to enable/disable columns
+  - Full multilingual support (FR/EN/DE)
+  - Data automatically extracted from character JSON files
+
+### Changed
+- **Action Menu Removed**: The "Action" menu and all its actions have been temporarily removed
+  - "Resistances" action removed from menu (data_editor.py preserved)
+  - Simplified interface
+- **Context Menu**: Icon removed from "Armor Management"
+  - Before: "📁 Armor Management"
+  - Now: "Armor Management"
+  - Text without icon in all 3 languages (FR/EN/DE)
+- **Class Column**: Fixed text formatting
+  - Text is no longer displayed in bold
+  - Normal font for better visual consistency
+
+### Technical
+- Added `font.setBold(False)` for Class column
+- Updated `context_menu_armor_management` translations (removed 📁)
+
+### Added (previous version)
 - **Armor Resistance System**: Complete new feature
   - File `Data/armor_resists.json` with resistances for all classes (47 classes)
   - Full multilingual support (EN/FR/DE) for all fields

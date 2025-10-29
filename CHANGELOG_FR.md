@@ -57,6 +57,30 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 ## [0.104] - 2025-10-29
 
 ### Ajouté
+- **Colonnes Classe et Race** : Nouvelles colonnes dans la vue principale
+  - Colonne "Classe" affichée par défaut
+  - Colonne "Race" masquée par défaut
+  - Cases à cocher dans le menu Affichage > Colonnes pour activer/désactiver les colonnes
+  - Support multilingue complet (FR/EN/DE)
+  - Données extraites automatiquement depuis les fichiers JSON de personnages
+
+### Modifié
+- **Menu Action supprimé** : Le menu "Action" et toutes ses actions ont été retirés temporairement
+  - Action "Résistances" retirée du menu (data_editor.py conservé)
+  - Interface simplifiée
+- **Menu contextuel** : Icône retirée de "Gestion des armures"
+  - Avant : "📁 Gestion des armures"
+  - Maintenant : "Gestion des armures"
+  - Texte sans icône dans les 3 langues (FR/EN/DE)
+- **Colonne Classe** : Correction du formatage du texte
+  - Le texte n'est plus affiché en gras
+  - Police normale pour une meilleure cohérence visuelle
+
+### Technique
+- Ajout de `font.setBold(False)` pour la colonne Classe
+- Mise à jour des traductions `context_menu_armor_management` (retrait de 📁)
+
+### Ajouté (version précédente)
 - **Système de Résistances d'Armure** : Nouvelle fonctionnalité complète
   - Fichier `Data/armor_resists.json` avec les résistances de toutes les classes (47 classes)
   - Support multilingue complet (EN/FR/DE) pour tous les champs

@@ -27,11 +27,15 @@ The configuration window displays:
 | **Selection** | `selection` | Checkbox for bulk actions | ✅ Visible |
 | **Realm** | `realm` | Realm icon (Albion/Hibernia/Midgard) | ✅ Visible |
 | **Season** | `season` | Character's season (S1, S2, S3, etc.) | ✅ Visible |
-| **Server** | `server` | Character's server (Eden, Blackthorn, etc.) | ✅ Visible |
+| **Server** | `server` | Character's server (Eden, Blackthorn, etc.) | ❌ Hidden |
 | **Name** | `name` | Character name | ✅ Visible |
 | **Level** | `level` | Character level | ✅ Visible |
 | **Rank** | `realm_rank` | Realm rank (e.g., 5L7) | ✅ Visible |
 | **Title** | `realm_title` | Rank title (e.g., Challenger) | ✅ Visible |
+| **Guild** | `guild` | Character's guild name | ✅ Visible |
+| **Page** | `page` | Character's page number (1-5) | ✅ Visible |
+| **Class** | `class` | Character class | ✅ Visible |
+| **Race** | `race` | Character race | ❌ Hidden |
 
 ## 💾 Save and Persistence
 
@@ -49,12 +53,16 @@ The configuration window displays:
   "column_visibility": {
     "selection": true,
     "realm": true,
-    "season": false,
+    "season": true,
     "server": false,
     "name": true,
     "level": true,
     "realm_rank": true,
-    "realm_title": true
+    "realm_title": true,
+    "guild": true,
+    "page": true,
+    "class": true,
+    "race": false
   }
 }
 ```

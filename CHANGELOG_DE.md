@@ -9,7 +9,31 @@ und dieses Projekt folgt dem [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [0.104] - 2025-10-29
 
+### Hinzugefügt
+- **Klassen- und Rassen-Spalten**: Neue Spalten in der Hauptansicht
+  - "Klasse"-Spalte standardmäßig angezeigt
+  - "Rasse"-Spalte standardmäßig ausgeblendet
+  - Kontrollkästchen im Ansicht > Spalten-Menü zum Aktivieren/Deaktivieren von Spalten
+  - Vollständige mehrsprachige Unterstützung (FR/EN/DE)
+  - Daten werden automatisch aus den Charakter-JSON-Dateien extrahiert
+
 ### Geändert
+- **Aktion-Menü entfernt**: Das "Aktion"-Menü und alle seine Aktionen wurden vorübergehend entfernt
+  - "Widerstände"-Aktion aus dem Menü entfernt (data_editor.py beibehalten)
+  - Vereinfachte Benutzeroberfläche
+- **Kontextmenü**: Symbol aus "Rüstungsverwaltung" entfernt
+  - Vorher: "📁 Rüstungsverwaltung"
+  - Jetzt: "Rüstungsverwaltung"
+  - Text ohne Symbol in allen 3 Sprachen (FR/EN/DE)
+- **Klassen-Spalte**: Textformatierung korrigiert
+  - Text wird nicht mehr fett angezeigt
+  - Normale Schrift für bessere visuelle Konsistenz
+
+### Technisch
+- `font.setBold(False)` für Klassen-Spalte hinzugefügt
+- `context_menu_armor_management` Übersetzungen aktualisiert (📁 entfernt)
+
+### Geändert (vorherige Version)
 - **Reichsrang-Schnittstelle**: Schieberegler durch Dropdown-Menüs ersetzt
   - Dropdown-Menü für Rang (1-14)
   - Dropdown-Menü für Level (L0-L10 für Rang 1, L0-L9 für andere)

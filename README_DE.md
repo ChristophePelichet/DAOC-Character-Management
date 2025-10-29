@@ -66,13 +66,13 @@ Verfügbare Spalten:
 - **Saison**: Charakter-Saison
 - **Server**: Charakter-Server (standardmäßig ausgeblendet)
 - **Name**: Charaktername
-- **Rasse**: Charakter-Rasse (neu!)
-- **Klasse**: Charakter-Klasse (neu!)
 - **Level**: Charakter-Level
 - **Rang**: Reichsrang (z.B.: 5L7)
 - **Titel**: Rang-Titel (z.B.: Challenger)
-- **Seite**: Charakter-Seite (1-5)
 - **Gilde**: Gildenname
+- **Seite**: Charakter-Seite (1-5)
+- **Klasse**: Charakter-Klasse (standardmäßig angezeigt)
+- **Rasse**: Charakter-Rasse (standardmäßig ausgeblendet)
 
 Siehe [Documentation/COLUMN_CONFIGURATION_EN.md](Documentation/COLUMN_CONFIGURATION_EN.md) (EN) für weitere Details.
 

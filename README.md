@@ -79,13 +79,13 @@ Colonnes disponibles :
 - **Saison** : Saison du personnage
 - **Serveur** : Serveur du personnage (cachée par défaut)
 - **Nom** : Nom du personnage
-- **Race** : Race du personnage (nouveau !)
-- **Classe** : Classe du personnage (nouveau !)
 - **Niveau** : Niveau du personnage
 - **Rang** : Rang de royaume (ex: 5L7)
 - **Titre** : Titre du rang (ex: Challenger)
-- **Page** : Page du personnage (1-5)
 - **Guilde** : Nom de la guilde
+- **Page** : Page du personnage (1-5)
+- **Classe** : Classe du personnage (affichée par défaut)
+- **Race** : Race du personnage (cachée par défaut)
 
 Voir [Documentation/COLUMN_CONFIGURATION_FR.md](Documentation/CONFIGURATION_COLONNES_FR.md) (FR) ou [Documentation/COLUMN_CONFIGURATION_EN.md](Documentation/COLUMN_CONFIGURATION_EN.md) (EN) pour plus de détails.
 

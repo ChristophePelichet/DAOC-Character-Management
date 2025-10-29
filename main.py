@@ -193,14 +193,6 @@ class CharacterApp(QMainWindow):
         settings_action.triggered.connect(self.open_configuration)
         file_menu.addAction(settings_action)
         
-        # Action Menu
-        action_menu = menubar.addMenu(lang.get("menu_action", default="Action"))
-        
-        # Action -> Resistances
-        resistances_action = QAction(lang.get("menu_action_resistances", default="📊 Résistances"), self)
-        resistances_action.triggered.connect(self.open_resistances_table)
-        action_menu.addAction(resistances_action)
-        
         # View Menu
         view_menu = menubar.addMenu(lang.get("menu_view"))
         
@@ -232,7 +224,7 @@ class CharacterApp(QMainWindow):
         self.context_menu.addSeparator()
 
         # Add armor management action
-        armor_action = self.context_menu.addAction(lang.get("context_menu_armor_management", default="📁 Gestion des armures"))
+        armor_action = self.context_menu.addAction(lang.get("context_menu_armor_management", default="Gestion des armures"))
         armor_action.triggered.connect(self.open_armor_management_global)
 
         self.context_menu.addSeparator()
@@ -328,7 +320,7 @@ class CharacterApp(QMainWindow):
         self.tree_model.clear()
         self.characters_by_id.clear()
 
-        # Set headers in new order: Selection, Realm, Name, Level, Rank, Title, Guild, Page, Server
+        # Set headers in new order: Selection, Realm, Name, Level, Rank, Title, Guild, Page, Server, Class, Race
         headers = [
             lang.get("column_selection"), 
             lang.get("column_realm"),
@@ -338,7 +330,9 @@ class CharacterApp(QMainWindow):
             lang.get("column_realm_title", default="Titre"),
             lang.get("column_guild", default="Guilde"),
             lang.get("column_page", default="Page"),
-            lang.get("column_server", default="Serveur")]
+            lang.get("column_server", default="Serveur"),
+            lang.get("column_class", default="Classe"),
+            lang.get("column_race", default="Race")]
         self.tree_model.setHorizontalHeaderLabels(headers)
         
         # Center align the realm column header
@@ -408,6 +402,18 @@ class CharacterApp(QMainWindow):
             item_server.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
             item_server.setTextAlignment(Qt.AlignCenter)
             
+            item_class = QStandardItem(char.get('class', ''))
+            item_class.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+            item_class.setTextAlignment(Qt.AlignCenter)
+            # Ensure the text is not bold
+            font = item_class.font()
+            font.setBold(False)
+            item_class.setFont(font)
+            
+            item_race = QStandardItem(char.get('race', ''))
+            item_race.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+            item_race.setTextAlignment(Qt.AlignCenter)
+            
             # Calculate realm rank and title from realm points
             realm_points = char.get('realm_points', 0)
             realm_rank_level = char.get('realm_rank', '1L1')
@@ -434,8 +440,8 @@ class CharacterApp(QMainWindow):
             # Allow checking but not direct text editing
             item_selection.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled | Qt.ItemIsUserCheckable)
 
-            # New order: Selection, Realm, Name, Level, Rank, Title, Guild, Page, Server
-            row_items = [item_selection, item_realm, item_name, item_level, item_realm_rank, item_realm_title, item_guild, item_page, item_server]
+            # New order: Selection, Realm, Name, Level, Rank, Title, Guild, Page, Server, Class, Race
+            row_items = [item_selection, item_realm, item_name, item_level, item_realm_rank, item_realm_title, item_guild, item_page, item_server, item_class, item_race]
             self.tree_model.appendRow(row_items)
 
         self.character_tree.header().setStretchLastSection(False)
@@ -480,7 +486,7 @@ class CharacterApp(QMainWindow):
             logging.debug("Column resize mode: Manual (Interactive)")
         else:
             # Automatic mode: Auto-resize columns with Name column stretching
-            for i in range(9):  # 9 columns: Selection, Realm, Name, Level, Rank, Title, Guild, Page, Server
+            for i in range(11):  # 11 columns: Selection, Realm, Name, Level, Rank, Title, Guild, Page, Server, Class, Race
                 if i == 2:  # Name column (index 2)
                     header.setSectionResizeMode(i, QHeaderView.Stretch)
                 else:
@@ -502,9 +508,11 @@ class CharacterApp(QMainWindow):
             "realm_rank": True,
             "realm_title": True,
             "server": False,  # Server column hidden by default
+            "class": True,  # Class column visible by default
+            "race": False,  # Race column hidden by default
         }
         
-        # Map column keys to their indices with new order: Selection, Realm, Name, Level, Rank, Title, Guild, Page, Server
+        # Map column keys to their indices with new order: Selection, Realm, Name, Level, Rank, Title, Guild, Page, Server, Class, Race
         column_map = {
             "selection": 0,
             "realm": 1,
@@ -515,6 +523,8 @@ class CharacterApp(QMainWindow):
             "guild": 6,
             "page": 7,
             "server": 8,
+            "class": 9,
+            "race": 10,
         }
         
         # Apply visibility to each column

@@ -568,6 +568,8 @@ class ColumnsConfigDialog(QDialog):
         {"key": "guild", "name_key": "column_guild", "default": True},
         {"key": "page", "name_key": "column_page", "default": True},
         {"key": "server", "name_key": "column_server", "default": False},  # Server hidden by default
+        {"key": "class", "name_key": "column_class", "default": True},  # Class visible by default
+        {"key": "race", "name_key": "column_race", "default": False},  # Race hidden by default
     ]
     
     def __init__(self, parent=None):

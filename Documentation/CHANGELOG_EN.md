@@ -10,12 +10,76 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
-- **Migration check on path change**: Enhanced security
-  - Automatic detection if the new Characters folder requires migration
-  - Trilingual warning popup (FR/EN/DE) if old structure is detected
-  - Message indicating to restart the application to perform migration
-  - Test script: `Scripts/test_migration_path_change.py`
-  - New translation keys: `migration_path_change_title` and `migration_path_change_message`
+- **Backup integrity verification**: Enhanced protection against corruption
+  - Automatic ZIP file testing after creation with `zipfile.testzip()`
+  - Verification of file count in archive
+  - Automatic removal of backup if corrupted
+  - Migration cancelled if backup is invalid
+  - Detailed logs for diagnosis
+- **Automatic rollback on error**: Maximum data security
+  - Tracking of all migrated files in a list
+  - If a single error detected → removal of all migrated files
+  - Original data always preserved in old structure
+  - Rollback also in case of critical exception
+  - Clear message to user with backup availability
+- **Complete JSON file validation**: Improved robustness
+  - Detection of corrupted JSON files (JSONDecodeError)
+  - Verification that content is a dictionary
+  - Validation of 'season' field
+  - Invalid files are skipped, migration continues for others
+  - Precise error statistics in logs
+- **Verification of each file copy**: Guaranteed integrity
+  - Each copied file is immediately reread and compared to original
+  - If different → file deleted and error counted
+  - Protection against corruption during copy
+- **Immediate migration on path change**: Improved UX
+  - Replacement of "restart" popup with Yes/No question
+  - If Yes → Migration executed immediately with progress dialog
+  - If No → Informative message, migration postponed
+  - Automatic list refresh after migration
+  - No need to restart application
+- **Translated error messages**: Better user experience
+  - `migration_success_message`: Success message with character count
+  - `migration_no_characters`: Message if no characters to migrate
+  - `migration_rollback_info`: Information during rollback
+  - `migration_data_safe`: Confirmation that data is secure
+  - ✅ icon before success message
+  - 💾 icon only before backup path (appears once)
+- **Improved secure cleanup**: Data loss prevention
+  - Old folder deleted only if 100% of files migrated
+  - If partial migration → old folder kept
+  - File-by-file verification before cleanup
+- **Overwrite prevention**: Additional protection
+  - Check if destination file already exists
+  - If yes → skip with error, no overwrite
+- **Partial backup cleanup**: No corrupted files
+  - If backup fails, partial ZIP file is deleted
+  - No confusion with invalid backups
+- **Migration done flag only on complete success**: Reliability
+  - `.migration_done` file created only if zero errors
+  - If failure → user can retry migration
+  - No "stuck" migration
+- **MIGRATION_SECURITY.md documentation**: Complete security guide
+  - Details of all protections implemented
+  - All data loss scenarios covered
+  - Recommended tests for validation
+  - Documented security guarantees
+
+### Changed
+- **Multilingual migration messages**: Linguistic consistency
+  - Removal of hardcoded "Successfully migrated" text in English
+  - Removal of hardcoded "Backup location:" text
+  - All messages now use translation keys
+  - `migration_backup_location` no longer contains all 3 languages
+  - Display only in interface language
+
+### Removed
+- **Help Menu > Migrate folder structure**: Interface simplification
+  - Manual migration option removed from Help menu
+  - Migration happens automatically at startup if needed
+  - Migration also offered when changing Characters folder path
+  - `run_manual_migration()` method removed
+  - `menu_help_migrate` translation key no longer used
 
 ## [0.104] - 2025-10-29
 
@@ -40,12 +104,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   - Prepares for future seasons
   - Automatic migration at startup (with confirmation)
   - Marker file `.migration_done` to avoid multiple migrations
-- **Help Menu > Migrate folder structure**: Manual migration option
-  - Allows manual re-run of migration if needed
-  - Asks for confirmation before proceeding
-  - Automatically creates ZIP backup
-  - Displays detailed migration report (number of characters, distribution by season)
-  - Automatically refreshes character list after migration
 - **migration_manager.py module**: Complete migration manager
   - `get_backup_path()`: Generates backup path in `Backup/Characters/`
   - `backup_characters()`: Creates compressed ZIP archive

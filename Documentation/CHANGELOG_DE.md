@@ -10,12 +10,76 @@ und dieses Projekt folgt dem [Semantic Versioning](https://semver.org/lang/de/).
 ## [Unveröffentlicht]
 
 ### Hinzugefügt
-- **Migrationsprüfung bei Pfadänderung**: Verbesserte Sicherheit
-  - Automatische Erkennung, ob der neue Characters-Ordner eine Migration erfordert
-  - Dreisprachiges Warnungs-Popup (FR/EN/DE), wenn alte Struktur erkannt wird
-  - Nachricht, die darauf hinweist, die Anwendung neu zu starten, um die Migration durchzuführen
-  - Test-Skript: `Scripts/test_migration_path_change.py`
-  - Neue Übersetzungsschlüssel: `migration_path_change_title` und `migration_path_change_message`
+- **Sicherungsintegritätsprüfung**: Verbesserter Schutz gegen Beschädigung
+  - Automatischer ZIP-Dateitest nach Erstellung mit `zipfile.testzip()`
+  - Überprüfung der Dateianzahl im Archiv
+  - Automatische Entfernung der Sicherung bei Beschädigung
+  - Migration abgebrochen, wenn Sicherung ungültig ist
+  - Detaillierte Logs zur Diagnose
+- **Automatischer Rollback bei Fehler**: Maximale Datensicherheit
+  - Tracking aller migrierten Dateien in einer Liste
+  - Bei einem einzigen Fehler → Entfernung aller migrierten Dateien
+  - Originaldaten immer in alter Struktur erhalten
+  - Rollback auch bei kritischer Ausnahme
+  - Klare Nachricht an Benutzer mit Sicherungsverfügbarkeit
+- **Vollständige JSON-Dateivalidierung**: Verbesserte Robustheit
+  - Erkennung beschädigter JSON-Dateien (JSONDecodeError)
+  - Überprüfung, dass Inhalt ein Wörterbuch ist
+  - Validierung des 'season'-Felds
+  - Ungültige Dateien werden übersprungen, Migration für andere fortgesetzt
+  - Präzise Fehlerstatistiken in Logs
+- **Überprüfung jeder Dateikopie**: Garantierte Integrität
+  - Jede kopierte Datei wird sofort neu gelesen und mit Original verglichen
+  - Bei Unterschied → Datei gelöscht und Fehler gezählt
+  - Schutz vor Beschädigung während des Kopierens
+- **Sofortige Migration bei Pfadänderung**: Verbesserte UX
+  - Ersetzung des "Neustart"-Popups durch Ja/Nein-Frage
+  - Bei Ja → Migration sofort mit Fortschrittsdialog ausgeführt
+  - Bei Nein → Informative Nachricht, Migration verschoben
+  - Automatische Listenaktualisierung nach Migration
+  - Kein Neustart der Anwendung erforderlich
+- **Übersetzte Fehlermeldungen**: Bessere Benutzererfahrung
+  - `migration_success_message`: Erfolgsnachricht mit Charakteranzahl
+  - `migration_no_characters`: Nachricht, wenn keine Charaktere zu migrieren
+  - `migration_rollback_info`: Information während Rollback
+  - `migration_data_safe`: Bestätigung, dass Daten sicher sind
+  - ✅ Symbol vor Erfolgsnachricht
+  - 💾 Symbol nur vor Sicherungspfad (erscheint einmal)
+- **Verbesserte sichere Bereinigung**: Datenverlust-Prävention
+  - Alter Ordner nur gelöscht, wenn 100% der Dateien migriert
+  - Bei Teilmigration → alter Ordner behalten
+  - Datei-für-Datei-Überprüfung vor Bereinigung
+- **Überschreibungsschutz**: Zusätzlicher Schutz
+  - Prüfung, ob Zieldatei bereits existiert
+  - Bei ja → Überspringen mit Fehler, kein Überschreiben
+- **Teilweise Sicherungsbereinigung**: Keine beschädigten Dateien
+  - Bei Sicherungsfehler wird teilweise ZIP-Datei gelöscht
+  - Keine Verwechslung mit ungültigen Sicherungen
+- **Migrations-Done-Flag nur bei vollständigem Erfolg**: Zuverlässigkeit
+  - `.migration_done`-Datei nur bei null Fehlern erstellt
+  - Bei Fehler → Benutzer kann Migration wiederholen
+  - Keine "festgefahrene" Migration
+- **MIGRATION_SECURITY.md Dokumentation**: Vollständiger Sicherheitsleitfaden
+  - Details aller implementierten Schutzmaßnahmen
+  - Alle Datenverlust-Szenarien abgedeckt
+  - Empfohlene Tests zur Validierung
+  - Dokumentierte Sicherheitsgarantien
+
+### Geändert
+- **Mehrsprachige Migrationsmeldungen**: Sprachliche Konsistenz
+  - Entfernung des fest codierten "Successfully migrated"-Textes auf Englisch
+  - Entfernung des fest codierten "Backup location:"-Textes
+  - Alle Meldungen verwenden jetzt Übersetzungsschlüssel
+  - `migration_backup_location` enthält nicht mehr alle 3 Sprachen
+  - Anzeige nur in Schnittstellensprache
+
+### Entfernt
+- **Hilfe-Menü > Ordnerstruktur migrieren**: Schnittstellenvereinfachung
+  - Manuelle Migrationsoption aus Hilfe-Menü entfernt
+  - Migration erfolgt automatisch beim Start, falls erforderlich
+  - Migration auch bei Änderung des Characters-Ordnerpfads angeboten
+  - `run_manual_migration()`-Methode entfernt
+  - `menu_help_migrate` Übersetzungsschlüssel nicht mehr verwendet
 
 ## [0.104] - 2025-10-29
 
@@ -40,12 +104,6 @@ und dieses Projekt folgt dem [Semantic Versioning](https://semver.org/lang/de/).
   - Bereitet auf zukünftige Saisons vor
   - Automatische Migration beim Start (mit Bestätigung)
   - Markierungsdatei `.migration_done` zur Vermeidung mehrfacher Migrationen
-- **Hilfe-Menü > Ordnerstruktur migrieren**: Manuelle Migrationsoption
-  - Ermöglicht manuelles Wiederholen der Migration bei Bedarf
-  - Fragt vor dem Fortfahren nach Bestätigung
-  - Erstellt automatisch ZIP-Sicherung
-  - Zeigt detaillierten Migrationsbericht (Anzahl Charaktere, Verteilung nach Saison)
-  - Aktualisiert Charakterliste automatisch nach Migration
 - **migration_manager.py Modul**: Vollständiger Migrationsmanager
   - `get_backup_path()`: Generiert Sicherungspfad in `Backup/Characters/`
   - `backup_characters()`: Erstellt komprimiertes ZIP-Archiv

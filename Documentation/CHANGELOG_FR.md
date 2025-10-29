@@ -10,12 +10,76 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 ## [Non publié]
 
 ### Ajouté
-- **Vérification de migration lors du changement de chemin** : Sécurité renforcée
-  - Détection automatique si le nouveau dossier Characters nécessite une migration
-  - Popup d'avertissement trilingue (FR/EN/DE) si ancienne structure détectée
-  - Message indiquant de relancer l'application pour effectuer la migration
-  - Script de test : `Scripts/test_migration_path_change.py`
-  - Nouvelles clés de traduction : `migration_path_change_title` et `migration_path_change_message`
+- **Vérification d'intégrité des sauvegardes** : Protection renforcée contre la corruption
+  - Test automatique du fichier ZIP après création avec `zipfile.testzip()`
+  - Vérification du nombre de fichiers dans l'archive
+  - Suppression automatique du backup si corrompu
+  - Migration annulée si le backup est invalide
+  - Logs détaillés pour le diagnostic
+- **Rollback automatique en cas d'erreur** : Sécurité maximale des données
+  - Tracking de tous les fichiers migrés dans une liste
+  - Si une seule erreur détectée → suppression de tous les fichiers migrés
+  - Données originales toujours préservées dans l'ancienne structure
+  - Rollback également en cas d'exception critique
+  - Message clair à l'utilisateur avec disponibilité du backup
+- **Validation complète des fichiers JSON** : Robustesse améliorée
+  - Détection des fichiers JSON corrompus (JSONDecodeError)
+  - Vérification que le contenu est bien un dictionnaire
+  - Validation du champ 'season'
+  - Les fichiers invalides sont skippés, migration continue pour les autres
+  - Statistiques précises des erreurs dans les logs
+- **Vérification de chaque copie de fichier** : Intégrité garantie
+  - Chaque fichier copié est immédiatement relu et comparé à l'original
+  - Si différent → fichier supprimé et erreur comptée
+  - Protection contre les corruptions lors de la copie
+- **Migration immédiate lors du changement de chemin** : UX améliorée
+  - Remplacement du popup "redémarrer" par une question Oui/Non
+  - Si Oui → Migration exécutée immédiatement avec dialogue de progression
+  - Si Non → Message informatif, migration reportée
+  - Rafraîchissement automatique de la liste après migration
+  - Plus besoin de redémarrer l'application
+- **Messages d'erreur traduits** : Meilleure expérience utilisateur
+  - `migration_success_message` : Message de succès avec nombre de personnages
+  - `migration_no_characters` : Message si aucun personnage à migrer
+  - `migration_rollback_info` : Information lors du rollback
+  - `migration_data_safe` : Confirmation que les données sont sécurisées
+  - Icône ✅ avant le message de succès
+  - Icône 💾 uniquement avant le chemin du backup (apparaît une seule fois)
+- **Nettoyage sécurisé amélioré** : Prévention de perte de données
+  - Ancien dossier supprimé uniquement si 100% des fichiers migrés
+  - Si migration partielle → ancien dossier conservé
+  - Vérification fichier par fichier avant nettoyage
+- **Prévention d'écrasement** : Protection supplémentaire
+  - Vérification si le fichier destination existe déjà
+  - Si oui → skip avec erreur, pas d'écrasement
+- **Nettoyage des backups partiels** : Pas de fichiers corrompus
+  - Si backup échoue, le fichier ZIP partiel est supprimé
+  - Pas de confusion avec des backups invalides
+- **Flag migration done uniquement sur succès complet** : Fiabilité
+  - Le fichier `.migration_done` créé seulement si zéro erreur
+  - Si échec → utilisateur peut réessayer la migration
+  - Pas de migration "bloquée"
+- **Documentation MIGRATION_SECURITY.md** : Guide de sécurité complet
+  - Détails de toutes les protections implémentées
+  - Scénarios de perte de données tous couverts
+  - Tests recommandés pour validation
+  - Garanties de sécurité documentées
+
+### Modifié
+- **Messages de migration multilingues** : Cohérence linguistique
+  - Suppression du texte hardcodé "Successfully migrated" en anglais
+  - Suppression du texte "Backup location:" hardcodé
+  - Tous les messages utilisent maintenant les clés de traduction
+  - `migration_backup_location` ne contient plus les 3 langues
+  - Affichage uniquement dans la langue de l'interface
+
+### Supprimé
+- **Menu Aide > Migrer la structure des dossiers** : Simplification de l'interface
+  - Option de migration manuelle supprimée du menu Aide
+  - Migration se fait automatiquement au démarrage si nécessaire
+  - Migration également proposée lors du changement de chemin du dossier Characters
+  - Méthode `run_manual_migration()` supprimée
+  - Clé de traduction `menu_help_migrate` plus utilisée
 
 ## [0.104] - 2025-10-29
 
@@ -40,12 +104,6 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
   - Prépare le terrain pour de futures saisons
   - Migration automatique au démarrage (avec confirmation)
   - Fichier marqueur `.migration_done` pour éviter les migrations multiples
-- **Menu Aide > Migrer la structure des dossiers** : Option manuelle de migration
-  - Permet de relancer la migration manuellement si nécessaire
-  - Demande confirmation avant de procéder
-  - Crée automatiquement une sauvegarde ZIP
-  - Affiche un rapport détaillé de la migration (nombre de personnages, répartition par saison)
-  - Actualise automatiquement la liste des personnages après migration
 - **Module migration_manager.py** : Gestionnaire de migration complet
   - `get_backup_path()` : Génère le chemin de sauvegarde dans `Backup/Characters/`
   - `backup_characters()` : Crée une archive ZIP compressée

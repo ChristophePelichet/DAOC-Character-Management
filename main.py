@@ -243,7 +243,7 @@ class CharacterApp(QMainWindow):
                         QMessageBox.information(
                             self,
                             lang.get("migration_success", default="Migration successful!"),
-                            migration_message
+                            f"✅ {migration_message}\n\n💾 {lang.get('migration_backup_location')}\n{backup_path}"
                         )
                         # Refresh character list to show migrated characters
                         self.refresh_character_list()
@@ -1070,6 +1070,11 @@ class CharacterApp(QMainWindow):
         if not new_debug_mode and old_debug_mode:
             logging.info("Debug mode has been DEACTIVATED. This is the last log entry.")
 
+        # Check if character folder path changed
+        old_char_folder = config.get("character_folder", "")
+        new_char_folder = dialog.char_path_edit.text()
+        char_folder_changed = (old_char_folder != new_char_folder)
+        
         config.set("character_folder", dialog.char_path_edit.text())
         config.set("config_folder", dialog.config_path_edit.text())
         config.set("log_folder", dialog.log_path_edit.text())
@@ -1124,6 +1129,65 @@ class CharacterApp(QMainWindow):
             logging.info("Debug mode has been ACTIVATED.")
 
         QMessageBox.information(self, lang.get("success_title"), lang.get("config_saved_success"))
+
+        # Check if character folder changed and verify migration
+        if char_folder_changed:
+            from Functions.migration_manager import check_migration_needed, is_migration_done, run_migration_with_backup
+            
+            # Check if the new path needs migration
+            if check_migration_needed() and not is_migration_done():
+                logging.warning(f"Character folder changed to a path requiring migration: {new_char_folder}")
+                
+                # Ask user if they want to migrate now
+                reply = QMessageBox.question(
+                    self, 
+                    lang.get("migration_path_change_title"),
+                    lang.get("migration_path_change_question"),
+                    QMessageBox.Yes | QMessageBox.No,
+                    QMessageBox.Yes
+                )
+                
+                if reply == QMessageBox.Yes:
+                    logging.info("User chose to migrate immediately after path change")
+                    
+                    # Show progress dialog
+                    progress = QMessageBox(self)
+                    progress.setWindowTitle(lang.get("migration_backup_info"))
+                    progress.setText(lang.get("migration_backup_info"))
+                    progress.setStandardButtons(QMessageBox.NoButton)
+                    progress.show()
+                    QApplication.processEvents()
+                    
+                    try:
+                        # Run migration with backup
+                        success, migration_message, backup_path = run_migration_with_backup()
+                        
+                        if success:
+                            logging.info(f"Migration completed successfully. Backup: {backup_path}")
+                            QMessageBox.information(
+                                self,
+                                lang.get("success_title"),
+                                f"✅ {migration_message}\n\n💾 {lang.get('migration_backup_location')}\n{backup_path}"
+                            )
+                            # Refresh character list to show new structure
+                            self.refresh_character_list()
+                        else:
+                            logging.error(f"Migration failed: {migration_message}")
+                            QMessageBox.critical(
+                                self,
+                                lang.get("error_title"),
+                                f"{lang.get('migration_error')}\n\n{migration_message}"
+                            )
+                    finally:
+                        progress.close()
+                        progress.deleteLater()
+                else:
+                    logging.info("User declined immediate migration after path change")
+                    QMessageBox.information(
+                        self,
+                        lang.get("info_title"),
+                        lang.get("migration_path_change_later")
+                    )
 
         if language_changed:
             self.change_language(new_lang_code)

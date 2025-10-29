@@ -9,6 +9,14 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+### Ajouté
+- **Vérification de migration lors du changement de chemin** : Sécurité renforcée
+  - Détection automatique si le nouveau dossier Characters nécessite une migration
+  - Popup d'avertissement trilingue (FR/EN/DE) si ancienne structure détectée
+  - Message indiquant de relancer l'application pour effectuer la migration
+  - Script de test : `Scripts/test_migration_path_change.py`
+  - Nouvelles clés de traduction : `migration_path_change_title` et `migration_path_change_message`
+
 ## [0.104] - 2025-10-29
 
 ### Ajouté

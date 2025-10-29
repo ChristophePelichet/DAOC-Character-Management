@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- **Migration check on path change**: Enhanced security
+  - Automatic detection if the new Characters folder requires migration
+  - Trilingual warning popup (FR/EN/DE) if old structure is detected
+  - Message indicating to restart the application to perform migration
+  - Test script: `Scripts/test_migration_path_change.py`
+  - New translation keys: `migration_path_change_title` and `migration_path_change_message`
+
 ## [0.104] - 2025-10-29
 
 ### Added

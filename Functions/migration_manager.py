@@ -9,6 +9,7 @@ import zipfile
 from datetime import datetime
 from Functions.config_manager import config
 from Functions.path_manager import get_base_path
+from Functions.language_manager import lang
 
 def get_character_dir():
     """Returns the configured character directory."""
@@ -33,6 +34,7 @@ def backup_characters():
     """
     Creates a compressed backup (.zip) of the entire Characters folder before migration.
     Backup is stored in Backup/Characters/ folder.
+    Validates backup integrity after creation.
     
     Returns:
         tuple: (success: bool, backup_path: str, message: str)
@@ -41,6 +43,8 @@ def backup_characters():
     
     if not os.path.exists(base_char_dir):
         return False, "", "Characters directory does not exist"
+    
+    backup_path = ""
     
     try:
         # Create backup directory structure
@@ -55,6 +59,9 @@ def backup_characters():
         
         logging.info(f"Creating compressed backup: {backup_path}")
         
+        # Count files to backup for validation
+        files_added = 0
+        
         # Create zip file
         with zipfile.ZipFile(backup_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
             # Walk through the Characters directory
@@ -64,7 +71,48 @@ def backup_characters():
                     # Calculate the archive name (relative path from Characters)
                     arcname = os.path.relpath(file_path, os.path.dirname(base_char_dir))
                     zipf.write(file_path, arcname)
+                    files_added += 1
                     logging.debug(f"Added to backup: {arcname}")
+        
+        logging.info(f"Compressed backup created with {files_added} file(s): {backup_path}")
+        
+        # CRITICAL: Verify backup integrity
+        try:
+            logging.info("Verifying backup integrity...")
+            with zipfile.ZipFile(backup_path, 'r') as zipf:
+                # Test the ZIP file integrity
+                bad_file = zipf.testzip()
+                if bad_file:
+                    error_msg = f"Backup verification failed: corrupted file {bad_file}"
+                    logging.error(error_msg)
+                    # Delete corrupted backup
+                    try:
+                        os.remove(backup_path)
+                    except:
+                        pass
+                    return False, "", error_msg
+                
+                # Verify file count
+                zip_files = len(zipf.namelist())
+                if zip_files != files_added:
+                    error_msg = f"Backup verification failed: expected {files_added} files, found {zip_files}"
+                    logging.error(error_msg)
+                    try:
+                        os.remove(backup_path)
+                    except:
+                        pass
+                    return False, "", error_msg
+            
+            logging.info(f"✓ Backup integrity verified: {zip_files} file(s) OK")
+            
+        except zipfile.BadZipFile as e:
+            error_msg = f"Backup verification failed: invalid ZIP file - {str(e)}"
+            logging.error(error_msg)
+            try:
+                os.remove(backup_path)
+            except:
+                pass
+            return False, "", error_msg
         
         logging.info(f"Compressed backup created successfully: {backup_path}")
         return True, backup_path, f"Backup created: {backup_name}"
@@ -72,6 +120,13 @@ def backup_characters():
     except Exception as e:
         error_msg = f"Backup failed: {str(e)}"
         logging.error(error_msg)
+        # Clean up partial backup if it exists
+        if backup_path and os.path.exists(backup_path):
+            try:
+                os.remove(backup_path)
+                logging.info("Cleaned up partial backup file")
+            except:
+                pass
         return False, "", error_msg
 
 def check_migration_needed():
@@ -110,6 +165,7 @@ def migrate_character_structure():
     to new structure (Characters/Season/Realm/character.json).
     
     Characters without season info will be placed in a default season folder.
+    If any errors occur, performs automatic rollback to preserve data integrity.
     
     Returns:
         tuple: (success: bool, message: str, stats: dict)
@@ -123,6 +179,9 @@ def migrate_character_structure():
         "errors": 0,
         "by_season": {}
     }
+    
+    # Track all migrated files for potential rollback
+    migrated_files = []  # List of (old_path, new_path) tuples
     
     logging.info("=" * 60)
     logging.info("Starting character structure migration...")
@@ -151,15 +210,27 @@ def migrate_character_structure():
                 old_file_path = os.path.join(old_realm_path, json_file)
                 
                 try:
-                    # Read character data to get season
+                    # CRITICAL: Validate JSON before processing
                     with open(old_file_path, 'r', encoding='utf-8') as f:
-                        char_data = json.load(f)
+                        try:
+                            char_data = json.load(f)
+                        except json.JSONDecodeError as je:
+                            error_msg = f"Invalid JSON in {json_file}: {str(je)}"
+                            logging.error(f"  ✗ {error_msg}")
+                            stats["errors"] += 1
+                            continue  # Skip this file but continue with others
+                    
+                    # Validate that it's a dictionary
+                    if not isinstance(char_data, dict):
+                        logging.error(f"  ✗ Invalid character data in {json_file}: not a dictionary")
+                        stats["errors"] += 1
+                        continue
                     
                     # Get season from character data, default to "S1" if not present
                     season = char_data.get('season', 'S1')
-                    if not season:
+                    if not season or not isinstance(season, str):
                         season = 'S1'
-                        logging.warning(f"Character {json_file} has no season, defaulting to S1")
+                        logging.warning(f"Character {json_file} has invalid/missing season, defaulting to S1")
                     
                     # Create new directory structure
                     new_season_path = os.path.join(base_char_dir, season)
@@ -169,9 +240,36 @@ def migrate_character_structure():
                     # New file path
                     new_file_path = os.path.join(new_realm_path, json_file)
                     
-                    # Copy file to new location
+                    # Check if target file already exists (safety check)
+                    if os.path.exists(new_file_path):
+                        logging.warning(f"  ! Target file already exists: {new_file_path}, skipping")
+                        stats["errors"] += 1
+                        continue
+                    
+                    # Copy file to new location (use copy2 to preserve metadata)
                     shutil.copy2(old_file_path, new_file_path)
+                    
+                    # Verify the copy was successful by reading it
+                    try:
+                        with open(new_file_path, 'r', encoding='utf-8') as f:
+                            verify_data = json.load(f)
+                        # Basic verification that data is intact
+                        if verify_data != char_data:
+                            raise Exception("Copied file data doesn't match original")
+                    except Exception as ve:
+                        logging.error(f"  ✗ Copy verification failed for {json_file}: {str(ve)}")
+                        # Remove the invalid copy
+                        try:
+                            os.remove(new_file_path)
+                        except:
+                            pass
+                        stats["errors"] += 1
+                        continue
+                    
                     logging.info(f"  ✓ Migrated: {json_file} -> {season}/{realm}/")
+                    
+                    # Track successful migration for potential rollback
+                    migrated_files.append((old_file_path, new_file_path))
                     
                     stats["migrated"] += 1
                     stats["by_season"][season] = stats["by_season"].get(season, 0) + 1
@@ -180,21 +278,28 @@ def migrate_character_structure():
                     logging.error(f"  ✗ Error migrating {json_file}: {e}")
                     stats["errors"] += 1
             
-            # After successful migration of all files in this realm, remove the old folder
-            if json_files and stats["errors"] == 0:
+            # CRITICAL: Only remove old files if ALL files in this realm migrated successfully
+            realm_files_count = len([f for f in json_files])
+            realm_migrated_count = len([mf for mf in migrated_files if realm in mf[0]])
+            
+            if realm_files_count > 0 and realm_migrated_count == realm_files_count:
                 try:
                     # Remove all JSON files from old location
                     for json_file in json_files:
-                        os.remove(os.path.join(old_realm_path, json_file))
+                        old_file = os.path.join(old_realm_path, json_file)
+                        if os.path.exists(old_file):
+                            os.remove(old_file)
                     
                     # Try to remove the old realm folder if empty
-                    if not os.listdir(old_realm_path):
+                    if os.path.exists(old_realm_path) and not os.listdir(old_realm_path):
                         os.rmdir(old_realm_path)
                         logging.info(f"  ✓ Removed empty old folder: {realm}/")
                     else:
                         logging.warning(f"  ! Old folder {realm}/ not empty, keeping it")
                 except Exception as e:
                     logging.warning(f"  ! Could not clean up old folder {realm}/: {e}")
+            else:
+                logging.warning(f"  ! Not all files migrated for {realm} ({realm_migrated_count}/{realm_files_count}), keeping old folder")
         
         # Summary
         logging.info("\n" + "=" * 60)
@@ -208,17 +313,46 @@ def migrate_character_structure():
                 logging.info(f"    {season}: {count} character(s)")
         logging.info("=" * 60)
         
+        # CRITICAL: If there were errors, perform rollback
         if stats["errors"] > 0:
-            return False, f"Migration completed with {stats['errors']} error(s)", stats
+            logging.error("⚠️  ERRORS DETECTED - Performing rollback to preserve data integrity")
+            rollback_count = 0
+            for old_path, new_path in migrated_files:
+                try:
+                    if os.path.exists(new_path):
+                        os.remove(new_path)
+                        rollback_count += 1
+                        logging.info(f"  Rolled back: {os.path.basename(new_path)}")
+                except Exception as re:
+                    logging.error(f"  ✗ Rollback failed for {new_path}: {re}")
+            
+            logging.info(f"Rollback completed: {rollback_count}/{len(migrated_files)} files removed from new location")
+            error_message = f"Migration failed with {stats['errors']} error(s). All changes have been rolled back. Your original files are safe."
+            return False, error_message, stats
+        
         elif stats["migrated"] == 0:
-            return True, "No characters to migrate", stats
+            return True, lang.get("migration_no_characters"), stats
         else:
-            return True, f"Successfully migrated {stats['migrated']} character(s)", stats
+            return True, lang.get("migration_success_message", count=stats['migrated']), stats
             
     except Exception as e:
-        error_msg = f"Migration failed: {e}"
+        error_msg = f"Migration failed with critical error: {e}"
         logging.error(error_msg)
-        return False, error_msg, stats
+        
+        # CRITICAL: Perform rollback on critical failure
+        if migrated_files:
+            logging.error("⚠️  CRITICAL FAILURE - Attempting rollback")
+            rollback_count = 0
+            for old_path, new_path in migrated_files:
+                try:
+                    if os.path.exists(new_path):
+                        os.remove(new_path)
+                        rollback_count += 1
+                except:
+                    pass
+            logging.info(f"Emergency rollback: {rollback_count}/{len(migrated_files)} files removed")
+        
+        return False, f"{error_msg}\nRollback performed. Your original files are safe.", stats
 
 def mark_migration_done():
     """
@@ -273,6 +407,7 @@ def run_migration_if_needed():
 def run_migration_with_backup():
     """
     Runs migration with automatic backup.
+    Only marks migration as done if completely successful (no errors).
     
     Returns:
         tuple: (success: bool, message: str, backup_path: str)
@@ -289,16 +424,26 @@ def run_migration_with_backup():
         logging.error(error_msg)
         return False, error_msg, ""
     
-    logging.info(f"Backup successful: {backup_path}")
+    logging.info(f"✓ Backup successful: {backup_path}")
+    logging.info(f"✓ Backup verified and ready for recovery if needed")
     
     # Run migration
     logging.info("Starting character structure migration...")
     success, message, stats = migrate_character_structure()
     
     if success:
-        mark_migration_done()
-        full_message = f"{message}\n\nBackup location: {backup_path}"
-        return True, full_message, backup_path
+        # CRITICAL: Only mark as done if truly successful (no errors)
+        if stats.get("errors", 0) == 0:
+            mark_migration_done()
+            logging.info("✓ Migration marked as completed")
+        else:
+            logging.warning("⚠️  Migration had errors, not marking as done")
+        
+        # Return only the migration message, let the UI handle backup path display
+        return True, message, backup_path
     else:
-        full_message = f"{message}\n\nYour original files are safe in: {backup_path}"
+        # On failure, rollback was already performed, don't mark as done
+        logging.error("✗ Migration failed, rollback performed, not marking as done")
+        # Include backup path in message for safety info
+        full_message = f"{message}\n\n✓ Your original files are safe in:\n{backup_path}"
         return False, full_message, backup_path

@@ -9,6 +9,14 @@ und dieses Projekt folgt dem [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unveröffentlicht]
 
+### Hinzugefügt
+- **Migrationsprüfung bei Pfadänderung**: Verbesserte Sicherheit
+  - Automatische Erkennung, ob der neue Characters-Ordner eine Migration erfordert
+  - Dreisprachiges Warnungs-Popup (FR/EN/DE), wenn alte Struktur erkannt wird
+  - Nachricht, die darauf hinweist, die Anwendung neu zu starten, um die Migration durchzuführen
+  - Test-Skript: `Scripts/test_migration_path_change.py`
+  - Neue Übersetzungsschlüssel: `migration_path_change_title` und `migration_path_change_message`
+
 ## [0.104] - 2025-10-29
 
 ### Hinzugefügt

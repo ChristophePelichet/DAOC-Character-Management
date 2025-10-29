@@ -1,5 +1,7 @@
 # ÄNDERUNGSPROTOKOLL
 
+> 📁 **Diese Datei wurde verschoben**: Früher im Stammverzeichnis, jetzt in `Documentation/` (v0.104)
+
 Alle bemerkenswerten Änderungen an diesem Projekt werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/),
@@ -7,64 +9,42 @@ und dieses Projekt folgt dem [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unveröffentlicht]
 
-## [0.104.1] - 2025-10-29
-
-### Hinzugefügt
-- **Migrationsbestätigungs-Popup**: Dialogfeld vor jeder Migration angezeigt
-  - Detaillierte Erklärung der Strukturänderung
-  - Visueller Vergleich: Alte Struktur → Neue Struktur
-  - Information über automatische Sicherung
-  - "OK"-Schaltfläche: Startet Sicherung und Migration
-  - "Abbrechen"-Schaltfläche: Schließt Anwendung ohne Änderungen
-  - Vollständige Übersetzung in FR/EN/DE
-- **Automatische Sicherung vor Migration**: Datenschutz
-  - Erstellt vollständige Kopie des `Characters`-Ordners
-  - Name mit Zeitstempel: `Characters_backup_JJJJMMTT_HHMMSS`
-  - Speicherort neben dem `Characters`-Ordner
-  - Erfolgsüberprüfung vor Start der Migration
-  - Bestätigungsnachricht mit Sicherungsort
-- **Test-Skript**: `Scripts/simulate_old_structure.py`
-  - Simuliert alte Struktur zum Testen der Migration
-  - Automatische Sicherung der aktuellen Struktur
-  - Erstellt Testcharaktere in allen Reichen
-
-### Geändert
-- **Automatische Migration**: Erfordert jetzt Benutzerbestätigung
-  - Startet nicht mehr automatisch ohne Nachfrage
-  - Zeigt Bestätigungs-Popup beim Start an
-  - Schließt Anwendung bei Abbruch durch Benutzer
-- **Funktion `run_migration_if_needed()`**: Geänderter Rückgabewert
-  - Startet Migration nicht mehr automatisch
-  - Gibt Status "Bestätigung ausstehend" zurück
-  - Lässt UI die Popup-Anzeige übernehmen
-
-### Technisch
-- Neue Funktion `backup_characters()` in `migration_manager.py`
-- Neue Funktion `run_migration_with_backup()` in `migration_manager.py`
-- Funktion `run_automatic_migration()` in `main.py` vollständig überarbeitet
-- 3 neue Übersetzungsschlüssel in FR/EN/DE hinzugefügt:
-  - `migration_startup_title`
-  - `migration_startup_message`
-  - `migration_backup_info`
-
 ## [0.104] - 2025-10-29
 
 ### Hinzugefügt
+- **Migrationsbestätigungs-Popup**: Dreisprachige Anzeige (FR/EN/DE) vor jeder Migration
+  - Detaillierte Erklärung der Strukturänderung
+  - Visueller Vergleich: Alte Struktur → Neue Struktur
+  - Information über automatische Sicherung mit Pfadangabe
+  - "OK"-Schaltfläche: Startet ZIP-Sicherung und dann Migration
+  - "Abbrechen"-Schaltfläche: Schließt Anwendung ohne Änderungen
+  - Benutzerdefinierte Abbruchmeldung bei Benutzerabbruch
+- **Automatische ZIP-Sicherung vor Migration**: Optimierter Datenschutz
+  - Erstellt komprimiertes ZIP-Archiv des `Characters`-Ordners
+  - Name mit Zeitstempel: `Characters_backup_JJJJMMTT_HHMMSS.zip`
+  - Organisierter Speicherort: `Backup/Characters/`
+  - ZIP_DEFLATED-Kompression spart 70-90% Speicherplatz
+  - Erfolgsüberprüfung vor Start der Migration
+  - Bestätigungsnachricht mit Sicherungsort
 - **Neue Ordnerstruktur**: Migration zu hierarchischer Organisation nach Saison
   - Alte Struktur: `Characters/Realm/Character.json`
   - Neue Struktur: `Characters/Season/Realm/Character.json`
   - Bereitet auf zukünftige Saisons vor
-  - Automatische Migration beim Start (nur einmal)
+  - Automatische Migration beim Start (mit Bestätigung)
   - Markierungsdatei `.migration_done` zur Vermeidung mehrfacher Migrationen
 - **Hilfe-Menü > Ordnerstruktur migrieren**: Manuelle Migrationsoption
   - Ermöglicht manuelles Wiederholen der Migration bei Bedarf
   - Fragt vor dem Fortfahren nach Bestätigung
+  - Erstellt automatisch ZIP-Sicherung
   - Zeigt detaillierten Migrationsbericht (Anzahl Charaktere, Verteilung nach Saison)
   - Aktualisiert Charakterliste automatisch nach Migration
 - **migration_manager.py Modul**: Vollständiger Migrationsmanager
+  - `get_backup_path()`: Generiert Sicherungspfad in `Backup/Characters/`
+  - `backup_characters()`: Erstellt komprimiertes ZIP-Archiv
   - `check_migration_needed()`: Erkennt, ob Migration erforderlich ist
   - `migrate_character_structure()`: Führt Migration mit detailliertem Bericht durch
   - `is_migration_done()`: Prüft, ob Migration bereits durchgeführt wurde
+  - `run_migration_with_backup()`: Orchestriert Sicherung und dann Migration
   - `run_migration_if_needed()`: Führt automatische Migration beim Start aus
   - Vollständige Fehlerbehandlung mit detaillierten Logs
   - Erhält Dateimetadaten (Daten, Attribute)
@@ -75,6 +55,16 @@ und dieses Projekt folgt dem [Semantic Versioning](https://semver.org/lang/de/).
   - Kontrollkästchen im Ansicht > Spalten-Menü zum Aktivieren/Deaktivieren von Spalten
   - Vollständige mehrsprachige Unterstützung (FR/EN/DE)
   - Daten werden automatisch aus den Charakter-JSON-Dateien extrahiert
+- **Test-Skripte**: Tools zum Testen der Migration
+  - `Scripts/simulate_old_structure.py`: Erstellt alte Struktur zum Testen
+  - `Scripts/test_backup_structure.py`: Überprüft ZIP-Sicherungserstellung
+- **Dokumentationsreorganisation**: Verbesserte Dateistruktur
+  - CHANGELOGs nach `Documentation/` verschoben
+  - Neues Haupt-`CHANGELOG.md` im Stammverzeichnis mit Verweis auf Sprachversionen
+  - Sprach-READMEs (EN/DE) nach `Documentation/` verschoben
+  - Haupt-README.md im Stammverzeichnis mit Links zu Sprachversionen
+  - Bessere Organisation der Dokumentationsdateien
+  - Alle internen Links aktualisiert
 
 ### Geändert
 - **Alle Charakterverwaltungsfunktionen**: Anpassung an neue Season/Realm-Struktur
@@ -84,47 +74,46 @@ und dieses Projekt folgt dem [Semantic Versioning](https://semver.org/lang/de/).
   - `delete_character()`: Löscht in neuer Struktur
   - `move_character_to_realm()`: Verschiebt zwischen Reichen innerhalb derselben Saison
   - Standardwert "S1" für Charaktere ohne angegebene Saison
-- **Aktion-Menü entfernt**: Das "Aktion"-Menü und alle seine Aktionen wurden vorübergehend entfernt
-  - "Widerstände"-Aktion aus dem Menü entfernt (data_editor.py beibehalten)
-  - Vereinfachte Benutzeroberfläche
-- **Kontextmenü**: Symbol aus "Rüstungsverwaltung" entfernt
-  - Vorher: "📁 Rüstungsverwaltung"
-  - Jetzt: "Rüstungsverwaltung"
-  - Text ohne Symbol in allen 3 Sprachen (FR/EN/DE)
-- **Klassen-Spalte**: Textformatierung korrigiert
-  - Text wird nicht mehr fett angezeigt
-  - Normale Schrift für bessere visuelle Konsistenz
+- **Automatische Migration**: Erfordert jetzt Benutzerbestätigung
+  - Startet nicht mehr automatisch ohne Nachfrage
+  - Zeigt Bestätigungs-Popup beim Start an
+  - Schließt Anwendung bei Benutzerabbruch
+- **Funktion `run_automatic_migration()` in main.py**: Vollständige Überarbeitung
+  - Zeigt Bestätigungs-Popup mit QMessageBox an
+  - Verwendet try/finally zur Garantie der Fortschritts-Popup-Schließung
+  - Ruft `progress.deleteLater()` auf, um Qt-Speicher zu bereinigen
+  - Behandelt Abbruchfälle mit dreisprachiger Nachricht
+- **Sicherungssystem**: Migration von Ordnerkopie zu ZIP-Archiv
+  - Alte Methode: `shutil.copytree()` erstellte schwere Kopie
+  - Neue Methode: `zipfile.ZipFile()` mit ZIP_DEFLATED-Kompression
+  - Spart 70-90% Speicherplatz für JSON-Dateien
+  - Organisation in dediziertem `Backup/`-Ordner
+- **Reichsrang-Schnittstelle**: Schieberegler durch Dropdown-Menüs ersetzt
+  - Dropdown-Menü für Rang (1-14)
+  - Dropdown-Menü für Level (L0-L10 für Rang 1, L0-L9 für andere)
+  - Rangtitel wird jetzt oben im Bereich in Reichsfarbe angezeigt
+- **Auto-Speichern für Ränge**: "Diesen Rang anwenden"-Button entfernt
+  - Rang/Level-Änderungen werden jetzt automatisch angewendet
+  - Bestätigung von Änderungen nicht mehr erforderlich
+- **.gitignore**: `Backup/`-Ordner zu Git-Ausschlüssen hinzugefügt
+
+### Behoben
+- **"Migration läuft"-Popup bleibt offen**: Kritischer Fehler behoben
+  - `try/finally` hinzugefügt zur Garantie der Popup-Schließung
+  - Expliziter Aufruf von `progress.close()` und `progress.deleteLater()`
+  - Popup schließt jetzt korrekt nach Migration
+- **LanguageManager-Fehler**: `lang.get()` Aufrufe mit falschen Standardwerten korrigiert
+- **AttributeError**: Methodennamen für Rang/Level-Callbacks korrigiert
 
 ### Technisch
 - **Verbesserte Architektur**: Saisontrennung auf Dateisystemebene
 - **Rückwärtskompatibilität**: Automatische Migration bewahrt alle vorhandenen Charaktere
 - **Detaillierte Protokollierung**: Alle Migrationsoperationen werden in Logs aufgezeichnet
 - **Robuste Fehlerbehandlung**: Migration behandelt Fehlerfälle ohne Datenverlust
-- **Optimierte Leistung**: Verwendet `shutil.copy2` zur Erhaltung von Metadaten
-- `font.setBold(False)` für Klassen-Spalte hinzugefügt
-- `context_menu_armor_management` Übersetzungen aktualisiert (📁 entfernt)
-
-### Geändert (vorherige Version)
-- **Reichsrang-Schnittstelle**: Schieberegler durch Dropdown-Menüs ersetzt
-  - Dropdown-Menü für Rang (1-14)
-  - Dropdown-Menü für Level (L0-L10 für Rang 1, L0-L9 für andere)
-  - Rangtitel wird jetzt oben im Bereich in Reichsfarbe angezeigt
-- **Auto-Speichern**: "Diesen Rang anwenden"-Button entfernt
-  - Rang/Level-Änderungen werden jetzt automatisch angewendet
-  - Bestätigung von Änderungen nicht mehr erforderlich
-- **Visuelle Organisation**: "Reichsrang"-Bereich neu organisiert
-  - Rangtitel mit Farbe (rot für Albion, grün für Hibernia, blau für Midgard) oben platziert
-  - Rang/Level-Steuerung unter dem Titel
-
-### Hinzugefügt
-- **Rüstungsbereich**: Neuer Bereich neben "Allgemeine Informationen"
-  - "Widerstände"-Button (vorübergehend deaktiviert, demnächst verfügbar)
-  - Vorbereitung für Integration des Widerstandssystems
-- **Übersetzungen**: `armor_group_title` und `resistances_button` Schlüssel in FR/EN/DE hinzugefügt
-
-### Entwicklungshinweise
-- Widerstandsverwaltungsfunktion wird in einer späteren Version implementiert
-- URL zum Scraping von Widerstandsdaten muss noch bereitgestellt werden
+- **Optimierte Leistung**: Verwendet `zipfile` mit Kompression für Sicherungen
+- **Qt-Speicherbereinigung**: Korrekte Verwendung von `deleteLater()` für temporäre Widgets
+- 9 neue Übersetzungsschlüssel in FR/EN/DE für Migrationssystem hinzugefügt
+- Vollständige Dokumentation erstellt: `BACKUP_ZIP_UPDATE.md`
 
 ## [0.103] - 2025-10-28
 

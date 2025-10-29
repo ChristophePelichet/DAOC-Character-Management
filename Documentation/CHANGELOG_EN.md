@@ -1,5 +1,7 @@
 # CHANGELOG
 
+> 📁 **This file has been moved**: Previously at root, now in `Documentation/` (v0.104)
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
@@ -7,109 +9,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-## [0.104.1] - 2025-10-29
-
-### Added
-- **Migration confirmation popup**: Dialog box displayed before any migration
-  - Detailed explanation of structure modification
-  - Visual comparison: Old structure → New structure
-  - Information about automatic backup
-  - "OK" button: Launches backup and migration
-  - "Cancel" button: Closes application without changes
-  - Complete translation in FR/EN/DE
-- **Automatic backup before migration**: Data protection
-  - Creates complete copy of `Characters` folder
-  - Timestamped name: `Characters_backup_YYYYMMDD_HHMMSS`
-  - Location next to `Characters` folder
-  - Success verification before launching migration
-  - Confirmation message with backup location
-- **Test script**: `Scripts/simulate_old_structure.py`
-  - Simulates old structure to test migration
-  - Automatic backup of current structure
-  - Creates test characters in all realms
-
-### Changed
-- **Automatic migration**: Now requires user confirmation
-  - No longer launches automatically without asking
-  - Displays confirmation popup at startup
-  - Closes application if user cancels
-- **Function `run_migration_if_needed()`**: Modified return
-  - No longer automatically launches migration
-  - Returns "awaiting confirmation" state
-  - Lets UI handle popup display
-
-### Technical
-- New function `backup_characters()` in `migration_manager.py`
-- New function `run_migration_with_backup()` in `migration_manager.py`
-- Function `run_automatic_migration()` in `main.py` completely refactored
-- Added 3 new translation keys in FR/EN/DE:
-  - `migration_startup_title`
-  - `migration_startup_message`
-  - `migration_backup_info`
-
-## [0.105] - 2024-12-XX
-
-### Added
-- **Action Menu**: New menu between "File" and "View"
-  - Action "📊 Resistances": Opens armor resistance table (launches data_editor.py)
-  - Full multilingual support (FR/EN/DE)
-  - Error handling with user messages
-  - Logging of all actions
-- **Enhanced Context Menu**:
-  - Added "📁 Armor Management" to right-click on character
-  - Placed between "Duplicate" and "Delete"
-- **Armor Management System**: Complete new feature
-  - Module `Functions/armor_manager.py` with `ArmorManager` class
-  - Upload armor files (all formats: PNG, JPG, PDF, TXT, etc.)
-  - Automatic duplicate handling (suffixes _1, _2, etc.)
-  - Organization by character ID in subfolders
-  - Armor list with metadata (name, size, modification date)
-  - Open files with system default application
-  - File deletion with confirmation
-  - `ArmorManagementDialog` with complete user interface
-  - "📁 Manage armors" button in character sheet (Armor section)
-  - Armor folder path configuration in Settings
-  - Complete documentation: `Documentation/ARMOR_MANAGEMENT_FR.md`
-  - Test script: `Scripts/test_armor_manager.py`
-- **Path Manager**: New functions for path management
-  - `get_armor_dir()`: Returns armor folder path
-  - `ensure_armor_dir()`: Creates armor folder automatically
-
-### Changed
-- **Configuration**: Added "Armor folder" field in configuration dialog
-  - New field with browse button
-  - Saved in `config.json` under `armor_folder` key
-  - Default value: `<app_dir>/Armures`
-- **Architecture**: "Drive-in" approach with configurable paths
-  - All paths stored in configuration
-  - Automatic creation of necessary directories
-  - No hardcoded paths
-
-### Technical
-- Support for all file formats
-- Metadata preservation during copy (shutil.copy2)
-- Detailed logging of all operations
-- Complete error handling with user messages
-- Windows compatible (tested with os.startfile)
-
 ## [0.104] - 2025-10-29
 
 ### Added
+- **Migration confirmation popup**: Trilingual display (FR/EN/DE) before any migration
+  - Detailed explanation of structure modification
+  - Visual comparison: Old structure → New structure
+  - Information about automatic backup with path location
+  - "OK" button: Launches ZIP backup then migration
+  - "Cancel" button: Closes application without changes
+  - Custom cancellation message if user cancels
+- **Automatic ZIP backup before migration**: Optimized data protection
+  - Creates compressed ZIP archive of `Characters` folder
+  - Timestamped name: `Characters_backup_YYYYMMDD_HHMMSS.zip`
+  - Organized location: `Backup/Characters/`
+  - ZIP_DEFLATED compression saves 70-90% disk space
+  - Success verification before launching migration
+  - Confirmation message with backup location
 - **New folder structure**: Migration to hierarchical organization by season
   - Old structure: `Characters/Realm/Character.json`
   - New structure: `Characters/Season/Realm/Character.json`
   - Prepares for future seasons
-  - Automatic migration at startup (only once)
+  - Automatic migration at startup (with confirmation)
   - Marker file `.migration_done` to avoid multiple migrations
 - **Help Menu > Migrate folder structure**: Manual migration option
   - Allows manual re-run of migration if needed
   - Asks for confirmation before proceeding
+  - Automatically creates ZIP backup
   - Displays detailed migration report (number of characters, distribution by season)
   - Automatically refreshes character list after migration
 - **migration_manager.py module**: Complete migration manager
+  - `get_backup_path()`: Generates backup path in `Backup/Characters/`
+  - `backup_characters()`: Creates compressed ZIP archive
   - `check_migration_needed()`: Detects if migration is needed
   - `migrate_character_structure()`: Performs migration with detailed report
   - `is_migration_done()`: Checks if migration was already completed
+  - `run_migration_with_backup()`: Orchestrates backup then migration
   - `run_migration_if_needed()`: Runs automatic migration at startup
   - Complete error handling with detailed logs
   - Preserves file metadata (dates, attributes)
@@ -120,6 +55,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   - Checkboxes in View > Columns menu to enable/disable columns
   - Full multilingual support (FR/EN/DE)
   - Data automatically extracted from character JSON files
+- **Test scripts**: Tools to test migration
+  - `Scripts/simulate_old_structure.py`: Creates old structure for testing
+  - `Scripts/test_backup_structure.py`: Verifies ZIP backup creation
+- **Documentation reorganization**: Improved file structure
+  - CHANGELOGs moved to `Documentation/`
+  - New main `CHANGELOG.md` at root redirecting to language versions
+  - Language READMEs (EN/DE) moved to `Documentation/`
+  - Main README.md at root with links to language versions
+  - Better organization of documentation files
+  - All internal links updated
 
 ### Changed
 - **All character management functions**: Adapted to new Season/Realm structure
@@ -129,73 +74,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   - `delete_character()`: Deletes in new structure
   - `move_character_to_realm()`: Moves between realms within same season
   - Default value "S1" for characters without specified season
-- **Action Menu Removed**: The "Action" menu and all its actions have been temporarily removed
-  - "Resistances" action removed from menu (data_editor.py preserved)
-  - Simplified interface
-- **Context Menu**: Icon removed from "Armor Management"
-  - Before: "📁 Armor Management"
-  - Now: "Armor Management"
-  - Text without icon in all 3 languages (FR/EN/DE)
-- **Class Column**: Fixed text formatting
-  - Text is no longer displayed in bold
-  - Normal font for better visual consistency
+- **Automatic migration**: Now requires user confirmation
+  - No longer launches automatically without asking
+  - Displays confirmation popup at startup
+  - Closes application if user cancels
+- **Function `run_automatic_migration()` in main.py**: Complete refactoring
+  - Displays confirmation popup with QMessageBox
+  - Uses try/finally to guarantee progress popup closure
+  - Calls `progress.deleteLater()` to clean up Qt memory
+  - Handles cancellation cases with trilingual message
+- **Backup system**: Migration from folder copy to ZIP archive
+  - Old method: `shutil.copytree()` created heavy copy
+  - New method: `zipfile.ZipFile()` with ZIP_DEFLATED compression
+  - Saves 70-90% disk space for JSON files
+  - Organization in dedicated `Backup/` folder
+- **Realm Rank Interface**: Replaced sliders with dropdown menus
+  - Dropdown menu for rank (1-14)
+  - Dropdown menu for level (L0-L10 for rank 1, L0-L9 for others)
+  - Rank title now displays at the top of the section in realm color
+- **Auto-save for ranks**: Removed "Apply this rank" button
+  - Rank/level changes are now applied automatically
+  - No need to confirm changes
+- **.gitignore**: Added `Backup/` folder to Git exclusions
+
+### Fixed
+- **"Migration in progress" popup staying open**: Critical fix
+  - Added `try/finally` to guarantee popup closure
+  - Explicit call to `progress.close()` and `progress.deleteLater()`
+  - Popup now closes correctly after migration
+- **LanguageManager Error**: Fixed `lang.get()` calls with incorrect default values
+- **AttributeError**: Fixed method names for rank/level callbacks
 
 ### Technical
 - **Improved architecture**: Season separation at file system level
 - **Backward compatibility**: Automatic migration preserves all existing characters
 - **Detailed logging**: All migration operations are recorded in logs
 - **Robust error handling**: Migration handles error cases without data loss
-- **Optimized performance**: Uses `shutil.copy2` to preserve metadata
-- Added `font.setBold(False)` for Class column
-- Updated `context_menu_armor_management` translations (removed 📁)
-
-### Added (previous version)
-- **Armor Resistance System**: Complete new feature
-  - File `Data/armor_resists.json` with resistances for all classes (47 classes)
-  - Full multilingual support (EN/FR/DE) for all fields
-  - 9 resistance types: Thrust, Crush, Slash, Cold, Energy, Heat, Matter, Spirit, Body
-  - 3 tables organized by realm (Albion: 16 classes, Hibernia: 16 classes, Midgard: 15 classes)
-  - Scraping script `scrape_armor_resists.py` to extract data from darkageofcamelot.com
-  - Script `add_armor_translations.py` to automatically add FR/DE translations
-- **Test Generation Tool**: Script `generate_test_characters.py`
-  - Generates 20 characters with random attributes
-  - Realistic Realm Points distribution
-  - Automatic validation of class/race combinations
-  - Ideal for testing the application with varied data
-
-### Added (continued)
-- **Startup Disclaimer**: Trilingual information message (FR/EN/DE)
-  - Warns that software is in Alpha version
-  - Informs about local data storage
-  - Option to disable message in Settings > Miscellaneous
-  - Replaces old hard-coded disclaimer system
-
-### Changed
-- **Realm Rank Interface**: Replaced sliders with dropdown menus
-  - Dropdown menu for rank (1-14)
-  - Dropdown menu for level (L0-L10 for rank 1, L0-L9 for others)
-  - Rank title now displays at the top of the section in realm color
-- **Auto-save**: Removed "Apply this rank" button
-  - Rank/level changes are now applied automatically
-  - No need to confirm changes
-- **Settings**: Added "Miscellaneous" group
-  - Checkbox to disable startup disclaimer
-  - Persistent save in config.json
-- **Visual Organization**: Reorganized "Realm Rank" section
-  - Rank title with color (red for Albion, green for Hibernia, blue for Midgard) placed at top
-  - Rank/level controls below the title
-- **Armor Section**: Positioned next to "General Information"
-  - "Resistances" button (temporarily disabled, coming soon)
-  - Preparation for resistance system integration
-
-### Fixed
-- **LanguageManager Error**: Fixed `lang.get()` calls with incorrect default values
-- **AttributeError**: Fixed method names for rank/level callbacks
-  - `on_rank_dropdown_changed` → `on_rank_changed`
-  - `on_level_dropdown_changed` → `on_level_changed`
-
-### Translations
-- Added `armor_group_title` and `resistances_button` keys in FR/EN/DE
+- **Optimized performance**: Uses `zipfile` with compression for backups
+- **Qt memory cleanup**: Correct use of `deleteLater()` for temporary widgets
+- Added 9 new translation keys in FR/EN/DE for migration system
+- Complete documentation created: `BACKUP_ZIP_UPDATE.md`
 
 ## [0.103] - 2025-10-28
 

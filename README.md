@@ -2,11 +2,11 @@
 
 Application de gestion de personnages pour Dark Age of Camelot (DAOC), développée en Python avec PySide6.
 
-**🌍 Disponible en :** **Français** | [English](README_EN.md) | [Deutsch](README_DE.md)
+**🌍 Disponible en :** **Français** | [English](Documentation/README_EN.md) | [Deutsch](Documentation/README_DE.md)
 
 ## 📦 Téléchargement
 
-**Version actuelle : v0.105**
+**Version actuelle : v0.104**
 
 [![Télécharger l'exécutable](https://img.shields.io/badge/T%C3%A9l%C3%A9charger-EXE-blue?style=for-the-badge&logo=windows)](https://github.com/ChristophePelichet/DAOC-Character-Management/releases/latest)
 
@@ -299,23 +299,28 @@ Pour activer le mode debug :
 
 ## 📝 Notes de Version
 
-Consultez le [journal des modifications](CHANGELOG_FR.md) pour l'historique complet.  
-**🌍 Disponible en :** [Français](CHANGELOG_FR.md) | [English](CHANGELOG_EN.md) | [Deutsch](CHANGELOG_DE.md)
+Consultez le [journal des modifications](CHANGELOG.md) pour l'historique complet.  
+**🌍 Disponible en :** [Français](Documentation/CHANGELOG_FR.md) | [English](Documentation/CHANGELOG_EN.md) | [Deutsch](Documentation/CHANGELOG_DE.md)
 
 ### Version 0.104 (29 Octobre 2025)
-- ✅ **Système de Résistances d'Armure** : Nouvelle fonctionnalité complète
-  - 47 classes avec leurs résistances par type d'armure
-  - 9 types de résistances : Thrust, Crush, Slash, Cold, Energy, Heat, Matter, Spirit, Body
-  - Support multilingue complet (EN/FR/DE)
-  - Organisation par royaume (Albion, Hibernia, Midgard)
-  - Scraping automatique depuis darkageofcamelot.com
-- ✅ **Outil de génération de test** : Script `generate_test_characters.py`
-  - Génère 20 personnages avec attributs aléatoires pour tester l'application
+- ✅ **Migration sécurisée avec sauvegarde automatique**
+  - Popup de confirmation trilingue (FR/EN/DE) avant migration
+  - Sauvegarde ZIP automatique dans `Backup/Characters/`
+  - Format : `Characters_backup_YYYYMMDD_HHMMSS.zip`
+  - Compression optimale pour économiser l'espace disque
+  - Protection complète des données avant toute modification
+- ✅ **Nouvelle structure de dossiers** : Organisation par saison
+  - Ancienne : `Characters/Realm/` → Nouvelle : `Characters/Season/Realm/`
+  - Migration automatique au premier démarrage
+  - Fichier marqueur `.migration_done` pour éviter les migrations multiples
+- ✅ **Colonnes Classe et Race** : Nouvelles colonnes dans la vue principale
+  - Colonne "Classe" affichée par défaut
+  - Colonne "Race" masquée par défaut
+  - Configuration via menu Affichage > Colonnes
 - ✅ **Interface Rang de Royaume améliorée** : Remplacement des curseurs par des menus déroulants
-- ✅ **Sauvegarde automatique** : Plus besoin de cliquer sur "Appliquer ce rang"
+- ✅ **Sauvegarde automatique des rangs** : Plus besoin de cliquer sur "Appliquer ce rang"
 - ✅ **Organisation visuelle** : Titre du rang affiché en haut avec couleur du royaume
-- ✅ **Section Armure** : Nouvelle section à côté de "Informations générales"
-- ✅ **Corrections** : Résolution d'erreurs LanguageManager et AttributeError
+- ✅ **Corrections** : Résolution du popup "Migration en cours" qui restait ouvert
 
 ### Version 0.103 (28 Octobre 2025)
 - ✅ **Sélection de race** : Ajout d'un champ race dans la création de personnage
@@ -373,5 +378,5 @@ Ce projet est un outil personnel de gestion de personnages DAOC.
 ---
 
 **Créé par :** Ewoline  
-**Version :** 0.102  
-**Dernière mise à jour :** 27 octobre 2025
+**Version :** 0.104  
+**Dernière mise à jour :** 29 octobre 2025

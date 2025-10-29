@@ -1,8 +1,10 @@
 # DAOC - Charakterverwaltung
 
+> 📁 **Diese Datei wurde verschoben**: Früher im Stammverzeichnis, jetzt in `Documentation/` (v0.104)
+
 Charakterverwaltungsanwendung für Dark Age of Camelot (DAOC), entwickelt in Python mit PySide6.
 
-**🌍 Verfügbar in:** [Français](README.md) | [English](README_EN.md) | **Deutsch**
+**🌍 Verfügbar in:** [Français](../README.md) | [English](README_EN.md) | **Deutsch**
 
 ## 📦 Download
 
@@ -74,7 +76,7 @@ Verfügbare Spalten:
 - **Klasse**: Charakter-Klasse (standardmäßig angezeigt)
 - **Rasse**: Charakter-Rasse (standardmäßig ausgeblendet)
 
-Siehe [Documentation/COLUMN_CONFIGURATION_EN.md](Documentation/COLUMN_CONFIGURATION_EN.md) (EN) für weitere Details.
+Siehe [COLUMN_CONFIGURATION_EN.md](COLUMN_CONFIGURATION_EN.md) (EN) für weitere Details.
 
 ## 🚀 Installation
 
@@ -110,25 +112,25 @@ Um Reichsrang-Daten von der offiziellen DAOC-Website zu aktualisieren:
 python scrape_realm_ranks.py
 ```
 
-Siehe [Documentation/DATA_MANAGER_EN.md](Documentation/DATA_MANAGER_EN.md) (EN) für weitere Informationen zur Datenverwaltung.
+Siehe [DATA_MANAGER_EN.md](DATA_MANAGER_EN.md) (EN) für weitere Informationen zur Datenverwaltung.
 
 ## 📚 Dokumentation
 
 Vollständige Dokumentation verfügbar im `Documentation/` Ordner:
 
 ### Français 🇫🇷
-- [Configuration des Colonnes](Documentation/CONFIGURATION_COLONNES_FR.md)
-- [Système Realm Ranks](Documentation/REALM_RANKS_FR.md)
-- [Gestionnaire de Données](Documentation/DATA_MANAGER_FR.md)
-- [Dossier Data](Documentation/DATA_FOLDER_FR.md)
-- [Menu Interface](Documentation/INTERFACE_MENU_FR.md)
+- [Configuration des Colonnes](CONFIGURATION_COLONNES_FR.md)
+- [Système Realm Ranks](REALM_RANKS_FR.md)
+- [Gestionnaire de Données](DATA_MANAGER_FR.md)
+- [Dossier Data](DATA_FOLDER_FR.md)
+- [Menu Interface](INTERFACE_MENU_FR.md)
 
 ### English 🇬🇧
-- [Column Configuration](Documentation/COLUMN_CONFIGURATION_EN.md)
-- [Realm Ranks System](Documentation/REALM_RANKS_EN.md)
-- [Data Manager](Documentation/DATA_MANAGER_EN.md)
-- [Data Folder](Documentation/DATA_FOLDER_EN.md)
-- [Menu Interface](Documentation/INTERFACE_MENU_EN.md)
+- [Column Configuration](COLUMN_CONFIGURATION_EN.md)
+- [Realm Ranks System](REALM_RANKS_EN.md)
+- [Data Manager](DATA_MANAGER_EN.md)
+- [Data Folder](DATA_FOLDER_EN.md)
+- [Menu Interface](INTERFACE_MENU_EN.md)
 
 ## 🗂️ Projektstruktur
 
@@ -206,16 +208,25 @@ Characters/
         └── Character.json
 ```
 
-### Automatische Migration
-- Die Migration erfolgt **automatisch beim ersten Start** der Anwendung
-- Ihre vorhandenen Charaktere bleiben **erhalten** und werden in die neue Struktur verschoben
-- Eine `.migration_done` Datei wird erstellt, um mehrfache Migrationen zu vermeiden
+### Automatische Migration mit Sicherung
+- **Bestätigungs-Popup**: Beim ersten Start erklärt ein Dialog die Migration
+  - Visueller Vergleich: Alte Struktur → Neue Struktur
+  - Information über automatische Sicherung
+  - "OK"-Button: Startet Sicherung und dann Migration
+  - "Abbrechen"-Button: Schließt Anwendung ohne Änderungen
+- **Automatische Sicherung**: Vor jeder Migration wird eine vollständige Sicherung erstellt
+  - Format: Komprimiertes ZIP-Archiv (`Characters_backup_JJJJMMTT_HHMMSS.zip`)
+  - Speicherort: `Backup/Characters/`
+  - Schützt Ihre Daten im Falle von Problemen
+- **Sichere Migration**: Ihre vorhandenen Charaktere bleiben erhalten und werden in die neue Struktur verschoben
+- Eine `.migration_done` Markierungsdatei wird erstellt, um mehrfache Migrationen zu vermeiden
 
 ### Manuelle Migration
 Wenn Sie die Migration erneut ausführen müssen:
 1. Gehen Sie zu **Hilfe > Ordnerstruktur migrieren**
 2. Bestätigen Sie den Vorgang
-3. Ein detaillierter Bericht mit der Anzahl der migrierten Charaktere wird angezeigt
+3. Eine ZIP-Sicherung wird automatisch erstellt
+4. Ein detaillierter Bericht mit der Anzahl der migrierten Charaktere wird angezeigt
 
 ## 🎯 Verwendung
 
@@ -263,15 +274,28 @@ Um den Debug-Modus zu aktivieren:
 
 ## 📝 Versionshinweise
 
-Siehe das [Änderungsprotokoll](CHANGELOG_DE.md) für vollständige Historie.  
+Siehe das [Änderungsprotokoll](../CHANGELOG.md) für vollständige Historie.  
 **🌍 Verfügbar in:** [Français](CHANGELOG_FR.md) | [English](CHANGELOG_EN.md) | [Deutsch](CHANGELOG_DE.md)
 
 ### Version 0.104 (29. Oktober 2025)
+- ✅ **Sichere Migration mit automatischer Sicherung**
+  - Dreisprachiges Bestätigungs-Popup (FR/EN/DE) vor Migration
+  - Automatische ZIP-Sicherung in `Backup/Characters/`
+  - Format: `Characters_backup_JJJJMMTT_HHMMSS.zip`
+  - Optimale Komprimierung zur Speicherplatzeinsparung
+  - Vollständiger Datenschutz vor jeder Änderung
+- ✅ **Neue Ordnerstruktur**: Organisation nach Saison
+  - Alt: `Characters/Realm/` → Neu: `Characters/Season/Realm/`
+  - Automatische Migration beim ersten Start
+  - Markierungsdatei `.migration_done` zur Vermeidung mehrfacher Migrationen
+- ✅ **Klassen- und Rassen-Spalten**: Neue Spalten in der Hauptansicht
+  - "Klasse"-Spalte standardmäßig angezeigt
+  - "Rasse"-Spalte standardmäßig ausgeblendet
+  - Konfiguration über Ansicht > Spalten-Menü
 - ✅ **Verbesserte Reichsrang-Schnittstelle**: Schieberegler durch Dropdown-Menüs ersetzt
-- ✅ **Auto-Speichern**: Kein Klick auf "Diesen Rang anwenden" mehr erforderlich
+- ✅ **Auto-Speichern für Ränge**: Kein Klick auf "Diesen Rang anwenden" mehr erforderlich
 - ✅ **Visuelle Organisation**: Rangtitel oben in Reichsfarbe angezeigt
-- ✅ **Rüstungsbereich**: Neuer Bereich neben "Allgemeine Informationen"
-- ✅ **Widerstände-Button**: Vorbereitung für Widerstandsverwaltungsfunktion (demnächst)
+- ✅ **Korrekturen**: "Migration läuft"-Popup, das offen blieb, behoben
 
 ### Version 0.103 (28. Oktober 2025)
 - ✅ **Rassen-Auswahl**: Rassen-Feld in der Charaktererstellung hinzugefügt
@@ -328,5 +352,5 @@ Dieses Projekt ist ein persönliches DAOC-Charakterverwaltungstool.
 ---
 
 **Erstellt von:** Ewoline  
-**Version:** 0.102  
-**Letzte Aktualisierung:** 27. Oktober 2025
+**Version:** 0.104  
+**Letzte Aktualisierung:** 29. Oktober 2025

@@ -1,8 +1,10 @@
 # DAOC - Character Manager
 
+> 📁 **This file has been moved**: Previously at root, now in `Documentation/` (v0.104)
+
 Character management application for Dark Age of Camelot (DAOC), developed in Python with PySide6.
 
-**🌍 Available in:** [Français](README.md) | **English** | [Deutsch](README_DE.md)
+**🌍 Available in:** [Français](../README.md) | **English** | [Deutsch](README_DE.md)
 
 ## 📦 Download
 
@@ -74,7 +76,7 @@ Available columns:
 - **Class**: Character class (displayed by default)
 - **Race**: Character race (hidden by default)
 
-See [Documentation/COLUMN_CONFIGURATION_EN.md](Documentation/COLUMN_CONFIGURATION_EN.md) for more details.
+See [COLUMN_CONFIGURATION_EN.md](COLUMN_CONFIGURATION_EN.md) for more details.
 
 ## 🚀 Installation
 
@@ -110,25 +112,25 @@ To update Realm Ranks data from the official DAOC website:
 python scrape_realm_ranks.py
 ```
 
-See [Documentation/DATA_MANAGER_EN.md](Documentation/DATA_MANAGER_EN.md) for more information on data management.
+See [DATA_MANAGER_EN.md](DATA_MANAGER_EN.md) for more information on data management.
 
 ## 📚 Documentation
 
 Complete documentation available in the `Documentation/` folder:
 
 ### Français 🇫🇷
-- [Configuration des Colonnes](Documentation/CONFIGURATION_COLONNES_FR.md)
-- [Système Realm Ranks](Documentation/REALM_RANKS_FR.md)
-- [Gestionnaire de Données](Documentation/DATA_MANAGER_FR.md)
-- [Dossier Data](Documentation/DATA_FOLDER_FR.md)
-- [Menu Interface](Documentation/INTERFACE_MENU_FR.md)
+- [Configuration des Colonnes](CONFIGURATION_COLONNES_FR.md)
+- [Système Realm Ranks](REALM_RANKS_FR.md)
+- [Gestionnaire de Données](DATA_MANAGER_FR.md)
+- [Dossier Data](DATA_FOLDER_FR.md)
+- [Menu Interface](INTERFACE_MENU_FR.md)
 
 ### English 🇬🇧
-- [Column Configuration](Documentation/COLUMN_CONFIGURATION_EN.md)
-- [Realm Ranks System](Documentation/REALM_RANKS_EN.md)
-- [Data Manager](Documentation/DATA_MANAGER_EN.md)
-- [Data Folder](Documentation/DATA_FOLDER_EN.md)
-- [Menu Interface](Documentation/INTERFACE_MENU_EN.md)
+- [Column Configuration](COLUMN_CONFIGURATION_EN.md)
+- [Realm Ranks System](REALM_RANKS_EN.md)
+- [Data Manager](DATA_MANAGER_EN.md)
+- [Data Folder](DATA_FOLDER_EN.md)
+- [Menu Interface](INTERFACE_MENU_EN.md)
 
 ## 🗂️ Project Structure
 
@@ -206,16 +208,25 @@ Characters/
         └── Character.json
 ```
 
-### Automatic migration
-- Migration is performed **automatically on first startup**
-- Your existing characters are **preserved** and moved to the new structure
-- A `.migration_done` file is created to prevent multiple migrations
+### Automatic migration with backup
+- **Confirmation popup**: On first startup, a dialog explains the migration
+  - Visual comparison: Old structure → New structure
+  - Information about automatic backup
+  - "OK" button: Launches backup then migration
+  - "Cancel" button: Closes application without changes
+- **Automatic backup**: Before any migration, a complete backup is created
+  - Format: Compressed ZIP archive (`Characters_backup_YYYYMMDD_HHMMSS.zip`)
+  - Location: `Backup/Characters/`
+  - Protects your data in case of issues
+- **Secure migration**: Your existing characters are preserved and moved to the new structure
+- A `.migration_done` marker file is created to prevent multiple migrations
 
 ### Manual migration
 If you need to run the migration again:
 1. Go to **Help > Migrate folder structure**
 2. Confirm the operation
-3. A detailed report displays the number of migrated characters
+3. A ZIP backup is created automatically
+4. A detailed report displays the number of migrated characters
 
 ## 🎯 Usage
 
@@ -263,15 +274,28 @@ To enable debug mode:
 
 ## 📝 Release Notes
 
-See the [changelog](CHANGELOG_EN.md) for complete history.  
+See the [changelog](../CHANGELOG.md) for complete history.  
 **🌍 Available in:** [Français](CHANGELOG_FR.md) | [English](CHANGELOG_EN.md) | [Deutsch](CHANGELOG_DE.md)
 
 ### Version 0.104 (October 29, 2025)
+- ✅ **Secure migration with automatic backup**
+  - Trilingual confirmation popup (FR/EN/DE) before migration
+  - Automatic ZIP backup in `Backup/Characters/`
+  - Format: `Characters_backup_YYYYMMDD_HHMMSS.zip`
+  - Optimal compression to save disk space
+  - Complete data protection before any modification
+- ✅ **New folder structure**: Organization by season
+  - Old: `Characters/Realm/` → New: `Characters/Season/Realm/`
+  - Automatic migration on first startup
+  - Marker file `.migration_done` to prevent multiple migrations
+- ✅ **Class and Race Columns**: New columns in main view
+  - "Class" column displayed by default
+  - "Race" column hidden by default
+  - Configuration via View > Columns menu
 - ✅ **Improved Realm Rank Interface**: Replaced sliders with dropdown menus
-- ✅ **Auto-save**: No need to click "Apply this rank" anymore
+- ✅ **Auto-save for ranks**: No need to click "Apply this rank" anymore
 - ✅ **Visual Organization**: Rank title displayed at top in realm color
-- ✅ **Armor Section**: New section next to "General Information"
-- ✅ **Resistances Button**: Preparation for resistance management feature (coming soon)
+- ✅ **Fixes**: Resolved "Migration in progress" popup staying open
 
 ### Version 0.103 (October 28, 2025)
 - ✅ **Race Selection**: Added race field in character creation
@@ -328,5 +352,5 @@ This project is a personal DAOC character management tool.
 ---
 
 **Created by:** Ewoline  
-**Version:** 0.102  
-**Last Update:** October 27, 2025
+**Version:** 0.104  
+**Last Update:** October 29, 2025

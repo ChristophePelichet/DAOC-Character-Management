@@ -1,5 +1,5 @@
 """
-DAOC Character Manager - Main Application Entry Point (Refactored v0.105)
+DAOC Character Manager - Main Application Entry Point (Refactored v0.104)
 Application PySide6 de gestion de personnages pour Dark Age of Camelot
 
 Refactoring complet:
@@ -38,7 +38,7 @@ from UI.dialogs import ColumnsConfigDialog, ConfigurationDialog
 setup_logging()
 
 APP_NAME = "DAOC Character Manager"
-APP_VERSION = "0.105"
+APP_VERSION = "0.104"
 
 
 def global_exception_handler(exc_type, exc_value, exc_traceback):

@@ -7,7 +7,7 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/),
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
-## [0.105] - 2025-10-29 - Refactoring Complet ✨
+## [0.104] - 2025-10-29 - Refactoring Complet ✨
 
 ### 🏗️ Architecture
 - **Refactoring complet de l'application** : Code modulaire et maintenable
@@ -39,13 +39,13 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
   - Import dans main.py : -36%
 
 ### 📚 Documentation
-- **Documentation complète du refactoring** : [REFACTORING_v0.105_COMPLETE.md](REFACTORING_v0.105_COMPLETE.md)
+- **Documentation complète du refactoring** : [REFACTORING_v0.104_COMPLETE.md](REFACTORING_v0.104_COMPLETE.md)
   - Comparaison avant/après détaillée
   - Architecture modulaire expliquée
   - Métriques de performance
   - Guide de migration pour contributeurs
 - **README mis à jour** : Mention du refactoring et nouveautés
-- **INDEX.md enrichi** : Section dédiée à v0.105
+- **INDEX.md enrichi** : Section dédiée à v0.104
 
 ### ✅ Qualité
 - **Testabilité améliorée** : Code modulaire facilement testable
@@ -53,7 +53,8 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 - **Extensibilité** : Ajout de fonctionnalités simplifié
 - **Compatibilité ascendante** : Toutes les fonctionnalités préservées
 
-## [Non publié]
+### 🔒 Sécurité et Migration
+- ✅ **Migration sécurisée avec sauvegarde automatique**
 
 ### Ajouté
 - **Vérification d'intégrité des sauvegardes** : Protection renforcée contre la corruption

@@ -1,4 +1,4 @@
-# Refactoring Complet v0.105 - 29 Octobre 2025
+# Refactoring Complet v0.104 - 29 Octobre 2025
 
 ## 🎯 Objectif du Refactoring
 
@@ -20,7 +20,7 @@ Refactoring complet du code de l'application DAOC Character Manager pour amélio
 - Difficile à tester
 - Difficile à maintenir
 
-### Nouveau Code (v0.105 - Architecture Modulaire)
+### Nouveau Code (v0.104 - Architecture Modulaire)
 ✅ **Améliorations**:
 - **main.py**: 493 lignes (-61%)
 - **3 nouveaux managers**: Code organisé et réutilisable
@@ -435,7 +435,7 @@ app.tree_manager.get_selected_character()  # Méthode utilitaire
 
 ## 🎉 Conclusion
 
-Le refactoring v0.105 transforme l'application d'un **monolithe** en une **architecture modulaire** moderne:
+Le refactoring v0.104 transforme l'application d'un **monolithe** en une **architecture modulaire** moderne:
 
 ✅ **Code plus propre et organisé**
 ✅ **Performance améliorée**
@@ -449,6 +449,6 @@ Le refactoring v0.105 transforme l'application d'un **monolithe** en une **archi
 ---
 
 **Date**: 29 Octobre 2025
-**Version**: 0.105
+**Version**: 0.104
 **Auteur**: Équipe de développement DAOC Character Manager
 **Statut**: ✅ Refactoring complet terminé

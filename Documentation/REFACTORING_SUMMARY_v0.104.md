@@ -1,8 +1,8 @@
-# 🎉 REFACTORING v0.105 - RÉSUMÉ RAPIDE
+# 🎉 REFACTORING v0.104 - RÉSUMÉ RAPIDE
 
 ## ✅ Mission Accomplie !
 
-Le refactoring complet de DAOC Character Manager v0.105 a été **réalisé avec succès** de manière **100% automatisée**.
+Le refactoring complet de DAOC Character Manager v0.104 a été **réalisé avec succès** de manière **100% automatisée**.
 
 ---
 
@@ -75,8 +75,8 @@ Le refactoring complet de DAOC Character Manager v0.105 a été **réalisé avec
 ## 📝 Documents Disponibles
 
 1. **README.md** - Présentation complète
-2. **REFACTORING_v0.105_COMPLETE.md** - Guide détaillé (420 lignes)
-3. **REFACTORING_FINAL_REPORT_v0.105.md** - Rapport complet
+2. **REFACTORING_v0.104_COMPLETE.md** - Guide détaillé (420 lignes)
+3. **REFACTORING_FINAL_REPORT_v0.104.md** - Rapport complet
 4. **CHANGELOG_FR/EN/DE.md** - Historique des changements
 
 ---
@@ -89,5 +89,5 @@ Le refactoring complet de DAOC Character Manager v0.105 a été **réalisé avec
 
 **Statut** : ✅ **SUCCÈS COMPLET**  
 **Date** : 29 Octobre 2025  
-**Version** : 0.105  
+**Version** : 0.104  
 **Commit** : `85a5bca`

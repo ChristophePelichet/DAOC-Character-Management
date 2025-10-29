@@ -2,7 +2,7 @@
 
 Bienvenue dans la documentation complète du gestionnaire de personnages DAOC.
 
-## 🆕 Nouveautés v0.105 / What's New
+## 🆕 Nouveautés v0.104 / What's New
 
 ### 🇫🇷 Français
 **Refactoring Complet - Architecture Modulaire**
@@ -10,7 +10,7 @@ Bienvenue dans la documentation complète du gestionnaire de personnages DAOC.
 - 🏗️ **Architecture modulaire** : 3 nouveaux managers (UIManager, TreeManager, CharacterActionsManager)
 - 🧹 **Code nettoyé** : main.py réduit de 1277 à 493 lignes (-61%)
 - 📦 **Optimisations** : Cache des icônes, réduction des appels redondants
-- 📚 **Documentation détaillée** : [REFACTORING_v0.105_COMPLETE.md](REFACTORING_v0.105_COMPLETE.md)
+- 📚 **Documentation détaillée** : [REFACTORING_v0.104_COMPLETE.md](REFACTORING_v0.104_COMPLETE.md)
 
 ### 🇬🇧 English
 **Complete Refactoring - Modular Architecture**
@@ -18,7 +18,7 @@ Bienvenue dans la documentation complète du gestionnaire de personnages DAOC.
 - 🏗️ **Modular architecture** : 3 new managers (UIManager, TreeManager, CharacterActionsManager)
 - 🧹 **Cleaned code** : main.py reduced from 1277 to 493 lines (-61%)
 - 📦 **Optimizations** : Icon caching, reduced redundant calls
-- 📚 **Detailed documentation** : [REFACTORING_v0.105_COMPLETE.md](REFACTORING_v0.105_COMPLETE.md)
+- 📚 **Detailed documentation** : [REFACTORING_v0.104_COMPLETE.md](REFACTORING_v0.104_COMPLETE.md)
 
 ### 🇩🇪 Deutsch
 **Vollständiges Refactoring - Modulare Architektur**
@@ -26,7 +26,7 @@ Bienvenue dans la documentation complète du gestionnaire de personnages DAOC.
 - 🏗️ **Modulare Architektur** : 3 neue Manager (UIManager, TreeManager, CharacterActionsManager)
 - 🧹 **Bereinigter Code** : main.py reduziert von 1277 auf 493 Zeilen (-61%)
 - 📦 **Optimierungen** : Icon-Caching, reduzierte redundante Aufrufe
-- 📚 **Detaillierte Dokumentation** : [REFACTORING_v0.105_COMPLETE.md](REFACTORING_v0.105_COMPLETE.md)
+- 📚 **Detaillierte Dokumentation** : [REFACTORING_v0.104_COMPLETE.md](REFACTORING_v0.104_COMPLETE.md)
 
 ---
 
@@ -175,6 +175,6 @@ If you encounter issues, check:
 
 ---
 
-**Version** : 0.105 (Refactoring Complet)  
+**Version** : 0.104 (Refactoring Complet)  
 **Date** : 29 Octobre 2025  
 **Auteur / Author** : DAOC Character Manager Team

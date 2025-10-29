@@ -7,7 +7,7 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/),
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
-## [0.104] - 2025-10-29 - Refactoring Complet ✨
+## [0.104] - 2025-10-29 - Refactoring Complet & Migration ✨
 
 ### 🏗️ Architecture
 - **Refactoring complet de l'application** : Code modulaire et maintenable
@@ -52,6 +52,13 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
   - Documentation des nouveaux managers (lignes de code)
   - Organisation claire des fichiers par catégorie
 - **INDEX.md enrichi** : Section dédiée à v0.104
+- **Réorganisation de la documentation** : Amélioration de la structure des fichiers
+  - CHANGELOGs déplacés dans `Documentation/`
+  - Nouveau `CHANGELOG.md` principal à la racine renvoyant vers les versions linguistiques
+  - READMEs linguistiques (EN/DE) déplacés dans `Documentation/`
+  - README.md principal à la racine avec liens vers les versions linguistiques
+  - Meilleure organisation des fichiers de documentation
+  - Tous les liens internes mis à jour
 
 ### 🛠️ Outils de Développement
 - **Script de nettoyage de projet** : `Tools/clean_project.py`
@@ -69,10 +76,23 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 - **Extensibilité** : Ajout de fonctionnalités simplifié
 - **Compatibilité ascendante** : Toutes les fonctionnalités préservées
 
-### 🔒 Sécurité et Migration
-- ✅ **Migration sécurisée avec sauvegarde automatique**
+### 🔒 Migration & Sécurité
 
-### Ajouté
+#### Ajouté
+- **Popup de confirmation de migration** : Affichage trilingue (FR/EN/DE) avant toute migration
+  - Explication détaillée de la modification de structure
+  - Comparaison visuelle : Ancienne structure → Nouvelle structure
+  - Information sur la sauvegarde automatique avec chemin d'accès
+  - Bouton "OK" : Lance la sauvegarde ZIP puis la migration
+  - Bouton "Annuler" : Ferme l'application sans modification
+  - Message d'annulation personnalisé si l'utilisateur annule
+- **Sauvegarde automatique ZIP avant migration** : Protection optimisée des données
+  - Création d'une archive ZIP compressée du dossier `Characters`
+  - Nom avec horodatage : `Characters_backup_YYYYMMDD_HHMMSS.zip`
+  - Emplacement organisé : `Backup/Characters/`
+  - Compression ZIP_DEFLATED pour économiser 70-90% d'espace disque
+  - Vérification de succès avant de lancer la migration
+  - Message de confirmation avec emplacement de la sauvegarde
 - **Vérification d'intégrité des sauvegardes** : Protection renforcée contre la corruption
   - Test automatique du fichier ZIP après création avec `zipfile.testzip()`
   - Vérification du nombre de fichiers dans l'archive
@@ -122,45 +142,6 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
   - Le fichier `.migration_done` créé seulement si zéro erreur
   - Si échec → utilisateur peut réessayer la migration
   - Pas de migration "bloquée"
-- **Documentation MIGRATION_SECURITY.md** : Guide de sécurité complet
-  - Détails de toutes les protections implémentées
-  - Scénarios de perte de données tous couverts
-  - Tests recommandés pour validation
-  - Garanties de sécurité documentées
-
-### Modifié
-- **Messages de migration multilingues** : Cohérence linguistique
-  - Suppression du texte hardcodé "Successfully migrated" en anglais
-  - Suppression du texte "Backup location:" hardcodé
-  - Tous les messages utilisent maintenant les clés de traduction
-  - `migration_backup_location` ne contient plus les 3 langues
-  - Affichage uniquement dans la langue de l'interface
-
-### Supprimé
-- **Menu Aide > Migrer la structure des dossiers** : Simplification de l'interface
-  - Option de migration manuelle supprimée du menu Aide
-  - Migration se fait automatiquement au démarrage si nécessaire
-  - Migration également proposée lors du changement de chemin du dossier Characters
-  - Méthode `run_manual_migration()` supprimée
-  - Clé de traduction `menu_help_migrate` plus utilisée
-
-## [0.104] - 2025-10-29
-
-### Ajouté
-- **Popup de confirmation de migration** : Affichage trilingue (FR/EN/DE) avant toute migration
-  - Explication détaillée de la modification de structure
-  - Comparaison visuelle : Ancienne structure → Nouvelle structure
-  - Information sur la sauvegarde automatique avec chemin d'accès
-  - Bouton "OK" : Lance la sauvegarde ZIP puis la migration
-  - Bouton "Annuler" : Ferme l'application sans modification
-  - Message d'annulation personnalisé si l'utilisateur annule
-- **Sauvegarde automatique ZIP avant migration** : Protection optimisée des données
-  - Création d'une archive ZIP compressée du dossier `Characters`
-  - Nom avec horodatage : `Characters_backup_YYYYMMDD_HHMMSS.zip`
-  - Emplacement organisé : `Backup/Characters/`
-  - Compression ZIP_DEFLATED pour économiser 70-90% d'espace disque
-  - Vérification de succès avant de lancer la migration
-  - Message de confirmation avec emplacement de la sauvegarde
 - **Nouvelle structure de dossiers** : Migration vers une organisation hiérarchique par saison
   - Ancienne structure : `Characters/Royaume/Personnage.json`
   - Nouvelle structure : `Characters/Saison/Royaume/Personnage.json`
@@ -178,24 +159,16 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
   - Gestion complète des erreurs avec logs détaillés
   - Préservation des métadonnées des fichiers (dates, attributs)
   - Nettoyage automatique des anciens dossiers vides
-- **Colonnes Classe et Race** : Nouvelles colonnes dans la vue principale
-  - Colonne "Classe" affichée par défaut
-  - Colonne "Race" masquée par défaut
-  - Cases à cocher dans le menu Affichage > Colonnes pour activer/désactiver les colonnes
-  - Support multilingue complet (FR/EN/DE)
-  - Données extraites automatiquement depuis les fichiers JSON de personnages
+- **Documentation MIGRATION_SECURITY.md** : Guide de sécurité complet
+  - Détails de toutes les protections implémentées
+  - Scénarios de perte de données tous couverts
+  - Tests recommandés pour validation
+  - Garanties de sécurité documentées
 - **Scripts de test** : Outils pour tester la migration
   - `Scripts/simulate_old_structure.py` : Crée l'ancienne structure pour tests
   - `Scripts/test_backup_structure.py` : Vérifie la création des sauvegardes ZIP
-- **Réorganisation de la documentation** : Amélioration de la structure des fichiers
-  - CHANGELOGs déplacés dans `Documentation/`
-  - Nouveau `CHANGELOG.md` principal à la racine renvoyant vers les versions linguistiques
-  - READMEs linguistiques (EN/DE) déplacés dans `Documentation/`
-  - README.md principal à la racine avec liens vers les versions linguistiques
-  - Meilleure organisation des fichiers de documentation
-  - Tous les liens internes mis à jour
 
-### Modifié
+#### Modifié
 - **Toutes les fonctions de gestion des personnages** : Adaptation à la nouvelle structure Season/Realm
   - `save_character()` : Sauvegarde dans `Season/Realm/`
   - `get_all_characters()` : Parcourt la structure Season/Realm avec `os.walk()`
@@ -217,16 +190,15 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
   - Nouvelle méthode : `zipfile.ZipFile()` avec compression ZIP_DEFLATED
   - Économie d'espace disque de 70-90% pour les fichiers JSON
   - Organisation dans un dossier dédié `Backup/`
-- **Interface Rang de Royaume** : Remplacement des curseurs par des menus déroulants
-  - Menu déroulant pour le rang (1-14)
-  - Menu déroulant pour le niveau (L0-L10 pour rang 1, L0-L9 pour les autres)
-  - Le titre du rang s'affiche maintenant en haut de la section avec la couleur du royaume
-- **Sauvegarde automatique des rangs** : Suppression du bouton "Appliquer ce rang"
-  - Les modifications de rang/niveau sont maintenant appliquées automatiquement
-  - Plus besoin de confirmer les changements
+- **Messages de migration multilingues** : Cohérence linguistique
+  - Suppression du texte hardcodé "Successfully migrated" en anglais
+  - Suppression du texte "Backup location:" hardcodé
+  - Tous les messages utilisent maintenant les clés de traduction
+  - `migration_backup_location` ne contient plus les 3 langues
+  - Affichage uniquement dans la langue de l'interface
 - **.gitignore** : Ajout du dossier `Backup/` aux exclusions Git
 
-### Corrigé
+#### Corrigé
 - **Popup "Migration en cours" restant ouvert** : Correction critique
   - Ajout de `try/finally` pour garantir la fermeture du popup
   - Appel explicite de `progress.close()` et `progress.deleteLater()`
@@ -234,7 +206,34 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 - **Erreur LanguageManager** : Correction des appels `lang.get()` avec valeurs par défaut incorrectes
 - **Erreur AttributeError** : Correction des noms de méthodes pour les callbacks de rang/niveau
 
-### Technique
+#### Supprimé
+- **Menu Aide > Migrer la structure des dossiers** : Simplification de l'interface
+  - Option de migration manuelle supprimée du menu Aide
+  - Migration se fait automatiquement au démarrage si nécessaire
+  - Migration également proposée lors du changement de chemin du dossier Characters
+  - Méthode `run_manual_migration()` supprimée
+  - Clé de traduction `menu_help_migrate` plus utilisée
+
+### 🎨 Interface & Expérience Utilisateur
+
+#### Ajouté
+- **Colonnes Classe et Race** : Nouvelles colonnes dans la vue principale
+  - Colonne "Classe" affichée par défaut
+  - Colonne "Race" masquée par défaut
+  - Cases à cocher dans le menu Affichage > Colonnes pour activer/désactiver les colonnes
+  - Support multilingue complet (FR/EN/DE)
+  - Données extraites automatiquement depuis les fichiers JSON de personnages
+
+#### Modifié
+- **Interface Rang de Royaume** : Remplacement des curseurs par des menus déroulants
+  - Menu déroulant pour le rang (1-14)
+  - Menu déroulant pour le niveau (L0-L10 pour rang 1, L0-L9 pour les autres)
+  - Le titre du rang s'affiche maintenant en haut de la section avec la couleur du royaume
+- **Sauvegarde automatique des rangs** : Suppression du bouton "Appliquer ce rang"
+  - Les modifications de rang/niveau sont maintenant appliquées automatiquement
+  - Plus besoin de confirmer les changements
+
+### 🔧 Technique
 - **Architecture améliorée** : Séparation des saisons au niveau du système de fichiers
 - **Compatibilité ascendante** : Migration automatique préserve tous les personnages existants
 - **Logging détaillé** : Toutes les opérations de migration sont enregistrées dans les logs
@@ -242,7 +241,7 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 - **Performance optimisée** : Utilisation de `zipfile` avec compression pour les sauvegardes
 - **Nettoyage mémoire Qt** : Utilisation correcte de `deleteLater()` pour les widgets temporaires
 - Ajout de 9 nouvelles clés de traduction dans FR/EN/DE pour le système de migration
-- Documentation complète créée : `BACKUP_ZIP_UPDATE.md`
+- Documentation complète créée : `BACKUP_ZIP_UPDATE.md`, `MIGRATION_SECURITY.md`
 
 ## [0.103] - 2025-10-28
 
@@ -374,7 +373,10 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## Liens de versions
 
-- [0.101] - Version actuelle avec interface menu Windows
+- [0.104] - Version actuelle avec refactoring complet et système de migration
+- [0.103] - Système de races/classes et spécialisations
+- [0.102] - Support multi-serveur Eden/Blackthorn
+- [0.101] - Interface menu Windows
 - [0.1] - Version initiale avec barre d'outils
 
 ## Autres langues

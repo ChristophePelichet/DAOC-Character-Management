@@ -7,7 +7,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.104] - 2025-10-29 - Complete Refactoring ✨
+## [0.104] - 2025-10-29 - Complete Refactoring & Migration ✨
 
 ### 🏗️ Architecture
 - **Complete application refactoring** : Modular and maintainable code
@@ -52,6 +52,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Documentation of new managers (lines of code)
   - Clear organization of files by category
 - **Enhanced INDEX.md** : Dedicated section for v0.104
+- **Documentation reorganization**: Improved file structure
+  - CHANGELOGs moved to `Documentation/`
+  - New main `CHANGELOG.md` at root redirecting to language versions
+  - Language READMEs (EN/DE) moved to `Documentation/`
+  - Main README.md at root with links to language versions
+  - Better organization of documentation files
+  - All internal links updated
 
 ### 🛠️ Development Tools
 - **Project cleanup script** : `Tools/clean_project.py`
@@ -69,10 +76,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Extensibility** : Simplified feature additions
 - **Backward compatibility** : All features preserved
 
-### 🔒 Security and Migration
-- ✅ **Secure migration with automatic backup**
+### 🔒 Migration & Security
 
-### Added
+#### Added
+- **Migration confirmation popup**: Trilingual display (FR/EN/DE) before any migration
+  - Detailed explanation of structure modification
+  - Visual comparison: Old structure → New structure
+  - Information about automatic backup with path location
+  - "OK" button: Launches ZIP backup then migration
+  - "Cancel" button: Closes application without changes
+  - Custom cancellation message if user cancels
+- **Automatic ZIP backup before migration**: Optimized data protection
+  - Creates compressed ZIP archive of `Characters` folder
+  - Timestamped name: `Characters_backup_YYYYMMDD_HHMMSS.zip`
+  - Organized location: `Backup/Characters/`
+  - ZIP_DEFLATED compression saves 70-90% disk space
+  - Success verification before launching migration
+  - Confirmation message with backup location
 - **Backup integrity verification**: Enhanced protection against corruption
   - Automatic ZIP file testing after creation with `zipfile.testzip()`
   - Verification of file count in archive
@@ -122,45 +142,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `.migration_done` file created only if zero errors
   - If failure → user can retry migration
   - No "stuck" migration
-- **MIGRATION_SECURITY.md documentation**: Complete security guide
-  - Details of all protections implemented
-  - All data loss scenarios covered
-  - Recommended tests for validation
-  - Documented security guarantees
-
-### Changed
-- **Multilingual migration messages**: Linguistic consistency
-  - Removal of hardcoded "Successfully migrated" text in English
-  - Removal of hardcoded "Backup location:" text
-  - All messages now use translation keys
-  - `migration_backup_location` no longer contains all 3 languages
-  - Display only in interface language
-
-### Removed
-- **Help Menu > Migrate folder structure**: Interface simplification
-  - Manual migration option removed from Help menu
-  - Migration happens automatically at startup if needed
-  - Migration also offered when changing Characters folder path
-  - `run_manual_migration()` method removed
-  - `menu_help_migrate` translation key no longer used
-
-## [0.104] - 2025-10-29
-
-### Added
-- **Migration confirmation popup**: Trilingual display (FR/EN/DE) before any migration
-  - Detailed explanation of structure modification
-  - Visual comparison: Old structure → New structure
-  - Information about automatic backup with path location
-  - "OK" button: Launches ZIP backup then migration
-  - "Cancel" button: Closes application without changes
-  - Custom cancellation message if user cancels
-- **Automatic ZIP backup before migration**: Optimized data protection
-  - Creates compressed ZIP archive of `Characters` folder
-  - Timestamped name: `Characters_backup_YYYYMMDD_HHMMSS.zip`
-  - Organized location: `Backup/Characters/`
-  - ZIP_DEFLATED compression saves 70-90% disk space
-  - Success verification before launching migration
-  - Confirmation message with backup location
 - **New folder structure**: Migration to hierarchical organization by season
   - Old structure: `Characters/Realm/Character.json`
   - New structure: `Characters/Season/Realm/Character.json`
@@ -178,24 +159,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Complete error handling with detailed logs
   - Preserves file metadata (dates, attributes)
   - Automatic cleanup of empty old folders
-- **Class and Race Columns**: New columns in main view
-  - "Class" column displayed by default
-  - "Race" column hidden by default
-  - Checkboxes in View > Columns menu to enable/disable columns
-  - Full multilingual support (FR/EN/DE)
-  - Data automatically extracted from character JSON files
+- **MIGRATION_SECURITY.md documentation**: Complete security guide
+  - Details of all protections implemented
+  - All data loss scenarios covered
+  - Recommended tests for validation
+  - Documented security guarantees
 - **Test scripts**: Tools to test migration
   - `Scripts/simulate_old_structure.py`: Creates old structure for testing
   - `Scripts/test_backup_structure.py`: Verifies ZIP backup creation
-- **Documentation reorganization**: Improved file structure
-  - CHANGELOGs moved to `Documentation/`
-  - New main `CHANGELOG.md` at root redirecting to language versions
-  - Language READMEs (EN/DE) moved to `Documentation/`
-  - Main README.md at root with links to language versions
-  - Better organization of documentation files
-  - All internal links updated
 
-### Changed
+#### Changed
 - **All character management functions**: Adapted to new Season/Realm structure
   - `save_character()`: Saves to `Season/Realm/`
   - `get_all_characters()`: Walks through Season/Realm structure with `os.walk()`
@@ -217,16 +190,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - New method: `zipfile.ZipFile()` with ZIP_DEFLATED compression
   - Saves 70-90% disk space for JSON files
   - Organization in dedicated `Backup/` folder
-- **Realm Rank Interface**: Replaced sliders with dropdown menus
-  - Dropdown menu for rank (1-14)
-  - Dropdown menu for level (L0-L10 for rank 1, L0-L9 for others)
-  - Rank title now displays at the top of the section in realm color
-- **Auto-save for ranks**: Removed "Apply this rank" button
-  - Rank/level changes are now applied automatically
-  - No need to confirm changes
+- **Multilingual migration messages**: Linguistic consistency
+  - Removal of hardcoded "Successfully migrated" text in English
+  - Removal of hardcoded "Backup location:" text
+  - All messages now use translation keys
+  - `migration_backup_location` no longer contains all 3 languages
+  - Display only in interface language
 - **.gitignore**: Added `Backup/` folder to Git exclusions
 
-### Fixed
+#### Fixed
 - **"Migration in progress" popup staying open**: Critical fix
   - Added `try/finally` to guarantee popup closure
   - Explicit call to `progress.close()` and `progress.deleteLater()`
@@ -234,7 +206,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **LanguageManager Error**: Fixed `lang.get()` calls with incorrect default values
 - **AttributeError**: Fixed method names for rank/level callbacks
 
-### Technical
+#### Removed
+- **Help Menu > Migrate folder structure**: Interface simplification
+  - Manual migration option removed from Help menu
+  - Migration happens automatically at startup if needed
+  - Migration also offered when changing Characters folder path
+  - `run_manual_migration()` method removed
+  - `menu_help_migrate` translation key no longer used
+
+### 🎨 Interface & User Experience
+
+#### Added
+- **Class and Race Columns**: New columns in main view
+  - "Class" column displayed by default
+  - "Race" column hidden by default
+  - Checkboxes in View > Columns menu to enable/disable columns
+  - Full multilingual support (FR/EN/DE)
+  - Data automatically extracted from character JSON files
+
+#### Changed
+- **Realm Rank Interface**: Replaced sliders with dropdown menus
+  - Dropdown menu for rank (1-14)
+  - Dropdown menu for level (L0-L10 for rank 1, L0-L9 for others)
+  - Rank title now displays at the top of the section in realm color
+- **Auto-save for ranks**: Removed "Apply this rank" button
+  - Rank/level changes are now applied automatically
+  - No need to confirm changes
+
+### 🔧 Technical
 - **Improved architecture**: Season separation at file system level
 - **Backward compatibility**: Automatic migration preserves all existing characters
 - **Detailed logging**: All migration operations are recorded in logs
@@ -242,7 +241,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Optimized performance**: Uses `zipfile` with compression for backups
 - **Qt memory cleanup**: Correct use of `deleteLater()` for temporary widgets
 - Added 9 new translation keys in FR/EN/DE for migration system
-- Complete documentation created: `BACKUP_ZIP_UPDATE.md`
+- Complete documentation created: `BACKUP_ZIP_UPDATE.md`, `MIGRATION_SECURITY.md`
 
 ## [0.103] - 2025-10-28
 
@@ -259,10 +258,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Manual mode: Free resizing of all columns by user
 
 ### Changed
+- **Class/Race Order Inverted**: Class is now selected BEFORE race
+- **Race Filtering by Class**: Available races are filtered based on selected class
 - **Mauler Removal**: Mauler class removed (not implemented on Eden server)
 - **Eden Support**: Data adjusted to match available classes on Eden
 - **Specialization Structure**: Multilingual format `{"name": "EN", "name_fr": "FR", "name_de": "DE"}`
-- **Enhanced DataManager**: Added 11 new functions to manage races/classes/specializations
+- **Enhanced DataManager**: Added 11 new functions to manage races/classes/specializations and `get_available_races_for_class()` for reverse filtering
+
+### Improved
+- **User Experience**: More logical order (class → race)
+- **Consistency**: Same order in character creation and editing
 
 ### Added Files
 - `Data/classes_races.json`: Complete race, class and specialization data
@@ -368,7 +373,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Version Links
 
-- [0.101] - Current version with Windows menu interface
+- [0.104] - Current version with complete refactoring and migration system
+- [0.103] - Race/class system and specializations
+- [0.102] - Multi-server support Eden/Blackthorn
+- [0.101] - Windows menu interface
 - [0.1] - Initial version with toolbar
 
 ## Other Languages

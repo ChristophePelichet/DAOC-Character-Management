@@ -139,16 +139,18 @@ class UIManager:
         status_layout.addWidget(self.eden_status_label)
         
         # Bouton pour rafraîchir
-        refresh_button = QPushButton("🔄 Actualiser")
-        refresh_button.clicked.connect(self.check_eden_status)
-        refresh_button.setMaximumWidth(120)
-        status_layout.addWidget(refresh_button)
+        self.refresh_button = QPushButton("🔄 Actualiser")
+        self.refresh_button.clicked.connect(self.check_eden_status)
+        self.refresh_button.setMaximumWidth(120)
+        self.refresh_button.setEnabled(False)  # Désactivé pendant la vérification initiale
+        status_layout.addWidget(self.refresh_button)
         
-        # Bouton pour ouvrir le gestionnaire
-        manage_button = QPushButton("⚙️ Gérer")
-        manage_button.clicked.connect(self.main_window.open_cookie_manager)
-        manage_button.setMaximumWidth(100)
-        status_layout.addWidget(manage_button)
+        # Bouton de recherche Herald
+        self.search_button = QPushButton("🔍 Recherche Herald")
+        self.search_button.clicked.connect(self.main_window.open_herald_search)
+        self.search_button.setMaximumWidth(150)
+        self.search_button.setEnabled(False)  # Désactivé pendant la vérification initiale
+        status_layout.addWidget(self.search_button)
         
         status_group.setLayout(status_layout)
         parent_layout.addWidget(status_group)
@@ -163,9 +165,11 @@ class UIManager:
             self.eden_status_thread.quit()
             self.eden_status_thread.wait()
         
-        # Afficher le statut de chargement
+        # Afficher le statut de chargement et désactiver les boutons
         self.eden_status_label.setText("⏳ Vérification en cours...")
         self.eden_status_label.setStyleSheet("padding: 5px; color: gray;")
+        self.refresh_button.setEnabled(False)
+        self.search_button.setEnabled(False)
         
         # Créer le gestionnaire de cookies
         from Functions.cookie_manager import CookieManager
@@ -184,6 +188,10 @@ class UIManager:
         else:
             self.eden_status_label.setText(f"❌ {message}")
             self.eden_status_label.setStyleSheet("padding: 5px; color: red;")
+        
+        # Réactiver les boutons après la vérification
+        self.refresh_button.setEnabled(True)
+        self.search_button.setEnabled(True)
         
         
     def create_status_bar(self):

@@ -49,8 +49,13 @@ class EdenScraper:
         try:
             chrome_options = Options()
             if headless:
-                chrome_options.add_argument('--headless')
+                chrome_options.add_argument('--headless=new')
                 chrome_options.add_argument('--disable-gpu')
+            else:
+                # En mode visible, minimiser la fenêtre
+                chrome_options.add_argument('--window-position=-2400,-2400')
+            
+            # Options minimales (trop d'options anti-détection causent des problèmes !)
             chrome_options.add_argument('--no-sandbox')
             chrome_options.add_argument('--disable-dev-shm-usage')
             chrome_options.add_argument('--log-level=3')
@@ -85,6 +90,10 @@ class EdenScraper:
             # Aller sur le domaine pour pouvoir ajouter les cookies
             self.driver.get("https://eden-daoc.net/")
             
+            # Attendre que la page soit chargée
+            import time
+            time.sleep(2)
+            
             # Ajouter chaque cookie
             for cookie in cookies_list:
                 try:
@@ -93,6 +102,9 @@ class EdenScraper:
                     logging.warning(f"Impossible d'ajouter le cookie {cookie.get('name')}: {e}")
             
             logging.info(f"{len(cookies_list)} cookies chargés dans le driver")
+            
+            # Attendre un peu après avoir ajouté les cookies
+            time.sleep(1)
             return True
             
         except Exception as e:
@@ -312,3 +324,170 @@ def search_characters(query, realm=None, cookie_manager=None):
     """
     with EdenScraper(cookie_manager) as scraper:
         return scraper.scrape_search_results(query, realm)
+
+
+def search_herald_character(character_name, realm_filter=""):
+    """
+    Recherche un personnage sur le Herald Eden et sauvegarde les résultats en JSON
+    
+    Args:
+        character_name: Nom du personnage à rechercher
+        realm_filter: Filtre de royaume ("alb", "mid", "hib", ou "" pour tous)
+        
+    Returns:
+        tuple: (success: bool, message: str, json_path: str)
+    """
+    from Functions.cookie_manager import CookieManager
+    from Functions.config_manager import get_config_dir
+    import time
+    
+    try:
+        # Vérifier les cookies
+        cookie_manager = CookieManager()
+        
+        if not cookie_manager.cookie_exists():
+            return False, "Aucun cookie trouvé. Veuillez générer ou importer des cookies d'abord.", ""
+        
+        info = cookie_manager.get_cookie_info()
+        if not info or not info.get('is_valid'):
+            return False, "Les cookies ont expiré. Veuillez les regénérer.", ""
+        
+        # Initialiser le scraper en mode visible (obligatoire - bot check)
+        scraper = EdenScraper(cookie_manager)
+        
+        if not scraper.initialize_driver(headless=False):
+            return False, "Impossible d'initialiser le navigateur Chrome.", ""
+        
+        if not scraper.load_cookies():
+            scraper.close()
+            return False, "Impossible de charger les cookies.", ""
+        
+        # Construire l'URL de recherche avec le filtre de royaume
+        if realm_filter:
+            search_url = f"https://eden-daoc.net/herald?n=search&r={realm_filter}&s={character_name}"
+        else:
+            search_url = f"https://eden-daoc.net/herald?n=search&s={character_name}"
+        logging.info(f"Recherche Herald: {search_url}")
+        
+        # Naviguer vers la page de recherche
+        scraper.driver.get(search_url)
+        
+        # Attendre que la page se charge complètement
+        time.sleep(5)
+        
+        # Extraire le contenu HTML
+        page_source = scraper.driver.page_source
+        soup = BeautifulSoup(page_source, 'html.parser')
+        
+        # Extraire les données de recherche
+        search_data = {
+            'character_name': character_name,
+            'search_url': search_url,
+            'timestamp': datetime.now().isoformat(),
+            'results': []
+        }
+        
+        # Chercher les résultats dans les tableaux
+        tables = soup.find_all('table')
+        for table in tables:
+            rows = table.find_all('tr')
+            if len(rows) > 1:  # Au moins un header et une ligne
+                headers = [th.get_text(strip=True) for th in rows[0].find_all('th')]
+                
+                for row in rows[1:]:
+                    cells = row.find_all('td')
+                    if cells:
+                        result = {}
+                        for idx, cell in enumerate(cells):
+                            header = headers[idx] if idx < len(headers) else f"col_{idx}"
+                            result[header] = cell.get_text(strip=True)
+                            
+                            # Extraire les liens
+                            links = cell.find_all('a')
+                            if links:
+                                result[f"{header}_links"] = [a.get('href', '') for a in links]
+                        
+                        if result:
+                            search_data['results'].append(result)
+        
+        # Utiliser le dossier temporaire de l'OS
+        import tempfile
+        temp_dir = Path(tempfile.gettempdir()) / "EdenSearchResult"
+        temp_dir.mkdir(exist_ok=True)
+        
+        # Nettoyer les anciens fichiers avant de créer les nouveaux
+        for old_file in temp_dir.glob("*.json"):
+            try:
+                old_file.unlink()
+            except Exception as e:
+                logging.warning(f"Impossible de supprimer l'ancien fichier {old_file}: {e}")
+        
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        json_filename = f"search_{character_name}_{timestamp}.json"
+        json_path = temp_dir / json_filename
+        
+        with open(json_path, 'w', encoding='utf-8') as f:
+            json.dump(search_data, f, indent=2, ensure_ascii=False)
+        
+        # Extraire les personnages formatés
+        characters = []
+        for result in search_data['results']:
+            # Vérifier si c'est une ligne de personnage
+            if (result.get('col_1') and 
+                result.get('col_3') and 
+                len(result.get('col_1', '')) > 0 and
+                result.get('col_0') and
+                result.get('col_0', '').isdigit()):
+                
+                rank = result.get('col_0', '')
+                name = result.get('col_1', '').strip()
+                char_class = result.get('col_3', '').strip()
+                race = result.get('col_5', '').strip()
+                guild = result.get('col_7', '').strip()
+                level = result.get('col_8', '').strip()
+                rp = result.get('col_9', '').strip()
+                realm_rank = result.get('col_10', '').strip()
+                realm_level = result.get('col_11', '').strip()
+                
+                if name and char_class:
+                    clean_name = name.split()[0]
+                    url = f"https://eden-daoc.net/herald?n=player&k={clean_name}"
+                    
+                    characters.append({
+                        'rank': rank,
+                        'name': name,
+                        'clean_name': clean_name,
+                        'class': char_class,
+                        'race': race,
+                        'guild': guild,
+                        'level': level,
+                        'realm_points': rp,
+                        'realm_rank': realm_rank,
+                        'realm_level': realm_level,
+                        'url': url
+                    })
+        
+        # Sauvegarder les personnages formatés dans le même dossier temp
+        characters_filename = f"characters_{character_name}_{timestamp}.json"
+        characters_path = temp_dir / characters_filename
+        
+        with open(characters_path, 'w', encoding='utf-8') as f:
+            json.dump({
+                'search_query': character_name,
+                'search_url': search_url,
+                'timestamp': search_data['timestamp'],
+                'characters': characters
+            }, f, indent=2, ensure_ascii=False)
+        
+        scraper.close()
+        
+        char_count = len(characters)
+        message = f"{char_count} personnage(s) trouvé(s)"
+        
+        logging.info(f"Recherche terminée: {char_count} personnages - Fichiers: {json_path}, {characters_path}")
+        
+        return True, message, str(characters_path)
+        
+    except Exception as e:
+        logging.error(f"Erreur lors de la recherche Herald: {e}", exc_info=True)
+        return False, f"Erreur: {str(e)}", ""

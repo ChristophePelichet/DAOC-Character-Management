@@ -152,10 +152,17 @@ class TreeManager:
         # Autres colonnes
         item_name = QStandardItem(char.get('name', 'N/A'))
         item_name.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+        # S'assurer que le nom n'est pas en gras
+        font_name = item_name.font()
+        font_name.setBold(False)
+        item_name.setFont(font_name)
         
         item_level = QStandardItem(str(char.get('level', 1)))
         item_level.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
         item_level.setTextAlignment(Qt.AlignCenter)
+        font_level = item_level.font()
+        font_level.setBold(False)
+        item_level.setFont(font_level)
         
         # Calcul du rang et titre de royaume
         realm_points = char.get('realm_points', 0)
@@ -170,33 +177,51 @@ class TreeManager:
         item_realm_rank = QStandardItem(str(realm_rank_level))
         item_realm_rank.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
         item_realm_rank.setTextAlignment(Qt.AlignCenter)
+        font_rank = item_realm_rank.font()
+        font_rank.setBold(False)
+        item_realm_rank.setFont(font_rank)
         
         item_realm_title = QStandardItem(realm_title)
         item_realm_title.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
         item_realm_title.setTextAlignment(Qt.AlignCenter)
         item_realm_title.setData(realm_name, Qt.UserRole)
+        font_title = item_realm_title.font()
+        font_title.setBold(False)
+        item_realm_title.setFont(font_title)
         
         item_guild = QStandardItem(char.get('guild', ''))
         item_guild.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+        font_guild = item_guild.font()
+        font_guild.setBold(False)
+        item_guild.setFont(font_guild)
         
         item_page = QStandardItem(str(char.get('page', 1)))
         item_page.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
         item_page.setTextAlignment(Qt.AlignCenter)
+        font_page = item_page.font()
+        font_page.setBold(False)
+        item_page.setFont(font_page)
         
         item_server = QStandardItem(char.get('server', 'Eden'))
         item_server.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
         item_server.setTextAlignment(Qt.AlignCenter)
+        font_server = item_server.font()
+        font_server.setBold(False)
+        item_server.setFont(font_server)
         
         item_class = QStandardItem(char.get('class', ''))
         item_class.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
         item_class.setTextAlignment(Qt.AlignCenter)
-        font = item_class.font()
-        font.setBold(False)
-        item_class.setFont(font)
+        font_class = item_class.font()
+        font_class.setBold(False)
+        item_class.setFont(font_class)
         
         item_race = QStandardItem(char.get('race', ''))
         item_race.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
         item_race.setTextAlignment(Qt.AlignCenter)
+        font_race = item_race.font()
+        font_race.setBold(False)
+        item_race.setFont(font_race)
         
         # Case à cocher pour la sélection
         item_selection = QStandardItem()

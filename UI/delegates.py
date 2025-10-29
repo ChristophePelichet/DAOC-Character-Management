@@ -9,10 +9,27 @@ from PySide6.QtCore import Qt, QRect, QSize, QEvent
 
 
 class CenterIconDelegate(QStyledItemDelegate):
-    """Custom delegate to center icons in TreeView cells."""
+    """Custom delegate to center icons in TreeView cells with realm-colored background."""
+    
+    # Couleurs de fond par royaume (alpha 25 pour plus de subtilité)
+    REALM_COLORS = {
+        "Albion": QColor(204, 0, 0, 25),      # Rouge clair
+        "Midgard": QColor(0, 102, 204, 25),   # Bleu clair
+        "Hibernia": QColor(0, 170, 0, 25)     # Vert clair
+    }
     
     def paint(self, painter, option, index):
-        """Draws the icon centered in the cell."""
+        """Draws the icon centered in the cell with realm-colored background."""
+        # Get realm from this cell (column 1 contains realm data)
+        realm = index.data(Qt.UserRole + 1)  # Realm name stored in UserRole + 1
+        
+        # Draw background with realm color if not selected
+        if not (option.state & QStyle.State_Selected):
+            if realm and realm in self.REALM_COLORS:
+                painter.save()
+                painter.fillRect(option.rect, self.REALM_COLORS[realm])
+                painter.restore()
+        
         icon = index.data(Qt.DecorationRole)
         if icon and isinstance(icon, QIcon) and not icon.isNull():
             # Draw only the background, not the icon or text
@@ -47,10 +64,28 @@ class CenterIconDelegate(QStyledItemDelegate):
 
 
 class CenterCheckboxDelegate(QStyledItemDelegate):
-    """Delegate to draw a checkbox in the center of a cell and handle clicks."""
+    """Delegate to draw a checkbox in the center of a cell with realm-colored background."""
+    
+    # Couleurs de fond par royaume (alpha 25 pour plus de subtilité)
+    REALM_COLORS = {
+        "Albion": QColor(204, 0, 0, 25),      # Rouge clair
+        "Midgard": QColor(0, 102, 204, 25),   # Bleu clair
+        "Hibernia": QColor(0, 170, 0, 25)     # Vert clair
+    }
     
     def paint(self, painter, option, index):
-        """Draws a centered checkbox."""
+        """Draws a centered checkbox with realm-colored background."""
+        # Get realm from row data (stored in column 1 - realm icon)
+        realm_index = index.sibling(index.row(), 1)
+        realm = realm_index.data(Qt.UserRole + 1)  # Realm name stored in UserRole + 1
+        
+        # Draw background with realm color if not selected
+        if not (option.state & QStyle.State_Selected):
+            if realm and realm in self.REALM_COLORS:
+                painter.save()
+                painter.fillRect(option.rect, self.REALM_COLORS[realm])
+                painter.restore()
+        
         opt = QStyleOptionViewItem(option)
         self.initStyleOption(opt, index)
         
@@ -136,4 +171,66 @@ class RealmTitleDelegate(QStyledItemDelegate):
         
         # Draw centered text
         painter.drawText(option.rect, Qt.AlignCenter, text)
+        painter.restore()
+
+
+class NormalTextDelegate(QStyledItemDelegate):
+    """Delegate to force normal (non-bold) text in cells with realm-based row coloring."""
+    
+    # Couleurs de fond par royaume (alpha 25 pour plus de subtilité)
+    REALM_COLORS = {
+        "Albion": QColor(204, 0, 0, 25),      # Rouge clair
+        "Midgard": QColor(0, 102, 204, 25),   # Bleu clair
+        "Hibernia": QColor(0, 170, 0, 25)     # Vert clair
+    }
+    
+    def paint(self, painter, option, index):
+        """Draws text with explicitly non-bold font and realm-colored background."""
+        # Get the text
+        text = index.data(Qt.DisplayRole)
+        if not text:
+            super().paint(painter, option, index)
+            return
+        
+        # Get realm from row data (stored in column 1 - realm icon)
+        realm_index = index.sibling(index.row(), 1)
+        realm = realm_index.data(Qt.UserRole + 1)  # Realm name stored in UserRole + 1
+        
+        # Draw background with realm color
+        painter.save()
+        
+        # Fill background with realm color if not selected
+        if not (option.state & QStyle.State_Selected):
+            if realm and realm in self.REALM_COLORS:
+                painter.fillRect(option.rect, self.REALM_COLORS[realm])
+        
+        painter.restore()
+        
+        # Draw standard background (selection, hover, etc.)
+        opt = QStyleOptionViewItem(option)
+        self.initStyleOption(opt, index)
+        
+        style = option.widget.style() if option.widget else QApplication.style()
+        style.drawPrimitive(QStyle.PE_PanelItemViewItem, opt, painter, option.widget)
+        
+        # Draw custom text with non-bold font
+        painter.save()
+        
+        # Force non-bold font
+        font = option.font
+        font.setBold(False)
+        painter.setFont(font)
+        
+        # Use default text color
+        if option.state & QStyle.State_Selected:
+            painter.setPen(option.palette.color(QPalette.HighlightedText))
+        else:
+            painter.setPen(option.palette.color(QPalette.Text))
+        
+        # Draw text with proper alignment
+        alignment = index.data(Qt.TextAlignmentRole)
+        if alignment is None:
+            alignment = Qt.AlignLeft | Qt.AlignVCenter
+        
+        painter.drawText(option.rect, alignment, str(text))
         painter.restore()

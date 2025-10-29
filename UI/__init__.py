@@ -3,7 +3,7 @@ UI Package - User Interface Components
 Contains all UI-related classes and widgets.
 """
 
-from .delegates import CenterIconDelegate, CenterCheckboxDelegate, RealmTitleDelegate
+from .delegates import CenterIconDelegate, CenterCheckboxDelegate, RealmTitleDelegate, NormalTextDelegate
 from .dialogs import (
     CharacterSheetWindow,
     ColumnsConfigDialog,
@@ -16,6 +16,7 @@ __all__ = [
     'CenterIconDelegate',
     'CenterCheckboxDelegate',
     'RealmTitleDelegate',
+    'NormalTextDelegate',
     'CharacterSheetWindow',
     'ColumnsConfigDialog',
     'NewCharacterDialog',

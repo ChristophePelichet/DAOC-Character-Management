@@ -31,7 +31,7 @@ from Functions.tree_manager import TreeManager
 from Functions.character_actions_manager import CharacterActionsManager
 
 # Import des composants UI
-from UI import DebugWindow, CenterIconDelegate, CenterCheckboxDelegate, RealmTitleDelegate
+from UI import DebugWindow, CenterIconDelegate, CenterCheckboxDelegate, RealmTitleDelegate, NormalTextDelegate
 from UI.dialogs import ColumnsConfigDialog, ConfigurationDialog
 
 # Configuration de l'application
@@ -95,8 +95,10 @@ class CharacterApp(QMainWindow):
         self.center_checkbox_delegate = CenterCheckboxDelegate(self)
         self.character_tree.setItemDelegateForColumn(0, self.center_checkbox_delegate)
         
-        self.realm_title_delegate = RealmTitleDelegate(self)
-        self.character_tree.setItemDelegateForColumn(9, self.realm_title_delegate)
+        # Appliquer le delegate texte normal pour toutes les colonnes de texte (y compris le titre)
+        self.normal_text_delegate = NormalTextDelegate(self)
+        for col in [2, 3, 4, 5, 6, 7, 8, 9, 10]:  # Name, Level, Rank, Title, Guild, Page, Server, Class, Race
+            self.character_tree.setItemDelegateForColumn(col, self.normal_text_delegate)
         
         # Initialisation du CharacterActionsManager
         self.actions_manager = CharacterActionsManager(self, self.tree_manager)
@@ -487,6 +489,12 @@ class CharacterApp(QMainWindow):
     def show_about_dialog(self):
         """Affiche la boîte de dialogue 'À propos'"""
         self.ui_manager.show_about_dialog(APP_NAME, APP_VERSION)
+        
+    def open_herald_search(self):
+        """Ouvre la fenêtre de recherche Herald"""
+        from UI.dialogs import HeraldSearchDialog
+        dialog = HeraldSearchDialog(self)
+        dialog.exec()
         
     # ========================================================================
     # ÉVÉNEMENTS

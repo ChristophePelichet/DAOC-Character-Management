@@ -10,9 +10,10 @@ from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QFormLayout, QGroupBox, QLabel, 
     QPushButton, QLineEdit, QComboBox, QCheckBox, QSlider, QMessageBox,
     QDialogButtonBox, QFileDialog, QTableWidget, QTableWidgetItem, QHeaderView,
-    QWidget
+    QWidget, QTextEdit
 )
 from PySide6.QtCore import Qt, QThread, Signal
+from PySide6.QtGui import QBrush, QColor, QIcon, QPixmap
 from Functions.language_manager import lang
 from Functions.config_manager import config, get_config_dir
 from Functions.character_manager import get_character_dir
@@ -143,6 +144,9 @@ class CharacterSheetWindow(QDialog):
         realm_rank_layout = QVBoxLayout()
         
         realm_points = self.character_data.get('realm_points', 0)
+        # Convertir realm_points en entier s'il s'agit d'une chaîne
+        if isinstance(realm_points, str):
+            realm_points = int(realm_points.replace(' ', '').replace('\xa0', '').replace(',', ''))
         
         # Get current rank and level
         current_rank = 1
@@ -326,6 +330,10 @@ class CharacterSheetWindow(QDialog):
     
     def update_rank_display(self, realm_points):
         """Updates current rank and title display."""
+        # Convertir realm_points en entier s'il s'agit d'une chaîne
+        if isinstance(realm_points, str):
+            realm_points = int(realm_points.replace(' ', '').replace('\xa0', '').replace(',', ''))
+        
         if hasattr(self.parent_app, 'data_manager'):
             rank_info = self.parent_app.data_manager.get_realm_rank_info(self.realm, realm_points)
             if rank_info:
@@ -1541,3 +1549,524 @@ class CookieManagerDialog(QDialog):
         self.generate_button.setEnabled(True)
         self.cookie_path_edit.setEnabled(True)
         self.refresh_status()
+
+
+# ============================================================================
+# HERALD SEARCH DIALOG
+# ============================================================================
+
+class SearchThread(QThread):
+    """Thread pour effectuer la recherche Herald en arrière-plan"""
+    search_finished = Signal(bool, str, str)  # (success, message, json_path)
+    
+    def __init__(self, character_name, realm_filter=""):
+        super().__init__()
+        self.character_name = character_name
+        self.realm_filter = realm_filter
+    
+    def run(self):
+        """Exécute la recherche"""
+        from Functions.eden_scraper import search_herald_character
+        success, message, json_path = search_herald_character(self.character_name, realm_filter=self.realm_filter)
+        self.search_finished.emit(success, message, json_path)
+
+
+class HeraldSearchDialog(QDialog):
+    """Fenêtre de recherche de personnage sur le Herald Eden"""
+    
+    # Mapping classe → royaume
+    CLASS_TO_REALM = {
+        # Albion
+        "Armsman": "Albion", "Cabalist": "Albion", "Cleric": "Albion", "Friar": "Albion",
+        "Heretic": "Albion", "Infiltrator": "Albion", "Mercenary": "Albion", "Minstrel": "Albion",
+        "Necromancer": "Albion", "Paladin": "Albion", "Reaver": "Albion", "Scout": "Albion",
+        "Sorcerer": "Albion", "Theurgist": "Albion", "Wizard": "Albion",
+        # Midgard
+        "Berserker": "Midgard", "Bonedancer": "Midgard", "Healer": "Midgard", "Hunter": "Midgard",
+        "Runemaster": "Midgard", "Savage": "Midgard", "Shadowblade": "Midgard", "Shaman": "Midgard",
+        "Skald": "Midgard", "Spiritmaster": "Midgard", "Thane": "Midgard", "Valkyrie": "Midgard",
+        "Warlock": "Midgard", "Warrior": "Midgard",
+        # Hibernia
+        "Animist": "Hibernia", "Bainshee": "Hibernia", "Bard": "Hibernia", "Blademaster": "Hibernia",
+        "Champion": "Hibernia", "Druid": "Hibernia", "Eldritch": "Hibernia", "Enchanter": "Hibernia",
+        "Hero": "Hibernia", "Mentalist": "Hibernia", "Nightshade": "Hibernia", "Ranger": "Hibernia",
+        "Valewalker": "Hibernia", "Vampiir": "Hibernia", "Warden": "Hibernia"
+    }
+    
+    # Couleurs des royaumes (depuis UI/delegates.py)
+    REALM_COLORS = {
+        "Albion": "#CC0000",      # Rouge
+        "Midgard": "#0066CC",     # Bleu
+        "Hibernia": "#00AA00"     # Vert
+    }
+    
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.setWindowTitle("🔍 Recherche Herald Eden")
+        self.resize(700, 600)
+        self.search_thread = None
+        self.temp_json_path = None  # Stocke le chemin du fichier temp
+        self.current_characters = []  # Stocke les données des personnages trouvés
+        self._load_realm_icons_for_combo()
+        
+        self.init_ui()
+    
+    def _load_realm_icons_for_combo(self):
+        """Charge les icônes des royaumes pour le menu déroulant"""
+        from pathlib import Path
+        
+        self.realm_combo_icons = {}
+        realm_logos = {
+            "Albion": "Img/albion_logo.png",
+            "Midgard": "Img/midgard_logo.png",
+            "Hibernia": "Img/hibernia_logo.png"
+        }
+        
+        for realm, logo_path in realm_logos.items():
+            full_path = Path(logo_path)
+            if full_path.exists():
+                pixmap = QPixmap(str(full_path))
+                # Redimensionner l'icône à 20x20 pixels pour le combo
+                scaled_pixmap = pixmap.scaled(20, 20, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+                self.realm_combo_icons[realm] = QIcon(scaled_pixmap)
+            else:
+                logging.warning(f"Logo introuvable pour {realm}: {logo_path}")
+        
+    def init_ui(self):
+        """Initialise l'interface"""
+        layout = QVBoxLayout(self)
+        
+        # Titre
+        title_label = QLabel("<h2>🔍 Recherche de Personnage</h2>")
+        title_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(title_label)
+        
+        # Description
+        desc_label = QLabel(
+            "Entrez le nom du personnage à rechercher sur le Herald Eden-DAOC.\n"
+            "Les résultats seront affichés ci-dessous."
+        )
+        desc_label.setWordWrap(True)
+        desc_label.setAlignment(Qt.AlignCenter)
+        desc_label.setStyleSheet("color: gray; padding: 10px;")
+        layout.addWidget(desc_label)
+        
+        # Groupe de recherche
+        search_group = QGroupBox("Recherche")
+        search_layout = QVBoxLayout()
+        
+        # Ligne 1 : Champ de saisie du nom
+        input_layout = QHBoxLayout()
+        input_label = QLabel("Nom du personnage :")
+        self.name_input = QLineEdit()
+        self.name_input.setPlaceholderText("Minimum 3 caractères (ex: Alb, Tho, Ely...)")
+        self.name_input.returnPressed.connect(self.start_search)
+        input_layout.addWidget(input_label)
+        input_layout.addWidget(self.name_input)
+        search_layout.addLayout(input_layout)
+        
+        # Ligne 2 : Sélection du royaume
+        realm_layout = QHBoxLayout()
+        realm_label = QLabel("Royaume :")
+        self.realm_combo = QComboBox()
+        self.realm_combo.addItem("Tous les royaumes", "")  # Par défaut
+        if "Albion" in self.realm_combo_icons:
+            self.realm_combo.addItem(self.realm_combo_icons["Albion"], "Albion", "alb")
+        else:
+            self.realm_combo.addItem("🔴 Albion", "alb")
+        if "Midgard" in self.realm_combo_icons:
+            self.realm_combo.addItem(self.realm_combo_icons["Midgard"], "Midgard", "mid")
+        else:
+            self.realm_combo.addItem("🔵 Midgard", "mid")
+        if "Hibernia" in self.realm_combo_icons:
+            self.realm_combo.addItem(self.realm_combo_icons["Hibernia"], "Hibernia", "hib")
+        else:
+            self.realm_combo.addItem("🟢 Hibernia", "hib")
+        self.realm_combo.setToolTip("Sélectionnez un royaume pour affiner la recherche")
+        realm_layout.addWidget(realm_label)
+        realm_layout.addWidget(self.realm_combo)
+        realm_layout.addStretch()
+        search_layout.addLayout(realm_layout)
+        
+        # Statut
+        self.status_label = QLabel("Prêt à rechercher")
+        self.status_label.setAlignment(Qt.AlignCenter)
+        self.status_label.setStyleSheet("padding: 10px; border: 1px solid #ccc; border-radius: 5px;")
+        search_layout.addWidget(self.status_label)
+        
+        search_group.setLayout(search_layout)
+        layout.addWidget(search_group)
+        
+        # Zone de résultats
+        results_group = QGroupBox("Résultats")
+        results_layout = QVBoxLayout()
+        
+        self.results_table = QTableWidget()
+        self.results_table.setMinimumHeight(250)
+        self.results_table.setAlternatingRowColors(True)
+        self.results_table.setSelectionBehavior(QTableWidget.SelectRows)
+        self.results_table.setSelectionMode(QTableWidget.SingleSelection)
+        self.results_table.setEditTriggers(QTableWidget.NoEditTriggers)
+        
+        # Configurer les colonnes (sans URL)
+        columns = ["☑", "Royaume", "Nom", "Classe", "Race", "Guilde", "Niveau", "RP", "Realm Rank"]
+        self.results_table.setColumnCount(len(columns))
+        self.results_table.setHorizontalHeaderLabels(columns)
+        
+        # Ajuster les colonnes
+        header = self.results_table.horizontalHeader()
+        header.setStretchLastSection(True)
+        for i in range(len(columns) - 1):
+            header.setSectionResizeMode(i, QHeaderView.ResizeToContents)
+        
+        results_layout.addWidget(self.results_table)
+        
+        results_group.setLayout(results_layout)
+        layout.addWidget(results_group)
+        
+        # Boutons
+        button_layout = QHBoxLayout()
+        
+        self.search_button = QPushButton("🔍 Rechercher")
+        self.search_button.clicked.connect(self.start_search)
+        self.search_button.setDefault(True)
+        button_layout.addWidget(self.search_button)
+        
+        button_layout.addStretch()
+        
+        # Boutons d'import
+        self.import_selected_button = QPushButton("📥 Importer sélection")
+        self.import_selected_button.clicked.connect(self.import_selected_characters)
+        self.import_selected_button.setEnabled(False)
+        self.import_selected_button.setToolTip("Importer les personnages cochés")
+        button_layout.addWidget(self.import_selected_button)
+        
+        self.import_all_button = QPushButton("📥 Importer tout")
+        self.import_all_button.clicked.connect(self.import_all_characters)
+        self.import_all_button.setEnabled(False)
+        self.import_all_button.setToolTip("Importer tous les personnages trouvés")
+        button_layout.addWidget(self.import_all_button)
+        
+        close_button = QPushButton("Fermer")
+        close_button.clicked.connect(self.accept)
+        button_layout.addWidget(close_button)
+        
+        layout.addLayout(button_layout)
+    
+    def closeEvent(self, event):
+        """Appelé à la fermeture de la fenêtre - nettoie les fichiers temporaires"""
+        self._cleanup_temp_files()
+        super().closeEvent(event)
+    
+    def accept(self):
+        """Appelé quand on ferme avec le bouton Fermer"""
+        self._cleanup_temp_files()
+        super().accept()
+    
+    def _cleanup_temp_files(self):
+        """Supprime les fichiers temporaires de recherche"""
+        import tempfile
+        from pathlib import Path
+        
+        try:
+            temp_dir = Path(tempfile.gettempdir()) / "EdenSearchResult"
+            if temp_dir.exists():
+                for file in temp_dir.glob("*.json"):
+                    try:
+                        file.unlink()
+                        logging.info(f"Fichier temporaire supprimé: {file}")
+                    except Exception as e:
+                        logging.warning(f"Impossible de supprimer {file}: {e}")
+        except Exception as e:
+            logging.warning(f"Erreur lors du nettoyage des fichiers temporaires: {e}")
+    
+    def start_search(self):
+        """Lance la recherche"""
+        character_name = self.name_input.text().strip()
+        
+        if not character_name:
+            QMessageBox.warning(
+                self,
+                "Nom requis",
+                "Veuillez entrer un nom de personnage à rechercher."
+            )
+            return
+        
+        # Vérifier le minimum de 3 caractères
+        if len(character_name) < 3:
+            QMessageBox.warning(
+                self,
+                "Nom trop court",
+                "Veuillez entrer au moins 3 caractères pour la recherche."
+            )
+            return
+        
+        # Récupérer le filtre de royaume sélectionné
+        realm_filter = self.realm_combo.currentData()
+        
+        # Désactiver les contrôles
+        self.search_button.setEnabled(False)
+        self.name_input.setEnabled(False)
+        self.realm_combo.setEnabled(False)
+        
+        # Message de statut avec info du royaume
+        realm_text = self.realm_combo.currentText()
+        if realm_filter:
+            self.status_label.setText(f"⏳ Recherche de '{character_name}' dans {realm_text}...")
+        else:
+            self.status_label.setText(f"⏳ Recherche de '{character_name}' en cours...")
+        self.status_label.setStyleSheet("padding: 10px; border: 1px solid #ccc; border-radius: 5px; color: blue;")
+        
+        # Lancer le thread avec le filtre de royaume
+        self.search_thread = SearchThread(character_name, realm_filter)
+        self.search_thread.search_finished.connect(self.on_search_finished)
+        self.search_thread.start()
+    
+    def on_search_finished(self, success, message, json_path):
+        """Appelé quand la recherche est terminée"""
+        # Réactiver les contrôles
+        self.search_button.setEnabled(True)
+        self.name_input.setEnabled(True)
+        self.realm_combo.setEnabled(True)
+        
+        if success:
+            # Charger et afficher les résultats
+            try:
+                import json
+                with open(json_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                
+                all_characters = data.get('characters', [])
+                search_query = data.get('search_query', '').lower()
+                
+                # Filtrer pour ne garder que les personnages dont le nom commence par les caractères recherchés
+                characters = []
+                for char in all_characters:
+                    char_name = char.get('clean_name', char.get('name', '')).lower()
+                    if char_name.startswith(search_query):
+                        characters.append(char)
+                
+                # Vider le tableau
+                self.results_table.setRowCount(0)
+                
+                if characters:
+                    # Remplir le tableau
+                    self.results_table.setRowCount(len(characters))
+                    
+                    for row, char in enumerate(characters):
+                        # Déterminer le royaume à partir de la classe
+                        class_name = char.get('class', '')
+                        realm = self.CLASS_TO_REALM.get(class_name, "Unknown")
+                        realm_color = self.REALM_COLORS.get(realm, "#000000")
+                        
+                        # Créer une couleur de fond pour le royaume (version plus claire pour la lisibilité)
+                        bg_color = QColor(realm_color)
+                        bg_color.setAlpha(50)  # Transparence pour la lisibilité
+                        bg_brush = QBrush(bg_color)
+                        
+                        # Case à cocher (colonne 0)
+                        checkbox_item = QTableWidgetItem()
+                        checkbox_item.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
+                        checkbox_item.setCheckState(Qt.Unchecked)
+                        checkbox_item.setBackground(bg_brush)
+                        self.results_table.setItem(row, 0, checkbox_item)
+                        
+                        # Royaume (colonne 1)
+                        realm_item = QTableWidgetItem(realm)
+                        realm_item.setBackground(bg_brush)
+                        self.results_table.setItem(row, 1, realm_item)
+                        
+                        # Nom (colonne 2)
+                        name_item = QTableWidgetItem(char.get('name', ''))
+                        name_item.setBackground(bg_brush)
+                        self.results_table.setItem(row, 2, name_item)
+                        
+                        # Classe (colonne 3)
+                        class_item = QTableWidgetItem(class_name)
+                        class_item.setBackground(bg_brush)
+                        self.results_table.setItem(row, 3, class_item)
+                        
+                        # Race (colonne 4)
+                        race_item = QTableWidgetItem(char.get('race', ''))
+                        race_item.setBackground(bg_brush)
+                        self.results_table.setItem(row, 4, race_item)
+                        
+                        # Guilde (colonne 5)
+                        guild_item = QTableWidgetItem(char.get('guild', ''))
+                        guild_item.setBackground(bg_brush)
+                        self.results_table.setItem(row, 5, guild_item)
+                        
+                        # Niveau (colonne 6)
+                        level_item = QTableWidgetItem(char.get('level', ''))
+                        level_item.setBackground(bg_brush)
+                        self.results_table.setItem(row, 6, level_item)
+                        
+                        # RP (colonne 7)
+                        rp_item = QTableWidgetItem(char.get('realm_points', ''))
+                        rp_item.setBackground(bg_brush)
+                        self.results_table.setItem(row, 7, rp_item)
+                        
+                        # Realm Rank (colonne 8)
+                        realm_rank = f"{char.get('realm_rank', '')} ({char.get('realm_level', '')})"
+                        rr_item = QTableWidgetItem(realm_rank)
+                        rr_item.setBackground(bg_brush)
+                        self.results_table.setItem(row, 8, rr_item)
+                    
+                    # Stocker les données des personnages
+                    self.current_characters = characters
+                    
+                    # Mettre à jour le message de statut avec le nombre filtré
+                    count = len(characters)
+                    self.status_label.setText(f"✅ {count} personnage(s) trouvé(s) commençant par '{search_query}'")
+                    self.status_label.setStyleSheet("padding: 10px; border: 1px solid #ccc; border-radius: 5px; color: green; font-weight: bold;")
+                    
+                    # Activer les boutons d'import
+                    self.import_all_button.setEnabled(True)
+                    self.import_selected_button.setEnabled(True)
+                else:
+                    # Aucun personnage trouvé
+                    self.current_characters = []
+                    self.import_all_button.setEnabled(False)
+                    self.import_selected_button.setEnabled(False)
+                    # Afficher un message dans le statut
+                    self.status_label.setText(f"⚠️ Aucun personnage trouvé pour '{data['search_query']}'")
+                    self.status_label.setStyleSheet("padding: 10px; border: 1px solid #ccc; border-radius: 5px; color: orange;")
+                    
+            except Exception as e:
+                self.current_characters = []
+                self.import_all_button.setEnabled(False)
+                self.import_selected_button.setEnabled(False)
+                self.status_label.setText(f"❌ Erreur de lecture: {str(e)}")
+                self.status_label.setStyleSheet("padding: 10px; border: 1px solid #ccc; border-radius: 5px; color: red;")
+        else:
+            self.current_characters = []
+            self.import_all_button.setEnabled(False)
+            self.import_selected_button.setEnabled(False)
+            self.status_label.setText(f"❌ Erreur : {message}")
+            self.status_label.setStyleSheet("padding: 10px; border: 1px solid #ccc; border-radius: 5px; color: red;")
+            # Vider le tableau en cas d'erreur
+            self.results_table.setRowCount(0)
+    
+    def import_selected_characters(self):
+        """Importe les personnages cochés"""
+        if not self.current_characters:
+            return
+        
+        # Récupérer les personnages cochés
+        selected_chars = []
+        for row in range(self.results_table.rowCount()):
+            checkbox_item = self.results_table.item(row, 0)
+            if checkbox_item and checkbox_item.checkState() == Qt.Checked:
+                if row < len(self.current_characters):
+                    selected_chars.append(self.current_characters[row])
+        
+        if not selected_chars:
+            QMessageBox.warning(
+                self,
+                "Aucune sélection",
+                "Veuillez cocher au moins un personnage à importer."
+            )
+            return
+        
+        # Confirmer l'import
+        count = len(selected_chars)
+        reply = QMessageBox.question(
+            self,
+            "Confirmer l'import",
+            f"Voulez-vous importer {count} personnage(s) sélectionné(s) ?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+        
+        if reply == QMessageBox.Yes:
+            self._import_characters(selected_chars)
+    
+    def import_all_characters(self):
+        """Importe tous les personnages trouvés"""
+        if not self.current_characters:
+            return
+        
+        # Confirmer l'import
+        count = len(self.current_characters)
+        reply = QMessageBox.question(
+            self,
+            "Confirmer l'import",
+            f"Voulez-vous importer tous les {count} personnage(s) trouvé(s) ?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+        
+        if reply == QMessageBox.Yes:
+            self._import_characters(self.current_characters)
+    
+    def _import_characters(self, characters):
+        """Importe une liste de personnages dans la base de données"""
+        from Functions.character_manager import save_character, get_all_characters
+        
+        success_count = 0
+        error_count = 0
+        errors = []
+        
+        for char_data in characters:
+            try:
+                # Préparer les données du personnage pour l'import
+                name = char_data.get('clean_name', char_data.get('name', ''))
+                char_class = char_data.get('class', '')
+                realm = self.CLASS_TO_REALM.get(char_class, "Unknown")
+                
+                # Vérifier si le personnage existe déjà
+                existing_chars = get_all_characters()
+                if any(c.get('name', '').lower() == name.lower() for c in existing_chars):
+                    error_count += 1
+                    errors.append(f"{name}: personnage déjà existant")
+                    continue
+                
+                # Créer le dictionnaire de données du personnage
+                character_data = {
+                    'name': name,
+                    'class': char_class,
+                    'race': char_data.get('race', ''),
+                    'realm': realm,
+                    'guild': char_data.get('guild', ''),
+                    'level': char_data.get('level', '50'),
+                    'realm_rank': char_data.get('realm_rank', ''),
+                    'realm_level': char_data.get('realm_level', ''),
+                    'realm_points': char_data.get('realm_points', '0'),
+                    'url': char_data.get('url', ''),
+                    # Valeurs par défaut pour les champs manquants
+                    'server': 'Eden',
+                    'mlevel': '0',
+                    'clevel': '0',
+                    'notes': f"Importé depuis le Herald le {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+                }
+                
+                # Sauvegarder le personnage
+                save_character(character_data)
+                success_count += 1
+                
+            except Exception as e:
+                error_count += 1
+                errors.append(f"{char_data.get('name', 'Unknown')}: {str(e)}")
+                logging.error(f"Erreur lors de l'import de {char_data.get('name')}: {e}", exc_info=True)
+        
+        # Afficher le résultat
+        if success_count > 0:
+            message = f"✅ {success_count} personnage(s) importé(s) avec succès !"
+            if error_count > 0:
+                message += f"\n⚠️ {error_count} erreur(s):\n" + "\n".join(errors[:5])
+                if len(errors) > 5:
+                    message += f"\n... et {len(errors) - 5} autre(s) erreur(s)"
+            
+            QMessageBox.information(self, "Import terminé", message)
+            
+            # Rafraîchir l'interface principale
+            if hasattr(self.parent(), 'tree_manager') and hasattr(self.parent().tree_manager, 'refresh_character_list'):
+                self.parent().tree_manager.refresh_character_list()
+        else:
+            error_msg = "❌ Aucun personnage n'a pu être importé.\n\n"
+            error_msg += "\n".join(errors[:10])
+            if len(errors) > 10:
+                error_msg += f"\n... et {len(errors) - 10} autre(s) erreur(s)"
+            QMessageBox.warning(self, "Échec de l'import", error_msg)
+
+

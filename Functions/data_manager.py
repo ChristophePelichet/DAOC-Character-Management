@@ -40,13 +40,13 @@ class DataManager:
                 self.realm_ranks = json.load(f)
         return self.realm_ranks
     
-    def get_realm_rank_info(self, realm: str, realm_points: int) -> Optional[Dict]:
+    def get_realm_rank_info(self, realm: str, realm_points) -> Optional[Dict]:
         """
         Récupère les informations du Realm Rank en fonction des points de royaume
         
         Args:
             realm: Nom du royaume ("Albion", "Hibernia", "Midgard")
-            realm_points: Nombre de points de royaume du joueur
+            realm_points: Nombre de points de royaume du joueur (int ou str)
             
         Returns:
             Dictionnaire avec les infos du rang (rank, title, level, etc.) ou None
@@ -54,6 +54,16 @@ class DataManager:
         ranks = self.load_realm_ranks()
         
         if realm not in ranks:
+            return None
+        
+        # Convertir realm_points en entier (gérer les strings avec espaces)
+        try:
+            if isinstance(realm_points, str):
+                # Supprimer les espaces et convertir en int
+                realm_points = int(realm_points.replace(' ', '').replace('\xa0', ''))
+            else:
+                realm_points = int(realm_points)
+        except (ValueError, AttributeError):
             return None
         
         realm_data = ranks[realm]
@@ -68,13 +78,13 @@ class DataManager:
         
         return current_rank
     
-    def get_next_realm_rank(self, realm: str, current_realm_points: int) -> Optional[Dict]:
+    def get_next_realm_rank(self, realm: str, current_realm_points) -> Optional[Dict]:
         """
         Récupère les informations du prochain Realm Rank à atteindre
         
         Args:
             realm: Nom du royaume
-            current_realm_points: Points de royaume actuels
+            current_realm_points: Points de royaume actuels (int ou str)
             
         Returns:
             Dictionnaire avec les infos du prochain rang ou None si max rank
@@ -82,6 +92,16 @@ class DataManager:
         ranks = self.load_realm_ranks()
         
         if realm not in ranks:
+            return None
+        
+        # Convertir current_realm_points en entier (gérer les strings avec espaces)
+        try:
+            if isinstance(current_realm_points, str):
+                # Supprimer les espaces et convertir en int
+                current_realm_points = int(current_realm_points.replace(' ', '').replace('\xa0', ''))
+            else:
+                current_realm_points = int(current_realm_points)
+        except (ValueError, AttributeError):
             return None
         
         realm_data = ranks[realm]

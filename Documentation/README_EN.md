@@ -135,49 +135,165 @@ Complete documentation available in the `Documentation/` folder:
 ## 🗂️ Project Structure
 
 ```
-DAOC-Character-Management/
-├── main.py                      # Main application
-├── requirements.txt             # Python dependencies
-├── scrape_realm_ranks.py        # Rank extraction script
-├── Characters/                  # Character data (Season/Realm structure)
-│   ├── S1/                      # Season 1
+DAOC---Gestion-des-personnages/
+├── 📄 Root files
+│   ├── main.py                          # Main application (493 lines - v0.104)
+│   ├── requirements.txt                 # Python project dependencies
+│   ├── CHANGELOG.md                     # Changelog
+│   ├── README.md                        # Main README (French)
+│   ├── .gitignore                       # Git excluded files
+│   └── .gitattributes                   # Git configuration
+│
+├── 📁 Characters/                       # ⭐ Character data (Season/Realm structure v0.104)
+│   ├── S1/                              # Season 1
+│   │   ├── Albion/                      # Albion S1 characters
+│   │   │   └── *.json                   # Character files
+│   │   ├── Hibernia/                    # Hibernia S1 characters
+│   │   └── Midgard/                     # Midgard S1 characters
+│   ├── S2/                              # Season 2
 │   │   ├── Albion/
 │   │   ├── Hibernia/
 │   │   └── Midgard/
-│   ├── S2/                      # Season 2
+│   ├── S3/                              # Season 3
 │   │   ├── Albion/
 │   │   ├── Hibernia/
 │   │   └── Midgard/
-│   └── S3/                      # Season 3
-│       ├── Albion/
-│       ├── Hibernia/
-│       └── Midgard/
-├── Configuration/               # Configuration files
-│   └── config.json
-├── Data/                        # Game data
-│   └── realm_ranks.json
-├── Documentation/               # Complete documentation (FR/EN)
-│   ├── INDEX.md
-│   ├── CONFIGURATION_COLONNES_FR.md
-│   ├── COLUMN_CONFIGURATION_EN.md
-│   ├── REALM_RANKS_FR.md
-│   ├── REALM_RANKS_EN.md
-│   ├── DATA_MANAGER_FR.md
-│   ├── DATA_MANAGER_EN.md
-│   ├── DATA_FOLDER_FR.md
-│   ├── DATA_FOLDER_EN.md
-│   ├── INTERFACE_MENU_FR.md
-│   └── INTERFACE_MENU_EN.md
-├── Functions/                   # Python modules
-│   ├── character_manager.py
-│   ├── config_manager.py
-│   ├── data_manager.py
-│   ├── language_manager.py
-│   ├── logging_manager.py
-│   ├── migration_manager.py     # Migration manager
-│   └── path_manager.py
-├── Img/                         # Images and icons
-├── Language/                    # Translation files
+│   └── .migration_done                  # Migration completed marker
+│
+├── 📁 Backup/                           # Automatic backups
+│   └── Characters/                      # ZIP backups before migration
+│       └── Characters_backup_*.zip      # Format: YYYYMMDD_HHMMSS.zip
+│
+├── 📁 Configuration/                    # Application settings
+│   └── config.json                      # User configuration
+│
+├── 📁 Data/                             # Game data (reference)
+│   ├── realm_ranks.json                 # Consolidated ranks (3 realms)
+│   ├── realm_ranks_albion.json          # Albion specific ranks
+│   ├── realm_ranks_hibernia.json        # Hibernia specific ranks
+│   ├── realm_ranks_midgard.json         # Midgard specific ranks
+│   ├── classes_races.json               # 44 classes, 18 races, 188 specializations
+│   ├── classes_races_stats.json         # Classes/races statistics
+│   ├── armor_resists.json               # Resistances by armor type
+│   └── README.md                        # Data folder documentation
+│
+├── 📁 Documentation/                    # Complete documentation (FR/EN/DE)
+│   ├── 📋 Main files
+│   │   ├── INDEX.md                     # Documentation index
+│   │   ├── README_EN.md                 # English README
+│   │   └── README_DE.md                 # German README
+│   ├── 📝 Changelogs
+│   │   ├── CHANGELOG_FR.md              # French changelog
+│   │   ├── CHANGELOG_EN.md              # English changelog
+│   │   └── CHANGELOG_DE.md              # German changelog
+│   ├── 🎮 User guides
+│   │   ├── CONFIGURATION_COLONNES_FR.md # Column configuration (FR)
+│   │   ├── COLUMN_CONFIGURATION_EN.md   # Column configuration (EN)
+│   │   ├── REALM_RANKS_FR.md            # Realm Ranks system (FR)
+│   │   ├── REALM_RANKS_EN.md            # Realm Ranks system (EN)
+│   │   ├── INTERFACE_MENU_FR.md         # Interface menu (FR)
+│   │   ├── INTERFACE_MENU_EN.md         # Interface menu (EN)
+│   │   ├── ACTION_MENU_FR.md            # Action menu (FR)
+│   │   ├── ARMOR_MANAGEMENT_FR.md       # Armor management (FR)
+│   │   └── ARMOR_MANAGEMENT_USER_GUIDE_FR.md  # Armor user guide (FR)
+│   ├── 🔧 Technical guides
+│   │   ├── DATA_MANAGER_FR.md           # Data manager (FR)
+│   │   ├── DATA_MANAGER_EN.md           # Data manager (EN)
+│   │   ├── DATA_FOLDER_FR.md            # Data folder (FR)
+│   │   ├── DATA_FOLDER_EN.md            # Data folder (EN)
+│   │   ├── CLASSES_RACES_IMPLEMENTATION.md    # Classes/races implementation
+│   │   ├── CLASSES_RACES_USAGE.md       # Classes/races usage
+│   │   └── DATA_EDITOR_README.md        # Data Editor guide
+│   └── 📊 v0.104 Documentation
+│       ├── REFACTORING_v0.104_COMPLETE.md     # Complete refactoring guide
+│       ├── REFACTORING_SUMMARY_v0.104.md      # Refactoring summary
+│       ├── REFACTORING_FINAL_REPORT_v0.104.md # Final report with metrics
+│       ├── REFACTORING_SUMMARY.md       # General summary
+│       ├── IMPLEMENTATION_COMPLETE.md   # Complete implementation
+│       ├── IMPLEMENTATION_SUMMARY_ARMOR_v0.105.md  # Armor summary v0.105
+│       ├── ACTION_MENU_IMPLEMENTATION_SUMMARY.md   # Action menu summary
+│       ├── BACKUP_ZIP_UPDATE.md         # ZIP backup update
+│       ├── MIGRATION_CONFIRMATION_UPDATE.md    # Migration confirmation update
+│       ├── MIGRATION_MULTILANG_UPDATE.md       # Multilingual migration update
+│       ├── MIGRATION_SECURITY.md        # Migration security
+│       ├── UPDATE_SUMMARY_29OCT2025.md  # Update summary Oct 29, 2025
+│       └── VERIFICATION_RAPPORT.md      # Verification report
+│
+├── 📁 Functions/                        # ⭐ Python modules (Modular Architecture v0.104)
+│   ├── __init__.py                      # Python package marker
+│   ├── 🎨 Interface managers (v0.104)
+│   │   ├── ui_manager.py                # Menus, dialogs, status bar (127 lines)
+│   │   ├── tree_manager.py              # Character list, QTreeView (297 lines)
+│   │   └── character_actions_manager.py # Character CRUD actions (228 lines)
+│   └── 🔧 Functional managers
+│       ├── character_manager.py         # Character file management
+│       ├── config_manager.py            # JSON configuration management
+│       ├── data_manager.py              # Game data loading
+│       ├── language_manager.py          # Multilingual translations
+│       ├── logging_manager.py           # Logging system
+│       ├── migration_manager.py         # Season/Realm migration with backup
+│       ├── path_manager.py              # Path management
+│       └── armor_manager.py             # Armor management
+│
+├── 📁 UI/                               # User interface components
+│   ├── __init__.py                      # Python package marker
+│   ├── dialogs.py                       # Custom dialogs (creation, editing)
+│   ├── delegates.py                     # QTreeView delegates (column rendering)
+│   └── debug_window.py                  # Integrated debug console
+│
+├── 📁 Img/                              # Graphic resources
+│   ├── albion.png                       # Albion realm icon
+│   ├── hibernia.png                     # Hibernia realm icon
+│   └── midgard.png                      # Midgard realm icon
+│
+├── 📁 Language/                         # Multilingual translations
+│   ├── fr.json                          # French translations (default language)
+│   ├── en.json                          # English translations
+│   └── de.json                          # German translations
+│
+├── 📁 Logs/                             # Application logging
+│   └── debug.log                        # Debug logs (created automatically)
+│
+├── 📁 Scripts/                          # Utility and maintenance scripts
+│   ├── 🌐 Web Scraping
+│   │   ├── scrape_realm_ranks.py        # Extract ranks from DAOC site
+│   │   ├── scrape_armor_resists.py      # Extract armor resistances
+│   │   └── add_armor_translations.py    # Add FR/DE translations
+│   ├── 📊 Data management
+│   │   ├── update_classes_races.py      # Update classes/races
+│   │   └── validate_classes_races.py    # Validate classes/races data
+│   ├── 🎨 Graphics
+│   │   ├── create_icons.py              # Icon creation
+│   │   ├── create_simple_icons.py       # Simplified icons
+│   │   └── check_png.py                 # PNG integrity check
+│   ├── 🧪 Tests
+│   │   ├── test_armor_manager.py        # Armor management tests
+│   │   ├── test_column_configuration.py # Column configuration tests
+│   │   ├── test_dynamic_data.py         # Dynamic data tests
+│   │   ├── test_realm_ranks_ui.py       # Realm ranks UI tests
+│   │   └── test_run.py                  # General test suite
+│   ├── 📝 Examples
+│   │   ├── example_classes_usage.py     # Classes usage examples
+│   │   └── example_integration.py       # Integration examples
+│   └── 🔧 Utilities
+│       ├── watch_logs.py                # Real-time log monitoring
+│       ├── analyse_gestion_erreurs.md   # Error analysis
+│       └── CORRECTIONS_ICONES.md        # Icon corrections documentation
+│
+└── 📁 Tools/                            # ⭐ Development tools (v0.104)
+    ├── clean_project.py                 # Project cleanup + Git branch creation
+    ├── generate_test_characters.py      # Generate 20 test characters (Season/Realm)
+    ├── generate_test_characters_old.py  # Legacy version (Realm only)
+    ├── data_editor.py                   # Visual JSON data editor
+    ├── DAOC-Character-Manager.spec      # PyInstaller configuration for EXE creation
+    └── requirements.txt                 # Dependencies for EXE compilation
+```
+
+**Legend:**
+- ⭐ = New features or major changes v0.104
+- 📁 = Folder
+- 📄 = Important file
+- 🎨/🔧/🌐/📊/🧪/📝 = Functional categories
 │   ├── fr.json
 │   ├── en.json
 │   └── de.json

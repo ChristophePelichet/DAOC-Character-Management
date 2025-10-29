@@ -7,9 +7,33 @@ from PySide6.QtWidgets import (
     QMenu, QMessageBox, QGroupBox, QHBoxLayout, QComboBox, QPushButton, QStatusBar, QLabel
 )
 from PySide6.QtGui import QAction
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QThread, Signal
 
 from Functions.language_manager import lang
+
+
+class EdenStatusThread(QThread):
+    """Thread pour vérifier le statut de connexion Eden en arrière-plan"""
+    status_updated = Signal(bool, str)  # (accessible, message)
+    
+    def __init__(self, cookie_manager):
+        super().__init__()
+        self.cookie_manager = cookie_manager
+    
+    def run(self):
+        """Vérifie le statut de connexion"""
+        if not self.cookie_manager.cookie_exists():
+            self.status_updated.emit(False, "Aucun cookie")
+            return
+        
+        info = self.cookie_manager.get_cookie_info()
+        if not info or not info.get('is_valid'):
+            self.status_updated.emit(False, "Cookies expirés")
+            return
+        
+        # Test de connexion
+        result = self.cookie_manager.test_eden_connection()
+        self.status_updated.emit(result['accessible'], result['message'])
 
 
 class UIManager:
@@ -24,9 +48,11 @@ class UIManager:
         """
         self.main_window = main_window
         self.context_menu = None
+        self.eden_status_label = None
+        self.eden_status_thread = None
         
     def create_menu_bar(self):
-        """Crée la barre de menus avec Fichier, Affichage, Aide"""
+        """Crée la barre de menus avec Fichier, Actions, Affichage, Aide"""
         menubar = self.main_window.menuBar()
         menubar.clear()
         
@@ -101,6 +127,64 @@ class UIManager:
         
         # Stocker la référence pour pouvoir y accéder plus tard
         self.main_window.bulk_action_combo = bulk_action_combo
+    
+    def create_eden_status_bar(self, parent_layout):
+        """Crée la barre de statut de connexion Eden"""
+        status_group = QGroupBox("Statut Eden Herald")
+        status_layout = QHBoxLayout()
+        
+        # Label de statut
+        self.eden_status_label = QLabel("⏳ Vérification en cours...")
+        self.eden_status_label.setStyleSheet("padding: 5px;")
+        status_layout.addWidget(self.eden_status_label)
+        
+        # Bouton pour rafraîchir
+        refresh_button = QPushButton("🔄 Actualiser")
+        refresh_button.clicked.connect(self.check_eden_status)
+        refresh_button.setMaximumWidth(120)
+        status_layout.addWidget(refresh_button)
+        
+        # Bouton pour ouvrir le gestionnaire
+        manage_button = QPushButton("⚙️ Gérer")
+        manage_button.clicked.connect(self.main_window.open_cookie_manager)
+        manage_button.setMaximumWidth(100)
+        status_layout.addWidget(manage_button)
+        
+        status_group.setLayout(status_layout)
+        parent_layout.addWidget(status_group)
+        
+        # Lancer la vérification initiale
+        self.check_eden_status()
+    
+    def check_eden_status(self):
+        """Vérifie le statut de connexion Eden en arrière-plan"""
+        # Arrêter un thread en cours si existant
+        if self.eden_status_thread and self.eden_status_thread.isRunning():
+            self.eden_status_thread.quit()
+            self.eden_status_thread.wait()
+        
+        # Afficher le statut de chargement
+        self.eden_status_label.setText("⏳ Vérification en cours...")
+        self.eden_status_label.setStyleSheet("padding: 5px; color: gray;")
+        
+        # Créer le gestionnaire de cookies
+        from Functions.cookie_manager import CookieManager
+        cookie_manager = CookieManager()
+        
+        # Lancer le thread de vérification
+        self.eden_status_thread = EdenStatusThread(cookie_manager)
+        self.eden_status_thread.status_updated.connect(self.update_eden_status)
+        self.eden_status_thread.start()
+    
+    def update_eden_status(self, accessible, message):
+        """Met à jour l'affichage du statut Eden"""
+        if accessible:
+            self.eden_status_label.setText(f"✅ Herald accessible")
+            self.eden_status_label.setStyleSheet("padding: 5px; color: green; font-weight: bold;")
+        else:
+            self.eden_status_label.setText(f"❌ {message}")
+            self.eden_status_label.setStyleSheet("padding: 5px; color: red;")
+        
         
     def create_status_bar(self):
         """Crée la barre de statut en bas de la fenêtre"""

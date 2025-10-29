@@ -77,6 +77,7 @@ class CharacterApp(QMainWindow):
         # Initialisation de l'UIManager
         self.ui_manager = UIManager(self)
         self.ui_manager.create_menu_bar()
+        self.ui_manager.create_eden_status_bar(main_layout)
         self.ui_manager.create_bulk_actions_bar(main_layout)
         
         # Création du TreeView
@@ -295,6 +296,14 @@ class CharacterApp(QMainWindow):
                 lang.get("success_title", default="Succès"),
                 lang.get("columns_config_saved", default="Configuration sauvegardée.")
             )
+    
+    def open_cookie_manager(self):
+        """Ouvre le gestionnaire de cookies Eden"""
+        logging.debug("Opening cookie manager dialog")
+        from UI.dialogs import CookieManagerDialog
+        
+        dialog = CookieManagerDialog(self)
+        dialog.exec()
             
     def open_configuration(self):
         """Ouvre la fenêtre de configuration"""

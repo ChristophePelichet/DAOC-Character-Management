@@ -12,7 +12,7 @@ from PySide6.QtWidgets import (
     QDialogButtonBox, QFileDialog, QTableWidget, QTableWidgetItem, QHeaderView,
     QWidget
 )
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QThread, Signal
 from Functions.language_manager import lang
 from Functions.config_manager import config, get_config_dir
 from Functions.character_manager import get_character_dir
@@ -1123,3 +1123,421 @@ class ArmorManagementDialog(QDialog):
             except Exception as e:
                 logging.error(f"Erreur lors de la suppression du fichier d'armure : {e}")
                 QMessageBox.critical(self, "Erreur", f"Impossible de supprimer le fichier :\n{str(e)}")
+
+
+class ConnectionTestThread(QThread):
+    """Thread pour tester la connexion Eden en arrière-plan"""
+    finished = Signal(dict)  # Signal émis avec le résultat du test
+    
+    def __init__(self, cookie_manager):
+        super().__init__()
+        self.cookie_manager = cookie_manager
+    
+    def run(self):
+        """Exécute le test de connexion"""
+        result = self.cookie_manager.test_eden_connection()
+        self.finished.emit(result)
+
+
+class CookieManagerDialog(QDialog):
+    """Dialog pour gérer les cookies Eden pour le scraping"""
+    
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Gestion des Cookies Eden")
+        self.resize(600, 400)
+        
+        # Importer le gestionnaire de cookies
+        from Functions.cookie_manager import CookieManager
+        self.cookie_manager = CookieManager()
+        
+        # Thread pour le test de connexion
+        self.connection_thread = None
+        
+        # Layout principal
+        layout = QVBoxLayout(self)
+        
+        # Titre et description
+        title_label = QLabel("<h2>🍪 Gestion des Cookies Eden</h2>")
+        title_label.setTextFormat(Qt.RichText)
+        layout.addWidget(title_label)
+        
+        layout.addSpacing(10)
+        
+        # Zone d'information sur les cookies
+        info_group = QGroupBox("📊 État des Cookies")
+        info_layout = QVBoxLayout()
+        
+        self.status_label = QLabel()
+        self.status_label.setWordWrap(True)
+        self.status_label.setTextFormat(Qt.RichText)
+        info_layout.addWidget(self.status_label)
+        
+        self.expiry_label = QLabel()
+        self.expiry_label.setWordWrap(True)
+        self.expiry_label.setTextFormat(Qt.RichText)
+        info_layout.addWidget(self.expiry_label)
+        
+        self.details_label = QLabel()
+        self.details_label.setWordWrap(True)
+        info_layout.addWidget(self.details_label)
+        
+        info_group.setLayout(info_layout)
+        layout.addWidget(info_group)
+        
+        # Section import manuel
+        import_group = QGroupBox("📂 Import Manuel")
+        import_layout = QHBoxLayout()
+        
+        import_label = QLabel("Chemin du fichier :")
+        import_layout.addWidget(import_label)
+        
+        self.cookie_path_edit = QLineEdit()
+        self.cookie_path_edit.setPlaceholderText("Sélectionnez un fichier .pkl ou saisissez le chemin")
+        self.cookie_path_edit.returnPressed.connect(self.import_from_path)
+        import_layout.addWidget(self.cookie_path_edit)
+        
+        browse_button = QPushButton("📁 Parcourir")
+        browse_button.clicked.connect(self.browse_cookie_file)
+        import_layout.addWidget(browse_button)
+        
+        import_group.setLayout(import_layout)
+        layout.addWidget(import_group)
+        
+        # Boutons d'action
+        buttons_layout = QHBoxLayout()
+        
+        self.generate_button = QPushButton("🔐 Générer des Cookies")
+        self.generate_button.setToolTip("Ouvre un navigateur pour se connecter et récupérer les cookies")
+        self.generate_button.clicked.connect(self.generate_cookies)
+        buttons_layout.addWidget(self.generate_button)
+        
+        self.refresh_button = QPushButton("🔄 Actualiser")
+        self.refresh_button.clicked.connect(self.refresh_status)
+        buttons_layout.addWidget(self.refresh_button)
+        
+        self.delete_button = QPushButton("🗑️ Supprimer")
+        self.delete_button.clicked.connect(self.delete_cookies)
+        buttons_layout.addWidget(self.delete_button)
+        
+        layout.addLayout(buttons_layout)
+        
+        # Bouton de fermeture
+        close_button = QPushButton("Fermer")
+        close_button.clicked.connect(self.accept)
+        layout.addWidget(close_button)
+        
+        # Afficher l'état initial
+        self.refresh_status()
+    
+    def start_connection_test(self):
+        """Lance le test de connexion en arrière-plan"""
+        # Annuler un test en cours si existant
+        if self.connection_thread and self.connection_thread.isRunning():
+            self.connection_thread.quit()
+            self.connection_thread.wait()
+        
+        # Créer et démarrer un nouveau thread
+        self.connection_thread = ConnectionTestThread(self.cookie_manager)
+        self.connection_thread.finished.connect(self.on_connection_test_finished)
+        self.connection_thread.start()
+    
+    def on_connection_test_finished(self, result):
+        """Appelé quand le test de connexion est terminé"""
+        # Récupérer les infos actuelles pour mettre à jour l'affichage
+        info = self.cookie_manager.get_cookie_info()
+        if info and info['is_valid']:
+            expiry_date = info['expiry_date']
+            now = datetime.now()
+            duration = expiry_date - now
+            days = duration.days
+            
+            # Construire le statut de connexion
+            if result['accessible']:
+                connection_status = "🌐 <b>Accès Eden :</b> <span style='color: green;'>✅ Connecté</span>"
+            else:
+                if result['status_code']:
+                    connection_status = f"🌐 <b>Accès Eden :</b> <span style='color: red;'>❌ {result['message']}</span>"
+                else:
+                    connection_status = f"🌐 <b>Accès Eden :</b> <span style='color: orange;'>⚠️ {result['message']}</span>"
+            
+            # Mettre à jour l'affichage
+            self.expiry_label.setText(
+                f"📅 <b>Date d'expiration:</b> {expiry_date.strftime('%d/%m/%Y à %H:%M')}<br/>"
+                f"⏰ <b>Validité restante:</b> {days} jours<br/>"
+                f"{connection_status}"
+            )
+    
+    def refresh_status(self):
+        """Actualise l'affichage de l'état des cookies"""
+        info = self.cookie_manager.get_cookie_info()
+        
+        if info is None:
+            # Aucun cookie
+            self.status_label.setText("❌ <b>Aucun cookie trouvé</b>")
+            self.status_label.setStyleSheet("color: red;")
+            self.expiry_label.setText("")
+            self.details_label.setText(
+                "Pour utiliser le scraper Eden, vous devez importer un fichier de cookies.<br/>"
+                "Utilisez le bouton 'Importer des Cookies' ci-dessous."
+            )
+            self.delete_button.setEnabled(False)
+            
+        elif info.get('error'):
+            # Erreur de lecture
+            self.status_label.setText("⚠️ <b>Erreur de lecture</b>")
+            self.status_label.setStyleSheet("color: orange;")
+            self.expiry_label.setText("")
+            self.details_label.setText(f"Erreur: {info['error']}")
+            self.delete_button.setEnabled(True)
+            
+        elif not info['is_valid']:
+            # Cookies expirés
+            self.status_label.setText("⚠️ <b>Cookies expirés</b>")
+            self.status_label.setStyleSheet("color: orange;")
+            self.expiry_label.setText("")
+            
+            details = f"Total: {info['total_cookies']} cookies<br/>"
+            details += f"Expirés: {info['expired_cookies']}<br/>"
+            details += f"Valides: {info['valid_cookies']}<br/>"
+            details += "<br/>Vous devez importer de nouveaux cookies."
+            
+            self.details_label.setText(details)
+            self.delete_button.setEnabled(True)
+            
+        else:
+            # Cookies valides
+            self.status_label.setText("✅ <b>Cookies valides</b>")
+            self.status_label.setStyleSheet("color: green;")
+            
+            expiry_date = info['expiry_date']
+            now = datetime.now()
+            duration = expiry_date - now
+            days = duration.days
+            
+            self.expiry_label.setText(
+                f"📅 <b>Date d'expiration:</b> {expiry_date.strftime('%d/%m/%Y à %H:%M')}<br/>"
+                f"⏰ <b>Validité restante:</b> {days} jours"
+            )
+            
+            if days < 7:
+                self.expiry_label.setStyleSheet("color: orange;")
+            else:
+                self.expiry_label.setStyleSheet("color: green;")
+            
+            # Afficher les infos de base immédiatement
+            self.expiry_label.setText(
+                f"📅 <b>Date d'expiration:</b> {expiry_date.strftime('%d/%m/%Y à %H:%M')}<br/>"
+                f"⏰ <b>Validité restante:</b> {days} jours<br/>"
+                f"🌐 <b>Accès Eden :</b> <span style='color: gray;'>⏳ Test en cours...</span>"
+            )
+            
+            # Lancer le test de connexion en arrière-plan
+            self.start_connection_test()
+            
+            details = f"📦 Total: {info['total_cookies']} cookies<br/>"
+            details += f"✓ Valides: {info['valid_cookies']}<br/>"
+            
+            if info['session_cookies'] > 0:
+                details += f"🔄 Session: {info['session_cookies']}<br/>"
+            
+            details += f"<br/>📁 Fichier: {info['file_path']}"
+            
+            self.details_label.setText(details)
+            self.delete_button.setEnabled(True)
+    
+    def browse_cookie_file(self):
+        """Ouvre un dialog pour sélectionner un fichier de cookies"""
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Sélectionner un fichier de cookies",
+            "",
+            "Fichiers Pickle (*.pkl);;Tous les fichiers (*.*)"
+        )
+        
+        if file_path:
+            self.cookie_path_edit.setText(file_path)
+            # Importer automatiquement après sélection
+            self.import_from_path()
+    
+    def import_from_path(self):
+        """Importe un fichier de cookies depuis le chemin saisi"""
+        file_path = self.cookie_path_edit.text().strip()
+        
+        if not file_path:
+            QMessageBox.warning(
+                self,
+                "Attention",
+                "Veuillez sélectionner ou saisir un chemin de fichier."
+            )
+            return
+        
+        # Vérifier que le fichier existe avant d'essayer d'importer
+        from pathlib import Path
+        import os
+        
+        if not os.path.exists(file_path):
+            QMessageBox.critical(
+                self,
+                "Erreur",
+                f"Le fichier n'existe pas :\n\n{file_path}\n\n"
+                "Vérifiez le chemin et réessayez."
+            )
+            return
+        
+        success = self.cookie_manager.import_cookie_file(file_path)
+        
+        if success:
+            QMessageBox.information(
+                self,
+                "Succès",
+                "Les cookies ont été importés avec succès !"
+            )
+            self.cookie_path_edit.clear()
+            self.refresh_status()
+        else:
+            QMessageBox.critical(
+                self,
+                "Erreur",
+                f"Impossible d'importer le fichier de cookies.\n\n"
+                f"Fichier : {file_path}\n\n"
+                "Le fichier doit être un fichier .pkl valide contenant des cookies."
+            )
+    
+    def delete_cookies(self):
+        """Supprime les cookies après confirmation"""
+        reply = QMessageBox.question(
+            self,
+            "Confirmer la suppression",
+            "Êtes-vous sûr de vouloir supprimer les cookies ?\n\n"
+            "Une sauvegarde sera créée automatiquement.",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+        
+        if reply == QMessageBox.Yes:
+            success = self.cookie_manager.delete_cookies()
+            
+            if success:
+                QMessageBox.information(
+                    self,
+                    "Succès",
+                    "Les cookies ont été supprimés."
+                )
+                self.refresh_status()
+            else:
+                QMessageBox.critical(
+                    self,
+                    "Erreur",
+                    "Impossible de supprimer les cookies."
+                )
+    
+    def generate_cookies(self):
+        """Génère de nouveaux cookies via authentification navigateur"""
+        
+        # Message d'information
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Information)
+        msg.setWindowTitle("Génération des Cookies")
+        msg.setTextFormat(Qt.RichText)
+        msg.setText("<b>Génération des cookies Eden</b>")
+        msg.setInformativeText(
+            "Un navigateur Chrome va s'ouvrir pour vous connecter à Eden-DAOC.<br/><br/>"
+            "<b>Étapes :</b><br/>"
+            "1. Le navigateur s'ouvrira automatiquement<br/>"
+            "2. Connectez-vous avec votre compte Discord<br/>"
+            "3. Une fois connecté, revenez ici et cliquez sur OK<br/>"
+            "4. Les cookies seront automatiquement sauvegardés"
+        )
+        msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+        
+        if msg.exec() != QMessageBox.Ok:
+            return
+        
+        # Désactiver les boutons pendant le processus
+        self.generate_button.setEnabled(False)
+        self.cookie_path_edit.setEnabled(False)
+        self.status_label.setText("⏳ <b>Ouverture du navigateur...</b>")
+        self.status_label.setStyleSheet("color: blue;")
+        
+        # Forcer la mise à jour de l'interface
+        from PySide6.QtWidgets import QApplication
+        QApplication.processEvents()
+        
+        # Générer les cookies
+        success, message, driver = self.cookie_manager.generate_cookies_with_browser()
+        
+        if not success:
+            # Erreur lors de l'ouverture
+            QMessageBox.critical(
+                self,
+                "Erreur",
+                f"Impossible d'ouvrir le navigateur :\n\n{message}\n\n"
+                "Assurez-vous que Chrome et Selenium sont installés."
+            )
+            self.generate_button.setEnabled(True)
+            self.cookie_path_edit.setEnabled(True)
+            self.refresh_status()
+            return
+        
+        # Le navigateur est ouvert
+        self.status_label.setText("🌐 <b>Navigateur ouvert - Connectez-vous avec Discord</b>")
+        self.status_label.setStyleSheet("color: orange;")
+        QApplication.processEvents()
+        
+        # Dialogue d'attente
+        wait_msg = QMessageBox()
+        wait_msg.setIcon(QMessageBox.Information)
+        wait_msg.setWindowTitle("En attente de connexion")
+        wait_msg.setTextFormat(Qt.RichText)
+        wait_msg.setText("<b>Connectez-vous maintenant</b>")
+        wait_msg.setInformativeText(
+            "Le navigateur Chrome est ouvert.<br/><br/>"
+            "Veuillez vous connecter avec Discord dans le navigateur,<br/>"
+            "puis cliquez sur OK une fois connecté."
+        )
+        wait_msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+        
+        result = wait_msg.exec()
+        
+        if result == QMessageBox.Ok:
+            # Récupérer et sauvegarder les cookies
+            self.status_label.setText("💾 <b>Sauvegarde des cookies...</b>")
+            self.status_label.setStyleSheet("color: blue;")
+            QApplication.processEvents()
+            
+            success, message, count = self.cookie_manager.save_cookies_from_driver(driver)
+            
+            # Fermer le navigateur
+            try:
+                driver.quit()
+            except:
+                pass
+            
+            if success:
+                QMessageBox.information(
+                    self,
+                    "Succès",
+                    f"Les cookies ont été générés avec succès !\n\n"
+                    f"{message}"
+                )
+            else:
+                QMessageBox.critical(
+                    self,
+                    "Erreur",
+                    f"Erreur lors de la sauvegarde des cookies :\n\n{message}"
+                )
+        else:
+            # Annulation - fermer le navigateur
+            try:
+                driver.quit()
+            except:
+                pass
+            
+            self.status_label.setText("❌ <b>Génération annulée</b>")
+            self.status_label.setStyleSheet("color: red;")
+        
+        # Réactiver les boutons et actualiser
+        self.generate_button.setEnabled(True)
+        self.cookie_path_edit.setEnabled(True)
+        self.refresh_status()

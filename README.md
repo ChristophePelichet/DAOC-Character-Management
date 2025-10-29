@@ -1,4 +1,4 @@
-# DAOC - Gestionnaire de Personnages
+# DAOC - Gestionnaire de Personnages v0.104
 
 Application de gestion de personnages pour Dark Age of Camelot (DAOC), développée en Python avec PySide6.
 
@@ -96,7 +96,7 @@ Colonnes disponibles :
 
 Voir [Documentation/COLUMN_CONFIGURATION_FR.md](Documentation/CONFIGURATION_COLONNES_FR.md) (FR) ou [Documentation/COLUMN_CONFIGURATION_EN.md](Documentation/COLUMN_CONFIGURATION_EN.md) (EN) pour plus de détails.
 
-## � Installation
+## 🚀 Installation
 
 ### Prérequis
 - Python 3.13 ou supérieur (⚠️ PySide6 n'est pas compatible avec Python 3.14+)
@@ -149,54 +149,110 @@ Documentation complète disponible dans le dossier `Documentation/` :
 - [Data Folder](Documentation/DATA_FOLDER_EN.md)
 - [Menu Interface](Documentation/INTERFACE_MENU_EN.md)
 
-## �🗂️ Structure du Projet
+## 🗂️ Structure du Projet
 
 ```
 DAOC---Gestion-des-personnages/
-├── main.py                      # Application principale
-├── requirements.txt             # Dépendances Python
-├── scrape_realm_ranks.py        # Script d'extraction des rangs
-├── Characters/                  # Données des personnages (structure Season/Realm)
-│   ├── S1/                      # Saison 1
+├── main.py                          # Application principale (493 lignes - refactorisé)
+├── main_backup_pre_refactoring.py   # Sauvegarde pré-refactoring
+├── requirements.txt                 # Dépendances Python
+├── CHANGELOG.md                     # Journal des modifications
+├── README.md                        # Documentation principale
+├── .gitignore                       # Fichiers ignorés par Git
+├── .venv/                           # Environnement virtuel Python
+├── Characters/                      # Données des personnages (par Saison/Royaume)
+│   ├── S1/                          # Saison 1
 │   │   ├── Albion/
 │   │   ├── Hibernia/
 │   │   └── Midgard/
-│   ├── S2/                      # Saison 2
+│   ├── S2/                          # Saison 2
 │   │   ├── Albion/
 │   │   ├── Hibernia/
 │   │   └── Midgard/
-│   └── S3/                      # Saison 3
+│   └── S3/                          # Saison 3
 │       ├── Albion/
 │       ├── Hibernia/
 │       └── Midgard/
-├── Configuration/               # Fichiers de configuration
+├── Characters.old/                  # Ancienne structure (avant migration)
+├── Configuration/                   # Fichiers de configuration
 │   └── config.json
-├── Data/                        # Données de jeu
-│   └── realm_ranks.json
-├── Documentation/               # Documentation complète (FR/EN)
-│   ├── INDEX.md
-│   ├── CONFIGURATION_COLONNES_FR.md
-│   ├── COLUMN_CONFIGURATION_EN.md
-│   ├── REALM_RANKS_FR.md
-│   ├── REALM_RANKS_EN.md
-│   ├── DATA_MANAGER_FR.md
-│   ├── DATA_MANAGER_EN.md
-│   ├── DATA_FOLDER_FR.md
-│   └── DATA_FOLDER_EN.md
-├── Functions/                   # Modules Python
-│   ├── character_manager.py
-│   ├── config_manager.py
-│   ├── data_manager.py
-│   ├── language_manager.py
-│   ├── logging_manager.py
-│   ├── migration_manager.py     # Gestionnaire de migration
-│   └── path_manager.py
-├── Img/                         # Images et icônes
-├── Language/                    # Fichiers de traduction
-│   ├── fr.json
-│   ├── en.json
-│   └── de.json
-└── Logs/                        # Fichiers de logs
+├── Backup/                          # Sauvegardes automatiques
+│   └── Characters/                  # Sauvegardes ZIP des personnages
+├── Data/                            # Données de jeu
+│   ├── realm_ranks.json             # Rangs de royaume consolidés
+│   ├── realm_ranks_albion.json      # Rangs Albion
+│   ├── realm_ranks_hibernia.json    # Rangs Hibernia
+│   ├── realm_ranks_midgard.json     # Rangs Midgard
+│   ├── classes_races.json           # Classes et races par royaume
+│   ├── classes_races_stats.json     # Statistiques des classes
+│   ├── armor_resists.json           # Résistances des armures
+│   └── README.md                    # Documentation du dossier Data
+├── Documentation/                   # Documentation complète (FR/EN/DE)
+│   ├── INDEX.md                     # Index de la documentation
+│   ├── README_EN.md                 # README en anglais
+│   ├── README_DE.md                 # README en allemand
+│   ├── CHANGELOG_FR.md              # Journal en français
+│   ├── CHANGELOG_EN.md              # Journal en anglais
+│   ├── CHANGELOG_DE.md              # Journal en allemand
+│   ├── CONFIGURATION_COLONNES_FR.md # Config colonnes (FR)
+│   ├── COLUMN_CONFIGURATION_EN.md   # Config colonnes (EN)
+│   ├── REALM_RANKS_FR.md            # Système Realm Ranks (FR)
+│   ├── REALM_RANKS_EN.md            # Système Realm Ranks (EN)
+│   ├── DATA_MANAGER_FR.md           # Gestionnaire données (FR)
+│   ├── DATA_MANAGER_EN.md           # Gestionnaire données (EN)
+│   ├── DATA_FOLDER_FR.md            # Dossier Data (FR)
+│   ├── DATA_FOLDER_EN.md            # Dossier Data (EN)
+│   ├── INTERFACE_MENU_FR.md         # Menu interface (FR)
+│   ├── INTERFACE_MENU_EN.md         # Menu interface (EN)
+│   ├── ARMOR_MANAGEMENT_FR.md       # Gestion armures (FR)
+│   ├── CLASSES_RACES_IMPLEMENTATION.md  # Implémentation classes/races
+│   ├── CLASSES_RACES_USAGE.md       # Utilisation classes/races
+│   ├── REFACTORING_v0.104_COMPLETE.md   # Guide complet du refactoring
+│   ├── REFACTORING_SUMMARY_v0.104.md    # Résumé du refactoring
+│   └── REFACTORING_FINAL_REPORT_v0.104.md  # Rapport final
+├── Functions/                       # Modules Python (architecture modulaire)
+│   ├── __init__.py
+│   ├── ui_manager.py                # Gestionnaire d'interface (127 lignes)
+│   ├── tree_manager.py              # Gestionnaire liste personnages (297 lignes)
+│   ├── character_actions_manager.py # Gestionnaire actions personnages (228 lignes)
+│   ├── character_manager.py         # Gestion CRUD personnages
+│   ├── config_manager.py            # Gestion configuration
+│   ├── data_manager.py              # Gestion données de jeu
+│   ├── language_manager.py          # Gestion multilingue
+│   ├── logging_manager.py           # Gestion logs
+│   ├── migration_manager.py         # Gestion migration structure
+│   ├── path_manager.py              # Gestion chemins
+│   └── armor_manager.py             # Gestion armures
+├── UI/                              # Composants d'interface
+│   ├── __init__.py
+│   ├── dialogs.py                   # Dialogues personnalisés
+│   ├── delegates.py                 # Délégués pour QTreeView
+│   └── debug_window.py              # Fenêtre de debug
+├── Img/                             # Images et icônes
+│   ├── albion.png                   # Icône Albion
+│   ├── hibernia.png                 # Icône Hibernia
+│   └── midgard.png                  # Icône Midgard
+├── Language/                        # Fichiers de traduction
+│   ├── fr.json                      # Traductions françaises
+│   ├── en.json                      # Traductions anglaises
+│   └── de.json                      # Traductions allemandes
+├── Logs/                            # Fichiers de journalisation
+│   └── debug.log                    # Logs de debug
+├── Scripts/                         # Scripts utilitaires
+│   ├── scrape_realm_ranks.py        # Extraction rangs de royaume
+│   ├── scrape_armor_resists.py      # Extraction résistances armures
+│   ├── add_armor_translations.py    # Ajout traductions armures
+│   ├── update_classes_races.py      # Mise à jour classes/races
+│   ├── validate_classes_races.py    # Validation classes/races
+│   ├── create_icons.py              # Création d'icônes
+│   ├── test_*.py                    # Scripts de test
+│   └── watch_logs.py                # Surveillance logs
+└── Tools/                           # Outils de développement
+    ├── clean_project.py             # Script de nettoyage projet
+    ├── data_editor.py               # Éditeur visuel de données
+    ├── DATA_EDITOR_README.md        # Documentation Data Editor
+    ├── DAOC-Character-Manager.spec  # Spec PyInstaller
+    └── requirements.txt             # Dépendances pour build
 ```
 
 ## ⚙️ Configuration
@@ -223,16 +279,18 @@ Characters/
         └── Character.json
 ```
 
-### Migration automatique
-- La migration s'effectue **automatiquement au premier démarrage** de l'application
-- Vos personnages existants sont **préservés** et déplacés vers la nouvelle structure
-- Un fichier `.migration_done` est créé pour éviter les migrations multiples
-
-### Migration manuelle
-Si vous avez besoin de relancer la migration :
-1. Allez dans **Aide > Migrer la structure des dossiers**
-2. Confirmez l'opération
-3. Un rapport détaillé s'affiche avec le nombre de personnages migrés
+### Migration automatique avec sauvegarde
+- **Popup de confirmation** : Au premier démarrage, un dialogue explique la migration
+  - Comparaison visuelle : Ancienne structure → Nouvelle structure
+  - Information sur la sauvegarde automatique
+  - Bouton "OK" : Lance la sauvegarde puis la migration
+  - Bouton "Annuler" : Ferme l'application sans modifications
+- **Sauvegarde automatique** : Avant toute migration, une sauvegarde complète est créée
+  - Format : Archive ZIP compressée (`Characters_backup_AAAAMMJJ_HHMMSS.zip`)
+  - Emplacement : `Backup/Characters/`
+  - Protège vos données en cas de problème
+- **Migration sécurisée** : Vos personnages existants sont préservés et déplacés vers la nouvelle structure
+- Un fichier marqueur `.migration_done` est créé pour éviter les migrations multiples
 
 ## 🎯 Utilisation
 
@@ -270,7 +328,7 @@ Pour choisir entre le mode automatique et manuel :
 2. Utilisez le menu déroulant "Actions en masse"
 3. Sélectionnez "Supprimer la sélection" et cliquez sur "Exécuter"
 
-## �️ Outils de Développement
+## 🛠️ Outils de Développement
 
 ### Générateur de Personnages de Test
 Pour tester l'application avec des données variées :
@@ -296,7 +354,7 @@ python Tools/data_editor.py
 - `Scripts/scrape_armor_resists.py` : Extraire les résistances d'armure
 - `Scripts/add_armor_translations.py` : Ajouter les traductions FR/DE automatiquement
 
-## �🐛 Débogage
+## 🐛 Débogage
 
 Pour activer le mode debug :
 1. Ouvrez la configuration via **Fichier > Paramètres**
@@ -309,7 +367,7 @@ Pour activer le mode debug :
 Consultez le [journal des modifications](CHANGELOG.md) pour l'historique complet.  
 **🌍 Disponible en :** [Français](Documentation/CHANGELOG_FR.md) | [English](Documentation/CHANGELOG_EN.md) | [Deutsch](Documentation/CHANGELOG_DE.md)
 
-### Version 0.104 (29 Octobre 2025) - Refactoring Complet ✨
+### Version 0.104 (29 Octobre 2025) - Refactoring Complet & Migration ✨
 - ⚡ **Performance** : -22% temps de chargement, -33% temps de rafraîchissement
 - 🏗️ **Architecture modulaire** : Extraction du code vers des managers dédiés
   - `Functions/ui_manager.py` : Gestion des éléments d'interface (menus, status bar)
@@ -321,28 +379,26 @@ Consultez le [journal des modifications](CHANGELOG.md) pour l'historique complet
 - 📚 **Documentation** : Nouveau guide complet du refactoring
 - ✅ **Compatibilité** : Toutes les fonctionnalités préservées
 - 🎯 **Testabilité** : Code modulaire plus facile à tester
-
-Voir [Documentation/REFACTORING_v0.104_COMPLETE.md](Documentation/REFACTORING_v0.104_COMPLETE.md) pour tous les détails du refactoring.
-
-### Version 0.104 (29 Octobre 2025) - Migration et Sécurité
-- ✅ **Migration sécurisée avec sauvegarde automatique**
+- 🔄 **Migration sécurisée avec sauvegarde automatique**
   - Popup de confirmation trilingue (FR/EN/DE) avant migration
   - Sauvegarde ZIP automatique dans `Backup/Characters/`
   - Format : `Characters_backup_YYYYMMDD_HHMMSS.zip`
   - Compression optimale pour économiser l'espace disque
   - Protection complète des données avant toute modification
-- ✅ **Nouvelle structure de dossiers** : Organisation par saison
+- 📁 **Nouvelle structure de dossiers** : Organisation par saison
   - Ancienne : `Characters/Realm/` → Nouvelle : `Characters/Season/Realm/`
   - Migration automatique au premier démarrage
   - Fichier marqueur `.migration_done` pour éviter les migrations multiples
-- ✅ **Colonnes Classe et Race** : Nouvelles colonnes dans la vue principale
+- 📋 **Colonnes Classe et Race** : Nouvelles colonnes dans la vue principale
   - Colonne "Classe" affichée par défaut
   - Colonne "Race" masquée par défaut
   - Configuration via menu Affichage > Colonnes
-- ✅ **Interface Rang de Royaume améliorée** : Remplacement des curseurs par des menus déroulants
-- ✅ **Sauvegarde automatique des rangs** : Plus besoin de cliquer sur "Appliquer ce rang"
-- ✅ **Organisation visuelle** : Titre du rang affiché en haut avec couleur du royaume
-- ✅ **Corrections** : Résolution du popup "Migration en cours" qui restait ouvert
+- 🏆 **Interface Rang de Royaume améliorée** : Remplacement des curseurs par des menus déroulants
+- 💾 **Sauvegarde automatique des rangs** : Plus besoin de cliquer sur "Appliquer ce rang"
+- 🎨 **Organisation visuelle** : Titre du rang affiché en haut avec couleur du royaume
+- 🐛 **Corrections** : Résolution du popup "Migration en cours" qui restait ouvert
+
+Voir [Documentation/REFACTORING_v0.104_COMPLETE.md](Documentation/REFACTORING_v0.104_COMPLETE.md) pour tous les détails du refactoring.
 
 ### Version 0.103 (28 Octobre 2025)
 - ✅ **Sélection de race** : Ajout d'un champ race dans la création de personnage

@@ -1,4 +1,4 @@
-# DAOC - Charakterverwaltung
+# DAOC - Charakterverwaltung v0.104
 
 > 📁 **Diese Datei wurde verschoben**: Früher im Stammverzeichnis, jetzt in `Documentation/` (v0.104)
 
@@ -221,13 +221,6 @@ Characters/
 - **Sichere Migration**: Ihre vorhandenen Charaktere bleiben erhalten und werden in die neue Struktur verschoben
 - Eine `.migration_done` Markierungsdatei wird erstellt, um mehrfache Migrationen zu vermeiden
 
-### Manuelle Migration
-Wenn Sie die Migration erneut ausführen müssen:
-1. Gehen Sie zu **Hilfe > Ordnerstruktur migrieren**
-2. Bestätigen Sie den Vorgang
-3. Eine ZIP-Sicherung wird automatisch erstellt
-4. Ein detaillierter Bericht mit der Anzahl der migrierten Charaktere wird angezeigt
-
 ## 🎯 Verwendung
 
 ### Charakter erstellen
@@ -277,25 +270,38 @@ Um den Debug-Modus zu aktivieren:
 Siehe das [Änderungsprotokoll](../CHANGELOG.md) für vollständige Historie.  
 **🌍 Verfügbar in:** [Français](CHANGELOG_FR.md) | [English](CHANGELOG_EN.md) | [Deutsch](CHANGELOG_DE.md)
 
-### Version 0.104 (29. Oktober 2025)
-- ✅ **Sichere Migration mit automatischer Sicherung**
+### Version 0.104 (29. Oktober 2025) - Vollständiges Refactoring & Migration ✨
+- ⚡ **Leistung**: -22% Ladezeit, -33% Aktualisierungszeit
+- 🏗️ **Modulare Architektur**: Code in dedizierte Manager extrahiert
+  - `Functions/ui_manager.py`: UI-Elementverwaltung (Menüs, Statusleiste)
+  - `Functions/tree_manager.py`: Charakterlistenverwaltung
+  - `Functions/character_actions_manager.py`: Charakteraktionen
+- 🧹 **Code-Bereinigung**: main.py von 1277 auf 493 Zeilen reduziert (-61%)
+- 📦 **Optimierungen**: Icon-Caching, reduzierte redundante Aufrufe
+- 🗑️ **Aufräumen**: Veraltete Testskripte entfernt
+- 📚 **Dokumentation**: Neue vollständige Refactoring-Anleitung
+- ✅ **Kompatibilität**: Alle Funktionen erhalten
+- 🎯 **Testbarkeit**: Modularer Code leichter zu testen
+- 🔄 **Sichere Migration mit automatischer Sicherung**
   - Dreisprachiges Bestätigungs-Popup (FR/EN/DE) vor Migration
   - Automatische ZIP-Sicherung in `Backup/Characters/`
   - Format: `Characters_backup_JJJJMMTT_HHMMSS.zip`
   - Optimale Komprimierung zur Speicherplatzeinsparung
   - Vollständiger Datenschutz vor jeder Änderung
-- ✅ **Neue Ordnerstruktur**: Organisation nach Saison
+- 📁 **Neue Ordnerstruktur**: Organisation nach Saison
   - Alt: `Characters/Realm/` → Neu: `Characters/Season/Realm/`
   - Automatische Migration beim ersten Start
   - Markierungsdatei `.migration_done` zur Vermeidung mehrfacher Migrationen
-- ✅ **Klassen- und Rassen-Spalten**: Neue Spalten in der Hauptansicht
+- 📋 **Klassen- und Rassen-Spalten**: Neue Spalten in der Hauptansicht
   - "Klasse"-Spalte standardmäßig angezeigt
   - "Rasse"-Spalte standardmäßig ausgeblendet
   - Konfiguration über Ansicht > Spalten-Menü
-- ✅ **Verbesserte Reichsrang-Schnittstelle**: Schieberegler durch Dropdown-Menüs ersetzt
-- ✅ **Auto-Speichern für Ränge**: Kein Klick auf "Diesen Rang anwenden" mehr erforderlich
-- ✅ **Visuelle Organisation**: Rangtitel oben in Reichsfarbe angezeigt
-- ✅ **Korrekturen**: "Migration läuft"-Popup, das offen blieb, behoben
+- 🏆 **Verbesserte Reichsrang-Schnittstelle**: Schieberegler durch Dropdown-Menüs ersetzt
+- 💾 **Auto-Speichern für Ränge**: Kein Klick auf "Diesen Rang anwenden" mehr erforderlich
+- 🎨 **Visuelle Organisation**: Rangtitel oben in Reichsfarbe angezeigt
+- 🐛 **Korrekturen**: "Migration läuft"-Popup, das offen blieb, behoben
+
+Siehe [REFACTORING_v0.104_COMPLETE.md](REFACTORING_v0.104_COMPLETE.md) für alle Refactoring-Details.
 
 ### Version 0.103 (28. Oktober 2025)
 - ✅ **Rassen-Auswahl**: Rassen-Feld in der Charaktererstellung hinzugefügt

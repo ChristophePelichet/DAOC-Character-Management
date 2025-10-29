@@ -44,8 +44,24 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
   - Architecture modulaire expliquée
   - Métriques de performance
   - Guide de migration pour contributeurs
-- **README mis à jour** : Mention du refactoring et nouveautés
+- **README mis à jour** : 
+  - Ajout de la version v0.104 dans le titre
+  - Structure du projet complètement revue et détaillée
+  - Nouveau dossier `Tools/` avec utilitaires de développement
+  - Nouveau dossier `UI/` avec composants d'interface
+  - Documentation des nouveaux managers (lignes de code)
+  - Organisation claire des fichiers par catégorie
 - **INDEX.md enrichi** : Section dédiée à v0.104
+
+### 🛠️ Outils de Développement
+- **Script de nettoyage de projet** : `Tools/clean_project.py`
+  - Suppression automatique des dossiers temporaires (Backup, build, dist, Characters, Configuration, Logs)
+  - Nettoyage des caches Python (__pycache__, .pyc, .pyo, .pyd)
+  - Mode simulation avec --dry-run
+  - Création automatique de nouvelle branche Git
+  - Switch et push automatique vers le dépôt distant
+  - Interface interactive avec confirmations
+  - Option --no-git pour nettoyer sans créer de branche
 
 ### ✅ Qualité
 - **Testabilité améliorée** : Code modulaire facilement testable

@@ -1,4 +1,4 @@
-# DAOC - Character Manager
+# DAOC - Character Manager v0.104
 
 > 📁 **This file has been moved**: Previously at root, now in `Documentation/` (v0.104)
 
@@ -221,13 +221,6 @@ Characters/
 - **Secure migration**: Your existing characters are preserved and moved to the new structure
 - A `.migration_done` marker file is created to prevent multiple migrations
 
-### Manual migration
-If you need to run the migration again:
-1. Go to **Help > Migrate folder structure**
-2. Confirm the operation
-3. A ZIP backup is created automatically
-4. A detailed report displays the number of migrated characters
-
 ## 🎯 Usage
 
 ### Create a Character
@@ -277,25 +270,38 @@ To enable debug mode:
 See the [changelog](../CHANGELOG.md) for complete history.  
 **🌍 Available in:** [Français](CHANGELOG_FR.md) | [English](CHANGELOG_EN.md) | [Deutsch](CHANGELOG_DE.md)
 
-### Version 0.104 (October 29, 2025)
-- ✅ **Secure migration with automatic backup**
+### Version 0.104 (October 29, 2025) - Complete Refactoring & Migration ✨
+- ⚡ **Performance**: -22% loading time, -33% refresh time
+- 🏗️ **Modular architecture**: Code extracted to dedicated managers
+  - `Functions/ui_manager.py`: UI elements management (menus, status bar)
+  - `Functions/tree_manager.py`: Character list management
+  - `Functions/character_actions_manager.py`: Character actions
+- 🧹 **Code cleanup**: main.py reduced from 1277 to 493 lines (-61%)
+- 📦 **Optimizations**: Icon caching, reduced redundant calls
+- 🗑️ **Cleanup**: Removed obsolete test scripts
+- 📚 **Documentation**: New complete refactoring guide
+- ✅ **Compatibility**: All features preserved
+- 🎯 **Testability**: Modular code easier to test
+- 🔄 **Secure migration with automatic backup**
   - Trilingual confirmation popup (FR/EN/DE) before migration
   - Automatic ZIP backup in `Backup/Characters/`
   - Format: `Characters_backup_YYYYMMDD_HHMMSS.zip`
   - Optimal compression to save disk space
   - Complete data protection before any modification
-- ✅ **New folder structure**: Organization by season
+- 📁 **New folder structure**: Organization by season
   - Old: `Characters/Realm/` → New: `Characters/Season/Realm/`
   - Automatic migration on first startup
   - Marker file `.migration_done` to prevent multiple migrations
-- ✅ **Class and Race Columns**: New columns in main view
+- 📋 **Class and Race Columns**: New columns in main view
   - "Class" column displayed by default
   - "Race" column hidden by default
   - Configuration via View > Columns menu
-- ✅ **Improved Realm Rank Interface**: Replaced sliders with dropdown menus
-- ✅ **Auto-save for ranks**: No need to click "Apply this rank" anymore
-- ✅ **Visual Organization**: Rank title displayed at top in realm color
-- ✅ **Fixes**: Resolved "Migration in progress" popup staying open
+- 🏆 **Improved Realm Rank Interface**: Replaced sliders with dropdown menus
+- 💾 **Auto-save for ranks**: No need to click "Apply this rank" anymore
+- 🎨 **Visual Organization**: Rank title displayed at top in realm color
+- 🐛 **Fixes**: Resolved "Migration in progress" popup staying open
+
+See [REFACTORING_v0.104_COMPLETE.md](REFACTORING_v0.104_COMPLETE.md) for all refactoring details.
 
 ### Version 0.103 (October 28, 2025)
 - ✅ **Race Selection**: Added race field in character creation

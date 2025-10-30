@@ -447,3 +447,291 @@ def run_migration_with_backup():
         # Include backup path in message for safety info
         full_message = f"{message}\n\n✓ Your original files are safe in:\n{backup_path}"
         return False, full_message, backup_path
+
+
+# ============================================================================
+# JSON STRUCTURE VALIDATION AND UPGRADE
+# ============================================================================
+
+def get_expected_json_structure():
+    """
+    Returns the expected structure for character JSON files with default values.
+    This serves as the reference for validation and migration.
+    
+    Returns:
+        dict: Dictionary with field names and their default values
+    """
+    return {
+        # Basic character info
+        "id": "",
+        "name": "",
+        "realm": "Albion",
+        "class": "",
+        "race": "",
+        "level": 1,
+        
+        # Organization
+        "season": "S1",
+        "server": "Eden",
+        "page": 1,
+        "guild": "",
+        
+        # Realm rank (RvR)
+        "realm_rank": "",          # Code format: "1L0", "5L3", etc.
+        "realm_title": "",         # Text format: "Guardian", "Warlord", etc.
+        "realm_points": 0,         # Numeric points
+        
+        # Eden Herald integration
+        "url": "",                 # Herald URL for the character
+        
+        # Metadata
+        "created_at": "",
+        "updated_at": ""
+    }
+
+
+def validate_and_upgrade_json_structure(file_path):
+    """
+    Validates a character JSON file and upgrades its structure if needed.
+    Adds missing fields with default values while preserving existing data.
+    
+    Args:
+        file_path (str): Path to the JSON file to validate/upgrade
+        
+    Returns:
+        tuple: (needs_update: bool, updated_data: dict, changes: list)
+    """
+    try:
+        # Read existing file
+        with open(file_path, 'r', encoding='utf-8') as f:
+            char_data = json.load(f)
+        
+        if not isinstance(char_data, dict):
+            logging.error(f"Invalid JSON structure in {file_path}: not a dictionary")
+            return False, None, []
+        
+        expected_structure = get_expected_json_structure()
+        changes = []
+        needs_update = False
+        
+        # Check for missing fields and add them
+        for field, default_value in expected_structure.items():
+            if field not in char_data:
+                char_data[field] = default_value
+                changes.append(f"Added missing field: {field} = {default_value}")
+                needs_update = True
+                logging.debug(f"  + Added field '{field}' with default value")
+        
+        # Validate/fix realm_rank format (should be like "1L0", "5L3")
+        if 'realm_rank' in char_data:
+            realm_rank = char_data.get('realm_rank', '')
+            # If realm_rank looks like a title (text) instead of code, clear it
+            if realm_rank and not any(c.isdigit() for c in str(realm_rank)):
+                logging.warning(f"  ! realm_rank '{realm_rank}' looks like a title, clearing it")
+                char_data['realm_rank'] = ""
+                changes.append("Fixed realm_rank: cleared invalid format")
+                needs_update = True
+        
+        # Ensure realm_points is numeric
+        if 'realm_points' in char_data:
+            try:
+                rp = char_data['realm_points']
+                if isinstance(rp, str):
+                    # Remove spaces and convert to int
+                    rp_clean = int(rp.replace(' ', '').replace('\xa0', '').replace(',', ''))
+                    if rp_clean != rp:
+                        char_data['realm_points'] = rp_clean
+                        changes.append(f"Normalized realm_points: {rp} -> {rp_clean}")
+                        needs_update = True
+                elif not isinstance(rp, int):
+                    char_data['realm_points'] = 0
+                    changes.append("Fixed realm_points: set to 0 (was invalid type)")
+                    needs_update = True
+            except:
+                char_data['realm_points'] = 0
+                changes.append("Fixed realm_points: set to 0 (conversion failed)")
+                needs_update = True
+        
+        # Ensure level is numeric and within valid range (1-50)
+        if 'level' in char_data:
+            try:
+                level = int(char_data['level'])
+                if level < 1 or level > 50:
+                    old_level = level
+                    level = max(1, min(50, level))
+                    char_data['level'] = level
+                    changes.append(f"Fixed level: {old_level} -> {level} (clamped to 1-50)")
+                    needs_update = True
+            except:
+                char_data['level'] = 1
+                changes.append("Fixed level: set to 1 (was invalid)")
+                needs_update = True
+        
+        # Ensure page is numeric and within valid range (1-5)
+        if 'page' in char_data:
+            try:
+                page = int(char_data['page'])
+                if page < 1 or page > 5:
+                    old_page = page
+                    page = max(1, min(5, page))
+                    char_data['page'] = page
+                    changes.append(f"Fixed page: {old_page} -> {page} (clamped to 1-5)")
+                    needs_update = True
+            except:
+                char_data['page'] = 1
+                changes.append("Fixed page: set to 1 (was invalid)")
+                needs_update = True
+        
+        return needs_update, char_data, changes
+        
+    except json.JSONDecodeError as e:
+        logging.error(f"JSON decode error in {file_path}: {e}")
+        return False, None, [f"ERROR: Invalid JSON - {str(e)}"]
+    except Exception as e:
+        logging.error(f"Error validating {file_path}: {e}")
+        return False, None, [f"ERROR: {str(e)}"]
+
+
+def upgrade_all_character_files():
+    """
+    Scans all character JSON files and upgrades their structure if needed.
+    Creates a backup before making any changes.
+    
+    Returns:
+        tuple: (success: bool, message: str, stats: dict)
+    """
+    base_char_dir = get_character_dir()
+    
+    if not os.path.exists(base_char_dir):
+        return False, "Characters directory does not exist", {}
+    
+    stats = {
+        "total_files": 0,
+        "checked": 0,
+        "upgraded": 0,
+        "errors": 0,
+        "skipped": 0
+    }
+    
+    changes_by_file = {}
+    
+    logging.info("=" * 60)
+    logging.info("Starting JSON structure validation and upgrade...")
+    logging.info(f"Base directory: {base_char_dir}")
+    logging.info("=" * 60)
+    
+    try:
+        # Walk through all directories to find JSON files
+        for root, dirs, files in os.walk(base_char_dir):
+            for file in files:
+                if not file.endswith('.json'):
+                    continue
+                
+                if file.startswith('.'):  # Skip hidden files like .migration_done
+                    continue
+                
+                stats["total_files"] += 1
+                file_path = os.path.join(root, file)
+                rel_path = os.path.relpath(file_path, base_char_dir)
+                
+                logging.info(f"\nChecking: {rel_path}")
+                
+                needs_update, updated_data, changes = validate_and_upgrade_json_structure(file_path)
+                stats["checked"] += 1
+                
+                if updated_data is None:
+                    # Error occurred
+                    logging.error(f"  ✗ Error: {changes[0] if changes else 'Unknown error'}")
+                    stats["errors"] += 1
+                    continue
+                
+                if not needs_update:
+                    logging.info(f"  ✓ Structure OK, no changes needed")
+                    continue
+                
+                # File needs updating
+                logging.info(f"  → Upgrading structure...")
+                for change in changes:
+                    logging.info(f"    • {change}")
+                
+                try:
+                    # Create backup of original file
+                    backup_path = file_path + '.backup'
+                    shutil.copy2(file_path, backup_path)
+                    
+                    # Write updated data
+                    with open(file_path, 'w', encoding='utf-8') as f:
+                        json.dump(updated_data, f, indent=2, ensure_ascii=False)
+                    
+                    # Verify the write was successful
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        verify_data = json.load(f)
+                    
+                    # Remove backup if verification successful
+                    os.remove(backup_path)
+                    
+                    logging.info(f"  ✓ Successfully upgraded")
+                    stats["upgraded"] += 1
+                    changes_by_file[rel_path] = changes
+                    
+                except Exception as e:
+                    logging.error(f"  ✗ Failed to upgrade: {e}")
+                    stats["errors"] += 1
+                    
+                    # Restore from backup if it exists
+                    if os.path.exists(backup_path):
+                        try:
+                            shutil.copy2(backup_path, file_path)
+                            os.remove(backup_path)
+                            logging.info(f"  ✓ Restored from backup")
+                        except:
+                            logging.error(f"  ✗ Could not restore from backup!")
+        
+        # Summary
+        logging.info("\n" + "=" * 60)
+        logging.info("JSON Structure Upgrade Summary:")
+        logging.info(f"  Total JSON files found: {stats['total_files']}")
+        logging.info(f"  Files checked: {stats['checked']}")
+        logging.info(f"  Files upgraded: {stats['upgraded']}")
+        logging.info(f"  Errors: {stats['errors']}")
+        logging.info(f"  Skipped: {stats['skipped']}")
+        
+        if changes_by_file:
+            logging.info("\nDetailed changes:")
+            for file_path, changes in changes_by_file.items():
+                logging.info(f"  {file_path}:")
+                for change in changes:
+                    logging.info(f"    • {change}")
+        
+        logging.info("=" * 60)
+        
+        if stats["errors"] > 0:
+            message = f"Structure upgrade completed with {stats['errors']} error(s). {stats['upgraded']} file(s) upgraded successfully."
+            return True, message, stats
+        elif stats["upgraded"] == 0:
+            message = f"All {stats['total_files']} character files already have the correct structure."
+            return True, message, stats
+        else:
+            message = f"Successfully upgraded {stats['upgraded']} character file(s) to the latest structure."
+            return True, message, stats
+            
+    except Exception as e:
+        error_msg = f"JSON structure upgrade failed: {e}"
+        logging.error(error_msg)
+        return False, error_msg, stats
+
+
+def check_and_upgrade_json_structures_if_needed():
+    """
+    Checks if any character JSON files need structure upgrades and performs them.
+    This should be called after folder structure migration.
+    
+    Returns:
+        tuple: (success: bool, message: str, stats: dict)
+    """
+    logging.info("Checking for JSON structure upgrades...")
+    
+    # Run the upgrade process
+    success, message, stats = upgrade_all_character_files()
+    
+    return success, message, stats

@@ -101,6 +101,11 @@ class UIManager:
         eden_debug_action.triggered.connect(self.main_window.open_eden_debug)
         help_menu.addAction(eden_debug_action)
         
+        # Vérifier la structure des fichiers JSON
+        check_json_action = QAction("🔧 Vérifier la structure des fichiers", self.main_window)
+        check_json_action.triggered.connect(self.main_window.check_json_structures)
+        help_menu.addAction(check_json_action)
+        
         help_menu.addSeparator()
         
         # Section À propos (en dernier)

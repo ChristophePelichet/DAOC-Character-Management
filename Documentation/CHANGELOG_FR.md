@@ -45,6 +45,52 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [0.105] - 2025-10-30 - Eden Scraping & Import en Masse 🌐
 
+### 🔧 Migration & Validation de Structure
+
+#### Ajouté
+- **Validation automatique de la structure JSON** : Système de vérification et mise à niveau des fichiers personnages
+  - Fonction `validate_and_upgrade_json_structure()` dans `migration_manager.py`
+  - Détection automatique des champs manquants dans les fichiers JSON existants
+  - Ajout automatique des nouveaux champs avec valeurs par défaut :
+    * `realm_title` : Titre textuel du rang de royaume
+    * `url` : URL Eden Herald du personnage
+    * `updated_at` : Date de dernière modification
+  - Validation et correction automatique des formats de données :
+    * `realm_points` : Conversion en entier, suppression des espaces
+    * `level` : Validation de la plage (1-50)
+    * `page` : Validation de la plage (1-5)
+    * `realm_rank` : Détection et correction du format invalide
+  - Backup automatique avant toute modification (fichier.json.backup)
+  - Vérification post-écriture pour garantir l'intégrité des données
+  - Restauration automatique depuis backup en cas d'erreur
+  
+- **Menu de vérification manuelle** : Nouvelle option dans le menu Aide
+  - "🔧 Vérifier la structure des fichiers" accessible à tout moment
+  - Dialogue de confirmation avant traitement
+  - Fenêtre de progression pendant l'analyse
+  - Rapport détaillé avec statistiques (fichiers vérifiés/mis à jour/erreurs)
+  - Rafraîchissement automatique de la liste après mise à jour
+
+- **Intégration avec la migration de dossiers** : Vérification automatique après migration
+  - Appelée automatiquement après `run_migration_with_backup()`
+  - S'exécute uniquement si la migration de dossiers réussit
+  - Message combiné affichant résultats de migration + upgrade JSON
+  - Logs détaillés de toutes les modifications apportées
+
+#### Modifié
+- **Structure JSON étendue** : Nouveaux champs ajoutés au schéma de référence
+  - `get_expected_json_structure()` : Définit la structure attendue
+  - Support rétrocompatible : anciens fichiers automatiquement mis à niveau
+  - Aucune perte de données : seuls les champs manquants sont ajoutés
+
+#### Sécurité
+- **Protection des données renforcée** : 
+  - Backup automatique avant toute modification (`.json.backup`)
+  - Vérification immédiate après écriture
+  - Rollback automatique en cas d'échec de vérification
+  - Aucune modification permanente sans validation réussie
+  - Logs détaillés pour audit et diagnostic
+
 ### 🌐 Eden Herald - Scraping et Import
 
 #### Ajouté

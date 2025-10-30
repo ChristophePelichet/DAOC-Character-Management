@@ -79,15 +79,34 @@ class UIManager:
         # Menu Aide
         help_menu = menubar.addMenu(lang.get("menu_help"))
         
-        about_action = QAction(lang.get("menu_help_about"), self.main_window)
-        about_action.triggered.connect(self.main_window.show_about_dialog)
-        help_menu.addAction(about_action)
+        # Sous-menu Documentation
+        doc_menu = QMenu(lang.get("menu_help_documentation"), self.main_window)
+        help_menu.addMenu(doc_menu)
+        
+        help_create_char_action = QAction(lang.get("menu_help_create_character"), self.main_window)
+        help_create_char_action.triggered.connect(self.main_window.show_help_create_character)
+        doc_menu.addAction(help_create_char_action)
+        
+        help_edit_char_action = QAction(lang.get("menu_help_edit_character"), self.main_window)
+        help_edit_char_action.triggered.connect(self.main_window.show_help_edit_character)
+        doc_menu.addAction(help_edit_char_action)
+        
+        help_delete_char_action = QAction(lang.get("menu_help_delete_character"), self.main_window)
+        help_delete_char_action.triggered.connect(self.main_window.show_help_delete_character)
+        doc_menu.addAction(help_delete_char_action)
         
         help_menu.addSeparator()
         
         eden_debug_action = QAction(lang.get("menu_help_eden_debug"), self.main_window)
         eden_debug_action.triggered.connect(self.main_window.open_eden_debug)
         help_menu.addAction(eden_debug_action)
+        
+        help_menu.addSeparator()
+        
+        # Section À propos (en dernier)
+        about_action = QAction(lang.get("menu_help_about"), self.main_window)
+        about_action.triggered.connect(self.main_window.show_about_dialog)
+        help_menu.addAction(about_action)
         
     def create_context_menu(self):
         """Crée le menu contextuel (clic droit) pour la liste des personnages"""

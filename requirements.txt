@@ -20,6 +20,7 @@ wheel==0.45.1
 WMI==1.5.1
 selenium==4.15.2
 beautifulsoup4==4.12.2
+markdown==3.7
 #lxml==4.9.3
 webdriver-manager==4.0.1
 PySide6

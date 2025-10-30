@@ -7,6 +7,42 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/),
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [1.0] - 2025-10-30 - Release Stable 🎉
+
+### 📚 Documentation
+
+#### Ajouté
+- **Système d'Aide Intégré** : Documentation complète dans l'application
+  - `Functions/help_manager.py` : Gestionnaire d'aide avec support Markdown
+  - `HelpWindow` : Fenêtre d'affichage avec rendu HTML professionnel
+  - Premier guide : "Créer un Nouveau Personnage" (FR)
+  - Support multi-langue avec fallback automatique (FR → EN → DE)
+  - Menu "Documentation" dans le menu Aide
+  - CSS styling professionnel pour un rendu optimal
+  - Support des polices emoji : Segoe UI Emoji, Apple Color Emoji, Noto Color Emoji
+  - Bibliothèque markdown 3.7 avec extensions (tables, code, toc)
+
+- **Structure de Documentation** : Organisation complète
+  - `Help/fr/`, `Help/en/`, `Help/de/` : Répertoires par langue
+  - `Help/images/` : Dossier pour les captures d'écran
+  - `Documentation/HELP_SYSTEM_PLAN.md` : Plan complet (30+ aides prévues)
+  - `Help/README.md` : Guide développeur pour ajouter des aides
+  - `Documentation/HELP_SYSTEM_IMPLEMENTATION.md` : Résumé de l'implémentation
+
+#### Modifié
+- Réorganisation du menu Aide avec sous-menu "📚 Documentation"
+- Optimisation des emojis pour meilleure compatibilité Windows/Qt
+- Emojis simplifiés dans les aides pour éviter les problèmes d'affichage
+
+### 🔧 Améliorations
+
+#### Modifié
+- Version de l'application passée à **1.0** (stable)
+- Configuration de la langue récupérée depuis `config.json`
+- Correction de `AttributeError` dans `show_help_create_character()`
+
+---
+
 ## [0.105] - 2025-10-30 - Eden Scraping & Import en Masse 🌐
 
 ### 🌐 Eden Herald - Scraping et Import

@@ -317,6 +317,36 @@ class CharacterApp(QMainWindow):
         self.eden_debug_window.show()
         self.eden_debug_window.raise_()
         self.eden_debug_window.activateWindow()
+    
+    def show_help_create_character(self):
+        """Affiche l'aide pour créer un nouveau personnage"""
+        from Functions.help_manager import HelpManager
+        from Functions.config_manager import config
+        
+        # Créer le gestionnaire d'aide avec la langue actuelle
+        current_lang = config.get("language", "fr")
+        help_manager = HelpManager(language=current_lang)
+        
+        # Afficher l'aide
+        help_manager.show_help('character_create', parent=self)
+    
+    def show_help_edit_character(self):
+        """Affiche l'aide pour modifier un personnage"""
+        from Functions.help_manager import HelpManager
+        from Functions.config_manager import config
+        
+        current_lang = config.get("language", "fr")
+        help_manager = HelpManager(language=current_lang)
+        help_manager.show_help('character_edit', parent=self)
+    
+    def show_help_delete_character(self):
+        """Affiche l'aide pour supprimer un personnage"""
+        from Functions.help_manager import HelpManager
+        from Functions.config_manager import config
+        
+        current_lang = config.get("language", "fr")
+        help_manager = HelpManager(language=current_lang)
+        help_manager.show_help('character_delete', parent=self)
             
     def open_configuration(self):
         """Ouvre la fenêtre de configuration"""

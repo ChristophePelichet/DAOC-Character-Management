@@ -92,23 +92,26 @@ class TreeManager:
         self.characters_by_id.clear()
         
         # Définir les en-têtes
+        # Ordre: Selection, Realm, Name, Class, Level, Rank, Title, Guild, Page, Server, Race, URL
         headers = [
             lang.get("column_selection"),
             lang.get("column_realm"),
             lang.get("column_name"),
+            lang.get("column_class", default="Classe"),
             lang.get("column_level"),
             lang.get("column_realm_rank", default="Rang"),
             lang.get("column_realm_title", default="Titre"),
             lang.get("column_guild", default="Guilde"),
             lang.get("column_page", default="Page"),
             lang.get("column_server", default="Serveur"),
-            lang.get("column_class", default="Classe"),
-            lang.get("column_race", default="Race")
+            lang.get("column_race", default="Race"),
+            lang.get("column_url", default="URL Herald")
         ]
         self.model.setHorizontalHeaderLabels(headers)
         
         # Centrer les en-têtes de certaines colonnes
-        for col_index in [1, 2, 5, 6, 8, 9]:  # Realm, Season, Level, Page, RR, Title
+        # Ordre: Selection(0), Realm(1), Name(2), Class(3), Level(4), Rank(5), Title(6), Guild(7), Page(8), Server(9), Race(10), URL(11)
+        for col_index in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]:  # Realm, Name, Class, Level, Rank, Title, Guild, Page, Server, Race
             header_item = self.model.horizontalHeaderItem(col_index)
             if header_item:
                 header_item.setTextAlignment(Qt.AlignCenter)
@@ -225,17 +228,25 @@ class TreeManager:
         font_race.setBold(False)
         item_race.setFont(font_race)
         
+        # Colonne URL Herald
+        item_url = QStandardItem(char.get('url', ''))
+        item_url.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+        item_url.setTextAlignment(Qt.AlignCenter)
+        font_url = item_url.font()
+        font_url.setBold(False)
+        item_url.setFont(font_url)
+        
         # Case à cocher pour la sélection
         item_selection = QStandardItem()
         item_selection.setCheckable(True)
         item_selection.setCheckState(Qt.Unchecked)
         item_selection.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled | Qt.ItemIsUserCheckable)
         
-        # Ordre: Selection, Realm, Name, Level, Rank, Title, Guild, Page, Server, Class, Race
+        # Ordre: Selection, Realm, Name, Class, Level, Rank, Title, Guild, Page, Server, Race, URL
         row_items = [
-            item_selection, item_realm, item_name, item_level,
+            item_selection, item_realm, item_name, item_class, item_level,
             item_realm_rank, item_realm_title, item_guild, item_page,
-            item_server, item_class, item_race
+            item_server, item_race, item_url
         ]
         self.model.appendRow(row_items)
         

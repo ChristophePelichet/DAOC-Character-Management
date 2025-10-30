@@ -66,6 +66,15 @@ class EdenScraper:
             
             if driver:
                 self.driver = driver
+                
+                # Minimiser la fenêtre du navigateur si pas en mode headless
+                if not headless:
+                    try:
+                        self.driver.minimize_window()
+                        eden_logger.info("🔽 Fenêtre du navigateur minimisée")
+                    except Exception as e:
+                        eden_logger.warning(f"Impossible de minimiser la fenêtre: {e}")
+                
                 eden_logger.info(f"✅ Driver Selenium initialisé: {browser_name}")
                 return True
             else:
@@ -268,15 +277,35 @@ class EdenScraper:
                     name_idx = headers.index('Name') if 'Name' in headers else headers.index('Nom')
                     
                     for row in rows[1:]:
-                        cells = [td.get_text(strip=True) for td in row.find_all('td')]
+                        cells = row.find_all('td')
                         if len(cells) > name_idx:
-                            char_name = cells[name_idx]
+                            # Extraire le nom et l'URL du lien
+                            name_cell = cells[name_idx]
+                            char_name = name_cell.get_text(strip=True)
+                            
+                            # Chercher le lien dans la cellule du nom
+                            link = name_cell.find('a')
+                            char_url = ""
+                            if link and link.get('href'):
+                                href = link.get('href')
+                                # Construire l'URL complète si c'est un lien relatif
+                                if href.startswith('?'):
+                                    char_url = f"https://eden-daoc.net/herald{href}"
+                                elif href.startswith('/'):
+                                    char_url = f"https://eden-daoc.net{href}"
+                                elif not href.startswith('http'):
+                                    char_url = f"https://eden-daoc.net/herald?{href}"
+                                else:
+                                    char_url = href
+                            
                             if char_name:
-                                characters.append({
+                                char_data = {
                                     'name': char_name,
-                                    'url': f"https://eden-daoc.net/herald?n=player&k={char_name.split()[0]}",
-                                    'raw_data': cells
-                                })
+                                    'url': char_url,
+                                    'raw_data': [td.get_text(strip=True) for td in cells]
+                                }
+                                characters.append(char_data)
+                                eden_logger.debug(f"Personnage trouvé: {char_name} - URL: {char_url}")
         
         return characters
     
@@ -455,9 +484,26 @@ def search_herald_character(character_name, realm_filter=""):
                 realm_rank = result.get('col_10', '').strip()
                 realm_level = result.get('col_11', '').strip()
                 
-                if name and char_class:
+                # Extraire l'URL depuis les liens (col_1 contient le nom avec le lien)
+                url = ""
+                if 'col_1_links' in result and result['col_1_links']:
+                    href = result['col_1_links'][0]
+                    # Construire l'URL complète
+                    if href.startswith('?'):
+                        url = f"https://eden-daoc.net/herald{href}"
+                    elif href.startswith('/'):
+                        url = f"https://eden-daoc.net{href}"
+                    elif not href.startswith('http'):
+                        url = f"https://eden-daoc.net/herald?{href}"
+                    else:
+                        url = href
+                else:
+                    # Fallback sur l'URL construite si pas de lien trouvé
                     clean_name = name.split()[0]
                     url = f"https://eden-daoc.net/herald?n=player&k={clean_name}"
+                
+                if name and char_class:
+                    clean_name = name.split()[0]
                     
                     characters.append({
                         'rank': rank,
@@ -472,6 +518,7 @@ def search_herald_character(character_name, realm_filter=""):
                         'realm_level': realm_level,
                         'url': url
                     })
+                    eden_logger.debug(f"Personnage extrait: {name} - URL: {url}")
         
         # Sauvegarder les personnages formatés dans le même dossier temp
         characters_filename = f"characters_{character_name}_{timestamp}.json"
@@ -497,4 +544,232 @@ def search_herald_character(character_name, realm_filter=""):
     except Exception as e:
         eden_logger.error(f"Erreur lors de la recherche Herald: {e}", exc_info=True)
         return False, f"Erreur: {str(e)}", ""
+
+
+def scrape_character_from_url(character_url, cookie_manager):
+    """
+    Récupère les données d'un personnage depuis son URL Herald
+    Utilise la recherche Herald car l'accès direct à la page est bloqué (bot check)
+    
+    Args:
+        character_url: URL du personnage sur Herald (contient le nom dans &k=)
+        cookie_manager: Instance de CookieManager
+        
+    Returns:
+        tuple: (success, data_dict, error_message)
+    """
+    try:
+        # Extraire le nom du personnage depuis l'URL
+        # Format: https://eden-daoc.net/herald?n=player&k=NomPersonnage
+        from urllib.parse import urlparse, parse_qs
+        
+        parsed_url = urlparse(character_url)
+        query_params = parse_qs(parsed_url.query)
+        character_name = query_params.get('k', [''])[0]
+        
+        if not character_name:
+            return False, None, "Impossible d'extraire le nom du personnage de l'URL"
+        
+        eden_logger.info(f"Mise à jour du personnage: {character_name} depuis URL: {character_url}")
+        
+        # Utiliser search_herald_character qui fonctionne (pas de bot check sur la recherche)
+        success, message, characters_file = search_herald_character(character_name)
+        
+        if not success:
+            return False, None, message
+        
+        # Charger les résultats
+        if not characters_file or not Path(characters_file).exists():
+            return False, None, "Aucun fichier de résultats trouvé"
+        
+        with open(characters_file, 'r', encoding='utf-8') as f:
+            results = json.load(f)
+        
+        characters = results.get('characters', [])
+        
+        if not characters:
+            return False, None, f"Aucun personnage trouvé pour '{character_name}'"
+        
+        # Trouver le personnage exact (correspondance exacte du nom)
+        target_char = None
+        for char in characters:
+            if char.get('clean_name', '').lower() == character_name.lower():
+                target_char = char
+                break
+        
+        # Si pas de correspondance exacte, prendre le premier
+        if not target_char and characters:
+            target_char = characters[0]
+            eden_logger.warning(f"Pas de correspondance exacte, utilisation du premier résultat: {target_char.get('name')}")
+        
+        if not target_char:
+            return False, None, "Personnage non trouvé dans les résultats"
+        
+        # Normaliser les données pour correspondre au format attendu
+        normalized_data = _normalize_herald_data(target_char)
+        
+        eden_logger.info(f"Données récupérées pour: {normalized_data.get('name')}")
+        return True, normalized_data, ""
+        
+    except Exception as e:
+        eden_logger.error(f"Erreur lors de la récupération: {e}", exc_info=True)
+        return False, None, f"Erreur: {str(e)}"
+
+
+def _normalize_herald_data(char_data):
+    """
+    Normalise les données Herald pour correspondre au format attendu par le dialogue
+    
+    Args:
+        char_data: Données brutes depuis search_herald_character
+        
+    Returns:
+        dict: Données normalisées
+    """
+    # Mapping des classes vers les royaumes
+    class_to_realm = {
+        # Albion
+        'Armsman': 'Albion', 'Cabalist': 'Albion', 'Cleric': 'Albion',
+        'Friar': 'Albion', 'Heretic': 'Albion', 'Infiltrator': 'Albion',
+        'Mercenary': 'Albion', 'Minstrel': 'Albion', 'Necromancer': 'Albion',
+        'Paladin': 'Albion', 'Reaver': 'Albion', 'Scout': 'Albion',
+        'Sorcerer': 'Albion', 'Theurgist': 'Albion', 'Wizard': 'Albion',
+        'Mauler': 'Albion',
+        
+        # Hibernia
+        'Animist': 'Hibernia', 'Bainshee': 'Hibernia', 'Bard': 'Hibernia',
+        'Blademaster': 'Hibernia', 'Champion': 'Hibernia', 'Druid': 'Hibernia',
+        'Eldritch': 'Hibernia', 'Enchanter': 'Hibernia', 'Hero': 'Hibernia',
+        'Mentalist': 'Hibernia', 'Nightshade': 'Hibernia', 'Ranger': 'Hibernia',
+        'Valewalker': 'Hibernia', 'Vampiir': 'Hibernia', 'Warden': 'Hibernia',
+        
+        # Midgard
+        'Berserker': 'Midgard', 'Bonedancer': 'Midgard', 'Healer': 'Midgard',
+        'Hunter': 'Midgard', 'Runemaster': 'Midgard', 'Savage': 'Midgard',
+        'Shadowblade': 'Midgard', 'Shaman': 'Midgard', 'Skald': 'Midgard',
+        'Spiritmaster': 'Midgard', 'Thane': 'Midgard', 'Valkyrie': 'Midgard',
+        'Warlock': 'Midgard', 'Warrior': 'Midgard'
+    }
+    
+    # Extraire la classe et déterminer le royaume
+    char_class = char_data.get('class', '')
+    realm = class_to_realm.get(char_class, 'Unknown')
+    
+    # Normaliser realm_points (enlever espaces et virgules)
+    realm_points = char_data.get('realm_points', '0')
+    if isinstance(realm_points, str):
+        realm_points = realm_points.replace(' ', '').replace(',', '')
+        try:
+            realm_points = int(realm_points)
+        except:
+            realm_points = 0
+    
+    # Convertir level en int si c'est une string
+    level = char_data.get('level', '1')
+    if isinstance(level, str):
+        try:
+            level = int(level)
+        except:
+            level = 1
+    
+    # Données normalisées
+    # ATTENTION : Dans le JSON Herald :
+    #   - realm_rank = titre texte (ex: "Stormur Vakten")  
+    #   - realm_level = code (ex: "5L2")
+    # Dans notre programme :
+    #   - realm_rank = code (ex: "5L2")
+    #   - realm_title = titre texte (ex: "Stormur Vakten")
+    # Il faut donc INVERSER les champs !
+    
+    normalized = {
+        'name': char_data.get('name', ''),
+        'clean_name': char_data.get('clean_name', ''),
+        'level': level,
+        'class': char_class,
+        'race': char_data.get('race', ''),
+        'realm': realm,
+        'guild': char_data.get('guild', ''),
+        'realm_points': realm_points,
+        'realm_rank': char_data.get('realm_level', '1L1'),  # Code (XLY) - INVERSÉ!
+        'realm_title': char_data.get('realm_rank', ''),  # Titre texte
+        'server': 'Eden',  # Toujours Eden pour ce Herald
+        'url': char_data.get('url', ''),
+        'rank': char_data.get('rank', '')
+    }
+    
+    eden_logger.debug(f"Données normalisées: {normalized}")
+    return normalized
+
+
+def _parse_character_herald_data(raw_data):
+    """
+    Parse les données brutes du Herald pour extraire les informations du personnage
+    
+    Args:
+        raw_data: Données brutes extraites de la page Herald
+        
+    Returns:
+        dict: Données structurées du personnage
+    """
+    parsed = {}
+    
+    try:
+        # Extraire le nom depuis le titre ou h1
+        if 'h1' in raw_data and raw_data['h1']:
+            parsed['name'] = raw_data['h1'][0]
+        elif 'title' in raw_data:
+            # Extraire le nom depuis le titre
+            title_parts = raw_data['title'].split('-')
+            if title_parts:
+                parsed['name'] = title_parts[0].strip()
+        
+        # Parcourir les tableaux pour extraire les informations
+        for table in raw_data.get('tables', []):
+            for row in table:
+                if len(row) >= 2:
+                    key = row[0].lower().strip()
+                    value = row[1].strip()
+                    
+                    # Niveau
+                    if 'level' in key or 'niveau' in key:
+                        try:
+                            parsed['level'] = int(value)
+                        except:
+                            pass
+                    
+                    # Classe
+                    elif 'class' in key or 'classe' in key:
+                        parsed['class'] = value
+                    
+                    # Race
+                    elif 'race' in key:
+                        parsed['race'] = value
+                    
+                    # Royaume
+                    elif 'realm' in key or 'royaume' in key:
+                        parsed['realm'] = value
+                    
+                    # Guilde
+                    elif 'guild' in key or 'guilde' in key:
+                        parsed['guild'] = value
+                    
+                    # Realm Points
+                    elif 'realm point' in key or 'points de royaume' in key:
+                        try:
+                            # Nettoyer les virgules/espaces
+                            clean_value = value.replace(',', '').replace(' ', '')
+                            parsed['realm_points'] = int(clean_value)
+                        except:
+                            pass
+                    
+                    # Server
+                    elif 'server' in key or 'serveur' in key:
+                        parsed['server'] = value
+        
+        return parsed if parsed else None
+        
+    except Exception as e:
+        eden_logger.error(f"Erreur lors du parsing des données: {e}")
+        return None
+
 

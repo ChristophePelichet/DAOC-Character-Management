@@ -14,9 +14,9 @@ import traceback
 import logging
 import time
 
-from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QMessageBox, QDialog, QStyleFactory
+from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QMessageBox, QDialog, QStyleFactory, QHBoxLayout, QLabel, QProgressBar
 from PySide6.QtGui import QStandardItemModel
-from PySide6.QtCore import Qt, Slot
+from PySide6.QtCore import Qt, Slot, QTimer
 
 # Import des managers fonctionnels
 from Functions.config_manager import config, get_config_dir
@@ -31,7 +31,7 @@ from Functions.tree_manager import TreeManager
 from Functions.character_actions_manager import CharacterActionsManager
 
 # Import des composants UI
-from UI import DebugWindow, CenterIconDelegate, CenterCheckboxDelegate, RealmTitleDelegate, NormalTextDelegate
+from UI import DebugWindow, CenterIconDelegate, CenterCheckboxDelegate, RealmTitleDelegate, NormalTextDelegate, UrlButtonDelegate, CharacterUpdateDialog, HeraldScraperWorker
 from UI.dialogs import ColumnsConfigDialog, ConfigurationDialog
 
 # Configuration de l'application
@@ -97,9 +97,14 @@ class CharacterApp(QMainWindow):
         self.character_tree.setItemDelegateForColumn(0, self.center_checkbox_delegate)
         
         # Appliquer le delegate texte normal pour toutes les colonnes de texte (y compris le titre)
+        # Ordre: Selection(0), Realm(1), Name(2), Class(3), Level(4), Rank(5), Title(6), Guild(7), Page(8), Server(9), Race(10), URL(11)
         self.normal_text_delegate = NormalTextDelegate(self)
-        for col in [2, 3, 4, 5, 6, 7, 8, 9, 10]:  # Name, Level, Rank, Title, Guild, Page, Server, Class, Race
+        for col in [2, 3, 4, 5, 6, 7, 8, 9, 10]:  # Name, Class, Level, Rank, Title, Guild, Page, Server, Race
             self.character_tree.setItemDelegateForColumn(col, self.normal_text_delegate)
+        
+        # Appliquer le delegate URL pour la colonne URL (11)
+        self.url_button_delegate = UrlButtonDelegate(self)
+        self.character_tree.setItemDelegateForColumn(11, self.url_button_delegate)
         
         # Initialisation du CharacterActionsManager
         self.actions_manager = CharacterActionsManager(self, self.tree_manager)
@@ -250,6 +255,148 @@ class CharacterApp(QMainWindow):
     def duplicate_selected_character(self):
         """Duplique le personnage sélectionné (appelé depuis menu contextuel)"""
         self.actions_manager.duplicate_selected_character()
+    
+    def update_character_from_herald(self):
+        """Met à jour le personnage sélectionné depuis Herald"""
+        # Récupérer le personnage sélectionné
+        selected_indices = self.character_tree.selectedIndexes()
+        if not selected_indices:
+            return
+        
+        # Récupérer l'ID du personnage
+        row = selected_indices[0].row()
+        realm_index = self.tree_manager.model.index(row, 1)
+        char_id = realm_index.data(Qt.UserRole)
+        
+        if not char_id:
+            return
+        
+        # Récupérer les données du personnage
+        character_data = self.tree_manager.characters_by_id.get(char_id)
+        if not character_data:
+            return
+        
+        # Vérifier si le personnage a une URL Herald
+        herald_url = character_data.get('url', '').strip()
+        if not herald_url:
+            QMessageBox.warning(
+                self,
+                lang.get("update_char_error"),
+                lang.get("update_char_no_url")
+            )
+            return
+        
+        # Stocker les données du personnage pour le callback
+        self._current_character_data = character_data
+        
+        # Créer une fenêtre de progression personnalisée avec animation
+        self.progress_dialog = QDialog(self)
+        self.progress_dialog.setWindowTitle("⏳ Mise à jour en cours...")
+        self.progress_dialog.setModal(True)
+        self.progress_dialog.setFixedSize(450, 150)
+        
+        progress_layout = QVBoxLayout(self.progress_dialog)
+        progress_layout.setSpacing(15)
+        
+        # Icône et titre
+        title_layout = QHBoxLayout()
+        title_label = QLabel("🌐 Récupération des données depuis Eden Herald...")
+        title_label.setStyleSheet("font-size: 12pt; font-weight: bold;")
+        title_layout.addWidget(title_label)
+        progress_layout.addLayout(title_layout)
+        
+        # Message de détail
+        detail_label = QLabel("Connexion au serveur et extraction des informations du personnage.")
+        detail_label.setWordWrap(True)
+        detail_label.setStyleSheet("color: #666; font-size: 10pt;")
+        progress_layout.addWidget(detail_label)
+        
+        # Barre de progression indéterminée (animation)
+        progress_bar = QProgressBar()
+        progress_bar.setRange(0, 0)  # Mode indéterminé = animation
+        progress_bar.setTextVisible(False)
+        progress_bar.setFixedHeight(25)
+        progress_layout.addWidget(progress_bar)
+        
+        # Message d'attente
+        wait_label = QLabel("⏱️ Veuillez patienter, cette opération peut prendre quelques secondes...")
+        wait_label.setStyleSheet("color: #888; font-size: 9pt; font-style: italic;")
+        wait_label.setWordWrap(True)
+        progress_layout.addWidget(wait_label)
+        
+        progress_layout.addStretch()
+        
+        # Créer et démarrer le worker thread
+        self.herald_worker = HeraldScraperWorker(herald_url)
+        self.herald_worker.finished.connect(self._on_herald_scraping_finished_main)
+        
+        # Afficher le dialogue et démarrer le worker
+        self.progress_dialog.show()
+        self.herald_worker.start()
+    
+    def _on_herald_scraping_finished_main(self, success, new_data, error_msg):
+        """Callback appelé quand le scraping est terminé (depuis main)"""
+        # Fermer et supprimer la fenêtre de progression
+        if hasattr(self, 'progress_dialog'):
+            self.progress_dialog.close()
+            self.progress_dialog.deleteLater()
+            delattr(self, 'progress_dialog')
+        
+        if not success:
+            QMessageBox.critical(
+                self,
+                lang.get("update_char_error"),
+                f"{lang.get('update_char_error')}: {error_msg}"
+            )
+            return
+        
+        # Récupérer les données du personnage depuis la variable stockée
+        character_data = self._current_character_data
+        
+        # Afficher le dialogue de validation des changements
+        dialog = CharacterUpdateDialog(self, character_data, new_data, character_data['name'])
+        
+        if dialog.exec() == QDialog.Accepted:
+            selected_changes = dialog.get_selected_changes()
+            
+            if not selected_changes:
+                QMessageBox.information(
+                    self,
+                    lang.get("update_char_cancelled"),
+                    lang.get("update_char_no_changes")
+                )
+                return
+            
+            # Appliquer les changements sélectionnés
+            for field, value in selected_changes.items():
+                character_data[field] = value
+            
+            # Sauvegarder le personnage (allow_overwrite=True pour écraser le fichier existant)
+            from Functions.character_manager import save_character
+            success, msg = save_character(character_data, allow_overwrite=True)
+            
+            if not success:
+                QMessageBox.critical(
+                    self,
+                    lang.get("error_title", default="Erreur"),
+                    f"Échec de la sauvegarde : {msg}"
+                )
+                return
+            
+            # Rafraîchir l'affichage
+            self.tree_manager.refresh_character_list()
+            
+            QMessageBox.information(
+                self,
+                lang.get("success_title", default="Succès"),
+                lang.get("update_char_success")
+            )
+        else:
+            QMessageBox.information(
+                self,
+                lang.get("update_char_cancelled"),
+                lang.get("update_char_cancelled")
+            )
         
     def execute_bulk_action(self):
         """Exécute l'action groupée sélectionnée"""

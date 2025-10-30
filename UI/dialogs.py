@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QFormLayout, QGroupBox, QLabel, 
     QPushButton, QLineEdit, QComboBox, QCheckBox, QSlider, QMessageBox,
     QDialogButtonBox, QFileDialog, QTableWidget, QTableWidgetItem, QHeaderView,
-    QWidget, QTextEdit
+    QWidget, QTextEdit, QApplication, QProgressBar
 )
 from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtGui import QBrush, QColor, QIcon, QPixmap
@@ -19,6 +19,29 @@ from Functions.config_manager import config, get_config_dir
 from Functions.character_manager import get_character_dir
 from Functions.logging_manager import get_log_dir
 from Functions.data_manager import DataManager
+
+
+class HeraldScraperWorker(QThread):
+    """Worker thread pour scraper Herald sans bloquer l'interface"""
+    finished = Signal(bool, object, str)  # success, data, error_msg
+    
+    def __init__(self, url):
+        super().__init__()
+        self.url = url
+        
+    def run(self):
+        """Exécute le scraping en arrière-plan"""
+        try:
+            from Functions.eden_scraper import scrape_character_from_url
+            from Functions.cookie_manager import CookieManager
+            
+            cookie_manager = CookieManager()
+            success, new_data, error_msg = scrape_character_from_url(self.url, cookie_manager)
+            self.finished.emit(success, new_data, error_msg)
+            
+        except Exception as e:
+            logging.error(f"Erreur dans le worker Herald: {e}", exc_info=True)
+            self.finished.emit(False, None, str(e))
 
 
 class CharacterSheetWindow(QDialog):
@@ -35,6 +58,41 @@ class CharacterSheetWindow(QDialog):
         self.resize(500, 400)
 
         layout = QVBoxLayout(self)
+        
+        # Eden Herald Section - EN HAUT POUR FACILITER LA MISE À JOUR
+        eden_group = QGroupBox("🌐 Eden Herald")
+        eden_layout = QVBoxLayout()
+        
+        # URL du Herald
+        url_form_layout = QFormLayout()
+        self.herald_url_edit = QLineEdit()
+        current_url = self.character_data.get('url', '')
+        self.herald_url_edit.setText(current_url)
+        self.herald_url_edit.setPlaceholderText("https://eden-daoc.net/herald?n=player&k=NomPersonnage")
+        url_form_layout.addRow("URL Herald :", self.herald_url_edit)
+        eden_layout.addLayout(url_form_layout)
+        
+        # Boutons d'action Herald
+        herald_buttons_layout = QHBoxLayout()
+        
+        self.open_herald_button = QPushButton("🌐 Ouvrir dans le navigateur")
+        self.open_herald_button.setToolTip("Ouvrir la page Herald dans le navigateur")
+        self.open_herald_button.clicked.connect(self.open_herald_url)
+        herald_buttons_layout.addWidget(self.open_herald_button)
+        
+        self.update_herald_button = QPushButton("🔄 Mettre à jour depuis Herald")
+        self.update_herald_button.setToolTip("Récupérer et mettre à jour les données depuis Herald")
+        self.update_herald_button.clicked.connect(self.update_from_herald)
+        # Mettre en évidence le bouton de mise à jour
+        self.update_herald_button.setStyleSheet("QPushButton { font-weight: bold; padding: 8px; }")
+        herald_buttons_layout.addWidget(self.update_herald_button)
+        
+        eden_layout.addLayout(herald_buttons_layout)
+        eden_group.setLayout(eden_layout)
+        layout.addWidget(eden_group)
+        
+        # Séparateur visuel
+        layout.addSpacing(10)
         
         # Basic Information Section
         info_group = QGroupBox("Informations générales")
@@ -63,7 +121,10 @@ class CharacterSheetWindow(QDialog):
         self._populate_classes_sheet()
         current_class = self.character_data.get('class', '')
         if current_class:
-            self.class_combo.setCurrentText(current_class)
+            # Utiliser findData pour sélectionner par itemData (nom anglais) au lieu du texte affiché
+            class_index = self.class_combo.findData(current_class)
+            if class_index >= 0:
+                self.class_combo.setCurrentIndex(class_index)
         self.class_combo.currentTextChanged.connect(self._on_class_changed_sheet)
         info_layout.addRow(lang.get("new_char_class_prompt", default="Classe :"), self.class_combo)
         
@@ -72,7 +133,10 @@ class CharacterSheetWindow(QDialog):
         self._populate_races_sheet()
         current_race = self.character_data.get('race', '')
         if current_race:
-            self.race_combo.setCurrentText(current_race)
+            # Utiliser findData pour sélectionner par itemData (nom anglais) au lieu du texte affiché
+            race_index = self.race_combo.findData(current_race)
+            if race_index >= 0:
+                self.race_combo.setCurrentIndex(race_index)
         self.race_combo.currentTextChanged.connect(self._on_race_changed_sheet)
         info_layout.addRow(lang.get("new_char_race_prompt", default="Race :"), self.race_combo)
         
@@ -484,6 +548,11 @@ class CharacterSheetWindow(QDialog):
             self.character_data['race'] = new_race
             self.character_data['class'] = new_class
             
+            # Save Eden Herald URL
+            herald_url = self.herald_url_edit.text().strip()
+            if herald_url:
+                self.character_data['url'] = herald_url
+            
             # Save character (it's already moved if realm changed)
             if old_realm == new_realm:
                 from Functions.character_manager import save_character
@@ -510,6 +579,214 @@ class CharacterSheetWindow(QDialog):
         
         dialog = ArmorManagementDialog(self, character_id)
         dialog.exec()
+    
+    def open_herald_url(self):
+        """Ouvre l'URL du Herald dans le navigateur par défaut"""
+        import webbrowser
+        url = self.herald_url_edit.text().strip()
+        
+        if not url:
+            QMessageBox.warning(
+                self,
+                "URL manquante",
+                "Veuillez entrer une URL Herald valide."
+            )
+            return
+        
+        # Vérifier que l'URL commence par http:// ou https://
+        if not url.startswith(('http://', 'https://')):
+            url = 'https://' + url
+            self.herald_url_edit.setText(url)
+        
+        try:
+            webbrowser.open(url)
+        except Exception as e:
+            QMessageBox.critical(
+                self,
+                "Erreur",
+                f"Impossible d'ouvrir l'URL : {str(e)}"
+            )
+    
+    def update_from_herald(self):
+        """Met à jour les données du personnage depuis Herald"""
+        url = self.herald_url_edit.text().strip()
+        
+        if not url:
+            QMessageBox.warning(
+                self,
+                lang.get("update_char_error"),
+                lang.get("update_char_no_url")
+            )
+            return
+        
+        # Vérifier que l'URL commence par http:// ou https://
+        if not url.startswith(('http://', 'https://')):
+            url = 'https://' + url
+            self.herald_url_edit.setText(url)
+        
+        # Créer une fenêtre de progression personnalisée avec animation
+        self.progress_dialog = QDialog(self)
+        self.progress_dialog.setWindowTitle("⏳ Mise à jour en cours...")
+        self.progress_dialog.setModal(True)
+        self.progress_dialog.setFixedSize(450, 150)
+        
+        progress_layout = QVBoxLayout(self.progress_dialog)
+        progress_layout.setSpacing(15)
+        
+        # Icône et titre
+        title_layout = QHBoxLayout()
+        title_label = QLabel("🌐 Récupération des données depuis Eden Herald...")
+        title_label.setStyleSheet("font-size: 12pt; font-weight: bold;")
+        title_layout.addWidget(title_label)
+        progress_layout.addLayout(title_layout)
+        
+        # Message de détail
+        detail_label = QLabel("Connexion au serveur et extraction des informations du personnage.")
+        detail_label.setWordWrap(True)
+        detail_label.setStyleSheet("color: #666; font-size: 10pt;")
+        progress_layout.addWidget(detail_label)
+        
+        # Barre de progression indéterminée (animation)
+        progress_bar = QProgressBar()
+        progress_bar.setRange(0, 0)  # Mode indéterminé = animation
+        progress_bar.setTextVisible(False)
+        progress_bar.setFixedHeight(25)
+        progress_layout.addWidget(progress_bar)
+        
+        # Message d'attente
+        wait_label = QLabel("⏱️ Veuillez patienter, cette opération peut prendre quelques secondes...")
+        wait_label.setStyleSheet("color: #888; font-size: 9pt; font-style: italic;")
+        wait_label.setWordWrap(True)
+        progress_layout.addWidget(wait_label)
+        
+        progress_layout.addStretch()
+        
+        # Créer et démarrer le worker thread
+        self.herald_worker = HeraldScraperWorker(url)
+        self.herald_worker.finished.connect(self._on_herald_scraping_finished)
+        
+        # Afficher le dialogue et démarrer le worker
+        self.progress_dialog.show()
+        self.herald_worker.start()
+    
+    def _on_herald_scraping_finished(self, success, new_data, error_msg):
+        """Callback appelé quand le scraping est terminé"""
+        # Fermer et supprimer la fenêtre de progression
+        if hasattr(self, 'progress_dialog'):
+            self.progress_dialog.close()
+            self.progress_dialog.deleteLater()
+            delattr(self, 'progress_dialog')
+        
+        if not success:
+            QMessageBox.critical(
+                self,
+                lang.get("update_char_error"),
+                f"{lang.get('update_char_error')}: {error_msg}"
+            )
+            return
+        
+        # Afficher le dialogue de validation des changements
+        dialog = CharacterUpdateDialog(self, self.character_data, new_data, self.character_data['name'])
+        
+        if dialog.exec() == QDialog.Accepted:
+            selected_changes = dialog.get_selected_changes()
+            
+            if not selected_changes:
+                QMessageBox.information(
+                    self,
+                    lang.get("update_char_cancelled"),
+                    lang.get("update_char_no_changes")
+                )
+                return
+            
+            # Appliquer les changements sélectionnés directement dans character_data
+            for field, value in selected_changes.items():
+                self.character_data[field] = value
+            
+            # Mettre à jour TOUS les champs de l'interface pour l'affichage immédiat
+            # (on reconstruit l'affichage complet plutôt que de mettre à jour champ par champ)
+            
+            # Level
+            if 'level' in selected_changes:
+                self.level_combo.setCurrentText(str(selected_changes['level']))
+            
+            # Class
+            if 'class' in selected_changes:
+                index = self.class_combo.findData(selected_changes['class'])
+                if index >= 0:
+                    self.class_combo.setCurrentIndex(index)
+            
+            # Race
+            if 'race' in selected_changes:
+                index = self.race_combo.findData(selected_changes['race'])
+                if index >= 0:
+                    self.race_combo.setCurrentIndex(index)
+            
+            # Guild
+            if 'guild' in selected_changes:
+                self.guild_edit.setText(selected_changes['guild'])
+            
+            # URL Herald
+            if 'url' in selected_changes:
+                self.herald_url_edit.setText(selected_changes['url'])
+            
+            # Realm Points et Realm Rank
+            if 'realm_points' in selected_changes or 'realm_rank' in selected_changes:
+                realm_points = self.character_data.get('realm_points', 0)
+                if isinstance(realm_points, str):
+                    realm_points = int(realm_points.replace(' ', '').replace('\xa0', '').replace(',', ''))
+                
+                # Mettre à jour l'affichage du rang et du titre
+                self.update_rank_display(realm_points)
+                
+                # Mettre à jour les dropdowns de rang/niveau
+                if hasattr(self.parent_app, 'data_manager'):
+                    rank_info = self.parent_app.data_manager.get_realm_rank_info(self.realm, realm_points)
+                    if rank_info:
+                        current_rank = rank_info['rank']
+                        level_str = rank_info['level']  # Format "XLY"
+                        level_match = re.search(r'L(\d+)', level_str)
+                        if level_match:
+                            current_level = int(level_match.group(1))
+                            
+                            # Mettre à jour le dropdown de rang
+                            self.rank_combo.blockSignals(True)
+                            self.rank_combo.setCurrentIndex(current_rank - 1)
+                            self.rank_combo.blockSignals(False)
+                            
+                            # Mettre à jour le dropdown de niveau
+                            self.update_level_dropdown(current_rank, current_level)
+            
+            # Sauvegarder directement character_data (pas via save_basic_info qui récupère depuis l'interface)
+            from Functions.character_manager import save_character
+            success, msg = save_character(self.character_data, allow_overwrite=True)
+            
+            if not success:
+                QMessageBox.critical(
+                    self,
+                    lang.get("error_title", default="Erreur"),
+                    f"Échec de la sauvegarde : {msg}"
+                )
+                return
+            
+            # Rafraîchir la liste des personnages dans la fenêtre principale
+            if hasattr(self.parent_app, 'tree_manager'):
+                self.parent_app.tree_manager.refresh_character_list()
+            elif hasattr(self.parent_app, 'refresh_character_list'):
+                self.parent_app.refresh_character_list()
+            
+            # Message de succès
+            QMessageBox.information(
+                self,
+                lang.get("success_title", default="Succès"),
+                lang.get("update_char_success")
+            )
+        else:
+            QMessageBox.information(
+                self,
+                lang.get("update_char_cancelled"),
+                lang.get("update_char_cancelled")
+            )
     
     def rename_character(self):
         """Renames the character with validation."""
@@ -578,6 +855,7 @@ class ColumnsConfigDialog(QDialog):
         {"key": "server", "name_key": "column_server", "default": False},  # Server hidden by default
         {"key": "class", "name_key": "column_class", "default": True},  # Class visible by default
         {"key": "race", "name_key": "column_race", "default": False},  # Race hidden by default
+        {"key": "url", "name_key": "column_url", "default": False},  # URL hidden by default
     ]
     
     def __init__(self, parent=None):
@@ -2168,5 +2446,225 @@ class HeraldSearchDialog(QDialog):
             if len(errors) > 10:
                 error_msg += f"\n... et {len(errors) - 10} autre(s) erreur(s)"
             QMessageBox.warning(self, "Échec de l'import", error_msg)
+
+
+class CharacterUpdateDialog(QDialog):
+    """Dialogue pour valider les mises à jour d'un personnage depuis Herald."""
+    
+    def __init__(self, parent, current_data, new_data, character_name):
+        super().__init__(parent)
+        self.current_data = current_data
+        self.new_data = new_data
+        self.character_name = character_name
+        self.changes = {}
+        
+        self.setWindowTitle(f"Mise à jour - {character_name}")
+        self.resize(600, 500)
+        
+        layout = QVBoxLayout(self)
+        
+        # En-tête
+        header_label = QLabel(f"<h2>Mise à jour du personnage: {character_name}</h2>")
+        layout.addWidget(header_label)
+        
+        info_label = QLabel(
+            "<b>Comparaison des données :</b><br>"
+            "• <span style='color: green;'>✓</span> = Valeurs identiques (pas de changement)<br>"
+            "• <span style='color: red;'>Valeur actuelle</span> → <span style='color: green;'><b>Nouvelle valeur</b></span> = Changement détecté<br>"
+            "Cochez les modifications que vous souhaitez appliquer."
+        )
+        info_label.setWordWrap(True)
+        layout.addWidget(info_label)
+        
+        # Tableau des modifications
+        self.changes_table = QTableWidget()
+        self.changes_table.setColumnCount(4)
+        self.changes_table.setHorizontalHeaderLabels(["Appliquer", "Champ", "Valeur actuelle", "Nouvelle valeur"])
+        self.changes_table.horizontalHeader().setStretchLastSection(True)
+        self.changes_table.setSelectionMode(QTableWidget.NoSelection)
+        
+        # Détecter les changements
+        self._detect_changes()
+        
+        layout.addWidget(self.changes_table)
+        
+        # Boutons de sélection
+        button_layout = QHBoxLayout()
+        
+        select_all_btn = QPushButton("Tout sélectionner")
+        select_all_btn.clicked.connect(self._select_all)
+        button_layout.addWidget(select_all_btn)
+        
+        deselect_all_btn = QPushButton("Tout désélectionner")
+        deselect_all_btn.clicked.connect(self._deselect_all)
+        button_layout.addWidget(deselect_all_btn)
+        
+        button_layout.addStretch()
+        layout.addLayout(button_layout)
+        
+        # Boutons OK/Annuler
+        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        button_box.accepted.connect(self.accept)
+        button_box.rejected.connect(self.reject)
+        
+        # Changer le texte du bouton OK
+        ok_button = button_box.button(QDialogButtonBox.Ok)
+        ok_button.setText("Appliquer les modifications")
+        
+        layout.addWidget(button_box)
+    
+    def _detect_changes(self):
+        """Détecte les changements entre les données actuelles et nouvelles."""
+        # Champs à comparer (TOUS les champs importants)
+        fields_to_check = {
+            'level': 'Niveau',
+            'class': 'Classe',
+            'race': 'Race',
+            'realm': 'Royaume',
+            'guild': 'Guilde',
+            'realm_points': 'Points de Royaume',
+            'realm_rank': 'Rang de Royaume',
+            'server': 'Serveur'
+        }
+        
+        all_rows = []
+        
+        for field, label in fields_to_check.items():
+            current_value = self.current_data.get(field, '')
+            new_value = self.new_data.get(field, '')
+            
+            # Normaliser les valeurs pour la comparaison
+            # Cas spécial pour realm_points qui peut contenir des espaces
+            if field == 'realm_points':
+                # Nettoyer les espaces dans les realm_points
+                if isinstance(new_value, str):
+                    new_value = new_value.replace(' ', '').replace(',', '')
+                    try:
+                        new_value = int(new_value)
+                    except:
+                        pass
+                if isinstance(current_value, str):
+                    current_value = current_value.replace(' ', '').replace(',', '')
+                    try:
+                        current_value = int(current_value)
+                    except:
+                        pass
+            
+            if isinstance(current_value, (int, float)):
+                current_value_str = str(current_value)
+            else:
+                current_value_str = str(current_value) if current_value else ''
+            
+            if isinstance(new_value, (int, float)):
+                new_value_str = str(new_value)
+            else:
+                new_value_str = str(new_value) if new_value else ''
+            
+            # Déterminer si c'est un changement
+            has_change = (current_value_str != new_value_str and new_value_str)
+            
+            all_rows.append({
+                'field': field,
+                'label': label,
+                'current': current_value_str or '(vide)',
+                'new': new_value_str or '(vide)',
+                'new_value_raw': new_value,
+                'has_change': has_change
+            })
+        
+        # Remplir le tableau avec TOUTES les lignes
+        self.changes_table.setRowCount(len(all_rows))
+        
+        for row, data in enumerate(all_rows):
+            # Case à cocher (seulement si changement)
+            if data['has_change']:
+                checkbox = QCheckBox()
+                checkbox.setChecked(True)
+                checkbox_widget = QWidget()
+                checkbox_layout = QHBoxLayout(checkbox_widget)
+                checkbox_layout.addWidget(checkbox)
+                checkbox_layout.setAlignment(Qt.AlignCenter)
+                checkbox_layout.setContentsMargins(0, 0, 0, 0)
+                self.changes_table.setCellWidget(row, 0, checkbox_widget)
+                
+                # Stocker la référence de la checkbox et la valeur brute
+                self.changes_table.setItem(row, 0, QTableWidgetItem())
+                self.changes_table.item(row, 0).setData(Qt.UserRole, checkbox)
+                self.changes_table.item(row, 0).setData(Qt.UserRole + 1, data['field'])
+                self.changes_table.item(row, 0).setData(Qt.UserRole + 2, data['new_value_raw'])
+            else:
+                # Pas de checkbox pour les valeurs identiques
+                item = QTableWidgetItem("✓")
+                item.setTextAlignment(Qt.AlignCenter)
+                item.setForeground(QBrush(QColor(0, 150, 0)))  # Vert
+                font = item.font()
+                font.setBold(True)
+                item.setFont(font)
+                self.changes_table.setItem(row, 0, item)
+            
+            # Label du champ
+            field_item = QTableWidgetItem(data['label'])
+            if not data['has_change']:
+                field_item.setForeground(QBrush(QColor(100, 100, 100)))  # Gris
+            self.changes_table.setItem(row, 1, field_item)
+            
+            # Valeur actuelle
+            current_item = QTableWidgetItem(data['current'])
+            if data['has_change']:
+                current_item.setForeground(QBrush(QColor(200, 0, 0)))  # Rouge
+            else:
+                current_item.setForeground(QBrush(QColor(100, 100, 100)))  # Gris
+            self.changes_table.setItem(row, 2, current_item)
+            
+            # Nouvelle valeur
+            new_value_item = QTableWidgetItem(data['new'])
+            if data['has_change']:
+                # En gras et vert pour les changements
+                font = new_value_item.font()
+                font.setBold(True)
+                new_value_item.setFont(font)
+                new_value_item.setForeground(QBrush(QColor(0, 150, 0)))  # Vert
+            else:
+                # Gris pour les valeurs identiques
+                new_value_item.setForeground(QBrush(QColor(100, 100, 100)))
+            self.changes_table.setItem(row, 3, new_value_item)
+        
+        # Ajuster les colonnes
+        self.changes_table.resizeColumnsToContents()
+        self.changes_table.setColumnWidth(0, 80)
+    
+    def _select_all(self):
+        """Sélectionne toutes les modifications."""
+        for row in range(self.changes_table.rowCount()):
+            item = self.changes_table.item(row, 0)
+            if item:
+                checkbox = item.data(Qt.UserRole)
+                if checkbox:
+                    checkbox.setChecked(True)
+    
+    def _deselect_all(self):
+        """Désélectionne toutes les modifications."""
+        for row in range(self.changes_table.rowCount()):
+            item = self.changes_table.item(row, 0)
+            if item:
+                checkbox = item.data(Qt.UserRole)
+                if checkbox:
+                    checkbox.setChecked(False)
+    
+    def get_selected_changes(self):
+        """Retourne les modifications sélectionnées."""
+        selected = {}
+        
+        for row in range(self.changes_table.rowCount()):
+            item = self.changes_table.item(row, 0)
+            if item:
+                checkbox = item.data(Qt.UserRole)
+                field = item.data(Qt.UserRole + 1)
+                value_raw = item.data(Qt.UserRole + 2)  # Récupérer la valeur brute
+                
+                if checkbox and checkbox.isChecked():
+                    selected[field] = value_raw  # Utiliser la valeur brute
+        
+        return selected
 
 

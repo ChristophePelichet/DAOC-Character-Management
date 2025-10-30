@@ -137,6 +137,21 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 - 🔷 **Cyan** (#9cdcfe) : Configuration, paramètres
 
 ### 🔧 Modifié
+- **Mise à jour de personnage depuis Herald** : Amélioration de l'interface utilisateur
+  - Section Herald déplacée en haut de la fiche personnage pour meilleure visibilité
+  - Boutons redesignés : "🌐 Ouvrir dans le navigateur" et "🔄 Mettre à jour depuis Herald"
+  - Fenêtre de progression agrandie (450x150px) avec animation fluide
+  - Barre de progression indéterminée avec `QProgressBar` pour feedback visuel
+  - **Worker thread** (`HeraldScraperWorker`) pour scraping en arrière-plan sans bloquer l'interface
+  - Animation réellement fonctionnelle grâce à l'exécution asynchrone via `QThread`
+  - Messages détaillés : "⏳ Mise à jour en cours...", "🌐 Récupération des données..."
+  - Dialogue de validation affichant toutes les modifications avant application
+  - Code couleur : ✓ vert (valeurs identiques), rouge→vert (changements)
+  - **Rafraîchissement automatique** de la fiche personnage après mise à jour (plus besoin de cliquer sur "Sauvegarder")
+  - Mise à jour immédiate de tous les champs : niveau, classe, race, guilde, rang, points de royaume, URL Herald
+  - Rafraîchissement automatique de la liste principale des personnages
+  - Amélioration dans `UI/dialogs.py` et `main.py`
+
 - **Logger Eden** : Migration de tous les logs Eden vers un logger dédié
   - `cookie_manager.py` : Tous les logs utilisent maintenant `eden_logger`
   - `eden_scraper.py` : Tous les logs utilisent maintenant `eden_logger`
@@ -158,6 +173,27 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
   - Support pour versions portables et installations personnalisées
 
 ### 🐛 Corrigé
+- **Classe changeante lors de modification du rang** : Correction critique de la fiche personnage
+  - Problème : La classe du personnage changeait lors du changement du rang de royaume
+  - Cause : Utilisation de `setCurrentText()` avec des noms traduits au lieu de `findData()`
+  - Solution : Utilisation de `findData()` + `setCurrentIndex()` pour sélection par identifiant
+  - Affecte : `CharacterSheetWindow.__init__()` dans `UI/dialogs.py`
+  - Résultat : La classe reste stable lors de toutes les modifications de rang
+
+- **Normalisation des données Herald** : Correction de l'inversion rang/titre de royaume
+  - Problème : Le scraper confondait le rang de royaume avec le titre de royaume
+  - JSON Eden : `realm_rank="Elding Vakten"` (titre), `realm_level="4L1"` (code)
+  - Programme : Nécessite `realm_rank="4L1"` (code), `realm_title="Elding Vakten"` (titre)
+  - Solution : Inversion des champs dans `_normalize_herald_data()` de `Functions/eden_scraper.py`
+  - Ajout du champ `realm_title` pour stocker le titre textuel
+
+- **Sauvegarde des modifications Herald** : Correction du mécanisme de sauvegarde
+  - Problème : Modifications appliquées mais non sauvegardées dans le fichier JSON
+  - Cause : Utilisation de `save_basic_info()` qui relit l'interface au lieu de sauvegarder les données
+  - Solution : Appel direct de `save_character(character_data, allow_overwrite=True)`
+  - Affecte : `update_from_herald()` dans `UI/dialogs.py` et `update_character_from_herald()` dans `main.py`
+  - Résultat : Toutes les modifications Herald sont maintenant persistées correctement
+
 - **ChromeDriver** : Résolution des problèmes de téléchargement
   - Gestion des erreurs réseau (timeout, connexion refusée)
   - Fallback automatique vers Selenium Manager

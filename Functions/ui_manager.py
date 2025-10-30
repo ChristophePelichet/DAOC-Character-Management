@@ -121,6 +121,12 @@ class UIManager:
         duplicate_action.triggered.connect(self.main_window.duplicate_selected_character)
 
         self.context_menu.addSeparator()
+        
+        # Mettre à jour depuis Herald
+        update_action = self.context_menu.addAction(lang.get("context_menu_update_from_herald", default="🔄 Mettre à jour depuis Herald"))
+        update_action.triggered.connect(self.main_window.update_character_from_herald)
+
+        self.context_menu.addSeparator()
 
         # Gestion des armures
         armor_action = self.context_menu.addAction(lang.get("context_menu_armor_management", default="Gestion des armures"))

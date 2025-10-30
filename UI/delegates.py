@@ -3,7 +3,8 @@ Custom QStyledItemDelegates for the character list view.
 These delegates customize the rendering of specific columns.
 """
 
-from PySide6.QtWidgets import QStyledItemDelegate, QStyleOptionViewItem, QStyle, QApplication
+import logging
+from PySide6.QtWidgets import QStyledItemDelegate, QStyleOptionViewItem, QStyle, QApplication, QStyleOptionButton
 from PySide6.QtGui import QIcon, QPalette, QColor
 from PySide6.QtCore import Qt, QRect, QSize, QEvent
 
@@ -235,3 +236,93 @@ class NormalTextDelegate(QStyledItemDelegate):
         
         painter.drawText(option.rect, alignment, str(text))
         painter.restore()
+
+
+class UrlButtonDelegate(QStyledItemDelegate):
+    """Delegate pour afficher un bouton 'Ouvrir' dans la colonne URL si une URL existe."""
+    
+    # Couleurs de fond par royaume (alpha 25 pour plus de subtilité)
+    REALM_COLORS = {
+        "Albion": QColor(204, 0, 0, 25),      # Rouge clair
+        "Midgard": QColor(0, 102, 204, 25),   # Bleu clair
+        "Hibernia": QColor(0, 170, 0, 25)     # Vert clair
+    }
+    
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.button_padding = 4
+        
+    def paint(self, painter, option, index):
+        """Dessine un bouton 'Ouvrir' si l'URL existe."""
+        url = index.data(Qt.DisplayRole)
+        
+        # Get realm from row data
+        realm_index = index.sibling(index.row(), 1)
+        realm = realm_index.data(Qt.UserRole + 1)
+        
+        # Draw background with realm color
+        painter.save()
+        
+        if not (option.state & QStyle.State_Selected):
+            if realm and realm in self.REALM_COLORS:
+                painter.fillRect(option.rect, self.REALM_COLORS[realm])
+        
+        painter.restore()
+        
+        # Draw standard background (selection, hover, etc.)
+        opt = QStyleOptionViewItem(option)
+        self.initStyleOption(opt, index)
+        
+        style = option.widget.style() if option.widget else QApplication.style()
+        style.drawPrimitive(QStyle.PE_PanelItemViewItem, opt, painter, option.widget)
+        
+        # Si pas d'URL, on s'arrête ici
+        if not url or not url.strip():
+            return
+        
+        # Dessiner le bouton "Ouvrir"
+        button_rect = self._get_button_rect(option.rect)
+        
+        # Style du bouton
+        button_opt = QStyleOptionButton()
+        button_opt.rect = button_rect
+        button_opt.text = "🌐 Ouvrir"
+        button_opt.state = QStyle.State_Enabled
+        
+        # Effet de survol
+        if option.state & QStyle.State_MouseOver:
+            button_opt.state |= QStyle.State_MouseOver
+        
+        # Dessiner le bouton
+        style.drawControl(QStyle.CE_PushButton, button_opt, painter, option.widget)
+    
+    def _get_button_rect(self, rect):
+        """Calcule le rectangle pour le bouton (aligné à gauche)."""
+        button_width = 100
+        button_height = rect.height() - 2 * self.button_padding
+        x = rect.x() + self.button_padding  # Aligné à gauche avec padding
+        y = rect.y() + self.button_padding
+        return QRect(x, y, button_width, button_height)
+    
+    def editorEvent(self, event, model, option, index):
+        """Gère les clics sur le bouton."""
+        if event.type() == QEvent.MouseButtonRelease:
+            url = index.data(Qt.DisplayRole)
+            if url and url.strip():
+                button_rect = self._get_button_rect(option.rect)
+                if button_rect.contains(event.pos()):
+                    # Ouvrir l'URL dans le navigateur
+                    import webbrowser
+                    try:
+                        if not url.startswith(('http://', 'https://')):
+                            url = 'https://' + url
+                        webbrowser.open(url)
+                    except Exception as e:
+                        logging.error(f"Erreur lors de l'ouverture de l'URL: {e}")
+                    return True
+        
+        return super().editorEvent(event, model, option, index)
+    
+    def sizeHint(self, option, index):
+        """Retourne la taille recommandée pour la cellule."""
+        return QSize(110, 30)

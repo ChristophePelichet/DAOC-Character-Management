@@ -12,10 +12,12 @@ import os
 from datetime import datetime
 from pathlib import Path
 
+# Logger dédié pour Eden
+eden_logger = logging.getLogger('eden')
+
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
 import json
 
@@ -38,36 +40,40 @@ class EdenScraper:
         
     def initialize_driver(self, headless=True):
         """
-        Initialise le driver Selenium Chrome
+        Initialise le driver Selenium avec fallback multi-navigateurs
+        Supporte Chrome, Edge et Firefox
+        Utilise le navigateur configuré dans les paramètres
         
         Args:
-            headless: Si True, lance Chrome en mode sans interface
+            headless: Si True, lance le navigateur en mode sans interface
             
         Returns:
             bool: True si l'initialisation a réussi
         """
         try:
-            chrome_options = Options()
-            if headless:
-                chrome_options.add_argument('--headless=new')
-                chrome_options.add_argument('--disable-gpu')
+            # Lire la configuration pour le navigateur préféré
+            from Functions.config_manager import config
+            preferred_browser = config.get('preferred_browser', 'Chrome')
+            allow_download = config.get('allow_browser_download', False)
+            
+            # Utiliser la fonction helper du cookie_manager
+            # (qui gère le fallback Chrome → Edge → Firefox)
+            driver, browser_name = self.cookie_manager._initialize_browser_driver(
+                headless=headless,
+                preferred_browser=preferred_browser,
+                allow_download=allow_download
+            )
+            
+            if driver:
+                self.driver = driver
+                eden_logger.info(f"✅ Driver Selenium initialisé: {browser_name}")
+                return True
             else:
-                # En mode visible, minimiser la fenêtre
-                chrome_options.add_argument('--window-position=-2400,-2400')
-            
-            # Options minimales (trop d'options anti-détection causent des problèmes !)
-            chrome_options.add_argument('--no-sandbox')
-            chrome_options.add_argument('--disable-dev-shm-usage')
-            chrome_options.add_argument('--log-level=3')
-            
-            service = Service(ChromeDriverManager().install())
-            self.driver = webdriver.Chrome(service=service, options=chrome_options)
-            
-            logging.info("Driver Selenium initialisé avec succès")
-            return True
+                eden_logger.error("❌ Impossible d'initialiser un navigateur")
+                return False
             
         except Exception as e:
-            logging.error(f"Erreur lors de l'initialisation du driver: {e}")
+            eden_logger.error(f"Erreur lors de l'initialisation du driver: {e}")
             return False
     
     def load_cookies(self):
@@ -78,13 +84,13 @@ class EdenScraper:
             bool: True si les cookies ont été chargés
         """
         if not self.driver:
-            logging.error("Driver non initialisé")
+            eden_logger.error("Driver non initialisé")
             return False
         
         try:
             cookies_list = self.cookie_manager.get_cookies_for_scraper()
             if not cookies_list:
-                logging.error("Aucun cookie disponible")
+                eden_logger.error("Aucun cookie disponible")
                 return False
             
             # Aller sur le domaine pour pouvoir ajouter les cookies
@@ -99,16 +105,16 @@ class EdenScraper:
                 try:
                     self.driver.add_cookie(cookie)
                 except Exception as e:
-                    logging.warning(f"Impossible d'ajouter le cookie {cookie.get('name')}: {e}")
+                    eden_logger.warning(f"Impossible d'ajouter le cookie {cookie.get('name')}: {e}")
             
-            logging.info(f"{len(cookies_list)} cookies chargés dans le driver")
+            eden_logger.info(f"{len(cookies_list)} cookies chargés dans le driver")
             
             # Attendre un peu après avoir ajouté les cookies
             time.sleep(1)
             return True
             
         except Exception as e:
-            logging.error(f"Erreur lors du chargement des cookies: {e}")
+            eden_logger.error(f"Erreur lors du chargement des cookies: {e}")
             return False
     
     def scrape_character(self, character_name):
@@ -126,13 +132,13 @@ class EdenScraper:
                 return None
         
         if not self.load_cookies():
-            logging.error("Impossible de charger les cookies")
+            eden_logger.error("Impossible de charger les cookies")
             return None
         
         try:
             # Construire l'URL du personnage
             url = f"https://eden-daoc.net/herald?n=player&k={character_name}"
-            logging.info(f"Scraping du personnage: {character_name} ({url})")
+            eden_logger.info(f"Scraping du personnage: {character_name} ({url})")
             
             # Charger la page
             self.driver.get(url)
@@ -152,11 +158,11 @@ class EdenScraper:
             data['character_name'] = character_name
             data['scraped_at'] = datetime.now().isoformat()
             
-            logging.info(f"Données du personnage {character_name} extraites avec succès")
+            eden_logger.info(f"Données du personnage {character_name} extraites avec succès")
             return data
             
         except Exception as e:
-            logging.error(f"Erreur lors du scraping du personnage {character_name}: {e}")
+            eden_logger.error(f"Erreur lors du scraping du personnage {character_name}: {e}")
             return None
     
     def scrape_search_results(self, search_query, realm=None):
@@ -175,7 +181,7 @@ class EdenScraper:
                 return []
         
         if not self.load_cookies():
-            logging.error("Impossible de charger les cookies")
+            eden_logger.error("Impossible de charger les cookies")
             return []
         
         try:
@@ -184,7 +190,7 @@ class EdenScraper:
             if realm:
                 url += f"&r={realm}"
             
-            logging.info(f"Recherche: {search_query} (realm: {realm or 'tous'})")
+            eden_logger.info(f"Recherche: {search_query} (realm: {realm or 'tous'})")
             
             # Charger la page
             self.driver.get(url)
@@ -202,11 +208,11 @@ class EdenScraper:
             # Extraire la liste des personnages
             characters = self._extract_search_results(soup)
             
-            logging.info(f"{len(characters)} personnages trouvés")
+            eden_logger.info(f"{len(characters)} personnages trouvés")
             return characters
             
         except Exception as e:
-            logging.error(f"Erreur lors de la recherche: {e}")
+            eden_logger.error(f"Erreur lors de la recherche: {e}")
             return []
     
     def _extract_character_data(self, soup):
@@ -279,9 +285,9 @@ class EdenScraper:
         if self.driver:
             try:
                 self.driver.quit()
-                logging.info("Driver Selenium fermé")
+                eden_logger.info("Driver Selenium fermé")
             except Exception as e:
-                logging.warning(f"Erreur lors de la fermeture du driver: {e}")
+                eden_logger.warning(f"Erreur lors de la fermeture du driver: {e}")
             finally:
                 self.driver = None
     
@@ -367,7 +373,7 @@ def search_herald_character(character_name, realm_filter=""):
             search_url = f"https://eden-daoc.net/herald?n=search&r={realm_filter}&s={character_name}"
         else:
             search_url = f"https://eden-daoc.net/herald?n=search&s={character_name}"
-        logging.info(f"Recherche Herald: {search_url}")
+        eden_logger.info(f"Recherche Herald: {search_url}")
         
         # Naviguer vers la page de recherche
         scraper.driver.get(search_url)
@@ -420,7 +426,7 @@ def search_herald_character(character_name, realm_filter=""):
             try:
                 old_file.unlink()
             except Exception as e:
-                logging.warning(f"Impossible de supprimer l'ancien fichier {old_file}: {e}")
+                eden_logger.warning(f"Impossible de supprimer l'ancien fichier {old_file}: {e}")
         
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         json_filename = f"search_{character_name}_{timestamp}.json"
@@ -484,10 +490,11 @@ def search_herald_character(character_name, realm_filter=""):
         char_count = len(characters)
         message = f"{char_count} personnage(s) trouvé(s)"
         
-        logging.info(f"Recherche terminée: {char_count} personnages - Fichiers: {json_path}, {characters_path}")
+        eden_logger.info(f"Recherche terminée: {char_count} personnages - Fichiers: {json_path}, {characters_path}")
         
         return True, message, str(characters_path)
         
     except Exception as e:
-        logging.error(f"Erreur lors de la recherche Herald: {e}", exc_info=True)
+        eden_logger.error(f"Erreur lors de la recherche Herald: {e}", exc_info=True)
         return False, f"Erreur: {str(e)}", ""
+

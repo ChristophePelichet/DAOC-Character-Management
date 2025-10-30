@@ -83,6 +83,12 @@ class UIManager:
         about_action.triggered.connect(self.main_window.show_about_dialog)
         help_menu.addAction(about_action)
         
+        help_menu.addSeparator()
+        
+        eden_debug_action = QAction(lang.get("menu_help_eden_debug"), self.main_window)
+        eden_debug_action.triggered.connect(self.main_window.open_eden_debug)
+        help_menu.addAction(eden_debug_action)
+        
     def create_context_menu(self):
         """Crée le menu contextuel (clic droit) pour la liste des personnages"""
         self.context_menu = QMenu(self.main_window)

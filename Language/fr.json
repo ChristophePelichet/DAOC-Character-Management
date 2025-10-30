@@ -123,6 +123,7 @@
     "menu_help": "Aide",
     "menu_help_about": "À propos",
     "menu_help_migrate": "Migrer la structure des dossiers",
+    "menu_help_eden_debug": "🌐 Debug Eden",
     "about_dialog_title": "À propos de {app_name}",
     "about_dialog_content": "Application : {app_name}\nVersion : {version}\nCréateur : Ewoline\n\nGestionnaire de personnages pour Dark Age of Camelot",
     "status_bar_selection_count": "{count} sur {total} personnage(s) sélectionné(s)",

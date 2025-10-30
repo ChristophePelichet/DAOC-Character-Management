@@ -7,6 +7,173 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/),
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [0.105] - 2025-10-30 - Eden Scraping & Import en Masse 🌐
+
+### 🌐 Eden Herald - Scraping et Import
+
+#### Ajouté
+- **Module Eden Scraper** : Système complet de scraping du Herald Eden-DAOC
+  - `Functions/eden_scraper.py` : Gestionnaire de scraping avec Selenium
+  - `Functions/cookie_manager.py` : Gestion des cookies d'authentification
+  - Support multi-navigateur (Chrome, Edge, Firefox) avec fallback automatique
+  - Extraction automatique des données de personnages depuis le Herald
+  - Gestion de session authentifiée avec cookies Discord OAuth
+
+- **Gestionnaire de Cookies** : Interface graphique dédiée
+  - Dialog de gestion des cookies accessible via le menu
+  - Génération de cookies via navigateur avec authentification Discord
+  - Import de cookies depuis un fichier externe (.pkl)
+  - Test de connexion au Herald avec feedback visuel
+  - Affichage du statut des cookies (valides/expirés/manquants)
+  - Bouton "Rafraîchir" pour mettre à jour l'état
+  - Sauvegarde automatique des cookies dans `Configuration/eden_cookies.pkl`
+
+- **Import en Masse de Personnages** : Recherche et import depuis le Herald
+  - Interface de recherche avec filtres (nom, royaume, niveau)
+  - Prévisualisation des résultats avant import
+  - Sélection multiple de personnages à importer
+  - Import automatique avec création des fichiers JSON
+  - Gestion des doublons (skip/overwrite/rename)
+  - Barre de progression pour les imports multiples
+  - Rafraîchissement automatique de la liste après import
+
+- **Support Multi-Navigateurs** : Système de fallback intelligent
+  - Détection automatique des navigateurs installés (Chrome, Edge, Firefox)
+  - Configuration du navigateur préféré dans les paramètres
+  - Ordre de priorité configurable : Navigateur préféré → Chrome → Edge → Firefox
+  - Fallback automatique si le navigateur préféré n'est pas disponible
+  - Affichage du navigateur utilisé dans l'interface de gestion des cookies
+  - Option pour autoriser/interdire le téléchargement automatique de drivers
+  - Confirmation utilisateur avant téléchargement de ChromeDriver si nécessaire
+
+- **ChromeDriver - Système 3-tiers** : Gestion robuste du driver Chrome
+  - **Tier 1 - Local** : Utilisation de `chromedriver.exe` à la racine du projet si présent
+  - **Tier 2 - System** : Utilisation du cache Selenium Manager (`~/.cache/selenium/`)
+  - **Tier 3 - Download** : Téléchargement via webdriver-manager en dernier recours
+  - Logs détaillés pour chaque tentative d'initialisation
+  - Gestion des erreurs réseau (firewall, proxy)
+  - Optimisation pour éviter les téléchargements inutiles
+
+#### Interface Utilisateur
+- **Configuration des Navigateurs** : Nouvelle section dans les paramètres
+  - Menu déroulant pour sélectionner le navigateur préféré
+  - Liste des navigateurs détectés sur le système
+  - Case à cocher "Autoriser le téléchargement automatique de drivers"
+  - Tooltip informatif affichant les navigateurs disponibles
+  - Sauvegarde de la configuration dans `config.json`
+
+- **Barre d'État Herald** : Affichage du statut de connexion
+  - Indicateur visuel de l'état des cookies (🟢 Valide / 🔴 Invalide)
+  - Bouton "Gérer les cookies" pour accès rapide
+  - Bouton "Import Herald" pour lancer l'import en masse
+  - Mise à jour automatique du statut au démarrage
+
+- **Dialog d'Import Herald** : Interface de recherche et import
+  - Champ de recherche avec placeholder explicatif
+  - Filtres par royaume (Albion, Hibernia, Midgard, Tous)
+  - Niveau minimum et maximum
+  - Bouton "Rechercher" avec gestion asynchrone
+  - Liste des résultats avec colonnes : Nom, Royaume, Niveau, Race, Classe, Guilde
+  - Sélection multiple (Ctrl+Clic, Shift+Clic, Ctrl+A)
+  - Boutons "Sélectionner tout" / "Désélectionner tout"
+  - Compteur de personnages sélectionnés
+  - Bouton "Importer" avec validation
+  - Dialog de progression avec pourcentage et détails
+  - Gestion des erreurs avec messages explicites
+
+### 🎨 Fenêtre Debug Eden
+
+#### Ajouté
+- **Fenêtre Debug Eden** : Nouvelle fenêtre dédiée au débogage des opérations Eden Herald
+  - Interface avec thème sombre (style VS Code)
+  - Coloration syntaxique intelligente (8 couleurs : succès, erreur, warning, recherche, navigateur, cookies, configuration)
+  - Boutons Export et Effacer
+  - Compteur de logs en temps réel
+  - Accessible via Menu → Aide → 🌐 Debug Eden
+
+#### Coloration des Logs
+- 🟢 **Vert** (#4ec9b0) : Succès, opérations réussies
+- 🔴 **Rouge** (#f48771) : Erreurs, échecs
+- 🟠 **Orange** (#ce9178) : Avertissements
+- 🟡 **Jaune** (#dcdcaa) : Recherche, détection
+- 🔵 **Bleu** (#569cd6) : Navigateur, browser
+- 🟣 **Violet** (#c586c0) : Cookies, authentification
+- 🔷 **Cyan** (#9cdcfe) : Configuration, paramètres
+
+### 🔧 Modifié
+- **Logger Eden** : Migration de tous les logs Eden vers un logger dédié
+  - `cookie_manager.py` : Tous les logs utilisent maintenant `eden_logger`
+  - `eden_scraper.py` : Tous les logs utilisent maintenant `eden_logger`
+  - Permet une séparation claire entre logs généraux et logs Eden
+  
+- **Menu Aide** : Ajout de l'option "🌐 Debug Eden" dans le menu Aide
+  - Accessible après "À propos" et "Migrer la structure des dossiers"
+  - Support multilingue (FR, EN, DE)
+
+- **Configuration** : Nouvelles options dans `config.json`
+  - `preferred_browser` : Navigateur préféré (Chrome, Edge, Firefox)
+  - `allow_browser_download` : Autorisation de téléchargement de drivers
+  - Valeurs par défaut : Chrome, téléchargement autorisé
+
+- **Détection des Navigateurs** : Optimisation de la détection
+  - Méthode ultra-rapide basée sur la vérification des chemins de fichiers
+  - Plus de lancement de navigateur pour tester la disponibilité
+  - Windows : Vérification dans Program Files et LocalAppData
+  - Support pour versions portables et installations personnalisées
+
+### 🐛 Corrigé
+- **ChromeDriver** : Résolution des problèmes de téléchargement
+  - Gestion des erreurs réseau (timeout, connexion refusée)
+  - Fallback automatique vers Selenium Manager
+  - Messages d'erreur explicites pour l'utilisateur
+  
+- **Fenêtre de Configuration** : Résolution de la lenteur d'ouverture
+  - Optimisation de la détection des navigateurs (de ~5s à instantané)
+  - Chargement asynchrone des ressources lourdes
+  
+- **Browser Préféré** : Correction du non-respect de la configuration
+  - Lecture systématique de la configuration avant initialisation
+  - Application correcte de l'ordre de priorité des navigateurs
+  - Logs de debug pour tracer la sélection du navigateur
+
+### 📚 Documentation
+- Ajout de `EDEN_DEBUG_WINDOW.md` : Guide complet d'utilisation de la fenêtre debug
+- Ajout de `EDEN_DEBUG_IMPLEMENTATION.md` : Documentation technique des changements
+- Ajout de `test_eden_debug.py` : Script de test pour la fenêtre Debug Eden
+- Documentation complète du système Eden Scraper
+- Guide d'utilisation de l'import en masse
+- Exemples de configuration des navigateurs
+
+### 🔒 Sécurité
+- **Gestion des Cookies** : Stockage sécurisé
+  - Cookies stockés en pickle avec permissions restrictives
+  - Pas de stockage de mots de passe
+  - Session authentifiée via Discord OAuth uniquement
+  - Backup automatique avant écrasement
+
+### ⚡ Performance
+- **Scraping Optimisé** : Performance améliorée
+  - Utilisation de Selenium en mode headless pour vitesse maximale
+  - Réutilisation de la session navigateur pour imports multiples
+  - Cache des cookies pour éviter les reconnexions
+  - Parsing HTML optimisé avec BeautifulSoup4
+
+### 🧪 Tests
+- **Scripts de Test** : Outils de validation
+  - `test_eden_debug.py` : Test de la fenêtre Debug Eden
+  - `test_browser_real.py` : Test des navigateurs disponibles
+  - Validation du système de cookies
+  - Test du scraping avec données réelles
+
+### ✅ Qualité
+- **Testabilité** : Script de test dédié pour la fenêtre Debug Eden
+- **Maintenabilité** : Code modulaire avec logger séparé
+- **Utilisabilité** : Interface intuitive avec coloration automatique
+- **Robustesse** : Gestion d'erreurs complète avec messages clairs
+- **Compatibilité** : Support de multiples navigateurs et configurations
+
+---
+
 ## [0.104] - 2025-10-29 - Refactoring Complet & Migration ✨
 
 ### 🏗️ Architecture

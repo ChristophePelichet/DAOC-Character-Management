@@ -115,6 +115,7 @@
     "menu_help": "Help",
     "menu_help_about": "About",
     "menu_help_migrate": "Migrate folder structure",
+    "menu_help_eden_debug": "🌐 Eden Debug",
     "about_dialog_title": "About {app_name}",
     "about_dialog_content": "Application: {app_name}\nVersion: {version}\nCreator: Ewoline\n\nCharacter manager for Dark Age of Camelot",
     "status_bar_selection_count": "{count} of {total} character(s) selected",

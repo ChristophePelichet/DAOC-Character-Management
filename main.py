@@ -68,6 +68,7 @@ class CharacterApp(QMainWindow):
         # Fenêtres auxiliaires
         self.config_window = None
         self.debug_window = None
+        self.eden_debug_window = None
         
         # Widget central
         central_widget = QWidget()
@@ -306,6 +307,16 @@ class CharacterApp(QMainWindow):
         
         dialog = CookieManagerDialog(self)
         dialog.exec()
+    
+    def open_eden_debug(self):
+        """Ouvre la fenêtre de debug Eden"""
+        if self.eden_debug_window is None:
+            from UI.debug_window import EdenDebugWindow
+            self.eden_debug_window = EdenDebugWindow(self)
+        
+        self.eden_debug_window.show()
+        self.eden_debug_window.raise_()
+        self.eden_debug_window.activateWindow()
             
     def open_configuration(self):
         """Ouvre la fenêtre de configuration"""
@@ -357,6 +368,10 @@ class CharacterApp(QMainWindow):
         config.set("manual_column_resize", new_manual_resize)
         if new_manual_resize != old_manual_resize:
             self.tree_manager.apply_column_resize_mode(new_manual_resize)
+        
+        # Navigateur et téléchargement
+        config.set("preferred_browser", dialog.browser_combo.currentText())
+        config.set("allow_browser_download", dialog.allow_browser_download_check.isChecked())
             
         # Langue
         selected_lang_name = dialog.language_combo.currentText()

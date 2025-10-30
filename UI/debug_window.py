@@ -5,7 +5,7 @@ Debug window and logging utilities for the DAOC Character Manager.
 import logging
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QGroupBox, 
-    QTextEdit, QPushButton, QLineEdit, QSplitter, QFileDialog
+    QTextEdit, QPushButton, QLineEdit, QSplitter, QFileDialog, QLabel
 )
 from PySide6.QtCore import QThread, QObject, Signal, Slot, Qt
 from PySide6.QtGui import QAction, QActionGroup
@@ -242,3 +242,147 @@ class DebugWindow(QMainWindow):
         logging.getLogger().removeHandler(self.log_handler)
         logging.getLogger().removeHandler(self.error_handler)
         super().closeEvent(event)
+
+
+# ============================================================================
+# EDEN DEBUG WINDOW
+# ============================================================================
+
+class EdenDebugWindow(QMainWindow):
+    """Fenêtre de debug dédiée aux connexions Eden, cookies et Herald"""
+    
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("🌐 Debug Eden - Connexions & Cookies")
+        self.setGeometry(150, 150, 1000, 600)
+        
+        # Central Widget
+        central_widget = QWidget()
+        self.setCentralWidget(central_widget)
+        main_layout = QVBoxLayout(central_widget)
+        
+        # Barre de boutons
+        button_layout = QHBoxLayout()
+        
+        clear_button = QPushButton("🗑️ Effacer")
+        clear_button.clicked.connect(self.clear_logs)
+        button_layout.addWidget(clear_button)
+        
+        export_button = QPushButton("💾 Exporter")
+        export_button.clicked.connect(self.export_logs)
+        button_layout.addWidget(export_button)
+        
+        button_layout.addStretch()
+        main_layout.addLayout(button_layout)
+        
+        # Zone de logs avec syntaxe colorée
+        logs_group = QGroupBox("📋 Logs Eden en temps réel")
+        logs_layout = QVBoxLayout()
+        
+        self.logs_widget = QTextEdit()
+        self.logs_widget.setReadOnly(True)
+        self.logs_widget.setStyleSheet("""
+            QTextEdit {
+                background-color: #1e1e1e;
+                color: #d4d4d4;
+                font-family: 'Consolas', 'Courier New', monospace;
+                font-size: 10pt;
+            }
+        """)
+        logs_layout.addWidget(self.logs_widget)
+        logs_group.setLayout(logs_layout)
+        main_layout.addWidget(logs_group)
+        
+        # Info footer
+        self.info_label = QLabel("Prêt à capturer les logs Eden...")
+        self.info_label.setStyleSheet("color: #666; font-style: italic;")
+        main_layout.addWidget(self.info_label)
+        
+        # Setup du handler spécifique Eden
+        self.eden_handler = QTextEditHandler(self)
+        formatter = logging.Formatter('%(asctime)s - %(message)s', datefmt='%H:%M:%S')
+        self.eden_handler.setFormatter(formatter)
+        self.eden_handler.log_updated.connect(self.append_colored_log)
+        
+        # Ajouter le handler au logger Eden
+        eden_logger = logging.getLogger('eden')
+        eden_logger.addHandler(self.eden_handler)
+        eden_logger.setLevel(logging.DEBUG)
+        
+        self.log_count = 0
+    
+    def append_colored_log(self, message):
+        """Ajoute un log avec coloration syntaxique"""
+        self.log_count += 1
+        
+        # Extraire le niveau et le message
+        if ' - ' in message:
+            timestamp, content = message.split(' - ', 1)
+        else:
+            timestamp = ""
+            content = message
+        
+        # Colorer selon les mots-clés
+        if '✅' in content or 'succès' in content.lower() or 'réussi' in content.lower():
+            color = '#4ec9b0'  # Vert clair
+            icon = '✅'
+        elif '❌' in content or 'erreur' in content.lower() or 'échec' in content.lower():
+            color = '#f48771'  # Rouge
+            icon = '❌'
+        elif '⚠️' in content or 'warning' in content.lower() or 'attention' in content.lower():
+            color = '#ce9178'  # Orange
+            icon = '⚠️'
+        elif '🔍' in content or 'recherche' in content.lower() or 'détection' in content.lower():
+            color = '#dcdcaa'  # Jaune
+            icon = '🔍'
+        elif '🌐' in content or 'navigateur' in content.lower() or 'browser' in content.lower():
+            color = '#569cd6'  # Bleu
+            icon = '🌐'
+        elif '🍪' in content or 'cookie' in content.lower():
+            color = '#c586c0'  # Violet
+            icon = '🍪'
+        elif '📋' in content or 'configuration' in content.lower() or 'config' in content.lower():
+            color = '#9cdcfe'  # Bleu clair
+            icon = '📋'
+        else:
+            color = '#d4d4d4'  # Blanc
+            icon = '•'
+        
+        # Construire le message formaté
+        html_message = f'<span style="color: #808080;">{timestamp}</span> <span style="color: {color};">{icon} {content}</span>'
+        
+        self.logs_widget.append(html_message)
+        self.info_label.setText(f"📊 {self.log_count} logs capturés")
+    
+    def clear_logs(self):
+        """Efface tous les logs"""
+        self.logs_widget.clear()
+        self.log_count = 0
+        self.info_label.setText("Logs effacés - Prêt à capturer de nouveaux logs")
+    
+    def export_logs(self):
+        """Exporte les logs dans un fichier"""
+        from datetime import datetime
+        filename = f"eden_debug_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+        
+        file_path, _ = QFileDialog.getSaveFileName(
+            self,
+            "Exporter les logs Eden",
+            filename,
+            "Fichiers texte (*.txt);;Tous les fichiers (*.*)"
+        )
+        
+        if file_path:
+            try:
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    f.write(self.logs_widget.toPlainText())
+                self.info_label.setText(f"✅ Logs exportés: {file_path}")
+            except Exception as e:
+                self.info_label.setText(f"❌ Erreur d'export: {e}")
+    
+    def closeEvent(self, event):
+        """Nettoyage à la fermeture"""
+        eden_logger = logging.getLogger('eden')
+        eden_logger.removeHandler(self.eden_handler)
+        super().closeEvent(event)
+

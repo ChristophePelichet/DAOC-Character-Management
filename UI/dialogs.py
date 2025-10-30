@@ -860,6 +860,35 @@ class ConfigurationDialog(QDialog):
                                                               default="Gestion manuelle de la taille des colonnes"))
         general_layout.addRow(self.manual_column_resize_check)
         
+        # Preferred Browser
+        from Functions.cookie_manager import CookieManager
+        cookie_manager = CookieManager()
+        available_browsers = cookie_manager.detect_available_browsers()
+        
+        self.browser_combo = QComboBox()
+        # Toujours afficher tous les navigateurs possibles
+        all_browsers = ['Chrome', 'Edge', 'Firefox']
+        self.browser_combo.addItems(all_browsers)
+        
+        # Indiquer quels navigateurs sont détectés
+        if available_browsers:
+            tooltip = f"Navigateurs détectés sur cette machine: {', '.join(available_browsers)}"
+        else:
+            tooltip = "Aucun navigateur détecté. Sélectionnez celui à installer ou utiliser."
+        self.browser_combo.setToolTip(tooltip)
+        
+        general_layout.addRow("🌐 Navigateur préféré:", self.browser_combo)
+        
+        # Allow browser download
+        self.allow_browser_download_check = QCheckBox(
+            "Autoriser le téléchargement automatique de drivers"
+        )
+        self.allow_browser_download_check.setToolTip(
+            "Si activé, télécharge automatiquement le driver si le navigateur n'est pas trouvé.\n"
+            "Nécessite une connexion Internet."
+        )
+        general_layout.addRow(self.allow_browser_download_check)
+        
         general_group.setLayout(general_layout)
         main_layout.addWidget(general_group)
 
@@ -964,6 +993,13 @@ class ConfigurationDialog(QDialog):
 
         manual_resize = config.get("manual_column_resize", False)
         self.manual_column_resize_check.setChecked(manual_resize)
+        
+        # Browser settings
+        preferred_browser = config.get("preferred_browser", "Chrome")
+        self.browser_combo.setCurrentText(preferred_browser)
+        
+        allow_download = config.get("allow_browser_download", False)
+        self.allow_browser_download_check.setChecked(allow_download)
 
     def browse_folder(self, line_edit, title_key):
         """Generic folder browser."""
@@ -1186,6 +1222,13 @@ class CookieManagerDialog(QDialog):
         self.expiry_label.setTextFormat(Qt.RichText)
         info_layout.addWidget(self.expiry_label)
         
+        # Label pour afficher le navigateur utilisé
+        self.browser_label = QLabel()
+        self.browser_label.setWordWrap(True)
+        self.browser_label.setTextFormat(Qt.RichText)
+        self.browser_label.setStyleSheet("color: #666; font-style: italic;")
+        info_layout.addWidget(self.browser_label)
+        
         self.details_label = QLabel()
         self.details_label.setWordWrap(True)
         info_layout.addWidget(self.details_label)
@@ -1275,6 +1318,15 @@ class CookieManagerDialog(QDialog):
                 f"⏰ <b>Validité restante:</b> {days} jours<br/>"
                 f"{connection_status}"
             )
+            
+            # Afficher le navigateur utilisé pour le test
+            if hasattr(self.cookie_manager, 'last_browser_used') and self.cookie_manager.last_browser_used:
+                browser_icon = {'Chrome': '🔵', 'Edge': '🔷', 'Firefox': '🦊'}.get(self.cookie_manager.last_browser_used, '🌐')
+                self.browser_label.setText(
+                    f"{browser_icon} <i>Test effectué avec: {self.cookie_manager.last_browser_used}</i>"
+                )
+            else:
+                self.browser_label.setText("")
     
     def refresh_status(self):
         """Actualise l'affichage de l'état des cookies"""
@@ -1353,6 +1405,10 @@ class CookieManagerDialog(QDialog):
             
             self.details_label.setText(details)
             self.delete_button.setEnabled(True)
+        
+        # Réinitialiser le label du navigateur (sera mis à jour après test/génération)
+        if not (info and info.get('is_valid')):
+            self.browser_label.setText("")
     
     def browse_cookie_file(self):
         """Ouvre un dialog pour sélectionner un fichier de cookies"""
@@ -1403,6 +1459,10 @@ class CookieManagerDialog(QDialog):
             )
             self.cookie_path_edit.clear()
             self.refresh_status()
+            
+            # Rafraîchir le statut Eden dans la fenêtre principale
+            if self.parent() and hasattr(self.parent(), 'ui_manager'):
+                self.parent().ui_manager.check_eden_status()
         else:
             QMessageBox.critical(
                 self,
@@ -1433,6 +1493,10 @@ class CookieManagerDialog(QDialog):
                     "Les cookies ont été supprimés."
                 )
                 self.refresh_status()
+                
+                # Rafraîchir le statut Eden dans la fenêtre principale
+                if self.parent() and hasattr(self.parent(), 'ui_manager'):
+                    self.parent().ui_manager.check_eden_status()
             else:
                 QMessageBox.critical(
                     self,
@@ -1443,24 +1507,10 @@ class CookieManagerDialog(QDialog):
     def generate_cookies(self):
         """Génère de nouveaux cookies via authentification navigateur"""
         
-        # Message d'information
-        msg = QMessageBox()
-        msg.setIcon(QMessageBox.Information)
-        msg.setWindowTitle("Génération des Cookies")
-        msg.setTextFormat(Qt.RichText)
-        msg.setText("<b>Génération des cookies Eden</b>")
-        msg.setInformativeText(
-            "Un navigateur Chrome va s'ouvrir pour vous connecter à Eden-DAOC.<br/><br/>"
-            "<b>Étapes :</b><br/>"
-            "1. Le navigateur s'ouvrira automatiquement<br/>"
-            "2. Connectez-vous avec votre compte Discord<br/>"
-            "3. Une fois connecté, revenez ici et cliquez sur OK<br/>"
-            "4. Les cookies seront automatiquement sauvegardés"
-        )
-        msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
-        
-        if msg.exec() != QMessageBox.Ok:
-            return
+        # Lire la configuration
+        from Functions.config_manager import config
+        preferred_browser = config.get('preferred_browser', 'Chrome')
+        allow_download = config.get('allow_browser_download', False)
         
         # Désactiver les boutons pendant le processus
         self.generate_button.setEnabled(False)
@@ -1472,24 +1522,63 @@ class CookieManagerDialog(QDialog):
         from PySide6.QtWidgets import QApplication
         QApplication.processEvents()
         
-        # Générer les cookies
-        success, message, driver = self.cookie_manager.generate_cookies_with_browser()
+        # Générer les cookies (ouvre le navigateur immédiatement)
+        success, message, driver = self.cookie_manager.generate_cookies_with_browser(
+            preferred_browser=preferred_browser,
+            allow_download=allow_download
+        )
         
         if not success:
-            # Erreur lors de l'ouverture
-            QMessageBox.critical(
-                self,
-                "Erreur",
-                f"Impossible d'ouvrir le navigateur :\n\n{message}\n\n"
-                "Assurez-vous que Chrome et Selenium sont installés."
-            )
-            self.generate_button.setEnabled(True)
-            self.cookie_path_edit.setEnabled(True)
-            self.refresh_status()
-            return
+            # Vérifier si c'est un problème de navigateur manquant
+            if "Impossible d'initialiser" in message and not allow_download:
+                # Proposer de télécharger un driver
+                reply = QMessageBox.question(
+                    self,
+                    "Téléchargement requis",
+                    f"Aucun navigateur compatible n'a été trouvé.\n\n"
+                    f"Voulez-vous autoriser le téléchargement automatique d'un driver de navigateur ?\n\n"
+                    f"Cela nécessite une connexion Internet.",
+                    QMessageBox.Yes | QMessageBox.No,
+                    QMessageBox.No
+                )
+                
+                if reply == QMessageBox.Yes:
+                    # Réessayer avec téléchargement autorisé
+                    success, message, driver = self.cookie_manager.generate_cookies_with_browser(
+                        preferred_browser=preferred_browser,
+                        allow_download=True
+                    )
+                    
+                    if not success:
+                        QMessageBox.critical(
+                            self,
+                            "Erreur",
+                            f"Impossible d'ouvrir le navigateur même après téléchargement :\n\n{message}"
+                        )
+                        self.generate_button.setEnabled(True)
+                        self.cookie_path_edit.setEnabled(True)
+                        self.refresh_status()
+                        return
+                else:
+                    self.generate_button.setEnabled(True)
+                    self.cookie_path_edit.setEnabled(True)
+                    self.refresh_status()
+                    return
+            else:
+                # Autre erreur
+                QMessageBox.critical(
+                    self,
+                    "Erreur",
+                    f"Impossible d'ouvrir le navigateur :\n\n{message}"
+                )
+                self.generate_button.setEnabled(True)
+                self.cookie_path_edit.setEnabled(True)
+                self.refresh_status()
+                return
         
         # Le navigateur est ouvert
-        self.status_label.setText("🌐 <b>Navigateur ouvert - Connectez-vous avec Discord</b>")
+        browser_name = getattr(self.cookie_manager, 'last_browser_used', 'le navigateur')
+        self.status_label.setText(f"🌐 <b>{browser_name} ouvert - Connectez-vous avec Discord</b>")
         self.status_label.setStyleSheet("color: orange;")
         QApplication.processEvents()
         
@@ -1500,7 +1589,7 @@ class CookieManagerDialog(QDialog):
         wait_msg.setTextFormat(Qt.RichText)
         wait_msg.setText("<b>Connectez-vous maintenant</b>")
         wait_msg.setInformativeText(
-            "Le navigateur Chrome est ouvert.<br/><br/>"
+            f"Le navigateur <b>{browser_name}</b> est ouvert.<br/><br/>"
             "Veuillez vous connecter avec Discord dans le navigateur,<br/>"
             "puis cliquez sur OK une fois connecté."
         )
@@ -1549,6 +1638,17 @@ class CookieManagerDialog(QDialog):
         self.generate_button.setEnabled(True)
         self.cookie_path_edit.setEnabled(True)
         self.refresh_status()
+        
+        # Afficher le navigateur utilisé après génération réussie
+        if success and hasattr(self.cookie_manager, 'last_browser_used') and self.cookie_manager.last_browser_used:
+            browser_icon = {'Chrome': '🔵', 'Edge': '🔷', 'Firefox': '🦊'}.get(self.cookie_manager.last_browser_used, '🌐')
+            self.browser_label.setText(
+                f"{browser_icon} <i>Généré avec: {self.cookie_manager.last_browser_used}</i>"
+            )
+        
+        # Rafraîchir le statut Eden dans la fenêtre principale si les cookies ont été générés
+        if success and self.parent() and hasattr(self.parent(), 'ui_manager'):
+            self.parent().ui_manager.check_eden_status()
 
 
 # ============================================================================

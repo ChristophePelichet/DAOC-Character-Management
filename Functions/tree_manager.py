@@ -269,16 +269,16 @@ class TreeManager:
         
         # Visibilité par défaut
         default_visibility = {
-            "selection": True, "realm": True, "name": True, "level": True,
-            "page": True, "guild": True, "realm_rank": True, "realm_title": True,
-            "server": False, "class": True, "race": False
+            "selection": True, "realm": True, "name": True, "class": True, "level": True,
+            "realm_rank": True, "realm_title": True, "guild": True, "page": True,
+            "server": False, "race": False, "url": False
         }
         
-        # Mapping colonnes -> indices
+        # Mapping colonnes -> indices (ordre : Selection, Realm, Name, Class, Level, Rank, Title, Guild, Page, Server, Race, URL)
         column_map = {
-            "selection": 0, "realm": 1, "name": 2, "level": 3,
-            "realm_rank": 4, "realm_title": 5, "guild": 6, "page": 7,
-            "server": 8, "class": 9, "race": 10
+            "selection": 0, "realm": 1, "name": 2, "class": 3, "level": 4,
+            "realm_rank": 5, "realm_title": 6, "guild": 7, "page": 8,
+            "server": 9, "race": 10, "url": 11
         }
         
         # Appliquer la visibilité
@@ -302,7 +302,7 @@ class TreeManager:
             header.setSectionResizeMode(QHeaderView.Interactive)
             logging.debug("Column resize mode: Manual")
         else:
-            for i in range(11):
+            for i in range(12):  # 12 colonnes : Selection(0), Realm(1), Name(2), Class(3), Level(4), Rank(5), Title(6), Guild(7), Page(8), Server(9), Race(10), URL(11)
                 if i == 2:  # Colonne Name
                     header.setSectionResizeMode(i, QHeaderView.Stretch)
                 else:

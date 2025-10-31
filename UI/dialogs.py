@@ -847,13 +847,13 @@ class ColumnsConfigDialog(QDialog):
         {"key": "selection", "name_key": "column_selection", "default": True},
         {"key": "realm", "name_key": "column_realm", "default": True},
         {"key": "name", "name_key": "column_name", "default": True},
+        {"key": "class", "name_key": "column_class", "default": True},  # Class visible by default
         {"key": "level", "name_key": "column_level", "default": True},
         {"key": "realm_rank", "name_key": "column_realm_rank", "default": True},
         {"key": "realm_title", "name_key": "column_realm_title", "default": True},
         {"key": "guild", "name_key": "column_guild", "default": True},
         {"key": "page", "name_key": "column_page", "default": True},
         {"key": "server", "name_key": "column_server", "default": False},  # Server hidden by default
-        {"key": "class", "name_key": "column_class", "default": True},  # Class visible by default
         {"key": "race", "name_key": "column_race", "default": False},  # Race hidden by default
         {"key": "url", "name_key": "column_url", "default": False},  # URL hidden by default
     ]

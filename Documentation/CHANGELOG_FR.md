@@ -26,6 +26,18 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 - **Compatibilité PyInstaller** : Fonctionne correctement avec l'application compilée
 - **Cohérence** : Même logique de résolution de chemin que le reste de l'application
 
+- **Configuration des colonnes corrigée** : Correction complète du système de colonnes
+  - Problème 1 : La colonne URL Herald (index 11) n'était pas incluse dans le redimensionnement (`range(11)` au lieu de `range(12)`)
+  - Problème 2 : L'ordre des colonnes Class et Level était inversé dans le menu de configuration
+  - Problème 3 : Le mapping de visibilité utilisait un ordre incorrect et la colonne URL était absente
+  - Solution : 
+    * `apply_column_resize_mode()` traite maintenant les 12 colonnes correctement
+    * Ordre du menu de configuration aligné avec le TreeView (Class avant Level)
+    * Mapping `column_map` corrigé avec le bon ordre et inclusion de la colonne URL
+  - Impact : Toutes les 12 colonnes (0-11) sont maintenant correctement configurables pour le redimensionnement et la visibilité
+  - Fichiers modifiés : `Functions/tree_manager.py`, `UI/dialogs.py`
+  - Documentation : `Documentation/COLUMN_CONFIGURATION_FIX.md` créée avec analyse détaillée
+
 ---
 
 ## [0.105] - 2025-10-31 - Eden Scraping & Import en Masse 🌐

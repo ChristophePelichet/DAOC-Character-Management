@@ -26,6 +26,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **PyInstaller compatibility** : Works correctly with compiled application
 - **Consistency** : Same path resolution logic as the rest of the application
 
+- **Column configuration fixed** : Complete correction of the column system
+  - Issue 1: URL Herald column (index 11) was not included in resizing (`range(11)` instead of `range(12)`)
+  - Issue 2: Class and Level columns order was inverted in the configuration menu
+  - Issue 3: Visibility mapping used incorrect order and URL column was missing
+  - Solution: 
+    * `apply_column_resize_mode()` now correctly processes all 12 columns
+    * Configuration menu order aligned with TreeView (Class before Level)
+    * `column_map` mapping corrected with proper order and URL column inclusion
+  - Impact: All 12 columns (0-11) are now correctly configurable for resizing and visibility
+  - Modified files: `Functions/tree_manager.py`, `UI/dialogs.py`
+  - Documentation: `Documentation/COLUMN_CONFIGURATION_FIX.md` created with detailed analysis
+
 ---
 
 ## [0.105] - 2025-10-31 - Eden Scraping & Mass Import 🌐

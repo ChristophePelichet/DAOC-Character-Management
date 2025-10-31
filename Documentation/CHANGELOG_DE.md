@@ -26,6 +26,18 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - **PyInstaller-Kompatibilität** : Funktioniert korrekt mit kompilierter Anwendung
 - **Konsistenz** : Gleiche Pfadauflösungslogik wie der Rest der Anwendung
 
+- **Spaltenkonfiguration korrigiert** : Vollständige Korrektur des Spaltensystems
+  - Problem 1: URL Herald-Spalte (Index 11) war nicht in der Größenänderung enthalten (`range(11)` statt `range(12)`)
+  - Problem 2: Die Reihenfolge der Spalten Klasse und Stufe war im Konfigurationsmenü vertauscht
+  - Problem 3: Sichtbarkeitszuordnung verwendete falsche Reihenfolge und URL-Spalte fehlte
+  - Lösung: 
+    * `apply_column_resize_mode()` verarbeitet jetzt korrekt alle 12 Spalten
+    * Konfigurationsmenü-Reihenfolge mit TreeView abgestimmt (Klasse vor Stufe)
+    * `column_map`-Zuordnung mit korrekter Reihenfolge und URL-Spalten-Einbeziehung korrigiert
+  - Auswirkung: Alle 12 Spalten (0-11) sind jetzt korrekt für Größenänderung und Sichtbarkeit konfigurierbar
+  - Geänderte Dateien: `Functions/tree_manager.py`, `UI/dialogs.py`
+  - Dokumentation: `Documentation/COLUMN_CONFIGURATION_FIX.md` mit detaillierter Analyse erstellt
+
 ---
 
 ## [0.105] - 2025-10-31 - Eden Scraping & Massenimport 🌐

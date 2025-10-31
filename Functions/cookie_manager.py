@@ -27,9 +27,9 @@ class CookieManager:
             config_dir: Dossier de configuration (par défaut: Configuration/)
         """
         if config_dir is None:
-            # Utiliser le dossier Configuration du projet
-            base_dir = Path(__file__).parent.parent
-            config_dir = base_dir / "Configuration"
+            # Utiliser le dossier Configuration depuis config_manager
+            from Functions.config_manager import get_config_dir
+            config_dir = Path(get_config_dir())
         else:
             config_dir = Path(config_dir)
         

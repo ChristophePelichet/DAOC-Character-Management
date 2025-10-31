@@ -7,6 +7,27 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/),
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [0.106] - 2025-10-31 - Correction Eden Scraping 🔧
+
+### 🐛 Corrections
+
+#### Corrigé (31/10/2025)
+- **Chemin de sauvegarde des cookies Eden** : Correction du dossier de sauvegarde
+  - Problème : Les cookies ne se sauvegardaient pas dans le dossier `Configuration/` par défaut
+  - Le `CookieManager` utilisait `Path(__file__).parent.parent` qui causait des problèmes avec PyInstaller
+  - Solution : Utilisation de `get_config_dir()` depuis `config_manager.py` pour une cohérence globale
+  - Les cookies sont maintenant correctement sauvegardés dans le dossier défini par `config_folder` dans `config.json`
+  - Compatible avec l'application compilée et l'exécution normale
+  - Fichier modifié : `Functions/cookie_manager.py` (ligne 22-34)
+  - Documentation : `Documentation/COOKIE_PATH_FIX.md` créée avec détails complets
+
+#### Améliorations
+- **Centralisation de la configuration** : Tous les chemins utilisent maintenant `get_config_dir()`
+- **Compatibilité PyInstaller** : Fonctionne correctement avec l'application compilée
+- **Cohérence** : Même logique de résolution de chemin que le reste de l'application
+
+---
+
 ## [0.105] - 2025-10-31 - Eden Scraping & Import en Masse 🌐
 
 ### 🌐 Eden Herald - Import Amélioré

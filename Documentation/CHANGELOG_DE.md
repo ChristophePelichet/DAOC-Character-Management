@@ -7,6 +7,78 @@ Alle wichtigen Änderungen an diesem Projekt werden in dieser Datei dokumentiert
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/),
 und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
+## [0.105] - 2025-10-31 - Eden Scraping & Massenimport 🌐
+
+### 🌐 Eden Herald - Import-Verbesserungen
+
+#### Hinzugefügt (31.10.2025)
+- **Automatische Standard-Saison-Zuweisung**: Beim Import von Eden Herald
+  - Importierte Charaktere werden automatisch in der in `config.json` definierten Saison `default_season` platziert
+  - Standardwert: "S1", wenn nicht in der Konfiguration definiert
+  - Charakter wird in `Characters/{season}/{name}.json` gespeichert
+  - Geändert in `UI/dialogs.py`: Methode `_import_characters()`
+  - Feld `'season': default_season` in `character_data` hinzugefügt
+  - Abgerufen über `config.get('default_season', 'S1')`
+
+- **Kontextmenü für schnellen Import**: Rechtsklick auf Ergebnistabelle
+  - Neues Kontextmenü in der Herald-Suchergebnistabelle
+  - Aktion "📥 Diesen Charakter importieren" per Rechtsklick auf eine Zeile verfügbar
+  - Direkter Charakter-Import ohne untere Schaltflächen
+  - Bestätigungsdialog vor Import, um Fehler zu vermeiden
+  - Neue Methode `show_context_menu(position)`: Zeigt Menü bei Rechtsklick
+  - Neue Methode `_import_single_character(row)`: Importiert einen bestimmten Charakter
+  - Import von `QMenu` in PySide6-Imports
+  - Konfiguration: `results_table.setContextMenuPolicy(Qt.CustomContextMenu)`
+  - Verbindung: `customContextMenuRequested.connect(self.show_context_menu)`
+
+#### Geändert (31.10.2025)
+- **Verbesserte Import-Ergonomie**:
+  - Zwei verfügbare Import-Methoden: Schaltflächen (bestehend) + Rechtsklick (neu)
+  - Schaltflächen "Auswahl importieren" und "Alle importieren" bleiben voll funktionsfähig
+  - Vereinfachter Workflow: Suchen → Rechtsklick → Bestätigen → In Standard-Saison importiert
+
+#### Dokumentation (31.10.2025)
+- Erstellt `Documentation/EDEN_IMPORT_IMPROVEMENTS_FR.md`:
+  - Vollständige technische Implementierungsdetails
+  - Vollständiger Workflow mit ASCII-Diagramm zur Veranschaulichung des Prozesses
+  - Vorher-Nachher-Vergleich für Endbenutzer
+  - Konfigurationsleitfaden und empfohlene Tests
+  - Mehrsprachige Unterstützung (FR/EN/DE-Vorschläge für Internationalisierung)
+  - Mögliche zukünftige Verbesserungen
+
+### 📚 Dokumentation (30.10.2025)
+
+#### Hinzugefügt
+- **Integriertes Hilfesystem**: Vollständige In-App-Dokumentation
+  - `Functions/help_manager.py`: Hilfe-Manager mit Markdown-Unterstützung
+  - `HelpWindow`: Anzeigefenster mit professionellem HTML-Rendering
+  - Erster Leitfaden: "Einen neuen Charakter erstellen" (FR)
+  - Mehrsprachige Unterstützung mit automatischem Fallback (FR → EN → DE)
+  - "Dokumentation"-Menü im Hilfe-Menü
+  - Professionelles CSS-Styling für optimales Rendering
+  - Emoji-Schriftart-Unterstützung: Segoe UI Emoji, Apple Color Emoji, Noto Color Emoji
+  - Markdown-Bibliothek 3.7 mit Erweiterungen (tables, code, toc)
+
+- **Dokumentationsstruktur**: Vollständige Organisation
+  - `Help/fr/`, `Help/en/`, `Help/de/`: Verzeichnisse nach Sprache
+  - `Help/images/`: Ordner für Screenshots
+  - `Documentation/HELP_SYSTEM_PLAN.md`: Vollständiger Plan (30+ geplante Hilfen)
+  - `Help/README.md`: Entwicklerleitfaden zum Hinzufügen von Hilfen
+  - `Documentation/HELP_SYSTEM_IMPLEMENTATION.md`: Implementierungszusammenfassung
+
+#### Geändert
+- Reorganisation des Hilfe-Menüs mit Untermenü "📚 Dokumentation"
+- Emoji-Optimierung für bessere Windows/Qt-Kompatibilität
+- Vereinfachte Emojis in Hilfen zur Vermeidung von Anzeigeproblemen
+
+### 🔧 Verbesserungen (30.10.2025)
+
+#### Geändert
+- Sprachkonfiguration aus `config.json` abgerufen
+- `AttributeError` in `show_help_create_character()` behoben
+
+---
+
 ## [0.104] - 2025-10-29 - Vollständiges Refactoring & Migration ✨
 
 ### 🏗️ Architektur

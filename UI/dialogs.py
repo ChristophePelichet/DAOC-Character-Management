@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QFormLayout, QGroupBox, QLabel, 
     QPushButton, QLineEdit, QComboBox, QCheckBox, QSlider, QMessageBox,
     QDialogButtonBox, QFileDialog, QTableWidget, QTableWidgetItem, QHeaderView,
-    QWidget, QTextEdit, QApplication, QProgressBar
+    QWidget, QTextEdit, QApplication, QProgressBar, QMenu
 )
 from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtGui import QBrush, QColor, QIcon, QPixmap
@@ -2085,6 +2085,8 @@ class HeraldSearchDialog(QDialog):
         self.results_table.setSelectionBehavior(QTableWidget.SelectRows)
         self.results_table.setSelectionMode(QTableWidget.SingleSelection)
         self.results_table.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.results_table.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.results_table.customContextMenuRequested.connect(self.show_context_menu)
         
         # Configurer les colonnes (sans URL)
         columns = ["☑", "Royaume", "Nom", "Classe", "Race", "Guilde", "Niveau", "RP", "Realm Rank"]
@@ -2325,6 +2327,46 @@ class HeraldSearchDialog(QDialog):
             # Vider le tableau en cas d'erreur
             self.results_table.setRowCount(0)
     
+    def show_context_menu(self, position):
+        """Affiche le menu contextuel sur la table de résultats"""
+        if not self.current_characters:
+            return
+        
+        # Récupérer la ligne sélectionnée
+        row = self.results_table.rowAt(position.y())
+        if row < 0:
+            return
+        
+        # Créer le menu contextuel
+        context_menu = QMenu(self)
+        
+        # Action d'import
+        import_action = context_menu.addAction("📥 Importer ce personnage")
+        import_action.triggered.connect(lambda: self._import_single_character(row))
+        
+        # Afficher le menu à la position du curseur
+        context_menu.exec_(self.results_table.viewport().mapToGlobal(position))
+    
+    def _import_single_character(self, row):
+        """Importe un personnage spécifique depuis la table"""
+        if row < 0 or row >= len(self.current_characters):
+            return
+        
+        char_data = self.current_characters[row]
+        
+        # Confirmer l'import
+        char_name = char_data.get('clean_name', char_data.get('name', ''))
+        reply = QMessageBox.question(
+            self,
+            "Confirmer l'import",
+            f"Voulez-vous importer le personnage '{char_name}' ?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+        
+        if reply == QMessageBox.Yes:
+            self._import_characters([char_data])
+    
     def import_selected_characters(self):
         """Importe les personnages cochés"""
         if not self.current_characters:
@@ -2399,6 +2441,9 @@ class HeraldSearchDialog(QDialog):
                     errors.append(f"{name}: personnage déjà existant")
                     continue
                 
+                # Récupérer la saison par défaut depuis la configuration
+                default_season = config.get('default_season', 'S1')
+                
                 # Créer le dictionnaire de données du personnage
                 character_data = {
                     'name': name,
@@ -2413,6 +2458,7 @@ class HeraldSearchDialog(QDialog):
                     'url': char_data.get('url', ''),
                     # Valeurs par défaut pour les champs manquants
                     'server': 'Eden',
+                    'season': default_season,
                     'mlevel': '0',
                     'clevel': '0',
                     'notes': f"Importé depuis le Herald le {datetime.now().strftime('%Y-%m-%d %H:%M')}"

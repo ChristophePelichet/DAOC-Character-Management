@@ -7,6 +7,78 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.105] - 2025-10-31 - Eden Scraping & Mass Import 🌐
+
+### 🌐 Eden Herald - Import Improvements
+
+#### Added (10/31/2025)
+- **Automatic default season assignment**: When importing from Eden Herald
+  - Imported characters are automatically placed in the season defined by `default_season` in `config.json`
+  - Default value: "S1" if not defined in configuration
+  - Character saved in `Characters/{season}/{name}.json`
+  - Modified in `UI/dialogs.py`: method `_import_characters()`
+  - Added field `'season': default_season` in `character_data`
+  - Retrieved via `config.get('default_season', 'S1')`
+
+- **Context menu for quick import**: Right-click on results table
+  - New context menu on Herald search results table
+  - Action "📥 Import this character" available by right-clicking on a row
+  - Direct character import without using bottom buttons
+  - Confirmation dialog before import to avoid errors
+  - New method `show_context_menu(position)`: Displays menu on right-click
+  - New method `_import_single_character(row)`: Imports a specific character
+  - Import of `QMenu` in PySide6 imports
+  - Configuration: `results_table.setContextMenuPolicy(Qt.CustomContextMenu)`
+  - Connection: `customContextMenuRequested.connect(self.show_context_menu)`
+
+#### Modified (10/31/2025)
+- **Improved import ergonomics**:
+  - Two import methods available: buttons (existing) + right-click (new)
+  - "Import selection" and "Import all" buttons remain fully functional
+  - Simplified workflow: Search → Right-click → Confirm → Imported to default season
+
+#### Documentation (10/31/2025)
+- Created `Documentation/EDEN_IMPORT_IMPROVEMENTS_FR.md`:
+  - Complete technical implementation details
+  - Complete workflow with ASCII diagram illustrating the process
+  - Before/after comparison for end user
+  - Configuration guide and recommended tests
+  - Multilingual support (FR/EN/DE suggestions for internationalization)
+  - Possible future improvements
+
+### 📚 Documentation (10/30/2025)
+
+#### Added
+- **Integrated Help System**: Complete in-app documentation
+  - `Functions/help_manager.py`: Help manager with Markdown support
+  - `HelpWindow`: Display window with professional HTML rendering
+  - First guide: "Create a New Character" (FR)
+  - Multi-language support with automatic fallback (FR → EN → DE)
+  - "Documentation" menu in Help menu
+  - Professional CSS styling for optimal rendering
+  - Emoji font support: Segoe UI Emoji, Apple Color Emoji, Noto Color Emoji
+  - Markdown library 3.7 with extensions (tables, code, toc)
+
+- **Documentation Structure**: Complete organization
+  - `Help/fr/`, `Help/en/`, `Help/de/`: Directories by language
+  - `Help/images/`: Folder for screenshots
+  - `Documentation/HELP_SYSTEM_PLAN.md`: Complete plan (30+ planned helps)
+  - `Help/README.md`: Developer guide for adding helps
+  - `Documentation/HELP_SYSTEM_IMPLEMENTATION.md`: Implementation summary
+
+#### Modified
+- Reorganization of Help menu with "📚 Documentation" submenu
+- Emoji optimization for better Windows/Qt compatibility
+- Simplified emojis in helps to avoid display issues
+
+### 🔧 Improvements (10/30/2025)
+
+#### Modified
+- Language configuration retrieved from `config.json`
+- Fixed `AttributeError` in `show_help_create_character()`
+
+---
+
 ## [0.104] - 2025-10-29 - Complete Refactoring & Migration ✨
 
 ### 🏗️ Architecture

@@ -7,9 +7,46 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/),
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
-## [1.0] - 2025-10-30 - Release Stable 🎉
+## [0.105] - 2025-10-31 - Eden Scraping & Import en Masse 🌐
 
-### 📚 Documentation
+### 🌐 Eden Herald - Import Amélioré
+
+#### Ajouté (31/10/2025)
+- **Assignation automatique de la saison par défaut** : Lors de l'import depuis Eden Herald
+  - Les personnages importés sont automatiquement placés dans la saison définie par `default_season` dans `config.json`
+  - Valeur par défaut : "S1" si non définie dans la configuration
+  - Le personnage est sauvegardé dans `Characters/{season}/{name}.json`
+  - Modification dans `UI/dialogs.py` : méthode `_import_characters()`
+  - Ajout du champ `'season': default_season` dans `character_data`
+  - Récupération via `config.get('default_season', 'S1')`
+
+- **Menu contextuel pour import rapide** : Clic droit sur la table de résultats
+  - Nouveau menu contextuel sur la table de résultats de recherche Herald
+  - Action "📥 Importer ce personnage" disponible par clic droit sur une ligne
+  - Import direct d'un personnage sans passer par les boutons en bas de page
+  - Dialogue de confirmation avant l'import pour éviter les erreurs
+  - Nouvelle méthode `show_context_menu(position)` : Affiche le menu au clic droit
+  - Nouvelle méthode `_import_single_character(row)` : Importe un personnage spécifique
+  - Import de `QMenu` dans les imports PySide6
+  - Configuration : `results_table.setContextMenuPolicy(Qt.CustomContextMenu)`
+  - Connection : `customContextMenuRequested.connect(self.show_context_menu)`
+
+#### Modifié (31/10/2025)
+- **Ergonomie d'import améliorée** :
+  - Deux méthodes d'import disponibles : boutons (existant) + clic droit (nouveau)
+  - Les boutons "Importer sélection" et "Importer tout" restent pleinement fonctionnels
+  - Workflow simplifié : Recherche → Clic droit → Confirmer → Importé dans la saison par défaut
+
+#### Documentation (31/10/2025)
+- Création de `Documentation/EDEN_IMPORT_IMPROVEMENTS_FR.md` :
+  - Détails techniques complets de l'implémentation
+  - Workflow complet avec diagramme ASCII illustrant le processus
+  - Comparaison avant/après pour l'utilisateur final
+  - Guide de configuration et tests recommandés
+  - Support multilingue (suggestions FR/EN/DE pour internationalisation)
+  - Améliorations futures possibles
+
+### 📚 Documentation (30/10/2025)
 
 #### Ajouté
 - **Système d'Aide Intégré** : Documentation complète dans l'application
@@ -34,16 +71,15 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 - Optimisation des emojis pour meilleure compatibilité Windows/Qt
 - Emojis simplifiés dans les aides pour éviter les problèmes d'affichage
 
-### 🔧 Améliorations
+### 🔧 Améliorations (30/10/2025)
 
 #### Modifié
-- Version de l'application passée à **1.0** (stable)
 - Configuration de la langue récupérée depuis `config.json`
 - Correction de `AttributeError` dans `show_help_create_character()`
 
 ---
 
-## [0.105] - 2025-10-30 - Eden Scraping & Import en Masse 🌐
+## [0.105] - 2025-10-30 - Eden Scraping & Import en Masse 🌐 (suite)
 
 ### 🔧 Migration & Validation de Structure
 

@@ -80,13 +80,13 @@ class LogScanner(QThread):
     def run(self):
         """Scanner tous les fichiers Python"""
         # Patterns pour détecter les logs
-        # Pattern 1: logger.info(), self.logger.debug(), module_logger.warning()
+        log_with_action(CHARACTER, "info", ")", action="INFO")
         logger_pattern = re.compile(
             r'(?:self\.)?(?:module_)?logger\.(?P<level>debug|info|warning|error|critical)\s*\(',
             re.IGNORECASE
         )
         
-        # Pattern 2: log_with_action(logger, "info", ...)
+        log_with_action(CHARACTER, "info", "...)", action="INFO")
         log_with_action_pattern = re.compile(
             r'log_with_action\s*\([^,]+,\s*["\'](?P<level>debug|info|warning|error|critical)["\']',
             re.IGNORECASE
@@ -198,7 +198,7 @@ class LogScanner(QThread):
                 if msg_fallback:
                     message = msg_fallback.group(1).strip()
         else:
-            # Cas 2: logger.info("message", extra={"action": "..."})
+            log_with_action(CHARACTER, "info", "message", action="INFO")
             # Chercher extra={"action": "..."} ou extra={'action': '...'}
             action_match = re.search(r'extra\s*=\s*{\s*["\']action["\']\s*:\s*["\']([^"\']+)["\']', line)
             if action_match:

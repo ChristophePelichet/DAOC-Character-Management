@@ -45,7 +45,7 @@ class CookieManager:
         # Créer le dossier si nécessaire
         self.config_dir.mkdir(parents=True, exist_ok=True)
         
-        eden_logger.info(f"CookieManager initialisé - Fichier: {self.cookie_file}")
+        logger.info(f"CookieManager initialisé - Fichier: {self.cookie_file}", extra={"action": "COOKIES"})
     
     def cookie_exists(self):
         """Vérifie si un fichier de cookies existe"""
@@ -125,7 +125,7 @@ class CookieManager:
             }
             
         except Exception as e:
-            eden_logger.error(f"Erreur lors de la lecture des cookies: {e}")
+            logger.error(f"Erreur lors de la lecture des cookies: {e}", extra={"action": "COOKIES"})
             return {
                 'exists': True,
                 'error': str(e),
@@ -144,42 +144,42 @@ class CookieManager:
         """
         source_path = Path(source_file)
         
-        eden_logger.info(f"Tentative d'import du fichier: {source_file}")
-        eden_logger.info(f"Chemin absolu: {source_path.absolute()}")
-        eden_logger.info(f"Le fichier existe: {source_path.exists()}")
+        logger.info(f"Tentative d", extra={"action": "FILE"})
+        logger.info(f"Chemin absolu: {source_path.absolute()}", extra={"action": "FILE"})
+        logger.info(f"Le fichier existe: {source_path.exists()}", extra={"action": "FILE"})
         
         if not source_path.exists():
-            eden_logger.error(f"Fichier source introuvable: {source_file}")
-            eden_logger.error(f"Chemin absolu testé: {source_path.absolute()}")
+            logger.error(f"Fichier source introuvable: {source_file}", extra={"action": "FILE"})
+            logger.error(f"Chemin absolu testé: {source_path.absolute()}", extra={"action": "FILE"})
             return False
         
         try:
             # Vérifier que c'est un fichier pickle valide
-            eden_logger.info(f"Lecture du fichier pickle...")
+            logger.info(f"Lecture du fichier pickle...", extra={"action": "FILE"})
             with open(source_path, 'rb') as f:
                 cookies = pickle.load(f)
             
-            eden_logger.info(f"Fichier chargé, type: {type(cookies)}")
+            logger.info(f"Fichier chargé, type: {type(cookies)}", extra={"action": "FILE"})
             
             if not isinstance(cookies, list):
-                eden_logger.error("Format de fichier invalide: doit contenir une liste de cookies")
+                logger.error("Format de fichier invalide: doit contenir une liste de cookies", extra={"action": "FILE"})
                 return False
             
-            eden_logger.info(f"Nombre de cookies dans le fichier: {len(cookies)}")
+            logger.info(f"Nombre de cookies dans le fichier: {len(cookies)}", extra={"action": "COOKIES"})
             # Sauvegarder l'ancien fichier si existant
             if self.cookie_file.exists():
                 backup_file = self.cookie_file.with_suffix('.pkl.backup')
                 shutil.copy2(self.cookie_file, backup_file)
-                eden_logger.info(f"Ancien fichier sauvegardé: {backup_file}")
+                logger.info(f"Ancien fichier sauvegardé: {backup_file}", extra={"action": "FILE"})
             
             # Copier le nouveau fichier
             shutil.copy2(source_path, self.cookie_file)
-            eden_logger.info(f"Cookies importés: {len(cookies)} cookies")
+            logger.info(f"Cookies importés: {len(cookies)} cookies", extra={"action": "COOKIES"})
             
             return True
             
         except Exception as e:
-            eden_logger.error(f"Erreur lors de l'importation: {e}")
+            logger.error(f"Erreur lors de l", extra={"action": "LOAD"})
             return False
     
     def delete_cookies(self):
@@ -190,7 +190,7 @@ class CookieManager:
             bool: True si la suppression a réussi
         """
         if not self.cookie_file.exists():
-            eden_logger.warning("Aucun fichier de cookies à supprimer")
+            logger.warning("Aucun fichier de cookies à supprimer", extra={"action": "COOKIES"})
             return True
         
         try:
@@ -200,12 +200,12 @@ class CookieManager:
             
             # Supprimer le fichier
             self.cookie_file.unlink()
-            eden_logger.info("Fichier de cookies supprimé")
+            logger.info("Fichier de cookies supprimé", extra={"action": "COOKIES"})
             
             return True
             
         except Exception as e:
-            eden_logger.error(f"Erreur lors de la suppression: {e}")
+            logger.error(f"Erreur lors de la suppression: {e}", extra={"action": "FILE"})
             return False
     
     def detect_available_browsers(self):
@@ -292,7 +292,7 @@ class CookieManager:
         import os
         
         # Log pour debug
-        eden_logger.info(f"🔍 _initialize_browser_driver appelé avec: preferred_browser={preferred_browser}, headless={headless}, allow_download={allow_download}")
+        logger.info(f"🔍 _initialize_browser_driver appelé avec: preferred_browser={preferred_browser},...", extra={"action": "INIT"})
         
         # Définir l'ordre de priorité
         if preferred_browser:
@@ -443,7 +443,7 @@ class CookieManager:
             tuple: (success: bool, message: str, driver ou None)
         """
         try:
-            eden_logger.info("🌐 Ouverture du navigateur pour authentification Eden")
+            log_with_action(EDEN, "info", "🌐 Ouverture du navigateur pour authentification Eden", action="SCRAPE")
             
             # Initialiser le driver avec fallback multi-navigateurs
             driver, browser_name = self._initialize_browser_driver(
@@ -463,10 +463,10 @@ class CookieManager:
                 )
                 if not allow_download:
                     error_msg += "\n\nNote: Le téléchargement automatique de drivers est désactivé."
-                eden_logger.error(error_msg)
+                log_with_action(CHARACTER, "error", "error_msg", action="ERROR")
                 return (False, error_msg, None)
             
-            eden_logger.info(f"✅ Navigateur initialisé: {browser_name}")
+            log_with_action(EDEN, "info", "✅ Navigateur initialisé: {browser_name}", action="SCRAPE")
             
             # Stocker le navigateur utilisé pour affichage
             self.last_browser_used = browser_name
@@ -476,7 +476,7 @@ class CookieManager:
                 discord_login_url = "https://eden-daoc.net/ucp.php?mode=login&redirect=forum.php%2Fforum&login=external&oauth_service=studio_discord"
                 driver.get(discord_login_url)
                 
-                eden_logger.info("Navigateur ouvert - En attente de l'authentification")
+                log_with_action(EDEN, "info", "Navigateur ouvert - En attente de l", action="SCRAPE")
                 
                 # Retourner le driver pour que l'interface puisse attendre
                 return (True, "browser_opened", driver)
@@ -484,16 +484,16 @@ class CookieManager:
             except Exception as e:
                 driver.quit()
                 error_msg = f"Erreur lors de l'ouverture du navigateur: {e}"
-                eden_logger.error(error_msg)
+                log_with_action(EDEN, "error", "error_msg", action="ERROR")
                 return (False, error_msg, None)
                 
         except ImportError as e:
             error_msg = "Selenium n'est pas installé. Installez-le avec: pip install selenium webdriver-manager"
-            eden_logger.error(error_msg)
+            log_with_action(EDEN, "error", "error_msg", action="ERROR")
             return (False, error_msg, None)
         except Exception as e:
             error_msg = f"Erreur lors de l'initialisation: {e}"
-            eden_logger.error(error_msg)
+            log_with_action(EDEN, "error", "error_msg", action="ERROR")
             return (False, error_msg, None)
     
     def save_cookies_from_driver(self, driver):
@@ -517,19 +517,19 @@ class CookieManager:
             if self.cookie_file.exists():
                 backup_file = self.cookie_file.with_suffix('.pkl.backup')
                 shutil.copy2(self.cookie_file, backup_file)
-                eden_logger.info(f"Ancien fichier sauvegardé: {backup_file}")
+                log_with_action(EDEN, "info", "Ancien fichier sauvegardé: {backup_file}", action="BACKUP")
             
             # Sauvegarder les nouveaux cookies
             with open(self.cookie_file, 'wb') as f:
                 pickle.dump(cookies, f)
             
-            eden_logger.info(f"{len(cookies)} cookies sauvegardés dans {self.cookie_file}")
+            log_with_action(EDEN, "info", "{len(cookies)} cookies sauvegardés dans {self.cookie_file}", action="COOKIS")
             
             return (True, f"{len(cookies)} cookies sauvegardés avec succès", len(cookies))
             
         except Exception as e:
             error_msg = f"Erreur lors de la sauvegarde des cookies: {e}"
-            eden_logger.error(error_msg)
+            log_with_action(EDEN, "error", "error_msg", action="ERROR")
             return (False, error_msg, 0)
     
     def get_cookies_for_scraper(self):
@@ -550,7 +550,7 @@ class CookieManager:
             with open(self.cookie_file, 'rb') as f:
                 return pickle.load(f)
         except Exception as e:
-            eden_logger.error(f"Erreur lors de la lecture des cookies: {e}")
+            log_with_action(EDEN, "error", "Erreur lors de la lecture des cookies: {e}", action="COOKIES")
             return None
     
     def test_eden_connection(self):
@@ -596,7 +596,7 @@ class CookieManager:
             preferred_browser = config.get('preferred_browser', 'Chrome')
             allow_download = config.get('allow_browser_download', False)
             
-            eden_logger.info(f"🔧 test_eden_connection - Configuration lue: preferred_browser='{preferred_browser}', allow_download={allow_download}")
+            log_with_action(EDEN, "info", "🔧 test_eden_connection - Configuration lue: preferred_browser=", action="TEST")
             
             # Créer le driver avec fallback multi-navigateurs (mode headless)
             driver, browser_name = self._initialize_browser_driver(
@@ -615,7 +615,7 @@ class CookieManager:
             
             # Stocker le navigateur utilisé pour affichage
             self.last_browser_used = browser_name
-            eden_logger.debug(f"✅ Test avec {browser_name} (headless)")
+            log_with_action(EDEN, "debug", "✅ Test avec {browser_name} (headless)", action="TEST")
             
             try:
                 # Aller sur la page d'accueil pour pouvoir ajouter les cookies
@@ -631,7 +631,7 @@ class CookieManager:
                 
                 # Tester l'accès au Herald avec une page spécifique
                 test_url = 'https://eden-daoc.net/herald?n=top_players&r=hib'
-                eden_logger.info(f"Test de connexion à {test_url}")
+                log_with_action(EDEN, "info", "Test de connexion à {test_url}", action="TEST")
                 
                 driver.get(test_url)
                 

@@ -163,7 +163,7 @@ class CharacterActionsManager:
             if confirm:
                 self.tree_manager.refresh_character_list()
         else:
-            log_with_action(logger, "error", f"Failed to delete character '{char_name}': {msg}", action="ERROR")
+            logger.error("f\"Failed to delete character '{char_name}': {msg}\"", extra={"action": "FILE"})
             QMessageBox.critical(
                 self.main_window,
                 lang.get("error_title"),
@@ -223,7 +223,7 @@ class CharacterActionsManager:
                 if msg == "char_exists_error" 
                 else msg
             )
-            log_with_action(logger, "error", f"Failed to rename character from '{old_name}' to '{new_name}': {error_msg}", action="ERROR")
+            logger.error("f\"Failed to rename character from '{old_name}' to '{new_name}': {error_msg}\"", extra={"action": "RENAME"})
             QMessageBox.critical(
                 self.main_window,
                 lang.get("error_title"),
@@ -279,7 +279,7 @@ class CharacterActionsManager:
                 if msg == "char_exists_error" 
                 else msg
             )
-            log_with_action(logger, "error", f"Failed to duplicate character from '{original_name}' to '{new_name}': {error_msg}", action="ERROR")
+            logger.error("f\"Failed to duplicate character from '{original_name}' to '{new_name}': {error_m...", extra={"action": "DUPLICATE"})
             QMessageBox.critical(
                 self.main_window,
                 lang.get("error_title"),

@@ -55,11 +55,11 @@ class ArmorManager:
             
             # Copy the file
             shutil.copy2(source_file_path, destination)
-            logger.info(f"Armor file uploaded: {destination}")
+            logger.info(f"Armor file uploaded: {destination}", extra={"action": "FILE"})
             return destination
             
         except Exception as e:
-            logger.error(f"Error uploading armor file: {e}")
+            logger.error(f"Error uploading armor file: {e}", extra={"action": "FILE"})
             return None
     
     def list_armors(self):
@@ -90,7 +90,7 @@ class ArmorManager:
             return armors
             
         except Exception as e:
-            logger.error(f"Error listing armor files: {e}")
+            logger.error(f"Error listing armor files: {e}", extra={"action": "FILE"})
             return []
     
     def delete_armor(self, filename):
@@ -107,13 +107,13 @@ class ArmorManager:
             filepath = os.path.join(self.character_armor_dir, filename)
             if os.path.exists(filepath):
                 os.remove(filepath)
-                logger.info(f"Armor file deleted: {filepath}")
+                logger.info(f"Armor file deleted: {filepath}", extra={"action": "DELETE"})
                 return True
             else:
-                logger.warning(f"Armor file not found: {filepath}")
+                logger.warning(f"Armor file not found: {filepath}", extra={"action": "FILE"})
                 return False
         except Exception as e:
-            logger.error(f"Error deleting armor file: {e}")
+            logger.error(f"Error deleting armor file: {e}", extra={"action": "FILE"})
             return False
     
     def open_armor(self, filename):
@@ -130,13 +130,13 @@ class ArmorManager:
             filepath = os.path.join(self.character_armor_dir, filename)
             if os.path.exists(filepath):
                 os.startfile(filepath)  # Windows
-                logger.info(f"Opened armor file: {filepath}")
+                logger.info(f"Opened armor file: {filepath}", extra={"action": "FILE"})
                 return True
             else:
-                logger.warning(f"Armor file not found: {filepath}")
+                logger.warning(f"Armor file not found: {filepath}", extra={"action": "FILE"})
                 return False
         except Exception as e:
-            logger.error(f"Error opening armor file: {e}")
+            logger.error(f"Error opening armor file: {e}", extra={"action": "FILE"})
             return False
     
     def get_armor_count(self):

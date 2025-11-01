@@ -515,7 +515,7 @@ class LogSourceEditor(QMainWindow):
         
         # Réinitialiser l'éditeur
         self.file_label.setText("Aucun log sélectionné")
-        self.logger_display.clear()
+        self.logger_combo.setCurrentIndex(0)
         self.level_display.clear()
         self.action_combo.clearEditText()
         self.message_edit.clear()

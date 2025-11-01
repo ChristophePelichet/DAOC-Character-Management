@@ -440,6 +440,22 @@ class CharacterSheetWindow(QDialog):
             # Refresh list
             if hasattr(self.parent_app, 'refresh_character_list'):
                 self.parent_app.refresh_character_list()
+            
+            # Trigger backup after character modification
+            if hasattr(self.parent_app, 'backup_manager'):
+                try:
+                    import sys
+                    import logging
+                    print("[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Rank) - Backup with reason=Update")
+                    sys.stderr.write("[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Rank) - Backup with reason=Update\n")
+                    sys.stderr.flush()
+                    logging.info("[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Rank) - Backup with reason=Update")
+                    self.parent_app.backup_manager.backup_characters_force(reason="Update")
+                except Exception as e:
+                    print(f"[BACKUP_TRIGGER] Warning: Backup after rank modification failed: {e}")
+                    sys.stderr.write(f"[BACKUP_TRIGGER] Warning: Backup after rank modification failed: {e}\n")
+                    sys.stderr.flush()
+                    logging.warning(f"[BACKUP_TRIGGER] Backup after rank modification failed: {e}")
     
     def apply_rank(self):
         """Old apply_rank method - kept for backwards compatibility but not used anymore."""
@@ -485,6 +501,22 @@ class CharacterSheetWindow(QDialog):
                 # Refresh list
                 if hasattr(self.parent_app, 'refresh_character_list'):
                     self.parent_app.refresh_character_list()
+                
+                # Trigger backup after character modification
+                if hasattr(self.parent_app, 'backup_manager'):
+                    try:
+                        import sys
+                        import logging
+                        print("[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Rank) - Backup with reason=Update")
+                        sys.stderr.write("[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Rank) - Backup with reason=Update\n")
+                        sys.stderr.flush()
+                        logging.info("[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Rank) - Backup with reason=Update")
+                        self.parent_app.backup_manager.backup_characters_force(reason="Update")
+                    except Exception as e:
+                        print(f"[BACKUP_TRIGGER] Warning: Backup after rank modification failed: {e}")
+                        sys.stderr.write(f"[BACKUP_TRIGGER] Warning: Backup after rank modification failed: {e}\n")
+                        sys.stderr.flush()
+                        logging.warning(f"[BACKUP_TRIGGER] Backup after rank modification failed: {e}")
             else:
                 QMessageBox.critical(self, "Erreur", f"Échec de la sauvegarde : {msg}")
 
@@ -560,6 +592,22 @@ class CharacterSheetWindow(QDialog):
                 if not success:
                     QMessageBox.critical(self, "Erreur", f"Échec de la sauvegarde : {msg}")
                     return
+                
+                # Trigger backup after character modification
+                if hasattr(self.parent_app, 'backup_manager'):
+                    try:
+                        import sys
+                        import logging
+                        print("[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Basic Info) - Backup with reason=Update")
+                        sys.stderr.write("[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Basic Info) - Backup with reason=Update\n")
+                        sys.stderr.flush()
+                        logging.info("[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Basic Info) - Backup with reason=Update")
+                        self.parent_app.backup_manager.backup_characters_force(reason="Update")
+                    except Exception as e:
+                        print(f"[BACKUP_TRIGGER] Warning: Backup after basic info modification failed: {e}")
+                        sys.stderr.write(f"[BACKUP_TRIGGER] Warning: Backup after basic info modification failed: {e}\n")
+                        sys.stderr.flush()
+                        logging.warning(f"[BACKUP_TRIGGER] Backup after basic info modification failed: {e}")
             
             QMessageBox.information(self, "Succès", "Informations du personnage mises à jour avec succès !")
             # Refresh list in parent
@@ -768,6 +816,22 @@ class CharacterSheetWindow(QDialog):
                     f"Échec de la sauvegarde : {msg}"
                 )
                 return
+            
+            # Trigger backup after character modification
+            if hasattr(self.parent_app, 'backup_manager'):
+                try:
+                    import sys
+                    import logging
+                    print("[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Skills/Armor) - Backup with reason=Update")
+                    sys.stderr.write("[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Skills/Armor) - Backup with reason=Update\n")
+                    sys.stderr.flush()
+                    logging.info("[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Skills/Armor) - Backup with reason=Update")
+                    self.parent_app.backup_manager.backup_characters_force(reason="Update")
+                except Exception as e:
+                    print(f"[BACKUP_TRIGGER] Warning: Backup after skills/armor modification failed: {e}")
+                    sys.stderr.write(f"[BACKUP_TRIGGER] Warning: Backup after skills/armor modification failed: {e}\n")
+                    sys.stderr.flush()
+                    logging.warning(f"[BACKUP_TRIGGER] Backup after skills/armor modification failed: {e}")
             
             # Rafraîchir la liste des personnages dans la fenêtre principale
             if hasattr(self.parent_app, 'tree_manager'):
@@ -2563,6 +2627,23 @@ class HeraldSearchDialog(QDialog):
             # Rafraîchir l'interface principale
             if hasattr(self.parent(), 'tree_manager') and hasattr(self.parent().tree_manager, 'refresh_character_list'):
                 self.parent().tree_manager.refresh_character_list()
+            
+            # Trigger backup after mass import/update
+            parent_app = self.parent()
+            if hasattr(parent_app, 'backup_manager'):
+                try:
+                    import sys
+                    import logging
+                    print(f"[BACKUP_TRIGGER] Action: CHARACTER IMPORT/UPDATE (Mass) - {success_count} created, {updated_count} updated - Backup with reason=Update")
+                    sys.stderr.write(f"[BACKUP_TRIGGER] Action: CHARACTER IMPORT/UPDATE (Mass) - {success_count} created, {updated_count} updated - Backup with reason=Update\n")
+                    sys.stderr.flush()
+                    logging.info(f"[BACKUP_TRIGGER] Action: CHARACTER IMPORT/UPDATE (Mass) - {success_count} created, {updated_count} updated - Backup with reason=Update")
+                    parent_app.backup_manager.backup_characters_force(reason="Update")
+                except Exception as e:
+                    print(f"[BACKUP_TRIGGER] Warning: Backup after mass import failed: {e}")
+                    sys.stderr.write(f"[BACKUP_TRIGGER] Warning: Backup after mass import failed: {e}\n")
+                    sys.stderr.flush()
+                    logging.warning(f"[BACKUP_TRIGGER] Backup after mass import failed: {e}")
         else:
             error_msg = "❌ Aucun personnage n'a pu être importé ou mis à jour.\n\n"
             error_msg += "\n".join(errors[:10])
@@ -2800,23 +2881,29 @@ class BackupSettingsDialog(QDialog):
         self.backup_manager = backup_manager
         self.config_manager = backup_manager.config_manager
         self.setWindowTitle(lang.get("backup_settings_title"))
-        self.resize(700, 600)
+        self.resize(750, 750)
         
-        layout = QVBoxLayout(self)
+        main_layout = QVBoxLayout(self)
         
-        # ============ Enabled/Disabled Section ============
+        # Get backup info once for use in multiple sections
+        backup_info = self.backup_manager.get_backup_info()
+        
+        # ============ SECTION 1: CHARACTERS ============
+        chars_group = QGroupBox("📁 Characters")
+        chars_layout = QVBoxLayout()
+        
+        # Enabled/Disabled checkbox
         enabled_layout = QHBoxLayout()
         self.enabled_checkbox = QCheckBox(lang.get("backup_enabled_label"))
         self.enabled_checkbox.setChecked(self.config_manager.get("backup_enabled", True))
         enabled_layout.addWidget(self.enabled_checkbox)
         enabled_layout.addStretch()
-        layout.addLayout(enabled_layout)
-        layout.addSpacing(10)
+        chars_layout.addLayout(enabled_layout)
+        chars_layout.addSpacing(5)
         
-        # ============ Path Configuration Section ============
-        path_group = QGroupBox(lang.get("backup_path_label"))
-        path_layout = QHBoxLayout()
-        
+        # Path Configuration
+        path_layout = QFormLayout()
+        path_row_layout = QHBoxLayout()
         self.path_edit = QLineEdit()
         backup_path = self.config_manager.get("backup_path")
         if not backup_path:
@@ -2825,92 +2912,121 @@ class BackupSettingsDialog(QDialog):
         self.path_edit.setText(backup_path)
         self.path_edit.setReadOnly(True)
         self.path_edit.setCursorPosition(0)
-        path_layout.addWidget(self.path_edit)
+        path_row_layout.addWidget(self.path_edit)
         
         browse_button = QPushButton(lang.get("browse_button"))
+        browse_button.setMaximumWidth(100)
         browse_button.clicked.connect(self.browse_backup_path)
-        path_layout.addWidget(browse_button)
+        path_row_layout.addWidget(browse_button)
+        path_layout.addRow(lang.get("backup_path_label") + " :", path_row_layout)
         
-        path_group.setLayout(path_layout)
-        layout.addWidget(path_group)
+        chars_layout.addLayout(path_layout)
+        chars_layout.addSpacing(10)
         
-        # ============ Compression Setting ============
+        # Compression Setting
         compression_layout = QHBoxLayout()
         self.compress_checkbox = QCheckBox(lang.get("backup_compress_label"))
         self.compress_checkbox.setChecked(self.config_manager.get("backup_compress", True))
         self.compress_checkbox.setToolTip(lang.get("backup_compress_tooltip"))
         compression_layout.addWidget(self.compress_checkbox)
         compression_layout.addStretch()
-        layout.addLayout(compression_layout)
-        layout.addSpacing(10)
+        chars_layout.addLayout(compression_layout)
+        chars_layout.addSpacing(10)
         
-        # ============ Retention Settings ============
-        retention_group = QGroupBox(lang.get("backup_retention_label"))
+        # Retention Settings (size limit only)
         retention_layout = QFormLayout()
-        
-        # Max count
-        max_count_layout = QHBoxLayout()
-        self.max_count_spin = QLineEdit()
-        self.max_count_spin.setText(str(self.config_manager.get("backup_max_count", 10)))
-        self.max_count_spin.setMaximumWidth(100)
-        max_count_layout.addWidget(self.max_count_spin)
-        max_count_layout.addWidget(QLabel(lang.get("backup_max_count_tooltip")))
-        max_count_layout.addStretch()
-        retention_layout.addRow(lang.get("backup_max_count_label"), max_count_layout)
         
         # Size limit
         size_limit_layout = QHBoxLayout()
         self.size_limit_spin = QLineEdit()
         self.size_limit_spin.setText(str(self.config_manager.get("backup_size_limit_mb", 20)))
-        self.size_limit_spin.setMaximumWidth(100)
+        self.size_limit_spin.setMaximumWidth(80)
         size_limit_layout.addWidget(self.size_limit_spin)
         size_limit_layout.addWidget(QLabel("MB"))
         size_limit_layout.addWidget(QLabel(lang.get("backup_size_limit_tooltip")))
         size_limit_layout.addStretch()
         retention_layout.addRow(lang.get("backup_size_limit_label"), size_limit_layout)
         
-        retention_group.setLayout(retention_layout)
-        layout.addWidget(retention_group)
+        chars_layout.addLayout(retention_layout)
+        chars_layout.addSpacing(10)
         
-        # ============ Usage Display ============
-        usage_group = QGroupBox(lang.get("backup_usage_label"))
-        usage_layout = QVBoxLayout()
+        # Last backup date and count info in Characters section
+        info_layout = QFormLayout()
         
-        backup_info = self.backup_manager.get_backup_info()
+        # Total backups count (FIRST)
+        total_backups = len(backup_info["backups"])
+        total_label = QLabel(f"{total_backups}")
+        total_label.setStyleSheet("font-weight: bold; color: #0078D4;")
+        info_layout.addRow("Nombre de sauvegardes :", total_label)
+        
+        # Last backup date (SECOND)
+        last_backup_date = self.config_manager.get("backup_last_date")
+        if last_backup_date:
+            try:
+                from datetime import datetime
+                dt = datetime.fromisoformat(last_backup_date)
+                last_backup_str = dt.strftime("%Y-%m-%d %H:%M:%S")
+            except:
+                last_backup_str = "N/A"
+        else:
+            last_backup_str = "Aucune sauvegarde"
+        last_backup_label = QLabel(last_backup_str)
+        last_backup_label.setStyleSheet("font-weight: bold; color: #0078D4;")
+        info_layout.addRow("Dernière sauvegarde :", last_backup_label)
+        
+        chars_layout.addLayout(info_layout)
+        chars_layout.addSpacing(15)
+        
+        # Backup Now Button in Characters section (auto-size to fit text)
+        backup_button_layout = QHBoxLayout()
+        backup_now_button = QPushButton(lang.get("backup_now_button"))
+        backup_now_button.setStyleSheet("QPushButton { padding: 6px 12px; font-weight: bold; background-color: #0078D4; color: white; border-radius: 4px; }")
+        backup_now_button.clicked.connect(self.backup_now)
+        from PySide6.QtWidgets import QSizePolicy
+        backup_now_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        backup_button_layout.addWidget(backup_now_button)
+        backup_button_layout.addStretch()
+        chars_layout.addLayout(backup_button_layout)
+        
+        chars_group.setLayout(chars_layout)
+        main_layout.addWidget(chars_group)
+        
+        # ============ SECTION 2: STATISTIQUES ============
+        stats_group = QGroupBox("Statistiques de Stockage")
+        stats_layout = QVBoxLayout()
+        
+        # Current Usage
         current_mb = backup_info["current_usage_mb"]
         size_limit = backup_info["size_limit_mb"]
         
+        stats_form = QFormLayout()
         self.usage_label = QLabel()
         self.update_usage_display(current_mb, size_limit)
-        usage_layout.addWidget(self.usage_label)
+        stats_form.addRow(lang.get("backup_usage_label") + " (Characters) :", self.usage_label)
         
-        # Backups list
+        stats_layout.addLayout(stats_form)
+        stats_group.setLayout(stats_layout)
+        main_layout.addWidget(stats_group)
+        
+        # ============ SECTION 3: DERNIÈRES SAUVEGARDES ============
+        recent_group = QGroupBox("⏱️ Dernières Sauvegardes")
+        recent_layout = QVBoxLayout()
+        
         self.backups_list = QTextEdit()
         self.backups_list.setReadOnly(True)
-        self.backups_list.setMaximumHeight(150)
+        self.backups_list.setMinimumHeight(150)
         self.update_backups_list(backup_info["backups"])
-        usage_layout.addWidget(QLabel(lang.get("backup_recent_label")))
-        usage_layout.addWidget(self.backups_list)
+        recent_layout.addWidget(self.backups_list)
         
-        usage_group.setLayout(usage_layout)
-        layout.addWidget(usage_group)
-        
-        # ============ Action Buttons ============
-        action_layout = QHBoxLayout()
-        
-        backup_now_button = QPushButton(lang.get("backup_now_button"))
-        backup_now_button.setStyleSheet("QPushButton { padding: 8px; font-weight: bold; }")
-        backup_now_button.clicked.connect(self.backup_now)
-        action_layout.addWidget(backup_now_button)
-        
-        action_layout.addStretch()
+        recent_group.setLayout(recent_layout)
+        main_layout.addWidget(recent_group)
         
         # ============ Dialog Buttons ============
+        main_layout.addSpacing(10)
         button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         button_box.accepted.connect(self.accept)
         button_box.rejected.connect(self.reject)
-        layout.addLayout(action_layout)
-        layout.addWidget(button_box)
+        main_layout.addWidget(button_box)
         
     def browse_backup_path(self):
         """Open directory selection dialog for backup path."""
@@ -2925,23 +3041,26 @@ class BackupSettingsDialog(QDialog):
             self.path_edit.setCursorPosition(0)
     
     def update_usage_display(self, current_mb, size_limit_mb):
-        """Update the usage display label."""
+        """Update the usage display label with better formatting."""
         if size_limit_mb > 0:
-            usage_text = f"{current_mb} MB / {size_limit_mb} MB"
             percentage = (current_mb / size_limit_mb) * 100 if size_limit_mb > 0 else 0
-            usage_text += f" ({percentage:.1f}%)"
             
             # Color based on usage
             if percentage > 90:
                 color = "#FF4444"  # Red
+                status = "⚠️ Presque plein"
             elif percentage > 70:
                 color = "#FFAA00"  # Orange
+                status = "⚡ Modéré"
             else:
                 color = "#00AA00"  # Green
+                status = "✓ Normal"
             
-            self.usage_label.setText(f"<b>Espace utilisé :</b> <span style='color: {color};'>{usage_text}</span>")
+            usage_text = f"<span style='color: {color}; font-weight: bold;'>{current_mb} MB / {size_limit_mb} MB ({percentage:.1f}%) - {status}</span>"
+            self.usage_label.setText(usage_text)
         else:
-            self.usage_label.setText(f"<b>Espace utilisé :</b> {current_mb} MB (Illimité)")
+            self.usage_label.setText(f"<b>{current_mb} MB</b> (Illimité - pas de limite)")
+
     
     def update_backups_list(self, backups):
         """Update the backups list display."""
@@ -2955,10 +3074,22 @@ class BackupSettingsDialog(QDialog):
         self.backups_list.setText(text)
     
     def backup_now(self):
-        """Perform a backup immediately."""
-        result = self.backup_manager.backup_characters()
+        """Perform a backup immediately, ignoring daily limit."""
+        import sys
+        import logging
+        
+        print("[UI_BACKUP] Manual backup button clicked - Starting backup process...")
+        sys.stdout.flush()
+        logging.info("[UI_BACKUP] Manual backup initiated from settings dialog")
+        
+        result = self.backup_manager.backup_characters_force()
+        
+        print(f"[UI_BACKUP] Backup result: {result['success']} - {result['message']}")
+        sys.stdout.flush()
         
         if result["success"]:
+            print("[UI_BACKUP] SUCCESS - Updating display...")
+            sys.stdout.flush()
             QMessageBox.information(
                 self,
                 lang.get("backup_success_title"),
@@ -2968,7 +3099,11 @@ class BackupSettingsDialog(QDialog):
             backup_info = self.backup_manager.get_backup_info()
             self.update_usage_display(backup_info["current_usage_mb"], backup_info["size_limit_mb"])
             self.update_backups_list(backup_info["backups"])
+            print("[UI_BACKUP] Display updated successfully")
+            sys.stdout.flush()
         else:
+            print("[UI_BACKUP] FAILED - Showing error message...")
+            sys.stdout.flush()
             QMessageBox.warning(
                 self,
                 lang.get("backup_error_title"),
@@ -2986,15 +3121,7 @@ class BackupSettingsDialog(QDialog):
             self.config_manager.set("backup_enabled", self.enabled_checkbox.isChecked())
             self.config_manager.set("backup_compress", self.compress_checkbox.isChecked())
             
-            # Validate numeric inputs
-            try:
-                max_count = int(self.max_count_spin.text())
-                self.config_manager.set("backup_max_count", max_count)
-            except ValueError:
-                QMessageBox.warning(self, lang.get("error_title"), 
-                                  lang.get("backup_invalid_max_count"))
-                return
-            
+            # Validate numeric inputs for size limit only
             try:
                 size_limit = int(self.size_limit_spin.text())
                 self.config_manager.set("backup_size_limit_mb", size_limit)

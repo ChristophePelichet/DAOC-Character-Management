@@ -2,6 +2,8 @@ import os
 import json
 import shutil
 import zipfile
+import sys
+import logging
 from datetime import datetime
 from pathlib import Path
 
@@ -19,6 +21,12 @@ class BackupManager:
         self.backup_dir = self._get_backup_dir()
         self.last_backup_date = None
         self._ensure_backup_dir()
+        init_msg = f"[BACKUP] BackupManager initialized - Backup directory: {self.backup_dir}"
+        print(init_msg)
+        print(init_msg, file=sys.stderr)
+        sys.stdout.flush()
+        sys.stderr.flush()
+        logging.info(init_msg)
 
     def _get_backup_dir(self):
         """Get backup directory from config or use default."""
@@ -57,6 +65,35 @@ class BackupManager:
         except (ValueError, TypeError):
             return True
     
+    def startup_backup(self):
+        """
+        Perform a daily backup on application startup (once per day).
+        This is called when the app starts and no backup was done today.
+        
+        Returns:
+            dict: Status with keys 'success' (bool), 'message' (str), 'file' (str or None)
+        """
+        if not self.should_backup_today():
+            log_msg = "[BACKUP] Startup: Daily backup already done today"
+            print(log_msg)
+            print(log_msg, file=sys.stderr)
+            sys.stdout.flush()
+            sys.stderr.flush()
+            logging.info(log_msg)
+            return {
+                "success": False,
+                "message": "Daily backup already done today",
+                "file": None
+            }
+        
+        log_msg = "[BACKUP] Startup: Performing daily backup on application start..."
+        print(log_msg)
+        print(log_msg, file=sys.stderr)
+        sys.stdout.flush()
+        sys.stderr.flush()
+        logging.info(log_msg)
+        return self._perform_backup("AUTO-DAILY", reason="Startup Daily")
+    
     def trigger_backup_if_needed(self):
         """
         Trigger a backup if conditions are met (once per day, enabled).
@@ -78,17 +115,49 @@ class BackupManager:
         """
         Create a backup of the Characters folder.
         Respects retention policy and storage size limits.
+        Called by auto-trigger system (once per day).
         
         Returns:
             dict: Status with keys 'success' (bool), 'message' (str), 'file' (str or None)
         """
+        log_msg = "[BACKUP] AUTO-BACKUP triggered - Checking daily limit..."
+        print(log_msg)
+        print(log_msg, file=sys.stderr)
+        sys.stdout.flush()
+        sys.stderr.flush()
+        
         if not self.should_backup_today():
+            msg = "Backup already done today - skipped"
+            log_msg = f"[BACKUP] AUTO-BACKUP blocked - {msg}"
+            print(log_msg)
+            print(log_msg, file=sys.stderr)
+            sys.stdout.flush()
+            sys.stderr.flush()
+            logging.info(log_msg)
             return {
                 "success": False,
-                "message": "Backup already done today",
+                "message": msg,
                 "file": None
             }
 
+        log_msg = "[BACKUP] AUTO-BACKUP - Daily limit OK, proceeding with backup..."
+        print(log_msg)
+        print(log_msg, file=sys.stderr)
+        sys.stdout.flush()
+        sys.stderr.flush()
+        return self._perform_backup("AUTO-BACKUP", reason="Action")
+
+    def _perform_backup(self, mode="MANUAL", reason=None):
+        """
+        Internal method that performs the actual backup.
+        
+        Args:
+            mode: String describing the backup mode (e.g., "AUTO-BACKUP", "MANUAL-BACKUP")
+            reason: Optional string describing why the backup was triggered (e.g., "Create", "Delete", "Update")
+        
+        Returns:
+            dict: Status with keys 'success' (bool), 'message' (str), 'file' (str or None)
+        """
         try:
             # Ensure backup directory exists
             self._ensure_backup_dir()
@@ -99,41 +168,98 @@ class BackupManager:
             # Get characters folder
             char_folder = self.config_manager.get("character_folder")
             if not char_folder or not os.path.exists(char_folder):
+                error_msg = "Characters folder not found"
+                print(f"[BACKUP] {mode} - ERROR: {error_msg}", file=sys.stderr)
+                sys.stderr.flush()
+                logging.error(f"[BACKUP] {mode} - {error_msg}")
                 return {
                     "success": False,
-                    "message": "Characters folder not found",
+                    "message": error_msg,
                     "file": None
                 }
 
-            # Create backup filename with timestamp
+            # Create backup filename with timestamp and reason
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            backup_name = f"backup_characters_{timestamp}"
+            reason_str = f"_{reason}" if reason else ""
+            backup_name = f"backup_characters_{timestamp}{reason_str}"
             
             if should_compress:
                 backup_file = os.path.join(self.backup_dir, f"{backup_name}.zip")
+                log_msg = f"[BACKUP] {mode} - Creating compressed backup: {os.path.basename(backup_file)}"
+                print(log_msg)
+                print(log_msg, file=sys.stderr)
+                sys.stdout.flush()
+                sys.stderr.flush()
+                logging.info(log_msg)
                 self._create_zip_backup(char_folder, backup_file)
             else:
                 backup_file = os.path.join(self.backup_dir, backup_name)
+                log_msg = f"[BACKUP] {mode} - Creating uncompressed backup: {os.path.basename(backup_file)}"
+                print(log_msg)
+                print(log_msg, file=sys.stderr)
+                sys.stdout.flush()
+                sys.stderr.flush()
+                logging.info(log_msg)
                 shutil.copytree(char_folder, backup_file, dirs_exist_ok=True)
 
             # Update last backup date
             self.config_manager.set("backup_last_date", datetime.now().isoformat())
             
             # Apply retention policies
+            log_msg = f"[BACKUP] {mode} - Applying retention policies..."
+            print(log_msg)
+            print(log_msg, file=sys.stderr)
+            sys.stdout.flush()
+            sys.stderr.flush()
+            logging.info(log_msg)
             self._apply_retention_policies()
 
+            success_msg = f"Backup created: {os.path.basename(backup_file)}"
+            log_msg = f"[BACKUP] {mode} - SUCCESS: {success_msg}"
+            print(log_msg)
+            print(log_msg, file=sys.stderr)
+            sys.stdout.flush()
+            sys.stderr.flush()
+            logging.info(log_msg)
             return {
                 "success": True,
-                "message": f"Backup created: {os.path.basename(backup_file)}",
+                "message": success_msg,
                 "file": backup_file
             }
 
         except Exception as e:
+            error_msg = f"Backup failed: {str(e)}"
+            log_msg = f"[BACKUP] {mode} - ERROR: {error_msg}"
+            print(log_msg)
+            print(log_msg, file=sys.stderr)
+            sys.stdout.flush()
+            sys.stderr.flush()
+            logging.error(log_msg, exc_info=True)
             return {
                 "success": False,
-                "message": f"Backup failed: {str(e)}",
+                "message": error_msg,
                 "file": None
             }
+
+    def backup_characters_force(self, reason=None):
+        """
+        Create a backup of the Characters folder immediately, ignoring daily limit.
+        Used when manually triggered from UI or during critical operations.
+        Respects retention policy and storage size limits.
+        
+        Args:
+            reason: Optional string describing why the backup was triggered (e.g., "Manual", "Delete", "Update")
+        
+        Returns:
+            dict: Status with keys 'success' (bool), 'message' (str), 'file' (str or None)
+        """
+        log_msg = "[BACKUP] MANUAL-BACKUP triggered by user - Bypassing daily limit..."
+        print(log_msg)
+        print(log_msg, file=sys.stderr)
+        sys.stdout.flush()
+        sys.stderr.flush()
+        logging.info(log_msg)
+        return self._perform_backup("MANUAL-BACKUP", reason=reason or "Manual")
 
     def _create_zip_backup(self, source_dir, zip_file):
         """Create a compressed ZIP backup of the source directory."""
@@ -145,18 +271,10 @@ class BackupManager:
                     zipf.write(file_path, arcname)
 
     def _apply_retention_policies(self):
-        """Apply retention policies based on count and storage size limits."""
+        """Apply retention policy based on storage size limit only."""
         backups = self._get_sorted_backups()
         
-        # Apply count retention
-        max_count = self.config_manager.get("backup_max_count", 10)
-        if max_count > 0 and len(backups) > max_count:
-            to_delete = backups[max_count:]
-            for backup_file in to_delete:
-                self._delete_backup(backup_file)
-            backups = backups[:max_count]
-        
-        # Apply size retention
+        # Apply size retention (size limit only, no count limit)
         size_limit_mb = self.config_manager.get("backup_size_limit_mb", 20)
         if size_limit_mb > 0:
             total_size = sum(self._get_file_size(b) for b in backups)
@@ -164,6 +282,12 @@ class BackupManager:
             
             while total_size > size_limit_bytes and backups:
                 oldest = backups.pop()  # Remove oldest
+                log_msg = f"[BACKUP] Deleting oldest backup due to size limit: {os.path.basename(oldest)}"
+                print(log_msg)
+                print(log_msg, file=sys.stderr)
+                sys.stdout.flush()
+                sys.stderr.flush()
+                logging.info(log_msg)
                 self._delete_backup(oldest)
                 total_size -= self._get_file_size(oldest)
 
@@ -212,7 +336,7 @@ class BackupManager:
         Get information about current backup configuration and usage.
         
         Returns:
-            dict: Contains path, max_count, compress, size_limit, current_usage, backups list
+            dict: Contains path, compress, size_limit, current_usage, backups list
         """
         backups = self._get_sorted_backups()
         total_size = sum(self._get_file_size(b) for b in backups)
@@ -231,7 +355,6 @@ class BackupManager:
 
         return {
             "path": self.backup_dir,
-            "max_count": self.config_manager.get("backup_max_count", 10),
             "compress": self.config_manager.get("backup_compress", True),
             "size_limit_mb": size_limit_mb,
             "current_usage_mb": round(total_size / (1024 * 1024), 2),

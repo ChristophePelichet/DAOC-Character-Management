@@ -50,7 +50,6 @@ class ConfigManager:
                 "tree_view_header_state": None,
                 "backup_enabled": True,
                 "backup_path": None,
-                "backup_max_count": 10,
                 "backup_size_limit_mb": 20,
                 "backup_compress": True,
                 "backup_last_date": None

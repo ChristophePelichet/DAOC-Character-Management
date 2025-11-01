@@ -89,6 +89,17 @@ class CharacterApp(QMainWindow):
         from Functions.backup_manager import BackupManager
         self.backup_manager = BackupManager(config)
         
+        # Perform startup backup (once per day)
+        try:
+            print("[APP_STARTUP] Checking for daily backup...")
+            startup_backup_result = self.backup_manager.startup_backup()
+            if startup_backup_result["success"]:
+                print(f"[APP_STARTUP] Daily backup completed: {startup_backup_result['message']}")
+            else:
+                print(f"[APP_STARTUP] Daily backup skipped: {startup_backup_result['message']}")
+        except Exception as e:
+            logging.warning(f"Startup backup check failed: {e}")
+        
         # Fenêtres auxiliaires
         self.config_window = None
         self.debug_window = None
@@ -421,11 +432,18 @@ class CharacterApp(QMainWindow):
             # Rafraîchir l'affichage
             self.tree_manager.refresh_character_list()
             
-            # Trigger automatic backup after Herald update
+            # Trigger backup with reason after character update
             try:
-                self.backup_manager.trigger_backup_if_needed()
+                print("[BACKUP_TRIGGER] Action: CHARACTER UPDATE - Backup with reason=Update")
+                sys.stderr.write("[BACKUP_TRIGGER] Action: CHARACTER UPDATE - Backup with reason=Update\n")
+                sys.stderr.flush()
+                logging.info("[BACKUP_TRIGGER] Action: CHARACTER UPDATE - Backup with reason=Update")
+                self.backup_manager.backup_characters_force(reason="Update")
             except Exception as e:
-                logging.warning(f"Backup after Herald update failed: {e}")
+                print(f"[BACKUP_TRIGGER] Warning: Backup after character update failed: {e}")
+                sys.stderr.write(f"[BACKUP_TRIGGER] Warning: Backup after character update failed: {e}\n")
+                sys.stderr.flush()
+                logging.warning(f"[BACKUP_TRIGGER] Backup after character update failed: {e}")
             
             QMessageBox.information(
                 self,

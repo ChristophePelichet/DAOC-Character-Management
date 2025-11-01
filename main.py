@@ -85,6 +85,10 @@ class CharacterApp(QMainWindow):
         self.data_manager = DataManager()
         self.available_languages = get_available_languages()
         
+        # Initialisation du BackupManager
+        from Functions.backup_manager import BackupManager
+        self.backup_manager = BackupManager(config)
+        
         # Fenêtres auxiliaires
         self.config_window = None
         self.debug_window = None
@@ -417,6 +421,12 @@ class CharacterApp(QMainWindow):
             # Rafraîchir l'affichage
             self.tree_manager.refresh_character_list()
             
+            # Trigger automatic backup after Herald update
+            try:
+                self.backup_manager.trigger_backup_if_needed()
+            except Exception as e:
+                logging.warning(f"Backup after Herald update failed: {e}")
+            
             QMessageBox.information(
                 self,
                 lang.get("success_title", default="Succès"),
@@ -724,6 +734,21 @@ class CharacterApp(QMainWindow):
                     lang.get("info_title"),
                     lang.get("migration_path_change_later")
                 )
+                
+    def open_backup_settings(self):
+        """Ouvre la fenêtre de paramètres de sauvegarde"""
+        logging.debug("Opening backup settings window")
+        from Functions.backup_manager import get_backup_manager
+        from UI.dialogs import BackupSettingsDialog
+        
+        # Initialize backup manager if not already done
+        backup_mgr = get_backup_manager(config)
+        if backup_mgr is None:
+            from Functions.backup_manager import BackupManager
+            backup_mgr = BackupManager(config)
+        
+        dialog = BackupSettingsDialog(self, backup_mgr)
+        dialog.exec()
                 
     # ========================================================================
     # LANGUE ET INTERFACE

@@ -2778,6 +2778,7 @@ class CharacterUpdateDialog(QDialog):
         """Retourne les modifications sélectionnées."""
         selected = {}
         
+        
         for row in range(self.changes_table.rowCount()):
             item = self.changes_table.item(row, 0)
             if item:
@@ -2789,5 +2790,235 @@ class CharacterUpdateDialog(QDialog):
                     selected[field] = value_raw  # Utiliser la valeur brute
         
         return selected
+
+
+class BackupSettingsDialog(QDialog):
+    """Dialog for configuring character backup settings."""
+    
+    def __init__(self, parent, backup_manager):
+        super().__init__(parent)
+        self.backup_manager = backup_manager
+        self.config_manager = backup_manager.config_manager
+        self.setWindowTitle(lang.get("backup_settings_title"))
+        self.resize(700, 600)
+        
+        layout = QVBoxLayout(self)
+        
+        # ============ Enabled/Disabled Section ============
+        enabled_layout = QHBoxLayout()
+        self.enabled_checkbox = QCheckBox(lang.get("backup_enabled_label"))
+        self.enabled_checkbox.setChecked(self.config_manager.get("backup_enabled", True))
+        enabled_layout.addWidget(self.enabled_checkbox)
+        enabled_layout.addStretch()
+        layout.addLayout(enabled_layout)
+        layout.addSpacing(10)
+        
+        # ============ Path Configuration Section ============
+        path_group = QGroupBox(lang.get("backup_path_label"))
+        path_layout = QHBoxLayout()
+        
+        self.path_edit = QLineEdit()
+        backup_path = self.config_manager.get("backup_path")
+        if not backup_path:
+            from Functions.path_manager import get_base_path
+            backup_path = os.path.join(get_base_path(), "Backup", "Characters")
+        self.path_edit.setText(backup_path)
+        self.path_edit.setReadOnly(True)
+        self.path_edit.setCursorPosition(0)
+        path_layout.addWidget(self.path_edit)
+        
+        browse_button = QPushButton(lang.get("browse_button"))
+        browse_button.clicked.connect(self.browse_backup_path)
+        path_layout.addWidget(browse_button)
+        
+        path_group.setLayout(path_layout)
+        layout.addWidget(path_group)
+        
+        # ============ Compression Setting ============
+        compression_layout = QHBoxLayout()
+        self.compress_checkbox = QCheckBox(lang.get("backup_compress_label"))
+        self.compress_checkbox.setChecked(self.config_manager.get("backup_compress", True))
+        self.compress_checkbox.setToolTip(lang.get("backup_compress_tooltip"))
+        compression_layout.addWidget(self.compress_checkbox)
+        compression_layout.addStretch()
+        layout.addLayout(compression_layout)
+        layout.addSpacing(10)
+        
+        # ============ Retention Settings ============
+        retention_group = QGroupBox(lang.get("backup_retention_label"))
+        retention_layout = QFormLayout()
+        
+        # Max count
+        max_count_layout = QHBoxLayout()
+        self.max_count_spin = QLineEdit()
+        self.max_count_spin.setText(str(self.config_manager.get("backup_max_count", 10)))
+        self.max_count_spin.setMaximumWidth(100)
+        max_count_layout.addWidget(self.max_count_spin)
+        max_count_layout.addWidget(QLabel(lang.get("backup_max_count_tooltip")))
+        max_count_layout.addStretch()
+        retention_layout.addRow(lang.get("backup_max_count_label"), max_count_layout)
+        
+        # Size limit
+        size_limit_layout = QHBoxLayout()
+        self.size_limit_spin = QLineEdit()
+        self.size_limit_spin.setText(str(self.config_manager.get("backup_size_limit_mb", 20)))
+        self.size_limit_spin.setMaximumWidth(100)
+        size_limit_layout.addWidget(self.size_limit_spin)
+        size_limit_layout.addWidget(QLabel("MB"))
+        size_limit_layout.addWidget(QLabel(lang.get("backup_size_limit_tooltip")))
+        size_limit_layout.addStretch()
+        retention_layout.addRow(lang.get("backup_size_limit_label"), size_limit_layout)
+        
+        retention_group.setLayout(retention_layout)
+        layout.addWidget(retention_group)
+        
+        # ============ Usage Display ============
+        usage_group = QGroupBox(lang.get("backup_usage_label"))
+        usage_layout = QVBoxLayout()
+        
+        backup_info = self.backup_manager.get_backup_info()
+        current_mb = backup_info["current_usage_mb"]
+        size_limit = backup_info["size_limit_mb"]
+        
+        self.usage_label = QLabel()
+        self.update_usage_display(current_mb, size_limit)
+        usage_layout.addWidget(self.usage_label)
+        
+        # Backups list
+        self.backups_list = QTextEdit()
+        self.backups_list.setReadOnly(True)
+        self.backups_list.setMaximumHeight(150)
+        self.update_backups_list(backup_info["backups"])
+        usage_layout.addWidget(QLabel(lang.get("backup_recent_label")))
+        usage_layout.addWidget(self.backups_list)
+        
+        usage_group.setLayout(usage_layout)
+        layout.addWidget(usage_group)
+        
+        # ============ Action Buttons ============
+        action_layout = QHBoxLayout()
+        
+        backup_now_button = QPushButton(lang.get("backup_now_button"))
+        backup_now_button.setStyleSheet("QPushButton { padding: 8px; font-weight: bold; }")
+        backup_now_button.clicked.connect(self.backup_now)
+        action_layout.addWidget(backup_now_button)
+        
+        action_layout.addStretch()
+        
+        # ============ Dialog Buttons ============
+        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        button_box.accepted.connect(self.accept)
+        button_box.rejected.connect(self.reject)
+        layout.addLayout(action_layout)
+        layout.addWidget(button_box)
+        
+    def browse_backup_path(self):
+        """Open directory selection dialog for backup path."""
+        current_path = self.path_edit.text()
+        selected_dir = QFileDialog.getExistingDirectory(
+            self,
+            lang.get("backup_path_dialog_title"),
+            current_path
+        )
+        if selected_dir:
+            self.path_edit.setText(selected_dir)
+            self.path_edit.setCursorPosition(0)
+    
+    def update_usage_display(self, current_mb, size_limit_mb):
+        """Update the usage display label."""
+        if size_limit_mb > 0:
+            usage_text = f"{current_mb} MB / {size_limit_mb} MB"
+            percentage = (current_mb / size_limit_mb) * 100 if size_limit_mb > 0 else 0
+            usage_text += f" ({percentage:.1f}%)"
+            
+            # Color based on usage
+            if percentage > 90:
+                color = "#FF4444"  # Red
+            elif percentage > 70:
+                color = "#FFAA00"  # Orange
+            else:
+                color = "#00AA00"  # Green
+            
+            self.usage_label.setText(f"<b>Espace utilisé :</b> <span style='color: {color};'>{usage_text}</span>")
+        else:
+            self.usage_label.setText(f"<b>Espace utilisé :</b> {current_mb} MB (Illimité)")
+    
+    def update_backups_list(self, backups):
+        """Update the backups list display."""
+        text = ""
+        for backup in backups:
+            text += f"• {backup['name']} ({backup['size_mb']} MB) - {backup['date']}\n"
+        
+        if not backups:
+            text = lang.get("backup_no_backups_yet")
+        
+        self.backups_list.setText(text)
+    
+    def backup_now(self):
+        """Perform a backup immediately."""
+        result = self.backup_manager.backup_characters()
+        
+        if result["success"]:
+            QMessageBox.information(
+                self,
+                lang.get("backup_success_title"),
+                result["message"]
+            )
+            # Refresh usage and backups display
+            backup_info = self.backup_manager.get_backup_info()
+            self.update_usage_display(backup_info["current_usage_mb"], backup_info["size_limit_mb"])
+            self.update_backups_list(backup_info["backups"])
+        else:
+            QMessageBox.warning(
+                self,
+                lang.get("backup_error_title"),
+                result["message"]
+            )
+    
+    def accept(self):
+        """Save settings and close dialog."""
+        try:
+            # Validate and save settings
+            backup_path = self.path_edit.text()
+            if backup_path:
+                self.config_manager.set("backup_path", backup_path)
+            
+            self.config_manager.set("backup_enabled", self.enabled_checkbox.isChecked())
+            self.config_manager.set("backup_compress", self.compress_checkbox.isChecked())
+            
+            # Validate numeric inputs
+            try:
+                max_count = int(self.max_count_spin.text())
+                self.config_manager.set("backup_max_count", max_count)
+            except ValueError:
+                QMessageBox.warning(self, lang.get("error_title"), 
+                                  lang.get("backup_invalid_max_count"))
+                return
+            
+            try:
+                size_limit = int(self.size_limit_spin.text())
+                self.config_manager.set("backup_size_limit_mb", size_limit)
+            except ValueError:
+                QMessageBox.warning(self, lang.get("error_title"),
+                                  lang.get("backup_invalid_size_limit"))
+                return
+            
+            # Update backup manager with new settings
+            self.backup_manager.backup_dir = self.backup_manager._get_backup_dir()
+            self.backup_manager._ensure_backup_dir()
+            
+            QMessageBox.information(
+                self,
+                lang.get("backup_settings_saved_title"),
+                lang.get("backup_settings_saved_message")
+            )
+            
+            super().accept()
+        
+        except Exception as e:
+            logging.error(f"Error saving backup settings: {e}", exc_info=True)
+            QMessageBox.critical(self, lang.get("error_title"),
+                               f"{lang.get('backup_settings_error')} : {str(e)}")
+
 
 

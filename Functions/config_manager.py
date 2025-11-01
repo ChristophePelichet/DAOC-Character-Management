@@ -47,7 +47,13 @@ class ConfigManager:
                 "default_server": "Eden",
                 "seasons": ["S1", "S2", "S3"],
                 "default_season": "S1",
-                "tree_view_header_state": None
+                "tree_view_header_state": None,
+                "backup_enabled": True,
+                "backup_path": None,
+                "backup_max_count": 10,
+                "backup_size_limit_mb": 20,
+                "backup_compress": True,
+                "backup_last_date": None
             }
             self.save_config()
 

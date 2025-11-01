@@ -57,6 +57,12 @@ class CharacterActionsManager:
         success, response = save_character(character_data)
         
         if success:
+            # Trigger automatic backup after character creation
+            try:
+                if hasattr(self.main_window, 'backup_manager'):
+                    self.main_window.backup_manager.trigger_backup_if_needed()
+            except Exception as e:
+                logging.warning(f"Backup after character creation failed: {e}")
             self.tree_manager.refresh_character_list()
             logging.info(f"Character '{character_name}' ({race} {class_name}) created")
             QMessageBox.information(
@@ -140,6 +146,12 @@ class CharacterActionsManager:
         
         if success:
             logging.info(f"Character '{char_name}' deleted")
+            # Trigger automatic backup after deletion
+            try:
+                if hasattr(self.main_window, 'backup_manager'):
+                    self.main_window.backup_manager.trigger_backup_if_needed()
+            except Exception as e:
+                logging.warning(f"Backup after deletion failed: {e}")
             if confirm:
                 self.tree_manager.refresh_character_list()
         else:
@@ -186,6 +198,12 @@ class CharacterActionsManager:
         success, msg = rename_character(old_name, new_name)
         
         if success:
+            # Trigger automatic backup after renaming
+            try:
+                if hasattr(self.main_window, 'backup_manager'):
+                    self.main_window.backup_manager.trigger_backup_if_needed()
+            except Exception as e:
+                logging.warning(f"Backup after character rename failed: {e}")
             self.tree_manager.refresh_character_list()
         else:
             error_msg = (
@@ -232,6 +250,12 @@ class CharacterActionsManager:
         success, msg = duplicate_character(char, new_name)
         
         if success:
+            # Trigger automatic backup after duplication
+            try:
+                if hasattr(self.main_window, 'backup_manager'):
+                    self.main_window.backup_manager.trigger_backup_if_needed()
+            except Exception as e:
+                logging.warning(f"Backup after character duplication failed: {e}")
             self.tree_manager.refresh_character_list()
         else:
             error_msg = (

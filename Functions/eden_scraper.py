@@ -12,8 +12,11 @@ import os
 from datetime import datetime
 from pathlib import Path
 
-# Logger dédié pour Eden
-eden_logger = logging.getLogger('eden')
+# Import new logging system
+from .logging_manager import get_logger, log_with_action, LOGGER_EDEN
+
+# Logger au niveau du module pour les fonctions qui ne sont pas dans la classe
+module_logger = get_logger(LOGGER_EDEN)
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -37,6 +40,7 @@ class EdenScraper:
         """
         self.cookie_manager = cookie_manager
         self.driver = None
+        self.logger = get_logger(LOGGER_EDEN)
         
     def initialize_driver(self, headless=True):
         """
@@ -71,18 +75,18 @@ class EdenScraper:
                 if not headless:
                     try:
                         self.driver.minimize_window()
-                        eden_logger.info("🔽 Fenêtre du navigateur minimisée")
+                        self.logger.info("🔽 Fenêtre du navigateur minimisée", extra={"action": "INIT"})
                     except Exception as e:
-                        eden_logger.warning(f"Impossible de minimiser la fenêtre: {e}")
+                        self.logger.warning(f"Impossible de minimiser la fenêtre: {e}", extra={"action": "INIT"})
                 
-                eden_logger.info(f"✅ Driver Selenium initialisé: {browser_name}")
+                self.logger.info(f"✅ Driver Selenium initialisé: {browser_name}", extra={"action": "INIT"})
                 return True
             else:
-                eden_logger.error("❌ Impossible d'initialiser un navigateur")
+                self.logger.error("❌ Impossible d'initialiser un navigateur", extra={"action": "INIT"})
                 return False
             
         except Exception as e:
-            eden_logger.error(f"Erreur lors de l'initialisation du driver: {e}")
+            self.logger.error(f"❌ Erreur lors de l", extra={"action": "INIT"})
             return False
     
     def load_cookies(self):
@@ -93,13 +97,13 @@ class EdenScraper:
             bool: True si les cookies ont été chargés
         """
         if not self.driver:
-            eden_logger.error("Driver non initialisé")
+            self.logger.error("❌ Driver non initialisé", extra={"action": "INIT"})
             return False
         
         try:
             cookies_list = self.cookie_manager.get_cookies_for_scraper()
             if not cookies_list:
-                eden_logger.error("Aucun cookie disponible")
+                self.logger.error("❌ Aucun cookie disponible", extra={"action": "COOKIES"})
                 return False
             
             # Aller sur le domaine pour pouvoir ajouter les cookies
@@ -114,16 +118,16 @@ class EdenScraper:
                 try:
                     self.driver.add_cookie(cookie)
                 except Exception as e:
-                    eden_logger.warning(f"Impossible d'ajouter le cookie {cookie.get('name')}: {e}")
+                    self.logger.warning(f"Impossible d'ajouter le cookie {cookie.get('name')}: {e}", extra={"action": "COOKIES"})
             
-            eden_logger.info(f"{len(cookies_list)} cookies chargés dans le driver")
+            self.logger.info(f"{len(cookies_list)} cookies chargés dans le driver", extra={"action": "COOKIES"})
             
             # Attendre un peu après avoir ajouté les cookies
             time.sleep(1)
             return True
             
         except Exception as e:
-            eden_logger.error(f"Erreur lors du chargement des cookies: {e}")
+            self.logger.error(f"❌ Erreur lors du chargement des cookies: {e}", extra={"action": "COOKIES"})
             return False
     
     def scrape_character(self, character_name):
@@ -141,13 +145,13 @@ class EdenScraper:
                 return None
         
         if not self.load_cookies():
-            eden_logger.error("Impossible de charger les cookies")
+            self.logger.error("❌ Impossible de charger les cookies", extra={"action": "COOKIES"})
             return None
         
         try:
             # Construire l'URL du personnage
             url = f"https://eden-daoc.net/herald?n=player&k={character_name}"
-            eden_logger.info(f"Scraping du personnage: {character_name} ({url})")
+            self.logger.info(f"Scraping du personnage: {character_name} ({url})", extra={"action": "SCRAPE"})
             
             # Charger la page
             self.driver.get(url)
@@ -167,11 +171,11 @@ class EdenScraper:
             data['character_name'] = character_name
             data['scraped_at'] = datetime.now().isoformat()
             
-            eden_logger.info(f"Données du personnage {character_name} extraites avec succès")
+            self.logger.info(f"Données du personnage {character_name} extraites avec succès", extra={"action": "SCRAPE"})
             return data
             
         except Exception as e:
-            eden_logger.error(f"Erreur lors du scraping du personnage {character_name}: {e}")
+            self.logger.error(f"❌ Erreur lors du scraping du personnage {character_name}: {e}", extra={"action": "SCRAPE"})
             return None
     
     def scrape_search_results(self, search_query, realm=None):
@@ -190,7 +194,7 @@ class EdenScraper:
                 return []
         
         if not self.load_cookies():
-            eden_logger.error("Impossible de charger les cookies")
+            self.logger.error("❌ Impossible de charger les cookies", extra={"action": "COOKIES"})
             return []
         
         try:
@@ -199,7 +203,7 @@ class EdenScraper:
             if realm:
                 url += f"&r={realm}"
             
-            eden_logger.info(f"Recherche: {search_query} (realm: {realm or 'tous'})")
+            self.logger.info(f"Recherche: {search_query} (realm: {realm or 'tous'})", extra={"action": "SEARCH"})
             
             # Charger la page
             self.driver.get(url)
@@ -217,11 +221,11 @@ class EdenScraper:
             # Extraire la liste des personnages
             characters = self._extract_search_results(soup)
             
-            eden_logger.info(f"{len(characters)} personnages trouvés")
+            self.logger.info(f"{len(characters)} personnages trouvés", extra={"action": "SEARCH"})
             return characters
             
         except Exception as e:
-            eden_logger.error(f"Erreur lors de la recherche: {e}")
+            self.logger.error(f"❌ Erreur lors de la recherche: {e}", extra={"action": "SEARCH"})
             return []
     
     def _extract_character_data(self, soup):
@@ -305,7 +309,7 @@ class EdenScraper:
                                     'raw_data': [td.get_text(strip=True) for td in cells]
                                 }
                                 characters.append(char_data)
-                                eden_logger.debug(f"Personnage trouvé: {char_name} - URL: {char_url}")
+                                self.logger.debug(f"Personnage trouvé: {char_name} - URL: {char_url}", extra={"action": "PARSE"})
         
         return characters
     
@@ -314,9 +318,9 @@ class EdenScraper:
         if self.driver:
             try:
                 self.driver.quit()
-                eden_logger.info("Driver Selenium fermé")
+                self.logger.info("Driver Selenium fermé", extra={"action": "CLOSE"})
             except Exception as e:
-                eden_logger.warning(f"Erreur lors de la fermeture du driver: {e}")
+                self.logger.warning(f"Erreur lors de la fermeture du driver: {e}", extra={"action": "CLOSE"})
             finally:
                 self.driver = None
     
@@ -402,7 +406,7 @@ def search_herald_character(character_name, realm_filter=""):
             search_url = f"https://eden-daoc.net/herald?n=search&r={realm_filter}&s={character_name}"
         else:
             search_url = f"https://eden-daoc.net/herald?n=search&s={character_name}"
-        eden_logger.info(f"Recherche Herald: {search_url}")
+        module_logger.info(f"Recherche Herald: {search_url}", extra={"action": "TEST"})
         
         # Naviguer vers la page de recherche
         scraper.driver.get(search_url)
@@ -455,7 +459,7 @@ def search_herald_character(character_name, realm_filter=""):
             try:
                 old_file.unlink()
             except Exception as e:
-                eden_logger.warning(f"Impossible de supprimer l'ancien fichier {old_file}: {e}")
+                module_logger.warning(f"Impossible de supprimer l'ancien fichier {old_file}: {e}", extra={"action": "CLEANUP"})
         
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         json_filename = f"search_{character_name}_{timestamp}.json"
@@ -518,7 +522,7 @@ def search_herald_character(character_name, realm_filter=""):
                         'realm_level': realm_level,
                         'url': url
                     })
-                    eden_logger.debug(f"Personnage extrait: {name} - URL: {url}")
+                    module_logger.debug(f"Personnage extrait: {name} - URL: {url}", extra={"action": "PARSE"})
         
         # Sauvegarder les personnages formatés dans le même dossier temp
         characters_filename = f"characters_{character_name}_{timestamp}.json"
@@ -537,12 +541,12 @@ def search_herald_character(character_name, realm_filter=""):
         char_count = len(characters)
         message = f"{char_count} personnage(s) trouvé(s)"
         
-        eden_logger.info(f"Recherche terminée: {char_count} personnages - Fichiers: {json_path}, {characters_path}")
+        module_logger.info(f"Recherche terminée: {char_count} personnages - Fichiers: {json_path}, {character...", extra={"action": "SCRAPE"})
         
         return True, message, str(characters_path)
         
     except Exception as e:
-        eden_logger.error(f"Erreur lors de la recherche Herald: {e}", exc_info=True)
+        module_logger.error(f"❌ Erreur lors de la recherche Herald: {e}", extra={"action": "SEARCH"})
         return False, f"Erreur: {str(e)}", ""
 
 
@@ -570,7 +574,7 @@ def scrape_character_from_url(character_url, cookie_manager):
         if not character_name:
             return False, None, "Impossible d'extraire le nom du personnage de l'URL"
         
-        eden_logger.info(f"Mise à jour du personnage: {character_name} depuis URL: {character_url}")
+        module_logger.info(f"Mise à jour du personnage: {character_name} depuis URL: {character_url}", extra={"action": "UPDATE"})
         
         # Utiliser search_herald_character qui fonctionne (pas de bot check sur la recherche)
         success, message, characters_file = search_herald_character(character_name)
@@ -600,7 +604,7 @@ def scrape_character_from_url(character_url, cookie_manager):
         # Si pas de correspondance exacte, prendre le premier
         if not target_char and characters:
             target_char = characters[0]
-            eden_logger.warning(f"Pas de correspondance exacte, utilisation du premier résultat: {target_char.get('name')}")
+            module_logger.warning(f"Pas de correspondance exacte, utilisation du premier résultat: {target_char.get(", extra={"action": "SEARCH"})
         
         if not target_char:
             return False, None, "Personnage non trouvé dans les résultats"
@@ -608,11 +612,11 @@ def scrape_character_from_url(character_url, cookie_manager):
         # Normaliser les données pour correspondre au format attendu
         normalized_data = _normalize_herald_data(target_char)
         
-        eden_logger.info(f"Données récupérées pour: {normalized_data.get('name')}")
+        module_logger.info(f"Données récupérées pour: {normalized_data.get(", extra={"action": "UPDATE"})
         return True, normalized_data, ""
         
     except Exception as e:
-        eden_logger.error(f"Erreur lors de la récupération: {e}", exc_info=True)
+        module_logger.error(f"❌ Erreur lors de la récupération: {e}", extra={"action": "UPDATE"})
         return False, None, f"Erreur: {str(e)}"
 
 
@@ -697,7 +701,7 @@ def _normalize_herald_data(char_data):
         'rank': char_data.get('rank', '')
     }
     
-    eden_logger.debug(f"Données normalisées: {normalized}")
+    module_logger.debug(f"Données normalisées: {normalized}", extra={"action": "SCRAPE"})
     return normalized
 
 
@@ -769,7 +773,7 @@ def _parse_character_herald_data(raw_data):
         return parsed if parsed else None
         
     except Exception as e:
-        eden_logger.error(f"Erreur lors du parsing des données: {e}")
+        module_logger.error(f"❌ Erreur lors du parsing des données: {e}", extra={"action": "SCRAPE"})
         return None
 
 

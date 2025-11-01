@@ -10,6 +10,9 @@ from datetime import datetime
 from Functions.config_manager import config
 from Functions.path_manager import get_base_path
 from Functions.language_manager import lang
+from Functions.logging_manager import get_logger, log_with_action, LOGGER_BACKUP
+
+logger = get_logger(LOGGER_BACKUP)
 
 def get_character_dir():
     """Returns the configured character directory."""
@@ -57,7 +60,7 @@ def backup_characters():
         backup_name = f"Characters_backup_{timestamp}.zip"
         backup_path = os.path.join(backup_dir, backup_name)
         
-        logging.info(f"Creating compressed backup: {backup_path}")
+        log_with_action(logger, "info", f"Creating compressed backup: {backup_path}", action="MIGRATION_ZIP")
         
         # Count files to backup for validation
         files_added = 0
@@ -72,19 +75,19 @@ def backup_characters():
                     arcname = os.path.relpath(file_path, os.path.dirname(base_char_dir))
                     zipf.write(file_path, arcname)
                     files_added += 1
-                    logging.debug(f"Added to backup: {arcname}")
+                    logger.debug(f"Added to backup: {arcname}")
         
-        logging.info(f"Compressed backup created with {files_added} file(s): {backup_path}")
+        log_with_action(logger, "info", f"Compressed backup created with {files_added} file(s): {backup_path}", action="MIGRATION_ZIP")
         
         # CRITICAL: Verify backup integrity
         try:
-            logging.info("Verifying backup integrity...")
+            logger.info("Verifying backup integrity...")
             with zipfile.ZipFile(backup_path, 'r') as zipf:
                 # Test the ZIP file integrity
                 bad_file = zipf.testzip()
                 if bad_file:
                     error_msg = f"Backup verification failed: corrupted file {bad_file}"
-                    logging.error(error_msg)
+                    log_with_action(logger, "error", error_msg, action="MIGRATION_VERIFY_FAILED")
                     # Delete corrupted backup
                     try:
                         os.remove(backup_path)
@@ -96,35 +99,35 @@ def backup_characters():
                 zip_files = len(zipf.namelist())
                 if zip_files != files_added:
                     error_msg = f"Backup verification failed: expected {files_added} files, found {zip_files}"
-                    logging.error(error_msg)
+                    log_with_action(logger, "error", error_msg, action="MIGRATION_VERIFY_FAILED")
                     try:
                         os.remove(backup_path)
                     except:
                         pass
                     return False, "", error_msg
             
-            logging.info(f"✓ Backup integrity verified: {zip_files} file(s) OK")
+            log_with_action(logger, "info", f"✓ Backup integrity verified: {zip_files} file(s) OK", action="MIGRATION_VERIFY")
             
         except zipfile.BadZipFile as e:
             error_msg = f"Backup verification failed: invalid ZIP file - {str(e)}"
-            logging.error(error_msg)
+            log_with_action(logger, "error", error_msg, action="MIGRATION_VERIFY_FAILED")
             try:
                 os.remove(backup_path)
             except:
                 pass
             return False, "", error_msg
         
-        logging.info(f"Compressed backup created successfully: {backup_path}")
+        log_with_action(logger, "info", f"Compressed backup created successfully: {backup_path}", action="MIGRATION_SUCCESS")
         return True, backup_path, f"Backup created: {backup_name}"
         
     except Exception as e:
         error_msg = f"Backup failed: {str(e)}"
-        logging.error(error_msg)
+        log_with_action(logger, "error", error_msg, action="MIGRATION_BACKUP_ERROR")
         # Clean up partial backup if it exists
         if backup_path and os.path.exists(backup_path):
             try:
                 os.remove(backup_path)
-                logging.info("Cleaned up partial backup file")
+                log_with_action(logger, "info", "Cleaned up partial backup file", action="MIGRATION_CLEANUP")
             except:
                 pass
         return False, "", error_msg
@@ -140,7 +143,7 @@ def check_migration_needed():
     base_char_dir = get_character_dir()
     
     if not os.path.exists(base_char_dir):
-        logging.info("Character directory does not exist yet. No migration needed.")
+        logger.info("Character directory does not exist yet. No migration needed.")
         return False
     
     # Check if old structure exists (Realm folders directly under Characters)
@@ -154,7 +157,7 @@ def check_migration_needed():
             json_files = [f for f in os.listdir(realm_path) if f.endswith('.json')]
             if json_files:
                 old_structure_exists = True
-                logging.info(f"Found old structure: {realm_path} contains {len(json_files)} character(s)")
+                logger.info(f"Found old structure: {realm_path} contains {len(json_files)} character(s)")
                 break
     
     return old_structure_exists
@@ -183,10 +186,10 @@ def migrate_character_structure():
     # Track all migrated files for potential rollback
     migrated_files = []  # List of (old_path, new_path) tuples
     
-    logging.info("=" * 60)
-    logging.info("Starting character structure migration...")
-    logging.info(f"Base directory: {base_char_dir}")
-    logging.info("=" * 60)
+    log_with_action(logger, "info", "=" * 60, action="MIGRATION_START")
+    log_with_action(logger, "info", "Starting character structure migration...", action="MIGRATION_START")
+    log_with_action(logger, "info", f"Base directory: {base_char_dir}", action="MIGRATION_START")
+    log_with_action(logger, "info", "=" * 60, action="MIGRATION_START")
     
     try:
         # Process each realm
@@ -202,8 +205,8 @@ def migrate_character_structure():
             # Get all JSON files in the old realm folder
             json_files = [f for f in os.listdir(old_realm_path) if f.endswith('.json')]
             
-            logging.info(f"\nProcessing realm: {realm}")
-            logging.info(f"Found {len(json_files)} character file(s)")
+            log_with_action(logger, "info", f"\nProcessing realm: {realm}", action="MIGRATION_PROCESS")
+            log_with_action(logger, "info", f"Found {len(json_files)} character file(s)", action="MIGRATION_PROCESS")
             
             for json_file in json_files:
                 stats["total_characters"] += 1
@@ -216,13 +219,13 @@ def migrate_character_structure():
                             char_data = json.load(f)
                         except json.JSONDecodeError as je:
                             error_msg = f"Invalid JSON in {json_file}: {str(je)}"
-                            logging.error(f"  ✗ {error_msg}")
+                            log_with_action(logger, "error", f"  ✗ {error_msg}", action="MIGRATION_JSON_ERROR")
                             stats["errors"] += 1
                             continue  # Skip this file but continue with others
                     
                     # Validate that it's a dictionary
                     if not isinstance(char_data, dict):
-                        logging.error(f"  ✗ Invalid character data in {json_file}: not a dictionary")
+                        log_with_action(logger, "error", f"  ✗ Invalid character data in {json_file}: not a dictionary", action="MIGRATION_INVALID_DATA")
                         stats["errors"] += 1
                         continue
                     
@@ -230,7 +233,7 @@ def migrate_character_structure():
                     season = char_data.get('season', 'S1')
                     if not season or not isinstance(season, str):
                         season = 'S1'
-                        logging.warning(f"Character {json_file} has invalid/missing season, defaulting to S1")
+                        log_with_action(logger, "warning", f"Character {json_file} has invalid/missing season, defaulting to S1", action="MIGRATION_NO_SEASON")
                     
                     # Create new directory structure
                     new_season_path = os.path.join(base_char_dir, season)
@@ -242,7 +245,7 @@ def migrate_character_structure():
                     
                     # Check if target file already exists (safety check)
                     if os.path.exists(new_file_path):
-                        logging.warning(f"  ! Target file already exists: {new_file_path}, skipping")
+                        log_with_action(logger, "warning", f"  ! Target file already exists: {new_file_path}, skipping", action="MIGRATION_FILE_EXISTS")
                         stats["errors"] += 1
                         continue
                     
@@ -257,7 +260,7 @@ def migrate_character_structure():
                         if verify_data != char_data:
                             raise Exception("Copied file data doesn't match original")
                     except Exception as ve:
-                        logging.error(f"  ✗ Copy verification failed for {json_file}: {str(ve)}")
+                        log_with_action(logger, "error", f"  ✗ Copy verification failed for {json_file}: {str(ve)}", action="MIGRATION_VERIFY_FAILED")
                         # Remove the invalid copy
                         try:
                             os.remove(new_file_path)
@@ -266,7 +269,7 @@ def migrate_character_structure():
                         stats["errors"] += 1
                         continue
                     
-                    logging.info(f"  ✓ Migrated: {json_file} -> {season}/{realm}/")
+                    log_with_action(logger, "info", f"  ✓ Migrated: {json_file} -> {season}/{realm}/", action="MIGRATION_SUCCESS")
                     
                     # Track successful migration for potential rollback
                     migrated_files.append((old_file_path, new_file_path))
@@ -275,7 +278,7 @@ def migrate_character_structure():
                     stats["by_season"][season] = stats["by_season"].get(season, 0) + 1
                     
                 except Exception as e:
-                    logging.error(f"  ✗ Error migrating {json_file}: {e}")
+                    log_with_action(logger, "error", f"  ✗ Error migrating {json_file}: {e}", action="MIGRATION_ERROR")
                     stats["errors"] += 1
             
             # CRITICAL: Only remove old files if ALL files in this realm migrated successfully
@@ -293,40 +296,40 @@ def migrate_character_structure():
                     # Try to remove the old realm folder if empty
                     if os.path.exists(old_realm_path) and not os.listdir(old_realm_path):
                         os.rmdir(old_realm_path)
-                        logging.info(f"  ✓ Removed empty old folder: {realm}/")
+                        log_with_action(logger, "info", f"  ✓ Removed empty old folder: {realm}/", action="MIGRATION_CLEANUP")
                     else:
-                        logging.warning(f"  ! Old folder {realm}/ not empty, keeping it")
+                        log_with_action(logger, "warning", f"  ! Old folder {realm}/ not empty, keeping it", action="MIGRATION_CLEANUP")
                 except Exception as e:
-                    logging.warning(f"  ! Could not clean up old folder {realm}/: {e}")
+                    log_with_action(logger, "warning", f"  ! Could not clean up old folder {realm}/: {e}", action="MIGRATION_CLEANUP_ERROR")
             else:
-                logging.warning(f"  ! Not all files migrated for {realm} ({realm_migrated_count}/{realm_files_count}), keeping old folder")
+                log_with_action(logger, "warning", f"  ! Not all files migrated for {realm} ({realm_migrated_count}/{realm_files_count}), keeping old folder", action="MIGRATION_INCOMPLETE")
         
         # Summary
-        logging.info("\n" + "=" * 60)
-        logging.info("Migration Summary:")
-        logging.info(f"  Total characters found: {stats['total_characters']}")
-        logging.info(f"  Successfully migrated: {stats['migrated']}")
-        logging.info(f"  Errors: {stats['errors']}")
+        log_with_action(logger, "info", "\n" + "=" * 60, action="MIGRATION_SUMMARY")
+        log_with_action(logger, "info", "Migration Summary:", action="MIGRATION_SUMMARY")
+        log_with_action(logger, "info", f"  Total characters found: {stats['total_characters']}", action="MIGRATION_SUMMARY")
+        log_with_action(logger, "info", f"  Successfully migrated: {stats['migrated']}", action="MIGRATION_SUMMARY")
+        log_with_action(logger, "info", f"  Errors: {stats['errors']}", action="MIGRATION_SUMMARY")
         if stats["by_season"]:
-            logging.info("  Characters by season:")
+            log_with_action(logger, "info", "  Characters by season:", action="MIGRATION_SUMMARY")
             for season, count in sorted(stats["by_season"].items()):
-                logging.info(f"    {season}: {count} character(s)")
-        logging.info("=" * 60)
+                log_with_action(logger, "info", f"    {season}: {count} character(s)", action="MIGRATION_SUMMARY")
+        log_with_action(logger, "info", "=" * 60, action="MIGRATION_SUMMARY")
         
         # CRITICAL: If there were errors, perform rollback
         if stats["errors"] > 0:
-            logging.error("⚠️  ERRORS DETECTED - Performing rollback to preserve data integrity")
+            log_with_action(logger, "error", "⚠️  ERRORS DETECTED - Performing rollback to preserve data integrity", action="MIGRATION_ROLLBACK")
             rollback_count = 0
             for old_path, new_path in migrated_files:
                 try:
                     if os.path.exists(new_path):
                         os.remove(new_path)
                         rollback_count += 1
-                        logging.info(f"  Rolled back: {os.path.basename(new_path)}")
+                        log_with_action(logger, "info", f"  Rolled back: {os.path.basename(new_path)}", action="MIGRATION_ROLLBACK")
                 except Exception as re:
-                    logging.error(f"  ✗ Rollback failed for {new_path}: {re}")
+                    log_with_action(logger, "error", f"  ✗ Rollback failed for {new_path}: {re}", action="MIGRATION_ROLLBACK_ERROR")
             
-            logging.info(f"Rollback completed: {rollback_count}/{len(migrated_files)} files removed from new location")
+            log_with_action(logger, "info", f"Rollback completed: {rollback_count}/{len(migrated_files)} files removed from new location", action="MIGRATION_ROLLBACK")
             error_message = f"Migration failed with {stats['errors']} error(s). All changes have been rolled back. Your original files are safe."
             return False, error_message, stats
         
@@ -337,11 +340,11 @@ def migrate_character_structure():
             
     except Exception as e:
         error_msg = f"Migration failed with critical error: {e}"
-        logging.error(error_msg)
+        log_with_action(logger, "error", error_msg, action="MIGRATION_CRITICAL_ERROR")
         
         # CRITICAL: Perform rollback on critical failure
         if migrated_files:
-            logging.error("⚠️  CRITICAL FAILURE - Attempting rollback")
+            log_with_action(logger, "error", "⚠️  CRITICAL FAILURE - Attempting rollback", action="MIGRATION_CRITICAL_ROLLBACK")
             rollback_count = 0
             for old_path, new_path in migrated_files:
                 try:
@@ -350,7 +353,7 @@ def migrate_character_structure():
                         rollback_count += 1
                 except:
                     pass
-            logging.info(f"Emergency rollback: {rollback_count}/{len(migrated_files)} files removed")
+            log_with_action(logger, "info", f"Emergency rollback: {rollback_count}/{len(migrated_files)} files removed", action="MIGRATION_CRITICAL_ROLLBACK")
         
         return False, f"{error_msg}\nRollback performed. Your original files are safe.", stats
 
@@ -364,10 +367,10 @@ def mark_migration_done():
     try:
         with open(flag_file, 'w') as f:
             f.write("Migration to Season/Realm structure completed")
-        logging.info("Migration flag file created")
+        log_with_action(logger, "info", "Migration flag file created", action="MIGRATION_DONE")
         return True
     except Exception as e:
-        logging.error(f"Could not create migration flag file: {e}")
+        log_with_action(logger, "error", f"Could not create migration flag file: {e}", action="MIGRATION_FLAG_ERROR")
         return False
 
 def is_migration_done():
@@ -391,17 +394,17 @@ def run_migration_if_needed():
     """
     # Check if migration was already done
     if is_migration_done():
-        logging.debug("Migration already completed (flag file exists)")
+        logger.debug("Migration already completed (flag file exists)")
         return False, True, "Migration already completed"
     
     # Check if migration is needed
     if not check_migration_needed():
-        logging.info("No migration needed - structure is already correct")
+        log_with_action(logger, "info", "No migration needed - structure is already correct", action="MIGRATION_NOT_NEEDED")
         mark_migration_done()
         return False, True, "No migration needed"
     
     # Migration is needed - return this info so UI can show confirmation dialog
-    logging.info("Migration needed - waiting for user confirmation...")
+    log_with_action(logger, "info", "Migration needed - waiting for user confirmation...", action="MIGRATION_NEEDS_CONFIRM")
     return True, False, "Migration needed - awaiting user confirmation"
 
 def run_migration_with_backup():
@@ -412,38 +415,38 @@ def run_migration_with_backup():
     Returns:
         tuple: (success: bool, message: str, backup_path: str)
     """
-    logging.info("=" * 60)
-    logging.info("Starting migration with backup...")
-    logging.info("=" * 60)
+    log_with_action(logger, "info", "=" * 60, action="MIGRATION_START_BACKUP")
+    log_with_action(logger, "info", "Starting migration with backup...", action="MIGRATION_START_BACKUP")
+    log_with_action(logger, "info", "=" * 60, action="MIGRATION_START_BACKUP")
     
     # Create backup first
     backup_success, backup_path, backup_msg = backup_characters()
     
     if not backup_success:
         error_msg = f"Backup failed: {backup_msg}\nMigration cancelled for safety."
-        logging.error(error_msg)
+        log_with_action(logger, "error", error_msg, action="MIGRATION_BACKUP_FAILED")
         return False, error_msg, ""
     
-    logging.info(f"✓ Backup successful: {backup_path}")
-    logging.info(f"✓ Backup verified and ready for recovery if needed")
+    log_with_action(logger, "info", f"✓ Backup successful: {backup_path}", action="MIGRATION_BACKUP_SUCCESS")
+    log_with_action(logger, "info", f"✓ Backup verified and ready for recovery if needed", action="MIGRATION_BACKUP_READY")
     
     # Run migration
-    logging.info("Starting character structure migration...")
+    log_with_action(logger, "info", "Starting character structure migration...", action="MIGRATION_START")
     success, message, stats = migrate_character_structure()
     
     if success:
         # CRITICAL: Only mark as done if truly successful (no errors)
         if stats.get("errors", 0) == 0:
             mark_migration_done()
-            logging.info("✓ Migration marked as completed")
+            log_with_action(logger, "info", "✓ Migration marked as completed", action="MIGRATION_DONE")
         else:
-            logging.warning("⚠️  Migration had errors, not marking as done")
+            log_with_action(logger, "warning", "⚠️  Migration had errors, not marking as done", action="MIGRATION_HAS_ERRORS")
         
         # Return only the migration message, let the UI handle backup path display
         return True, message, backup_path
     else:
         # On failure, rollback was already performed, don't mark as done
-        logging.error("✗ Migration failed, rollback performed, not marking as done")
+        log_with_action(logger, "error", "✗ Migration failed, rollback performed, not marking as done", action="MIGRATION_FAILED_ROLLBACK")
         # Include backup path in message for safety info
         full_message = f"{message}\n\n✓ Your original files are safe in:\n{backup_path}"
         return False, full_message, backup_path

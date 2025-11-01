@@ -6,6 +6,7 @@ import sys
 import logging
 from datetime import datetime
 from pathlib import Path
+from .logging_manager import get_logger, log_with_action, LOGGER_BACKUP, LoggerFactory
 
 class BackupManager:
     """Manages character backups with compression, retention policies, and size limits."""
@@ -21,12 +22,12 @@ class BackupManager:
         self.backup_dir = self._get_backup_dir()
         self.last_backup_date = None
         self._ensure_backup_dir()
-        init_msg = f"[BACKUP] BackupManager initialized - Backup directory: {self.backup_dir}"
-        print(init_msg)
-        print(init_msg, file=sys.stderr)
-        sys.stdout.flush()
+        self.logger = get_logger(LOGGER_BACKUP)
+        
+        init_msg = f"BackupManager initialized - Backup directory: {self.backup_dir}"
+        log_with_action(self.logger, "info", init_msg, action="INIT")
+        print(f"[{LOGGER_BACKUP.upper()}] {init_msg}", file=sys.stderr)
         sys.stderr.flush()
-        logging.info(init_msg)
 
     def _get_backup_dir(self):
         """Get backup directory from config or use default."""
@@ -74,24 +75,14 @@ class BackupManager:
             dict: Status with keys 'success' (bool), 'message' (str), 'file' (str or None)
         """
         if not self.should_backup_today():
-            log_msg = "[BACKUP] Startup: Daily backup already done today"
-            print(log_msg)
-            print(log_msg, file=sys.stderr)
-            sys.stdout.flush()
-            sys.stderr.flush()
-            logging.info(log_msg)
+            log_with_action(self.logger, "info", "Daily backup already done today", action="STARTUP")
             return {
                 "success": False,
                 "message": "Daily backup already done today",
                 "file": None
             }
         
-        log_msg = "[BACKUP] Startup: Performing daily backup on application start..."
-        print(log_msg)
-        print(log_msg, file=sys.stderr)
-        sys.stdout.flush()
-        sys.stderr.flush()
-        logging.info(log_msg)
+        log_with_action(self.logger, "info", "Performing daily backup on application start...", action="STARTUP")
         return self._perform_backup("AUTO-DAILY", reason="Startup Daily")
     
     def trigger_backup_if_needed(self):
@@ -120,31 +111,18 @@ class BackupManager:
         Returns:
             dict: Status with keys 'success' (bool), 'message' (str), 'file' (str or None)
         """
-        log_msg = "[BACKUP] AUTO-BACKUP triggered - Checking daily limit..."
-        print(log_msg)
-        print(log_msg, file=sys.stderr)
-        sys.stdout.flush()
-        sys.stderr.flush()
+        log_with_action(self.logger, "info", "AUTO-BACKUP triggered - Checking daily limit...", action="AUTO_TRIGGER")
         
         if not self.should_backup_today():
             msg = "Backup already done today - skipped"
-            log_msg = f"[BACKUP] AUTO-BACKUP blocked - {msg}"
-            print(log_msg)
-            print(log_msg, file=sys.stderr)
-            sys.stdout.flush()
-            sys.stderr.flush()
-            logging.info(log_msg)
+            log_with_action(self.logger, "info", msg, action="AUTO_BLOCKED")
             return {
                 "success": False,
                 "message": msg,
                 "file": None
             }
 
-        log_msg = "[BACKUP] AUTO-BACKUP - Daily limit OK, proceeding with backup..."
-        print(log_msg)
-        print(log_msg, file=sys.stderr)
-        sys.stdout.flush()
-        sys.stderr.flush()
+        log_with_action(self.logger, "info", "Daily limit OK, proceeding with backup...", action="AUTO_PROCEED")
         return self._perform_backup("AUTO-BACKUP", reason="Action")
 
     def _perform_backup(self, mode="MANUAL", reason=None):
@@ -169,9 +147,7 @@ class BackupManager:
             char_folder = self.config_manager.get("character_folder")
             if not char_folder or not os.path.exists(char_folder):
                 error_msg = "Characters folder not found"
-                print(f"[BACKUP] {mode} - ERROR: {error_msg}", file=sys.stderr)
-                sys.stderr.flush()
-                logging.error(f"[BACKUP] {mode} - {error_msg}")
+                log_with_action(self.logger, "error", error_msg, action=f"{mode}")
                 return {
                     "success": False,
                     "message": error_msg,
@@ -185,42 +161,22 @@ class BackupManager:
             
             if should_compress:
                 backup_file = os.path.join(self.backup_dir, f"{backup_name}.zip")
-                log_msg = f"[BACKUP] {mode} - Creating compressed backup: {os.path.basename(backup_file)}"
-                print(log_msg)
-                print(log_msg, file=sys.stderr)
-                sys.stdout.flush()
-                sys.stderr.flush()
-                logging.info(log_msg)
+                log_with_action(self.logger, "info", f"Creating compressed backup: {os.path.basename(backup_file)}", action=f"{mode}_ZIP")
                 self._create_zip_backup(char_folder, backup_file)
             else:
                 backup_file = os.path.join(self.backup_dir, backup_name)
-                log_msg = f"[BACKUP] {mode} - Creating uncompressed backup: {os.path.basename(backup_file)}"
-                print(log_msg)
-                print(log_msg, file=sys.stderr)
-                sys.stdout.flush()
-                sys.stderr.flush()
-                logging.info(log_msg)
+                log_with_action(self.logger, "info", f"Creating uncompressed backup: {os.path.basename(backup_file)}", action=f"{mode}_COPY")
                 shutil.copytree(char_folder, backup_file, dirs_exist_ok=True)
 
             # Update last backup date
             self.config_manager.set("backup_last_date", datetime.now().isoformat())
             
             # Apply retention policies
-            log_msg = f"[BACKUP] {mode} - Applying retention policies..."
-            print(log_msg)
-            print(log_msg, file=sys.stderr)
-            sys.stdout.flush()
-            sys.stderr.flush()
-            logging.info(log_msg)
+            log_with_action(self.logger, "info", "Applying retention policies...", action=f"{mode}_RETENTION")
             self._apply_retention_policies()
 
             success_msg = f"Backup created: {os.path.basename(backup_file)}"
-            log_msg = f"[BACKUP] {mode} - SUCCESS: {success_msg}"
-            print(log_msg)
-            print(log_msg, file=sys.stderr)
-            sys.stdout.flush()
-            sys.stderr.flush()
-            logging.info(log_msg)
+            log_with_action(self.logger, "info", success_msg, action=f"{mode}_SUCCESS")
             return {
                 "success": True,
                 "message": success_msg,
@@ -229,12 +185,8 @@ class BackupManager:
 
         except Exception as e:
             error_msg = f"Backup failed: {str(e)}"
-            log_msg = f"[BACKUP] {mode} - ERROR: {error_msg}"
-            print(log_msg)
-            print(log_msg, file=sys.stderr)
-            sys.stdout.flush()
-            sys.stderr.flush()
-            logging.error(log_msg, exc_info=True)
+            log_with_action(self.logger, "error", error_msg, action=f"{mode}_ERROR")
+            logging.error(f"Exception during backup: {str(e)}", exc_info=True)
             return {
                 "success": False,
                 "message": error_msg,
@@ -253,12 +205,7 @@ class BackupManager:
         Returns:
             dict: Status with keys 'success' (bool), 'message' (str), 'file' (str or None)
         """
-        log_msg = "[BACKUP] MANUAL-BACKUP triggered by user - Bypassing daily limit..."
-        print(log_msg)
-        print(log_msg, file=sys.stderr)
-        sys.stdout.flush()
-        sys.stderr.flush()
-        logging.info(log_msg)
+        log_with_action(self.logger, "info", "MANUAL-BACKUP triggered - Bypassing daily limit...", action="MANUAL_TRIGGER")
         return self._perform_backup("MANUAL-BACKUP", reason=reason or "Manual")
 
     def _create_zip_backup(self, source_dir, zip_file):
@@ -282,12 +229,7 @@ class BackupManager:
             
             while total_size > size_limit_bytes and backups:
                 oldest = backups.pop()  # Remove oldest
-                log_msg = f"[BACKUP] Deleting oldest backup due to size limit: {os.path.basename(oldest)}"
-                print(log_msg)
-                print(log_msg, file=sys.stderr)
-                sys.stdout.flush()
-                sys.stderr.flush()
-                logging.info(log_msg)
+                log_with_action(self.logger, "info", f"Deleting oldest backup: {os.path.basename(oldest)}", action="RETENTION_DELETE")
                 self._delete_backup(oldest)
                 total_size -= self._get_file_size(oldest)
 

@@ -29,11 +29,11 @@ def generate_test_logs():
     # Logs de succès (vert)
     eden_logger.info("✅ Connexion Herald réussie")
     eden_logger.info("✅ Chrome (Selenium Manager)")
-    eden_logger.info("✅ 4 cookies sauvegardés avec succès")
+    logger.info("✅ 4 cookies sauvegardés avec succès", extra={"action": "COOKIES"})
     
     # Logs d'erreur (rouge)
-    eden_logger.error("❌ Échec de l'initialisation du driver")
-    eden_logger.error("❌ Erreur de connexion au Herald")
+    logger.error("❌ Échec de l", extra={"action": "INIT"})
+    logger.error("❌ Erreur de connexion au Herald", extra={"action": "SCRAPE"})
     
     # Logs d'avertissement (orange)
     eden_logger.warning("⚠️ Attention : Cookies expirés")
@@ -54,20 +54,20 @@ def generate_test_logs():
     eden_logger.info("🍪 Authentification via cookies réussie")
     
     # Logs de configuration (cyan)
-    eden_logger.info("📋 Configuration lue : preferred_browser='Edge', allow_download=False")
-    eden_logger.info("📋 Ordre de priorité des navigateurs : Edge, Chrome, Firefox")
-    eden_logger.info("📋 Paramètres de scraping chargés")
+    logger.info("📋 Configuration lue : preferred_browser=", extra={"action": "INIT"})
+    logger.info("📋 Ordre de priorité des navigateurs : Edge, Chrome, Firefox", extra={"action": "INIT"})
+    logger.info("📋 Paramètres de scraping chargés", extra={"action": "SCRAPE"})
     
     # Logs mixtes (plusieurs couleurs)
-    eden_logger.info("🔍 Détection des navigateurs... Chrome trouvé, Edge trouvé")
-    eden_logger.info("🍪 Tentative de connexion avec les cookies existants...")
-    eden_logger.error("❌ Échec de connexion - Erreur de navigateur")
+    logger.info("🔍 Détection des navigateurs... Chrome trouvé, Edge trouvé", extra={"action": "INIT"})
+    logger.info("🍪 Tentative de connexion avec les cookies existants...", extra={"action": "COOKIES"})
+    logger.error("❌ Échec de connexion - Erreur de navigateur", extra={"action": "INIT"})
     eden_logger.info("✅ Reconnexion réussie avec Edge")
     
     # Logs DEBUG (plus détaillés)
-    eden_logger.debug("DEBUG: Vérification de l'existence de chromedriver.exe")
-    eden_logger.debug("DEBUG: Path système : C:\\Users\\...\\selenium\\chromedriver")
-    eden_logger.debug("DEBUG: Cookies trouvés : {'eden_daoc_sid': 'abc123', ...}")
+    logger.debug("DEBUG: Vérification de l", extra={"action": "INIT"})
+    logger.debug("DEBUG: Path système : C:\\Users\\...\\selenium\\chromedriver", extra={"action": "INIT"})
+    logger.debug("DEBUG: Cookies trouvés : {", extra={"action": "COOKIES"})
     
     print("✅ Logs de test générés avec succès\n")
 

@@ -4,6 +4,46 @@ from logging.handlers import RotatingFileHandler
 from .config_manager import config
 from .path_manager import get_base_path, get_resource_path
 
+# Logger names constants - for easy filtering and organization
+LOGGER_ROOT = "ROOT"
+LOGGER_BACKUP = "BACKUP"
+LOGGER_EDEN = "EDEN"
+LOGGER_UI = "UI"
+LOGGER_CHARACTER = "CHARACTER"
+
+# All available loggers (for future UI filtering)
+ALL_LOGGERS = [LOGGER_BACKUP, LOGGER_EDEN, LOGGER_UI, LOGGER_CHARACTER]
+
+class ContextualFormatter(logging.Formatter):
+    """
+    Enhanced formatter that includes:
+    - asctime (date and time)
+    - logger name
+    - level name
+    - action (custom attribute)
+    - message
+    
+    Format: LOGGER - LEVEL - ACTION - MESSAGE
+    Example: EDEN - INFO - TEST - Connexion à https://eden-daoc.net/herald?n=top_players&r=hib
+    """
+    def format(self, record):
+        # Add action field (empty by default)
+        if not hasattr(record, 'action'):
+            record.action = "-"
+        else:
+            # If action is provided but empty, replace with dash
+            if not record.action:
+                record.action = "-"
+        
+        # Convert logger name to uppercase, with special handling for 'root'
+        logger_name = record.name.upper() if record.name != 'root' else 'ROOT'
+        
+        # Build the format string with all parts
+        fmt = '%(asctime)s - ' + logger_name + ' - %(levelname)s - %(action)s - %(message)s'
+        
+        formatter = logging.Formatter(fmt, datefmt='%Y-%m-%d %H:%M:%S')
+        return formatter.format(record)
+
 def get_log_dir():
     """
     Gets the log directory from the config.
@@ -56,7 +96,8 @@ def setup_logging(extra_handlers=None):
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
     
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    # Use the new contextual formatter
+    formatter = ContextualFormatter()
     log_file_path = os.path.join(log_dir, "debug.log")
 
     # Always create a file handler for CRITICAL and ERROR messages (even if debug is OFF)
@@ -77,3 +118,52 @@ def setup_logging(extra_handlers=None):
         ch.setLevel(logging.DEBUG)
         ch.setFormatter(formatter)
         logger.addHandler(ch)
+
+
+def get_logger(name):
+    """
+    Get a logger with a specific name.
+    
+    Usage:
+        logger = get_logger("backup")
+        logger.info("Backup started", extra={"action": "START"})
+    """
+    return logging.getLogger(name)
+
+
+def log_with_action(logger, level, message, action=""):
+    """
+    Log a message with an action field for better filtering.
+    
+    Usage:
+        log_with_action(logger, "info", "Character updated", action="MODIFY")
+    """
+    extra = {"action": action} if action else {}
+    if level.lower() == "debug":
+        logger.debug(message, extra=extra)
+    elif level.lower() == "info":
+        logger.info(message, extra=extra)
+    elif level.lower() == "warning":
+        logger.warning(message, extra=extra)
+    elif level.lower() == "error":
+        logger.error(message, extra=extra)
+    elif level.lower() == "critical":
+        logger.critical(message, extra=extra)
+
+
+class LoggerFactory:
+    """Factory for creating and managing loggers with consistent formatting."""
+    
+    _loggers = {}
+    
+    @staticmethod
+    def get_logger(name):
+        """Get or create a logger with the given name."""
+        if name not in LoggerFactory._loggers:
+            LoggerFactory._loggers[name] = logging.getLogger(name)
+        return LoggerFactory._loggers[name]
+    
+    @staticmethod
+    def log(logger, level, message, action=""):
+        """Log a message with optional action for context."""
+        log_with_action(logger, level, message, action)

@@ -5,11 +5,13 @@ Debug window and logging utilities for the DAOC Character Manager.
 import logging
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QGroupBox, 
-    QTextEdit, QPushButton, QLineEdit, QSplitter, QFileDialog, QLabel
+    QTextEdit, QPushButton, QLineEdit, QSplitter, QFileDialog, QLabel,
+    QComboBox
 )
 from PySide6.QtCore import QThread, QObject, Signal, Slot, Qt
 from PySide6.QtGui import QAction, QActionGroup
 from Functions.language_manager import lang
+from Functions.logging_manager import ALL_LOGGERS
 
 
 class QTextEditHandler(logging.Handler, QObject):
@@ -36,6 +38,26 @@ class LogLevelFilter(logging.Filter):
 
     def filter(self, record):
         return self.min_level <= record.levelno <= self.max_level
+
+
+class LoggerNameFilter(logging.Filter):
+    """Filter logs based on logger name."""
+    
+    def __init__(self, allowed_loggers=None):
+        super().__init__()
+        self.allowed_loggers = allowed_loggers if allowed_loggers else []
+
+    def filter(self, record):
+        if not self.allowed_loggers:
+            return True
+        # Map 'ROOT' to 'root' (actual root logger name in Python logging)
+        # and allow the specified loggers
+        display_name = 'ROOT' if record.name == 'root' else record.name
+        return display_name in self.allowed_loggers or record.name == 'root'
+    
+    def set_allowed_loggers(self, loggers):
+        """Update the list of allowed loggers."""
+        self.allowed_loggers = loggers if loggers else []
 
 
 class LogFileReaderThread(QThread):
@@ -77,6 +99,7 @@ class DebugWindow(QMainWindow):
         self.setGeometry(100, 100, 1200, 700)
         self.monitoring_thread = None
         self.current_log_level = logging.DEBUG
+        self.current_loggers = []  # All loggers selected by default
 
         # Central Widget and Layout
         central_widget = QWidget()
@@ -86,8 +109,21 @@ class DebugWindow(QMainWindow):
         # Menu Bar
         self._create_menus()
         
-        # Button Bar
+        # Button Bar with Logger Dropdown
         button_bar_layout = QHBoxLayout()
+        
+        # Logger dropdown
+        logger_label = QLabel("🔍 Filter Logger:")
+        self.logger_combo = QComboBox()
+        self.logger_combo.addItem("📋 All Loggers", ALL_LOGGERS + ['ROOT'])
+        self.logger_combo.addItem("─" * 30)  # Separator
+        for logger_name in ALL_LOGGERS:
+            self.logger_combo.addItem(f"  {logger_name}", [logger_name, 'ROOT'])
+        self.logger_combo.currentIndexChanged.connect(self._on_logger_combo_changed)
+        button_bar_layout.addWidget(logger_label)
+        button_bar_layout.addWidget(self.logger_combo)
+        button_bar_layout.addSpacing(20)
+        
         test_debug_button = QPushButton(lang.get("test_debug_button"))
         test_debug_button.clicked.connect(self.raise_test_exception)
         button_bar_layout.addWidget(test_debug_button)
@@ -145,13 +181,17 @@ class DebugWindow(QMainWindow):
         main_splitter.setSizes([700, 500])
 
         # Setup Logging Handlers
-        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        
+        # Create logger name filter (allow all loggers by default)
+        self.logger_filter = LoggerNameFilter(ALL_LOGGERS + ['ROOT'])
         
         # General log handler (INFO and below)
         self.log_filter = LogLevelFilter(logging.DEBUG, logging.INFO)
         self.log_handler = QTextEditHandler(self)
         self.log_handler.setFormatter(formatter)
         self.log_handler.addFilter(self.log_filter)
+        self.log_handler.addFilter(self.logger_filter)
         self.log_handler.log_updated.connect(self.log_widget.append)
         logging.getLogger().addHandler(self.log_handler)
 
@@ -160,11 +200,12 @@ class DebugWindow(QMainWindow):
         self.error_handler = QTextEditHandler(self)
         self.error_handler.setFormatter(formatter)
         self.error_handler.addFilter(self.error_filter)
+        self.error_handler.addFilter(self.logger_filter)
         self.error_handler.log_updated.connect(self.error_widget.append)
         logging.getLogger().addHandler(self.error_handler)
 
     def _create_menus(self):
-        """Create the menu bar with log level options."""
+        """Create the menu bar with log level and logger filter options."""
         menu_bar = self.menuBar()
 
         # Level Menu
@@ -190,6 +231,30 @@ class DebugWindow(QMainWindow):
             if level == self.current_log_level:
                 action.setChecked(True)
 
+        # Logger Menu
+        logger_menu = menu_bar.addMenu("Loggers")
+        logger_action_group = QActionGroup(self)
+        logger_action_group.setExclusive(True)
+        logger_action_group.triggered.connect(self.set_logger_filter)
+
+        # "All Loggers" option
+        all_loggers_action = QAction("All Loggers", self)
+        all_loggers_action.setData(ALL_LOGGERS + ['ROOT'])
+        all_loggers_action.setCheckable(True)
+        all_loggers_action.setChecked(True)
+        logger_menu.addAction(all_loggers_action)
+        logger_action_group.addAction(all_loggers_action)
+
+        logger_menu.addSeparator()
+
+        # Individual logger options
+        for logger_name in ALL_LOGGERS:
+            action = QAction(logger_name, self)
+            action.setData([logger_name, 'ROOT'])  # Include ROOT with each logger
+            action.setCheckable(True)
+            logger_menu.addAction(action)
+            logger_action_group.addAction(action)
+
     @Slot(QAction)
     def set_log_level(self, action):
         """Sets the minimum logging level for the handlers."""
@@ -200,6 +265,34 @@ class DebugWindow(QMainWindow):
         # Update filters
         self.log_filter.min_level = level
         self.error_filter.min_level = level
+
+    @Slot(QAction)
+    def set_logger_filter(self, action):
+        """Update the logger filter based on the selected option."""
+        loggers = action.data()
+        self.current_loggers = loggers
+        self.logger_filter.set_allowed_loggers(loggers)
+        
+        selected = ", ".join(loggers)
+        logging.info(f"Debug window logger filter set to: {selected}")
+    
+    @Slot(int)
+    def _on_logger_combo_changed(self, index):
+        """Handle logger dropdown selection change."""
+        if index < 0:
+            return
+        
+        # Skip separator
+        if self.logger_combo.itemText(index).startswith("─"):
+            self.logger_combo.setCurrentIndex(0)
+            return
+        
+        loggers = self.logger_combo.itemData(index)
+        self.current_loggers = loggers
+        self.logger_filter.set_allowed_loggers(loggers)
+        
+        selected = ", ".join(loggers)
+        logging.info(f"🔍 Debug window logger filter set to: {selected}")
         
     def raise_test_exception(self):
         """Raises a test exception to verify the logging system."""

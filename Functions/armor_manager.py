@@ -37,7 +37,7 @@ class ArmorManager:
         """
         try:
             if not os.path.exists(source_file_path):
-                logger.error(f"Source file does not exist: {source_file_path}")
+                logger.error(f"Source file does not exist: {source_file_path}", extra={"action": "FILE"})
                 return None
             
             filename = os.path.basename(source_file_path)

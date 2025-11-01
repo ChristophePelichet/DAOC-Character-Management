@@ -13,8 +13,11 @@ from datetime import datetime
 from pathlib import Path
 import logging
 
+# Import new logging system
+from .logging_manager import get_logger, LOGGER_EDEN
+
 # Logger dédié pour Eden
-eden_logger = logging.getLogger('eden')
+eden_logger = get_logger(LOGGER_EDEN)
 
 class CookieManager:
     """Gestionnaire de cookies pour l'authentification Eden"""

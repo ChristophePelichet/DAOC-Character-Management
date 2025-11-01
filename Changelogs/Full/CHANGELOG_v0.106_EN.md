@@ -94,6 +94,28 @@
 ✅ **Complete application portability** - Centralized configuration without __file__ dependencies  
 ✅ **Ability to diagnose unexpected crashes** - Detailed logs of all critical events  
 ✅ **Consistent and coherent interface** - Unified labels and optimal path display  
+✅ **Automatic backup on modifications** - Each character modification creates a backup with visible logs  
+
+### Automatic backup system on character updates
+- **Problem** : When modifying an existing character (rank, info, armor, skills) or updating from Herald, no backup was triggered
+- **Solution** : Integration of automatic backups with descriptive reason at all modification points
+- **Points covered** :
+  * Herald update after confirmation (main.py)
+  * Automatic rank modification (auto_apply_rank)
+  * Manual rank modification (apply_rank_manual)
+  * Basic info modification (save_basic_info)
+  * Armor/skills modification (CharacterSheetWindow)
+  * Mass import/update (import dialog)
+- **Backup type** : `backup_characters_force(reason="Update")` → MANUAL (bypass daily limit)
+- **Filename** : `backup_characters_YYYYMMDD_HHMMSS_Update.zip`
+- **Generated logs** : Each modification generates visible logs with `[BACKUP_TRIGGER]` tag :
+  ```
+  [BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Rank) - Backup with reason=Update
+  [BACKUP] MANUAL-BACKUP - Creating compressed backup: backup_characters_20251101_143045_Update.zip
+  ```
+- **Result** : Each character modification automatically creates a backup with descriptive reason and visible logs
+- **Modified files** : `main.py`, `UI/dialogs.py`
+- **Documentation** : `Documentations/BACKUP_DEBUG_GUIDE.md` updated with new scenarios
 
 ## 🔗 Modified Files
 
@@ -105,3 +127,4 @@
 - `Language/fr.json`
 - `Language/en.json`
 - `Language/de.json`
+- `Documentations/BACKUP_DEBUG_GUIDE.md`

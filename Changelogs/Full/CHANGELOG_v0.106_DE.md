@@ -94,6 +94,28 @@
 ✅ **Vollständige Anwendungsportabilität** - Zentralisierte Konfiguration ohne __file__-Abhängigkeiten  
 ✅ **Möglichkeit, unerwartete Abstürze zu diagnostizieren** - Detaillierte Protokolle aller kritischen Ereignisse  
 ✅ **Konsistente und kohärente Benutzeroberfläche** - Einheitliche Labels und optimale Pfadanzeige  
+✅ **Automatische Sicherung bei Änderungen** - Jede Charaktermodifikation erstellt eine Sicherung mit sichtbaren Logs  
+
+### Automatisches Sicherungssystem bei Charakteraktualisierungen
+- **Problem** : Bei der Änderung eines vorhandenen Charakters (Rang, Info, Rüstung, Fähigkeiten) oder bei der Aktualisierung von Herald wurde keine Sicherung ausgelöst
+- **Lösung** : Integration automatischer Sicherungen mit aussagekräftigen Gründen an allen Änderungspunkten
+- **Abgedeckte Punkte** :
+  * Herald-Aktualisierung nach Bestätigung (main.py)
+  * Automatische Rangänderung (auto_apply_rank)
+  * Manuelle Rangänderung (apply_rank_manual)
+  * Änderung von Basis-Infos (save_basic_info)
+  * Rüstungs-/Fähigkeitsänderung (CharacterSheetWindow)
+  * Massen-Import/Aktualisierung (Import-Dialog)
+- **Sicherungstyp** : `backup_characters_force(reason="Update")` → MANUELL (umgeht tägliches Limit)
+- **Dateiname** : `backup_characters_YYYYMMDD_HHMMSS_Update.zip`
+- **Generierte Logs** : Jede Änderung generiert sichtbare Logs mit Tag `[BACKUP_TRIGGER]` :
+  ```
+  [BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Rank) - Backup with reason=Update
+  [BACKUP] MANUAL-BACKUP - Creating compressed backup: backup_characters_20251101_143045_Update.zip
+  ```
+- **Ergebnis** : Jede Charakteränderung erstellt automatisch eine Sicherung mit aussagekräftigem Grund und sichtbaren Logs
+- **Geänderte Dateien** : `main.py`, `UI/dialogs.py`
+- **Dokumentation** : `Documentations/BACKUP_DEBUG_GUIDE.md` mit neuen Szenarien aktualisiert
 
 ## 🔗 Geänderte Dateien
 
@@ -105,3 +127,4 @@
 - `Language/fr.json`
 - `Language/en.json`
 - `Language/de.json`
+- `Documentations/BACKUP_DEBUG_GUIDE.md`

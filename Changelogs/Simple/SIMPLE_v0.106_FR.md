@@ -8,4 +8,4 @@
 ✅ Affichage du début des chemins  
 ✅ Système de diagnostic robuste pour les arrêts inattendus  
 ✅ Nettoyage et réorganisation du système CHANGELOGs  
-
+✅ Système de sauvegarde automatique lors des mises à jour de personnages

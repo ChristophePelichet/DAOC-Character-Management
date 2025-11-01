@@ -8,4 +8,4 @@
 ✅ Verbesserte Pfadanzeige  
 ✅ Robustes Diagnosesystem für unerwartete Abstürze  
 ✅ Bereinigung und Umstrukturierung des CHANGELOGs-Systems  
-
+✅ Automatisches Sicherungssystem bei Charakteraktualisierungen

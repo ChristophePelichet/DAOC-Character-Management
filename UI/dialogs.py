@@ -17,8 +17,11 @@ from PySide6.QtGui import QBrush, QColor, QIcon, QPixmap
 from Functions.language_manager import lang
 from Functions.config_manager import config, get_config_dir
 from Functions.character_manager import get_character_dir
-from Functions.logging_manager import get_log_dir
+from Functions.logging_manager import get_log_dir, get_logger, log_with_action, LOGGER_CHARACTER
 from Functions.data_manager import DataManager
+
+# Get CHARACTER logger
+logger_char = get_logger(LOGGER_CHARACTER)
 
 
 class HeraldScraperWorker(QThread):
@@ -441,6 +444,8 @@ class CharacterSheetWindow(QDialog):
             if hasattr(self.parent_app, 'refresh_character_list'):
                 self.parent_app.refresh_character_list()
             
+            log_with_action(logger_char, "info", f"Character rank auto-applied to {level_str} with {new_rp:,} RP", action="RANK_UPDATE")
+            
             # Trigger backup after character modification
             if hasattr(self.parent_app, 'backup_manager'):
                 try:
@@ -495,6 +500,7 @@ class CharacterSheetWindow(QDialog):
             success, msg = save_character(self.character_data, allow_overwrite=True)
             
             if success:
+                log_with_action(logger_char, "info", f"Character rank applied to {level_str} with {new_rp:,} RP after confirmation", action="RANK_UPDATE")
                 QMessageBox.information(self, "Succès", f"Rang mis à jour : {level_str}\nRealm Points : {new_rp:,}")
                 # Update display
                 self.update_rank_display(new_rp)
@@ -518,6 +524,7 @@ class CharacterSheetWindow(QDialog):
                         sys.stderr.flush()
                         logging.warning(f"[BACKUP_TRIGGER] Backup after rank modification failed: {e}")
             else:
+                log_with_action(logger_char, "error", f"Failed to apply rank {level_str}: {msg}", action="ERROR")
                 QMessageBox.critical(self, "Erreur", f"Échec de la sauvegarde : {msg}")
 
     def save_basic_info(self):
@@ -593,6 +600,8 @@ class CharacterSheetWindow(QDialog):
                     QMessageBox.critical(self, "Erreur", f"Échec de la sauvegarde : {msg}")
                     return
                 
+                log_with_action(logger_char, "info", f"Character basic info updated: Level={new_level}, Season={new_season}, Guild={new_guild}", action="INFO_UPDATE")
+                
                 # Trigger backup after character modification
                 if hasattr(self.parent_app, 'backup_manager'):
                     try:
@@ -616,6 +625,7 @@ class CharacterSheetWindow(QDialog):
             self.accept()  # Close dialog
                 
         except Exception as e:
+            log_with_action(logger_char, "error", f"Error saving basic info: {str(e)}", action="ERROR")
             QMessageBox.critical(self, "Erreur", f"Erreur lors de la sauvegarde : {str(e)}")
 
     def open_armor_manager(self):

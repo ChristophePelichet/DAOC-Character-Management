@@ -10,9 +10,13 @@ from Functions.character_manager import (
     create_character_data, save_character, delete_character,
     rename_character, duplicate_character, REALMS
 )
+from Functions.logging_manager import get_logger, log_with_action, LOGGER_CHARACTER
 from Functions.language_manager import lang
 from Functions.config_manager import config
 from UI.dialogs import NewCharacterDialog, CharacterSheetWindow
+
+# Get CHARACTER logger
+logger = get_logger(LOGGER_CHARACTER)
 
 
 class CharacterActionsManager:
@@ -44,7 +48,7 @@ class CharacterActionsManager:
         result = dialog.get_data() if dialog.exec() == QDialog.Accepted else None
         
         if not result:
-            logging.info("Character creation cancelled by user")
+            log_with_action(logger, "info", "Character creation cancelled by user", action="CREATE")
             return
             
         character_name, realm, season, level, page, guild, race, class_name = result
@@ -65,7 +69,7 @@ class CharacterActionsManager:
             except Exception as e:
                 logging.warning(f"Backup after character creation failed: {e}")
             self.tree_manager.refresh_character_list()
-            logging.info(f"Character '{character_name}' ({race} {class_name}) created")
+            log_with_action(logger, "info", f"Character '{character_name}' ({race} {class_name}) created successfully", action="CREATE")
             QMessageBox.information(
                 self.main_window,
                 lang.get("success_title"),
@@ -77,7 +81,7 @@ class CharacterActionsManager:
                 if response == "char_exists_error" 
                 else response
             )
-            logging.error(f"Failed to create character '{character_name}': {error_message}")
+            log_with_action(logger, "error", f"Failed to create character '{character_name}': {error_message}", action="ERROR")
             QMessageBox.critical(
                 self.main_window,
                 lang.get("error_title"),
@@ -115,7 +119,7 @@ class CharacterActionsManager:
         )
         
         if reply == QMessageBox.Yes:
-            logging.info(f"Bulk deletion of {len(checked_ids)} characters initiated")
+            log_with_action(logger, "info", f"Bulk deletion of {len(checked_ids)} characters initiated", action="DELETE")
             for char_name in checked_ids:
                 self._delete_character(char_name, confirm=False)
             self.tree_manager.refresh_character_list()
@@ -129,7 +133,7 @@ class CharacterActionsManager:
             confirm: Si True, demande confirmation avant suppression
         """
         if not char_name:
-            logging.warning("Attempted to delete character with empty name")
+            log_with_action(logger, "warning", "Attempted to delete character with empty name", action="ERROR")
             return
             
         if confirm:
@@ -141,6 +145,7 @@ class CharacterActionsManager:
                 QMessageBox.No
             )
             if reply != QMessageBox.Yes:
+                log_with_action(logger, "info", f"Character deletion cancelled by user for '{char_name}'", action="DELETE")
                 return
         
         # Backup BEFORE deletion
@@ -154,11 +159,11 @@ class CharacterActionsManager:
         success, msg = delete_character(char_name)
         
         if success:
-            logging.info(f"Character '{char_name}' deleted")
+            log_with_action(logger, "info", f"Character '{char_name}' deleted successfully", action="DELETE")
             if confirm:
                 self.tree_manager.refresh_character_list()
         else:
-            logging.error(f"Failed to delete character '{char_name}': {msg}")
+            log_with_action(logger, "error", f"Failed to delete character '{char_name}': {msg}", action="ERROR")
             QMessageBox.critical(
                 self.main_window,
                 lang.get("error_title"),
@@ -184,6 +189,7 @@ class CharacterActionsManager:
         )
         
         if not ok or not new_name:
+            log_with_action(logger, "info", f"Character rename cancelled by user for '{old_name}'", action="RENAME")
             return
             
         new_name = new_name.strip()
@@ -209,6 +215,7 @@ class CharacterActionsManager:
         success, msg = rename_character(old_name, new_name)
         
         if success:
+            log_with_action(logger, "info", f"Character renamed from '{old_name}' to '{new_name}'", action="RENAME")
             self.tree_manager.refresh_character_list()
         else:
             error_msg = (
@@ -216,6 +223,7 @@ class CharacterActionsManager:
                 if msg == "char_exists_error" 
                 else msg
             )
+            log_with_action(logger, "error", f"Failed to rename character from '{old_name}' to '{new_name}': {error_msg}", action="ERROR")
             QMessageBox.critical(
                 self.main_window,
                 lang.get("error_title"),
@@ -241,6 +249,7 @@ class CharacterActionsManager:
         )
         
         if not ok or not new_name:
+            log_with_action(logger, "info", f"Character duplication cancelled by user for '{original_name}'", action="DUPLICATE")
             return
             
         new_name = new_name.strip()
@@ -262,6 +271,7 @@ class CharacterActionsManager:
                     self.main_window.backup_manager.trigger_backup_if_needed()
             except Exception as e:
                 logging.warning(f"Backup after character duplication failed: {e}")
+            log_with_action(logger, "info", f"Character '{original_name}' duplicated to '{new_name}'", action="DUPLICATE")
             self.tree_manager.refresh_character_list()
         else:
             error_msg = (
@@ -269,6 +279,7 @@ class CharacterActionsManager:
                 if msg == "char_exists_error" 
                 else msg
             )
+            log_with_action(logger, "error", f"Failed to duplicate character from '{original_name}' to '{new_name}': {error_msg}", action="ERROR")
             QMessageBox.critical(
                 self.main_window,
                 lang.get("error_title"),
@@ -296,11 +307,12 @@ class CharacterActionsManager:
         character_data = self.tree_manager.characters_by_id.get(char_name)
         
         if character_data:
-            logging.info(f"Opening character sheet for '{char_name}'")
+            log_with_action(logger, "info", f"Opening character sheet for '{char_name}'", action="UPDATE")
             sheet = CharacterSheetWindow(self.main_window, character_data)
             sheet.exec()
         else:
-            logging.warning(f"Could not find data for character '{char_name}'")
+            log_with_action(logger, "warning", f"Could not find data for character '{char_name}'", action="ERROR")
+
             
     def open_armor_management(self):
         """Ouvre la gestion des armures pour le personnage sélectionné"""

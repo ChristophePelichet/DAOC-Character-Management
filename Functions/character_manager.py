@@ -4,6 +4,10 @@ import uuid
 import logging
 from Functions.config_manager import config
 from Functions.path_manager import get_base_path
+from Functions.logging_manager import get_logger, log_with_action, LOGGER_CHARACTER
+
+# Get CHARACTER logger
+logger = get_logger(LOGGER_CHARACTER)
 
 # Lazy load to avoid circular imports
 _data_manager = None
@@ -40,6 +44,7 @@ def create_character_data(name, realm, season, server, level=1, page=1, guild=""
     The 'id' is now the character name for file system identification.
     A separate 'uuid' is kept for internal robustness if needed.
     """
+    log_with_action(logger, "debug", f"Creating character data for '{name}' in {realm}", action="CREATE")
     return {
         'id': name,  # The main identifier is now the name
         'uuid': str(uuid.uuid4()),  # Still keep a unique ID internally
@@ -89,15 +94,17 @@ def save_character(character_data, allow_overwrite=False):
 
     # Only check for existing file if we're not allowing overwrites
     if not allow_overwrite and os.path.exists(file_path):
+        log_with_action(logger, "warning", f"Character '{character_name}' already exists at {file_path}", action="CREATE")
         return False, "char_exists_error"
 
     try:
         with open(file_path, 'w', encoding='utf-8') as f:
             json.dump(character_data, f, indent=4)
-        logging.info(f"Character '{character_name}' saved to {file_path}")
+        log_with_action(logger, "info", f"Character '{character_name}' saved to {file_path}", action="CREATE")
         return True, "Character saved successfully."
     except Exception as e:
-        logging.error(f"Error saving character '{character_name}': {e}")
+        error_msg = f"Error saving character '{character_name}': {e}"
+        log_with_action(logger, "error", error_msg, action="ERROR")
         return False, f"Failed to save character file: {e}"
 
 def duplicate_character(original_char_data, new_name):
@@ -108,7 +115,7 @@ def duplicate_character(original_char_data, new_name):
         return False, "Original character data and new name must be provided."
 
     original_name = original_char_data.get('name', 'N/A')
-    logging.debug(f"Duplicating character '{original_name}' to new character '{new_name}'.")
+    log_with_action(logger, "info", f"Duplicating character '{original_name}' to new character '{new_name}'", action="DUPLICATE")
 
     # Create a deep copy to avoid modifying the original data
     new_char_data = original_char_data.copy()
@@ -143,6 +150,8 @@ def get_all_characters():
                         characters.append(char_data)
                 except (json.JSONDecodeError, KeyError) as e:
                     logging.warning(f"Could not load or parse {file_path}: {e}")
+    
+    log_with_action(logger, "debug", f"Loaded {len(characters)} characters from disk", action="LOAD")
     return sorted(characters, key=lambda c: c.get('name', '').lower())
 
 def rename_character(old_name, new_name):
@@ -154,6 +163,7 @@ def rename_character(old_name, new_name):
         return False, "Old and new names must be provided."
 
     if old_name == new_name:
+        log_with_action(logger, "debug", f"Rename attempt: old and new names are the same ('{old_name}')", action="RENAME")
         return True, "Names are the same, no action taken."
 
     base_char_dir = get_character_dir()
@@ -173,11 +183,13 @@ def rename_character(old_name, new_name):
             break
     
     if not old_file_path:
+        log_with_action(logger, "warning", f"Character '{old_name}' not found for rename", action="ERROR")
         return False, f"Character '{old_name}' not found."
 
     # Check if the new name already exists in the same season/realm
     new_file_path = os.path.join(base_char_dir, character_season, character_realm, f"{new_name}.json")
     if os.path.exists(new_file_path):
+        log_with_action(logger, "warning", f"Target name '{new_name}' already exists", action="ERROR")
         return False, "char_exists_error"
 
     try:
@@ -195,10 +207,11 @@ def rename_character(old_name, new_name):
 
         # Remove the old file
         os.remove(old_file_path)
-        logging.info(f"Character '{old_name}' renamed to '{new_name}'.")
+        log_with_action(logger, "info", f"Character renamed from '{old_name}' to '{new_name}'", action="RENAME")
         return True, "Character renamed successfully."
     except (IOError, json.JSONDecodeError, OSError) as e:
-        logging.error(f"Error renaming character from '{old_name}' to '{new_name}': {e}")
+        error_msg = f"Error renaming character from '{old_name}' to '{new_name}': {e}"
+        log_with_action(logger, "error", error_msg, action="ERROR")
         # Clean up the new file if it was created
         if os.path.exists(new_file_path):
             os.remove(new_file_path)
@@ -224,13 +237,14 @@ def delete_character(character_name):
     if file_to_delete:
         try:
             os.remove(file_to_delete)
-            logging.info(f"Deleted character file: {file_to_delete}")
+            log_with_action(logger, "info", f"Character '{character_name}' deleted from {file_to_delete}", action="DELETE")
             return True, "Character deleted successfully."
         except OSError as e:
-            logging.error(f"Error deleting file {file_to_delete}: {e}")
+            error_msg = f"Error deleting file {file_to_delete}: {e}"
+            log_with_action(logger, "error", error_msg, action="ERROR")
             return False, f"Could not delete character file: {e}"
     else:
-        logging.warning(f"Attempted to delete non-existent character file for '{character_name}'.")
+        log_with_action(logger, "warning", f"Attempted to delete non-existent character '{character_name}'", action="ERROR")
         return False, "Character file not found."
 
 def move_character_to_realm(character_data, old_realm, new_realm):
@@ -287,11 +301,11 @@ def move_character_to_realm(character_data, old_realm, new_realm):
         # Remove old file
         os.remove(old_file_path)
         
-        logging.info(f"Character '{character_name}' moved from {old_realm} to {new_realm}.")
+        log_with_action(logger, "info", f"Character '{character_name}' moved from {old_realm} to {new_realm}", action="UPDATE")
         return True, f"Character moved to {new_realm} successfully."
         
     except Exception as e:
-        logging.error(f"Error moving character '{character_name}' from {old_realm} to {new_realm}: {e}")
+        log_with_action(logger, "error", f"Error moving character '{character_name}' from {old_realm} to {new_realm}: {e}", action="ERROR")
         # Try to clean up if new file was created but old wasn't deleted
         if os.path.exists(new_file_path) and os.path.exists(old_file_path):
             try:

@@ -75,13 +75,13 @@ def backup_characters():
                     arcname = os.path.relpath(file_path, os.path.dirname(base_char_dir))
                     zipf.write(file_path, arcname)
                     files_added += 1
-                    logger.debug(f"Added to backup: {arcname}")
+                    log_with_action(logger, "debug", f"Added to backup: {arcname}", action="MIGRATION_ZIP")
         
         log_with_action(logger, "info", f"Compressed backup created with {files_added} file(s): {backup_path}", action="MIGRATION_ZIP")
         
         # CRITICAL: Verify backup integrity
         try:
-            logger.info("Verifying backup integrity...")
+            log_with_action(logger, "info", "Verifying backup integrity...", action="MIGRATION_VERIFY")
             with zipfile.ZipFile(backup_path, 'r') as zipf:
                 # Test the ZIP file integrity
                 bad_file = zipf.testzip()
@@ -143,7 +143,7 @@ def check_migration_needed():
     base_char_dir = get_character_dir()
     
     if not os.path.exists(base_char_dir):
-        logger.info("Character directory does not exist yet. No migration needed.")
+        log_with_action(logger, "info", "Character directory does not exist yet. No migration needed.", action="MIGRATION_CHECK")
         return False
     
     # Check if old structure exists (Realm folders directly under Characters)
@@ -157,7 +157,7 @@ def check_migration_needed():
             json_files = [f for f in os.listdir(realm_path) if f.endswith('.json')]
             if json_files:
                 old_structure_exists = True
-                logger.info(f"Found old structure: {realm_path} contains {len(json_files)} character(s)")
+                log_with_action(logger, "info", f"Found old structure: {realm_path} contains {len(json_files)} character(s)", action="MIGRATION_CHECK")
                 break
     
     return old_structure_exists
@@ -394,7 +394,7 @@ def run_migration_if_needed():
     """
     # Check if migration was already done
     if is_migration_done():
-        logger.debug("Migration already completed (flag file exists)")
+        log_with_action(logger, "debug", "Migration already completed (flag file exists)", action="MIGRATION_CHECK")
         return False, True, "Migration already completed"
     
     # Check if migration is needed

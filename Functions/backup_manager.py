@@ -43,8 +43,11 @@ class BackupManager:
         """Create backup directory if it doesn't exist."""
         try:
             os.makedirs(self.backup_dir, exist_ok=True)
+            log_with_action(self.logger, "debug", f"Backup directory ensured: {self.backup_dir}", action="DIRECTORY")
         except Exception as e:
-            print(f"Error creating backup directory: {e}")
+            error_msg = f"Error creating backup directory: {e}"
+            log_with_action(self.logger, "error", error_msg, action="ERROR")
+            print(f"[{LOGGER_BACKUP.upper()}] {error_msg}", file=sys.stderr)
 
     def should_backup_today(self):
         """
@@ -53,17 +56,22 @@ class BackupManager:
         """
         backup_enabled = self.config_manager.get("backup_enabled", True)
         if not backup_enabled:
+            log_with_action(self.logger, "debug", "Backup is disabled in configuration", action="CHECK")
             return False
         
         last_backup_str = self.config_manager.get("backup_last_date")
         if not last_backup_str:
+            log_with_action(self.logger, "debug", "No previous backup found - backup needed", action="CHECK")
             return True
         
         try:
             last_backup = datetime.fromisoformat(last_backup_str).date()
             today = datetime.now().date()
-            return last_backup != today
-        except (ValueError, TypeError):
+            should_backup = last_backup != today
+            log_with_action(self.logger, "debug", f"Backup check: last={last_backup}, today={today}, needed={should_backup}", action="CHECK")
+            return should_backup
+        except (ValueError, TypeError) as e:
+            log_with_action(self.logger, "warning", f"Invalid backup date format: {e}", action="CHECK")
             return True
     
     def startup_backup(self):
@@ -92,14 +100,16 @@ class BackupManager:
         Returns True if backup was triggered, False otherwise.
         """
         if not self.should_backup_today():
+            log_with_action(self.logger, "debug", "Backup not needed or disabled", action="TRIGGER")
             return False
         
+        log_with_action(self.logger, "info", "Triggering automatic backup", action="TRIGGER")
         result = self.backup_characters()
         if result["success"]:
-            print(f"[Backup] {result['message']}")
+            log_with_action(self.logger, "info", result['message'], action="TRIGGER")
             return True
         else:
-            print(f"[Backup Error] {result['message']}")
+            log_with_action(self.logger, "error", result['message'], action="TRIGGER")
             return False
 
     def backup_characters(self):
@@ -147,7 +157,7 @@ class BackupManager:
             char_folder = self.config_manager.get("character_folder")
             if not char_folder or not os.path.exists(char_folder):
                 error_msg = "Characters folder not found"
-                log_with_action(self.logger, "error", error_msg, action=f"{mode}")
+                self.logger.error("error_msg", extra={"action": "INFO"})
                 return {
                     "success": False,
                     "message": error_msg,
@@ -161,22 +171,22 @@ class BackupManager:
             
             if should_compress:
                 backup_file = os.path.join(self.backup_dir, f"{backup_name}.zip")
-                log_with_action(self.logger, "info", f"Creating compressed backup: {os.path.basename(backup_file)}", action=f"{mode}_ZIP")
+                self.logger.info("Creating compressed backup: {os.path.basename(backup_file)}\", action=", extra={"action": "ZIP"})
                 self._create_zip_backup(char_folder, backup_file)
             else:
                 backup_file = os.path.join(self.backup_dir, backup_name)
-                log_with_action(self.logger, "info", f"Creating uncompressed backup: {os.path.basename(backup_file)}", action=f"{mode}_COPY")
+                self.logger.info("Creating uncompressed backup: {os.path.basename(backup_file)}\", action=", extra={"action": "ZIP"})
                 shutil.copytree(char_folder, backup_file, dirs_exist_ok=True)
 
             # Update last backup date
             self.config_manager.set("backup_last_date", datetime.now().isoformat())
             
             # Apply retention policies
-            log_with_action(self.logger, "info", "Applying retention policies...", action=f"{mode}_RETENTION")
+            self.logger.info("Applying retention policies...", extra={"action": "RETENTION"})
             self._apply_retention_policies()
 
             success_msg = f"Backup created: {os.path.basename(backup_file)}"
-            log_with_action(self.logger, "info", success_msg, action=f"{mode}_SUCCESS")
+            self.logger.info("success_msg", extra={"action": "INFO"})
             return {
                 "success": True,
                 "message": success_msg,
@@ -185,7 +195,7 @@ class BackupManager:
 
         except Exception as e:
             error_msg = f"Backup failed: {str(e)}"
-            log_with_action(self.logger, "error", error_msg, action=f"{mode}_ERROR")
+            self.logger.error("error_msg", extra={"action": "INFO"})
             logging.error(f"Exception during backup: {str(e)}", exc_info=True)
             return {
                 "success": False,
@@ -210,16 +220,26 @@ class BackupManager:
 
     def _create_zip_backup(self, source_dir, zip_file):
         """Create a compressed ZIP backup of the source directory."""
-        with zipfile.ZipFile(zip_file, 'w', zipfile.ZIP_DEFLATED) as zipf:
-            for root, dirs, files in os.walk(source_dir):
-                for file in files:
-                    file_path = os.path.join(root, file)
-                    arcname = os.path.relpath(file_path, source_dir)
-                    zipf.write(file_path, arcname)
+        log_with_action(self.logger, "debug", f"Starting ZIP compression from {source_dir}", action="ZIP")
+        file_count = 0
+        try:
+            with zipfile.ZipFile(zip_file, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                for root, dirs, files in os.walk(source_dir):
+                    for file in files:
+                        file_path = os.path.join(root, file)
+                        arcname = os.path.relpath(file_path, source_dir)
+                        zipf.write(file_path, arcname)
+                        file_count += 1
+            log_with_action(self.logger, "debug", f"ZIP compression complete: {file_count} files", action="ZIP")
+        except Exception as e:
+            log_with_action(self.logger, "error", f"ZIP compression failed: {e}", action="ZIP")
+            raise
 
     def _apply_retention_policies(self):
         """Apply retention policy based on storage size limit only."""
         backups = self._get_sorted_backups()
+        
+        log_with_action(self.logger, "debug", f"Found {len(backups)} existing backups", action="RETENTION")
         
         # Apply size retention (size limit only, no count limit)
         size_limit_mb = self.config_manager.get("backup_size_limit_mb", 20)
@@ -227,17 +247,28 @@ class BackupManager:
             total_size = sum(self._get_file_size(b) for b in backups)
             size_limit_bytes = size_limit_mb * 1024 * 1024
             
+            log_with_action(self.logger, "debug", f"Total backup size: {total_size / (1024*1024):.2f} MB / {size_limit_mb} MB", action="RETENTION")
+            
+            deleted_count = 0
             while total_size > size_limit_bytes and backups:
                 oldest = backups.pop()  # Remove oldest
-                log_with_action(self.logger, "info", f"Deleting oldest backup: {os.path.basename(oldest)}", action="RETENTION_DELETE")
+                old_size = self._get_file_size(oldest)
+                log_with_action(self.logger, "info", f"Deleting oldest backup: {os.path.basename(oldest)} ({old_size / (1024*1024):.2f} MB)", action="RETENTION")
                 self._delete_backup(oldest)
-                total_size -= self._get_file_size(oldest)
+                total_size -= old_size
+                deleted_count += 1
+            
+            if deleted_count > 0:
+                log_with_action(self.logger, "info", f"Retention policy applied: {deleted_count} backup(s) deleted", action="RETENTION")
+            else:
+                log_with_action(self.logger, "debug", "No backups need to be deleted", action="RETENTION")
 
     def _get_sorted_backups(self):
         """Get list of backups sorted by modification time (newest first)."""
         backups = []
         
         if not os.path.exists(self.backup_dir):
+            log_with_action(self.logger, "debug", "Backup directory does not exist yet", action="SCAN")
             return backups
         
         for item in os.listdir(self.backup_dir):
@@ -247,6 +278,7 @@ class BackupManager:
         
         # Sort by modification time (newest first)
         backups.sort(key=lambda x: os.path.getmtime(x), reverse=True)
+        log_with_action(self.logger, "debug", f"Found {len(backups)} backup(s) in directory", action="SCAN")
         return backups
 
     def _delete_backup(self, backup_path):
@@ -254,10 +286,14 @@ class BackupManager:
         try:
             if os.path.isfile(backup_path):
                 os.remove(backup_path)
+                log_with_action(self.logger, "debug", f"Deleted backup file: {os.path.basename(backup_path)}", action="DELETE")
             elif os.path.isdir(backup_path):
                 shutil.rmtree(backup_path)
+                log_with_action(self.logger, "debug", f"Deleted backup directory: {os.path.basename(backup_path)}", action="DELETE")
         except Exception as e:
-            print(f"Error deleting backup {backup_path}: {e}")
+            error_msg = f"Error deleting backup {backup_path}: {e}"
+            log_with_action(self.logger, "error", error_msg, action="DELETE")
+            print(f"[{LOGGER_BACKUP.upper()}] {error_msg}", file=sys.stderr)
 
     def _get_file_size(self, path):
         """Get total size of a file or directory in bytes."""
@@ -280,6 +316,7 @@ class BackupManager:
         Returns:
             dict: Contains path, compress, size_limit, current_usage, backups list
         """
+        log_with_action(self.logger, "debug", "Gathering backup information", action="INFO")
         backups = self._get_sorted_backups()
         total_size = sum(self._get_file_size(b) for b in backups)
         size_limit_mb = self.config_manager.get("backup_size_limit_mb", 20)
@@ -295,6 +332,8 @@ class BackupManager:
                 "date": mtime_str
             })
 
+        log_with_action(self.logger, "debug", f"Backup info: {len(backup_list)} backups, {total_size / (1024*1024):.2f} MB total", action="INFO")
+        
         return {
             "path": self.backup_dir,
             "compress": self.config_manager.get("backup_compress", True),
@@ -315,39 +354,51 @@ class BackupManager:
             dict: Status with 'success' (bool) and 'message' (str)
         """
         try:
+            log_with_action(self.logger, "info", f"Starting backup restoration from: {os.path.basename(backup_path)}", action="RESTORE")
+            
             if restore_to is None:
                 restore_to = self.config_manager.get("character_folder")
             
             if not restore_to:
+                error_msg = "Target directory not specified"
+                log_with_action(self.logger, "error", error_msg, action="RESTORE")
                 return {
                     "success": False,
-                    "message": "Target directory not specified"
+                    "message": error_msg
                 }
 
             # Create backup of current state before restoring
             backup_current = os.path.join(self.backup_dir, f"pre_restore_{datetime.now().strftime('%Y%m%d_%H%M%S')}")
+            log_with_action(self.logger, "info", f"Creating pre-restore backup: {os.path.basename(backup_current)}", action="RESTORE")
             shutil.copytree(restore_to, backup_current, dirs_exist_ok=True)
 
             # Clear current directory
+            log_with_action(self.logger, "debug", f"Clearing target directory: {restore_to}", action="RESTORE")
             shutil.rmtree(restore_to)
             os.makedirs(restore_to, exist_ok=True)
 
             # Restore from backup
             if backup_path.endswith('.zip'):
+                log_with_action(self.logger, "debug", "Extracting ZIP backup", action="RESTORE")
                 with zipfile.ZipFile(backup_path, 'r') as zipf:
                     zipf.extractall(restore_to)
             else:
+                log_with_action(self.logger, "debug", "Copying uncompressed backup", action="RESTORE")
                 shutil.copytree(backup_path, restore_to, dirs_exist_ok=True)
 
+            success_msg = f"Backup restored successfully from {os.path.basename(backup_path)}"
+            log_with_action(self.logger, "info", success_msg, action="RESTORE")
             return {
                 "success": True,
-                "message": f"Backup restored successfully"
+                "message": success_msg
             }
 
         except Exception as e:
+            error_msg = f"Restore failed: {str(e)}"
+            log_with_action(self.logger, "error", error_msg, action="RESTORE")
             return {
                 "success": False,
-                "message": f"Restore failed: {str(e)}"
+                "message": error_msg
             }
 
 

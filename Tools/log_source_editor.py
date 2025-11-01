@@ -78,15 +78,16 @@ class LogScanner(QThread):
         
     def run(self):
         """Scanner tous les fichiers Python"""
-        # Pattern pour détecter les logs
-        # Exemples:
-        # logger.info("message")
-        # logger.info("message", extra={"action": "TEST"})
-        # self.logger.debug(f"message {var}")
-        # module_logger.warning("message", extra={'action': 'INIT'})
-        
-        log_pattern = re.compile(
+        # Patterns pour détecter les logs
+        # Pattern 1: logger.info(), self.logger.debug(), module_logger.warning()
+        logger_pattern = re.compile(
             r'(?:self\.)?(?:module_)?logger\.(?P<level>debug|info|warning|error|critical)\s*\(',
+            re.IGNORECASE
+        )
+        
+        # Pattern 2: log_with_action(logger, "info", ...)
+        log_with_action_pattern = re.compile(
+            r'log_with_action\s*\([^,]+,\s*["\'](?P<level>debug|info|warning|error|critical)["\']',
             re.IGNORECASE
         )
         
@@ -109,8 +110,14 @@ class LogScanner(QThread):
                     
                 # Chercher les logs ligne par ligne
                 for line_num, line in enumerate(lines, start=1):
-                    match = log_pattern.search(line)
+                    # Essayer le pattern logger.xxx()
+                    match = logger_pattern.search(line)
+                    if not match:
+                        # Essayer le pattern log_with_action()
+                        match = log_with_action_pattern.search(line)
+                    
                     if match:
+                        # Extraire le level
                         level = match.group('level').upper()
                         
                         # Extraire le logger name du contexte du fichier
@@ -146,17 +153,22 @@ class LogScanner(QThread):
         # Mapping basé sur le chemin du fichier
         if 'eden_scraper' in file_str or 'eden' in file_str:
             return 'EDEN'
-        elif 'backup' in file_str:
+        elif 'backup' in file_str or 'migration' in file_str:
             return 'BACKUP'
         elif 'ui' in file_str or 'window' in file_str:
             return 'UI'
         elif 'character' in file_str:
             return 'CHARACTER'
         
-        # Chercher dans le code: setup_logger("LOGGER_NAME")
+        # Chercher dans le code: get_logger(LOGGER_XXX) ou setup_logger("LOGGER_NAME")
         for line in lines:
+            # get_logger(LOGGER_BACKUP)
+            if 'get_logger' in line and 'LOGGER_' in line:
+                match = re.search(r'get_logger\(LOGGER_([A-Z_]+)\)', line)
+                if match:
+                    return match.group(1)
+            # setup_logger("LOGGER_NAME")
             if 'setup_logger' in line:
-                # Extraire le nom entre guillemets
                 match = re.search(r'setup_logger\(["\']([A-Z_]+)["\']', line)
                 if match:
                     return match.group(1)
@@ -168,24 +180,43 @@ class LogScanner(QThread):
         action = ""
         message = ""
         
-        # Chercher extra={"action": "..."} ou extra={'action': '...'}
-        action_match = re.search(r'extra\s*=\s*{\s*["\']action["\']\s*:\s*["\']([^"\']+)["\']', line)
-        if action_match:
-            action = action_match.group(1)
-        
-        # Extraire le message (première string dans l'appel)
-        # Gérer les f-strings, strings normales, et concaténations
-        msg_match = re.search(r'logger\.\w+\s*\(\s*([fFrRbB]?["\'])(.*?)(?:["\'])', line)
-        if msg_match:
-            message = msg_match.group(2)
-            # Limiter la longueur pour l'affichage
-            if len(message) > 80:
-                message = message[:80] + "..."
+        # Cas 1: log_with_action(logger, "level", "message", action="ACTION")
+        if 'log_with_action' in line:
+            # Extraire l'action du paramètre action="..."
+            action_match = re.search(r'action\s*=\s*["\']([^"\']+)["\']', line)
+            if action_match:
+                action = action_match.group(1)
+            
+            # Extraire le message (troisième paramètre)
+            msg_match = re.search(r'log_with_action\([^,]+,\s*["\'][^"\']+["\']\s*,\s*([fFrRbB]?["\'])(.+?)(?:\1)', line)
+            if msg_match:
+                message = msg_match.group(2)
+            else:
+                # Fallback: chercher la première string après la virgule
+                msg_fallback = re.search(r'log_with_action\([^,]+,\s*["\'][^"\']+["\']\s*,\s*([^,]+)', line)
+                if msg_fallback:
+                    message = msg_fallback.group(1).strip()
         else:
-            # Fallback: prendre tout après la parenthèse jusqu'à la virgule ou fin
-            msg_fallback = re.search(r'logger\.\w+\s*\(\s*(.+?)(?:,|\))', line)
-            if msg_fallback:
-                message = msg_fallback.group(1).strip()[:80]
+            # Cas 2: logger.info("message", extra={"action": "..."})
+            # Chercher extra={"action": "..."} ou extra={'action': '...'}
+            action_match = re.search(r'extra\s*=\s*{\s*["\']action["\']\s*:\s*["\']([^"\']+)["\']', line)
+            if action_match:
+                action = action_match.group(1)
+            
+            # Extraire le message (première string dans l'appel)
+            # Gérer les f-strings, strings normales, et concaténations
+            msg_match = re.search(r'logger\.\w+\s*\(\s*([fFrRbB]?["\'])(.*?)(?:["\'])', line)
+            if msg_match:
+                message = msg_match.group(2)
+            else:
+                # Fallback: prendre tout après la parenthèse jusqu'à la virgule ou fin
+                msg_fallback = re.search(r'logger\.\w+\s*\(\s*(.+?)(?:,|\))', line)
+                if msg_fallback:
+                    message = msg_fallback.group(1).strip()
+        
+        # Limiter la longueur pour l'affichage
+        if len(message) > 80:
+            message = message[:80] + "..."
             
         return action, message
 

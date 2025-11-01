@@ -1118,7 +1118,16 @@ class ConfigurationDialog(QDialog):
         armor_path_layout = QHBoxLayout()
         armor_path_layout.addWidget(self.armor_path_edit)
         armor_path_layout.addWidget(browse_armor_button)
-        paths_layout.addRow("Dossier des armures :", armor_path_layout)
+        paths_layout.addRow(lang.get("config_armor_path_label"), armor_path_layout)
+
+        # Cookies Path (for Herald scraping)
+        self.cookies_path_edit = QLineEdit()
+        browse_cookies_button = QPushButton(lang.get("browse_button"))
+        browse_cookies_button.clicked.connect(self.browse_cookies_folder)
+        cookies_path_layout = QHBoxLayout()
+        cookies_path_layout.addWidget(self.cookies_path_edit)
+        cookies_path_layout.addWidget(browse_cookies_button)
+        paths_layout.addRow(lang.get("config_cookies_path_label"), cookies_path_layout)
 
         paths_group.setLayout(paths_layout)
         main_layout.addWidget(paths_group)
@@ -1247,11 +1256,18 @@ class ConfigurationDialog(QDialog):
         config_folder = config.get("config_folder") or get_config_dir()
         log_folder = config.get("log_folder") or get_log_dir()
         armor_folder = config.get("armor_folder") or get_armor_dir()
+        cookies_folder = config.get("cookies_folder") or get_config_dir()
         
         self.char_path_edit.setText(char_folder)
+        self.char_path_edit.setCursorPosition(0)
         self.config_path_edit.setText(config_folder)
+        self.config_path_edit.setCursorPosition(0)
         self.log_path_edit.setText(log_folder)
+        self.log_path_edit.setCursorPosition(0)
         self.armor_path_edit.setText(armor_folder)
+        self.armor_path_edit.setCursorPosition(0)
+        self.cookies_path_edit.setText(cookies_folder)
+        self.cookies_path_edit.setCursorPosition(0)
         self.debug_mode_check.setChecked(config.get("debug_mode", False))
         self.show_debug_window_check.setChecked(config.get("show_debug_window", False))
         self.disable_disclaimer_check.setChecked(config.get("disable_disclaimer", False))
@@ -1297,6 +1313,10 @@ class ConfigurationDialog(QDialog):
     def browse_armor_folder(self):
         """Browse for armor folder."""
         self.browse_folder(self.armor_path_edit, "select_folder_dialog_title")
+    
+    def browse_cookies_folder(self):
+        """Browse for cookies folder."""
+        self.browse_folder(self.cookies_path_edit, "select_folder_dialog_title")
 
 
 class ArmorManagementDialog(QDialog):
@@ -2422,10 +2442,14 @@ class HeraldSearchDialog(QDialog):
     def _import_characters(self, characters):
         """Importe une liste de personnages dans la base de données"""
         from Functions.character_manager import save_character, get_all_characters
+        import json
+        import os
+        from Functions.character_manager import get_character_dir
         
         success_count = 0
         error_count = 0
         errors = []
+        updated_count = 0
         
         for char_data in characters:
             try:
@@ -2433,13 +2457,6 @@ class HeraldSearchDialog(QDialog):
                 name = char_data.get('clean_name', char_data.get('name', ''))
                 char_class = char_data.get('class', '')
                 realm = self.CLASS_TO_REALM.get(char_class, "Unknown")
-                
-                # Vérifier si le personnage existe déjà
-                existing_chars = get_all_characters()
-                if any(c.get('name', '').lower() == name.lower() for c in existing_chars):
-                    error_count += 1
-                    errors.append(f"{name}: personnage déjà existant")
-                    continue
                 
                 # Récupérer la saison par défaut depuis la configuration
                 default_season = config.get('default_season', 'S1')
@@ -2461,12 +2478,65 @@ class HeraldSearchDialog(QDialog):
                     'season': default_season,
                     'mlevel': '0',
                     'clevel': '0',
-                    'notes': f"Importé depuis le Herald le {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+                    'notes': f"Mis à jour depuis le Herald le {datetime.now().strftime('%Y-%m-%d %H:%M')}"
                 }
                 
-                # Sauvegarder le personnage
-                save_character(character_data)
-                success_count += 1
+                # Vérifier si le personnage existe déjà
+                existing_chars = get_all_characters()
+                existing_char = None
+                for c in existing_chars:
+                    if c.get('name', '').lower() == name.lower():
+                        existing_char = c
+                        break
+                
+                if existing_char:
+                    # Le personnage existe, on va le mettre à jour
+                    # Construire le chemin du fichier existant
+                    base_char_dir = get_character_dir()
+                    char_season = existing_char.get('season', 'S1')
+                    char_realm = existing_char.get('realm', realm)
+                    file_path = os.path.join(base_char_dir, char_season, char_realm, f"{name}.json")
+                    
+                    if os.path.exists(file_path):
+                        # Charger les données existantes pour conserver les infos importantes
+                        try:
+                            with open(file_path, 'r', encoding='utf-8') as f:
+                                existing_data = json.load(f)
+                            
+                            # Mettre à jour avec les nouvelles données (seulement les infos pertinentes)
+                            existing_data.update({
+                                'class': character_data['class'],
+                                'race': character_data['race'],
+                                'guild': character_data['guild'],
+                                'level': character_data['level'],
+                                'realm_rank': character_data['realm_rank'],
+                                'realm_level': character_data['realm_level'],
+                                'realm_points': character_data['realm_points'],
+                                'url': character_data['url'],
+                                'notes': character_data['notes']
+                            })
+                            
+                            # Sauvegarder avec allow_overwrite=True
+                            success, msg = save_character(existing_data, allow_overwrite=True)
+                            if success:
+                                updated_count += 1
+                            else:
+                                error_count += 1
+                                errors.append(f"{name}: erreur lors de la mise à jour - {msg}")
+                        except json.JSONDecodeError:
+                            error_count += 1
+                            errors.append(f"{name}: impossible de lire le fichier existant")
+                    else:
+                        error_count += 1
+                        errors.append(f"{name}: fichier existant introuvable")
+                else:
+                    # Le personnage n'existe pas, on l'ajoute
+                    success, msg = save_character(character_data)
+                    if success:
+                        success_count += 1
+                    else:
+                        error_count += 1
+                        errors.append(f"{name}: {msg}")
                 
             except Exception as e:
                 error_count += 1
@@ -2474,8 +2544,15 @@ class HeraldSearchDialog(QDialog):
                 logging.error(f"Erreur lors de l'import de {char_data.get('name')}: {e}", exc_info=True)
         
         # Afficher le résultat
-        if success_count > 0:
-            message = f"✅ {success_count} personnage(s) importé(s) avec succès !"
+        if success_count > 0 or updated_count > 0:
+            message = ""
+            if success_count > 0:
+                message += f"✅ {success_count} personnage(s) importé(s) avec succès !"
+            if updated_count > 0:
+                if message:
+                    message += "\n"
+                message += f"🔄 {updated_count} personnage(s) mis à jour !"
+            
             if error_count > 0:
                 message += f"\n⚠️ {error_count} erreur(s):\n" + "\n".join(errors[:5])
                 if len(errors) > 5:
@@ -2487,7 +2564,7 @@ class HeraldSearchDialog(QDialog):
             if hasattr(self.parent(), 'tree_manager') and hasattr(self.parent().tree_manager, 'refresh_character_list'):
                 self.parent().tree_manager.refresh_character_list()
         else:
-            error_msg = "❌ Aucun personnage n'a pu être importé.\n\n"
+            error_msg = "❌ Aucun personnage n'a pu être importé ou mis à jour.\n\n"
             error_msg += "\n".join(errors[:10])
             if len(errors) > 10:
                 error_msg += f"\n... et {len(errors) - 10} autre(s) erreur(s)"

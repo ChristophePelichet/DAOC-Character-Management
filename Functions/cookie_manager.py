@@ -27,12 +27,15 @@ class CookieManager:
             config_dir: Dossier de configuration (par défaut: Configuration/)
         """
         if config_dir is None:
-            # Utiliser le dossier Configuration depuis config_manager
-            from Functions.config_manager import get_config_dir
-            config_dir = Path(get_config_dir())
-        else:
-            config_dir = Path(config_dir)
+            # Utiliser le dossier des cookies depuis la configuration
+            from Functions.config_manager import config, get_config_dir
+            # Vérifier si un dossier de cookies a été configuré
+            config_dir = config.get("cookies_folder")
+            if not config_dir:
+                # Fallback sur le dossier de configuration par défaut
+                config_dir = get_config_dir()
         
+        config_dir = Path(config_dir)
         self.config_dir = config_dir
         self.cookie_file = self.config_dir / "eden_cookies.pkl"
         

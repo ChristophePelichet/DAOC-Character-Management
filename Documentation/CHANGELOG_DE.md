@@ -7,7 +7,7 @@ Alle wichtigen Änderungen an diesem Projekt werden in dieser Datei dokumentiert
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/),
 und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
-## [0.106] - 2025-10-31 - Eden Scraping Korrektur 🔧
+## [0.106] - 2025-11-01 - Eden Scraping Korrektur & Auto-Update 🔧🔄
 
 ### 🐛 Fehlerbehebungen
 
@@ -21,11 +21,6 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   - Geänderte Datei: `Functions/cookie_manager.py` (Zeile 22-34)
   - Dokumentation: `Documentation/COOKIE_PATH_FIX.md` mit vollständigen Details erstellt
 
-#### Verbesserungen
-- **Konfigurationszentralisierung** : Alle Pfade verwenden jetzt `get_config_dir()`
-- **PyInstaller-Kompatibilität** : Funktioniert korrekt mit kompilierter Anwendung
-- **Konsistenz** : Gleiche Pfadauflösungslogik wie der Rest der Anwendung
-
 - **Spaltenkonfiguration korrigiert** : Vollständige Korrektur des Spaltensystems
   - Problem 1: URL Herald-Spalte (Index 11) war nicht in der Größenänderung enthalten (`range(11)` statt `range(12)`)
   - Problem 2: Die Reihenfolge der Spalten Klasse und Stufe war im Konfigurationsmenü vertauscht
@@ -37,6 +32,54 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   - Auswirkung: Alle 12 Spalten (0-11) sind jetzt korrekt für Größenänderung und Sichtbarkeit konfigurierbar
   - Geänderte Dateien: `Functions/tree_manager.py`, `UI/dialogs.py`
   - Dokumentation: `Documentation/COLUMN_CONFIGURATION_FIX.md` mit detaillierter Analyse erstellt
+
+### ✨ Verbesserungen
+
+#### Hinzugefügt (01.11.2025)
+- **Konfigurationszentralisierung** : Alle Pfade verwenden jetzt `get_config_dir()`
+- **PyInstaller-Kompatibilität** : Funktioniert korrekt mit kompilierter Anwendung
+- **Konsistenz** : Gleiche Pfadauflösungslogik wie der Rest der Anwendung
+
+- **Auto-Update beim Charakter-Import** : Automatische Aktualisierung statt Ablehnung
+  - Vorher: Wenn Charakter existiert → Fehler "Charakter existiert bereits"
+  - Jetzt: Wenn Charakter existiert → Automatische Aktualisierung von Herald 🔄
+  - Beibehaltene Daten: name, realm, season, server, benutzerdefinierte Felder
+  - Aktualisierte Daten: class, race, guild, level, realm_rank, realm_points, url, notes
+  - Detaillierter Bericht: Zeigt Anzahl von Erstellungen, Aktualisierungen und Fehlern
+  - Anwendungsfall: Ideal, um Charaktere über Herald-Import aktuell zu halten
+  - Geänderte Datei: `UI/dialogs.py` - Funktion `_import_characters()` (Zeile 2422)
+  - Dokumentation: `Documentation/IMPORT_UPDATE_IMPROVEMENT.md` mit vollständigen Details erstellt
+
+- **Konfigurierbarer Herald-Cookies-Ordner** : Benutzerdefinierter Speicherort für Scraping-Cookies
+  - Neue Option im Einstellungsfenster → "Herald-Cookies-Ordner"
+  - Ermöglicht die Angabe eines benutzerdefinierten Ordners zum Speichern von Eden-Scraping-Cookies
+  - Enthält eine "Durchsuchen..."-Schaltfläche zur erleichterten Ordnerauswahl
+  - Standardwert: `Configuration/`-Ordner (Verhalten bleibt erhalten, wenn nicht konfiguriert)
+  - Portable Anwendung: Pfade sind absolut, keine Abhängigkeit von `__file__`
+  - Persistenz: Die Konfiguration wird in `config.json` unter dem Schlüssel `"cookies_folder"` gespeichert
+  - Fallback-Logik: Wenn `cookies_folder` nicht gesetzt ist, wird `config_folder` verwendet (gewährleistet Abwärtskompatibilität)
+  - Geänderte Dateien: `UI/dialogs.py`, `main.py`, `Functions/cookie_manager.py`
+  - Dokumentation: `Documentation/COOKIES_FOLDER_CONFIG.md` mit vollständigen Details erstellt
+
+- **Robustes Diagnosesystem für unerwartete Abstürze** : Vollständige Verfolgung von Crashes und Fehlern
+  - Global Exception Handler: Erfasst und protokolliert alle unbehandelten Ausnahmen
+  - System-Signal-Handler: Erkennt SIGTERM, SIGINT und andere Betriebssystem-Unterbrechungen
+  - CRITICAL/ERROR-Logging immer aktiv: Auch bei debug_mode = OFF werden Fehler aufgezeichnet
+  - Startup-Verfolgung: Zeichnet Zeit, Python-Version, aktive Threads auf
+  - Shutdown-Verfolgung: Zeichnet genau auf, wann und wie die App beendet wird
+  - Exit-Code: Zeigt den von der Qt-Ereignisschleife zurückgegebenen Code
+  - Geänderte Dateien: `main.py`, `Functions/logging_manager.py`
+  - Dokumentation: `Documentation/CRASH_DIAGNOSIS_GUIDE.md` mit vollständigem Debugging-Leitfaden
+
+#### Auswirkung
+- Intuitiverer und flüssigerer Import-Workflow
+- Kein Löschen/Neuimportieren eines vorhandenen Charakters erforderlich
+- Transparente Stats-Aktualisierung von Herald
+- Ordnungsgemäße Fehlerbehandlung mit detailliertem Bericht
+- Erhöhte Flexibilität für Cookie- und benutzerdefinierte Pfadverwaltung
+- Vollständige Anwendungsportabilität mit zentralisierter Konfiguration
+- Möglichkeit, unerwartete Abstürze zu diagnostizieren und zu beheben
+- Detaillierte Verfolgung aller kritischen Systemereignisse
 
 ---
 

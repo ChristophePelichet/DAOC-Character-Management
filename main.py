@@ -13,6 +13,10 @@ import sys
 import traceback
 import logging
 import time
+import signal
+import threading
+import atexit
+from datetime import datetime
 
 from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QMessageBox, QDialog, QStyleFactory, QHBoxLayout, QLabel, QProgressBar
 from PySide6.QtGui import QStandardItemModel
@@ -45,7 +49,23 @@ def global_exception_handler(exc_type, exc_value, exc_traceback):
     """Gestionnaire global des exceptions non gérées"""
     tb_lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
     tb_string = "".join(tb_lines)
-    logging.critical(f"Unhandled exception:\n{tb_string}")
+    logging.critical(f"UNHANDLED EXCEPTION:\n{tb_string}")
+    print(f"CRITICAL ERROR: {exc_type.__name__}: {exc_value}", file=sys.stderr)
+    print(tb_string, file=sys.stderr)
+
+
+def signal_handler(signum, frame):
+    """Gestionnaire des signaux système (SIGTERM, SIGINT, etc.)"""
+    signal_name = signal.Signals(signum).name if hasattr(signal, 'Signals') else str(signum)
+    logging.critical(f"Application interrupted by signal: {signal_name}")
+    print(f"CRITICAL: Received signal {signal_name}", file=sys.stderr)
+    sys.exit(1)
+
+
+def on_app_exit():
+    """Enregistre la fermeture de l'application"""
+    logging.info(f"Application exit at {datetime.now().isoformat()}")
+    print("Application exiting...", file=sys.stderr)
 
 
 class CharacterApp(QMainWindow):
@@ -597,6 +617,7 @@ class CharacterApp(QMainWindow):
         config.set("config_folder", dialog.config_path_edit.text())
         config.set("log_folder", dialog.log_path_edit.text())
         config.set("armor_folder", dialog.armor_path_edit.text())
+        config.set("cookies_folder", dialog.cookies_path_edit.text())
         config.set("debug_mode", new_debug_mode)
         config.set("show_debug_window", dialog.show_debug_window_check.isChecked())
         config.set("disable_disclaimer", dialog.disable_disclaimer_check.isChecked())
@@ -795,32 +816,58 @@ def apply_theme(app):
 
 def main():
     """Point d'entrée principal de l'application"""
+    # Enregistrement du démarrage
     start_time = time.perf_counter()
+    logging.info(f"Application started at {datetime.now().isoformat()}")
+    logging.info(f"Python version: {sys.version}")
+    logging.info(f"Process ID: {sys.argv}")
     
-    app = QApplication(sys.argv)
-    apply_theme(app)
-    
-    # Configuration du gestionnaire d'exceptions global
+    # Configuration des gestionnaires
     sys.excepthook = global_exception_handler
+    atexit.register(on_app_exit)
     
-    main_window = CharacterApp()
+    # Configuration des signaux (sauf sur Windows)
+    if hasattr(signal, 'SIGTERM'):
+        signal.signal(signal.SIGTERM, signal_handler)
+    if hasattr(signal, 'SIGINT'):
+        signal.signal(signal.SIGINT, signal_handler)
     
-    # Calcul et affichage du temps de chargement
-    end_time = time.perf_counter()
-    load_duration = end_time - start_time
-    logging.info(f"Application loaded in {load_duration:.4f} seconds")
-    main_window.load_time = load_duration
-    main_window.ui_manager.update_status_bar(
-        lang.get("status_bar_loaded", duration=load_duration)
-    )
+    # Vérification des threads actifs au démarrage
+    logging.debug(f"Active threads at startup: {threading.active_count()}")
+    for thread in threading.enumerate():
+        logging.debug(f"  - {thread.name} (daemon: {thread.daemon})")
     
-    main_window.show()
-    
-    # Afficher la fenêtre de debug si configuré
-    if config.get("show_debug_window", False):
-        main_window.show_debug_window()
+    try:
+        app = QApplication(sys.argv)
+        apply_theme(app)
         
-    sys.exit(app.exec())
+        main_window = CharacterApp()
+        
+        # Calcul et affichage du temps de chargement
+        end_time = time.perf_counter()
+        load_duration = end_time - start_time
+        logging.info(f"Application loaded in {load_duration:.4f} seconds")
+        main_window.load_time = load_duration
+        main_window.ui_manager.update_status_bar(
+            lang.get("status_bar_loaded", duration=load_duration)
+        )
+        
+        main_window.show()
+        
+        # Afficher la fenêtre de debug si configuré
+        if config.get("show_debug_window", False):
+            main_window.show_debug_window()
+        
+        logging.info("Entering main event loop")
+        exit_code = app.exec()
+        logging.info(f"Main event loop exited with code: {exit_code}")
+        sys.exit(exit_code)
+        
+    except Exception as e:
+        logging.critical(f"Fatal error during application startup: {e}", exc_info=True)
+        print(f"FATAL ERROR: {e}", file=sys.stderr)
+        traceback.print_exc(file=sys.stderr)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

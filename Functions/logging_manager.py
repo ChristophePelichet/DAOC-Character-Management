@@ -30,7 +30,7 @@ def get_img_dir():
 def setup_logging(extra_handlers=None):
     """
     Configures the application's logger based on settings in config.json.
-    If debug mode is off, all logging is disabled.
+    Always logs CRITICAL and ERROR messages to file, even if debug mode is off.
     An optional list of extra_handlers (like for a GUI window) can be provided.
     """
     # Get the root logger
@@ -51,20 +51,27 @@ def setup_logging(extra_handlers=None):
     # This allows individual handlers to control what they display.
     logger.setLevel(logging.DEBUG)
 
-    # If debug mode is ON, configure file and console handlers
+    # Create log directory if it doesn't exist
+    log_dir = get_log_dir()
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
+    
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    log_file_path = os.path.join(log_dir, "debug.log")
+
+    # Always create a file handler for CRITICAL and ERROR messages (even if debug is OFF)
+    fh_errors = RotatingFileHandler(log_file_path, maxBytes=1024*1024, backupCount=5, encoding='utf-8')
+    fh_errors.setLevel(logging.ERROR)  # Only ERROR and CRITICAL
+    fh_errors.setFormatter(formatter)
+    logger.addHandler(fh_errors)
+
+    # If debug mode is ON, configure full debug logging
     if is_debug_mode:
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
-        log_dir = get_log_dir()
-        if not os.path.exists(log_dir):
-            os.makedirs(log_dir)
-        log_file_path = os.path.join(log_dir, "debug.log")
-
-        # Rotates logs: 5 files of 1MB each
-        fh = RotatingFileHandler(log_file_path, maxBytes=1024*1024, backupCount=5, encoding='utf-8')
-        fh.setLevel(logging.DEBUG)
-        fh.setFormatter(formatter)
-        logger.addHandler(fh)
+        # Full debug file handler
+        fh_debug = RotatingFileHandler(log_file_path, maxBytes=1024*1024, backupCount=5, encoding='utf-8')
+        fh_debug.setLevel(logging.DEBUG)
+        fh_debug.setFormatter(formatter)
+        logger.addHandler(fh_debug)
 
         ch = logging.StreamHandler()
         ch.setLevel(logging.DEBUG)

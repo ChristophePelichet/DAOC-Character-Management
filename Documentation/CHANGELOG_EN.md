@@ -7,7 +7,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.106] - 2025-10-31 - Eden Scraping Fix 🔧
+## [0.106] - 2025-11-01 - Eden Scraping Fix & Auto-Update 🔧🔄
 
 ### 🐛 Bug Fixes
 
@@ -21,11 +21,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Modified file: `Functions/cookie_manager.py` (line 22-34)
   - Documentation: `Documentation/COOKIE_PATH_FIX.md` created with complete details
 
-#### Improvements
-- **Configuration centralization** : All paths now use `get_config_dir()`
-- **PyInstaller compatibility** : Works correctly with compiled application
-- **Consistency** : Same path resolution logic as the rest of the application
-
 - **Column configuration fixed** : Complete correction of the column system
   - Issue 1: URL Herald column (index 11) was not included in resizing (`range(11)` instead of `range(12)`)
   - Issue 2: Class and Level columns order was inverted in the configuration menu
@@ -38,6 +33,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Modified files: `Functions/tree_manager.py`, `UI/dialogs.py`
   - Documentation: `Documentation/COLUMN_CONFIGURATION_FIX.md` created with detailed analysis
 
+### ✨ Improvements
+
+#### Added (11/01/2025)
+- **Configuration centralization** : All paths now use `get_config_dir()`
+- **PyInstaller compatibility** : Works correctly with compiled application
+- **Consistency** : Same path resolution logic as the rest of the application
+
+- **Auto-update on character import** : Automatic update instead of rejection
+  - Before: If character exists → Error "character already exists"
+  - Now: If character exists → Automatic update from Herald 🔄
+  - Preserved data: name, realm, season, server, custom fields
+  - Updated data: class, race, guild, level, realm_rank, realm_points, url, notes
+  - Detailed report: Shows number of creations, updates and errors
+  - Use case: Ideal for keeping characters up-to-date via Herald import
+  - Modified file: `UI/dialogs.py` - Function `_import_characters()` (line 2422)
+  - Documentation: `Documentation/IMPORT_UPDATE_IMPROVEMENT.md` created with full details
+
+- **Configurable Herald cookies folder** : Custom location for scraping cookies
+  - New option in Settings window → "Herald cookies folder"
+  - Allows you to specify a custom folder for saving Eden scraping cookies
+  - Includes a "Browse..." button to facilitate folder selection
+  - Default value: `Configuration/` folder (behavior preserved if not configured)
+  - Portable application: Paths are absolute, no dependency on `__file__`
+  - Persistence: Configuration is saved in `config.json` under key `"cookies_folder"`
+  - Fallback logic: If `cookies_folder` is not set, uses `config_folder` (ensures backward compatibility)
+  - Modified files: `UI/dialogs.py`, `main.py`, `Functions/cookie_manager.py`
+  - Documentation: `Documentation/COOKIES_FOLDER_CONFIG.md` created with full details
+
+- **Robust diagnostic system for unexpected crashes** : Complete tracing of crashes and errors
+  - Global exception handler: Captures and logs all unhandled exceptions
+  - System signal handler: Detects SIGTERM, SIGINT and other OS interruptions
+  - CRITICAL/ERROR logging always active: Even with debug_mode = OFF, errors are recorded
+  - Startup tracing: Records time, Python version, active threads
+  - Shutdown tracing: Records exactly when and how the app stops
+  - Exit code: Shows the code returned by the Qt event loop
+  - Modified files: `main.py`, `Functions/logging_manager.py`
+  - Documentation: `Documentation/CRASH_DIAGNOSIS_GUIDE.md` created with complete debugging guide
+
+#### Impact
+- More intuitive and fluid import workflow
+- No need to delete/reimport existing character
+- Transparent stats update from Herald
+- Proper error handling with detailed report
+- Increased flexibility for cookie and custom path management
+- Complete application portability with centralized configuration
+- Ability to diagnose and fix unexpected crashes
+- Detailed traces of all critical system events
+
 ---
 
 ## [0.105] - 2025-10-31 - Eden Scraping & Mass Import 🌐
@@ -48,6 +91,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Automatic default season assignment**: When importing from Eden Herald
   - Imported characters are automatically placed in the season defined by `default_season` in `config.json`
   - Default value: "S1" if not defined in configuration
+
   - Character saved in `Characters/{season}/{name}.json`
   - Modified in `UI/dialogs.py`: method `_import_characters()`
   - Added field `'season': default_season` in `character_data`

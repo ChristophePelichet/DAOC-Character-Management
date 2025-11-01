@@ -51,6 +51,7 @@ class LogEntry:
         self.message = message
         self.full_line = full_line  # Ligne complète pour remplacement
         self.modified = False
+        self.new_logger = logger_name  # Nouveau logger (peut être changé)
         self.new_action = action
         self.new_message = message
     
@@ -407,12 +408,15 @@ class LogSourceEditor(QMainWindow):
         self.file_label.setWordWrap(True)
         layout.addWidget(self.file_label)
         
-        # Logger et Level (lecture seule)
+        # Logger (éditable via ComboBox) et Level (lecture seule)
         info_layout = QHBoxLayout()
         info_layout.addWidget(QLabel("Logger:"))
-        self.logger_display = QLineEdit()
-        self.logger_display.setReadOnly(True)
-        info_layout.addWidget(self.logger_display)
+        self.logger_combo = QComboBox()
+        self.logger_combo.addItem("ROOT", LOGGER_ROOT)
+        for logger_name in ALL_LOGGERS:
+            self.logger_combo.addItem(logger_name, logger_name)
+        self.logger_combo.setToolTip("Sélectionner le logger pour ce log")
+        info_layout.addWidget(self.logger_combo)
         
         info_layout.addWidget(QLabel("Level:"))
         self.level_display = QLineEdit()
@@ -674,7 +678,7 @@ class LogSourceEditor(QMainWindow):
         
         # Remplir l'éditeur
         self.file_label.setText(f"📁 {log.file_path}\n📍 Ligne {log.line_number}")
-        self.logger_display.setText(log.logger_name)
+        self.logger_combo.setCurrentText(log.new_logger)
         self.level_display.setText(log.level)
         self.action_combo.setEditText(log.new_action)
         self.message_edit.setPlainText(log.new_message)
@@ -690,6 +694,7 @@ class LogSourceEditor(QMainWindow):
                 return
             
             # Récupérer les nouvelles valeurs
+            new_logger = self.logger_combo.currentData()
             new_action = self.action_combo.currentText().strip()
             new_message = self.message_edit.toPlainText().strip()
             
@@ -698,7 +703,8 @@ class LogSourceEditor(QMainWindow):
                 self.action_combo.addItem(new_action)
             
             # Vérifier si changé par rapport aux valeurs ORIGINALES
-            if new_action != self.current_log.action or new_message != self.current_log.message:
+            if new_logger != self.current_log.logger_name or new_action != self.current_log.action or new_message != self.current_log.message:
+                self.current_log.new_logger = new_logger
                 self.current_log.new_action = new_action
                 self.current_log.new_message = new_message
                 self.current_log.modified = True
@@ -710,6 +716,7 @@ class LogSourceEditor(QMainWindow):
                 self.status_label.setText(f"✏️ Log modifié : {Path(self.current_log.file_path).name}:{self.current_log.line_number}")
             else:
                 # Pas de changement par rapport à l'original
+                self.current_log.new_logger = new_logger
                 self.current_log.new_action = new_action
                 self.current_log.new_message = new_message
                 self.current_log.modified = False
@@ -731,10 +738,12 @@ class LogSourceEditor(QMainWindow):
         if not self.current_log:
             return
         
+        self.current_log.new_logger = self.current_log.logger_name
         self.current_log.new_action = self.current_log.action
         self.current_log.new_message = self.current_log.message
         self.current_log.modified = False
         
+        self.logger_combo.setCurrentText(self.current_log.logger_name)
         self.action_combo.setEditText(self.current_log.action)
         self.message_edit.setPlainText(self.current_log.message)
         
@@ -750,6 +759,10 @@ class LogSourceEditor(QMainWindow):
         for row in range(self.table.rowCount()):
             log = self.table.item(row, 0).data(Qt.UserRole)
             if log == self.current_log:
+                # Mettre à jour logger si changé
+                logger_text = log.new_logger if log.new_logger else log.logger_name
+                self.table.item(row, 2).setText(logger_text)
+                
                 # Mettre à jour action
                 action_text = log.new_action if log.new_action else "-"
                 self.table.item(row, 4).setText(action_text)
@@ -914,6 +927,7 @@ class LogSourceEditor(QMainWindow):
             log.modified = False
             log.action = log.new_action
             log.message = log.new_message
+            log.logger_name = log.new_logger
         
         # Rafraîchir la table
         for row in range(self.table.rowCount()):
@@ -953,11 +967,15 @@ class LogSourceEditor(QMainWindow):
             msg_escaped = log.new_message.replace('"', '\\"')
             new_msg = f'"{msg_escaped}"'
         
-        # Construire la ligne complète
+        # Vérifier si le logger a changé - utiliser log_with_action si action existe
         if log.new_action:
-            new_line = f'{indent_str}{logger_prefix}logger.{level_lower}({new_msg}, extra={{"action": "{log.new_action}"}})\n'
+            # Format: log_with_action(logger, "level", message, action="ACTION")
+            # Échapper les guillemets dans le message pour log_with_action
+            msg_for_func = log.new_message.replace('"', '\\"')
+            new_line = f'{indent_str}log_with_action({log.new_logger}, "{level_lower}", "{msg_for_func}", action="{log.new_action}")\n'
         else:
-            new_line = f'{indent_str}{logger_prefix}logger.{level_lower}({new_msg})\n'
+            # Format standard: logger.level(message) ou nouveau logger
+            new_line = f'{indent_str}{logger_prefix}{log.new_logger}.{level_lower}({new_msg})\n'
         
         return new_line
 

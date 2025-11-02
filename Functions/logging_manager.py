@@ -100,24 +100,25 @@ def setup_logging(extra_handlers=None):
     formatter = ContextualFormatter()
     log_file_path = os.path.join(log_dir, "debug.log")
 
-    # Always create a file handler for CRITICAL and ERROR messages (even if debug is OFF)
-    fh_errors = RotatingFileHandler(log_file_path, maxBytes=1024*1024, backupCount=5, encoding='utf-8')
-    fh_errors.setLevel(logging.ERROR)  # Only ERROR and CRITICAL
-    fh_errors.setFormatter(formatter)
-    logger.addHandler(fh_errors)
-
-    # If debug mode is ON, configure full debug logging
+    # Create a single RotatingFileHandler for all messages
+    # This avoids file locking issues when rotating
     if is_debug_mode:
         # Full debug file handler
-        fh_debug = RotatingFileHandler(log_file_path, maxBytes=1024*1024, backupCount=5, encoding='utf-8')
-        fh_debug.setLevel(logging.DEBUG)
-        fh_debug.setFormatter(formatter)
-        logger.addHandler(fh_debug)
+        fh = RotatingFileHandler(log_file_path, maxBytes=1024*1024, backupCount=5, encoding='utf-8')
+        fh.setLevel(logging.DEBUG)
+        fh.setFormatter(formatter)
+        logger.addHandler(fh)
 
         ch = logging.StreamHandler()
         ch.setLevel(logging.DEBUG)
         ch.setFormatter(formatter)
         logger.addHandler(ch)
+    else:
+        # When debug mode is OFF, still log errors to file
+        fh_errors = RotatingFileHandler(log_file_path, maxBytes=1024*1024, backupCount=5, encoding='utf-8')
+        fh_errors.setLevel(logging.ERROR)  # Only ERROR and CRITICAL
+        fh_errors.setFormatter(formatter)
+        logger.addHandler(fh_errors)
 
 
 def get_logger(name):

@@ -550,7 +550,7 @@ class CookieManager:
             with open(self.cookie_file, 'rb') as f:
                 return pickle.load(f)
         except Exception as e:
-            log_with_action(EDEN, "error", "Erreur lors de la lecture des cookies: {e}", action="COOKIES")
+            eden_logger.error(f"Erreur lors de la lecture des cookies: {e}", extra={"action": "COOKIES"})
             return None
     
     def test_eden_connection(self):
@@ -618,65 +618,64 @@ class CookieManager:
             eden_logger.debug("✅ Test avec {browser_name} (headless)", extra={"action": "TEST"})
             
             try:
-                # Aller sur la page d'accueil pour pouvoir ajouter les cookies
+                # TEST SIMPLE MAIS COMPLET:
+                # Même flux que dans eden_scraper.py load_cookies()
+                
+                import time
+                
+                # Aller sur la page d'accueil
                 driver.get("https://eden-daoc.net/")
+                time.sleep(2)
                 
                 # Ajouter les cookies
+                eden_logger.info(f"Ajout de {len(cookies_list)} cookies", extra={"action": "TEST"})
                 for cookie in cookies_list:
-                    driver.add_cookie(cookie)
+                    try:
+                        driver.add_cookie(cookie)
+                    except:
+                        pass
                 
-                # Attendre un peu pour que les cookies soient pris en compte
-                import time
-                time.sleep(2)
+                time.sleep(3)
                 
-                # Tester l'accès au Herald avec une page spécifique
-                test_url = 'https://eden-daoc.net/herald?n=top_players&r=hib'
-                eden_logger.info(f"Test de connexion à {test_url}", extra={"action": "TEST"})
+                # REFRESH IMPORTANT - Les cookies ne sont pas actifs sans refresh
+                eden_logger.info("Refresh pour activer les cookies", extra={"action": "TEST"})
+                driver.refresh()
+                time.sleep(3)
                 
-                driver.get(test_url)
+                # Aller sur le Herald
+                eden_logger.info("Navigation vers https://eden-daoc.net/herald", extra={"action": "TEST"})
+                driver.get("https://eden-daoc.net/herald")
+                time.sleep(4)
                 
-                # Attendre que la page se charge
-                time.sleep(2)
+                # Chercher le message d'erreur
+                page_source = driver.page_source
                 
-                current_url = driver.current_url
+                # Détection: Le message d'erreur spécifique
+                error_message = 'The requested page "herald" is not available.'
+                has_error_msg = error_message in page_source
                 
-                eden_logger.info(f"URL finale: {current_url}")
+                # ALTERNATIVE: Redirection vers login
+                # Si pas connecté, on devrait voir une redirection ucp.php avec herald dans le redirect
+                has_login_redirect = ('redirect=' in page_source and 'herald' in page_source.lower() and 'ucp.php' in page_source)
                 
-                # Vérifier si on est redirigé vers la page de login
-                if 'login' in current_url.lower() or 'ucp.php?mode=login' in current_url:
+                is_not_connected = has_error_msg or has_login_redirect
+                
+                if is_not_connected:
+                    eden_logger.warning(f'NON CONNECTÉ - Détection: erreur_msg={has_error_msg}, login_redirect={has_login_redirect}', extra={"action": "TEST"})
                     return {
                         'success': True,
                         'status_code': 200,
-                        'message': 'Redirigé vers la page de connexion',
+                        'message': 'Non connecté à Herald',
                         'accessible': False
                     }
-                
-                # Vérifier le contenu de la page
-                page_source = driver.page_source.lower()
-                
-                # Log pour debug
-                has_login_form = 'mode=login' in page_source
-                has_connexion_text = 'connexion' in page_source and 'mot de passe' in page_source
-                has_herald_content = 'herald' in page_source or 'top players' in page_source or 'player' in page_source
-                
-                eden_logger.info(f"Analyse de la page - mode=login: {has_login_form}, formulaire connexion: {has_connexion_text}, contenu herald: {has_herald_content}")
-                
-                # Si on détecte un formulaire de connexion ET pas de contenu Herald, c'est qu'on n'est pas connecté
-                if (has_login_form or has_connexion_text) and not has_herald_content:
+                else:
+                    eden_logger.info("CONNECTÉ - Pas de signes de non-connexion détectés", extra={"action": "TEST"})
                     return {
                         'success': True,
                         'status_code': 200,
-                        'message': 'Page de connexion détectée',
-                        'accessible': False
+                        'message': 'Connecté à Herald',
+                        'accessible': True
                     }
-                
-                # Si on arrive ici, on est probablement connecté
-                return {
-                    'success': True,
-                    'status_code': 200,
-                    'message': 'Accès autorisé',
-                    'accessible': True
-                }
                     
             finally:
                 driver.quit()

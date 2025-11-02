@@ -94,7 +94,7 @@ class EdenScraper:
         Charge les cookies d'authentification dans le driver
         
         Returns:
-            bool: True si les cookies ont été chargés
+            bool: True si les cookies ont été chargés et la session est active
         """
         if not self.driver:
             self.logger.error("❌ Driver non initialisé", extra={"action": "INIT"})
@@ -106,28 +106,105 @@ class EdenScraper:
                 self.logger.error("❌ Aucun cookie disponible", extra={"action": "COOKIES"})
                 return False
             
-            # Aller sur le domaine pour pouvoir ajouter les cookies
+            # Étape 1: Naviguer vers le domaine racine
+            self.logger.info("🌐 Étape 1: Navigation vers https://eden-daoc.net/", extra={"action": "COOKIES"})
             self.driver.get("https://eden-daoc.net/")
             
             # Attendre que la page soit chargée
             import time
             time.sleep(2)
             
-            # Ajouter chaque cookie
+            # Étape 2: Ajouter les cookies
+            self.logger.info(f"🍪 Étape 2: Ajout de {len(cookies_list)} cookies...", extra={"action": "COOKIES"})
+            cookies_added = 0
             for cookie in cookies_list:
                 try:
+                    # Certains cookies peuvent avoir des attributs qui causent des problèmes
+                    # On retire 'expiry' si elle est trop dans le passé
+                    if 'expiry' in cookie:
+                        import time as time_module
+                        if cookie['expiry'] < time_module.time():
+                            self.logger.debug(f"Cookie {cookie.get('name')} expiré, tentative d'ajout quand même", extra={"action": "COOKIES"})
+                    
                     self.driver.add_cookie(cookie)
+                    cookies_added += 1
                 except Exception as e:
-                    self.logger.warning(f"Impossible d'ajouter le cookie {cookie.get('name')}: {e}", extra={"action": "COOKIES"})
+                    self.logger.warning(f"⚠️ Impossible d'ajouter le cookie {cookie.get('name')}: {e}", extra={"action": "COOKIES"})
             
-            self.logger.info(f"{len(cookies_list)} cookies chargés dans le driver", extra={"action": "COOKIES"})
+            self.logger.info(f"✅ {cookies_added}/{len(cookies_list)} cookies chargés dans le driver", extra={"action": "COOKIES"})
             
-            # Attendre un peu après avoir ajouté les cookies
-            time.sleep(1)
-            return True
+            # Étape 3: Attendre et rafraîchir la page d'accueil
+            self.logger.info("⏳ Étape 3: Attente de 3 secondes avant rafraîchissement...", extra={"action": "COOKIES"})
+            time.sleep(3)
+            
+            self.logger.info("🔄 Rafraîchissement de la page d'accueil pour activer la session...", extra={"action": "COOKIES"})
+            self.driver.refresh()
+            time.sleep(3)
+            
+            # Étape 4: Naviguer vers le Herald pour tester la session
+            self.logger.info("🔍 Étape 4: Navigation vers le Herald (test de session)...", extra={"action": "COOKIES"})
+            self.driver.get("https://eden-daoc.net/herald")
+            time.sleep(4)
+            
+            # Vérifier si on est connecté
+            current_url = self.driver.current_url
+            html_content = self.driver.page_source
+            
+            self.logger.debug(f"URL actuelle: {current_url}", extra={"action": "COOKIES"})
+            
+            # DEBUG: Sauvegarder le HTML pour inspection
+            import os
+            debug_file = os.path.join(os.path.dirname(__file__), '..', 'Scripts', 'debug_herald_page.html')
+            try:
+                os.makedirs(os.path.dirname(debug_file), exist_ok=True)
+                with open(debug_file, 'w', encoding='utf-8') as f:
+                    f.write(html_content)
+                self.logger.debug(f"HTML sauvegardé dans {debug_file}", extra={"action": "COOKIES"})
+            except:
+                pass
+            
+            # UNIQUE MÉTHODE DE DÉTECTION: Chercher le message d'erreur spécifique
+            # OU chercher s'il y a des éléments de login/non-connexion
+            error_message = 'The requested page "herald" is not available.'
+            has_error_msg = error_message in html_content
+            
+            # ALTERNATIVE: Chercher des signes de non-connexion
+            # Si pas connecté, on devrait voir des éléments de login
+            has_login_button = 'login' in html_content.lower() and ('ucp.php' in html_content or 'oauth_service' in html_content)
+            
+            # Chercher si on a vraiment du contenu Herald (pas juste la page phpBB)
+            # Chercher un lien vers player ou search parameters dans le lien de login
+            is_redirecting_to_login = ('redirect=app.php' in html_content or 'herald' in html_content.lower()) and has_login_button
+            
+            is_not_logged_in = has_error_msg or is_redirecting_to_login
+            
+            self.logger.debug(f"Message d'erreur présent: {has_error_msg}", extra={"action": "COOKIES"})
+            self.logger.debug(f"Détecté redirection login: {is_redirecting_to_login}", extra={"action": "COOKIES"})
+            self.logger.debug(f"Conclusion - Pas connecté: {is_not_logged_in}", extra={"action": "COOKIES"})
+            self.logger.debug(f"Taille HTML: {len(html_content)} caractères", extra={"action": "COOKIES"})
+            
+            # DEBUG: Afficher la recherche
+            if "not available" in html_content.lower():
+                self.logger.debug("Partie du HTML contient 'not available' en minuscules", extra={"action": "COOKIES"})
+            if "herald" in html_content.lower():
+                self.logger.debug("Partie du HTML contient 'herald' en minuscules", extra={"action": "COOKIES"})
+            
+            # LOGIQUE: 
+            # - Si message d'erreur → Définitivement pas connecté
+            # - Si pas de message d'erreur → Probablement connecté
+            if is_not_logged_in:
+                self.logger.error('❌ NON CONNECTÉ - Message détecté: "The requested page herald is not available."', extra={"action": "COOKIES"})
+                self.logger.error("💡 Conseil: Régénérez vos cookies en utilisant le Cookie Manager (générateur ou import)", extra={"action": "COOKIES"})
+                self.logger.debug(f"Extrait HTML (premiers 500 car.): {html_content[:500]}", extra={"action": "COOKIES"})
+                return False
+            else:
+                self.logger.info("✅ Session authentifiée avec succès - Pas de message d'erreur détecté", extra={"action": "COOKIES"})
+                return True
             
         except Exception as e:
             self.logger.error(f"❌ Erreur lors du chargement des cookies: {e}", extra={"action": "COOKIES"})
+            import traceback
+            self.logger.debug(f"Traceback complet: {traceback.format_exc()}", extra={"action": "COOKIES"})
             return False
     
     def scrape_character(self, character_name):
@@ -381,42 +458,57 @@ def search_herald_character(character_name, realm_filter=""):
     import time
     
     try:
+        module_logger.info(f"Début de la recherche Herald pour: {character_name}", extra={"action": "SEARCH"})
+        
         # Vérifier les cookies
         cookie_manager = CookieManager()
         
         if not cookie_manager.cookie_exists():
+            module_logger.error("Aucun cookie trouvé", extra={"action": "SEARCH"})
             return False, "Aucun cookie trouvé. Veuillez générer ou importer des cookies d'abord.", ""
         
         info = cookie_manager.get_cookie_info()
         if not info or not info.get('is_valid'):
+            module_logger.error("Cookies expirés", extra={"action": "SEARCH"})
             return False, "Les cookies ont expiré. Veuillez les regénérer.", ""
+        
+        module_logger.info(f"Cookies valides - {info.get('cookie_count', 0)} cookies chargés", extra={"action": "SEARCH"})
         
         # Initialiser le scraper en mode visible (obligatoire - bot check)
         scraper = EdenScraper(cookie_manager)
         
         if not scraper.initialize_driver(headless=False):
+            module_logger.error("Impossible d'initialiser le navigateur", extra={"action": "SEARCH"})
             return False, "Impossible d'initialiser le navigateur Chrome.", ""
+        
+        module_logger.info("Navigateur initialisé avec succès", extra={"action": "SEARCH"})
         
         if not scraper.load_cookies():
             scraper.close()
+            module_logger.error("Impossible de charger les cookies dans le navigateur", extra={"action": "SEARCH"})
             return False, "Impossible de charger les cookies.", ""
+        
+        module_logger.info("Cookies chargés dans le navigateur - Authentification complétée", extra={"action": "SEARCH"})
         
         # Construire l'URL de recherche avec le filtre de royaume
         if realm_filter:
             search_url = f"https://eden-daoc.net/herald?n=search&r={realm_filter}&s={character_name}"
         else:
             search_url = f"https://eden-daoc.net/herald?n=search&s={character_name}"
-        module_logger.info(f"Recherche Herald: {search_url}", extra={"action": "TEST"})
+        module_logger.info(f"Recherche Herald: {search_url}", extra={"action": "SEARCH"})
         
         # Naviguer vers la page de recherche
         scraper.driver.get(search_url)
         
         # Attendre que la page se charge complètement
+        module_logger.info("Attente du chargement de la page de recherche (5 secondes)...", extra={"action": "SEARCH"})
         time.sleep(5)
         
         # Extraire le contenu HTML
         page_source = scraper.driver.page_source
         soup = BeautifulSoup(page_source, 'html.parser')
+        
+        module_logger.info(f"Page chargée - Taille: {len(page_source)} caractères", extra={"action": "SEARCH"})
         
         # Extraire les données de recherche
         search_data = {
@@ -454,12 +546,22 @@ def search_herald_character(character_name, realm_filter=""):
         temp_dir = Path(tempfile.gettempdir()) / "EdenSearchResult"
         temp_dir.mkdir(exist_ok=True)
         
+        module_logger.info(f"Dossier temporaire: {temp_dir}", extra={"action": "CLEANUP"})
+        
         # Nettoyer les anciens fichiers avant de créer les nouveaux
-        for old_file in temp_dir.glob("*.json"):
-            try:
-                old_file.unlink()
-            except Exception as e:
-                module_logger.warning(f"Impossible de supprimer l'ancien fichier {old_file}: {e}", extra={"action": "CLEANUP"})
+        old_files_list = list(temp_dir.glob("*.json"))
+        if old_files_list:
+            module_logger.info(f"Nettoyage de {len(old_files_list)} fichier(s) ancien(s)...", extra={"action": "CLEANUP"})
+            
+            for old_file in old_files_list:
+                try:
+                    module_logger.debug(f"Suppression: {old_file.name}", extra={"action": "CLEANUP"})
+                    old_file.unlink()
+                    module_logger.info(f"✅ Fichier supprimé: {old_file.name}", extra={"action": "CLEANUP"})
+                except Exception as e:
+                    module_logger.warning(f"❌ Impossible de supprimer {old_file.name}: {e}", extra={"action": "CLEANUP"})
+        else:
+            module_logger.info("Aucun ancien fichier à nettoyer", extra={"action": "CLEANUP"})
         
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         json_filename = f"search_{character_name}_{timestamp}.json"
@@ -541,6 +643,8 @@ def search_herald_character(character_name, realm_filter=""):
         char_count = len(characters)
         message = f"{char_count} personnage(s) trouvé(s)"
         
+        module_logger.info(f"Recherche terminée: {char_count} personnages trouvés", extra={"action": "SEARCH"})
+        module_logger.info(f"Résultats sauvegardés dans: {characters_path}", extra={"action": "SEARCH"})
         module_logger.info(f"Recherche terminée: {char_count} personnages - Fichiers: {json_path}, {characters_path}", extra={"action": "SCRAPE"})
         
         return True, message, str(characters_path)

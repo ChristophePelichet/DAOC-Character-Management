@@ -397,8 +397,9 @@ class EdenDebugWindow(QMainWindow):
         self.eden_handler.setFormatter(formatter)
         self.eden_handler.log_updated.connect(self.append_colored_log)
         
-        # Ajouter le handler au logger Eden
-        eden_logger = logging.getLogger('eden')
+        # Ajouter le handler au logger Eden (utiliser la constante du logging_manager)
+        from Functions.logging_manager import LOGGER_EDEN
+        eden_logger = logging.getLogger(LOGGER_EDEN)
         eden_logger.addHandler(self.eden_handler)
         eden_logger.setLevel(logging.DEBUG)
         

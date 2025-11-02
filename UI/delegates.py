@@ -316,17 +316,25 @@ class UrlButtonDelegate(QStyledItemDelegate):
                     if not self._check_herald_connection():
                         return True
                     
-                    # Ouvrir l'URL dans le navigateur
-                    import webbrowser
-                    try:
-                        if not url.startswith(('http://', 'https://')):
-                            url = 'https://' + url
-                        webbrowser.open(url)
-                    except Exception as e:
-                        logging.error(f"Erreur lors de l'ouverture de l'URL: {e}")
+                    # Ouvrir l'URL avec cookies dans un thread pour ne pas bloquer l'UI
+                    import threading
+                    thread = threading.Thread(target=self._open_url_in_thread, args=(url,), daemon=True)
+                    thread.start()
                     return True
         
         return super().editorEvent(event, model, option, index)
+    
+    def _open_url_in_thread(self, url):
+        """Ouvre l'URL avec les cookies dans un thread séparé."""
+        try:
+            from Functions.cookie_manager import CookieManager
+            cookie_manager = CookieManager()
+            result = cookie_manager.open_url_with_cookies(url)
+            
+            if not result.get('success', False):
+                logging.warning(f"Erreur lors de l'ouverture de l'URL: {result.get('message', 'Erreur inconnue')}")
+        except Exception as e:
+            logging.error(f"Erreur lors de l'ouverture de l'URL avec cookies: {e}")
     
     def _check_herald_connection(self):
         """Vérifie si la connexion Herald est OK, sinon affiche un message."""

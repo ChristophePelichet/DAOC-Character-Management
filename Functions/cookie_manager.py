@@ -702,3 +702,124 @@ class CookieManager:
                 'accessible': False
             }
 
+    def open_url_with_cookies(self, url):
+        """
+        Ouvre une URL dans le navigateur avec les cookies chargés.
+        Utilise Selenium pour charger les cookies puis ouvre le navigateur.
+        
+        Args:
+            url (str): L'URL à ouvrir (ex: https://eden-daoc.net/herald)
+            
+        Returns:
+            dict: {
+                'success': bool,
+                'message': str,
+                'browser': str
+            }
+        """
+        if not self.cookie_exists():
+            return {
+                'success': False,
+                'message': 'Aucun cookie trouvé',
+                'browser': None
+            }
+        
+        try:
+            from selenium import webdriver
+            from selenium.webdriver.chrome.service import Service
+            from selenium.webdriver.chrome.options import Options
+            from webdriver_manager.chrome import ChromeDriverManager
+            import time
+            
+            # Charger les cookies
+            cookies_list = self.get_cookies_for_scraper()
+            if not cookies_list:
+                return {
+                    'success': False,
+                    'message': 'Cookies invalides ou expirés',
+                    'browser': None
+                }
+            
+            # Lire la configuration pour le navigateur préféré
+            from Functions.config_manager import config
+            preferred_browser = config.get('preferred_browser', 'Chrome')
+            allow_download = config.get('allow_browser_download', False)
+            
+            # Créer le driver en mode NON-HEADLESS (pour voir le résultat)
+            driver, browser_name = self._initialize_browser_driver(
+                headless=False,  # Important: pas de headless pour voir le résultat
+                preferred_browser=preferred_browser,
+                allow_download=allow_download
+            )
+            
+            if not driver:
+                return {
+                    'success': False,
+                    'message': 'Impossible d\'initialiser un navigateur',
+                    'browser': None
+                }
+            
+            try:
+                # Étape 1: Aller à la page d'accueil d'abord
+                eden_logger.info(f"Ouverture de {url} avec cookies", extra={"action": "NAVIGATE"})
+                driver.get("https://eden-daoc.net/")
+                time.sleep(2)
+                
+                # Étape 2: Ajouter les cookies
+                eden_logger.info(f"Chargement de {len(cookies_list)} cookies", extra={"action": "NAVIGATE"})
+                for cookie in cookies_list:
+                    try:
+                        driver.add_cookie(cookie)
+                    except Exception as cookie_err:
+                        eden_logger.debug(f"Impossible d'ajouter un cookie: {cookie_err}")
+                
+                time.sleep(1)
+                
+                # Étape 3: Refresh pour activer les cookies
+                eden_logger.info("Refresh pour activer les cookies", extra={"action": "NAVIGATE"})
+                driver.refresh()
+                time.sleep(2)
+                
+                # Étape 4: Naviguer vers l'URL demandée
+                if not url.startswith(('http://', 'https://')):
+                    url = 'https://' + url
+                
+                eden_logger.info(f"Navigation vers {url}", extra={"action": "NAVIGATE"})
+                driver.get(url)
+                time.sleep(2)
+                
+                eden_logger.info(f"✅ Page ouverte avec succès via {browser_name}", extra={"action": "NAVIGATE"})
+                
+                return {
+                    'success': True,
+                    'message': f'Page ouverte via {browser_name}',
+                    'browser': browser_name
+                }
+                
+            except Exception as e:
+                eden_logger.error(f"Erreur lors de la navigation: {e}")
+                try:
+                    driver.quit()
+                except:
+                    pass
+                return {
+                    'success': False,
+                    'message': f'Erreur: {str(e)[:50]}',
+                    'browser': browser_name
+                }
+                
+        except ImportError as e:
+            missing_module = str(e).split("'")[1] if "'" in str(e) else "inconnu"
+            return {
+                'success': False,
+                'message': f'Module {missing_module} non installé',
+                'browser': None
+            }
+        except Exception as e:
+            eden_logger.error(f"Erreur lors de l'ouverture de l'URL avec cookies: {e}")
+            return {
+                'success': False,
+                'message': f'Erreur: {str(e)[:50]}',
+                'browser': None
+            }
+

@@ -639,8 +639,7 @@ class CharacterSheetWindow(QDialog):
         dialog.exec()
     
     def open_herald_url(self):
-        """Ouvre l'URL du Herald dans le navigateur par défaut"""
-        import webbrowser
+        """Ouvre l'URL du Herald dans le navigateur avec les cookies"""
         url = self.herald_url_edit.text().strip()
         
         if not url:
@@ -657,13 +656,30 @@ class CharacterSheetWindow(QDialog):
             self.herald_url_edit.setText(url)
         
         try:
-            webbrowser.open(url)
+            # Ouvrir l'URL avec les cookies dans un thread séparé
+            import threading
+            thread = threading.Thread(target=self._open_url_in_thread, args=(url,), daemon=True)
+            thread.start()
         except Exception as e:
             QMessageBox.critical(
                 self,
                 "Erreur",
                 f"Impossible d'ouvrir l'URL : {str(e)}"
             )
+    
+    def _open_url_in_thread(self, url):
+        """Ouvre l'URL avec les cookies dans un thread séparé."""
+        try:
+            from Functions.cookie_manager import CookieManager
+            cookie_manager = CookieManager()
+            result = cookie_manager.open_url_with_cookies(url)
+            
+            if not result.get('success', False):
+                import logging
+                logging.warning(f"Erreur lors de l'ouverture de l'URL: {result.get('message', 'Erreur inconnue')}")
+        except Exception as e:
+            import logging
+            logging.error(f"Erreur lors de l'ouverture de l'URL avec cookies: {e}")
     
     def update_from_herald(self):
         """Met à jour les données du personnage depuis Herald"""

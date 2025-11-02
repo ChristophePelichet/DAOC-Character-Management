@@ -951,3 +951,109 @@ class CookieManager:
                 'browser': None
             }
 
+    def open_url_with_cookies_simple(self, url):
+        """
+        Ouvre une URL dans le navigateur par défaut avec les cookies injectés.
+        Utilise un petit serveur local qui injecte les cookies et redirige.
+        
+        Args:
+            url (str): L'URL à ouvrir
+            
+        Returns:
+            dict: {
+                'success': bool,
+                'message': str
+            }
+        """
+        if not self.cookie_exists():
+            return {
+                'success': False,
+                'message': 'Aucun cookie trouvé'
+            }
+        
+        try:
+            from http.server import HTTPServer, BaseHTTPRequestHandler
+            import json
+            import threading
+            import webbrowser
+            import time
+            
+            cookies_list = self.get_cookies_for_scraper()
+            if not cookies_list:
+                return {
+                    'success': False,
+                    'message': 'Cookies invalides ou expirés'
+                }
+            
+            # Préparer l'URL cible
+            target_url = url
+            if not target_url.startswith(('http://', 'https://')):
+                target_url = 'https://' + target_url
+            
+            class CookieInjectorHandler(BaseHTTPRequestHandler):
+                """Handler qui injecte les cookies et redirige"""
+                
+                def do_GET(self):
+                    if self.path == '/':
+                        # Générer une page HTML qui injecte les cookies et redirige
+                        cookies_js = 'document.cookie = "";\n'
+                        for cookie in cookies_list:
+                            name = cookie.get('name', '')
+                            value = cookie.get('value', '')
+                            domain = cookie.get('domain', '')
+                            path = cookie.get('path', '/')
+                            # Injecter le cookie (simple, pas de domaine spécifique)
+                            safe_value = value.replace('"', '\\"')
+                            cookies_js += f'document.cookie = "{name}={safe_value}; path={path}; max-age=31536000";\n'
+                        
+                        html = f"""
+                        <html>
+                        <head><title>Loading...</title></head>
+                        <body>
+                        <script>
+                        {cookies_js}
+                        window.location.href = "{target_url}";
+                        </script>
+                        </body>
+                        </html>
+                        """
+                        
+                        self.send_response(200)
+                        self.send_header('Content-type', 'text/html')
+                        self.send_header('Access-Control-Allow-Origin', '*')
+                        self.end_headers()
+                        self.wfile.write(html.encode())
+                    else:
+                        self.send_response(404)
+                        self.end_headers()
+                
+                def log_message(self, format, *args):
+                    pass  # Supprimer les logs du serveur
+            
+            # Démarrer le serveur dans un thread séparé
+            server = HTTPServer(('127.0.0.1', 0), CookieInjectorHandler)
+            port = server.server_address[1]
+            server_thread = threading.Thread(target=server.handle_request, daemon=True)
+            server_thread.start()
+            
+            # Ouvrir le navigateur vers le serveur local
+            local_url = f"http://127.0.0.1:{port}/"
+            eden_logger.info(f"Ouverture de {target_url} avec cookies via serveur local", extra={"action": "NAVIGATE"})
+            webbrowser.open(local_url)
+            
+            # Attendre que la page soit servie
+            time.sleep(3)
+            server.server_close()
+            
+            return {
+                'success': True,
+                'message': f'Page ouverte via navigateur par défaut avec cookies'
+            }
+            
+        except Exception as e:
+            eden_logger.error(f"Erreur lors de l'ouverture simple avec cookies: {e}")
+            return {
+                'success': False,
+                'message': f'Erreur: {str(e)[:50]}'
+            }
+

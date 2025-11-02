@@ -1249,54 +1249,33 @@ class CookieManager:
             with open(cookies_file, 'wb') as f:
                 pickle.dump(cookies_list, f)
             
-            eden_logger.info(f"Lancement de {preferred_browser} en processus indépendant vers {url}", extra={"action": "NAVIGATE"})
+            eden_logger.info(f"Lancement de {preferred_browser} avec Selenium et cookies", extra={"action": "NAVIGATE"})
             
-            # Lancer le navigateur en processus complètement détaché
-            # Utiliser subprocess.DETACHED_PROCESS sous Windows pour que le processus continue
-            if os.name == 'nt':  # Windows
-                # Détacher complètement le processus
-                import ctypes
-                startupinfo = subprocess.STARTUPINFO()
-                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-                startupinfo.wShowWindow = 5  # SW_SHOW = 5
-                
-                subprocess.Popen(
-                    [browser_path, url],
-                    startupinfo=startupinfo,
-                    creationflags=subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP,
-                    close_fds=True
-                )
-            else:
-                # Unix/Linux
-                subprocess.Popen(
-                    [browser_path, url],
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                    preexec_fn=os.setsid
-                )
-            
-            # Maintenant utiliser Selenium dans le même profil pour charger les cookies
-            # (dans le navigateur qui vient d'être lancé)
+            # NE PAS lancer le navigateur directement
+            # Seulement utiliser Selenium pour lancer et charger les cookies
             import time
-            time.sleep(2)  # Attendre que le navigateur se lance
             
             try:
                 from selenium import webdriver
                 from selenium.webdriver.chrome.options import Options
+                from selenium.webdriver.edge.options import Options as EdgeOptions
                 
-                chrome_options = Options()
-                chrome_options.add_argument(f"--user-data-dir={profile_dir}")
-                chrome_options.add_argument("--no-first-run")
-                chrome_options.add_argument("--no-default-browser-check")
-                
-                # Créer une session Selenium pour charger les cookies
                 if preferred_browser == 'Chrome':
+                    chrome_options = Options()
+                    chrome_options.add_argument("--no-first-run")
+                    chrome_options.add_argument("--no-default-browser-check")
+                    chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+                    
                     from webdriver_manager.chrome import ChromeDriverManager
                     driver = webdriver.Chrome(options=chrome_options)
                 else:
+                    edge_options = EdgeOptions()
+                    edge_options.add_argument("--no-first-run")
+                    edge_options.add_argument("--disable-blink-features=AutomationControlled")
+                    
                     from selenium.webdriver.edge.service import Service as EdgeService
                     from webdriver_manager.microsoft import EdgeChromiumDriverManager
-                    driver = webdriver.Edge(options=chrome_options)
+                    driver = webdriver.Edge(options=edge_options)
                 
                 try:
                     # Charger la page et ajouter les cookies
@@ -1314,22 +1293,26 @@ class CookieManager:
                     time.sleep(2)
                     
                     driver.get(url)
-                    time.sleep(2)
+                    time.sleep(3)
                     
-                    eden_logger.info(f"✅ Navigateur lancé avec succès et cookies chargés", extra={"action": "NAVIGATE"})
+                    eden_logger.info(f"✅ Navigateur lancé via Selenium avec cookies chargés", extra={"action": "NAVIGATE"})
+                    
+                    # IMPORTANT: Garder une référence au driver pour éviter le garbage collection
+                    self.persistent_drivers.append(driver)
+                    
+                    # IMPORTANT: NE PAS appeler quit()
+                    # Laisser le driver/navigateur ouvert indéfiniment
+                    return {
+                        'success': True,
+                        'message': f'Navigateur lancé avec succès et cookies chargés'
+                    }
                     
                 finally:
-                    # NE PAS appeler quit() - laisser Selenium détaché aussi
+                    # Ne pas fermer le driver
                     pass
                 
             except Exception as e:
-                eden_logger.debug(f"Erreur lors de la tentative de chargement des cookies Selenium: {e}")
-                # Pas grave, le navigateur est déjà lancé
-            
-            return {
-                'success': True,
-                'message': f'Navigateur lancé en processus indépendant'
-            }
+                eden_logger.error(f"Erreur Selenium avec cookies: {e}")
             
         except Exception as e:
             eden_logger.error(f"Erreur lors du lancement subprocess: {e}")

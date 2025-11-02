@@ -374,8 +374,8 @@ class UrlButtonDelegate(QStyledItemDelegate):
         
         # Si l'utilisateur clique sur "Ouvrir Paramètres"
         if result == QMessageBox.Open and self.parent_app:
-            if hasattr(self.parent_app, 'open_settings'):
-                self.parent_app.open_settings()
+            if hasattr(self.parent_app, 'open_configuration'):
+                self.parent_app.open_configuration()
     
     def sizeHint(self, option, index):
         """Retourne la taille recommandée pour la cellule."""

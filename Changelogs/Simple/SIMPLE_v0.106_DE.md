@@ -1,4 +1,13 @@
-# v0.106 - Logging-System & Entwicklerwerkzeuge
+# v0.106 - Logging-System, Cookie-Sicherung & Verbesserungen
+
+## 🍪 Eden-Cookies-Sicherung (NEU)
+✅ Automatische tägliche Cookie-Sicherung beim Start  
+✅ Dedizierter "Cookies Eden" Abschnitt im Sicherungsfenster  
+✅ Gleiche Optionen wie Characters: Komprimierung, Speicherlimit  
+✅ Schaltfläche "Jetzt sichern" für sofortige erzwungene Sicherung  
+✅ Schaltfläche "Ordner öffnen" für direkten Ordnerzugriff  
+✅ Automatische Aktualisierung nach Sicherung  
+✅ Anzeige der Sicherungsanzahl und des letzten Sicherungsdatums  
 
 ## 🔧 Neues Logging-System
 ✅ Einheitliches Format: `LOGGER - LEVEL - ACTION - MESSAGE`  
@@ -18,21 +27,49 @@
 ✅ Merkt sich das zuletzt bearbeitete Projekt  
 ✅ Echtzeit-Statistiken  
 
-## 🔍 Eden-Scraping-Korrekturen
+## 🔍 Eden-Scraping-Korrektionen
 ✅ Korrektur des Eden-Cookies-Speicherpfads (PyInstaller-Korrektur)  
 ✅ Auto-Update beim Charakterimport  
 ✅ Konfigurierbarer Herald-Cookies-Ordner  
+
+## 🧬 Herald-Authentifizierung - Vereinfachte & Zuverlässige Erkennung
+✅ Authentifizierungserkennung basierend auf einzelnem definitivem Kriterium  
+✅ Fehlermeldung 'The requested page "herald" is not available.' = NICHT VERBUNDEN  
+✅ Abwesenheit der Fehlermeldung = VERBUNDEN (kann Daten scrapen)  
+✅ Kohärente Logik zwischen `test_eden_connection()` und `load_cookies()`  
+✅ Ungültige Cookies korrekt erkannt und gemeldet  
+✅ Tests mit etwa 58 Herald-Suchergebnissen validiert  
+
+## 🎛️ Herald-Schaltflächen-Steuerung
+✅ "Aktualisieren" und "Herald-Suche" Schaltflächen automatisch deaktiviert  
+✅ Deaktiviert, wenn kein Cookie erkannt wird  
+✅ Deaktiviert, wenn Cookies abgelaufen sind  
+✅ Schaltflächenzustand mit Verbindungsstatus synchronisiert  
+✅ Klare Benutzer-Nachricht: "Kein Cookie erkannt"  
 
 ## 📝 Backup-Modul
 ✅ 46+ Logs mit klaren Aktionen getaggt  
 ✅ Aktionen: INIT, CHECK, TRIGGER, RETENTION, ZIP, RESTORE, etc.  
 ✅ Debug-Logs für vollständige Rückverfolgbarkeit  
+✅ Vollständige Unterstützung für Cookie-Sicherung mit Aufbewahrungsrichtlinien  
 
-## 🎨 Benutzeroberfläche
+## 🎨 Benutzeroberfläche - Sicherungsfenster
+✅ Nebeneinander-Layout: Characters und Cookies Eden  
+✅ Vergrößertes Fenster für beide Abschnitte (1400x800)  
+✅ Intelligente Aktualisierung der Info nach Sicherung  
+✅ "Ordner öffnen" Schaltflächen für direkten Zugriff (Windows/Mac/Linux)  
+
+## 🎨 Benutzeroberfläche - Allgemein
 ✅ Korrektur der Spaltenkonfiguration (12 Spalten)  
 ✅ Einheitliche Verzeichnis-Labels ("Verzeichnis")  
 ✅ Verbesserte Pfadanzeige  
 ✅ Robustes Diagnosesystem für unerwartete Abstürze  
+
+## 🧹 Repository-Bereinigung
+✅ Löschung von 13 temporären Debug-Skripten  
+✅ Löschung von 3 Debug-HTML-Dateien  
+✅ Sauberes und wartbares Repository  
+✅ Leistungsoptimierung  
 
 ## 📚 Dokumentation
 ✅ Bereinigung und Umstrukturierung des CHANGELOGs-Systems

@@ -32,6 +32,21 @@
 ✅ Auto-update on character import  
 ✅ Configurable Herald cookies folder  
 
+## 🧬 Herald Authentication - Simplified & Reliable Detection
+✅ Authentication detection based on single definitive criterion  
+✅ Error message 'The requested page "herald" is not available.' = NOT CONNECTED  
+✅ Absence of error message = CONNECTED (can scrape data)  
+✅ Coherent logic between `test_eden_connection()` and `load_cookies()`  
+✅ Invalid cookies correctly detected and reported  
+✅ Tests validated with approximately 58 Herald search results  
+
+## 🎛️ Herald Button Controls
+✅ "Refresh" and "Herald Search" buttons automatically disabled  
+✅ Disabled when no cookie is detected  
+✅ Disabled when cookies are expired  
+✅ Button state synchronized with connection status  
+✅ Clear user message: "No cookie detected"  
+
 ## 📝 Backup Module
 ✅ 46+ logs tagged with clear actions  
 ✅ Actions: INIT, CHECK, TRIGGER, RETENTION, ZIP, RESTORE, etc.  
@@ -49,6 +64,12 @@
 ✅ Unified folder labels ("Directory")  
 ✅ Improved path display  
 ✅ Robust diagnostic system for unexpected crashes  
+
+## 🧹 Repository Cleanup
+✅ Deletion of 13 temporary debug scripts  
+✅ Deletion of 3 debugging HTML files  
+✅ Clean and maintainable repository  
+✅ Performance optimization  
 
 ## 📚 Documentation
 ✅ CHANGELOGs system cleanup and reorganization

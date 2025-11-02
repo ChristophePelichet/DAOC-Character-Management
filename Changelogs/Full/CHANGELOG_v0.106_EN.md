@@ -1,301 +1,464 @@
-# CHANGELOG v0.106 - Logging System & Developer Tools# CHANGELOG v0.106 - Eden Scraping & Auto-Update Fixes
+# CHANGELOG v0.106 - Logging System, Cookie Backup & Enhancements
 
+**Date**: 2025-11-01  
+**Version**: 0.106
 
+---
 
-**Date**: 2025-11-01  **Date** : 2025-11-01  
+## 🔧 New Logging System
 
-**Version**: 0.106**Version** : 0.106
+### Unified format with ACTION
 
+- **Before**: Inconsistent format, difficult to filter and analyze logs
+- **Now**: Standardized format `LOGGER - LEVEL - ACTION - MESSAGE`
+- **Example**: `2025-11-01 14:30:00 - BACKUP - INFO - INIT - BackupManager initialized`
 
+**Benefits**:
+- Easy filtering by logger (BACKUP, EDEN, UI, CHARACTER, ROOT)
+- Clear actions for each operation
+- Complete execution flow traceability
+- Compatible with log analysis tools
 
----## 🐛 Fixes
+**Implementation**:
+- New `ContextualFormatter` in `logging_manager.py`
+- Action handling: Uses `extra={"action": "VALUE"}` in logs
+- Fallback: Displays "-" if no action is provided
+- Helper function: `log_with_action(logger, level, message, action="XXX")`
 
+### BACKUP Logger - Backup Module
 
+- **Modified files**: `backup_manager.py`, `migration_manager.py`
+- **46+ logs tagged** with clear actions
 
-## 🔧 New Logging System### Eden cookies save path (PyInstaller fix)
+**Standardized actions**:
+- `INIT` - BackupManager initialization
+- `DIRECTORY` - Backup directory creation/verification
+- `CHECK` - Check if backup is needed today
+- `STARTUP` - Automatic backup on startup
+- `TRIGGER` - Automatic backup trigger
+- `AUTO_TRIGGER` - Auto-backup start
+- `AUTO_PROCEED` - Auto-backup continuation
+- `AUTO_BLOCKED` - Auto-backup blocked (already done)
+- `MANUAL_TRIGGER` - Manual backup triggered
+- `ZIP` - ZIP compression in progress
+- `RETENTION` - Retention management (old backup deletion)
+- `SCAN` - Existing backup scan
+- `DELETE` - Backup deletion
+- `INFO` - Backup information
+- `RESTORE` - Backup restore
+- `ERROR` - General errors
 
-- **Problem** : Cookies were not being saved to the `Configuration/` folder by default
+**Levels**: DEBUG (details), INFO (progress), WARNING (alerts), ERROR (errors)
 
-### Unified format with ACTION- **Cause** : `CookieManager` was using `Path(__file__).parent.parent` which caused issues with PyInstaller
-
-- **Solution** : Using `get_config_dir()` from `config_manager.py` for global consistency
-
-- **Before**: Inconsistent format, difficult to filter and analyze logs- **Result** : Cookies are now correctly saved in the folder defined by `config_folder` in `config.json`
-
-- **Now**: Standardized format `LOGGER - LEVEL - ACTION - MESSAGE`- **Compatibility** : Works correctly with compiled application and normal execution
-
-- **Example**: `2025-11-01 14:30:00 - BACKUP - INFO - INIT - BackupManager initialized`- **Modified file** : `Functions/cookie_manager.py` (line 22-34)
-
-- **Benefits**:
-
-  * Easy filtering by logger (BACKUP, EDEN, UI, CHARACTER, ROOT)### Column configuration fixed
-
-  * Clear actions for each operation- **Problem 1** : The Herald URL column (index 11) was not included in resize mode (`range(11)` instead of `range(12)`)
-
-  * Complete execution flow traceability- **Problem 2** : The order of Class and Level columns was reversed in the configuration menu
-
-  * Compatible with log analysis tools- **Problem 3** : Visibility mapping used incorrect order and URL column was missing
-
-- **Solution** :
-
-### BACKUP Logger - Backup Module  * `apply_column_resize_mode()` now correctly handles all 12 columns
-
-  * Configuration menu order aligned with TreeView (Class before Level)
-
-- **Files modified**: `backup_manager.py`, `migration_manager.py`  * `column_map` fixed with correct order and URL column inclusion
-
-- **46+ logs tagged** with clear actions- **Impact** : All 12 columns (0-11) are now correctly configurable for resize mode and visibility
-
-- **Standardized actions**: INIT, DIRECTORY, CHECK, STARTUP, TRIGGER, AUTO_TRIGGER, AUTO_PROCEED, AUTO_BLOCKED, MANUAL_TRIGGER, ZIP, RETENTION, SCAN, DELETE, INFO, RESTORE, ERROR- **Modified files** : `Functions/tree_manager.py`, `UI/dialogs.py`
-
-- **Levels**: DEBUG (details), INFO (progress), WARNING (alerts), ERROR (errors)
-
-## ✨ Improvements
+**Traceability**: Detailed logs for each backup process step
 
 ### EDEN Logger - Herald Scraper
 
-### Auto-update on character import
+- **File**: `eden_scraper.py`
+- **Actions**: INIT, COOKIES, SCRAPE, SEARCH, PARSE, TEST, CLOSE, CLEANUP, ERROR
+- **All logs** now use `extra={"action": "XXX"}`
 
-- **File**: `eden_scraper.py`- **Before** : If character exists → Error "character already exists"
+---
 
-- **Actions**: INIT, COOKIES, SCRAPE, SEARCH, PARSE, TEST, CLOSE, CLEANUP, ERROR- **Now** : If character exists → Automatic update from Herald 🔄
+## 🛠️ Log Source Editor - New Development Tool
 
-- **Preserved data** : name, realm, season, server, custom fields
+### Overview
 
-### Enhanced Debug Window- **Updated data** : class, race, guild, level, realm_rank, realm_points, url, notes
+- **File**: `Tools/log_source_editor.py` (975 lines)
+- **Purpose**: Edit logs directly in source code BEFORE compilation
+- **Framework**: PySide6 (Qt6) with complete GUI
 
-- **Detailed report** : Shows number of creations, updates and errors
+### Source Code Scanner
 
-- **New filter**: Dropdown to filter by logger- **Use case** : Ideal for keeping characters up-to-date via Herald import
+- **Technology**: Asynchronous QThread to not block UI
+- **Pattern 1**: Detects `logger.info()`, `self.logger.debug()`, `module_logger.warning()`
+- **Pattern 2**: Detects `log_with_action(logger, "info", "message", action="TEST")`
 
-- **Options**: All, BACKUP, EDEN, UI, CHARACTER, ROOT- **Modified file** : `UI/dialogs.py` - Function `_import_characters()` (line 2422)
+**Smart detection**:
+- Logger name extraction from filename
+- Parsing `get_logger(LOGGER_XXX)`
+- Parsing `setup_logger("LOGGER_NAME")`
 
+**Parsing**:
+- Action extraction from `action="XXX"` or `extra={"action": "XXX"}`
+- Message extraction (supports f-strings, normal strings, concatenations)
+- Level retrieval (DEBUG, INFO, WARNING, ERROR, CRITICAL)
 
-
----### Configurable Herald cookies folder
-
-- **New option** : Settings window → "Herald Cookies Directory"
-
-## 🛠️ Log Source Editor - New Development Tool- **Feature** : Specify a custom folder for saving Eden scraping cookies
-
-- **Interface** : "Browse..." button to facilitate folder selection
-
-### Overview- **Default value** : `Configuration/` folder (behavior preserved if not configured)
-
-- **Portable application** : Paths are absolute, no dependency on `__file__`
-
-- **File**: `Tools/log_source_editor.py` (975 lines)- **Persistence** : Configuration is saved in `config.json` under key `"cookies_folder"`
-
-- **Purpose**: Edit logs directly in source code BEFORE compilation- **Fallback logic** : If `cookies_folder` is not set, uses `config_folder` (ensures backward compatibility)
-
-- **Framework**: PySide6 (Qt6) with complete GUI- **Modified files** : `UI/dialogs.py`, `main.py`, `Functions/cookie_manager.py`
-
-
-
-### Source Code Scanner### Unified folder labels
-
-- **Before** : Mixed labels ("Folder of...", "Directory of...")
-
-- **Technology**: Asynchronous QThread to not block UI- **Now** : All folder paths start with "Directory"
-
-- **Pattern 1**: Detects `logger.info()`, `self.logger.debug()`, `module_logger.warning()`- **Labels** :
-
-- **Pattern 2**: Detects `log_with_action(logger, "info", "message", action="TEST")`  * Character Directory
-
-- **Smart detection**:  * Configuration Directory
-
-  * Extract logger name from file name  * Log Directory
-
-  * Parse `get_logger(LOGGER_XXX)`  * Armor Directory
-
-  * Parse `setup_logger("LOGGER_NAME")`  * Herald Cookies Directory
-
-- **Removed colons** : No more colons at the end of labels (added automatically by QFormLayout)
-
-### User Interface- **Localization** : Complete translations in EN, FR, DE
-
-- **Modified files** : `UI/dialogs.py`, `Language/fr.json`, `Language/en.json`, `Language/de.json`
+### User Interface
 
 **Main layout**:
+- **Left**: Table of found logs (read-only)
+  - Columns: File, Line, Logger, Level, Action, Message, Modified
+  - Protection: `setEditTriggers(QTableWidget.NoEditTriggers)`
+- **Right**: Edit panel
+  - File/Line/Logger/Level (display)
+  - Action: Editable ComboBox with history
+  - Message: Multi-line QTextEdit
+  - Original code: Read-only QTextEdit
+  - Buttons: Apply, Reset
 
-- **Left**: Table of found logs (read-only)### Improved path display
+**Toolbar**:
+- 🔍 Scan project
+- Filters: Logger (dropdown), Level (dropdown), Modified only, Text search
+- Statistics: `📊 X/Y logs | ✏️ Z modified`
 
-  * Columns: File, Line, Logger, Level, Action, Message, Modified- **Before** : Cursor was at start but text was aligned to end (displaying "...Configuration/" in QLineEdit)
-
-- **Right**: Edit panel- **Now** : `setCursorPosition(0)` applied to all path fields
-
-  * Action: Editable ComboBox with history- **Result** : Beginning of path is visible (e.g., "d:\Projects\Python\..." instead of "...Configuration/")
-
-  * Message: Multi-line QTextEdit- **Modified file** : `UI/dialogs.py` - Method `update_fields()` (line 1260+)
-
-  * Original code: Read-only QTextEdit
-
-### Robust diagnostic system for unexpected crashes
-
-**Toolbar**:- **Global exception handler** : Captures and logs all unhandled exceptions
-
-- 🔍 Scan project- **System signal handler** : Detects SIGTERM, SIGINT and other OS interruptions
-
-- Filters: Logger, Level, Modified only, Text search- **CRITICAL/ERROR logging always active** : Even with debug_mode = OFF, errors are recorded
-
-- Statistics: `📊 X/Y logs | ✏️ Z modified`- **Startup tracing** : Records time (ISO 8601), Python version, active threads
-
-- **Shutdown tracing** : Records exactly when and how the app stops
-
-### Key Features- **Exit code** : Shows the code returned by the Qt event loop
-
-- **Modified files** : `main.py`, `Functions/logging_manager.py`
+### Key Features
 
 **1. Action ComboBox with history**
+- Pre-filled with all actions found in scan
+- Editable: allows typing new actions
+- Auto-completion: suggestions based on history
+- Dynamic addition: new actions automatically added to list
+- Policy: `NoInsert` to control addition manually
 
-- Pre-filled with all actions found in scan### CHANGELOGs system cleanup and reorganization
+**2. Keyboard shortcuts**
+- `Enter` in Action field → Applies modifications
+- `Ctrl+Enter` in Message field → Applies modifications
+- Arrow navigation in table
 
-- Editable: allows typing new actions- **Old system** : Monolithic CHANGELOGs in `Documentation/` mixing all versions (difficult to navigate)
-
-- Auto-completion based on history- **New system** : Hierarchical structure in `Changelogs/` with clear separation by version and language
-
-- Dynamic addition of new actions- **Structure created** :
-
-  - `Changelogs/Full/` : Detailed CHANGELOGs (~150 lines) for v0.106, v0.104 and earlier versions
-
-**2. Keyboard shortcuts**  - `Changelogs/Simple/` : Concise lists for quick navigation of all 7 versions (v0.1 to v0.106)
-
-- `Enter` in Action field → Apply changes  - Tri-lingual support : FR, EN, DE for each file
-
-- `Ctrl+Enter` in Message field → Apply changes- **Centralized access** : New `CHANGELOG.md` at root with index and navigation to all versions
-
-- **Old content** : Monolithic CHANGELOGs removed from `Documentation/` (CHANGELOG_FR.md, CHANGELOG_EN.md, CHANGELOG_DE.md)
-
-**3. Filtering system**- **Files created** : 27 files total (6 Full + 21 Simple)
-
-- **By logger**: BACKUP, EDEN, UI, CHARACTER, ROOT, All- **Result** : Much clearer and more maintainable system for finding changes by version and language
-
+**3. Filtering system**
+- **By logger**: BACKUP, EDEN, UI, CHARACTER, ROOT, All
 - **By level**: DEBUG, INFO, WARNING, ERROR, CRITICAL, All
-
-- **By status**: All, Modified only## 📊 Overall Impact
-
+- **By status**: All, Modified only
 - **By text**: Search in messages
+- Real-time statistics update
 
-✅ **More intuitive and fluid import workflow** - No need to delete/reimport existing character  
+**4. File saving**
+- Direct Python source file modification
+- Original indentation preservation
+- Support for f-strings and complex formats
+- `self.logger` and `module_logger` handling
+- Safe line-by-line replacement
 
-**4. Save to files**✅ **Transparent stats update from Herald** - Characters automatically update  
+**5. Last project memory**
+- JSON configuration: `Tools/log_editor_config.json`
+- Automatic loading on startup (100ms delay)
+- Default selection in dialog
+- Window title: `🔧 Log Source Editor - ProjectName (X logs)`
 
-- Direct modification of Python source files✅ **Proper error handling with detailed report** - Number of creations, updates and errors  
+**6. Protections and validations**
+- `_updating` flag: prevents recursive update loops
+- `blockSignals(True)`: during table updates
+- `__eq__` and `__hash__` comparison: avoids reloading same log
+- Pre-save check: detects unmodified files
 
-- Preserves original indentation✅ **Increased flexibility for cookie management** - Customizable paths for scraping  
+### User Workflow
 
-- Supports f-strings and complex formats✅ **Complete application portability** - Centralized configuration without __file__ dependencies  
+1. **Launch**: `.venv\Scripts\python.exe Tools\log_source_editor.py`
+2. **Auto scan**: Last project loads automatically
+3. **Filtering**: Select "Logger: BACKUP" to see backup module logs
+4. **Selection**: Click on a log in the table
+5. **Editing**:
+   - Choose action from dropdown or type a new one
+   - Modify message if needed
+6. **Apply**: Press Enter or click "Apply"
+7. **Repeat**: Navigate with ↓ for next log
+8. **Save**: Click "💾 Save" to write to source files
 
-✅ **Ability to diagnose unexpected crashes** - Detailed logs of all critical events  
+### Displayed Statistics (After scan)
 
-**5. Remember last project**✅ **Consistent and coherent interface** - Unified labels and optimal path display  
+```
+✅ Scan complete: 144 logs found
 
-- JSON configuration: `Tools/log_editor_config.json`✅ **Automatic backup on modifications** - Each character modification creates a backup with visible logs  
+📊 By Logger:
+   BACKUP: 46
+   EDEN: 52
+   ROOT: 30
+   UI: 16
 
-- Automatic loading on startup
+📊 By Level:
+   INFO: 80
+   DEBUG: 40
+   WARNING: 15
+   ERROR: 9
 
-- Window title: `🔧 Log Source Editor - ProjectName (X logs)`### Automatic backup system on character updates
+📊 Actions:
+   • Found actions: CHECK, DELETE, DIRECTORY, ERROR, INIT, PARSE, RETENTION, RESTORE, SCAN, SCRAPE, TRIGGER, ZIP
+   • With action: 120
+   • Without action: 24
+```
 
-- **Problem** : When modifying an existing character (rank, info, armor, skills) or updating from Herald, no backup was triggered
+---
 
----- **Solution** : Integration of automatic backups with descriptive reason at all modification points
+## 🐛 Fixes
 
-- **Points covered** :
+### Eden cookies save path (PyInstaller fix)
 
-## 🔍 Eden Scraping Fixes  * Herald update after confirmation (main.py)
+- **Problem**: Cookies were not being saved to the `Configuration/` folder by default
+- **Cause**: `CookieManager` was using `Path(__file__).parent.parent` which caused PyInstaller issues
+- **Solution**: Using `get_config_dir()` from `config_manager.py` for global consistency
+- **Result**: Cookies are now correctly saved in the folder defined by `config_folder` in `config.json`
+- **Compatibility**: Works correctly with compiled application and normal execution
+- **Modified file**: `Functions/cookie_manager.py`
 
-  * Automatic rank modification (auto_apply_rank)
+### Column configuration fixed
 
-### Eden cookies save path (PyInstaller fix)  * Manual rank modification (apply_rank_manual)
-
-  * Basic info modification (save_basic_info)
-
-- **Problem**: Cookies didn't save to `Configuration/` folder by default  * Armor/skills modification (CharacterSheetWindow)
-
-- **Solution**: Use `get_config_dir()` from `config_manager.py` for global consistency  * Mass import/update (import dialog)
-
-- **Result**: Cookies now correctly saved in folder defined by `config_folder` in `config.json`- **Backup type** : `backup_characters_force(reason="Update")` → MANUAL (bypass daily limit)
-
-- **Filename** : `backup_characters_YYYYMMDD_HHMMSS_Update.zip`
-
-### Auto-update on character import- **Generated logs** : Each modification generates visible logs with `[BACKUP_TRIGGER]` tag :
-
-  ```
-
-- **Before**: If character exists → Error "character already exists"  [BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Rank) - Backup with reason=Update
-
-- **Now**: If character exists → Automatic update from Herald 🔄  [BACKUP] MANUAL-BACKUP - Creating compressed backup: backup_characters_20251101_143045_Update.zip
-
-- **Data preserved**: name, realm, season, server, custom data  ```
-
-- **Data updated**: class, race, guild, level, realm_rank, realm_points, url, notes- **Result** : Each character modification automatically creates a backup with descriptive reason and visible logs
-
-- **Modified files** : `main.py`, `UI/dialogs.py`
-
-### Configurable Herald cookies folder- **Documentation** : `Documentations/BACKUP_DEBUG_GUIDE.md` updated with new scenarios
-
-
-
-- **New option**: Settings Window → "Herald cookies directory"## 🔗 Modified Files
-
-- **Functionality**: Specify custom folder for Eden scraping cookies
-
-- **Default**: `Configuration/` folder (preserved if not configured)- `main.py`
-
-- `UI/dialogs.py`
-
----- `Functions/cookie_manager.py`
-
-- `Functions/tree_manager.py`
-
-## 🎨 Interface Improvements- `Functions/logging_manager.py`
-
-- `Language/fr.json`
-
-### Fixed column configuration- `Language/en.json`
-
-- `Language/de.json`
-
-- **Problem 1**: Herald URL column (index 11) not included in resizing- `Documentations/BACKUP_DEBUG_GUIDE.md`
-
-- **Problem 2**: Class and Level column order was reversed in config menu
+- **Problem 1**: Herald URL column (index 11) was not included in resize mode (`range(11)` instead of `range(12)`)
+- **Problem 2**: Class and Level column order was reversed in configuration menu
 - **Problem 3**: Visibility mapping used incorrect order and URL column was missing
-- **Solution**: All 12 columns (0-11) now correctly configurable
 
-### Unified directory labels
+**Solution**:
+- `apply_column_resize_mode()` now correctly handles all 12 columns
+- Configuration menu order aligned with TreeView (Class before Level)
+- `column_map` fixed with correct order and URL column inclusion
+
+**Impact**: All 12 columns (0-11) are now correctly configurable for resize mode and visibility
+
+**Modified files**: `Functions/tree_manager.py`, `UI/dialogs.py`
+
+### 🧬 Herald Authentication - Simplified & Reliable Detection
+
+- **Problem**: Authentication detection with multiple unreliable criteria
+- **Cause**: Invalid cookies or inconsistent detection technique
+- **Solution**: Detection based on single definitive criterion
+
+**Detection logic**:
+- Error message `'The requested page "herald" is not available.'` = NOT CONNECTED
+- Absence of error message = CONNECTED (can scrape data)
+
+**Consistency**:
+- Identical logic between `test_eden_connection()` (cookie_manager.py) and `load_cookies()` (eden_scraper.py)
+- Invalid cookies correctly detected and reported
+- Tests validated with approximately 58 Herald search results
+
+**Modified files**: `Functions/cookie_manager.py`, `Functions/eden_scraper.py`
+
+---
+
+## ✨ Improvements
+
+### Auto-update on character import
+
+- **Before**: If character exists → Error "character already exists"
+- **Now**: If character exists → Automatic update from Herald 🔄
+
+**Preserved data**: name, realm, season, server, custom fields
+
+**Updated data**: class, race, guild, level, realm_rank, realm_points, url, notes
+
+**Detailed report**: Shows number of creations, updates and errors
+
+**Use case**: Ideal for keeping characters up-to-date via Herald import
+
+**Modified file**: `UI/dialogs.py` - Function `_import_characters()` (line 2422)
+
+### Configurable Herald cookies folder
+
+- **New option**: Settings window → "Herald Cookies Directory"
+- **Feature**: Specify a custom folder for saving Eden scraping cookies
+- **Interface**: "Browse..." button to facilitate folder selection
+- **Default value**: `Configuration/` folder (behavior preserved if not configured)
+- **Portable application**: Paths are absolute, no dependency on `__file__`
+- **Persistence**: Configuration is saved in `config.json` under key `"cookies_folder"`
+- **Fallback logic**: If `cookies_folder` is not set, uses `config_folder` (ensures backward compatibility)
+
+**Modified files**: `UI/dialogs.py`, `main.py`, `Functions/cookie_manager.py`
+
+### Enhanced Debug Window
+
+- **New filter**: Dropdown to filter by logger
+- **Options**: All, BACKUP, EDEN, UI, CHARACTER, ROOT
+
+**Modified file**: `UI/debug_window.py`
+
+### Unified folder labels
 
 - **Before**: Mixed labels ("Folder of...", "Directory of...")
 - **Now**: All folder paths start with "Directory"
-- **Labels**: Characters directory, Configuration directory, Logs directory, Armor directory, Herald cookies directory
 
-### Display path start
+**Labels**:
+- Directory of characters
+- Directory of configuration
+- Directory of logs
+- Directory of armor
+- Directory of Herald cookies
 
-- **Before**: Cursor at start but text aligned to end
+**Colon removal**: No more colons at end of labels (added automatically by QFormLayout)
+
+**Localization**: Complete translations in EN, FR, DE
+
+**Modified files**: `UI/dialogs.py`, `Language/fr.json`, `Language/en.json`, `Language/de.json`
+
+### Path beginning display
+
+- **Before**: Cursor at beginning but text aligned to end (displayed "...Configuration/" in QLineEdit)
 - **Now**: `setCursorPosition(0)` applied to all path fields
-- **Result**: Display path start (e.g., "d:\Projects\Python\..." instead of "...Configuration/")
+- **Result**: Display beginning of path (e.g.: "d:\Projects\Python\..." instead of "...Configuration/")
+
+**Modified file**: `UI/dialogs.py` - Method `update_fields()`
+
+### Robust diagnostic system for unexpected stops
+
+- **Global exception handler**: Captures and logs all unhandled exceptions
+- **System signal handler**: Detects SIGTERM, SIGINT and other OS interruptions
+- **Always-active CRITICAL/ERROR logging**: Even with debug_mode = OFF, errors are recorded
+- **Startup tracing**: Records time (ISO 8601), Python version, active threads
+- **Shutdown tracing**: Records exactly when and how app stops
+- **Exit code**: Displays code returned by Qt event loop
+
+**Modified files**: `main.py`, `Functions/logging_manager.py`
+
+### 🎛️ Herald Button Controls
+
+- **Buttons**: "Refresh" and "Herald Search" automatically disabled
+- **Disable conditions**:
+  - When no cookie is detected
+  - When cookies are expired
+- **Synchronization**: Button state synchronized with connection status
+- **User message**: Clear - "No cookie detected"
+
+**Logic**: If `cookie_exists()` returns False or cookies invalid → buttons disabled
+
+**Modified file**: `UI/ui_manager.py` - Function `update_eden_status()`
+
+### Automatic save system on character updates
+
+- **Problem**: When modifying existing character (rank, info, armor, skills) or Herald update, no save was triggered
+- **Solution**: Integration of automatic backups with descriptive reason at all modification points
+
+**Covered points**:
+- Herald update after confirmation (main.py)
+- Automatic rank modification (auto_apply_rank)
+- Manual rank modification (apply_rank_manual)
+- Basic info modification (save_basic_info)
+- Armor/skills modification (CharacterSheetWindow)
+- Massive import/update (import dialog)
+
+**Backup type**: `backup_characters_force(reason="Update")` → MANUAL (bypass daily limit)
+
+**Filename**: `backup_characters_YYYYMMDD_HHMMSS_Update.zip`
+
+**Generated logs**: Each modification generates visible logs with `[BACKUP_TRIGGER]` tag:
+
+```
+[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Rank) - Backup with reason=Update
+[BACKUP] MANUAL-BACKUP - Creating compressed backup: backup_characters_20251101_143045_Update.zip
+```
+
+**Result**: Each character modification automatically creates backup with descriptive reason and visible logs
+
+**Modified files**: `main.py`, `UI/dialogs.py`
+
+**Documentation**: `Documentations/BACKUP_DEBUG_GUIDE.md` updated with new scenarios
+
+---
+
+## 🎨 Interface Improvements
+
+### Column configuration
+
+- All 12 columns (0-11) correctly configurable
+- Resize mode and visibility functional
+- Configuration menu aligned with TreeView
+
+### Unified labels
+
+- All folder paths start with "Directory"
+- Removal of unnecessary colons
+- Consistent and professional interface
+
+### Optimized path display
+
+- Beginning of paths visible (no "...")
+- Cursor at beginning of fields
+- Better readability for user
+
+---
+
+## 🧹 Repository Cleanup
+
+- **Deletion of 13 temporary debug scripts**
+- **Deletion of 3 debugging HTML files**
+- **Clean and maintainable repository**
+- **Performance optimization**
+
+**Deleted files**:
+- analyze_search_structure.py
+- debug_comparison.py
+- debug_herald_content.py
+- debug_search_html.py
+- debug_test_connection.py
+- save_search_html.py
+- show_cookies.py
+- test_direct_search.py
+- test_full_flow.py
+- test_herald_detection.py
+- test_identical_flow.py
+- test_load_cookies_msg.py
+- test_simple.py
+- debug_herald_page.html
+- debug_test_connection.html
+- search_result.html
 
 ---
 
 ## 📚 Documentation
 
-### CHANGELOG system cleanup and reorganization
+### Cleanup and reorganization of CHANGELOG system
 
-- **Old system**: Monolithic CHANGELOGs in `Documentation/` mixing all versions
-- **New system**: Hierarchical structure at `Changelogs/` with clear separation by version and language
-- **Structure**:
-  - `Changelogs/Full/`: Detailed CHANGELOGs (~200+ lines)
-  - `Changelogs/Simple/`: Concise lists for quick navigation
-  - Tri-lingual support: FR, EN, DE
+- **Old system**: Monolithic CHANGELOGs in `Documentation/` mixing all versions (difficult to navigate)
+- **New system**: Hierarchical structure in `Changelogs/` with clear version and language separation
+
+**Created structure**:
+- `Changelogs/Full/`: Detailed CHANGELOGs (~200+ lines) for v0.106, v0.104 and earlier versions
+- `Changelogs/Simple/`: Concise lists for quick navigation of all versions (v0.1 to v0.106)
+- Trilingual support: EN, FR, DE for each file
+
+**Centralized access**: New `CHANGELOG.md` at root with index and navigation to all versions
+
+**Old content**: Monolithic CHANGELOGs removed from `Documentation/`
+
+**Created files**: 27+ files in total (6 Full + 21 Simple)
+
+**Result**: Much clearer and more maintainable system for finding changes by version and language
 
 ---
 
 ## 📊 Statistics
 
-- **Lines of code added**: ~1000+ (log_source_editor.py: 975 lines)
-- **Files modified**: 12 files
-- **Files created**: 2 files
-- **Logs tagged**: 46+ in backup_manager.py, 52+ in eden_scraper.py
+- **Code lines added**: ~1000+ (log_source_editor.py: 975 lines)
+- **Modified files**: 12 files
+- **Created files**: 2 files (log_source_editor.py, log_editor_config.json)
+- **Tagged logs**: 46+ in backup_manager.py, 52+ in eden_scraper.py
 - **Standardized actions**: 20+ different actions
+- **Tests performed**: Scanning, filtering, editing, saving validated
+
+---
+
+## 🔗 Modified Files
+
+- `main.py`
+- `UI/dialogs.py`
+- `UI/ui_manager.py`
+- `UI/debug_window.py`
+- `Functions/cookie_manager.py`
+- `Functions/eden_scraper.py`
+- `Functions/tree_manager.py`
+- `Functions/logging_manager.py`
+- `Language/fr.json`
+- `Language/en.json`
+- `Language/de.json`
+- `Documentations/BACKUP_DEBUG_GUIDE.md`
+
+---
+
+## 📊 Overall Impact
+
+✅ **More intuitive and fluid import workflow** - No need to delete/re-import existing character
+
+✅ **Transparent stats update from Herald** - Characters automatically update
+
+✅ **Clean error handling with detailed report** - Number of creations, updates and errors
+
+✅ **Increased cookie management flexibility** - Customizable paths for scraping
+
+✅ **Complete application portability** - Centralized configuration without __file__ dependencies
+
+✅ **Ability to diagnose unexpected stops** - Detailed logs of all critical events
+
+✅ **Consistent and coherent interface** - Unified labels and optimal path display
+
+✅ **Automatic save on modifications** - Each character modification creates a backup with visible logs
 
 ---
 
@@ -305,8 +468,15 @@
 
 ---
 
+## 🐛 Known Bugs
+
+No known bugs to date.
+
+---
+
 ## 📝 Development Notes
 
-- Log Source Editor is a development tool, not included in main application
-- Unified logging format enables better analysis and debugging
-- Standardized actions facilitate filtering and searching in logs
+- The Log Source Editor is a development tool, not included in main application
+- The tool greatly facilitates logging system maintenance and improvement
+- Unified logging format allows better analysis and debugging
+- Standardized actions facilitate filtering and log searching

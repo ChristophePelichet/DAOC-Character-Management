@@ -32,6 +32,21 @@
 ✅ Auto-update lors de l'import de personnages  
 ✅ Dossier des cookies Herald configurable  
 
+## 🧬 Authentification Herald - Détection Simplifiée & Fiable
+✅ Détection d'authentification basée sur un seul critère définitif  
+✅ Message d'erreur 'The requested page "herald" is not available.' = NOT CONNECTED  
+✅ Absence du message d'erreur = CONNECTED (peut scraper les données)  
+✅ Logique cohérente entre `test_eden_connection()` et `load_cookies()`  
+✅ Cookies invalidés correctement détectés et signalés  
+✅ Tests validés avec environ 58 résultats de recherche Herald  
+
+## 🎛️ Contrôle des Boutons Herald
+✅ Boutons "Actualiser" et "Recherche Herald" automatiquement désactivés  
+✅ Désactivation quand aucun cookie n'est détecté  
+✅ Désactivation quand les cookies sont expirés  
+✅ État du bouton synchronisé avec le statut de connexion  
+✅ Message utilisateur clair : "Aucun cookie détecté"  
+
 ## 📝 Backup Module
 ✅ 46+ logs tagués avec actions claires  
 ✅ Actions : INIT, CHECK, TRIGGER, RETENTION, ZIP, RESTORE, etc.  
@@ -48,6 +63,16 @@
 ✅ Correction de la configuration des colonnes (12 colonnes)  
 ✅ Unification des labels ("Répertoire")  
 ✅ Affichage du début des chemins  
+✅ Système de diagnostic robuste pour les arrêts inattendus  
+
+## 🧹 Nettoyage du Répertoire
+✅ Suppression de 13 scripts debug temporaires  
+✅ Suppression de 3 fichiers HTML de débogage  
+✅ Repository clean et maintainable  
+✅ Optimisation des performances  
+
+## 📚 Documentation
+✅ Nettoyage et réorganisation du système CHANGELOGs
 ✅ Système de diagnostic robuste pour les arrêts inattendus  
 
 ## 📚 Documentation

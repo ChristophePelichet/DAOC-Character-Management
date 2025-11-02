@@ -672,7 +672,7 @@ class CharacterSheetWindow(QDialog):
         try:
             from Functions.cookie_manager import CookieManager
             cookie_manager = CookieManager()
-            result = cookie_manager.open_url_with_cookies_detached(url)
+            result = cookie_manager.open_url_with_cookies_subprocess(url)
             
             if not result.get('success', False):
                 import logging

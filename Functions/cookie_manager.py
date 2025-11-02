@@ -1167,3 +1167,173 @@ class CookieManager:
                 'message': f'Erreur: {str(e)[:50]}'
             }
 
+    def open_url_with_cookies_subprocess(self, url):
+        """
+        Ouvre une URL dans un navigateur COMPLÈTEMENT INDÉPENDANT avec les cookies.
+        Lance Chrome/Edge comme processus détaché qui ne se ferme pas avec l'appli.
+        
+        Args:
+            url (str): L'URL à ouvrir
+            
+        Returns:
+            dict: {
+                'success': bool,
+                'message': str
+            }
+        """
+        if not self.cookie_exists():
+            return {
+                'success': False,
+                'message': 'Aucun cookie trouvé'
+            }
+        
+        try:
+            import subprocess
+            import json
+            import tempfile
+            import os
+            from pathlib import Path
+            
+            cookies_list = self.get_cookies_for_scraper()
+            if not cookies_list:
+                return {
+                    'success': False,
+                    'message': 'Cookies invalides ou expirés'
+                }
+            
+            # Préparer l'URL
+            if not url.startswith(('http://', 'https://')):
+                url = 'https://' + url
+            
+            # Lire la configuration pour le navigateur préféré
+            from Functions.config_manager import config
+            preferred_browser = config.get('preferred_browser', 'Chrome')
+            
+            # Trouver le chemin du navigateur
+            browser_path = None
+            if preferred_browser == 'Chrome':
+                possible_paths = [
+                    r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+                    r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+                    os.path.expandvars(r"%ProgramFiles%\Google\Chrome\Application\chrome.exe"),
+                ]
+            elif preferred_browser == 'Edge':
+                possible_paths = [
+                    r"C:\Program Files\Microsoft\Edge\Application\msedge.exe",
+                    r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
+                    os.path.expandvars(r"%ProgramFiles%\Microsoft\Edge\Application\msedge.exe"),
+                ]
+            else:
+                possible_paths = []
+            
+            for path in possible_paths:
+                if os.path.exists(path):
+                    browser_path = path
+                    break
+            
+            if not browser_path:
+                # Fallback: essayer de lancer via webbrowser
+                import webbrowser
+                webbrowser.open(url)
+                return {
+                    'success': True,
+                    'message': f'Ouvert via navigateur par défaut (pas de cookies)'
+                }
+            
+            # Créer un profil temporaire pour les cookies
+            profile_dir = tempfile.mkdtemp(prefix="daoc_")
+            cookies_file = os.path.join(profile_dir, "cookies.txt")
+            
+            # Sauvegarder les cookies dans un fichier pour Selenium de charger plus tard
+            import pickle
+            with open(cookies_file, 'wb') as f:
+                pickle.dump(cookies_list, f)
+            
+            eden_logger.info(f"Lancement de {preferred_browser} en processus indépendant vers {url}", extra={"action": "NAVIGATE"})
+            
+            # Lancer le navigateur en processus complètement détaché
+            # Utiliser subprocess.DETACHED_PROCESS sous Windows pour que le processus continue
+            if os.name == 'nt':  # Windows
+                # Détacher complètement le processus
+                startupinfo = subprocess.STARTUPINFO()
+                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                startupinfo.wShowWindow = subprocess.SW_SHOW
+                
+                subprocess.Popen(
+                    [browser_path, url],
+                    startupinfo=startupinfo,
+                    creationflags=subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP,
+                    close_fds=True
+                )
+            else:
+                # Unix/Linux
+                subprocess.Popen(
+                    [browser_path, url],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    preexec_fn=os.setsid
+                )
+            
+            # Maintenant utiliser Selenium dans le même profil pour charger les cookies
+            # (dans le navigateur qui vient d'être lancé)
+            import time
+            time.sleep(2)  # Attendre que le navigateur se lance
+            
+            try:
+                from selenium import webdriver
+                from selenium.webdriver.chrome.options import Options
+                
+                chrome_options = Options()
+                chrome_options.add_argument(f"--user-data-dir={profile_dir}")
+                chrome_options.add_argument("--no-first-run")
+                chrome_options.add_argument("--no-default-browser-check")
+                
+                # Créer une session Selenium pour charger les cookies
+                if preferred_browser == 'Chrome':
+                    from webdriver_manager.chrome import ChromeDriverManager
+                    driver = webdriver.Chrome(options=chrome_options)
+                else:
+                    from selenium.webdriver.edge.service import Service as EdgeService
+                    from webdriver_manager.microsoft import EdgeChromiumDriverManager
+                    driver = webdriver.Edge(options=chrome_options)
+                
+                try:
+                    # Charger la page et ajouter les cookies
+                    driver.get("https://eden-daoc.net/")
+                    time.sleep(1)
+                    
+                    for cookie in cookies_list:
+                        try:
+                            driver.add_cookie(cookie)
+                        except:
+                            pass
+                    
+                    time.sleep(1)
+                    driver.refresh()
+                    time.sleep(2)
+                    
+                    driver.get(url)
+                    time.sleep(2)
+                    
+                    eden_logger.info(f"✅ Navigateur lancé avec succès et cookies chargés", extra={"action": "NAVIGATE"})
+                    
+                finally:
+                    # NE PAS appeler quit() - laisser Selenium détaché aussi
+                    pass
+                
+            except Exception as e:
+                eden_logger.debug(f"Erreur lors de la tentative de chargement des cookies Selenium: {e}")
+                # Pas grave, le navigateur est déjà lancé
+            
+            return {
+                'success': True,
+                'message': f'Navigateur lancé en processus indépendant'
+            }
+            
+        except Exception as e:
+            eden_logger.error(f"Erreur lors du lancement subprocess: {e}")
+            return {
+                'success': False,
+                'message': f'Erreur: {str(e)[:50]}'
+            }
+

@@ -368,14 +368,14 @@ class UrlButtonDelegate(QStyledItemDelegate):
         
         # Modifier les labels des boutons
         msg.button(QMessageBox.Ok).setText("Fermer")
-        msg.button(QMessageBox.Open).setText("Ouvrir Paramètres")
+        msg.button(QMessageBox.Open).setText("Gérer les Cookies")
         
         result = msg.exec()
         
-        # Si l'utilisateur clique sur "Ouvrir Paramètres"
+        # Si l'utilisateur clique sur "Gérer les Cookies"
         if result == QMessageBox.Open and self.parent_app:
-            if hasattr(self.parent_app, 'open_configuration'):
-                self.parent_app.open_configuration(focus_cookies=True)
+            if hasattr(self.parent_app, 'open_cookie_manager'):
+                self.parent_app.open_cookie_manager()
     
     def sizeHint(self, option, index):
         """Retourne la taille recommandée pour la cellule."""

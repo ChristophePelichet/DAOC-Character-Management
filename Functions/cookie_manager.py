@@ -19,6 +19,10 @@ from .logging_manager import get_logger, LOGGER_EDEN
 # Logger dédié pour Eden
 eden_logger = get_logger(LOGGER_EDEN)
 
+# Variable GLOBALE pour garder les drivers Selenium vivants
+# Cette liste empêche le garbage collection des navigateurs
+_PERSISTENT_DRIVERS = []
+
 class CookieManager:
     """Gestionnaire de cookies pour l'authentification Eden"""
     
@@ -1297,8 +1301,10 @@ class CookieManager:
                     
                     eden_logger.info(f"✅ Navigateur lancé via Selenium avec cookies chargés", extra={"action": "NAVIGATE"})
                     
-                    # IMPORTANT: Garder une référence au driver pour éviter le garbage collection
-                    self.persistent_drivers.append(driver)
+                    # IMPORTANT: Garder une référence GLOBALE au driver pour éviter le garbage collection
+                    # Utiliser la variable globale, pas self.persistent_drivers
+                    global _PERSISTENT_DRIVERS
+                    _PERSISTENT_DRIVERS.append(driver)
                     
                     # IMPORTANT: NE PAS appeler quit()
                     # Laisser le driver/navigateur ouvert indéfiniment

@@ -334,7 +334,7 @@ class UrlButtonDelegate(QStyledItemDelegate):
             return True
         
         try:
-            # Vérifier si les cookies existent
+            # Vérifier si les cookies existent (check rapide sans Selenium)
             from Functions.cookie_manager import CookieManager
             cookie_manager = CookieManager()
             
@@ -343,13 +343,9 @@ class UrlButtonDelegate(QStyledItemDelegate):
                     "Vous devez d'abord générer des cookies Herald.\n\nAllez dans Paramètres pour configurer vos cookies.")
                 return False
             
-            # Tester la connexion Herald
-            is_connected = cookie_manager.test_eden_connection()
-            if not is_connected:
-                self._show_connection_error("Connexion Herald impossible",
-                    "Les cookies ont expiré ou la connexion a échoué.\n\nAllez dans Paramètres pour mettre à jour vos cookies.")
-                return False
-            
+            # Note: Ne pas appeler test_eden_connection() depuis le thread UI
+            # car cela bloque l'application avec Selenium.
+            # On accepte les cookies s'ils existent.
             return True
             
         except Exception as e:

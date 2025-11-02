@@ -250,7 +250,8 @@ class UrlButtonDelegate(QStyledItemDelegate):
     
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.button_padding = 4
+        self.button_padding = 2
+        self.parent_app = parent  # Store reference to main app
         
     def paint(self, painter, option, index):
         """Dessine un bouton 'Ouvrir' si l'URL existe."""
@@ -298,19 +299,23 @@ class UrlButtonDelegate(QStyledItemDelegate):
     
     def _get_button_rect(self, rect):
         """Calcule le rectangle pour le bouton (aligné à gauche)."""
-        button_width = 120  # Augmenté de 100 à 120 pour plus de visibilité
+        button_width = 100  # Réduit de 120 à 100
         button_height = rect.height() - 2 * self.button_padding
         x = rect.x() + self.button_padding  # Aligné à gauche avec padding
         y = rect.y() + self.button_padding
         return QRect(x, y, button_width, button_height)
     
     def editorEvent(self, event, model, option, index):
-        """Gère les clics sur le bouton."""
+        """Gère les clics sur le bouton avec vérification de la connexion Herald."""
         if event.type() == QEvent.MouseButtonRelease:
             url = index.data(Qt.DisplayRole)
             if url and url.strip():
                 button_rect = self._get_button_rect(option.rect)
                 if button_rect.contains(event.pos()):
+                    # Vérifier la connexion Herald
+                    if not self._check_herald_connection():
+                        return True
+                    
                     # Ouvrir l'URL dans le navigateur
                     import webbrowser
                     try:
@@ -323,6 +328,55 @@ class UrlButtonDelegate(QStyledItemDelegate):
         
         return super().editorEvent(event, model, option, index)
     
+    def _check_herald_connection(self):
+        """Vérifie si la connexion Herald est OK, sinon affiche un message."""
+        if not self.parent_app:
+            return True
+        
+        try:
+            # Vérifier si les cookies existent
+            from Functions.cookie_manager import CookieManager
+            cookie_manager = CookieManager()
+            
+            if not cookie_manager.cookie_exists():
+                self._show_connection_error("Aucun cookie détecté", 
+                    "Vous devez d'abord générer des cookies Herald.\n\nAllez dans Paramètres pour configurer vos cookies.")
+                return False
+            
+            # Tester la connexion Herald
+            is_connected = cookie_manager.test_eden_connection()
+            if not is_connected:
+                self._show_connection_error("Connexion Herald impossible",
+                    "Les cookies ont expiré ou la connexion a échoué.\n\nAllez dans Paramètres pour mettre à jour vos cookies.")
+                return False
+            
+            return True
+            
+        except Exception as e:
+            logging.error(f"Erreur lors de la vérification Herald: {e}")
+            return False
+    
+    def _show_connection_error(self, title, message):
+        """Affiche un message d'erreur avec suggestion de configuration."""
+        from PySide6.QtWidgets import QMessageBox
+        
+        msg = QMessageBox(self.parent_app if self.parent_app else None)
+        msg.setWindowTitle(title)
+        msg.setText(message)
+        msg.setIcon(QMessageBox.Warning)
+        msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Open)
+        
+        # Modifier les labels des boutons
+        msg.button(QMessageBox.Ok).setText("Fermer")
+        msg.button(QMessageBox.Open).setText("Ouvrir Paramètres")
+        
+        result = msg.exec()
+        
+        # Si l'utilisateur clique sur "Ouvrir Paramètres"
+        if result == QMessageBox.Open and self.parent_app:
+            if hasattr(self.parent_app, 'open_settings'):
+                self.parent_app.open_settings()
+    
     def sizeHint(self, option, index):
         """Retourne la taille recommandée pour la cellule."""
-        return QSize(130, 40)  # Augmenté de (110, 30) à (130, 40) pour meilleure visibilité
+        return QSize(110, 32)  # Réduit de (130, 40) à (110, 32)

@@ -163,31 +163,21 @@ class EdenScraper:
             except:
                 pass
             
-            # UNIQUE MÉTHODE DE DÉTECTION: Chercher les signes de CONNEXION
-            # Quand connecté, on voit: id="username_logged_in" ou <span class="username">NOM</span>
-            is_logged_in = 'username_logged_in' in html_content or ('class="username"' in html_content)
-            
-            # Chercher aussi le message d'erreur (absolument pas connecté)
+            # DÉTECTION SIMPLE ET FIABLE:
+            # Si on a le message "not available" → Pas connecté
+            # Sinon → Connecté (c'est la seule indication vraiment fiable)
             error_message = 'The requested page "herald" is not available.'
-            has_error_msg = error_message in html_content
+            has_error = error_message in html_content
             
-            self.logger.debug(f"Message d'erreur présent: {has_error_msg}", extra={"action": "COOKIES"})
-            self.logger.debug(f"Éléments de connexion présents: {is_logged_in}", extra={"action": "COOKIES"})
+            self.logger.debug(f"Message 'not available' présent: {has_error}", extra={"action": "COOKIES"})
             self.logger.debug(f"Taille HTML: {len(html_content)} caractères", extra={"action": "COOKIES"})
             
-            # LOGIQUE: Si le message d'erreur est là → PAS CONNECTÉ
-            # Sinon, chercher les signes de connexion
-            if has_error_msg:
+            if has_error:
                 self.logger.error('❌ NON CONNECTÉ - Message détecté: "The requested page herald is not available."', extra={"action": "COOKIES"})
                 self.logger.error("💡 Conseil: Régénérez vos cookies en utilisant le Cookie Manager (générateur ou import)", extra={"action": "COOKIES"})
-                self.logger.debug(f"Extrait HTML (premiers 500 car.): {html_content[:500]}", extra={"action": "COOKIES"})
                 return False
-            elif is_logged_in:
-                self.logger.info("✅ Session authentifiée avec succès - Éléments de connexion détectés", extra={"action": "COOKIES"})
-                return True
             else:
-                self.logger.warning("⚠️ État incertain - Pas d'erreur mais pas de signes clairs de connexion", extra={"action": "COOKIES"})
-                # Par défaut, retourner True si pas d'erreur explicite
+                self.logger.info("✅ Connecté à Herald - Pas de message d'erreur", extra={"action": "COOKIES"})
                 return True
             
         except Exception as e:

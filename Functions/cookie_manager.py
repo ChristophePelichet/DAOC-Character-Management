@@ -657,19 +657,16 @@ class CookieManager:
                 except:
                     pass
                 
-                # MÉTHODE DE DÉTECTION - Chercher les signes de CONNEXION plutôt que non-connexion:
-                # Quand connecté, on voit: id="username_logged_in" ou <span class="username">NOM</span>
-                is_logged_in = 'username_logged_in' in page_source or ('class="username"' in page_source)
-                
-                # Chercher aussi le message d'erreur (absolument pas connecté)
+                # MÉTHODE DE DÉTECTION SIMPLE ET FIABLE:
+                # Si on n'a pas le message d'erreur "not available" → On est connecté
                 error_message = 'The requested page "herald" is not available.'
-                has_error_msg = error_message in page_source
+                has_error = error_message in page_source
                 
-                eden_logger.debug(f"HTML size: {len(page_source)}, logged_in: {is_logged_in}, error: {has_error_msg}", extra={"action": "TEST"})
+                eden_logger.debug(f"HTML size: {len(page_source)}, error present: {has_error}", extra={"action": "TEST"})
                 
-                # Si pas le message d'erreur ET on a des signes de connexion → CONNECTÉ
-                if is_logged_in and not has_error_msg:
-                    eden_logger.info("CONNECTÉ - Éléments de connexion trouvés", extra={"action": "TEST"})
+                # LOGIQUE SIMPLE: Pas d'erreur = Connecté
+                if not has_error:
+                    eden_logger.info("CONNECTÉ - Pas de message d'erreur détecté", extra={"action": "TEST"})
                     return {
                         'success': True,
                         'status_code': 200,
@@ -677,7 +674,7 @@ class CookieManager:
                         'accessible': True
                     }
                 else:
-                    eden_logger.warning(f'NON CONNECTÉ - logged_in={is_logged_in}, error_msg={has_error_msg}', extra={"action": "TEST"})
+                    eden_logger.warning('NON CONNECTÉ - Message d\'erreur détecté', extra={"action": "TEST"})
                     return {
                         'success': True,
                         'status_code': 200,

@@ -922,10 +922,8 @@ class CookieManager:
                 
             except Exception as e:
                 eden_logger.error(f"Erreur lors de la navigation (persistent): {e}")
-                try:
-                    driver.quit()
-                except:
-                    pass
+                # IMPORTANT: En mode persistent, on ne ferme PAS le driver même en cas d'erreur
+                # pour laisser l'utilisateur voir la page actuelle
                 return {
                     'success': False,
                     'message': f'Erreur: {str(e)[:50]}',

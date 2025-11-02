@@ -329,7 +329,7 @@ class UrlButtonDelegate(QStyledItemDelegate):
         try:
             from Functions.cookie_manager import CookieManager
             cookie_manager = CookieManager()
-            result = cookie_manager.open_url_with_cookies_simple(url)
+            result = cookie_manager.open_url_with_cookies_detached(url)
             
             if not result.get('success', False):
                 logging.warning(f"Erreur lors de l'ouverture de l'URL: {result.get('message', 'Erreur inconnue')}")

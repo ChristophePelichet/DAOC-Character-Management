@@ -1057,3 +1057,113 @@ class CookieManager:
                 'message': f'Erreur: {str(e)[:50]}'
             }
 
+    def open_url_with_cookies_detached(self, url):
+        """
+        Ouvre une URL dans un navigateur Selenium DÉTACHÉ avec les cookies.
+        Le navigateur continue de fonctionner même après que la fonction se termine.
+        
+        Args:
+            url (str): L'URL à ouvrir
+            
+        Returns:
+            dict: {
+                'success': bool,
+                'message': str
+            }
+        """
+        if not self.cookie_exists():
+            return {
+                'success': False,
+                'message': 'Aucun cookie trouvé'
+            }
+        
+        try:
+            from selenium import webdriver
+            from selenium.webdriver.chrome.options import Options
+            from webdriver_manager.chrome import ChromeDriverManager
+            import time
+            import subprocess
+            import os
+            
+            cookies_list = self.get_cookies_for_scraper()
+            if not cookies_list:
+                return {
+                    'success': False,
+                    'message': 'Cookies invalides ou expirés'
+                }
+            
+            # Lire la configuration pour le navigateur préféré
+            from Functions.config_manager import config
+            preferred_browser = config.get('preferred_browser', 'Chrome')
+            allow_download = config.get('allow_browser_download', False)
+            
+            # Créer le driver
+            driver, browser_name = self._initialize_browser_driver(
+                headless=False,
+                preferred_browser=preferred_browser,
+                allow_download=allow_download
+            )
+            
+            if not driver:
+                return {
+                    'success': False,
+                    'message': 'Impossible d\'initialiser un navigateur'
+                }
+            
+            try:
+                # Préparer l'URL
+                if not url.startswith(('http://', 'https://')):
+                    url = 'https://' + url
+                
+                eden_logger.info(f"Ouverture détachée de {url} avec cookies", extra={"action": "NAVIGATE"})
+                
+                # Étape 1: Page d'accueil
+                driver.get("https://eden-daoc.net/")
+                time.sleep(1)
+                
+                # Étape 2: Ajouter les cookies
+                for cookie in cookies_list:
+                    try:
+                        driver.add_cookie(cookie)
+                    except:
+                        pass
+                
+                time.sleep(1)
+                
+                # Étape 3: Refresh
+                driver.refresh()
+                time.sleep(2)
+                
+                # Étape 4: Navigation vers l'URL
+                driver.get(url)
+                time.sleep(2)
+                
+                eden_logger.info(f"✅ Page ouverte avec succès via {browser_name} (détaché)", extra={"action": "NAVIGATE"})
+                
+                # IMPORTANT: Ne PAS appeler driver.quit()
+                # Laisser le driver/navigateur ouvert en arrière-plan
+                # Le processus se terminera quand l'utilisateur ferme le navigateur
+                
+                return {
+                    'success': True,
+                    'message': f'Page ouverte via {browser_name}'
+                }
+                
+            except Exception as e:
+                eden_logger.error(f"Erreur lors de la navigation détachée: {e}")
+                try:
+                    driver.quit()
+                except:
+                    pass
+                return {
+                    'success': False,
+                    'message': f'Erreur: {str(e)[:50]}'
+                }
+        
+        except Exception as e:
+            eden_logger.error(f"Erreur lors de l'ouverture détachée: {e}")
+            return {
+                'success': False,
+                'message': f'Erreur: {str(e)[:50]}'
+            }
+

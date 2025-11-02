@@ -16,7 +16,7 @@
 <meta property="og:image:height" content="65">
 
 
-<title>Eden-DAoC - Information</title>
+<title>Eden-DAoC - Herald</title>
 
 	<link rel="alternate" type="application/atom+xml" title="Feed - Eden-DAoC" href="/feed">			<link rel="alternate" type="application/atom+xml" title="Feed - New Topics" href="/feed/topics">				
 
@@ -99,6 +99,8 @@
 <![endif]-->
 
 
+<link href="/hrald/herald.css" rel="stylesheet" media="screen">
+<link href="./ext/phpbb/pages/styles/prosilver/theme/pages_controller.css?assets_version=238" rel="stylesheet" media="screen">
 <link href="./ext/alfredoramos/simplespoiler/styles/all/theme/css/common.min.css?assets_version=238" rel="stylesheet" media="screen">
 <link href="./ext/alfredoramos/simplespoiler/styles/prosilver/theme/css/style.min.css?assets_version=238" rel="stylesheet" media="screen">
 <link href="./ext/alfredoramos/simplespoiler/styles/prosilver/theme/css/colors.min.css?assets_version=238" rel="stylesheet" media="screen">
@@ -237,8 +239,30 @@
 								</li> -->
 							<li class="separator"></li>
 
-																				
+																												<li>
+									<a href="./search.php" role="menuitem">
+										<i class="icon fa-search fa-fw" aria-hidden="true"></i><span>Search</span>
+									</a>
+								</li>
+								<li class="separator"></li>																					
+														
+																						
+									<li>
+									<a href="./search.php?search_id=egosearch" role="menuitem">
+										<i class="icon fa-map-marker fa-fw" aria-hidden="true"></i><span>Your posts</span>
+									</a>
+								</li>	
+								<li>
+									<a href="./search.php?search_id=newposts" role="menuitem">
+										<i class="icon fa-file-o fa-fw" aria-hidden="true"></i><span>New posts</span>
+									</a>
+								</li>
 																						<li>
+									<a href="./search.php?search_id=unreadposts" role="menuitem">
+										<i class="icon fa-file-o fa-fw" aria-hidden="true"></i><span>Unread posts</span>
+									</a>
+								</li>
+															<li>
 									<a href="./search.php?search_id=unanswered" role="menuitem">
 										<i class="icon fa-file-o fa-fw" aria-hidden="true"></i><span>Unanswered topics</span>
 									</a>
@@ -249,7 +273,18 @@
 									</a>
 								</li>
 						
-												<li class="separator"></li>
+													<li class="separator"></li>
+															<li>
+									<a href="./memberlist.php" role="menuitem">
+										<i class="icon fa-group fa-fw" aria-hidden="true"></i><span>Members</span>
+									</a>
+								</li>
+																						<li>
+									<a href="./memberlist.php?mode=team" role="menuitem">
+										<i class="icon fa-shield fa-fw" aria-hidden="true"></i><span>The team</span>
+									</a>
+								</li>
+																			<li class="separator"></li>
 
 											</ul>
 				</div>
@@ -274,12 +309,103 @@
 			</a>
 		</li>
 									
-					<li class="rightside" data-skip-responsive="true">
-				<a href="./ucp.php?mode=login&amp;redirect=app.php%2Fherald&amp;login=external&amp;oauth_service=studio_discord" title="Login" accesskey="x" role="menuitem" class="special-header-item">
-					<i class="icon fa-power-off fa-fw" aria-hidden="true"></i><span>Login</span>
+				<li id="username_logged_in" class="rightside  no-bulletin" data-skip-responsive="true">
+						</li><li id="username_logged_in" class="rightside  no-bulletin" data-skip-responsive="true">
+								
+				
+				
+				
+				
+				<div class="header-profile dropdown-container">
+					<a href="https://game.eden-daoc.net/play" class="edn-play dropdown-trigger dropdown-toggle"><img src="/styles/Renegade/theme/images/custom/edn_play.png"> Play</a>
+				<div class="dropdown">
+				<div class="pointer"><div class="pointer-inner"></div></div>
+				<ul class="dropdown-contents" role="menu">
+				<li>
+				<a href="https://game.eden-daoc.net/play" role="menuitem">
+				<i class="icon fa-regular fa-circle-play fa-fw" aria-hidden="true"></i><span> Play Eden   </span>
 				</a>
-			</li>
-										</ul>
+				</li>
+				<li>
+				<a href="https://eden-daoc.net/account" role="menuitem">
+				<i class="icon fa-solid fa-circle-user fa-fw" aria-hidden="true"></i><span> Account   </span>
+				</a>
+				</li>
+				
+					
+					</ul></div>
+					</div>
+					
+					
+					
+				
+					
+					
+					
+					
+				<div class="header-profile dropdown-container">
+					<a href="./ucp.php" class="header-avatar dropdown-trigger dropdown-toggle">
+						<span class="username">.ewo78</span> <img class="avatar" src="./download/file.php?avatar=g2_1651448146.png" width="90" height="90" alt="User avatar">					</a>
+					<div class="dropdown">
+						<div class="pointer"><div class="pointer-inner"></div></div>
+						<ul class="dropdown-contents" role="menu">
+							
+						
+							<li>
+								<a href="./ucp.php" title="User Control Panel" role="menuitem">
+									<i class="icon fa-sliders fa-fw" aria-hidden="true"></i><span>User Control Panel</span>
+								</a>
+							</li>
+															<li>
+									<a href="./memberlist.php?mode=viewprofile&amp;u=31123" title="Profile" role="menuitem">
+										<i class="icon fa-user fa-fw" aria-hidden="true"></i><span>Profile</span>
+									</a>
+								</li>
+							
+							
+							<li class="separator"></li>
+							<li>
+								<a href="./ucp.php?mode=logout&amp;sid=938ec29c41b214fe88ff3881f3f0d87b" title="Logout" accesskey="x" role="menuitem">
+									<i class="icon fa-power-off fa-fw" aria-hidden="true"></i><span>Logout</span>
+								</a>
+							</li>
+						</ul>
+					</div>
+				</div>
+							</li>
+							<li class="rightside" data-skip-responsive="true">
+					<a href="./ucp.php?i=pm&amp;folder=inbox" role="menuitem">
+
+							<i class="icon fa-inbox fa-fw" aria-hidden="true"></i>&nbsp;0
+					</a>
+				</li>
+										<li class="dropdown-container dropdown-right rightside" data-skip-responsive="true">
+					<a href="./ucp.php?i=ucp_notifications" id="notification_list_button" class="dropdown-trigger dropdown-toggle">
+								<i class="icon fa-bell fa-fw" aria-hidden="true"></i>&nbsp;0
+					</a>
+					<div id="notification_list" class="dropdown dropdown-extended notification_list">
+	<div class="pointer"><div class="pointer-inner"></div></div>
+	<div class="dropdown-contents">
+		<div class="header">
+			Notifications
+			<span class="header_settings">
+				<a href="./ucp.php?i=ucp_notifications&amp;mode=notification_options">Settings</a>
+							</span>
+		</div>
+
+		<ul>
+							<li class="no_notifications">
+					You have no notifications
+				</li>
+								</ul>
+
+		<div class="footer">
+			<a href="./ucp.php?i=ucp_notifications"><span>See All</span></a>
+		</div>
+	</div>
+</div>
+				</li>
+									</ul>
 
 		</div>
 	</div></div>
@@ -297,7 +423,9 @@
 		
 					<span class="crumb" itemtype="https://schema.org/ListItem" itemprop="itemListElement" itemscope=""><a itemprop="item" href="./forum" accesskey="h" data-navbar-reference="index" title="Forum"><span itemprop="name">Forum</span></a><meta itemprop="position" content="2"></span>
 
-		
+								
+						<span class="crumb" itemtype="https://schema.org/ListItem" itemprop="itemListElement" itemscope=""><a itemprop="item" href="/herald" title="Herald"><span itemprop="name">Herald</span></a><meta itemprop="position" content="3"></span>
+					
 			</li>
 
 	
@@ -312,14 +440,668 @@
             
             
             
-<div class="panel" id="message">
-	<div class="inner">
-	<h2 class="message-title">Information</h2>
-	<p>The requested page “herald” is not available.</p>
-		</div>
+ 
+ <script type="text/javascript">var discordid = "340843196827303938";</script>
+<script type="text/javascript" src="/assets/javascript/js.cookie.min.js"></script>
+<link href="hrald/loading.css" rel="stylesheet">
+<div class="content pages-content">
+
+    <div id="main" style="display: block;">
+        <table id="realmwar" class="realmwar" border="0" cellpadding="0" cellspacing="0" style="margin-bottom: 20px;">
+            <tbody><tr>
+                <td class="title" colspan="3">Realm War</td>
+            </tr>
+            <tr>
+                <td style="width: 33%;">
+                    <table class="realms" style="height: 175px; border: 1px solid #38A59D00;" cellpadding="0" cellspacing="0">
+                        <tbody><tr>
+                            <td rowspan="4" class="realm albbg2" style="border: 0;"><img class="realmwar_alblogo" src="hrald/img/albion_logo.png" alt=""></td>
+                            <td class="realmwar_realm albbg2" style="text-align: left;"><span id="realmwar_rank_alb">-</span>. Albion</td>
+                            <td class="realmwar_score albbg2" id="realmwar_score_alb" style="text-align: right;">-</td>
+                        </tr>
+                        <tr>
+                            <td class="realmwar_score2 albbg" style="text-align: left;">Capture</td>
+                            <td class="realmwar_score2 albbg" id="realmwar_score_alb_capture" style="text-align: right;">-</td>
+                        </tr>
+                        <tr>
+                            <td class="realmwar_score2 albbg2" style="text-align: left;">Hold</td>
+                            <td class="realmwar_score2 albbg2" id="realmwar_score_alb_hold" style="text-align: right;">-
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="realmwar_score2 albbg" style="text-align: left;">Kills</td>
+                            <td class="realmwar_score2 albbg" id="realmwar_score_alb_kills" style="text-align: right;">-
+                            </td>
+                        </tr>
+                    </tbody></table>
+                </td>
+                <td style="padding-left: 15px; padding-right: 15px;">
+                    <table class="realms" style="height: 175px; border: 1px solid #38A59D00;" cellpadding="0" cellspacing="0">
+                        <tbody><tr>
+                            <td rowspan="4" class="realm hibbg2" style="border: 0;"><img class="realmwar_hiblogo" src="hrald/img/hibernia_logo.png" alt=""></td>
+                            <td class="realmwar_realm hibbg2" style="text-align: left;"><span id="realmwar_rank_hib">-</span>. Hibernia</td>
+                            <td class="realmwar_score hibbg2" id="realmwar_score_hib" style="text-align: right;">-</td>
+                        </tr>
+                        <tr>
+                            <td class="realmwar_score2 hibbg" style="text-align: left;">Capture</td>
+                            <td class="realmwar_score2 hibbg" id="realmwar_score_hib_capture" style="text-align: right;">-</td>
+                        </tr>
+                        <tr>
+                            <td class="realmwar_score2 hibbg2" style="text-align: left;">Hold</td>
+                            <td class="realmwar_score2 hibbg2" id="realmwar_score_hib_hold" style="text-align: right;">-
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="realmwar_score2 hibbg" style="text-align: left;">Kills</td>
+                            <td class="realmwar_score2 hibbg" id="realmwar_score_hib_kills" style="text-align: right;">-
+                            </td>
+                        </tr>
+                    </tbody></table>
+                </td>
+                <td style="width: 33%;">
+                    <table class="realms" style="height: 175px; border: 1px solid #38A59D00;" cellpadding="0" cellspacing="0">
+                        <tbody><tr>
+                            <td rowspan="4" class="realm midbg2" style="border: 0;"><img class="realmwar_midlogo" src="hrald/img/midgard_logo.png" alt=""></td>
+                            <td class="realmwar_realm midbg2" style="text-align: left;"><span id="realmwar_rank_mid">-</span>. Midgard</td>
+                            <td class="realmwar_score midbg2" id="realmwar_score_mid" style="text-align: right;">-</td>
+                        </tr>
+                        <tr>
+                            <td class="realmwar_score2 midbg" style="text-align: left;">Capture</td>
+                            <td class="realmwar_score2 midbg" id="realmwar_score_mid_capture" style="text-align: right;">-</td>
+                        </tr>
+                        <tr>
+                            <td class="realmwar_score2 midbg2" style="text-align: left;">Hold</td>
+                            <td class="realmwar_score2 midbg2" id="realmwar_score_mid_hold" style="text-align: right;">-
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="realmwar_score2 midbg" style="text-align: left;">Kills</td>
+                            <td class="realmwar_score2 midbg" id="realmwar_score_mid_kills" style="text-align: right;">-
+                            </td>
+                        </tr>
+                    </tbody></table>
+                </td>
+            </tr>
+            <!--<tr>
+                <td colspan="3" style="padding-top: 15px; border: 1px solid #38A59D00;">
+                    <img id="realmwar_graph" style="width: 100%;" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" title="Realm War" alt="">
+                </td>
+            </tr>-->
+            <tr>
+                <td colspan="3" id="realmwar_graph"></td>
+            </tr>
+        </tbody></table>
+
+        <table id="compet" class="compet" border="0" cellpadding="0" cellspacing="0" style="margin-bottom: 20px;">
+            <tbody><tr>
+                <td class="title" colspan="4">Weekly Competitive</td>
+            </tr>
+            <tr>
+                <td>
+                    <table class="realms" style="height: 100%;" border="0" cellpadding="0" cellspacing="0">
+                        <tbody><tr>
+                            <td style="width: 25%;">
+                                <table style="padding-left: 0px; padding-right: 10px; width: 100%; height: 100%; " border="0" cellpadding="0" cellspacing="0">
+                                    <tbody><tr class="top_header">
+                                        <td class="allbg2 center bold">Top 8v8</td>
+                                    </tr>
+                                </tbody></table>
+                            </td>
+                            <td style="width: 25%;">
+                                <table style="padding-left: 10px; padding-right: 10px; width: 100%; height: 100%; " border="0" cellpadding="0" cellspacing="0">
+                                    <tbody><tr class="top_header">
+                                        <td class="allbg2 center bold">Top 5v5</td>
+                                    </tr>
+                                </tbody></table>
+                            </td>
+                            <td style="width: 25%;">
+                                <table style="padding-left: 10px; padding-right: 10px; width: 100%; height: 100%; " border="0" cellpadding="0" cellspacing="0">
+                                    <tbody><tr class="top_header">
+                                        <td class="allbg2 center bold">Top 2v2</td>
+                                    </tr>
+                                </tbody></table>
+                            </td>
+                            <td style="width: 25%;">
+                                <table style="padding-left: 10px; padding-right: 0px; width: 100%; height: 100%; " border="0" cellpadding="0" cellspacing="0">
+                                    <tbody><tr class="top_header">
+                                        <td class="allbg2 center bold">Top 1v1</td>
+                                    </tr>
+                                </tbody></table>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="4" style="height: 5px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="width: 25%;">
+                                <table id="compet_8v8" style="padding-left: 0px; padding-right: 10px; width: 100%; height: 100%; " border="0" cellpadding="0" cellspacing="0"><tr class="top_header"><td class="allbg2 center">#</td><td class="allbg2">Name</td><td class="allbg2 center">W</td><td class="allbg2 center">L</td></tr><tr class="hibbg2 top_line" onclick="nav(this)" data-n="player" data-k="Cher"><td class="center">1</td><td class="">Cher</td><td class="center">36</td><td class="center">15</td></tr><tr class="hibbg top_line" onclick="nav(this)" data-n="player" data-k="Headshotdead"><td class="center">2</td><td class="">Headshotdead</td><td class="center">36</td><td class="center">17</td></tr><tr class="midbg2 top_line" onclick="nav(this)" data-n="player" data-k="Loemiiee"><td class="center">3</td><td class="">Loemiiee</td><td class="center">34</td><td class="center">17</td></tr><tr class="hibbg top_line" onclick="nav(this)" data-n="player" data-k="Sweater"><td class="center">4</td><td class="">Sweater</td><td class="center">30</td><td class="center">14</td></tr><tr class="midbg2 top_line" onclick="nav(this)" data-n="player" data-k="Xkazz"><td class="center">5</td><td class="">Xkazz</td><td class="center">30</td><td class="center">16</td></tr><tr class="midbg top_line" onclick="nav(this)" data-n="player" data-k="Thiarxsm"><td class="center">6</td><td class="">Thiarxsm</td><td class="center">28</td><td class="center">13</td></tr><tr class="albbg2 top_line" onclick="nav(this)" data-n="player" data-k="Nouma"><td class="center">7</td><td class="">Nouma</td><td class="center">25</td><td class="center">4</td></tr><tr class="midbg top_line" onclick="nav(this)" data-n="player" data-k="Numakyrie"><td class="center">8</td><td class="">Numakyrie</td><td class="center">24</td><td class="center">9</td></tr></table>
+                            </td>
+                            <td style="width: 25%;">
+                                <table id="compet_5v5" style="padding-left: 10px; padding-right: 10px; width: 100%; height: 100%; " border="0" cellpadding="0" cellspacing="0"><tr class="top_header"><td class="allbg2 center">#</td><td class="allbg2">Name</td><td class="allbg2 center">W</td><td class="allbg2 center">L</td></tr><tr class="albbg2 top_line" onclick="nav(this)" data-n="player" data-k="Billywally"><td class="center">1</td><td class="">Billywally</td><td class="center">6</td><td class="center">2</td></tr><tr class="albbg top_line" onclick="nav(this)" data-n="player" data-k="Pet"><td class="center">2</td><td class="">Pet</td><td class="center">6</td><td class="center">2</td></tr><tr class="midbg2 top_line" onclick="nav(this)" data-n="player" data-k="Benn"><td class="center">3</td><td class="">Benn</td><td class="center">4</td><td class="center">0</td></tr><tr class="midbg top_line" onclick="nav(this)" data-n="player" data-k="Saries"><td class="center">4</td><td class="">Saries</td><td class="center">4</td><td class="center">0</td></tr><tr class="midbg2 top_line" onclick="nav(this)" data-n="player" data-k="Gluestick"><td class="center">5</td><td class="">Gluestick</td><td class="center">4</td><td class="center">0</td></tr><tr class="midbg top_line" onclick="nav(this)" data-n="player" data-k="Taksee"><td class="center">6</td><td class="">Taksee</td><td class="center">4</td><td class="center">0</td></tr><tr class="midbg2 top_line" onclick="nav(this)" data-n="player" data-k="Delbv"><td class="center">7</td><td class="">Delbv</td><td class="center">4</td><td class="center">0</td></tr><tr class="albbg top_line" onclick="nav(this)" data-n="player" data-k="Valathius"><td class="center">8</td><td class="">Valathius</td><td class="center">4</td><td class="center">1</td></tr></table>
+                            </td>
+                            <td style="width: 25%;">
+                                <table id="compet_2v2" style="padding-left: 10px; padding-right: 10px; width: 100%; height: 100%; " border="0" cellpadding="0" cellspacing="0"><tr class="top_header"><td class="allbg2 center">#</td><td class="allbg2">Name</td><td class="allbg2 center">W</td><td class="allbg2 center">L</td></tr><tr class="hibbg2 top_line" onclick="nav(this)" data-n="player" data-k="Aline"><td class="center">1</td><td class="">Aline</td><td class="center">9</td><td class="center">0</td></tr><tr class="midbg top_line" onclick="nav(this)" data-n="player" data-k="Suig"><td class="center">2</td><td class="">Suig</td><td class="center">9</td><td class="center">2</td></tr><tr class="midbg2 top_line" onclick="nav(this)" data-n="player" data-k="Fallace"><td class="center">3</td><td class="">Fallace</td><td class="center">8</td><td class="center">3</td></tr><tr class="hibbg top_line" onclick="nav(this)" data-n="player" data-k="Hashs"><td class="center">4</td><td class="">Hashs</td><td class="center">8</td><td class="center">5</td></tr><tr class="midbg2 top_line" onclick="nav(this)" data-n="player" data-k="Chilindra"><td class="center">5</td><td class="">Chilindra</td><td class="center">7</td><td class="center">3</td></tr><tr class="midbg top_line" onclick="nav(this)" data-n="player" data-k="Zarri"><td class="center">6</td><td class="">Zarri</td><td class="center">7</td><td class="center">3</td></tr><tr class="midbg2 top_line" onclick="nav(this)" data-n="player" data-k="Marus"><td class="center">7</td><td class="">Marus</td><td class="center">7</td><td class="center">4</td></tr><tr class="midbg top_line" onclick="nav(this)" data-n="player" data-k="Tilawia"><td class="center">8</td><td class="">Tilawia</td><td class="center">7</td><td class="center">4</td></tr></table>
+                            </td>
+                            <td style="width: 25%;">
+                                <table id="compet_1v1" style="padding-left: 10px; padding-right: 0px; width: 100%; height: 100%; " border="0" cellpadding="0" cellspacing="0"><tr class="top_header"><td class="allbg2 center">#</td><td class="allbg2">Name</td><td class="allbg2 center">W</td><td class="allbg2 center">L</td></tr><tr class="midbg2 top_line" onclick="nav(this)" data-n="player" data-k="Anika"><td class="center">1</td><td class="">Anika</td><td class="center">85</td><td class="center">7</td></tr><tr class="midbg top_line" onclick="nav(this)" data-n="player" data-k="Iniotsk"><td class="center">2</td><td class="">Iniotsk</td><td class="center">83</td><td class="center">17</td></tr><tr class="midbg2 top_line" onclick="nav(this)" data-n="player" data-k="Nicottv"><td class="center">3</td><td class="">Nicottv</td><td class="center">82</td><td class="center">2</td></tr><tr class="albbg top_line" onclick="nav(this)" data-n="player" data-k="Amkelavi"><td class="center">4</td><td class="">Amkelavi</td><td class="center">80</td><td class="center">5</td></tr><tr class="albbg2 top_line" onclick="nav(this)" data-n="player" data-k="Riasradh"><td class="center">5</td><td class="">Riasradh</td><td class="center">79</td><td class="center">2</td></tr><tr class="hibbg top_line" onclick="nav(this)" data-n="player" data-k="Skogstoken"><td class="center">6</td><td class="">Skogstoken</td><td class="center">77</td><td class="center">6</td></tr><tr class="albbg2 top_line" onclick="nav(this)" data-n="player" data-k="Spartaque"><td class="center">7</td><td class="">Spartaque</td><td class="center">70</td><td class="center">34</td></tr><tr class="hibbg top_line" onclick="nav(this)" data-n="player" data-k="Turningleaf"><td class="center">8</td><td class="">Turningleaf</td><td class="center">66</td><td class="center">5</td></tr></table>
+                            </td>
+                        </tr>
+                    </tbody></table>
+                </td>
+        </tr></tbody></table>
+
+        <table class="realms" border="0" cellpadding="0" cellspacing="0">
+            <tbody><tr>
+                <td class="title" colspan="3">Lifetime</td>
+            </tr>
+            <tr>
+                <td style="width: 16%;"><button data-n="top_players" class="button cat allbg2">Top Players</button></td>
+                <td style="width: 16%;"><button data-n="top_guilds" class="button cat allbg">Top Guilds</button></td>
+                <!--<td style="width: 14%;"><button data-n="top_deathblows" class="button cat allbg2">Top Deathblows</button></td>-->
+                <!--<td style="width: 14%;"><button data-n="top_kills" class="button cat allbg">Top Kills</button></td>-->
+                <td style="width: 16%;"><button data-n="top_kills" class="button cat allbg2">Top PvP</button></td>
+                <!--<td style="width: 14%;"><button data-n="top_solokills" class="button cat allbg2">Top Solo Kills</button></td>-->
+                <td style="width: 16%;"><button data-n="rvr_keeps" class="button cat allbg">Top RvR</button></td>
+                <td style="width: 16%;"><button data-n="pve" class="button cat allbg2">Top PvE</button></td>
+                <!-- <td style="width: 16%;"><button data-n="wealth_money" class="button cat allbg">Top Wealth</button></td> -->
+            </tr>
+        </tbody></table>
+
+        <br>
+
+        <table border="0" cellpadding="0" cellspacing="0" style="width: 100%;">
+            <tbody><tr>
+                <td style="width: 33%;">
+                    <table class="realms" border="0" cellpadding="0" cellspacing="0">
+                        <tbody><tr>
+                            <td rowspan="5" class="realm albbg2"><img class="alblogo" src="hrald/img/albion_logo.png" alt=""></td>
+                            <td><button data-n="top_players" data-r="alb" class="button cat albbg2">Top Albion
+                                    Players</button></td>
+                        </tr>
+                        <tr>
+                            <td><button data-n="top_guilds" data-r="alb" class="button cat albbg">Top Albion
+                                    Guilds</button></td>
+                        </tr>
+                        <tr>
+                            <td><button data-n="top_deathblows" data-r="alb" class="button cat albbg2">Top Albion
+                                    Deathblows</button></td>
+                        </tr>
+                        <tr>
+                            <td><button data-n="top_kills" data-r="alb" class="button cat albbg">Top Albion
+                                    Kills</button></td>
+                        </tr>
+                        <tr>
+                            <td><button data-n="top_solokills" data-r="alb" class="button cat albbg2">Top Albion Solo
+                                    Kills</button></td>
+                        </tr>
+                    </tbody></table>
+                </td>
+                <td style="padding-left: 15px; padding-right: 15px;">
+                    <table class="realms" border="0" cellpadding="0" cellspacing="0">
+                        <tbody><tr>
+                            <td rowspan="5" class="realm hibbg2"><img class="hiblogo" src="hrald/img/hibernia_logo.png" alt=""></td>
+                            <td><button data-n="top_players" data-r="hib" class="button cat hibbg2">Top Hibernia
+                                    Players</button></td>
+                        </tr>
+                        <tr>
+                            <td><button data-n="top_guilds" data-r="hib" class="button cat hibbg">Top Hibernia
+                                    Guilds</button></td>
+                        </tr>
+                        <tr>
+                            <td><button data-n="top_deathblows" data-r="hib" class="button cat hibbg2">Top Hibernia
+                                    Deathblows</button></td>
+                        </tr>
+                        <tr>
+                            <td><button data-n="top_kills" data-r="hib" class="button cat hibbg">Top Hibernia
+                                    Kills</button></td>
+                        </tr>
+                        <tr>
+                            <td><button data-n="top_solokills" data-r="hib" class="button cat hibbg2">Top Hibernia Solo
+                                    Kills</button></td>
+                        </tr>
+                    </tbody></table>
+                </td>
+                <td style="width: 33%;">
+                    <table class="realms" border="0" cellpadding="0" cellspacing="0">
+                        <tbody><tr>
+                            <td rowspan="5" class="realm midbg2"><img class="midlogo" src="hrald/img/midgard_logo.png" alt=""></td>
+                            <td><button data-n="top_players" data-r="mid" class="button cat midbg2">Top Midgard
+                                    Players</button></td>
+                        </tr>
+                        <tr>
+                            <td><button data-n="top_guilds" data-r="mid" class="button cat midbg">Top Midgard
+                                    Guilds</button></td>
+                        </tr>
+                        <tr>
+                            <td><button data-n="top_deathblows" data-r="mid" class="button cat midbg2">Top Midgard
+                                    Deathblows</button></td>
+                        </tr>
+                        <tr>
+                            <td><button data-n="top_kills" data-r="mid" class="button cat midbg">Top Midgard
+                                    Kills</button></td>
+                        </tr>
+                        <tr>
+                            <td><button data-n="top_solokills" data-r="mid" class="button cat midbg2">Top Midgard Solo
+                                    Kills</button></td>
+                        </tr>
+                    </tbody></table>
+                </td>
+            </tr>
+        </tbody></table>
+
+        <br>
+
+        <table border="0" cellpadding="0" cellspacing="0" style="width: 100%;">
+            <tbody><tr>
+                <td style="width: 33%; vertical-align: top;">
+                    <table border="0" cellpadding="0" cellspacing="0" style="width: 100%;">
+                        <tbody><tr>
+                            <td class="cls albbg2"><img class="cls" src="hrald/img/Armsman_class_icon.webp" alt="">
+                            </td>
+                            <td><button data-n="top_players" data-c="armsman" class="button cat albbg2">Armsman</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="cls albbg"><img class="cls" src="hrald/img/Mercenary_class_icon.webp" alt="">
+                            </td>
+                            <td><button data-n="top_players" data-c="mercenary" class="button cat albbg">Mercenary</button></td>
+                        </tr>
+                        <tr>
+                            <td class="cls albbg2"><img class="cls" src="hrald/img/Paladin_class_icon.webp" alt="">
+                            </td>
+                            <td><button data-n="top_players" data-c="paladin" class="button cat albbg2">Paladin</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="cls albbg"><img class="cls" src="hrald/img/Reaver_class_icon.webp" alt=""></td>
+                            <td><button data-n="top_players" data-c="reaver" class="button cat albbg">Reaver</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="cls albbg2"><img class="cls" src="hrald/img/Cabalist_class_icon.webp" alt="">
+                            </td>
+                            <td><button data-n="top_players" data-c="cabalist" class="button cat albbg2">Cabalist</button></td>
+                        </tr>
+                        <tr>
+                            <td class="cls albbg"><img class="cls" src="hrald/img/Necromancer_class_icon.webp" alt="">
+                            </td>
+                            <td><button data-n="top_players" data-c="necromancer" class="button cat albbg">Necromancer</button></td>
+                        </tr>
+                        <tr>
+                            <td class="cls albbg"><img class="cls" src="hrald/img/Necromancer_class_icon.webp" alt="">
+                            </td>
+                            <td><button data-n="top_players" data-c="occultist" class="button cat albbg">Occultist</button></td>
+                        </tr>
+                        <tr>
+                            <td class="cls albbg2"><img class="cls" src="hrald/img/Sorcerer_class_icon.webp" alt="">
+                            </td>
+                            <td><button data-n="top_players" data-c="sorcerer" class="button cat albbg2">Sorcerer</button></td>
+                        </tr>
+                        <tr>
+                            <td class="cls albbg"><img class="cls" src="hrald/img/Theurgist_class_icon.webp" alt="">
+                            </td>
+                            <td><button data-n="top_players" data-c="theurgist" class="button cat albbg">Theurgist</button></td>
+                        </tr>
+                        <tr>
+                            <td class="cls albbg2"><img class="cls" src="hrald/img/Wizard_class_icon.webp" alt="">
+                            </td>
+                            <td><button data-n="top_players" data-c="wizard" class="button cat albbg2">Wizard</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="cls albbg"><img class="cls" src="hrald/img/Cleric_class_icon.webp" alt=""></td>
+                            <td><button data-n="top_players" data-c="cleric" class="button cat albbg">Cleric</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="cls albbg2"><img class="cls" src="hrald/img/Friar_class_icon.webp" alt=""></td>
+                            <td><button data-n="top_players" data-c="friar" class="button cat albbg2">Friar</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="cls albbg"><img class="cls" src="hrald/img/Heretic_class_icon.webp" alt="">
+                            </td>
+                            <td><button data-n="top_players" data-c="heretic" class="button cat albbg">Heretic</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="cls albbg2"><img class="cls" src="hrald/img/Infiltrator_class_icon.webp" alt=""></td>
+                            <td><button data-n="top_players" data-c="infiltrator" class="button cat albbg2">Infiltrator</button></td>
+                        </tr>
+                        <tr>
+                            <td class="cls albbg"><img class="cls" src="hrald/img/Minstrel_class_icon.webp" alt="">
+                            </td>
+                            <td><button data-n="top_players" data-c="minstrel" class="button cat albbg">Minstrel</button></td>
+                        </tr>
+                        <tr>
+                            <td class="cls albbg2"><img class="cls" src="hrald/img/Scout_class_icon.webp" alt=""></td>
+                            <td><button data-n="top_players" data-c="scout" class="button cat albbg2">Scout</button>
+                            </td>
+                        </tr>
+                    </tbody></table>
+                </td>
+                <td style="padding-left: 15px; padding-right: 15px; vertical-align: top;">
+                    <table border="0" cellpadding="0" cellspacing="0" style="width: 100%;">
+                        <tbody><tr>
+                            <td class="cls hibbg2"><img class="cls" src="hrald/img/Blademaster_class_icon.webp" alt=""></td>
+                            <td><button data-n="top_players" data-c="blademaster" class="button cat hibbg2">Blademaster</button></td>
+                        </tr>
+                        <tr>
+                            <td class="cls hibbg"><img class="cls" src="hrald/img/Champion_class_icon.webp" alt="">
+                            </td>
+                            <td><button data-n="top_players" data-c="champion" class="button cat hibbg">Champion</button></td>
+                        </tr>
+                        <tr>
+                            <td class="cls hibbg2"><img class="cls" src="hrald/img/Hero_class_icon.webp" alt=""></td>
+                            <td><button data-n="top_players" data-c="hero" class="button cat hibbg2">Hero</button></td>
+                        </tr>
+                        <tr>
+                            <td class="cls hibbg"><img class="cls" src="hrald/img/Valewalker_class_icon.webp" alt="">
+                            </td>
+                            <td><button data-n="top_players" data-c="valewalker" class="button cat hibbg">Valewalker</button></td>
+                        </tr>
+                        <tr>
+                            <td class="cls hibbg"><img class="cls" src="hrald/img/Vampiir_class_icon.webp" alt="">
+                            </td>
+                            <td><button data-n="top_players" data-c="vampiir" class="button cat hibbg">Vampiir</button></td>
+                        </tr>
+                        <tr>
+                            <td class="cls hibbg2"><img class="cls" src="hrald/img/Animist_class_icon.webp" alt="">
+                            </td>
+                            <td><button data-n="top_players" data-c="animist" class="button cat hibbg2">Animist</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="cls hibbg"><img class="cls" src="hrald/img/Eldritch_class_icon.webp" alt="">
+                            </td>
+                            <td><button data-n="top_players" data-c="eldritch" class="button cat hibbg">Eldritch</button></td>
+                        </tr>
+                        <tr>
+                            <td class="cls hibbg2"><img class="cls" src="hrald/img/Enchanter_class_icon.webp" alt="">
+                            </td>
+                            <td><button data-n="top_players" data-c="enchanter" class="button cat hibbg2">Enchanter</button></td>
+                        </tr>
+                        <tr>
+                            <td class="cls hibbg"><img class="cls" src="hrald/img/Mentalist_class_icon.webp" alt="">
+                            </td>
+                            <td><button data-n="top_players" data-c="mentalist" class="button cat hibbg">Mentalist</button></td>
+                        </tr>
+                        <tr>
+                            <td class="cls hibbg2"><img class="cls" src="hrald/img/Bainshee_class_icon.webp" alt="">
+                            </td>
+                            <td><button data-n="top_players" data-c="bainshee" class="button cat hibbg2">Bainshee</button></td>
+                        </tr>
+                        <tr>
+                            <td class="cls hibbg"><img class="cls" src="hrald/img/Bard_class_icon.webp" alt=""></td>
+                            <td><button data-n="top_players" data-c="bard" class="button cat hibbg">Bard</button></td>
+                        </tr>
+                        <tr>
+                            <td class="cls hibbg2"><img class="cls" src="hrald/img/Druid_class_icon.webp" alt=""></td>
+                            <td><button data-n="top_players" data-c="druid" class="button cat hibbg2">Druid</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="cls hibbg"><img class="cls" src="hrald/img/Warden_class_icon.webp" alt=""></td>
+                            <td><button data-n="top_players" data-c="warden" class="button cat hibbg">Warden</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="cls hibbg2"><img class="cls" src="hrald/img/Nightshade_class_icon.webp" alt="">
+                            </td>
+                            <td><button data-n="top_players" data-c="nightshade" class="button cat hibbg2">Nightshade</button></td>
+                        </tr>
+                        <tr>
+                            <td class="cls hibbg"><img class="cls" src="hrald/img/Ranger_class_icon.webp" alt=""></td>
+                            <td><button data-n="top_players" data-c="ranger" class="button cat hibbg">Ranger</button>
+                            </td>
+                        </tr>
+                    </tbody></table>
+                </td>
+                <td style="width: 33%; vertical-align: top;">
+                    <table border="0" cellpadding="0" cellspacing="0" style="width: 100%;">
+                        <tbody><tr>
+                            <td class="cls midbg2"><img class="cls" src="hrald/img/Berserker_class_icon.webp" alt="">
+                            </td>
+                            <td><button data-n="top_players" data-c="berserker" class="button cat midbg2">Berserker</button></td>
+                        </tr>
+                        <tr>
+                            <td class="cls midbg"><img class="cls" src="hrald/img/Savage_class_icon.webp" alt=""></td>
+                            <td><button data-n="top_players" data-c="savage" class="button cat midbg">Savage</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="cls midbg2"><img class="cls" src="hrald/img/Skald_class_icon.webp" alt=""></td>
+                            <td><button data-n="top_players" data-c="skald" class="button cat midbg2">Skald</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="cls midbg"><img class="cls" src="hrald/img/Thane_class_icon.webp" alt=""></td>
+                            <td><button data-n="top_players" data-c="thane" class="button cat midbg">Thane</button></td>
+                        </tr>
+                        <tr>
+                            <td class="cls midbg2"><img class="cls" src="hrald/img/Warrior_class_icon.webp" alt="">
+                            </td>
+                            <td><button data-n="top_players" data-c="warrior" class="button cat midbg2">Warrior</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="cls midbg"><img class="cls" src="hrald/img/Valkyrie_class_icon.webp" alt="">
+                            </td>
+                            <td><button data-n="top_players" data-c="valkyrie" class="button cat midbg">Valkyrie</button></td>
+                        </tr>
+                        <tr>
+                            <td class="cls midbg2"><img class="cls" src="hrald/img/Bonedancer_class_icon.webp" alt="">
+                            </td>
+                            <td><button data-n="top_players" data-c="bonedancer" class="button cat midbg2">Bonedancer</button></td>
+                        </tr>
+                        <tr>
+                            <td class="cls midbg"><img class="cls" src="hrald/img/Runemaster_class_icon.webp" alt="">
+                            </td>
+                            <td><button data-n="top_players" data-c="runemaster" class="button cat midbg">Runemaster</button></td>
+                        </tr>
+                        <tr>
+                            <td class="cls midbg2"><img class="cls" src="hrald/img/Spiritmaster_class_icon.webp" alt=""></td>
+                            <td><button data-n="top_players" data-c="spiritmaster" class="button cat midbg2">Spiritmaster</button></td>
+                        </tr>
+                        <tr>
+                            <td class="cls midbg2"><img class="cls" src="hrald/img/Warlock_class_icon.webp" alt=""></td>
+                            <td><button data-n="top_players" data-c="warlock" class="button cat midbg2">Warlock</button></td>
+                        </tr>
+                        <tr>
+                            <td class="cls midbg"><img class="cls" src="hrald/img/Healer_class_icon.webp" alt=""></td>
+                            <td><button data-n="top_players" data-c="healer" class="button cat midbg">Healer</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="cls midbg2"><img class="cls" src="hrald/img/Shaman_class_icon.webp" alt="">
+                            </td>
+                            <td><button data-n="top_players" data-c="shaman" class="button cat midbg2">Shaman</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="cls midbg"><img class="cls" src="hrald/img/Hunter_class_icon.webp" alt=""></td>
+                            <td><button data-n="top_players" data-c="hunter" class="button cat midbg">Hunter</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="cls midbg2"><img class="cls" src="hrald/img/Shadowblade_class_icon.webp" alt=""></td>
+                            <td><button data-n="top_players" data-c="shadowblade" class="button cat midbg2">Shadowblade</button></td>
+                        </tr>
+                    </tbody></table>
+                </td>
+            </tr>
+        </tbody></table>
+    </div>
+
+    <div id="tops" style="display: none;">
+        <table class="realms" border="0" cellpadding="0" cellspacing="0">
+            <tbody><tr>
+                <td class="allbg2" style="width: 50px;"><button data-n="home" class="button cat"><b>&lt;&nbsp;&lt;</b></button></td>
+                <td style="width: 50px;"><button id="nav_all" data-n="top_players" class="button cat top_nav allbg2" style="padding: 0; margin: 0;"><img style="height: 26px;" src="hrald/img/all_logo.png" alt="" title="All"></button></td>
+                <td style="width: 50px;"><button id="nav_alb" data-n="top_players" data-r="alb" class="button cat top_nav allbg2" style="padding: 0; margin: 0;"><img style="height: 24px;" src="hrald/img/albion_logo.png" alt="" title="Albion"></button></td>
+                <td style="width: 50px;"><button id="nav_hib" data-n="top_players" data-r="hib" class="button cat top_nav allbg2" style="padding: 0; margin: 0;"><img style="height: 26px;" src="hrald/img/hibernia_logo.png" alt="" title="Hibernia"></button></td>
+                <td style="width: 50px;"><button id="nav_mid" data-n="top_players" data-r="mid" class="button cat top_nav allbg2" style="padding: 0; margin: 0;"><img style="height: 26px;" src="hrald/img/midgard_logo.png" alt="" title="Midgard"></button></td>
+                <td class="allbg center bold" style="width: 250px;">
+                    <select id="nav" class="selector nav">
+                        <option value="none" disabled="disabled">Browse</option>
+                        <option value="top_players">Top Players</option>
+                        <option value="top_lwrp">Top Last Week RP</option>
+                        <option value="top_lwsk">Top Last Week SK</option>
+                        <option value="top_guilds">Top Guilds</option>
+                        <option value="top_guildslwrp">Top Guilds LWRP</option>
+                        <option value="top_deathblows">Top Deathblows</option>
+                        <option value="top_kills">Top Kills</option>
+                        <option value="top_solokills">Top Solo Kills</option>
+                        <option value="top_alb_deathblows">Top Albion Deathblows</option>
+                        <option value="top_alb_kills">Top Albion Kills</option>
+                        <option value="top_alb_solokills">Top Albion Solo Kills</option>
+                        <option value="top_hib_deathblows">Top Hibernia Deathblows</option>
+                        <option value="top_hib_kills">Top Hibernia Kills</option>
+                        <option value="top_hib_solokills">Top Hibernia Solo Kills</option>
+                        <option value="top_mid_deathblows">Top Midgard Deathblows</option>
+                        <option value="top_mid_kills">Top Midgard Kills</option>
+                        <option value="top_mid_solokills">Top Midgard Solo Kills</option>
+                        <option value="rvr_loyalty">Top Loyalty</option>
+                        <option value="rvr_keeps">Top Keep Captures</option>
+                        <option value="rvr_towers">Top Tower Captures</option>
+                        <option value="rvr_relics">Top Relic Captures</option>
+                        <option value="rvr_healing">Top Healing</option>
+                        <!-- <option value="wealth_money">Top Wealth Money</option> -->
+                        <option value="wealth_bounty">Top Wealth Bounty</option>
+                        <option value="wealth_dragon">Top Wealth Dragon</option>
+                        <option value="wealth_epic">Top Wealth Epic</option>
+                        <option value="wealth_sobekite">Top Wealth Sobekite</option>
+                    </select>
+                </td>
+                <!--<td class="allbg" style="width: 50px;">&nbsp;&nbsp;Search:&nbsp;&nbsp;</td>-->
+                <td class="allbg" style="width: 20px; padding-left: 6px; padding-right: 0px;"><img style="margin-top: 2px; height: 36px;" src="hrald/img/search.png" alt="" title="Search"></td>
+                <td class="allbg" style="padding-right: 16px;"><input id="search2" class="searchbox" type="text" value="Search by name" autocorrect="off" spellcheck="false"></td>
+                <td class="allbg" style="width: 100px;"><select id="search_type2" class="searchbox_type selector">
+                        <option value="player">Player</option>
+                        <option value="guild">Guild</option>
+                    </select></td>
+                <td class="allbg2" style="width: 40px;"><button id="search_button2" class="searchbox_button button cat">Search</button></td>
+                <td class="allbg"></td>
+                <td class="allbg" style="width: 50px;">&nbsp;&nbsp;Page:&nbsp;&nbsp;</td>
+                <td class="allbg2" style="width: 40px;"><button id="page_minus" class="button cat"><b>-</b></button>
+                </td>
+                <td class="allbg" style="width: 10px;"><input type="text" id="page" value="1"></td>
+                <td class="allbg2" style="width: 40px;"><button id="page_plus" class="button cat"><b>+</b></button></td>
+                <td class="allbg" style="width: 10px;">&nbsp;&nbsp;/&nbsp;</td>
+                <td class="allbg" style="width: 20px;">&nbsp;<span id="maxpage">1</span>&nbsp;&nbsp;</td>
+            </tr>
+        </tbody></table>
+
+        <br>
+
+        <div id="tops_content">
+
+        </div>
+    </div>
+
+    <div id="player" style="display: none;">
+        <table class="realms" border="0" cellpadding="0" cellspacing="0">
+            <tbody><tr>
+                <td class="allbg2" style="width: 50px;"><button data-n="home" data-t="" class="button cat"><b>&lt;&nbsp;&lt;</b></button></td>
+                <!--<td style="width: 50px;"><button id="nav_all" data-n="top_players" class="button cat top_nav allbg2" style="padding: 0; margin: 0;"><img style="height: 26px;" src="hrald/img/all_logo.png" alt="" title="All" /></button></td>
+                <td style="width: 50px;"><button id="nav_alb" data-n="top_players" data-r="alb" class="button cat top_nav allbg2" style="padding: 0; margin: 0;"><img style="height: 24px;" src="hrald/img/albion_logo.png" alt="" title="Albion" /></button></td>
+                <td style="width: 50px;"><button id="nav_hib" data-n="top_players" data-r="hib" class="button cat top_nav allbg2" style="padding: 0; margin: 0;"><img style="height: 26px;" src="hrald/img/hibernia_logo.png" alt="" title="Hibernia" /></button></td>
+                <td style="width: 50px;"><button id="nav_mid" data-n="top_players" data-r="mid" class="button cat top_nav allbg2" style="padding: 0; margin: 0;"><img style="height: 26px;" src="hrald/img/midgard_logo.png" alt="" title="Midgard" /></button></td>-->
+                <td class="allbg center bold" style="width: 250px; padding-right: 4px;">
+                    <select id="nav" class="selector nav">
+                        <option value="none" disabled="disabled">Browse</option>
+                        <option value="top_players">Top Players</option>
+                        <option value="top_guilds">Top Guilds</option>
+                        <option value="top_deathblows">Top Deathblows</option>
+                        <option value="top_kills">Top Kills</option>
+                        <option value="top_solokills">Top Solo Kills</option>
+                        <option value="top_alb_deathblows">Top Albion Deathblows</option>
+                        <option value="top_alb_kills">Top Albion Kills</option>
+                        <option value="top_alb_solokills">Top Albion Solo Kills</option>
+                        <option value="top_hib_deathblows">Top Hibernia Deathblows</option>
+                        <option value="top_hib_kills">Top Hibernia Kills</option>
+                        <option value="top_hib_solokills">Top Hibernia Solo Kills</option>
+                        <option value="top_mid_deathblows">Top Midgard Deathblows</option>
+                        <option value="top_mid_kills">Top Midgard Kills</option>
+                        <option value="top_mid_solokills">Top Midgard Solo Kills</option>
+                        <option value="rvr_keeps">Top Keep Captures</option>
+                        <option value="rvr_towers">Top Tower Captures</option>
+                        <option value="rvr_relics">Top Relic Captures</option>
+                        <option value="rvr_healing">Top Healing</option>
+                        <!-- <option value="wealth_money">Top Wealth Money</option> -->
+                        <option value="wealth_bounty">Top Wealth Bounty</option>
+                        <option value="wealth_dragon">Top Wealth Dragon</option>
+                        <option value="wealth_epic">Top Wealth Epic</option>
+                        <option value="wealth_sobekite">Top Wealth Sobekite</option>
+                    </select>
+                </td>
+                <!--<td class="allbg" style="width: 50px;">&nbsp;&nbsp;Search:&nbsp;&nbsp;</td>-->
+                <td style="width: 5px;"></td>
+                <td class="allbg2" id="player_name">&nbsp;</td>
+                <td style="width: 5px;"></td>
+                <!--<td class="allbg" style="width: 20px; padding-left: 6px; padding-right: 0px;"><img style="margin-top: 2px; height: 36px;" src="hrald/img/search.png" alt="" title="Search" /></td>-->
+                <td class="allbg" style="width: 180px; padding-left: 0px; padding-right: 16px;"><input id="search" class="searchbox" type="text" value="Search by name" autocorrect="off" spellcheck="false">
+                </td>
+                <td class="allbg" style="width: 90px;"><select id="search_type" class="searchbox_type selector" style="width: 90px;">
+                        <option value="player">Player</option>
+                        <option value="guild">Guild</option>
+                    </select></td>
+                <td class="allbg2" style="width: 40px;"><button id="search_button" class="searchbox_button button cat">Search</button></td>
+                <td class="allbg"></td>
+                <!--<td class="allbg" style="width: 50px;">&nbsp;&nbsp;Page:&nbsp;&nbsp;</td>
+                <td class="allbg2" style="width: 40px;"><button id="page_minus" class="button cat"><b>-</b></button></td>
+                <td class="allbg" style="width: 10px;"><input type="text" id="page" value="1" /></td>
+                <td class="allbg2" style="width: 40px;"><button id="page_plus" class="button cat"><b>+</b></button></td>
+                <td class="allbg" style="width: 10px;">&nbsp;&nbsp;/&nbsp;</td>
+                <td class="allbg" style="width: 20px;">&nbsp;<span id="maxpage">1</span>&nbsp;&nbsp;</td>-->
+            </tr>
+        </tbody></table>
+
+        <br>
+
+        <div id="player_content">
+
+        </div>
+    </div>
+
+    <div id="pve" style="display: none;">
+        <table class="realms" border="0" cellpadding="0" cellspacing="0">
+            <tbody><tr>
+                <td class="allbg2" style="width: 50px;"><button data-n="home" class="button cat"><b>&lt;&nbsp;&lt;</b></button></td>
+                <td style="width: 50px;"><button id="filter_all" class="filter_realm button cat top_nav allbg2 hover" style="padding: 0; margin: 0;"><img style="height: 26px;" src="hrald/img/all_logo.png" alt="" title="All"></button></td>
+                <td style="width: 50px;"><button id="filter_alb" class="filter_realm button cat top_nav allbg2" style="padding: 0; margin: 0;"><img style="height: 24px;" src="hrald/img/albion_logo.png" alt="" title="Albion"></button></td>
+                <td style="width: 50px;"><button id="filter_hib" class="filter_realm button cat top_nav allbg2" style="padding: 0; margin: 0;"><img style="height: 26px;" src="hrald/img/hibernia_logo.png" alt="" title="Hibernia"></button></td>
+                <td style="width: 50px;"><button id="filter_mid" class="filter_realm button cat top_nav allbg2" style="padding: 0; margin: 0;"><img style="height: 26px;" src="hrald/img/midgard_logo.png" alt="" title="Midgard"></button></td>
+                <td class="allbg" style="text-align: right; padding-right: 10px; font-style: italic; font-size: 14px; line-height: 15px;">
+                    <!--<b>Please note:</b> This page is a work in progress. Encounter data collection has only recently been introduced (older encounters may not be shown),<br />and encounter data for any boss may be reset if their mechanics or difficulty are updated.-->
+                </td>
+            </tr>
+        </tbody></table>
+
+        <br>
+
+        <div id="pve_content">
+
+        </div>
+    </div>
+
+    <div id="test" style="display: none;">
+        <table border="0" cellpadding="0" cellspacing="0">
+            <tbody><tr>
+                <td>
+                </td>
+            </tr>
+        </tbody></table>
+    </div>
+    <!--<div id="debug"></div>-->
 </div>
 
-						
+<div class="tooltip tooltipstered"></div>
+
+<div id="hidder">
+    <div id="messagebox"></div>
+</div>
+					
 
                                     </div>
 
@@ -340,6 +1122,11 @@
 					<i class="icon fa-trash fa-fw" aria-hidden="true"></i><span>Delete cookies</span>
 				</a>
 			</li>
+							<li class="rightside" data-last-responsive="true">
+					<a href="./memberlist.php" title="View complete list of members" role="menuitem">
+						<i class="icon fa-group fa-fw" aria-hidden="true"></i><span>Members</span>
+					</a>
+				</li>
 							        <li class="rightside">
 			<a class="footer-link" href="./ucp.php?mode=privacy" title="Privacy" role="menuitem">
 				<i class="icon fa-lock fa-fw" aria-hidden="true"></i><span class="footer-link-text">Privacy</span>
@@ -350,6 +1137,11 @@
 				<i class="icon fa-check fa-fw" aria-hidden="true"></i><span class="footer-link-text">Terms</span>
 			</a>        
         </li>
+					<li class="rightside" data-last-responsive="true">
+				<a href="./memberlist.php?mode=team" role="menuitem">
+					<i class="icon fa-shield fa-fw" aria-hidden="true"></i><span>The team</span>
+				</a>
+			</li>
 							</ul>
 
 	</div>
@@ -442,7 +1234,8 @@
 </script>
 
 
-                        <script src="./styles/Renegade/template/tooltipster.bundle.min.js?assets_version=238"></script>
+                        <script src="/hrald/herald.js"></script>
+<script src="./styles/Renegade/template/tooltipster.bundle.min.js?assets_version=238"></script>
 <script src="./styles/Renegade/template/jquery.collapse.js?assets_version=238"></script>
 <script src="./styles/Renegade/template/jquery.collapse_storage.js?assets_version=238"></script>
 <script src="./styles/Renegade/template/forum_fn.js?assets_version=238"></script>

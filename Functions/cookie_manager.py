@@ -618,16 +618,14 @@ class CookieManager:
             eden_logger.debug("✅ Test avec {browser_name} (headless)", extra={"action": "TEST"})
             
             try:
-                # TEST SIMPLE MAIS COMPLET:
-                # Même flux que dans eden_scraper.py load_cookies()
-                
+                # TEST ALIGNÉ EXACTEMENT AVEC load_cookies()
                 import time
                 
-                # Aller sur la page d'accueil
+                # Étape 1: Page d'accueil
                 driver.get("https://eden-daoc.net/")
                 time.sleep(2)
                 
-                # Ajouter les cookies
+                # Étape 2: Ajouter les cookies
                 eden_logger.info(f"Ajout de {len(cookies_list)} cookies", extra={"action": "TEST"})
                 for cookie in cookies_list:
                     try:
@@ -635,46 +633,56 @@ class CookieManager:
                     except:
                         pass
                 
-                time.sleep(3)
+                time.sleep(1)
                 
-                # REFRESH IMPORTANT - Les cookies ne sont pas actifs sans refresh
+                # Étape 3: Refresh
                 eden_logger.info("Refresh pour activer les cookies", extra={"action": "TEST"})
                 driver.refresh()
                 time.sleep(3)
                 
-                # Aller sur le Herald
+                # Étape 4: Aller sur le Herald
                 eden_logger.info("Navigation vers https://eden-daoc.net/herald", extra={"action": "TEST"})
                 driver.get("https://eden-daoc.net/herald")
-                time.sleep(4)
+                time.sleep(5)  # Attendre plus longtemps pour que le contenu se charge
                 
-                # Chercher le message d'erreur
+                # Récupérer et analyser le HTML
                 page_source = driver.page_source
                 
-                # Détection: Le message d'erreur spécifique
+                # DEBUG: Sauvegarder pour inspection
+                import os
+                debug_file = os.path.join(os.path.dirname(__file__), '..', 'Scripts', 'debug_test_connection.html')
+                try:
+                    with open(debug_file, 'w', encoding='utf-8') as f:
+                        f.write(page_source)
+                except:
+                    pass
+                
+                # MÉTHODE DE DÉTECTION - Chercher les signes de CONNEXION plutôt que non-connexion:
+                # Quand connecté, on voit: id="username_logged_in" ou <span class="username">NOM</span>
+                is_logged_in = 'username_logged_in' in page_source or ('class="username"' in page_source)
+                
+                # Chercher aussi le message d'erreur (absolument pas connecté)
                 error_message = 'The requested page "herald" is not available.'
                 has_error_msg = error_message in page_source
                 
-                # ALTERNATIVE: Redirection vers login
-                # Si pas connecté, on devrait voir une redirection ucp.php avec herald dans le redirect
-                has_login_redirect = ('redirect=' in page_source and 'herald' in page_source.lower() and 'ucp.php' in page_source)
+                eden_logger.debug(f"HTML size: {len(page_source)}, logged_in: {is_logged_in}, error: {has_error_msg}", extra={"action": "TEST"})
                 
-                is_not_connected = has_error_msg or has_login_redirect
-                
-                if is_not_connected:
-                    eden_logger.warning(f'NON CONNECTÉ - Détection: erreur_msg={has_error_msg}, login_redirect={has_login_redirect}', extra={"action": "TEST"})
-                    return {
-                        'success': True,
-                        'status_code': 200,
-                        'message': 'Non connecté à Herald',
-                        'accessible': False
-                    }
-                else:
-                    eden_logger.info("CONNECTÉ - Pas de signes de non-connexion détectés", extra={"action": "TEST"})
+                # Si pas le message d'erreur ET on a des signes de connexion → CONNECTÉ
+                if is_logged_in and not has_error_msg:
+                    eden_logger.info("CONNECTÉ - Éléments de connexion trouvés", extra={"action": "TEST"})
                     return {
                         'success': True,
                         'status_code': 200,
                         'message': 'Connecté à Herald',
                         'accessible': True
+                    }
+                else:
+                    eden_logger.warning(f'NON CONNECTÉ - logged_in={is_logged_in}, error_msg={has_error_msg}', extra={"action": "TEST"})
+                    return {
+                        'success': True,
+                        'status_code': 200,
+                        'message': 'Non connecté à Herald',
+                        'accessible': False
                     }
                     
             finally:

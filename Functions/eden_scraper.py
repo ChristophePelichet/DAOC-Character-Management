@@ -163,42 +163,31 @@ class EdenScraper:
             except:
                 pass
             
-            # UNIQUE MÉTHODE DE DÉTECTION: Chercher le message d'erreur spécifique
-            # OU chercher s'il y a des éléments de login/non-connexion
+            # UNIQUE MÉTHODE DE DÉTECTION: Chercher les signes de CONNEXION
+            # Quand connecté, on voit: id="username_logged_in" ou <span class="username">NOM</span>
+            is_logged_in = 'username_logged_in' in html_content or ('class="username"' in html_content)
+            
+            # Chercher aussi le message d'erreur (absolument pas connecté)
             error_message = 'The requested page "herald" is not available.'
             has_error_msg = error_message in html_content
             
-            # ALTERNATIVE: Chercher des signes de non-connexion
-            # Si pas connecté, on devrait voir des éléments de login
-            has_login_button = 'login' in html_content.lower() and ('ucp.php' in html_content or 'oauth_service' in html_content)
-            
-            # Chercher si on a vraiment du contenu Herald (pas juste la page phpBB)
-            # Chercher un lien vers player ou search parameters dans le lien de login
-            is_redirecting_to_login = ('redirect=app.php' in html_content or 'herald' in html_content.lower()) and has_login_button
-            
-            is_not_logged_in = has_error_msg or is_redirecting_to_login
-            
             self.logger.debug(f"Message d'erreur présent: {has_error_msg}", extra={"action": "COOKIES"})
-            self.logger.debug(f"Détecté redirection login: {is_redirecting_to_login}", extra={"action": "COOKIES"})
-            self.logger.debug(f"Conclusion - Pas connecté: {is_not_logged_in}", extra={"action": "COOKIES"})
+            self.logger.debug(f"Éléments de connexion présents: {is_logged_in}", extra={"action": "COOKIES"})
             self.logger.debug(f"Taille HTML: {len(html_content)} caractères", extra={"action": "COOKIES"})
             
-            # DEBUG: Afficher la recherche
-            if "not available" in html_content.lower():
-                self.logger.debug("Partie du HTML contient 'not available' en minuscules", extra={"action": "COOKIES"})
-            if "herald" in html_content.lower():
-                self.logger.debug("Partie du HTML contient 'herald' en minuscules", extra={"action": "COOKIES"})
-            
-            # LOGIQUE: 
-            # - Si message d'erreur → Définitivement pas connecté
-            # - Si pas de message d'erreur → Probablement connecté
-            if is_not_logged_in:
+            # LOGIQUE: Si le message d'erreur est là → PAS CONNECTÉ
+            # Sinon, chercher les signes de connexion
+            if has_error_msg:
                 self.logger.error('❌ NON CONNECTÉ - Message détecté: "The requested page herald is not available."', extra={"action": "COOKIES"})
                 self.logger.error("💡 Conseil: Régénérez vos cookies en utilisant le Cookie Manager (générateur ou import)", extra={"action": "COOKIES"})
                 self.logger.debug(f"Extrait HTML (premiers 500 car.): {html_content[:500]}", extra={"action": "COOKIES"})
                 return False
+            elif is_logged_in:
+                self.logger.info("✅ Session authentifiée avec succès - Éléments de connexion détectés", extra={"action": "COOKIES"})
+                return True
             else:
-                self.logger.info("✅ Session authentifiée avec succès - Pas de message d'erreur détecté", extra={"action": "COOKIES"})
+                self.logger.warning("⚠️ État incertain - Pas d'erreur mais pas de signes clairs de connexion", extra={"action": "COOKIES"})
+                # Par défaut, retourner True si pas d'erreur explicite
                 return True
             
         except Exception as e:

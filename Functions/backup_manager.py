@@ -19,10 +19,10 @@ class BackupManager:
             config_manager: ConfigManager instance for accessing app configuration
         """
         self.config_manager = config_manager
+        self.logger = get_logger(LOGGER_BACKUP)
         self.backup_dir = self._get_backup_dir()
         self.last_backup_date = None
         self._ensure_backup_dir()
-        self.logger = get_logger(LOGGER_BACKUP)
         
         init_msg = f"BackupManager initialized - Backup directory: {self.backup_dir}"
         log_with_action(self.logger, "info", init_msg, action="INIT")

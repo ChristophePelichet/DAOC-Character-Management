@@ -227,13 +227,21 @@ class UIManager:
         if accessible:
             self.eden_status_label.setText(f"✅ Herald accessible")
             self.eden_status_label.setStyleSheet("padding: 5px; color: green; font-weight: bold;")
+            # Réactiver les boutons - Herald est accessible
+            self.refresh_button.setEnabled(True)
+            self.search_button.setEnabled(True)
         else:
             self.eden_status_label.setText(f"❌ {message}")
             self.eden_status_label.setStyleSheet("padding: 5px; color: red;")
-        
-        # Réactiver les boutons après la vérification
-        self.refresh_button.setEnabled(True)
-        self.search_button.setEnabled(True)
+            
+            # Griser les boutons si pas de cookies
+            if "Aucun cookie" in message:
+                self.refresh_button.setEnabled(False)
+                self.search_button.setEnabled(False)
+            else:
+                # Si c'est juste une erreur de connexion, garder les boutons activés
+                self.refresh_button.setEnabled(True)
+                self.search_button.setEnabled(True)
         
         
     def create_status_bar(self):

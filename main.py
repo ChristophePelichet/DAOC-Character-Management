@@ -129,12 +129,14 @@ class CharacterApp(QMainWindow):
         self.ui_manager = UIManager(self)
         self.ui_manager.create_menu_bar()
         self.ui_manager.create_eden_status_bar(main_layout)
-        self.ui_manager.create_bulk_actions_bar(main_layout)
         
         # Création du TreeView
         from PySide6.QtWidgets import QTreeView
         self.character_tree = QTreeView()
         main_layout.addWidget(self.character_tree)
+        
+        # Bouton de suppression en bas
+        self.ui_manager.create_delete_button(main_layout)
         
         # Initialisation du TreeManager
         self.tree_manager = TreeManager(self, self.character_tree, self.data_manager)
@@ -473,10 +475,8 @@ class CharacterApp(QMainWindow):
             )
         
     def execute_bulk_action(self):
-        """Exécute l'action groupée sélectionnée"""
-        selected_action = self.bulk_action_combo.currentText()
-        if selected_action == lang.get("bulk_action_delete"):
-            self.actions_manager.delete_checked_characters()
+        """Exécute l'action de suppression groupée"""
+        self.actions_manager.delete_checked_characters()
             
     def open_armor_management_global(self):
         """Ouvre la gestion des armures (appelé depuis menu contextuel)"""

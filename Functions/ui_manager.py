@@ -152,24 +152,17 @@ class UIManager:
         
         return self.context_menu
         
-    def create_bulk_actions_bar(self, parent_layout):
-        """Crée la barre d'actions groupées au-dessus de la liste des personnages"""
-        bulk_actions_group = QGroupBox(lang.get("bulk_actions_group_title", default="Actions sur la sélection"))
-        bulk_actions_layout = QHBoxLayout()
-
-        bulk_action_combo = QComboBox()
-        bulk_action_combo.addItem(lang.get("bulk_action_delete", default="Supprimer la sélection"))
-        bulk_actions_layout.addWidget(bulk_action_combo)
-
-        execute_button = QPushButton(lang.get("bulk_action_execute_button", default="Exécuter"))
-        execute_button.clicked.connect(self.main_window.execute_bulk_action)
-        bulk_actions_layout.addWidget(execute_button)
-
-        bulk_actions_group.setLayout(bulk_actions_layout)
-        parent_layout.addWidget(bulk_actions_group)
+    def create_delete_button(self, parent_layout):
+        """Crée le bouton de suppression de la sélection en bas de la liste"""
+        delete_button_layout = QHBoxLayout()
         
-        # Stocker la référence pour pouvoir y accéder plus tard
-        self.main_window.bulk_action_combo = bulk_action_combo
+        delete_button = QPushButton(lang.get("bulk_action_delete", default="Supprimer la sélection"))
+        delete_button.clicked.connect(self.main_window.execute_bulk_action)
+        delete_button_layout.addWidget(delete_button)
+        
+        delete_button_layout.addStretch()  # Aligné à gauche
+        
+        parent_layout.addLayout(delete_button_layout)
     
     def create_eden_status_bar(self, parent_layout):
         """Crée la barre de statut de connexion Eden"""

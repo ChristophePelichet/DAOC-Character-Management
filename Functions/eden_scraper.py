@@ -541,7 +541,7 @@ def search_herald_character(character_name, realm_filter=""):
         char_count = len(characters)
         message = f"{char_count} personnage(s) trouvé(s)"
         
-        module_logger.info(f"Recherche terminée: {char_count} personnages - Fichiers: {json_path}, {character...", extra={"action": "SCRAPE"})
+        module_logger.info(f"Recherche terminée: {char_count} personnages - Fichiers: {json_path}, {characters_path}", extra={"action": "SCRAPE"})
         
         return True, message, str(characters_path)
         
@@ -604,7 +604,7 @@ def scrape_character_from_url(character_url, cookie_manager):
         # Si pas de correspondance exacte, prendre le premier
         if not target_char and characters:
             target_char = characters[0]
-            module_logger.warning(f"Pas de correspondance exacte, utilisation du premier résultat: {target_char.get(", extra={"action": "SEARCH"})
+            module_logger.warning(f"Pas de correspondance exacte, utilisation du premier résultat: {target_char.get('name', 'Unknown')}", extra={"action": "SEARCH"})
         
         if not target_char:
             return False, None, "Personnage non trouvé dans les résultats"
@@ -612,7 +612,7 @@ def scrape_character_from_url(character_url, cookie_manager):
         # Normaliser les données pour correspondre au format attendu
         normalized_data = _normalize_herald_data(target_char)
         
-        module_logger.info(f"Données récupérées pour: {normalized_data.get(", extra={"action": "UPDATE"})
+        module_logger.info(f"Données récupérées pour: {normalized_data.get('name', 'Unknown')}", extra={"action": "UPDATE"})
         return True, normalized_data, ""
         
     except Exception as e:

@@ -140,15 +140,15 @@ def log_with_action(logger, level, message, action=""):
     """
     extra = {"action": action} if action else {}
     if level.lower() == "debug":
-        log_with_action(CHARACTER, "debug", "message", action="INFO")
+        logger.debug(message, extra=extra)
     elif level.lower() == "info":
-        log_with_action(CHARACTER, "info", "message", action="INFO")
+        logger.info(message, extra=extra)
     elif level.lower() == "warning":
-        log_with_action(CHARACTER, "warning", "message", action="INFO")
+        logger.warning(message, extra=extra)
     elif level.lower() == "error":
-        log_with_action(CHARACTER, "error", "message", action="INFO")
+        logger.error(message, extra=extra)
     elif level.lower() == "critical":
-        log_with_action(CHARACTER, "critical", "message", action="INFO")
+        logger.critical(message, extra=extra)
 
 
 class LoggerFactory:

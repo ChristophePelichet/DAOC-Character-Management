@@ -1,4 +1,13 @@
-# v0.106 - Système de Logging & Outils de Développement
+# v0.106 - Système de Logging, Sauvegarde Cookies & Améliorations
+
+## 🍪 Sauvegarde des Cookies Eden (NOUVEAU)
+✅ Sauvegarde quotidienne automatique des cookies au démarrage  
+✅ Section dédiée "Cookies Eden" dans la fenêtre de sauvegarde  
+✅ Options identiques aux Characters : compression, limite de stockage  
+✅ Bouton "Sauvegarder Maintenant" pour force backup immédiat  
+✅ Bouton "Ouvrir le dossier" pour accéder directement au dossier  
+✅ Rafraîchissement automatique après sauvegarde  
+✅ Affichage du nombre de sauvegardes et date du dernier backup  
 
 ## 🔧 Nouveau Système de Logging
 ✅ Format unifié : `LOGGER - LEVEL - ACTION - MESSAGE`  
@@ -27,8 +36,15 @@
 ✅ 46+ logs tagués avec actions claires  
 ✅ Actions : INIT, CHECK, TRIGGER, RETENTION, ZIP, RESTORE, etc.  
 ✅ Logs de debug pour traçabilité complète  
+✅ Support complet pour cookies backup avec policies de rétention  
 
-## 🎨 Interface
+## 🎨 Interface - Fenêtre Sauvegarde
+✅ Layout côte à côte : Characters et Cookies Eden  
+✅ Fenêtre agrandie pour accommoder les deux sections (1400x800)  
+✅ Rafraîchissement intelligent des infos après sauvegarde  
+✅ Boutons "Ouvrir le dossier" pour accès direct (Windows/Mac/Linux)  
+
+## 🎨 Interface - Général
 ✅ Correction de la configuration des colonnes (12 colonnes)  
 ✅ Unification des labels ("Répertoire")  
 ✅ Affichage du début des chemins  

@@ -89,16 +89,31 @@ class CharacterApp(QMainWindow):
         from Functions.backup_manager import BackupManager
         self.backup_manager = BackupManager(config)
         
-        # Perform startup backup (once per day)
+        # Perform startup backup for Characters (once per day)
         try:
-            print("[APP_STARTUP] Checking for daily backup...")
+            print("[APP_STARTUP] Checking for daily backup of Characters...")
             startup_backup_result = self.backup_manager.startup_backup()
             if startup_backup_result["success"]:
-                print(f"[APP_STARTUP] Daily backup completed: {startup_backup_result['message']}")
+                print(f"[APP_STARTUP] Daily Characters backup completed: {startup_backup_result['message']}")
             else:
-                print(f"[APP_STARTUP] Daily backup skipped: {startup_backup_result['message']}")
+                print(f"[APP_STARTUP] Daily Characters backup skipped: {startup_backup_result['message']}")
         except Exception as e:
-            logging.warning(f"Startup backup check failed: {e}")
+            logging.warning(f"Startup backup check failed for Characters: {e}")
+        
+        # Perform startup backup for Cookies Eden (once per day)
+        try:
+            print("[APP_STARTUP] Checking for daily backup of Cookies...")
+            cookies_backup_enabled = config.get("cookies_backup_enabled", True)
+            if cookies_backup_enabled:
+                startup_cookies_backup_result = self.backup_manager.backup_cookies()
+                if startup_cookies_backup_result["success"]:
+                    print(f"[APP_STARTUP] Daily Cookies backup completed: {startup_cookies_backup_result['message']}")
+                else:
+                    print(f"[APP_STARTUP] Daily Cookies backup skipped: {startup_cookies_backup_result['message']}")
+            else:
+                print("[APP_STARTUP] Cookies backup is disabled - skipping startup backup")
+        except Exception as e:
+            logging.warning(f"Startup backup check failed for Cookies: {e}")
         
         # Fenêtres auxiliaires
         self.config_window = None

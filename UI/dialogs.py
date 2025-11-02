@@ -2891,7 +2891,7 @@ class BackupSettingsDialog(QDialog):
         self.backup_manager = backup_manager
         self.config_manager = backup_manager.config_manager
         self.setWindowTitle(lang.get("backup_settings_title"))
-        self.resize(750, 750)
+        self.resize(1400, 800)
         
         main_layout = QVBoxLayout(self)
         
@@ -2965,9 +2965,9 @@ class BackupSettingsDialog(QDialog):
         
         # Total backups count (FIRST)
         total_backups = len(backup_info["backups"])
-        total_label = QLabel(f"{total_backups}")
-        total_label.setStyleSheet("font-weight: bold; color: #0078D4;")
-        info_layout.addRow("Nombre de sauvegardes :", total_label)
+        self.total_label = QLabel(f"{total_backups}")
+        self.total_label.setStyleSheet("font-weight: bold; color: #0078D4;")
+        info_layout.addRow("Nombre de sauvegardes :", self.total_label)
         
         # Last backup date (SECOND)
         last_backup_date = self.config_manager.get("backup_last_date")
@@ -2980,9 +2980,9 @@ class BackupSettingsDialog(QDialog):
                 last_backup_str = "N/A"
         else:
             last_backup_str = "Aucune sauvegarde"
-        last_backup_label = QLabel(last_backup_str)
-        last_backup_label.setStyleSheet("font-weight: bold; color: #0078D4;")
-        info_layout.addRow("Dernière sauvegarde :", last_backup_label)
+        self.last_backup_label = QLabel(last_backup_str)
+        self.last_backup_label.setStyleSheet("font-weight: bold; color: #0078D4;")
+        info_layout.addRow("Dernière sauvegarde :", self.last_backup_label)
         
         chars_layout.addLayout(info_layout)
         chars_layout.addSpacing(15)
@@ -2995,11 +2995,147 @@ class BackupSettingsDialog(QDialog):
         from PySide6.QtWidgets import QSizePolicy
         backup_now_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         backup_button_layout.addWidget(backup_now_button)
+        
+        # Open backup folder button for Characters
+        open_folder_button = QPushButton("📂 Ouvrir le dossier")
+        open_folder_button.setStyleSheet("QPushButton { padding: 6px 12px; font-weight: bold; background-color: #107C10; color: white; border-radius: 4px; }")
+        open_folder_button.clicked.connect(self.open_characters_backup_folder)
+        open_folder_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        backup_button_layout.addWidget(open_folder_button)
+        
         backup_button_layout.addStretch()
         chars_layout.addLayout(backup_button_layout)
         
         chars_group.setLayout(chars_layout)
-        main_layout.addWidget(chars_group)
+        
+        # ============ SECTION 1.5: COOKIES EDEN ============
+        cookies_info = self.backup_manager.get_cookies_backup_info()
+        
+        cookies_group = QGroupBox("🍪 Cookies Eden")
+        cookies_layout = QVBoxLayout()
+        
+        # Enabled/Disabled checkbox
+        cookies_enabled_layout = QHBoxLayout()
+        self.cookies_enabled_checkbox = QCheckBox(lang.get("backup_enabled_label"))
+        self.cookies_enabled_checkbox.setChecked(self.config_manager.get("cookies_backup_enabled", True))
+        cookies_enabled_layout.addWidget(self.cookies_enabled_checkbox)
+        cookies_enabled_layout.addStretch()
+        cookies_layout.addLayout(cookies_enabled_layout)
+        cookies_layout.addSpacing(5)
+        
+        # Path Configuration
+        cookies_path_layout = QFormLayout()
+        cookies_path_row_layout = QHBoxLayout()
+        self.cookies_path_edit = QLineEdit()
+        cookies_backup_path = self.config_manager.get("cookies_backup_path")
+        if not cookies_backup_path:
+            from Functions.path_manager import get_base_path
+            cookies_backup_path = os.path.join(get_base_path(), "Backup", "Cookies")
+        self.cookies_path_edit.setText(cookies_backup_path)
+        self.cookies_path_edit.setReadOnly(True)
+        self.cookies_path_edit.setCursorPosition(0)
+        cookies_path_row_layout.addWidget(self.cookies_path_edit)
+        
+        browse_cookies_button = QPushButton(lang.get("browse_button"))
+        browse_cookies_button.setMaximumWidth(100)
+        browse_cookies_button.clicked.connect(self.browse_cookies_backup_path)
+        cookies_path_row_layout.addWidget(browse_cookies_button)
+        cookies_path_layout.addRow(lang.get("backup_path_label") + " :", cookies_path_row_layout)
+        
+        cookies_layout.addLayout(cookies_path_layout)
+        cookies_layout.addSpacing(10)
+        
+        # Compression Setting
+        cookies_compression_layout = QHBoxLayout()
+        self.cookies_compress_checkbox = QCheckBox(lang.get("backup_compress_label"))
+        self.cookies_compress_checkbox.setChecked(self.config_manager.get("cookies_backup_compress", True))
+        self.cookies_compress_checkbox.setToolTip(lang.get("backup_compress_tooltip"))
+        cookies_compression_layout.addWidget(self.cookies_compress_checkbox)
+        cookies_compression_layout.addStretch()
+        cookies_layout.addLayout(cookies_compression_layout)
+        cookies_layout.addSpacing(10)
+        
+        # Retention Settings (size limit only)
+        cookies_retention_layout = QFormLayout()
+        
+        # Size limit
+        cookies_size_limit_layout = QHBoxLayout()
+        self.cookies_size_limit_spin = QLineEdit()
+        self.cookies_size_limit_spin.setText(str(self.config_manager.get("cookies_backup_size_limit_mb", 10)))
+        self.cookies_size_limit_spin.setMaximumWidth(80)
+        cookies_size_limit_layout.addWidget(self.cookies_size_limit_spin)
+        cookies_size_limit_layout.addWidget(QLabel("MB"))
+        cookies_size_limit_layout.addWidget(QLabel(lang.get("backup_size_limit_tooltip")))
+        cookies_size_limit_layout.addStretch()
+        cookies_retention_layout.addRow(lang.get("backup_size_limit_label"), cookies_size_limit_layout)
+        
+        cookies_layout.addLayout(cookies_retention_layout)
+        cookies_layout.addSpacing(10)
+        
+        # Last cookies backup date and count info
+        cookies_info_layout = QFormLayout()
+        
+        # Total backups count (FIRST)
+        cookies_total_backups = len(cookies_info["backups"])
+        self.cookies_total_label = QLabel(f"{cookies_total_backups}")
+        self.cookies_total_label.setStyleSheet("font-weight: bold; color: #0078D4;")
+        cookies_info_layout.addRow("Nombre de sauvegardes :", self.cookies_total_label)
+        
+        # Last backup date (SECOND)
+        cookies_last_backup_date = self.config_manager.get("cookies_backup_last_date")
+        if cookies_last_backup_date:
+            try:
+                from datetime import datetime
+                dt = datetime.fromisoformat(cookies_last_backup_date)
+                cookies_last_backup_str = dt.strftime("%Y-%m-%d %H:%M:%S")
+            except:
+                cookies_last_backup_str = "N/A"
+        else:
+            cookies_last_backup_str = "Aucune sauvegarde"
+        self.cookies_last_backup_label = QLabel(cookies_last_backup_str)
+        self.cookies_last_backup_label.setStyleSheet("font-weight: bold; color: #0078D4;")
+        cookies_info_layout.addRow("Dernière sauvegarde :", self.cookies_last_backup_label)
+        
+        cookies_layout.addLayout(cookies_info_layout)
+        cookies_layout.addSpacing(10)
+        
+        # Usage info for cookies
+        cookies_current_mb = cookies_info["current_usage_mb"]
+        cookies_size_limit = cookies_info["size_limit_mb"]
+        
+        cookies_usage_form = QFormLayout()
+        self.cookies_usage_label = QLabel()
+        self.update_cookies_usage_display(cookies_current_mb, cookies_size_limit)
+        cookies_usage_form.addRow(lang.get("backup_usage_label") + " :", self.cookies_usage_label)
+        
+        cookies_layout.addLayout(cookies_usage_form)
+        cookies_layout.addSpacing(15)
+        
+        # Backup Now Button in Cookies section
+        cookies_backup_button_layout = QHBoxLayout()
+        cookies_backup_now_button = QPushButton(lang.get("backup_now_button"))
+        cookies_backup_now_button.setStyleSheet("QPushButton { padding: 6px 12px; font-weight: bold; background-color: #0078D4; color: white; border-radius: 4px; }")
+        cookies_backup_now_button.clicked.connect(self.backup_cookies_now)
+        cookies_backup_now_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        cookies_backup_button_layout.addWidget(cookies_backup_now_button)
+        
+        # Open backup folder button for Cookies
+        open_cookies_folder_button = QPushButton("📂 Ouvrir le dossier")
+        open_cookies_folder_button.setStyleSheet("QPushButton { padding: 6px 12px; font-weight: bold; background-color: #107C10; color: white; border-radius: 4px; }")
+        open_cookies_folder_button.clicked.connect(self.open_cookies_backup_folder)
+        open_cookies_folder_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        cookies_backup_button_layout.addWidget(open_cookies_folder_button)
+        
+        cookies_backup_button_layout.addStretch()
+        cookies_layout.addLayout(cookies_backup_button_layout)
+        
+        cookies_group.setLayout(cookies_layout)
+        
+        # ============ SECTION 1 & 1.5: Add both sections side by side ============
+        sections_layout = QHBoxLayout()
+        sections_layout.addWidget(chars_group)
+        sections_layout.addWidget(cookies_group)
+        main_layout.addLayout(sections_layout)
         
         # ============ SECTION 2: STATISTIQUES ============
         stats_group = QGroupBox("Statistiques de Stockage")
@@ -3050,6 +3186,58 @@ class BackupSettingsDialog(QDialog):
             self.path_edit.setText(selected_dir)
             self.path_edit.setCursorPosition(0)
     
+    def browse_cookies_backup_path(self):
+        """Open directory selection dialog for cookies backup path."""
+        current_path = self.cookies_path_edit.text()
+        selected_dir = QFileDialog.getExistingDirectory(
+            self,
+            lang.get("backup_path_dialog_title"),
+            current_path
+        )
+        if selected_dir:
+            self.cookies_path_edit.setText(selected_dir)
+            self.cookies_path_edit.setCursorPosition(0)
+    
+    def open_characters_backup_folder(self):
+        """Open the Characters backup folder in file explorer."""
+        import subprocess
+        import platform
+        
+        backup_path = self.path_edit.text()
+        if not backup_path or not os.path.exists(backup_path):
+            QMessageBox.warning(self, "Attention", "Le dossier de sauvegarde n'existe pas ou n'est pas valide.")
+            return
+        
+        try:
+            if platform.system() == "Windows":
+                os.startfile(backup_path)
+            elif platform.system() == "Darwin":  # macOS
+                subprocess.Popen(["open", backup_path])
+            else:  # Linux
+                subprocess.Popen(["xdg-open", backup_path])
+        except Exception as e:
+            QMessageBox.critical(self, "Erreur", f"Impossible d'ouvrir le dossier : {str(e)}")
+    
+    def open_cookies_backup_folder(self):
+        """Open the Cookies backup folder in file explorer."""
+        import subprocess
+        import platform
+        
+        backup_path = self.cookies_path_edit.text()
+        if not backup_path or not os.path.exists(backup_path):
+            QMessageBox.warning(self, "Attention", "Le dossier de sauvegarde n'existe pas ou n'est pas valide.")
+            return
+        
+        try:
+            if platform.system() == "Windows":
+                os.startfile(backup_path)
+            elif platform.system() == "Darwin":  # macOS
+                subprocess.Popen(["open", backup_path])
+            else:  # Linux
+                subprocess.Popen(["xdg-open", backup_path])
+        except Exception as e:
+            QMessageBox.critical(self, "Erreur", f"Impossible d'ouvrir le dossier : {str(e)}")
+    
     def update_usage_display(self, current_mb, size_limit_mb):
         """Update the usage display label with better formatting."""
         if size_limit_mb > 0:
@@ -3083,6 +3271,77 @@ class BackupSettingsDialog(QDialog):
         
         self.backups_list.setText(text)
     
+    def update_cookies_info_display(self, cookies_info):
+        """Update the cookies backup info display with latest data."""
+        # Update backups count
+        cookies_total_backups = len(cookies_info["backups"])
+        self.cookies_total_label.setText(f"{cookies_total_backups}")
+        
+        # Update last backup date
+        cookies_last_backup_date = self.config_manager.get("cookies_backup_last_date")
+        if cookies_last_backup_date:
+            try:
+                from datetime import datetime
+                dt = datetime.fromisoformat(cookies_last_backup_date)
+                cookies_last_backup_str = dt.strftime("%Y-%m-%d %H:%M:%S")
+            except:
+                cookies_last_backup_str = "N/A"
+        else:
+            cookies_last_backup_str = "Aucune sauvegarde"
+        self.cookies_last_backup_label.setText(cookies_last_backup_str)
+        
+        # Update usage display for cookies
+        if hasattr(self, 'cookies_usage_label'):
+            current_mb = cookies_info["current_usage_mb"]
+            size_limit = cookies_info["size_limit_mb"]
+            self.update_cookies_usage_display(current_mb, size_limit)
+    
+    def update_cookies_usage_display(self, current_mb, size_limit_mb):
+        """Update the cookies usage display label with better formatting."""
+        if size_limit_mb > 0:
+            percentage = (current_mb / size_limit_mb) * 100 if size_limit_mb > 0 else 0
+            
+            # Color based on usage
+            if percentage > 90:
+                color = "#FF4444"  # Red
+                status = "⚠️ Presque plein"
+            elif percentage > 70:
+                color = "#FFAA00"  # Orange
+                status = "⚡ Modéré"
+            else:
+                color = "#00AA00"  # Green
+                status = "✓ Normal"
+            
+            usage_text = f"<span style='color: {color}; font-weight: bold;'>{current_mb} MB / {size_limit_mb} MB ({percentage:.1f}%) - {status}</span>"
+            self.cookies_usage_label.setText(usage_text)
+        else:
+            self.cookies_usage_label.setText(f"<b>{current_mb} MB</b> (Illimité - pas de limite)")
+    
+    def update_characters_info_display(self, backup_info):
+        """Update the characters backup info display with latest data."""
+        # Update backups count
+        total_backups = len(backup_info["backups"])
+        self.total_label.setText(f"{total_backups}")
+        
+        # Update last backup date
+        last_backup_date = self.config_manager.get("backup_last_date")
+        if last_backup_date:
+            try:
+                from datetime import datetime
+                dt = datetime.fromisoformat(last_backup_date)
+                last_backup_str = dt.strftime("%Y-%m-%d %H:%M:%S")
+            except:
+                last_backup_str = "N/A"
+        else:
+            last_backup_str = "Aucune sauvegarde"
+        self.last_backup_label.setText(last_backup_str)
+        
+        # Update usage display for characters
+        if hasattr(self, 'usage_label'):
+            current_mb = backup_info["current_usage_mb"]
+            size_limit = backup_info["size_limit_mb"]
+            self.update_usage_display(current_mb, size_limit)
+    
     def backup_now(self):
         """Perform a backup immediately, ignoring daily limit."""
         import sys
@@ -3105,9 +3364,9 @@ class BackupSettingsDialog(QDialog):
                 lang.get("backup_success_title"),
                 result["message"]
             )
-            # Refresh usage and backups display
+            # Refresh characters backup info
             backup_info = self.backup_manager.get_backup_info()
-            self.update_usage_display(backup_info["current_usage_mb"], backup_info["size_limit_mb"])
+            self.update_characters_info_display(backup_info)
             self.update_backups_list(backup_info["backups"])
             print("[UI_BACKUP] Display updated successfully")
             sys.stdout.flush()
@@ -3120,10 +3379,46 @@ class BackupSettingsDialog(QDialog):
                 result["message"]
             )
     
+    def backup_cookies_now(self):
+        """Perform a cookies backup immediately, ignoring daily limit."""
+        import sys
+        import logging
+        
+        print("[UI_BACKUP_COOKIES] Manual cookies backup button clicked - Starting backup process...")
+        sys.stdout.flush()
+        logging.info("[UI_BACKUP_COOKIES] Manual cookies backup initiated from settings dialog")
+        
+        result = self.backup_manager.backup_cookies_force()
+        
+        print(f"[UI_BACKUP_COOKIES] Backup result: {result['success']} - {result['message']}")
+        sys.stdout.flush()
+        
+        if result["success"]:
+            print("[UI_BACKUP_COOKIES] SUCCESS - Updating display...")
+            sys.stdout.flush()
+            QMessageBox.information(
+                self,
+                lang.get("backup_success_title"),
+                result["message"]
+            )
+            # Refresh cookies backup info
+            cookies_info = self.backup_manager.get_cookies_backup_info()
+            self.update_cookies_info_display(cookies_info)
+            print("[UI_BACKUP_COOKIES] Display updated successfully")
+            sys.stdout.flush()
+        else:
+            print("[UI_BACKUP_COOKIES] FAILED - Showing error message...")
+            sys.stdout.flush()
+            QMessageBox.warning(
+                self,
+                lang.get("backup_error_title"),
+                result["message"]
+            )
+    
     def accept(self):
         """Save settings and close dialog."""
         try:
-            # Validate and save settings
+            # Validate and save settings for CHARACTERS
             backup_path = self.path_edit.text()
             if backup_path:
                 self.config_manager.set("backup_path", backup_path)
@@ -3140,9 +3435,29 @@ class BackupSettingsDialog(QDialog):
                                   lang.get("backup_invalid_size_limit"))
                 return
             
-            # Update backup manager with new settings
+            # Update backup manager with new settings for characters
             self.backup_manager.backup_dir = self.backup_manager._get_backup_dir()
             self.backup_manager._ensure_backup_dir()
+            
+            # Validate and save settings for COOKIES
+            cookies_backup_path = self.cookies_path_edit.text()
+            if cookies_backup_path:
+                self.config_manager.set("cookies_backup_path", cookies_backup_path)
+            
+            self.config_manager.set("cookies_backup_enabled", self.cookies_enabled_checkbox.isChecked())
+            self.config_manager.set("cookies_backup_compress", self.cookies_compress_checkbox.isChecked())
+            
+            # Validate numeric inputs for cookies size limit
+            try:
+                cookies_size_limit = int(self.cookies_size_limit_spin.text())
+                self.config_manager.set("cookies_backup_size_limit_mb", cookies_size_limit)
+            except ValueError:
+                QMessageBox.warning(self, lang.get("error_title"),
+                                  lang.get("backup_invalid_size_limit"))
+                return
+            
+            # Update backup manager with new settings for cookies
+            self.backup_manager._ensure_cookies_backup_dir()
             
             QMessageBox.information(
                 self,

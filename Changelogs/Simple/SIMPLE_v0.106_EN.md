@@ -1,4 +1,13 @@
-# v0.106 - Logging System & Developer Tools
+# v0.106 - Logging System, Cookies Backup & Improvements
+
+## 🍪 Eden Cookies Backup (NEW)
+✅ Automatic daily cookies backup on startup  
+✅ Dedicated "Cookies Eden" section in backup window  
+✅ Same options as Characters: compression, storage limit  
+✅ "Backup Now" button for immediate forced backup  
+✅ "Open Folder" button for direct folder access  
+✅ Automatic refresh after backup  
+✅ Display backup count and last backup date  
 
 ## 🔧 New Logging System
 ✅ Unified format: `LOGGER - LEVEL - ACTION - MESSAGE`  
@@ -27,8 +36,15 @@
 ✅ 46+ logs tagged with clear actions  
 ✅ Actions: INIT, CHECK, TRIGGER, RETENTION, ZIP, RESTORE, etc.  
 ✅ Debug logs for complete traceability  
+✅ Full support for cookies backup with retention policies  
 
-## 🎨 Interface
+## 🎨 Interface - Backup Window
+✅ Side-by-side layout: Characters and Cookies Eden  
+✅ Enlarged window to accommodate both sections (1400x800)  
+✅ Smart refresh of info after backup  
+✅ "Open Folder" buttons for direct access (Windows/Mac/Linux)  
+
+## 🎨 Interface - General
 ✅ Fixed column configuration (12 columns)  
 ✅ Unified folder labels ("Directory")  
 ✅ Improved path display  

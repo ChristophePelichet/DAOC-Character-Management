@@ -39,6 +39,16 @@ class BackupManager:
         from .path_manager import get_base_path
         return os.path.join(get_base_path(), "Backup", "Characters")
 
+    def _get_cookies_backup_dir(self):
+        """Get cookies backup directory from config or use default."""
+        cookies_backup_path = self.config_manager.get("cookies_backup_path")
+        if cookies_backup_path:
+            return cookies_backup_path
+        
+        # Default: Backup/Cookies relative to base path
+        from .path_manager import get_base_path
+        return os.path.join(get_base_path(), "Backup", "Cookies")
+
     def _ensure_backup_dir(self):
         """Create backup directory if it doesn't exist."""
         try:
@@ -46,6 +56,17 @@ class BackupManager:
             log_with_action(self.logger, "debug", f"Backup directory ensured: {self.backup_dir}", action="DIRECTORY")
         except Exception as e:
             error_msg = f"Error creating backup directory: {e}"
+            log_with_action(self.logger, "error", error_msg, action="ERROR")
+            print(f"[{LOGGER_BACKUP.upper()}] {error_msg}", file=sys.stderr)
+
+    def _ensure_cookies_backup_dir(self):
+        """Create cookies backup directory if it doesn't exist."""
+        cookies_backup_dir = self._get_cookies_backup_dir()
+        try:
+            os.makedirs(cookies_backup_dir, exist_ok=True)
+            log_with_action(self.logger, "debug", f"Cookies backup directory ensured: {cookies_backup_dir}", action="DIRECTORY")
+        except Exception as e:
+            error_msg = f"Error creating cookies backup directory: {e}"
             log_with_action(self.logger, "error", error_msg, action="ERROR")
             print(f"[{LOGGER_BACKUP.upper()}] {error_msg}", file=sys.stderr)
 
@@ -218,6 +239,184 @@ class BackupManager:
         log_with_action(self.logger, "info", "MANUAL-BACKUP triggered - Bypassing daily limit...", action="MANUAL_TRIGGER")
         return self._perform_backup("MANUAL-BACKUP", reason=reason or "Manual")
 
+    def backup_cookies(self):
+        """
+        Create a backup of the Eden cookies folder.
+        Respects retention policy and storage size limits.
+        
+        Returns:
+            dict: Status with keys 'success' (bool), 'message' (str), 'file' (str or None)
+        """
+        log_with_action(self.logger, "info", "COOKIES-BACKUP triggered - Checking daily limit...", action="AUTO_TRIGGER_COOKIES")
+        
+        if not self.should_cookies_backup_today():
+            msg = "Cookies backup already done today - skipped"
+            log_with_action(self.logger, "info", msg, action="AUTO_BLOCKED_COOKIES")
+            return {
+                "success": False,
+                "message": msg,
+                "file": None
+            }
+
+        log_with_action(self.logger, "info", "Daily limit OK for cookies, proceeding with backup...", action="AUTO_PROCEED_COOKIES")
+        return self._perform_cookies_backup("AUTO-BACKUP", reason="Action")
+
+    def backup_cookies_force(self, reason=None):
+        """
+        Create a backup of the cookies folder immediately, ignoring daily limit.
+        Used when manually triggered from UI or during critical operations.
+        Respects retention policy and storage size limits.
+        
+        Args:
+            reason: Optional string describing why the backup was triggered (e.g., "Manual", "Delete", "Update")
+        
+        Returns:
+            dict: Status with keys 'success' (bool), 'message' (str), 'file' (str or None)
+        """
+        log_with_action(self.logger, "info", "MANUAL-COOKIES-BACKUP triggered - Bypassing daily limit...", action="MANUAL_TRIGGER_COOKIES")
+        return self._perform_cookies_backup("MANUAL-BACKUP", reason=reason or "Manual")
+
+    def should_cookies_backup_today(self):
+        """
+        Check if a cookies backup should be performed today.
+        Returns True if last backup was on a different day or no backup exists yet.
+        """
+        cookies_backup_enabled = self.config_manager.get("cookies_backup_enabled", True)
+        if not cookies_backup_enabled:
+            log_with_action(self.logger, "debug", "Cookies backup is disabled in configuration", action="CHECK_COOKIES")
+            return False
+        
+        last_backup_str = self.config_manager.get("cookies_backup_last_date")
+        if not last_backup_str:
+            log_with_action(self.logger, "debug", "No previous cookies backup found - backup needed", action="CHECK_COOKIES")
+            return True
+        
+        try:
+            last_backup = datetime.fromisoformat(last_backup_str).date()
+            today = datetime.now().date()
+            should_backup = last_backup != today
+            log_with_action(self.logger, "debug", f"Cookies backup check: last={last_backup}, today={today}, needed={should_backup}", action="CHECK_COOKIES")
+            return should_backup
+        except (ValueError, TypeError) as e:
+            log_with_action(self.logger, "warning", f"Invalid cookies backup date format: {e}", action="CHECK_COOKIES")
+            return True
+
+    def _perform_cookies_backup(self, mode="MANUAL", reason=None):
+        """
+        Internal method that performs the actual cookies backup.
+        
+        Args:
+            mode: String describing the backup mode (e.g., "AUTO-BACKUP", "MANUAL-BACKUP")
+            reason: Optional string describing why the backup was triggered
+        
+        Returns:
+            dict: Status with keys 'success' (bool), 'message' (str), 'file' (str or None)
+        """
+        try:
+            # Ensure backup directory exists
+            self._ensure_cookies_backup_dir()
+
+            # Get configuration
+            should_compress = self.config_manager.get("cookies_backup_compress", True)
+            
+            # Get cookies folder
+            cookies_folder = self.config_manager.get("cookies_folder")
+            if not cookies_folder or not os.path.exists(cookies_folder):
+                error_msg = "Cookies folder not found"
+                log_with_action(self.logger, "error", error_msg, action="COOKIES_INFO")
+                return {
+                    "success": False,
+                    "message": error_msg,
+                    "file": None
+                }
+
+            # Create backup filename with timestamp and reason
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            reason_str = f"_{reason}" if reason else ""
+            backup_name = f"backup_cookies_{timestamp}{reason_str}"
+            
+            cookies_backup_dir = self._get_cookies_backup_dir()
+            if should_compress:
+                backup_file = os.path.join(cookies_backup_dir, f"{backup_name}.zip")
+                log_with_action(self.logger, "info", f"Creating compressed cookies backup: {os.path.basename(backup_file)}", action="ZIP_COOKIES")
+                self._create_zip_backup(cookies_folder, backup_file)
+            else:
+                backup_file = os.path.join(cookies_backup_dir, backup_name)
+                log_with_action(self.logger, "info", f"Creating uncompressed cookies backup: {os.path.basename(backup_file)}", action="ZIP_COOKIES")
+                shutil.copytree(cookies_folder, backup_file, dirs_exist_ok=True)
+
+            # Update last cookies backup date
+            self.config_manager.set("cookies_backup_last_date", datetime.now().isoformat())
+            
+            # Apply retention policies for cookies
+            log_with_action(self.logger, "info", "Applying retention policies for cookies backup...", action="RETENTION_COOKIES")
+            self._apply_cookies_retention_policies()
+
+            success_msg = f"Cookies backup created: {os.path.basename(backup_file)}"
+            log_with_action(self.logger, "info", success_msg, action="COOKIES_INFO")
+            return {
+                "success": True,
+                "message": success_msg,
+                "file": backup_file
+            }
+
+        except Exception as e:
+            error_msg = f"Cookies backup failed: {str(e)}"
+            log_with_action(self.logger, "error", error_msg, action="COOKIES_INFO")
+            logging.error(f"Exception during cookies backup: {str(e)}", exc_info=True)
+            return {
+                "success": False,
+                "message": error_msg,
+                "file": None
+            }
+
+    def _apply_cookies_retention_policies(self):
+        """Apply retention policy for cookies backups based on storage size limit only."""
+        cookies_backup_dir = self._get_cookies_backup_dir()
+        backups = self._get_sorted_backups_in_dir(cookies_backup_dir)
+        
+        log_with_action(self.logger, "debug", f"Found {len(backups)} existing cookies backups", action="RETENTION_COOKIES")
+        
+        # Apply size retention (size limit only, no count limit)
+        size_limit_mb = self.config_manager.get("cookies_backup_size_limit_mb", 10)
+        if size_limit_mb > 0:
+            total_size = sum(self._get_file_size(b) for b in backups)
+            size_limit_bytes = size_limit_mb * 1024 * 1024
+            
+            log_with_action(self.logger, "debug", f"Total cookies backup size: {total_size / (1024*1024):.2f} MB / {size_limit_mb} MB", action="RETENTION_COOKIES")
+            
+            deleted_count = 0
+            while total_size > size_limit_bytes and backups:
+                oldest = backups.pop()  # Remove oldest
+                old_size = self._get_file_size(oldest)
+                log_with_action(self.logger, "info", f"Deleting oldest cookies backup: {os.path.basename(oldest)} ({old_size / (1024*1024):.2f} MB)", action="RETENTION_COOKIES")
+                self._delete_backup(oldest)
+                total_size -= old_size
+                deleted_count += 1
+            
+            if deleted_count > 0:
+                log_with_action(self.logger, "info", f"Cookies retention policy applied: {deleted_count} backup(s) deleted", action="RETENTION_COOKIES")
+            else:
+                log_with_action(self.logger, "debug", "No cookies backups need to be deleted", action="RETENTION_COOKIES")
+
+    def _get_sorted_backups_in_dir(self, directory):
+        """Get list of backups in a specific directory sorted by modification time (newest first)."""
+        backups = []
+        
+        if not os.path.exists(directory):
+            log_with_action(self.logger, "debug", f"Backup directory does not exist: {directory}", action="SCAN")
+            return backups
+        
+        for item in os.listdir(directory):
+            item_path = os.path.join(directory, item)
+            if os.path.isfile(item_path) or os.path.isdir(item_path):
+                backups.append(item_path)
+        
+        # Sort by modification time (newest first)
+        backups.sort(key=lambda x: os.path.getmtime(x), reverse=True)
+        log_with_action(self.logger, "debug", f"Found {len(backups)} backup(s) in directory: {directory}", action="SCAN")
+        return backups
+
     def _create_zip_backup(self, source_dir, zip_file):
         """Create a compressed ZIP backup of the source directory."""
         log_with_action(self.logger, "debug", f"Starting ZIP compression from {source_dir}", action="ZIP")
@@ -337,6 +536,40 @@ class BackupManager:
         return {
             "path": self.backup_dir,
             "compress": self.config_manager.get("backup_compress", True),
+            "size_limit_mb": size_limit_mb,
+            "current_usage_mb": round(total_size / (1024 * 1024), 2),
+            "backups": backup_list
+        }
+
+    def get_cookies_backup_info(self):
+        """
+        Get information about current cookies backup configuration and usage.
+        
+        Returns:
+            dict: Contains path, compress, size_limit, current_usage, backups list
+        """
+        log_with_action(self.logger, "debug", "Gathering cookies backup information", action="INFO_COOKIES")
+        cookies_backup_dir = self._get_cookies_backup_dir()
+        backups = self._get_sorted_backups_in_dir(cookies_backup_dir)
+        total_size = sum(self._get_file_size(b) for b in backups)
+        size_limit_mb = self.config_manager.get("cookies_backup_size_limit_mb", 10)
+
+        backup_list = []
+        for backup_path in backups[:10]:  # Show last 10
+            size = self._get_file_size(backup_path)
+            mtime = os.path.getmtime(backup_path)
+            mtime_str = datetime.fromtimestamp(mtime).strftime("%Y-%m-%d %H:%M:%S")
+            backup_list.append({
+                "name": os.path.basename(backup_path),
+                "size_mb": round(size / (1024 * 1024), 2),
+                "date": mtime_str
+            })
+
+        log_with_action(self.logger, "debug", f"Cookies backup info: {len(backup_list)} backups, {total_size / (1024*1024):.2f} MB total", action="INFO_COOKIES")
+        
+        return {
+            "path": cookies_backup_dir,
+            "compress": self.config_manager.get("cookies_backup_compress", True),
             "size_limit_mb": size_limit_mb,
             "current_usage_mb": round(total_size / (1024 * 1024), 2),
             "backups": backup_list

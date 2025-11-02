@@ -45,6 +45,9 @@ class CookieManager:
         # Créer le dossier si nécessaire
         self.config_dir.mkdir(parents=True, exist_ok=True)
         
+        # Garder une référence aux drivers persistants pour éviter le garbage collection
+        self.persistent_drivers = []
+        
         eden_logger.info(f"CookieManager initialisé - Fichier: {self.cookie_file}", extra={"action": "COOKIES"})
     
     def cookie_exists(self):
@@ -886,7 +889,7 @@ class CookieManager:
                 # Étape 1: Aller à la page d'accueil d'abord
                 eden_logger.info(f"Ouverture de {url} avec cookies (persistent)", extra={"action": "NAVIGATE"})
                 driver.get("https://eden-daoc.net/")
-                time.sleep(2)
+                time.sleep(3)  # Augmenté de 2 à 3
                 
                 # Étape 2: Ajouter les cookies
                 eden_logger.info(f"Chargement de {len(cookies_list)} cookies", extra={"action": "NAVIGATE"})
@@ -896,12 +899,12 @@ class CookieManager:
                     except Exception as cookie_err:
                         eden_logger.debug(f"Impossible d'ajouter un cookie: {cookie_err}")
                 
-                time.sleep(1)
+                time.sleep(2)  # Augmenté de 1 à 2
                 
                 # Étape 3: Refresh pour activer les cookies
                 eden_logger.info("Refresh pour activer les cookies", extra={"action": "NAVIGATE"})
                 driver.refresh()
-                time.sleep(2)
+                time.sleep(4)  # Augmenté de 2 à 4
                 
                 # Étape 4: Naviguer vers l'URL demandée
                 if not url.startswith(('http://', 'https://')):
@@ -909,9 +912,12 @@ class CookieManager:
                 
                 eden_logger.info(f"Navigation vers {url}", extra={"action": "NAVIGATE"})
                 driver.get(url)
-                time.sleep(2)
+                time.sleep(5)  # Augmenté de 2 à 5 - laisser le temps au contenu de charger
                 
                 eden_logger.info(f"✅ Page ouverte avec succès via {browser_name} (navigateur restera ouvert)", extra={"action": "NAVIGATE"})
+                
+                # IMPORTANT: Garder une référence au driver pour éviter le garbage collection
+                self.persistent_drivers.append(driver)
                 
                 # IMPORTANT: Ne pas fermer le driver pour garder le navigateur ouvert
                 return {

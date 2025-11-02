@@ -625,7 +625,7 @@ class CharacterApp(QMainWindow):
         help_manager = HelpManager(language=current_lang)
         help_manager.show_help('character_delete', parent=self)
             
-    def open_configuration(self):
+    def open_configuration(self, focus_cookies=False):
         """Ouvre la fenêtre de configuration"""
         logging.debug("Opening configuration window")
         seasons = config.get("seasons", ["S1", "S2", "S3"])
@@ -638,6 +638,10 @@ class CharacterApp(QMainWindow):
             available_servers=servers,
             available_realms=realms
         )
+        
+        # Si on doit focus sur les cookies, mettre le focus sur le champ des cookies
+        if focus_cookies:
+            dialog.cookies_path_edit.setFocus()
         
         if dialog.exec() == QDialog.Accepted:
             self.save_configuration(dialog)

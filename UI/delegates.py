@@ -298,7 +298,7 @@ class UrlButtonDelegate(QStyledItemDelegate):
     
     def _get_button_rect(self, rect):
         """Calcule le rectangle pour le bouton (aligné à gauche)."""
-        button_width = 100
+        button_width = 120  # Augmenté de 100 à 120 pour plus de visibilité
         button_height = rect.height() - 2 * self.button_padding
         x = rect.x() + self.button_padding  # Aligné à gauche avec padding
         y = rect.y() + self.button_padding
@@ -325,4 +325,4 @@ class UrlButtonDelegate(QStyledItemDelegate):
     
     def sizeHint(self, option, index):
         """Retourne la taille recommandée pour la cellule."""
-        return QSize(110, 30)
+        return QSize(130, 40)  # Augmenté de (110, 30) à (130, 40) pour meilleure visibilité

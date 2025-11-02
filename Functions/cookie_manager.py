@@ -1255,9 +1255,10 @@ class CookieManager:
             # Utiliser subprocess.DETACHED_PROCESS sous Windows pour que le processus continue
             if os.name == 'nt':  # Windows
                 # Détacher complètement le processus
+                import ctypes
                 startupinfo = subprocess.STARTUPINFO()
                 startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-                startupinfo.wShowWindow = subprocess.SW_SHOW
+                startupinfo.wShowWindow = 5  # SW_SHOW = 5
                 
                 subprocess.Popen(
                     [browser_path, url],

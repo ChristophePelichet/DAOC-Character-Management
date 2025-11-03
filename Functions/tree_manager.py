@@ -374,8 +374,12 @@ class TreeManager:
         indexes = self.tree_view.selectedIndexes()
         if not indexes:
             return None
-            
-        row = indexes[0].row()
+        
+        # Mapper l'index du proxy vers le modèle source
+        proxy_index = indexes[0]
+        source_index = self.proxy_model.mapToSource(proxy_index)
+        row = source_index.row()
+        
         name_item = self.model.item(row, 2)
         char_name = name_item.text()
         

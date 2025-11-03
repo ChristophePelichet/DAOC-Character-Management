@@ -402,6 +402,41 @@ self.tree_view.setColumnWidth(11, 120)
 - ✅ Comfortable space for interaction
 - ✅ No impact on other columns
 
+### Proxy model index mapping for character operations
+
+**Problem**: After sorting by realm (or any column), character operations showed/deleted/opened wrong character
+- Delete confirmation showed different character name
+- Opening character sheet opened wrong character
+- Herald update targeted wrong character
+
+**Root cause**: With `QSortFilterProxyModel`, TreeView indices (sorted view) don't match source model indices (storage). Operations were using proxy indices directly on source model.
+
+**Solution**: Use `mapToSource()` to translate proxy indices to source indices before accessing model data
+
+**Modified methods**:
+- `get_selected_character()` in `tree_manager.py` - Used by delete, rename, duplicate operations
+- `open_character_sheet()` in `character_actions_manager.py` - Double-click to open character sheet
+- `update_character_from_herald()` in `main.py` - Right-click menu to update from Herald
+
+**Code example**:
+```python
+# Before (incorrect with proxy model):
+row = indexes[0].row()
+name_item = self.model.item(row, 2)
+
+# After (correct with proxy model):
+proxy_index = indexes[0]
+source_index = self.proxy_model.mapToSource(proxy_index)
+row = source_index.row()
+name_item = self.model.item(row, 2)
+```
+
+**Result**:
+- ✅ Delete confirms correct character
+- ✅ Character sheet opens correct character
+- ✅ Herald update targets correct character
+- ✅ All operations work correctly with any sorting
+
 ---
 
 ## 🧹 Repository Cleanup

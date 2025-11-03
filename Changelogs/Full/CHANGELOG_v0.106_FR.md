@@ -402,6 +402,41 @@ self.tree_view.setColumnWidth(11, 120)
 - ✅ Espace confortable pour l'interaction
 - ✅ Pas d'impact sur les autres colonnes
 
+### Mappage des indices du proxy model pour les opérations sur personnages
+
+**Problème** : Après un tri par royaume (ou toute colonne), les opérations sur les personnages affectaient le mauvais personnage
+- Suppression affichait le nom d'un autre personnage
+- Ouverture d'une fiche ouvrait le mauvais personnage
+- Mise à jour Herald ciblait le mauvais personnage
+
+**Cause racine** : Avec `QSortFilterProxyModel`, les indices de la TreeView (vue triée) ne correspondent pas aux indices du modèle source (stockage). Les opérations utilisaient les indices du proxy directement sur le modèle source.
+
+**Solution** : Utiliser `mapToSource()` pour traduire les indices du proxy vers les indices du modèle source avant d'accéder aux données du modèle
+
+**Méthodes modifiées** :
+- `get_selected_character()` dans `tree_manager.py` - Utilisée par supprimer, renommer, dupliquer
+- `open_character_sheet()` dans `character_actions_manager.py` - Double-clic pour ouvrir la fiche
+- `update_character_from_herald()` dans `main.py` - Menu clic-droit pour mettre à jour depuis Herald
+
+**Exemple de code** :
+```python
+# Avant (incorrect avec proxy model) :
+row = indexes[0].row()
+name_item = self.model.item(row, 2)
+
+# Après (correct avec proxy model) :
+proxy_index = indexes[0]
+source_index = self.proxy_model.mapToSource(proxy_index)
+row = source_index.row()
+name_item = self.model.item(row, 2)
+```
+
+**Résultat** :
+- ✅ Suppression confirme le bon personnage
+- ✅ Fiche ouvre le bon personnage
+- ✅ Mise à jour Herald cible le bon personnage
+- ✅ Toutes les opérations fonctionnent correctement avec n'importe quel tri
+
 ---
 
 ## 🧹 Nettoyage du Répertoire

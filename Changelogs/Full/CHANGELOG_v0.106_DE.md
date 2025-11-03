@@ -402,6 +402,41 @@ self.tree_view.setColumnWidth(11, 120)
 - ✅ Komfortabler Platz für Interaktion
 - ✅ Keine Auswirkungen auf andere Spalten
 
+### Proxy-Model-Index-Zuordnung für Charakteroperationen
+
+**Problem**: Nach dem Sortieren nach Realm (oder einer beliebigen Spalte) betrafen Charakteroperationen den falschen Charakter
+- Löschung bestätigte einen anderen Charakternamen
+- Charakterblatt öffnete falschen Charakter
+- Herald-Update zielte auf falschen Charakter ab
+
+**Grundursache**: Mit `QSortFilterProxyModel` stimmen die TreeView-Indizes (sortierte Ansicht) nicht mit den Quellmodell-Indizes (Speicher) überein. Operationen verwendeten Proxy-Indizes direkt auf das Quellmodell.
+
+**Lösung**: Verwenden Sie `mapToSource()`, um Proxy-Indizes vor dem Zugriff auf Modelldaten in Quellmodell-Indizes zu übersetzen
+
+**Geänderte Methoden**:
+- `get_selected_character()` in `tree_manager.py` - Verwendet durch Löschen, Umbenennen, Duplizieren
+- `open_character_sheet()` in `character_actions_manager.py` - Doppelklick zum Öffnen des Charakterblatts
+- `update_character_from_herald()` in `main.py` - Rechtsklick-Menü zum Aktualisieren aus Herald
+
+**Codebeispiel**:
+```python
+# Vorher (falsch mit Proxy-Modell):
+row = indexes[0].row()
+name_item = self.model.item(row, 2)
+
+# Nachher (korrekt mit Proxy-Modell):
+proxy_index = indexes[0]
+source_index = self.proxy_model.mapToSource(proxy_index)
+row = source_index.row()
+name_item = self.model.item(row, 2)
+```
+
+**Ergebnis**:
+- ✅ Löschung bestätigt richtigen Charakter
+- ✅ Charakterblatt öffnet richtigen Charakter
+- ✅ Herald-Update zielt auf richtigen Charakter ab
+- ✅ Alle Operationen funktionieren korrekt mit jeder Sortierung
+
 ---
 
 ## 🧹 Repository-Bereinigung

@@ -326,8 +326,10 @@ class CharacterApp(QMainWindow):
         if not selected_indices:
             return
         
-        # Récupérer l'ID du personnage
-        row = selected_indices[0].row()
+        # Mapper l'index du proxy vers le modèle source
+        proxy_index = selected_indices[0]
+        source_index = self.tree_manager.proxy_model.mapToSource(proxy_index)
+        row = source_index.row()
         realm_index = self.tree_manager.model.index(row, 1)
         char_id = realm_index.data(Qt.UserRole)
         

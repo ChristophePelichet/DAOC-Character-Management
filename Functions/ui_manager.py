@@ -261,6 +261,8 @@ class UIManager:
         """Affiche le menu contextuel à la position spécifiée"""
         index = self.main_window.character_tree.indexAt(position)
         if index.isValid():
+            # Sélectionner la ligne cliquée avant d'afficher le menu
+            self.main_window.character_tree.setCurrentIndex(index)
             self.context_menu.exec(self.main_window.character_tree.viewport().mapToGlobal(position))
             
     def update_status_bar(self, message):

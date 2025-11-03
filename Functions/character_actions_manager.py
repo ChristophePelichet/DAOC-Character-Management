@@ -299,8 +299,10 @@ class CharacterActionsManager:
         # Ne pas ouvrir si on clique sur la case à cocher
         if index.column() == 0:
             return
-            
-        row = index.row()
+        
+        # Mapper l'index du proxy vers le modèle source
+        source_index = self.tree_manager.proxy_model.mapToSource(index)
+        row = source_index.row()
         name_item = self.tree_manager.model.item(row, 2)
         char_name = name_item.text()
         

@@ -66,6 +66,11 @@
 ✅ Robust diagnostic system for unexpected crashes  
 ✅ **Functional realm sorting** (added RealmSortProxyModel)  
 ✅ **Optimized Herald URL column width** (120px minimum)  
+✅ **Proxy model index mapping** for sorted operations  
+✅ **Character sheet Save button** no longer closes window  
+✅ **Herald buttons uniform sizing** in character sheet  
+✅ **Main window layout redesign** with Currency section placeholder  
+✅ **Herald status bar optimizations** (750px buttons × 35px height)  
 
 ## 🧹 Repository Cleanup
 ✅ Deletion of 13 temporary debug scripts  

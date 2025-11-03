@@ -466,6 +466,31 @@ name_item = self.model.item(row, 2)
 - ✅ Better visual design and symmetry
 - ✅ Enhanced user interface cohesion
 
+### Main window layout improvements - Herald and Currency sections
+
+**Enhancement**: Redesigned the bottom status section of the main window for better ergonomics
+
+**Changes**:
+- Split bottom section into two equal columns:
+  - **Left column**: "Status Eden Herald" section (reduced to 50% width)
+  - **Right column**: New "Monnaie" section with "🔜 Feature à venir" placeholder
+- Reorganized Herald buttons:
+  - Changed layout from vertical to horizontal
+  - Reduced to emoji + text format (🔄 Actualiser, 🔍 Recherche, ⚙️ Gérer)
+  - All three buttons same size (750px width × 35px height)
+  - Compact with reduced font size and spacing
+- Optimized dimensions:
+  - Height: 35px (more compact than before)
+  - Width: 750px per button (wide format for better visibility)
+  - All elements aligned horizontally for consistency
+
+**Result**:
+- ✅ Better main window ergonomics and layout
+- ✅ Improved space utilization
+- ✅ All Herald buttons same size and visually balanced
+- ✅ Preparation for future Currency feature
+- ✅ More compact and efficient interface
+
 ---
 
 ## 🧹 Repository Cleanup

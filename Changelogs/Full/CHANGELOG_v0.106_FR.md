@@ -466,6 +466,31 @@ name_item = self.model.item(row, 2)
 - ✅ Meilleur design visuel et symétrie
 - ✅ Cohérence améliorée de l'interface utilisateur
 
+### Améliorations du layout de la fenêtre principale - Sections Herald et Monnaie
+
+**Amélioration** : Redesign de la section de statut inférieure de la fenêtre principale pour une meilleure ergonomie
+
+**Modifications** :
+- Division de la section inférieure en deux colonnes égales :
+  - **Colonne gauche** : Section "Statut Eden Herald" (réduite à 50% de la largeur)
+  - **Colonne droite** : Nouvelle section "Monnaie" avec placeholder "🔜 Feature à venir"
+- Réorganisation des boutons Herald :
+  - Changement du layout vertical au horizontal
+  - Réduits au format emoji + texte (🔄 Actualiser, 🔍 Recherche, ⚙️ Gérer)
+  - Les trois boutons de même taille (750px largeur × 35px hauteur)
+  - Compact avec police réduite et espacement minimal
+- Dimensions optimisées :
+  - Hauteur : 35px (plus compact qu'avant)
+  - Largeur : 750px par bouton (format large pour meilleure visibilité)
+  - Tous les éléments alignés horizontalement pour cohérence
+
+**Résultat** :
+- ✅ Meilleure ergonomie et layout de la fenêtre principale
+- ✅ Utilisation optimisée de l'espace
+- ✅ Tous les boutons Herald de même taille et visuellement équilibrés
+- ✅ Préparation pour la future fonctionnalité Monnaie
+- ✅ Interface plus compacte et efficace
+
 ---
 
 ## 🧹 Nettoyage du Répertoire

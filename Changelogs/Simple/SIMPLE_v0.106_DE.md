@@ -66,6 +66,11 @@
 ✅ Robustes Diagnosesystem für unerwartete Abstürze  
 ✅ **Funktionale Reich-Sortierung** (RealmSortProxyModel hinzugefügt)  
 ✅ **Optimierte Herald-URL-Spaltenbreite** (120px Minimum)  
+✅ **Proxy-Modell-Index-Zuordnung** für sortierte Operationen  
+✅ **Speichern-Schaltfläche Charakterblatt** schließt nicht mehr  
+✅ **Herald-Schaltflächen einheitliche Größe** im Charakterblatt  
+✅ **Hauptfenster-Layout Redesign** mit Währungssektion  
+✅ **Herald-Statusleisten-Optimierungen** (750px Schaltflächen × 35px)  
 
 ## 🧹 Repository-Bereinigung
 ✅ Löschung von 13 temporären Debug-Skripten  

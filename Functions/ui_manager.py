@@ -4,7 +4,7 @@ Extrait de main.py pour réduire la complexité
 """
 import logging
 from PySide6.QtWidgets import (
-    QMenu, QMessageBox, QGroupBox, QHBoxLayout, QComboBox, QPushButton, QStatusBar, QLabel
+    QMenu, QMessageBox, QGroupBox, QHBoxLayout, QVBoxLayout, QComboBox, QPushButton, QStatusBar, QLabel
 )
 from PySide6.QtGui import QAction
 from PySide6.QtCore import Qt, QThread, Signal
@@ -165,37 +165,65 @@ class UIManager:
         parent_layout.addLayout(delete_button_layout)
     
     def create_eden_status_bar(self, parent_layout):
-        """Crée la barre de statut de connexion Eden"""
+        """Crée la barre de statut de connexion Eden et la section Monnaie"""
+        # Conteneur horizontal pour deux colonnes
+        container_layout = QHBoxLayout()
+        
+        # ===== SECTION GAUCHE : Status Herald Eden (réduite de moitié) =====
         status_group = QGroupBox("Statut Eden Herald")
         status_layout = QHBoxLayout()
+        status_layout.setSpacing(5)
+        status_layout.setContentsMargins(5, 5, 5, 5)
         
         # Label de statut
         self.eden_status_label = QLabel("⏳ Vérification en cours...")
-        self.eden_status_label.setStyleSheet("padding: 5px;")
-        status_layout.addWidget(self.eden_status_label)
+        self.eden_status_label.setStyleSheet("padding: 3px; font-size: 12px;")
+        self.eden_status_label.setMinimumHeight(35)
+        status_layout.addWidget(self.eden_status_label, 1)
         
-        # Bouton pour rafraîchir
+        # Boutons réduits alignés horizontalement - tous la même taille
         self.refresh_button = QPushButton("🔄 Actualiser")
         self.refresh_button.clicked.connect(self.check_eden_status)
-        self.refresh_button.setMaximumWidth(120)
-        self.refresh_button.setEnabled(False)  # Désactivé pendant la vérification initiale
+        self.refresh_button.setEnabled(False)
+        self.refresh_button.setMaximumWidth(750)
+        self.refresh_button.setMinimumHeight(35)
+        self.refresh_button.setStyleSheet("font-size: 12px; padding: 3px;")
         status_layout.addWidget(self.refresh_button)
         
-        # Bouton de recherche Herald
-        self.search_button = QPushButton("🔍 Recherche Herald")
+        self.search_button = QPushButton("🔍 Recherche")
         self.search_button.clicked.connect(self.main_window.open_herald_search)
-        self.search_button.setMaximumWidth(150)
-        self.search_button.setEnabled(False)  # Désactivé pendant la vérification initiale
+        self.search_button.setEnabled(False)
+        self.search_button.setMaximumWidth(750)
+        self.search_button.setMinimumHeight(35)
+        self.search_button.setStyleSheet("font-size: 12px; padding: 3px;")
         status_layout.addWidget(self.search_button)
         
-        # Bouton pour gérer les cookies
         manage_button = QPushButton("⚙️ Gérer")
         manage_button.clicked.connect(self.main_window.open_cookie_manager)
-        manage_button.setMaximumWidth(100)
+        manage_button.setMaximumWidth(750)
+        manage_button.setMinimumHeight(35)
+        manage_button.setStyleSheet("font-size: 12px; padding: 3px 15px;")
         status_layout.addWidget(manage_button)
         
         status_group.setLayout(status_layout)
-        parent_layout.addWidget(status_group)
+        container_layout.addWidget(status_group, 1)  # Stretch = 1
+        
+        # ===== SECTION DROITE : Monnaie (feature à venir) =====
+        currency_group = QGroupBox("Monnaie")
+        currency_layout = QHBoxLayout()
+        currency_layout.setContentsMargins(5, 5, 5, 5)
+        
+        currency_label = QLabel("🔜 Feature à venir")
+        currency_label.setStyleSheet("padding: 3px; text-align: center; font-size: 12px;")
+        currency_label.setAlignment(Qt.AlignCenter)
+        currency_label.setMinimumHeight(35)
+        currency_layout.addWidget(currency_label)
+        
+        currency_group.setLayout(currency_layout)
+        container_layout.addWidget(currency_group, 1)  # Stretch = 1
+        
+        # Ajouter le conteneur à la layout principale
+        parent_layout.addLayout(container_layout)
         
         # Lancer la vérification initiale
         self.check_eden_status()

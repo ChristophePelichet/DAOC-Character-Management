@@ -466,6 +466,31 @@ name_item = self.model.item(row, 2)
 - ✅ Besseres visuelles Design und Symmetrie
 - ✅ Verbesserte Kohäsion der Benutzeroberfläche
 
+### Verbesserungen des Hauptfenster-Layouts - Herald- und Währungssektionen
+
+**Verbesserung**: Redesign des unteren Statusbereichs des Hauptfensters für bessere Ergonomie
+
+**Änderungen**:
+- Unterteilung des unteren Bereichs in zwei gleiche Spalten:
+  - **Linke Spalte**: Sektion "Status Eden Herald" (auf 50% der Breite reduziert)
+  - **Rechte Spalte**: Neue Sektion "Monnaie" mit Platzhalter "🔜 Feature à venir"
+- Umgestaltung der Herald-Schaltflächen:
+  - Änderung von vertikalem zu horizontalem Layout
+  - Auf Emoji + Text reduziert (🔄 Actualiser, 🔍 Recherche, ⚙️ Gérer)
+  - Alle drei Schaltflächen gleiche Größe (750px Breite × 35px Höhe)
+  - Kompakt mit reduzierter Schriftgröße und Abstanden
+- Optimierte Abmessungen:
+  - Höhe: 35px (kompakter als zuvor)
+  - Breite: 750px pro Schaltfläche (breites Format für bessere Sichtbarkeit)
+  - Alle Elemente horizontal ausgerichtet für Konsistenz
+
+**Ergebnis**:
+- ✅ Bessere Ergonomie und Layout des Hauptfensters
+- ✅ Optimierte Raumnutzung
+- ✅ Alle Herald-Schaltflächen gleiche Größe und visuell ausgewogen
+- ✅ Vorbereitung für zukünftige Währungsfunktion
+- ✅ Kompaktere und effizientere Benutzeroberfläche
+
 ---
 
 ## 🧹 Repository-Bereinigung

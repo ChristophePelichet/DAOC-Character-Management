@@ -66,16 +66,17 @@
 ✅ Système de diagnostic robuste pour les arrêts inattendus  
 ✅ **Tri par royaume fonctionnel** (ajout RealmSortProxyModel)  
 ✅ **Largeur colonne URL Herald optimisée** (120px minimum)  
+✅ **Mappage proxy model** pour opérations triées  
+✅ **Bouton Enregistrer fiche** ne ferme plus la fenêtre  
+✅ **Boutons Herald taille uniforme** dans la fiche  
+✅ **Redesign layout fenêtre principale** avec section Monnaie  
+✅ **Optimisations barre status Herald** (boutons 750px × 35px)  
 
 ## 🧹 Nettoyage du Répertoire
 ✅ Suppression de 13 scripts debug temporaires  
 ✅ Suppression de 3 fichiers HTML de débogage  
 ✅ Repository clean et maintainable  
 ✅ Optimisation des performances  
-
-## 📚 Documentation
-✅ Nettoyage et réorganisation du système CHANGELOGs
-✅ Système de diagnostic robuste pour les arrêts inattendus  
 
 ## 📚 Documentation
 ✅ Nettoyage et réorganisation du système CHANGELOGs

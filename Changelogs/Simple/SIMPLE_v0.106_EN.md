@@ -64,6 +64,8 @@
 ✅ Unified folder labels ("Directory")  
 ✅ Improved path display  
 ✅ Robust diagnostic system for unexpected crashes  
+✅ **Functional realm sorting** (added RealmSortProxyModel)  
+✅ **Optimized Herald URL column width** (120px minimum)  
 
 ## 🧹 Repository Cleanup
 ✅ Deletion of 13 temporary debug scripts  

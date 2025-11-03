@@ -64,6 +64,8 @@
 ✅ Unification des labels ("Répertoire")  
 ✅ Affichage du début des chemins  
 ✅ Système de diagnostic robuste pour les arrêts inattendus  
+✅ **Tri par royaume fonctionnel** (ajout RealmSortProxyModel)  
+✅ **Largeur colonne URL Herald optimisée** (120px minimum)  
 
 ## 🧹 Nettoyage du Répertoire
 ✅ Suppression de 13 scripts debug temporaires  

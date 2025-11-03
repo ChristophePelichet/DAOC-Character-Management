@@ -363,6 +363,45 @@
 - Cursor at beginning of fields
 - Better readability for user
 
+### Realm sorting
+
+**Problem**: The Realm column did not allow sorting by clicking the header
+
+**Solution**:
+- Added custom `RealmSortProxyModel`
+- Implementation of `lessThan()` for column 1 (Realm)
+- Use of `Qt.UserRole + 2` to store sorting data
+- Proxy intercepts sorting and uses realm name
+
+**Modified files**:
+- `Functions/tree_manager.py`: Added `RealmSortProxyModel` class
+- Import of `QSortFilterProxyModel` from `PySide6.QtCore`
+- Proxy configuration in `__init__()`: `self.proxy_model.setSourceModel(self.model)`
+
+**Result**:
+- ✅ Functional alphabetical sorting (Albion → Hibernia → Midgard)
+- ✅ Realm icons always displayed (without text)
+- ✅ Existing delegate preserved (`CenterIconDelegate`)
+
+### Herald URL column width
+
+**Problem**: Herald button was crushed in too narrow URL column
+
+**Solution**:
+- Minimum width of 120px set for column 11 (URL)
+- Applied in `apply_column_resize_mode()` after `ResizeToContents`
+
+**Code**:
+```python
+# Set minimum width for URL column (11)
+self.tree_view.setColumnWidth(11, 120)
+```
+
+**Result**:
+- ✅ Herald button perfectly visible
+- ✅ Comfortable space for interaction
+- ✅ No impact on other columns
+
 ---
 
 ## 🧹 Repository Cleanup

@@ -64,6 +64,8 @@
 ✅ Einheitliche Verzeichnis-Labels ("Verzeichnis")  
 ✅ Verbesserte Pfadanzeige  
 ✅ Robustes Diagnosesystem für unerwartete Abstürze  
+✅ **Funktionale Reich-Sortierung** (RealmSortProxyModel hinzugefügt)  
+✅ **Optimierte Herald-URL-Spaltenbreite** (120px Minimum)  
 
 ## 🧹 Repository-Bereinigung
 ✅ Löschung von 13 temporären Debug-Skripten  

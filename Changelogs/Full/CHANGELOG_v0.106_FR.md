@@ -363,6 +363,45 @@
 - Curseur au début des champs
 - Meilleure lisibilité pour l'utilisateur
 
+### Tri par royaume
+
+**Problème** : La colonne Realm (royaume) ne permettait pas le tri en cliquant sur l'en-tête
+
+**Solution** :
+- Ajout d'un `RealmSortProxyModel` personnalisé
+- Implémentation de `lessThan()` pour la colonne 1 (Realm)
+- Utilisation de `Qt.UserRole + 2` pour stocker les données de tri
+- Le proxy intercepte le tri et utilise le nom du royaume
+
+**Fichiers modifiés** :
+- `Functions/tree_manager.py` : Ajout de la classe `RealmSortProxyModel`
+- Import de `QSortFilterProxyModel` depuis `PySide6.QtCore`
+- Configuration du proxy dans `__init__()` : `self.proxy_model.setSourceModel(self.model)`
+
+**Résultat** :
+- ✅ Tri alphabétique fonctionnel (Albion → Hibernia → Midgard)
+- ✅ Icônes du royaume toujours affichées (sans texte)
+- ✅ Delegate existant préservé (`CenterIconDelegate`)
+
+### Largeur colonne URL Herald
+
+**Problème** : Le bouton Herald était écrasé dans la colonne URL trop étroite
+
+**Solution** :
+- Largeur minimale de 120px définie pour la colonne 11 (URL)
+- Appliquée dans `apply_column_resize_mode()` après `ResizeToContents`
+
+**Code** :
+```python
+# Définir une largeur minimale pour la colonne URL (11)
+self.tree_view.setColumnWidth(11, 120)
+```
+
+**Résultat** :
+- ✅ Bouton Herald parfaitement visible
+- ✅ Espace confortable pour l'interaction
+- ✅ Pas d'impact sur les autres colonnes
+
 ---
 
 ## 🧹 Nettoyage du Répertoire

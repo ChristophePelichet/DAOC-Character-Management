@@ -363,6 +363,45 @@
 - Cursor am Anfang der Felder
 - Bessere Lesbarkeit für Benutzer
 
+### Reich-Sortierung
+
+**Problem**: Die Reich-Spalte erlaubte keine Sortierung durch Klicken auf die Kopfzeile
+
+**Lösung**:
+- Benutzerdefiniertes `RealmSortProxyModel` hinzugefügt
+- Implementierung von `lessThan()` für Spalte 1 (Reich)
+- Verwendung von `Qt.UserRole + 2` zum Speichern von Sortierdaten
+- Proxy fängt Sortierung ab und verwendet Reich-Namen
+
+**Geänderte Dateien**:
+- `Functions/tree_manager.py`: `RealmSortProxyModel`-Klasse hinzugefügt
+- Import von `QSortFilterProxyModel` aus `PySide6.QtCore`
+- Proxy-Konfiguration in `__init__()`: `self.proxy_model.setSourceModel(self.model)`
+
+**Ergebnis**:
+- ✅ Funktionale alphabetische Sortierung (Albion → Hibernia → Midgard)
+- ✅ Reich-Icons immer angezeigt (ohne Text)
+- ✅ Vorhandener Delegate beibehalten (`CenterIconDelegate`)
+
+### Herald-URL-Spaltenbreite
+
+**Problem**: Herald-Schaltfläche war in zu schmaler URL-Spalte zerquetscht
+
+**Lösung**:
+- Mindestbreite von 120px für Spalte 11 (URL) festgelegt
+- Angewendet in `apply_column_resize_mode()` nach `ResizeToContents`
+
+**Code**:
+```python
+# Mindestbreite für URL-Spalte (11) festlegen
+self.tree_view.setColumnWidth(11, 120)
+```
+
+**Ergebnis**:
+- ✅ Herald-Schaltfläche perfekt sichtbar
+- ✅ Komfortabler Platz für Interaktion
+- ✅ Keine Auswirkungen auf andere Spalten
+
 ---
 
 ## 🧹 Repository-Bereinigung

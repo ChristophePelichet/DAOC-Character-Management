@@ -5,7 +5,7 @@ Extrait de main.py pour améliorer la maintenabilité
 import logging
 from PySide6.QtWidgets import QHeaderView, QMessageBox, QInputDialog, QLineEdit, QTreeView
 from PySide6.QtGui import QStandardItemModel, QStandardItem, QIcon
-from PySide6.QtCore import Qt, QByteArray
+from PySide6.QtCore import Qt, QByteArray, QSortFilterProxyModel
 
 from Functions.character_manager import (
     get_all_characters, REALM_ICONS, delete_character, 
@@ -14,6 +14,22 @@ from Functions.character_manager import (
 from Functions.language_manager import lang
 from Functions.config_manager import config
 from Functions.logging_manager import get_img_dir
+
+
+class RealmSortProxyModel(QSortFilterProxyModel):
+    """Proxy model personnalisé pour trier la colonne Realm par le nom du royaume"""
+    
+    def lessThan(self, left, right):
+        """Compare deux éléments pour le tri"""
+        # Pour la colonne Realm (1), utiliser UserRole + 2 pour le tri
+        if left.column() == 1:
+            left_data = self.sourceModel().data(left, Qt.UserRole + 2)
+            right_data = self.sourceModel().data(right, Qt.UserRole + 2)
+            if left_data and right_data:
+                return left_data < right_data
+        
+        # Pour les autres colonnes, utiliser le comportement par défaut
+        return super().lessThan(left, right)
 
 
 class TreeManager:
@@ -32,7 +48,12 @@ class TreeManager:
         self.tree_view = tree_view
         self.data_manager = data_manager
         self.model = QStandardItemModel()
-        self.tree_view.setModel(self.model)
+        
+        # Utiliser un proxy model pour le tri personnalisé de la colonne Realm
+        self.proxy_model = RealmSortProxyModel()
+        self.proxy_model.setSourceModel(self.model)
+        self.tree_view.setModel(self.proxy_model)
+        
         self.characters_by_id = {}
         self.realm_icons = {}
         
@@ -146,7 +167,8 @@ class TreeManager:
         item_realm = QStandardItem()
         realm_icon = self.realm_icons.get(realm_name)
         if realm_icon:
-            item_realm.setData(realm_name, Qt.UserRole + 1)  # Pour le tri
+            item_realm.setData(realm_name, Qt.UserRole + 1)  # Pour le delegate (couleur de fond)
+            item_realm.setData(realm_name, Qt.UserRole + 2)  # Pour le tri
             item_realm.setIcon(realm_icon)
         item_realm.setData(char_id, Qt.UserRole)
         item_realm.setTextAlignment(Qt.AlignCenter)
@@ -307,6 +329,9 @@ class TreeManager:
                     header.setSectionResizeMode(i, QHeaderView.Stretch)
                 else:
                     header.setSectionResizeMode(i, QHeaderView.ResizeToContents)
+            
+            # Définir une largeur minimale pour la colonne URL (11) pour éviter que le bouton soit écrasé
+            self.tree_view.setColumnWidth(11, 120)
             logging.debug("Column resize mode: Automatic")
             
     def save_header_state(self):

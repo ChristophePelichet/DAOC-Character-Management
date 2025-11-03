@@ -71,6 +71,7 @@
 ✅ **Boutons Herald taille uniforme** dans la fiche  
 ✅ **Redesign layout fenêtre principale** avec section Monnaie  
 ✅ **Optimisations barre status Herald** (boutons 750px × 35px)  
+✅ **Redesign fiche personnage** (renommage Statistiques, suppression Résistances, déplacement Gérer Armor)  
 
 ## 🧹 Nettoyage du Répertoire
 ✅ Suppression de 13 scripts debug temporaires  

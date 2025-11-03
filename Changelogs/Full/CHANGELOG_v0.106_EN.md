@@ -491,6 +491,24 @@ name_item = self.model.item(row, 2)
 - ✅ Preparation for future Currency feature
 - ✅ More compact and efficient interface
 
+### Character sheet layout improvements - Statistics section
+
+**Enhancement**: Reorganized the character detail sheet for better readability and functionality
+
+**Changes**:
+- Renamed "Armor" section to "Statistics" (all 3 languages)
+- Removed disabled "Resistances" button (grayed out placeholder)
+- Added "🔜 Feature coming soon" text in Statistics section
+- Relocated "Manage Armor" button below "Realm Rank" section
+- Improved visual hierarchy and section organization
+
+**Result**:
+- ✅ Clearer section naming (Statistics vs Armor)
+- ✅ Removed disabled UI elements for cleaner appearance
+- ✅ Better visual flow with button placement
+- ✅ Placeholder indicates future features clearly
+- ✅ More intuitive character sheet layout
+
 ---
 
 ## 🧹 Repository Cleanup

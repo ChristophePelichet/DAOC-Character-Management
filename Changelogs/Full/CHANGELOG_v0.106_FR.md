@@ -491,6 +491,24 @@ name_item = self.model.item(row, 2)
 - ✅ Préparation pour la future fonctionnalité Monnaie
 - ✅ Interface plus compacte et efficace
 
+### Améliorations du layout de la fiche personnage - Section Statistiques
+
+**Amélioration** : Réorganisation de la fiche personnage pour une meilleure lisibilité et fonctionnalité
+
+**Modifications** :
+- Renommage de la section "Armure" en "Statistiques" (3 langues)
+- Suppression du bouton "Résistances" grisé (placeholder désactivé)
+- Ajout du texte "🔜 Fonctionnalité bientôt disponible" dans la section Statistiques
+- Déplacement du bouton "Gérer les armures" sous la section "Rang de Royaume"
+- Amélioration de la hiérarchie visuelle et organisation des sections
+
+**Résultat** :
+- ✅ Nommage de section plus clair (Statistiques vs Armure)
+- ✅ Suppression des éléments UI désactivés pour apparence plus propre
+- ✅ Meilleur flux visuel avec placement des boutons
+- ✅ Placeholder indiquant clairement les futures fonctionnalités
+- ✅ Layout de fiche personnage plus intuitif
+
 ---
 
 ## 🧹 Nettoyage du Répertoire

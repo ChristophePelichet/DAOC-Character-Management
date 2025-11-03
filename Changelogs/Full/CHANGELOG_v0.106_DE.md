@@ -491,6 +491,33 @@ name_item = self.model.item(row, 2)
 - ✅ Vorbereitung für zukünftige Währungsfunktion
 - ✅ Kompaktere und effizientere Benutzeroberfläche
 
+### Verbesserungen des Charakterblatt-Layouts - Statistikensektion
+
+**Verbesserung**: Reorganisation des Charakterdetailblatts für bessere Klarheit und zukünftige Erweiterungen
+
+**Änderungen**:
+- **Umbenennung der Rüstungssektion**: "Rüstung" → "Statistiken"
+  - Vorbereitung für zukünftige Statistik-Features
+  - Bessere semantische Beschreibung des Sektion-Inhalts
+- **Entfernung des deaktivierten "Widerstände"-Schaltfläche**:
+  - Der Schaltfläche war deaktiviert (graugefahren) und verursachte Verwirrung
+  - Bereinigung der Benutzeroberfläche für bessere visuelle Hierarchie
+- **Hinzufügen von "Funktion kommt bald" Platzhalter-Text**:
+  - 🔜 Funktion kommt bald" wird in der Statistikensektion angezeigt
+  - Informiert Benutzer über zukünftige Statistik-Features
+  - Verhindert visuelle Leere in der neuen Sektion
+- **Verschiebung des "Rüstung verwalten" Schaltfläche**:
+  - Verschiebung aus der Rüstungssektion
+  - Neue Position: Unterhalb der "Realm-Rang" Sektion
+  - Verbesserte logische Gruppierung von zusammenhängenden Features
+
+**Ergebnis**:
+- ✅ Klarere und intuitivere Charakterblatt-Layout
+- ✅ Konsistente Benutzeroberfläche ohne deaktivierte Elemente
+- ✅ Vorbereitung für zukünftige Statistik-Features
+- ✅ Bessere visuelle Hierarchie und Benutzerführung
+- ✅ Sprachunterstützung in allen 3 Sprachen (EN/FR/DE)
+
 ---
 
 ## 🧹 Repository-Bereinigung

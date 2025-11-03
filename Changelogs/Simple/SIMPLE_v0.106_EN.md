@@ -71,6 +71,7 @@
 ✅ **Herald buttons uniform sizing** in character sheet  
 ✅ **Main window layout redesign** with Currency section placeholder  
 ✅ **Herald status bar optimizations** (750px buttons × 35px height)  
+✅ **Character sheet redesign** (Statistics section rename, Resistances button removed, Armor manager relocated)  
 
 ## 🧹 Repository Cleanup
 ✅ Deletion of 13 temporary debug scripts  

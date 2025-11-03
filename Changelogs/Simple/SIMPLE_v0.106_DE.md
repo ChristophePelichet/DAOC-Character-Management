@@ -71,6 +71,7 @@
 ✅ **Herald-Schaltflächen einheitliche Größe** im Charakterblatt  
 ✅ **Hauptfenster-Layout Redesign** mit Währungssektion  
 ✅ **Herald-Statusleisten-Optimierungen** (750px Schaltflächen × 35px)  
+✅ **Charakterblatt-Redesign** (Statistiken-Umbennung, Widerstands-Taste entfernt, Rüstung-Manager verlegt)  
 
 ## 🧹 Repository-Bereinigung
 ✅ Löschung von 13 temporären Debug-Skripten  

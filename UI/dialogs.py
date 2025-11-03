@@ -188,28 +188,22 @@ class CharacterSheetWindow(QDialog):
         
         info_group.setLayout(info_layout)
         
-        # Armor Section (new)
-        armor_group = QGroupBox(lang.get("armor_group_title"))
-        armor_layout = QVBoxLayout()
+        # Statistics Section (renamed from Armor)
+        statistics_group = QGroupBox(lang.get("armor_group_title"))
+        statistics_layout = QVBoxLayout()
         
-        # Resistances button (placeholder for now)
-        resistances_button = QPushButton(lang.get("resistances_button"))
-        resistances_button.setEnabled(False)  # Disabled until functionality is added
-        resistances_button.setToolTip("Fonctionnalité à venir : gérer les résistances du personnage")
-        armor_layout.addWidget(resistances_button)
+        # Coming soon message
+        coming_soon_label = QLabel(lang.get("statistics_coming_soon"))
+        coming_soon_label.setStyleSheet("font-size: 11px; color: gray; text-align: center;")
+        coming_soon_label.setAlignment(Qt.AlignCenter)
+        statistics_layout.addWidget(coming_soon_label)
         
-        # Armor Manager button
-        armor_manager_button = QPushButton("📁 Gérer les armures")
-        armor_manager_button.clicked.connect(self.open_armor_manager)
-        armor_manager_button.setToolTip("Upload et gestion des fichiers d'armure créés avec des logiciels tiers")
-        armor_layout.addWidget(armor_manager_button)
+        statistics_group.setLayout(statistics_layout)
         
-        armor_group.setLayout(armor_layout)
-        
-        # Horizontal layout for Info and Armor groups side by side
+        # Horizontal layout for Info and Statistics groups side by side
         top_layout = QHBoxLayout()
         top_layout.addWidget(info_group)
-        top_layout.addWidget(armor_group)
+        top_layout.addWidget(statistics_group)
         layout.addLayout(top_layout)
         
         # Realm Rank Section
@@ -274,6 +268,12 @@ class CharacterSheetWindow(QDialog):
         
         realm_rank_group.setLayout(realm_rank_layout)
         layout.addWidget(realm_rank_group)
+        
+        # Armor Manager button (moved here after Realm Rank section)
+        armor_manager_button = QPushButton("📁 Gérer les armures")
+        armor_manager_button.clicked.connect(self.open_armor_manager)
+        armor_manager_button.setToolTip("Upload et gestion des fichiers d'armure créés avec des logiciels tiers")
+        layout.addWidget(armor_manager_button)
         
         layout.addStretch()
 

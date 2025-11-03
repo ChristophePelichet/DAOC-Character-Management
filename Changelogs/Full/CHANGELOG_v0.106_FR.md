@@ -437,6 +437,21 @@ name_item = self.model.item(row, 2)
 - ✅ Mise à jour Herald cible le bon personnage
 - ✅ Toutes les opérations fonctionnent correctement avec n'importe quel tri
 
+### Comportement du bouton Enregistrer de la fiche personnage
+
+**Amélioration** : Le bouton Enregistrer ne ferme plus la fenêtre de la fiche automatiquement
+
+**Avant** : Cliquer sur Enregistrer sauvegardait les infos et fermait immédiatement la fenêtre
+
+**Maintenant** : Cliquer sur Enregistrer sauvegarde les infos et garde la fenêtre ouverte, permettant de continuer à éditer d'autres champs
+
+**Cas d'usage** : Les utilisateurs peuvent maintenant modifier plusieurs champs et les enregistrer séquentiellement sans rouvrir la fiche à chaque fois
+
+**Résultat** :
+- ✅ Flux de travail plus efficace pour plusieurs modifications
+- ✅ Les utilisateurs ferment explicitement la fenêtre avec le bouton Fermer
+- ✅ Meilleur contrôle utilisateur sur la session d'édition
+
 ---
 
 ## 🧹 Nettoyage du Répertoire

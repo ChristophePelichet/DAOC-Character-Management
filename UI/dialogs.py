@@ -622,7 +622,6 @@ class CharacterSheetWindow(QDialog):
             # Refresh list in parent
             if hasattr(self.parent_app, 'refresh_character_list'):
                 self.parent_app.refresh_character_list()
-            self.accept()  # Close dialog
                 
         except Exception as e:
             log_with_action(logger_char, "error", f"Error saving basic info: {str(e)}", action="ERROR")

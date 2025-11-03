@@ -437,6 +437,21 @@ name_item = self.model.item(row, 2)
 - ✅ Herald update targets correct character
 - ✅ All operations work correctly with any sorting
 
+### Character sheet Save button behavior
+
+**Improvement**: Save button no longer closes the character sheet window automatically
+
+**Before**: Clicking Save would save the character info and immediately close the window
+
+**Now**: Clicking Save saves the character info and keeps the window open, allowing users to continue editing other fields
+
+**Use case**: Users can now modify multiple fields and save them sequentially without reopening the character sheet each time
+
+**Result**:
+- ✅ More efficient workflow for multiple modifications
+- ✅ Users explicitly close the window with the Close button
+- ✅ Better user control over the editing session
+
 ---
 
 ## 🧹 Repository Cleanup

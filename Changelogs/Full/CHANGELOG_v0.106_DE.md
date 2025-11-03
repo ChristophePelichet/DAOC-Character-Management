@@ -437,6 +437,21 @@ name_item = self.model.item(row, 2)
 - ✅ Herald-Update zielt auf richtigen Charakter ab
 - ✅ Alle Operationen funktionieren korrekt mit jeder Sortierung
 
+### Verhalten der Schaltfläche "Speichern" des Charakterblatts
+
+**Verbesserung**: Die Schaltfläche "Speichern" schließt das Charakterblatt-Fenster nicht mehr automatisch
+
+**Vorher**: Ein Klick auf "Speichern" speicherte die Infos und schloss das Fenster sofort
+
+**Nachher**: Ein Klick auf "Speichern" speichert die Infos und behält das Fenster offen, sodass Benutzer andere Felder weiterhin bearbeiten können
+
+**Anwendungsfall**: Benutzer können jetzt mehrere Felder ändern und diese nacheinander speichern, ohne das Charakterblatt jedes Mal neu zu öffnen
+
+**Ergebnis**:
+- ✅ Effizienterer Arbeitsablauf für mehrere Änderungen
+- ✅ Benutzer schließen das Fenster explizit mit der Schaltfläche "Schließen"
+- ✅ Bessere Benutzerkontrolle über die Bearbeitungssitzung
+
 ---
 
 ## 🧹 Repository-Bereinigung

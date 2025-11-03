@@ -452,6 +452,20 @@ name_item = self.model.item(row, 2)
 - ✅ Les utilisateurs ferment explicitement la fenêtre avec le bouton Fermer
 - ✅ Meilleur contrôle utilisateur sur la session d'édition
 
+### Design uniforme des boutons Herald
+
+**Amélioration** : Les deux boutons Herald (Ouvrir dans le navigateur et Mettre à jour depuis Herald) ont maintenant une taille et un layout uniformes
+
+**Modifications** :
+- Distribution égale de la largeur utilisant `setStretch(1, 1)` pour les deux boutons
+- Hauteur minimale cohérente de 30px pour les deux boutons
+- Apparence plus équilibrée et professionnelle
+
+**Résultat** :
+- ✅ Dimensionnement cohérent des boutons dans la section Herald
+- ✅ Meilleur design visuel et symétrie
+- ✅ Cohérence améliorée de l'interface utilisateur
+
 ---
 
 ## 🧹 Nettoyage du Répertoire

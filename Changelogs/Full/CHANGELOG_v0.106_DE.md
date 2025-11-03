@@ -452,6 +452,20 @@ name_item = self.model.item(row, 2)
 - ✅ Benutzer schließen das Fenster explizit mit der Schaltfläche "Schließen"
 - ✅ Bessere Benutzerkontrolle über die Bearbeitungssitzung
 
+### Einheitliches Design der Herald-Schaltflächen
+
+**Verbesserung**: Beide Herald-Schaltflächen (Im Browser öffnen und Von Herald aktualisieren) haben jetzt eine einheitliche Größe und Layout
+
+**Änderungen**:
+- Gleiche Breitenverteilung mit `setStretch(1, 1)` für beide Schaltflächen
+- Konsistente Mindesthöhe von 30px für beide Schaltflächen
+- Ausgewogeneres und professionelleres Erscheinungsbild
+
+**Ergebnis**:
+- ✅ Konsistente Schaltflächengrößen im Herald-Bereich
+- ✅ Besseres visuelles Design und Symmetrie
+- ✅ Verbesserte Kohäsion der Benutzeroberfläche
+
 ---
 
 ## 🧹 Repository-Bereinigung

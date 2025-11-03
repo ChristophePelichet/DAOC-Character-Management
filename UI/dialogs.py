@@ -81,14 +81,20 @@ class CharacterSheetWindow(QDialog):
         self.open_herald_button = QPushButton("🌐 Ouvrir dans le navigateur")
         self.open_herald_button.setToolTip("Ouvrir la page Herald dans le navigateur")
         self.open_herald_button.clicked.connect(self.open_herald_url)
+        self.open_herald_button.setMinimumHeight(28)
         herald_buttons_layout.addWidget(self.open_herald_button)
         
         self.update_herald_button = QPushButton("🔄 Mettre à jour depuis Herald")
         self.update_herald_button.setToolTip("Récupérer et mettre à jour les données depuis Herald")
         self.update_herald_button.clicked.connect(self.update_from_herald)
+        self.update_herald_button.setMinimumHeight(30)
         # Mettre en évidence le bouton de mise à jour
         self.update_herald_button.setStyleSheet("QPushButton { font-weight: bold; padding: 8px; }")
         herald_buttons_layout.addWidget(self.update_herald_button)
+        
+        # Définir des stretch égaux pour les deux boutons
+        herald_buttons_layout.setStretch(0, 1)
+        herald_buttons_layout.setStretch(1, 1)
         
         eden_layout.addLayout(herald_buttons_layout)
         eden_group.setLayout(eden_layout)

@@ -452,6 +452,20 @@ name_item = self.model.item(row, 2)
 - ✅ Users explicitly close the window with the Close button
 - ✅ Better user control over the editing session
 
+### Herald buttons uniform design
+
+**Improvement**: Both Herald buttons (Open in browser and Update from Herald) now have uniform size and layout
+
+**Changes**:
+- Equal width distribution using `setStretch(1, 1)` for both buttons
+- Consistent minimum height of 30px for both buttons
+- Improved visual balance and professional appearance
+
+**Result**:
+- ✅ Consistent button sizing in Herald section
+- ✅ Better visual design and symmetry
+- ✅ Enhanced user interface cohesion
+
 ---
 
 ## 🧹 Repository Cleanup

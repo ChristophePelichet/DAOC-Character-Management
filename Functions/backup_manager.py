@@ -182,7 +182,7 @@ class BackupManager:
             char_folder = self.config_manager.get("character_folder")
             if not char_folder or not os.path.exists(char_folder):
                 error_msg = "Characters folder not found"
-                self.logger.error("error_msg", extra={"action": "INFO"})
+                log_with_action(self.logger, "error", error_msg, action="CHECK")
                 return {
                     "success": False,
                     "message": error_msg,
@@ -196,22 +196,22 @@ class BackupManager:
             
             if should_compress:
                 backup_file = os.path.join(self.backup_dir, f"{backup_name}.zip")
-                self.logger.info("Creating compressed backup: {os.path.basename(backup_file)}\", action=", extra={"action": "ZIP"})
+                log_with_action(self.logger, "info", f"Creating compressed backup: {os.path.basename(backup_file)}", action="ZIP")
                 self._create_zip_backup(char_folder, backup_file)
             else:
                 backup_file = os.path.join(self.backup_dir, backup_name)
-                self.logger.info("Creating uncompressed backup: {os.path.basename(backup_file)}\", action=", extra={"action": "ZIP"})
+                log_with_action(self.logger, "info", f"Creating uncompressed backup: {os.path.basename(backup_file)}", action="COPY")
                 shutil.copytree(char_folder, backup_file, dirs_exist_ok=True)
 
             # Update last backup date
             self.config_manager.set("backup_last_date", datetime.now().isoformat())
             
             # Apply retention policies
-            self.logger.info("Applying retention policies...", extra={"action": "RETENTION"})
+            log_with_action(self.logger, "info", "Applying retention policies...", action="RETENTION")
             self._apply_retention_policies()
 
             success_msg = f"Backup created: {os.path.basename(backup_file)}"
-            self.logger.info("success_msg", extra={"action": "INFO"})
+            log_with_action(self.logger, "info", success_msg, action="SUCCESS")
             return {
                 "success": True,
                 "message": success_msg,
@@ -220,7 +220,7 @@ class BackupManager:
 
         except Exception as e:
             error_msg = f"Backup failed: {str(e)}"
-            self.logger.error("error_msg", extra={"action": "INFO"})
+            log_with_action(self.logger, "error", error_msg, action="ERROR")
             logging.error(f"Exception during backup: {str(e)}", exc_info=True)
             return {
                 "success": False,

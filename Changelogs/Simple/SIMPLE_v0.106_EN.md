@@ -73,6 +73,14 @@
 ✅ **Herald status bar optimizations** (750px buttons × 35px height)  
 ✅ **Character sheet redesign** (Statistics section rename, Resistances button removed, Armor manager relocated)  
 
+## 🐛 Bug Fixes - PyInstaller .exe Stability
+✅ **sys.stderr/stdout None handling** - Fixed noconsole crash (AttributeError on flush)  
+✅ **Herald connection test protection** - Prevented silent crashes with complete error logging  
+✅ **Selenium import error handling** - Explicit error messages for missing modules  
+✅ **Driver cleanup protection** - Safe driver.quit() with None checks  
+✅ **Thread exception catching** - EdenStatusThread errors no longer crash application  
+✅ **Complete traceback logging** - All errors logged to debug.log for troubleshooting  
+
 ## 🧹 Repository Cleanup
 ✅ Deletion of 13 temporary debug scripts  
 ✅ Deletion of 3 debugging HTML files  

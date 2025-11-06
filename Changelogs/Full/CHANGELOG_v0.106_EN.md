@@ -511,6 +511,112 @@ name_item = self.model.item(row, 2)
 
 ---
 
+## 🐛 Bug Fixes - PyInstaller .exe Stability
+
+### Fix: PyInstaller noconsole crash - sys.stderr/stdout None handling
+
+**Issue**: Application crashed on startup with `AttributeError: 'NoneType' object has no attribute 'flush'`
+
+**Root cause**: When PyInstaller compiles the application in `--noconsole` mode (no Windows console), `sys.stderr` and `sys.stdout` are automatically set to `None`. The code was calling `sys.stderr.flush()` without checking if `sys.stderr` existed, causing immediate crash.
+
+**Affected locations**:
+- `main.py` - Global initialization
+- `Functions/backup_manager.py` - Line 30 in `__init__()`
+- `UI/dialogs.py` - 10+ occurrences in various dialogs
+
+**Solution implemented**:
+```python
+# Fix for PyInstaller --noconsole mode: sys.stderr/stdout can be None
+if sys.stderr is None:
+    sys.stderr = open('nul', 'w') if sys.platform == 'win32' else open('/dev/null', 'w')
+if sys.stdout is None:
+    sys.stdout = open('nul', 'w') if sys.platform == 'win32' else open('/dev/null', 'w')
+```
+
+**Result**:
+- ✅ Application starts successfully in `--noconsole` mode
+- ✅ No more `NoneType` crashes
+- ✅ Logs still written correctly to files
+- ✅ .exe fully functional
+
+**Files modified**: `main.py`, `backup_manager.py`, `dialogs.py`
+
+### Fix: Prevent silent crash during Herald connection test
+
+**Issue**: The .exe application crashed silently (without logs) during Herald Eden connection verification. No error messages, no logs, no traceback - complete silent crash.
+
+**Root causes identified**:
+1. **Selenium import** could fail in PyInstaller .exe without proper logging
+2. **Driver initialization** could return `None` and cause crash in `driver.quit()`
+3. **Uncaught exceptions** in `EdenStatusThread` thread crashed the entire process
+4. **No complete traceback** for debugging errors
+
+**Vulnerable code path**:
+- `cookie_manager.test_eden_connection()` - Main test method
+- `ui_manager.EdenStatusThread.run()` - Background verification thread
+- Selenium WebDriver initialization and cleanup
+
+**Solutions implemented**:
+
+**In `cookie_manager.py`**:
+- Initialize `driver = None` at method start for safe cleanup
+- Separate `try-except` for Selenium imports with explicit error messages
+- Check `if not driver` before any driver operations
+- Protected `finally` block with `if driver:` before `driver.quit()`
+- Complete logging with `traceback.format_exc()` for debugging
+- Fixed indentation in debug file save block
+
+**In `ui_manager.py`**:
+- Global `try-except` in `EdenStatusThread.run()`
+- Complete exception logging with traceback
+- Emit error signal instead of crashing
+- UI remains responsive even on error
+
+**Enhanced error handling structure**:
+```python
+driver = None  # Safe initialization
+try:
+    # Separated import with specific error handling
+    try:
+        from selenium import webdriver
+    except ImportError as e:
+        # Log and return structured error
+        
+    # Driver initialization
+    driver, browser = self._initialize_browser_driver(...)
+    if not driver:
+        # Early return with error message
+        
+    # Selenium operations...
+    
+except Exception as e:
+    # Complete traceback logging
+    traceback_details = traceback.format_exc()
+    logger.error(f"CRASH: {e}\n{traceback_details}")
+    
+finally:
+    # Safe cleanup
+    if driver:
+        try:
+            driver.quit()
+        except Exception as e:
+            logger.warning(f"Driver cleanup error: {e}")
+```
+
+**Result**:
+- ✅ No more silent crashes
+- ✅ All exceptions logged to `Logs/debug.log`
+- ✅ Clear error messages for users
+- ✅ Application remains stable even if Herald test fails
+- ✅ Complete traceback available for debugging
+- ✅ Thread crashes don't kill the entire application
+
+**Files modified**: `cookie_manager.py` (117 lines changed), `ui_manager.py`
+
+**Testing**: Validated in compiled .exe with various error scenarios (no browser, network issues, invalid cookies)
+
+---
+
 ## 🧹 Repository Cleanup
 
 - **Deletion of 13 temporary debug scripts**

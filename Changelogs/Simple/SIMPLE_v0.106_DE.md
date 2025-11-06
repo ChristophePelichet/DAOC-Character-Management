@@ -73,6 +73,14 @@
 ✅ **Herald-Statusleisten-Optimierungen** (750px Schaltflächen × 35px)  
 ✅ **Charakterblatt-Redesign** (Statistiken-Umbennung, Widerstands-Taste entfernt, Rüstung-Manager verlegt)  
 
+## 🐛 Fehlerbehebungen - PyInstaller .exe Stabilität
+✅ **sys.stderr/stdout None Behandlung** - Noconsole-Crash behoben (AttributeError bei flush)  
+✅ **Herald-Verbindungstest-Schutz** - Stumme Abstürze mit vollständigem Fehler-Logging verhindert  
+✅ **Selenium-Import-Fehlerbehandlung** - Explizite Fehlermeldungen für fehlende Module  
+✅ **Driver-Bereinigungsschutz** - Sicheres driver.quit() mit None-Prüfungen  
+✅ **Thread-Exception-Abfangen** - EdenStatusThread-Fehler stürzen Anwendung nicht mehr ab  
+✅ **Vollständiges Traceback-Logging** - Alle Fehler in debug.log protokolliert für Fehlerbehebung  
+
 ## 🧹 Repository-Bereinigung
 ✅ Löschung von 13 temporären Debug-Skripten  
 ✅ Löschung von 3 Debug-HTML-Dateien  

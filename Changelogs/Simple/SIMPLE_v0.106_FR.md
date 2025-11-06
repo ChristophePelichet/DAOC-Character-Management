@@ -73,6 +73,14 @@
 ✅ **Optimisations barre status Herald** (boutons 750px × 35px)  
 ✅ **Redesign fiche personnage** (renommage Statistiques, suppression Résistances, déplacement Gérer Armor)  
 
+## 🐛 Corrections de Bugs - Stabilité .exe PyInstaller
+✅ **Gestion sys.stderr/stdout None** - Correction crash noconsole (AttributeError sur flush)  
+✅ **Protection test connexion Herald** - Prévention crashs silencieux avec logging complet  
+✅ **Gestion erreur import Selenium** - Messages d'erreur explicites pour modules manquants  
+✅ **Protection cleanup driver** - driver.quit() sécurisé avec vérifications None  
+✅ **Capture exceptions thread** - Erreurs EdenStatusThread ne crashent plus l'application  
+✅ **Logging traceback complet** - Toutes erreurs loguées dans debug.log pour dépannage  
+
 ## 🧹 Nettoyage du Répertoire
 ✅ Suppression de 13 scripts debug temporaires  
 ✅ Suppression de 3 fichiers HTML de débogage  

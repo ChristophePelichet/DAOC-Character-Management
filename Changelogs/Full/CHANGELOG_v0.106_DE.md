@@ -520,6 +520,112 @@ name_item = self.model.item(row, 2)
 
 ---
 
+## 🐛 Fehlerbehebungen - PyInstaller .exe Stabilität
+
+### Fix: PyInstaller noconsole Crash - sys.stderr/stdout None Behandlung
+
+**Problem**: Anwendung stürzte beim Start mit `AttributeError: 'NoneType' object has no attribute 'flush'` ab
+
+**Grundursache**: Wenn PyInstaller die Anwendung im `--noconsole` Modus (ohne Windows-Konsole) kompiliert, werden `sys.stderr` und `sys.stdout` automatisch auf `None` gesetzt. Der Code rief `sys.stderr.flush()` auf, ohne zu prüfen, ob `sys.stderr` existiert, was zu einem sofortigen Absturz führte.
+
+**Betroffene Stellen**:
+- `main.py` - Globale Initialisierung
+- `Functions/backup_manager.py` - Zeile 30 in `__init__()`
+- `UI/dialogs.py` - 10+ Vorkommen in verschiedenen Dialogen
+
+**Implementierte Lösung**:
+```python
+# Fix für PyInstaller --noconsole Modus: sys.stderr/stdout können None sein
+if sys.stderr is None:
+    sys.stderr = open('nul', 'w') if sys.platform == 'win32' else open('/dev/null', 'w')
+if sys.stdout is None:
+    sys.stdout = open('nul', 'w') if sys.platform == 'win32' else open('/dev/null', 'w')
+```
+
+**Ergebnis**:
+- ✅ Anwendung startet erfolgreich im `--noconsole` Modus
+- ✅ Keine `NoneType` Abstürze mehr
+- ✅ Logs werden weiterhin korrekt in Dateien geschrieben
+- ✅ .exe vollständig funktionsfähig
+
+**Geänderte Dateien**: `main.py`, `backup_manager.py`, `dialogs.py`
+
+### Fix: Verhinderung stiller Abstürze beim Herald-Verbindungstest
+
+**Problem**: Die .exe Anwendung stürzte stumm (ohne Logs) während der Herald Eden Verbindungsüberprüfung ab. Keine Fehlermeldungen, keine Logs, kein Traceback - vollständiger stummer Absturz.
+
+**Identifizierte Grundursachen**:
+1. **Selenium Import** konnte im PyInstaller .exe ohne ordnungsgemäßes Logging fehlschlagen
+2. **Driver-Initialisierung** konnte `None` zurückgeben und Absturz in `driver.quit()` verursachen
+3. **Nicht abgefangene Exceptions** im `EdenStatusThread` Thread ließen den gesamten Prozess abstürzen
+4. **Kein vollständiger Traceback** für Fehlersuche
+
+**Anfälliger Code-Pfad**:
+- `cookie_manager.test_eden_connection()` - Haupt-Testmethode
+- `ui_manager.EdenStatusThread.run()` - Hintergrund-Verifizierungs-Thread
+- Selenium WebDriver Initialisierung und Bereinigung
+
+**Implementierte Lösungen**:
+
+**In `cookie_manager.py`**:
+- Initialisierung `driver = None` am Methodenstart für sichere Bereinigung
+- Separates `try-except` für Selenium-Imports mit expliziten Fehlermeldungen
+- Prüfung `if not driver` vor jeder Driver-Operation
+- Geschützter `finally` Block mit `if driver:` vor `driver.quit()`
+- Vollständiges Logging mit `traceback.format_exc()` für Debugging
+- Korrigierte Einrückung im Debug-Datei-Speicher-Block
+
+**In `ui_manager.py`**:
+- Globales `try-except` in `EdenStatusThread.run()`
+- Vollständiges Exception-Logging mit Traceback
+- Fehler-Signal senden statt Absturz
+- UI bleibt reaktionsfähig auch bei Fehlern
+
+**Verbesserte Fehlerbehandlungsstruktur**:
+```python
+driver = None  # Sichere Initialisierung
+try:
+    # Separierter Import mit spezifischer Fehlerbehandlung
+    try:
+        from selenium import webdriver
+    except ImportError as e:
+        # Log und strukturierte Fehlerrückgabe
+        
+    # Driver-Initialisierung
+    driver, browser = self._initialize_browser_driver(...)
+    if not driver:
+        # Frühe Rückkehr mit Fehlermeldung
+        
+    # Selenium-Operationen...
+    
+except Exception as e:
+    # Vollständiges Traceback-Logging
+    traceback_details = traceback.format_exc()
+    logger.error(f"CRASH: {e}\n{traceback_details}")
+    
+finally:
+    # Sichere Bereinigung
+    if driver:
+        try:
+            driver.quit()
+        except Exception as e:
+            logger.warning(f"Driver-Bereinigungsfehler: {e}")
+```
+
+**Ergebnis**:
+- ✅ Keine stummen Abstürze mehr
+- ✅ Alle Exceptions in `Logs/debug.log` protokolliert
+- ✅ Klare Fehlermeldungen für Benutzer
+- ✅ Anwendung bleibt stabil auch wenn Herald-Test fehlschlägt
+- ✅ Vollständiger Traceback für Debugging verfügbar
+- ✅ Thread-Abstürze töten nicht die gesamte Anwendung
+
+**Geänderte Dateien**: `cookie_manager.py` (117 Zeilen geändert), `ui_manager.py`
+
+**Tests**: Validiert in kompilierter .exe mit verschiedenen Fehlerszenarien (kein Browser, Netzwerkprobleme, ungültige Cookies)
+
+---
+
 ## 🧹 Repository-Bereinigung
 
 - **Löschung von 13 temporären Debug-Skripten**

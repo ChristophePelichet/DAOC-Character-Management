@@ -511,6 +511,112 @@ name_item = self.model.item(row, 2)
 
 ---
 
+## 🐛 Corrections de Bugs - Stabilité .exe PyInstaller
+
+### Fix : Crash PyInstaller noconsole - Gestion sys.stderr/stdout None
+
+**Problème** : L'application crashait au démarrage avec `AttributeError: 'NoneType' object has no attribute 'flush'`
+
+**Cause racine** : Quand PyInstaller compile l'application en mode `--noconsole` (sans console Windows), `sys.stderr` et `sys.stdout` sont automatiquement mis à `None`. Le code appelait `sys.stderr.flush()` sans vérifier si `sys.stderr` existait, causant un crash immédiat.
+
+**Emplacements affectés** :
+- `main.py` - Initialisation globale
+- `Functions/backup_manager.py` - Ligne 30 dans `__init__()`
+- `UI/dialogs.py` - 10+ occurrences dans divers dialogues
+
+**Solution implémentée** :
+```python
+# Fix pour PyInstaller --noconsole mode: sys.stderr/stdout peuvent être None
+if sys.stderr is None:
+    sys.stderr = open('nul', 'w') if sys.platform == 'win32' else open('/dev/null', 'w')
+if sys.stdout is None:
+    sys.stdout = open('nul', 'w') if sys.platform == 'win32' else open('/dev/null', 'w')
+```
+
+**Résultat** :
+- ✅ Application démarre avec succès en mode `--noconsole`
+- ✅ Plus de crashs `NoneType`
+- ✅ Logs toujours écrits correctement dans les fichiers
+- ✅ .exe totalement fonctionnel
+
+**Fichiers modifiés** : `main.py`, `backup_manager.py`, `dialogs.py`
+
+### Fix : Prévention crash silencieux lors du test de connexion Herald
+
+**Problème** : L'application .exe crashait silencieusement (sans logs) pendant la vérification de connexion Herald Eden. Aucun message d'erreur, aucun log, aucun traceback - crash silencieux complet.
+
+**Causes racines identifiées** :
+1. **Import Selenium** pouvait échouer dans le .exe PyInstaller sans logging approprié
+2. **Initialisation du driver** pouvait retourner `None` et causer un crash dans `driver.quit()`
+3. **Exceptions non catchées** dans le thread `EdenStatusThread` crashaient tout le process
+4. **Pas de traceback complet** pour déboguer les erreurs
+
+**Chemin de code vulnérable** :
+- `cookie_manager.test_eden_connection()` - Méthode de test principale
+- `ui_manager.EdenStatusThread.run()` - Thread de vérification en arrière-plan
+- Initialisation et cleanup du WebDriver Selenium
+
+**Solutions implémentées** :
+
+**Dans `cookie_manager.py`** :
+- Initialisation `driver = None` au début de la méthode pour cleanup sécurisé
+- `try-except` séparé pour les imports Selenium avec messages d'erreur explicites
+- Vérification `if not driver` avant toute opération sur le driver
+- Bloc `finally` protégé avec `if driver:` avant `driver.quit()`
+- Logging complet avec `traceback.format_exc()` pour débogage
+- Correction indentation dans le bloc de sauvegarde du fichier debug
+
+**Dans `ui_manager.py`** :
+- `try-except` global dans `EdenStatusThread.run()`
+- Logging complet des exceptions avec traceback
+- Émission d'un signal d'erreur au lieu de crasher
+- UI reste responsive même en cas d'erreur
+
+**Structure de gestion d'erreur améliorée** :
+```python
+driver = None  # Initialisation sécurisée
+try:
+    # Import séparé avec gestion d'erreur spécifique
+    try:
+        from selenium import webdriver
+    except ImportError as e:
+        # Log et retour d'erreur structurée
+        
+    # Initialisation du driver
+    driver, browser = self._initialize_browser_driver(...)
+    if not driver:
+        # Retour anticipé avec message d'erreur
+        
+    # Opérations Selenium...
+    
+except Exception as e:
+    # Logging traceback complet
+    traceback_details = traceback.format_exc()
+    logger.error(f"CRASH: {e}\n{traceback_details}")
+    
+finally:
+    # Cleanup sécurisé
+    if driver:
+        try:
+            driver.quit()
+        except Exception as e:
+            logger.warning(f"Erreur cleanup driver: {e}")
+```
+
+**Résultat** :
+- ✅ Plus de crashs silencieux
+- ✅ Toutes les exceptions loguées dans `Logs/debug.log`
+- ✅ Messages d'erreur clairs pour les utilisateurs
+- ✅ Application reste stable même si le test Herald échoue
+- ✅ Traceback complet disponible pour débogage
+- ✅ Les crashs de thread ne tuent pas toute l'application
+
+**Fichiers modifiés** : `cookie_manager.py` (117 lignes changées), `ui_manager.py`
+
+**Tests** : Validé dans le .exe compilé avec divers scénarios d'erreur (pas de navigateur, problèmes réseau, cookies invalides)
+
+---
+
 ## 🧹 Nettoyage du Répertoire
 
 - **Suppression de 13 scripts debug temporaires**

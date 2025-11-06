@@ -574,19 +574,31 @@ class CookieManager:
                 'accessible': bool
             }
         """
-        if not self.cookie_exists():
-            return {
-                'success': False,
-                'status_code': None,
-                'message': 'Aucun cookie trouvé',
-                'accessible': False
-            }
+        driver = None  # Initialize to None for safe cleanup
         
         try:
-            from selenium import webdriver
-            from selenium.webdriver.chrome.service import Service
-            from selenium.webdriver.chrome.options import Options
-            from webdriver_manager.chrome import ChromeDriverManager
+            if not self.cookie_exists():
+                return {
+                    'success': False,
+                    'status_code': None,
+                    'message': 'Aucun cookie trouvé',
+                    'accessible': False
+                }
+            
+            try:
+                from selenium import webdriver
+                from selenium.webdriver.chrome.service import Service
+                from selenium.webdriver.chrome.options import Options
+                from webdriver_manager.chrome import ChromeDriverManager
+            except ImportError as e:
+                missing_module = str(e).split("'")[1] if "'" in str(e) else "inconnu"
+                eden_logger.error(f"Import Selenium échoué: {e}", extra={"action": "TEST"})
+                return {
+                    'success': False,
+                    'status_code': None,
+                    'message': f'Module {missing_module} non installé',
+                    'accessible': False
+                }
             
             # Charger les cookies
             cookies_list = self.get_cookies_for_scraper()
@@ -613,6 +625,7 @@ class CookieManager:
             )
             
             if not driver:
+                eden_logger.error("Impossible d'initialiser un navigateur", extra={"action": "TEST"})
                 return {
                     'success': False,
                     'status_code': None,
@@ -624,90 +637,89 @@ class CookieManager:
             self.last_browser_used = browser_name
             eden_logger.debug("✅ Test avec {browser_name} (headless)", extra={"action": "TEST"})
             
-            try:
-                # TEST ALIGNÉ EXACTEMENT AVEC load_cookies()
-                import time
-                
-                # Étape 1: Page d'accueil
-                driver.get("https://eden-daoc.net/")
-                time.sleep(2)
-                
-                # Étape 2: Ajouter les cookies
-                eden_logger.info(f"Ajout de {len(cookies_list)} cookies", extra={"action": "TEST"})
-                for cookie in cookies_list:
-                    try:
-                        driver.add_cookie(cookie)
-                    except:
-                        pass
-                
-                time.sleep(1)
-                
-                # Étape 3: Refresh
-                eden_logger.info("Refresh pour activer les cookies", extra={"action": "TEST"})
-                driver.refresh()
-                time.sleep(3)
-                
-                # Étape 4: Aller sur le Herald
-                eden_logger.info("Navigation vers https://eden-daoc.net/herald", extra={"action": "TEST"})
-                driver.get("https://eden-daoc.net/herald")
-                time.sleep(5)  # Attendre plus longtemps pour que le contenu se charge
-                
-                # Récupérer et analyser le HTML
-                page_source = driver.page_source
-                
-                # DEBUG: Sauvegarder pour inspection
-                import os
-                debug_file = os.path.join(os.path.dirname(__file__), '..', 'Scripts', 'debug_test_connection.html')
+            # TEST ALIGNÉ EXACTEMENT AVEC load_cookies()
+            import time
+            
+            # Étape 1: Page d'accueil
+            driver.get("https://eden-daoc.net/")
+            time.sleep(2)
+            
+            # Étape 2: Ajouter les cookies
+            eden_logger.info(f"Ajout de {len(cookies_list)} cookies", extra={"action": "TEST"})
+            for cookie in cookies_list:
                 try:
-                    with open(debug_file, 'w', encoding='utf-8') as f:
-                        f.write(page_source)
+                    driver.add_cookie(cookie)
                 except:
                     pass
-                
-                # MÉTHODE DE DÉTECTION SIMPLE ET FIABLE:
-                # Si on n'a pas le message d'erreur "not available" → On est connecté
-                error_message = 'The requested page "herald" is not available.'
-                has_error = error_message in page_source
-                
-                eden_logger.debug(f"HTML size: {len(page_source)}, error present: {has_error}", extra={"action": "TEST"})
-                
-                # LOGIQUE SIMPLE: Pas d'erreur = Connecté
-                if not has_error:
-                    eden_logger.info("CONNECTÉ - Pas de message d'erreur détecté", extra={"action": "TEST"})
-                    return {
-                        'success': True,
-                        'status_code': 200,
-                        'message': 'Connecté à Herald',
-                        'accessible': True
-                    }
-                else:
-                    eden_logger.warning('NON CONNECTÉ - Message d\'erreur détecté', extra={"action": "TEST"})
-                    return {
-                        'success': True,
-                        'status_code': 200,
-                        'message': 'Non connecté à Herald',
-                        'accessible': False
-                    }
+            
+            time.sleep(1)
+            
+            # Étape 3: Refresh
+            eden_logger.info("Refresh pour activer les cookies", extra={"action": "TEST"})
+            driver.refresh()
+            time.sleep(3)
+            
+            # Étape 4: Aller sur le Herald
+            eden_logger.info("Navigation vers https://eden-daoc.net/herald", extra={"action": "TEST"})
+            driver.get("https://eden-daoc.net/herald")
+            time.sleep(5)  # Attendre plus longtemps pour que le contenu se charge
+            
+            # Récupérer et analyser le HTML
+            page_source = driver.page_source
+            
+            # DEBUG: Sauvegarder pour inspection
+            import os
+            debug_file = os.path.join(os.path.dirname(__file__), '..', 'Scripts', 'debug_test_connection.html')
+            try:
+                with open(debug_file, 'w', encoding='utf-8') as f:
+                    f.write(page_source)
+            except:
+                pass
+            
+            # MÉTHODE DE DÉTECTION SIMPLE ET FIABLE:
+            # Si on n'a pas le message d'erreur "not available" → On est connecté
+            error_message = 'The requested page "herald" is not available.'
+            has_error = error_message in page_source
+            
+            eden_logger.debug(f"HTML size: {len(page_source)}, error present: {has_error}", extra={"action": "TEST"})
+            
+            # LOGIQUE SIMPLE: Pas d'erreur = Connecté
+            if not has_error:
+                eden_logger.info("CONNECTÉ - Pas de message d'erreur détecté", extra={"action": "TEST"})
+                return {
+                    'success': True,
+                    'status_code': 200,
+                    'message': 'Connecté à Herald',
+                    'accessible': True
+                }
+            else:
+                eden_logger.warning('NON CONNECTÉ - Message d\'erreur détecté', extra={"action": "TEST"})
+                return {
+                    'success': True,
+                    'status_code': 200,
+                    'message': 'Non connecté à Herald',
+                    'accessible': False
+                }
                     
-            finally:
-                driver.quit()
-                
-        except ImportError as e:
-            missing_module = str(e).split("'")[1] if "'" in str(e) else "inconnu"
-            return {
-                'success': False,
-                'status_code': None,
-                'message': f'Module {missing_module} non installé',
-                'accessible': False
-            }
         except Exception as e:
-            eden_logger.error(f"Erreur lors du test de connexion: {e}")
+            # Log détaillé de l'exception pour debug
+            import traceback
+            error_details = traceback.format_exc()
+            eden_logger.error(f"CRASH test_eden_connection: {e}\n{error_details}", extra={"action": "TEST"})
             return {
                 'success': False,
                 'status_code': None,
-                'message': f'Erreur: {str(e)[:50]}',
+                'message': f'Erreur: {str(e)[:100]}',
                 'accessible': False
             }
+        finally:
+            # Toujours fermer le driver proprement
+            if driver:
+                try:
+                    driver.quit()
+                    eden_logger.debug("Driver fermé proprement", extra={"action": "TEST"})
+                except Exception as e:
+                    eden_logger.warning(f"Erreur lors de la fermeture du driver: {e}", extra={"action": "TEST"})
 
     def open_url_with_cookies(self, url):
         """

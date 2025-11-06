@@ -22,18 +22,26 @@ class EdenStatusThread(QThread):
     
     def run(self):
         """Vérifie le statut de connexion"""
-        if not self.cookie_manager.cookie_exists():
-            self.status_updated.emit(False, "Aucun cookie")
-            return
-        
-        info = self.cookie_manager.get_cookie_info()
-        if not info or not info.get('is_valid'):
-            self.status_updated.emit(False, "Cookies expirés")
-            return
-        
-        # Test de connexion
-        result = self.cookie_manager.test_eden_connection()
-        self.status_updated.emit(result['accessible'], result['message'])
+        try:
+            if not self.cookie_manager.cookie_exists():
+                self.status_updated.emit(False, "Aucun cookie")
+                return
+            
+            info = self.cookie_manager.get_cookie_info()
+            if not info or not info.get('is_valid'):
+                self.status_updated.emit(False, "Cookies expirés")
+                return
+            
+            # Test de connexion
+            result = self.cookie_manager.test_eden_connection()
+            self.status_updated.emit(result['accessible'], result['message'])
+            
+        except Exception as e:
+            # Log et émettre un signal d'erreur au lieu de crasher
+            import logging
+            import traceback
+            logging.error(f"EdenStatusThread crash: {e}\n{traceback.format_exc()}")
+            self.status_updated.emit(False, f"Erreur: {str(e)[:50]}")
 
 
 class UIManager:

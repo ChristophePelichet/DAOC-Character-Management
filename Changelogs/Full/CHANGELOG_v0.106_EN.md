@@ -615,6 +615,55 @@ finally:
 
 **Testing**: Validated in compiled .exe with various error scenarios (no browser, network issues, invalid cookies)
 
+### Fix: Backup logging errors - proper error messages in logs
+
+**Issue**: Backup logs showed meaningless literal strings instead of actual error messages:
+```
+2025-11-03 14:14:28 - BACKUP - ERROR - INFO - error_msg
+2025-11-03 14:20:18 - BACKUP - ERROR - INFO - error_msg
+```
+
+**Root cause**: The code was logging string literals `"error_msg"` and `"success_msg"` instead of the actual variable contents. Additionally, f-string formatting was malformed with escaped quotes.
+
+**Problematic code**:
+```python
+# Lines 185, 223 - Literal strings logged instead of variables
+self.logger.error("error_msg", extra={"action": "INFO"})
+self.logger.info("success_msg", extra={"action": "INFO"})
+
+# Line 200-202 - Malformed f-strings
+self.logger.info("Creating compressed backup: {os.path.basename(backup_file)}\", action=", ...)
+```
+
+**Fixed code**:
+```python
+# Proper variable logging with log_with_action
+log_with_action(self.logger, "error", error_msg, action="CHECK")
+log_with_action(self.logger, "info", success_msg, action="SUCCESS")
+
+# Correct f-string formatting
+log_with_action(self.logger, "info", f"Creating compressed backup: {os.path.basename(backup_file)}", action="ZIP")
+```
+
+**Changes made**:
+- **Line 185**: Use `log_with_action()` with actual `error_msg` variable instead of literal string
+- **Line 200**: Fixed f-string formatting for compressed backup message
+- **Line 202**: Changed action from `ZIP` to `COPY` for uncompressed backups (proper categorization)
+- **Line 215**: Use `log_with_action()` with actual `success_msg` variable instead of literal string
+- **Line 223**: Use `log_with_action()` with actual `error_msg` variable instead of literal string
+- Proper action tags: `CHECK`, `ZIP`, `COPY`, `SUCCESS`, `ERROR`, `RETENTION`
+
+**Result**:
+- ✅ Clear error messages in logs: `BACKUP - ERROR - CHECK - Characters folder not found`
+- ✅ Success messages show actual filenames: `BACKUP - INFO - SUCCESS - Backup created: backup_characters_20251106_153045_Delete.zip`
+- ✅ All backup operations fully traceable with meaningful log messages
+- ✅ Proper action categorization for easier debugging
+- ✅ No more meaningless "error_msg" or "success_msg" literals in logs
+
+**Files modified**: `backup_manager.py` (6 lines changed)
+
+**Impact**: This fix makes it much easier to debug backup issues by providing clear, actionable error messages instead of placeholder text.
+
 ---
 
 ## 🧹 Repository Cleanup

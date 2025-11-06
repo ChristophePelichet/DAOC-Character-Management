@@ -80,6 +80,7 @@
 ✅ **Driver-Bereinigungsschutz** - Sicheres driver.quit() mit None-Prüfungen  
 ✅ **Thread-Exception-Abfangen** - EdenStatusThread-Fehler stürzen Anwendung nicht mehr ab  
 ✅ **Vollständiges Traceback-Logging** - Alle Fehler in debug.log protokolliert für Fehlerbehebung  
+✅ **Backup-Logging-Fehler behoben** - Ordnungsgemäße Fehlermeldungen statt literaler "error_msg" Platzhalter  
 
 ## 🧹 Repository-Bereinigung
 ✅ Löschung von 13 temporären Debug-Skripten  

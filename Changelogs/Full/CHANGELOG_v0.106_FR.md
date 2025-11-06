@@ -615,6 +615,55 @@ finally:
 
 **Tests** : Validé dans le .exe compilé avec divers scénarios d'erreur (pas de navigateur, problèmes réseau, cookies invalides)
 
+### Fix : Erreurs de logging du backup - messages d'erreur appropriés
+
+**Problème** : Les logs de backup affichaient des chaînes littérales sans signification au lieu des vrais messages d'erreur :
+```
+2025-11-03 14:14:28 - BACKUP - ERROR - INFO - error_msg
+2025-11-03 14:20:18 - BACKUP - ERROR - INFO - error_msg
+```
+
+**Cause racine** : Le code loguait les chaînes littérales `"error_msg"` et `"success_msg"` au lieu du contenu réel des variables. De plus, le formatage des f-strings était malformé avec des guillemets échappés.
+
+**Code problématique** :
+```python
+# Lignes 185, 223 - Chaînes littérales au lieu des variables
+self.logger.error("error_msg", extra={"action": "INFO"})
+self.logger.info("success_msg", extra={"action": "INFO"})
+
+# Ligne 200-202 - F-strings malformés
+self.logger.info("Creating compressed backup: {os.path.basename(backup_file)}\", action=", ...)
+```
+
+**Code corrigé** :
+```python
+# Logging approprié des variables avec log_with_action
+log_with_action(self.logger, "error", error_msg, action="CHECK")
+log_with_action(self.logger, "info", success_msg, action="SUCCESS")
+
+# Formatage f-string correct
+log_with_action(self.logger, "info", f"Creating compressed backup: {os.path.basename(backup_file)}", action="ZIP")
+```
+
+**Modifications effectuées** :
+- **Ligne 185** : Utilisation de `log_with_action()` avec la vraie variable `error_msg` au lieu de la chaîne littérale
+- **Ligne 200** : Correction du formatage f-string pour le message de backup compressé
+- **Ligne 202** : Changement de l'action de `ZIP` à `COPY` pour les backups non compressés (catégorisation appropriée)
+- **Ligne 215** : Utilisation de `log_with_action()` avec la vraie variable `success_msg` au lieu de la chaîne littérale
+- **Ligne 223** : Utilisation de `log_with_action()` avec la vraie variable `error_msg` au lieu de la chaîne littérale
+- Tags d'actions appropriés : `CHECK`, `ZIP`, `COPY`, `SUCCESS`, `ERROR`, `RETENTION`
+
+**Résultat** :
+- ✅ Messages d'erreur clairs dans les logs : `BACKUP - ERROR - CHECK - Characters folder not found`
+- ✅ Messages de succès montrent les vrais noms de fichiers : `BACKUP - INFO - SUCCESS - Backup created: backup_characters_20251106_153045_Delete.zip`
+- ✅ Toutes les opérations de backup entièrement traçables avec des messages significatifs
+- ✅ Catégorisation appropriée des actions pour faciliter le débogage
+- ✅ Plus de littéraux "error_msg" ou "success_msg" sans signification dans les logs
+
+**Fichiers modifiés** : `backup_manager.py` (6 lignes changées)
+
+**Impact** : Cette correction facilite grandement le débogage des problèmes de backup en fournissant des messages d'erreur clairs et actionnables au lieu de texte placeholder.
+
 ---
 
 ## 🧹 Nettoyage du Répertoire

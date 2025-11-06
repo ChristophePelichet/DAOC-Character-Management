@@ -80,6 +80,7 @@
 ✅ **Protection cleanup driver** - driver.quit() sécurisé avec vérifications None  
 ✅ **Capture exceptions thread** - Erreurs EdenStatusThread ne crashent plus l'application  
 ✅ **Logging traceback complet** - Toutes erreurs loguées dans debug.log pour dépannage  
+✅ **Erreurs logging backup corrigées** - Messages d'erreur appropriés au lieu de placeholders "error_msg" littéraux  
 
 ## 🧹 Nettoyage du Répertoire
 ✅ Suppression de 13 scripts debug temporaires  

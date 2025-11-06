@@ -18,6 +18,12 @@ import threading
 import atexit
 from datetime import datetime
 
+# Fix for PyInstaller --noconsole mode: sys.stderr/stdout can be None
+if sys.stderr is None:
+    sys.stderr = open('nul', 'w') if sys.platform == 'win32' else open('/dev/null', 'w')
+if sys.stdout is None:
+    sys.stdout = open('nul', 'w') if sys.platform == 'win32' else open('/dev/null', 'w')
+
 from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QMessageBox, QDialog, QStyleFactory, QHBoxLayout, QLabel, QProgressBar
 from PySide6.QtGui import QStandardItemModel
 from PySide6.QtCore import Qt, Slot, QTimer

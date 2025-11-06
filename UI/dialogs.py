@@ -4,8 +4,14 @@ Dialog windows for the DAOC Character Manager application.
 
 import re
 import os
+import sys
 import logging
 from datetime import datetime
+
+# Fix for PyInstaller --noconsole mode: sys.stderr can be None
+if sys.stderr is None:
+    sys.stderr = open('nul', 'w') if sys.platform == 'win32' else open('/dev/null', 'w')
+
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QFormLayout, QGroupBox, QLabel, 
     QPushButton, QLineEdit, QComboBox, QCheckBox, QSlider, QMessageBox,

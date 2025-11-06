@@ -8,6 +8,10 @@ from datetime import datetime
 from pathlib import Path
 from .logging_manager import get_logger, log_with_action, LOGGER_BACKUP, LoggerFactory
 
+# Fix for PyInstaller --noconsole mode: sys.stderr can be None
+if sys.stderr is None:
+    sys.stderr = open('nul', 'w') if sys.platform == 'win32' else open('/dev/null', 'w')
+
 class BackupManager:
     """Manages character backups with compression, retention policies, and size limits."""
 

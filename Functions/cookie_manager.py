@@ -657,12 +657,12 @@ class CookieManager:
             # Étape 3: Refresh
             eden_logger.info("Refresh pour activer les cookies", extra={"action": "TEST"})
             driver.refresh()
-            time.sleep(3)
+            time.sleep(2)  # Optimisé: 3s → 2s (Phase 1 bis - conservateur)
             
             # Étape 4: Aller sur le Herald
             eden_logger.info("Navigation vers https://eden-daoc.net/herald", extra={"action": "TEST"})
             driver.get("https://eden-daoc.net/herald")
-            time.sleep(5)  # Attendre plus longtemps pour que le contenu se charge
+            time.sleep(4)  # Optimisé: 5s → 4s (Phase 1 bis - conservateur)
             
             # Récupérer et analyser le HTML
             page_source = driver.page_source

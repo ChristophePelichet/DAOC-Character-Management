@@ -1,6 +1,13 @@
 # v0.106 - Système de Logging, Sauvegarde Cookies & Optimisation Herald
 
-## 🔧 Corrections Critiques Herald Search (NOUVEAU - 7 nov 2025)
+## ✨ Amélioration Backup - Noms de Fichiers Clairs (NOUVEAU - 7 nov 2025)
+✅ **Nom du personnage** inclus dans les fichiers de backup  
+✅ Opérations simples : `backup_characters_20251107_143025_Update_Merlin.zip`  
+✅ Opérations multiples : `backup_characters_20251107_143025_Update_multi.zip`  
+✅ Identification immédiate du personnage concerné  
+✅ Navigation dans l'historique des backups facilitée  
+
+## 🔧 Corrections Critiques Herald Search (7 nov 2025)
 ✅ **FIX CRITIQUE** : Crash brutal lors d'erreurs de recherche Herald résolu  
 ✅ Fermeture propre du WebDriver dans tous les chemins d'erreur  
 ✅ Logging du stacktrace complet pour diagnostic  

@@ -6,6 +6,118 @@
 
 ---
 
+## ✨ Amélioration Backup - Noms de Fichiers Clairs (7 novembre 2025)
+
+### Amélioration : Inclusion du nom de personnage dans les fichiers de backup
+
+**Problème** :
+Les noms de fichiers de backup n'étaient pas assez explicites - impossible de savoir rapidement quel personnage était concerné par une sauvegarde spécifique.
+
+**Exemple ancien format** :
+```
+backup_characters_20251107_143025_Update.zip
+backup_characters_20251107_144512_Delete.zip
+```
+❌ Quel personnage a été modifié ? Impossible à dire sans ouvrir le fichier.
+
+**Nouveau format** :
+```
+# Opération sur un personnage unique
+backup_characters_20251107_143025_Update_Merlin.zip
+backup_characters_20251107_144512_Delete_Arthur.zip
+backup_characters_20251107_145820_Rename_Lancelot.zip
+
+# Opération sur plusieurs personnages
+backup_characters_20251107_150230_Update_multi.zip
+
+# Backup manuel/automatique global
+backup_characters_20251107_151045_Manual.zip
+```
+
+**Modifications apportées** :
+
+1. **Ajout du paramètre `character_name`** :
+```python
+# backup_manager.py
+def backup_characters_force(self, reason=None, character_name=None):
+    """
+    Args:
+        reason: "Manual", "Delete", "Update", "Rename"...
+        character_name: Nom du personnage ou "multi" pour opérations multiples
+    """
+    return self._perform_backup("MANUAL-BACKUP", reason=reason or "Manual", character_name=character_name)
+
+def _perform_backup(self, mode="MANUAL", reason=None, character_name=None):
+    # Génération du nom de fichier
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    reason_str = f"_{reason}" if reason else ""
+    char_str = f"_{character_name}" if character_name else ""
+    
+    backup_name = f"backup_characters_{timestamp}{reason_str}{char_str}"
+```
+
+2. **Mise à jour de tous les points d'appel** :
+
+**Suppression de personnage** :
+```python
+# character_actions_manager.py
+self.main_window.backup_manager.backup_characters_force(
+    reason="Delete", 
+    character_name=char_name  # ✅ Nom du personnage
+)
+```
+
+**Renommage** :
+```python
+# character_actions_manager.py
+self.main_window.backup_manager.backup_characters_force(
+    reason="Rename", 
+    character_name=old_name  # ✅ Ancien nom du personnage
+)
+```
+
+**Modifications (rank, info, armor)** :
+```python
+# dialogs.py
+self.parent_app.backup_manager.backup_characters_force(
+    reason="Update", 
+    character_name=self.character_data.get('name', 'Unknown')  # ✅ Nom du personnage
+)
+```
+
+**Import massif** :
+```python
+# dialogs.py - Mass Import
+parent_app.backup_manager.backup_characters_force(
+    reason="Update", 
+    character_name="multi"  # ✅ Tag pour opérations multiples
+)
+```
+
+**Backup manuel** :
+```python
+# dialogs.py - Manual backup button
+self.backup_manager.backup_characters_force()  # ✅ Pas de nom (backup global)
+```
+
+**Fichiers modifiés** :
+- `Functions/backup_manager.py` (ajout paramètre + génération nom)
+- `Functions/character_actions_manager.py` (delete, rename)
+- `UI/dialogs.py` (update rank/info/armor, mass import)
+- `main.py` (update from Herald)
+
+**Avantages** :
+- ✅ **Identification immédiate** : Vous savez tout de suite quel personnage est concerné
+- ✅ **Distinction claire** : Opérations simples vs. multiples facilement identifiables
+- ✅ **Historique lisible** : Navigation dans les backups beaucoup plus intuitive
+- ✅ **Recherche rapide** : Trouvez facilement la sauvegarde d'un personnage spécifique
+- ✅ **Maintenance facilitée** : Nettoyage des anciens backups plus simple
+
+**Commit** :
+- `339a5a8` - feat: Add character name to backup filenames for clarity
+
+---
+
 ## 🔧 Corrections Critiques Herald Search (7 novembre 2025)
 
 ### FIX CRITIQUE : Crash brutal lors d'erreurs de recherche Herald

@@ -1,6 +1,13 @@
 # v0.106 - Logging-System, Cookie-Sicherung & Herald-Optimierung
 
-## 🔧 Kritische Herald-Such-Korrekturen (NEU - 7. Nov 2025)
+## ✨ Backup-Verbesserung - Klare Dateinamen (NEU - 7. Nov 2025)
+✅ **Charaktername** in Backup-Dateinamen enthalten  
+✅ Einzeloperationen: `backup_characters_20251107_143025_Update_Merlin.zip`  
+✅ Massenoperationen: `backup_characters_20251107_143025_Update_multi.zip`  
+✅ Sofortige Identifizierung des betroffenen Charakters  
+✅ Einfachere Navigation im Backup-Verlauf  
+
+## 🔧 Kritische Herald-Such-Korrekturen (7. Nov 2025)
 ✅ **KRITISCHER FIX**: Brutaler Absturz bei Herald-Suchfehlern behoben  
 ✅ Ordnungsgemäßes Schließen des WebDrivers in allen Fehlerpfaden  
 ✅ Vollständiges Stacktrace-Logging für Diagnosen  

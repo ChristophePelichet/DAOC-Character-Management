@@ -168,13 +168,14 @@ class BackupManager:
         log_with_action(self.logger, "info", "Daily limit OK, proceeding with backup...", action="AUTO_PROCEED")
         return self._perform_backup("AUTO-BACKUP", reason="Action")
 
-    def _perform_backup(self, mode="MANUAL", reason=None):
+    def _perform_backup(self, mode="MANUAL", reason=None, character_name=None):
         """
         Internal method that performs the actual backup.
         
         Args:
             mode: String describing the backup mode (e.g., "AUTO-BACKUP", "MANUAL-BACKUP")
             reason: Optional string describing why the backup was triggered (e.g., "Create", "Delete", "Update")
+            character_name: Optional character name for single-character operations, or "multi" for mass operations
         
         Returns:
             dict: Status with keys 'success' (bool), 'message' (str), 'file' (str or None)
@@ -200,10 +201,17 @@ class BackupManager:
                     "file": None
                 }
 
-            # Create backup filename with timestamp and reason
+            # Create backup filename with timestamp, reason and character name
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             reason_str = f"_{reason}" if reason else ""
-            backup_name = f"backup_characters_{timestamp}{reason_str}"
+            
+            # Add character name or "multi" tag to backup filename
+            if character_name:
+                char_str = f"_{character_name}"
+            else:
+                char_str = ""
+            
+            backup_name = f"backup_characters_{timestamp}{reason_str}{char_str}"
             
             if should_compress:
                 backup_file = os.path.join(self.backup_dir, f"{backup_name}.zip")
@@ -239,7 +247,7 @@ class BackupManager:
                 "file": None
             }
 
-    def backup_characters_force(self, reason=None):
+    def backup_characters_force(self, reason=None, character_name=None):
         """
         Create a backup of the Characters folder immediately, ignoring daily limit.
         Used when manually triggered from UI or during critical operations.
@@ -247,12 +255,13 @@ class BackupManager:
         
         Args:
             reason: Optional string describing why the backup was triggered (e.g., "Manual", "Delete", "Update")
+            character_name: Optional character name for single-character operations, or "multi" for mass operations
         
         Returns:
             dict: Status with keys 'success' (bool), 'message' (str), 'file' (str or None)
         """
         log_with_action(self.logger, "info", "MANUAL-BACKUP triggered - Bypassing daily limit...", action="MANUAL_TRIGGER")
-        return self._perform_backup("MANUAL-BACKUP", reason=reason or "Manual")
+        return self._perform_backup("MANUAL-BACKUP", reason=reason or "Manual", character_name=character_name)
 
     def backup_cookies(self):
         """

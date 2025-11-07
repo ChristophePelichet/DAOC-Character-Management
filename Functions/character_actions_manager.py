@@ -151,8 +151,8 @@ class CharacterActionsManager:
         # Backup BEFORE deletion
         try:
             if hasattr(self.main_window, 'backup_manager'):
-                print("[BACKUP_TRIGGER] Action: DELETE character (BEFORE) - Creating backup...")
-                self.main_window.backup_manager.backup_characters_force(reason="Delete")
+                print(f"[BACKUP_TRIGGER] Action: DELETE character '{char_name}' (BEFORE) - Creating backup...")
+                self.main_window.backup_manager.backup_characters_force(reason="Delete", character_name=char_name)
         except Exception as e:
             logging.warning(f"Backup before deletion failed: {e}")
                 
@@ -207,8 +207,8 @@ class CharacterActionsManager:
         # Backup BEFORE renaming
         try:
             if hasattr(self.main_window, 'backup_manager'):
-                print("[BACKUP_TRIGGER] Action: RENAME character (BEFORE) - Creating backup...")
-                self.main_window.backup_manager.backup_characters_force(reason="Rename")
+                print(f"[BACKUP_TRIGGER] Action: RENAME character '{old_name}' -> '{new_name}' (BEFORE) - Creating backup...")
+                self.main_window.backup_manager.backup_characters_force(reason="Rename", character_name=old_name)
         except Exception as e:
             logging.warning(f"Backup before rename failed: {e}")
             

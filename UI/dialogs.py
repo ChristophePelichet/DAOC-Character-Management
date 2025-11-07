@@ -461,13 +461,14 @@ class CharacterSheetWindow(QDialog):
             # Trigger backup after character modification
             if hasattr(self.parent_app, 'backup_manager'):
                 try:
+                    char_name = self.character_data.get('name', 'Unknown')
                     import sys
                     import logging
-                    print("[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Rank) - Backup with reason=Update")
-                    sys.stderr.write("[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Rank) - Backup with reason=Update\n")
+                    print(f"[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Rank) '{char_name}' - Backup with reason=Update")
+                    sys.stderr.write(f"[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Rank) '{char_name}' - Backup with reason=Update\n")
                     sys.stderr.flush()
-                    logging.info("[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Rank) - Backup with reason=Update")
-                    self.parent_app.backup_manager.backup_characters_force(reason="Update")
+                    logging.info(f"[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Rank) '{char_name}' - Backup with reason=Update")
+                    self.parent_app.backup_manager.backup_characters_force(reason="Update", character_name=char_name)
                 except Exception as e:
                     print(f"[BACKUP_TRIGGER] Warning: Backup after rank modification failed: {e}")
                     sys.stderr.write(f"[BACKUP_TRIGGER] Warning: Backup after rank modification failed: {e}\n")
@@ -523,13 +524,14 @@ class CharacterSheetWindow(QDialog):
                 # Trigger backup after character modification
                 if hasattr(self.parent_app, 'backup_manager'):
                     try:
+                        char_name = self.character_data.get('name', 'Unknown')
                         import sys
                         import logging
-                        print("[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Rank) - Backup with reason=Update")
-                        sys.stderr.write("[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Rank) - Backup with reason=Update\n")
+                        print(f"[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Rank) '{char_name}' - Backup with reason=Update")
+                        sys.stderr.write(f"[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Rank) '{char_name}' - Backup with reason=Update\n")
                         sys.stderr.flush()
-                        logging.info("[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Rank) - Backup with reason=Update")
-                        self.parent_app.backup_manager.backup_characters_force(reason="Update")
+                        logging.info(f"[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Rank) '{char_name}' - Backup with reason=Update")
+                        self.parent_app.backup_manager.backup_characters_force(reason="Update", character_name=char_name)
                     except Exception as e:
                         print(f"[BACKUP_TRIGGER] Warning: Backup after rank modification failed: {e}")
                         sys.stderr.write(f"[BACKUP_TRIGGER] Warning: Backup after rank modification failed: {e}\n")
@@ -617,13 +619,14 @@ class CharacterSheetWindow(QDialog):
                 # Trigger backup after character modification
                 if hasattr(self.parent_app, 'backup_manager'):
                     try:
+                        char_name = self.character_data.get('name', 'Unknown')
                         import sys
                         import logging
-                        print("[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Basic Info) - Backup with reason=Update")
-                        sys.stderr.write("[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Basic Info) - Backup with reason=Update\n")
+                        print(f"[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Basic Info) '{char_name}' - Backup with reason=Update")
+                        sys.stderr.write(f"[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Basic Info) '{char_name}' - Backup with reason=Update\n")
                         sys.stderr.flush()
-                        logging.info("[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Basic Info) - Backup with reason=Update")
-                        self.parent_app.backup_manager.backup_characters_force(reason="Update")
+                        logging.info(f"[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Basic Info) '{char_name}' - Backup with reason=Update")
+                        self.parent_app.backup_manager.backup_characters_force(reason="Update", character_name=char_name)
                     except Exception as e:
                         print(f"[BACKUP_TRIGGER] Warning: Backup after basic info modification failed: {e}")
                         sys.stderr.write(f"[BACKUP_TRIGGER] Warning: Backup after basic info modification failed: {e}\n")
@@ -857,13 +860,14 @@ class CharacterSheetWindow(QDialog):
             # Trigger backup after character modification
             if hasattr(self.parent_app, 'backup_manager'):
                 try:
+                    char_name = self.character_data.get('name', 'Unknown')
                     import sys
                     import logging
-                    print("[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Skills/Armor) - Backup with reason=Update")
-                    sys.stderr.write("[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Skills/Armor) - Backup with reason=Update\n")
+                    print(f"[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Skills/Armor) '{char_name}' - Backup with reason=Update")
+                    sys.stderr.write(f"[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Skills/Armor) '{char_name}' - Backup with reason=Update\n")
                     sys.stderr.flush()
-                    logging.info("[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Skills/Armor) - Backup with reason=Update")
-                    self.parent_app.backup_manager.backup_characters_force(reason="Update")
+                    logging.info(f"[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Skills/Armor) '{char_name}' - Backup with reason=Update")
+                    self.parent_app.backup_manager.backup_characters_force(reason="Update", character_name=char_name)
                 except Exception as e:
                     print(f"[BACKUP_TRIGGER] Warning: Backup after skills/armor modification failed: {e}")
                     sys.stderr.write(f"[BACKUP_TRIGGER] Warning: Backup after skills/armor modification failed: {e}\n")
@@ -2675,7 +2679,7 @@ class HeraldSearchDialog(QDialog):
                     sys.stderr.write(f"[BACKUP_TRIGGER] Action: CHARACTER IMPORT/UPDATE (Mass) - {success_count} created, {updated_count} updated - Backup with reason=Update\n")
                     sys.stderr.flush()
                     logging.info(f"[BACKUP_TRIGGER] Action: CHARACTER IMPORT/UPDATE (Mass) - {success_count} created, {updated_count} updated - Backup with reason=Update")
-                    parent_app.backup_manager.backup_characters_force(reason="Update")
+                    parent_app.backup_manager.backup_characters_force(reason="Update", character_name="multi")
                 except Exception as e:
                     print(f"[BACKUP_TRIGGER] Warning: Backup after mass import failed: {e}")
                     sys.stderr.write(f"[BACKUP_TRIGGER] Warning: Backup after mass import failed: {e}\n")

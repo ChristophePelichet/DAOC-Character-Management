@@ -6,6 +6,110 @@
 
 ---
 
+## 🔧 Corrections Critiques Herald Search (7 novembre 2025)
+
+### FIX CRITIQUE : Crash brutal lors d'erreurs de recherche Herald
+
+**Problème** :
+Le programme se fermait **brutalement** (sans message d'erreur) lors de certaines erreurs pendant la recherche Herald. Aucun log, fermeture immédiate.
+
+**Cause racine** :
+Le WebDriver (navigateur Chrome) n'était **pas fermé proprement** dans les chemins d'erreur :
+```python
+# eden_scraper.py - search_herald_character() (CASSÉ)
+try:
+    scraper = EdenScraper(cookie_manager)
+    if not scraper.initialize_driver(headless=False):
+        return False, "Erreur", ""  # ❌ scraper pas fermé !
+    
+    # ... code de recherche ...
+    scraper.close()  # ✅ OK dans le chemin normal
+    return True, message, path
+    
+except Exception as e:
+    return False, str(e), ""  # ❌ scraper pas fermé !
+```
+
+**Solution** :
+Ajout de `scraper.close()` dans **tous** les chemins d'erreur avec protection :
+```python
+# eden_scraper.py - search_herald_character() (CORRIGÉ)
+try:
+    scraper = EdenScraper(cookie_manager)
+    if not scraper.initialize_driver(headless=False):
+        try:
+            scraper.close()  # ✅ Fermeture propre
+        except:
+            pass
+        return False, "Erreur", ""
+    
+    # ... code de recherche ...
+    scraper.close()  # ✅ Chemin normal
+    return True, message, path
+    
+except Exception as e:
+    module_logger.error(f"Erreur: {e}")
+    module_logger.error(f"Stacktrace: {traceback.format_exc()}")  # ✅ Log complet
+    try:
+        scraper.close()  # ✅ Fermeture dans exception
+    except:
+        pass
+    return False, str(e), ""
+```
+
+**Corrections appliquées** :
+
+1. **Fermeture propre du WebDriver** (`eden_scraper.py`) :
+   - Ajout `scraper.close()` dans le bloc `except`
+   - Ajout `scraper.close()` quand `initialize_driver()` échoue
+   - Protection avec `try/except` pour éviter erreurs en cascade
+
+2. **Amélioration du diagnostic** :
+   - Import module `traceback`
+   - Logging du stacktrace complet en cas d'erreur
+   - Logs détaillés à chaque étape de la recherche
+
+3. **Validation par test de stabilité** :
+   - Script `test_herald_stability.py` créé
+   - 25 recherches consécutives testées
+   - Résultats : **100% de réussite, 0 crash**
+
+**Test de stabilité effectué** :
+```
+Configuration :
+  - Personnages testés : 5
+  - Itérations : 5
+  - Total de recherches : 25
+  - Délai entre recherches : 3s
+
+Résultats (2025-11-07) :
+  - Tests effectués : 25
+  - ✅ Réussis : 25 (100.0%)
+  - ❌ Échoués : 0 (0.0%)
+  - ⏱️ Durée totale : 662.3s (11.0 min)
+  - ⏱️ Durée moyenne : 26.5s par recherche
+  
+Conclusion : ✨ AUCUNE ERREUR - SYSTÈME STABLE ✨
+```
+
+**Fichiers modifiés** :
+- `Functions/eden_scraper.py` (fermeture propre + logs)
+
+**Fichiers ajoutés** :
+- `Scripts/test_herald_stability.py` (script de test automatisé)
+
+**Commits** :
+- `9e84494` - fix: Ensure scraper is properly closed in all error paths
+- `a351226` - test: Add Herald search stability test script
+
+**Impact** :
+- ✅ Plus de crash brutal du programme
+- ✅ Logs d'erreur complets pour diagnostic
+- ✅ 100% stable validé par tests automatisés
+- ✅ Script de test pour validation continue
+
+---
+
 ## 🔧 Corrections Critiques Backup (7 novembre 2025)
 
 ### FIX CRITIQUE : Résolution des chemins pour les backups

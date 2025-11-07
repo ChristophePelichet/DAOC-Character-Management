@@ -1,6 +1,13 @@
 # v0.106 - Système de Logging, Sauvegarde Cookies & Optimisation Herald
 
-## 🔧 Corrections Critiques Backup (NOUVEAU - 7 nov 2025)
+## 🔧 Corrections Critiques Herald Search (NOUVEAU - 7 nov 2025)
+✅ **FIX CRITIQUE** : Crash brutal lors d'erreurs de recherche Herald résolu  
+✅ Fermeture propre du WebDriver dans tous les chemins d'erreur  
+✅ Logging du stacktrace complet pour diagnostic  
+✅ Test de stabilité : 25/25 recherches réussies (100% stable)  
+✅ Script de test automatisé pour validation continue  
+
+## 🔧 Corrections Critiques Backup (7 nov 2025)
 ✅ **FIX CRITIQUE** : Résolution des chemins pour les backups (totalement cassés)  
 ✅ Backups automatiques création/modification/suppression fonctionnent maintenant  
 ✅ Backup manuel fonctionne correctement  

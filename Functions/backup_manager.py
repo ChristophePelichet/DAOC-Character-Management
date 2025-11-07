@@ -186,9 +186,11 @@ class BackupManager:
             # Get configuration
             should_compress = self.config_manager.get("backup_compress", True)
             
-            # Get characters folder
-            char_folder = self.config_manager.get("character_folder")
-            if not char_folder or not os.path.exists(char_folder):
+            # Get characters folder - use get_character_dir() which has proper fallback
+            from Functions.character_manager import get_character_dir
+            char_folder = get_character_dir()
+            
+            if not os.path.exists(char_folder):
                 # This is normal on first startup - folder will be created when first character is added
                 info_msg = "Characters folder does not exist yet (normal on first startup)"
                 log_with_action(self.logger, "info", info_msg, action="CHECK")
@@ -332,9 +334,11 @@ class BackupManager:
             # Get configuration
             should_compress = self.config_manager.get("cookies_backup_compress", True)
             
-            # Get cookies folder
-            cookies_folder = self.config_manager.get("cookies_folder")
-            if not cookies_folder or not os.path.exists(cookies_folder):
+            # Get cookies folder - use get_config_dir() which has proper fallback
+            from Functions.config_manager import get_config_dir
+            cookies_folder = self.config_manager.get("cookies_folder") or get_config_dir()
+            
+            if not os.path.exists(cookies_folder):
                 # This is normal on first startup - folder will be created when first cookies are saved
                 info_msg = "Cookies folder does not exist yet (normal on first startup)"
                 log_with_action(self.logger, "info", info_msg, action="COOKIES_INFO")
@@ -604,7 +608,8 @@ class BackupManager:
             log_with_action(self.logger, "info", f"Starting backup restoration from: {os.path.basename(backup_path)}", action="RESTORE")
             
             if restore_to is None:
-                restore_to = self.config_manager.get("character_folder")
+                from Functions.character_manager import get_character_dir
+                restore_to = get_character_dir()
             
             if not restore_to:
                 error_msg = "Target directory not specified"

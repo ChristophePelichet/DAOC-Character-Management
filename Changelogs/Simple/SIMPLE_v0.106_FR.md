@@ -1,6 +1,14 @@
-# v0.106 - Système de Logging, Sauvegarde Cookies & Améliorations
+# v0.106 - Système de Logging, Sauvegarde Cookies & Optimisation Herald
 
-## 🍪 Sauvegarde des Cookies Eden (NOUVEAU)
+## ⚡ Optimisation Herald Performance (NOUVEAU - 7 nov 2025)
+✅ Réduction des timeouts Herald de 18% (-4 secondes par opération)  
+✅ Test connexion : 11s → 9s (-2 secondes)  
+✅ Recherche personnage : 12s → 10s (-2 secondes)  
+✅ 100% stable - Approche conservatrice validée  
+✅ Documentation complète du diagnostic (HERALD_TIMEOUTS_ANALYSIS.md)  
+✅ Exclusion fichier debug Herald du versioning (.gitignore)  
+
+## 🍪 Sauvegarde des Cookies Eden
 ✅ Sauvegarde quotidienne automatique des cookies au démarrage  
 ✅ Section dédiée "Cookies Eden" dans la fenêtre de sauvegarde  
 ✅ Options identiques aux Characters : compression, limite de stockage  

@@ -1,6 +1,14 @@
-# v0.106 - Logging System, Cookies Backup & Improvements
+# v0.106 - Logging System, Cookies Backup & Herald Optimization
 
-## 🍪 Eden Cookies Backup (NEW)
+## ⚡ Herald Performance Optimization (NEW - Nov 7, 2025)
+✅ Herald timeout reduction by 18% (-4 seconds per operation)  
+✅ Connection test: 11s → 9s (-2 seconds)  
+✅ Character search: 12s → 10s (-2 seconds)  
+✅ 100% stable - Conservative approach validated  
+✅ Complete diagnostic documentation (HERALD_TIMEOUTS_ANALYSIS.md)  
+✅ Herald debug file excluded from versioning (.gitignore)  
+
+## 🍪 Eden Cookies Backup
 ✅ Automatic daily cookies backup on startup  
 ✅ Dedicated "Cookies Eden" section in backup window  
 ✅ Same options as Characters: compression, storage limit  

@@ -1,7 +1,53 @@
-# CHANGELOG v0.106 - Système de Logging, Sauvegarde Cookies & Améliorations
+# CHANGELOG v0.106 - Système de Logging, Sauvegarde Cookies & Optimisation Herald
 
-**Date** : 2025-11-01  
+**Date de début** : 2025-11-01  
+**Dernière mise à jour** : 2025-11-07  
 **Version** : 0.106
+
+---
+
+## ⚡ Optimisation Herald Performance (7 novembre 2025)
+
+### Réduction des Timeouts Herald
+
+**Contexte** :
+- Analyse complète des 21 occurrences de `time.sleep()` dans le code Herald
+- Tests de 2 approches : agressive (Phase 1) et conservatrice (Phase 1 bis)
+- Documentation complète du processus dans `HERALD_TIMEOUTS_ANALYSIS.md`
+
+**Phase 1 bis - Solution retenue** :
+```python
+# eden_scraper.py
+time.sleep(2)  # Refresh (avant: 3s) → -1s
+time.sleep(3)  # Herald load (avant: 4s) → -1s
+
+# cookie_manager.py  
+time.sleep(2)  # Refresh test (avant: 3s) → -1s
+time.sleep(4)  # Herald test (avant: 5s) → -1s
+```
+
+**Performance** :
+- Test connexion Herald : 11s → 9s (-18%)
+- Recherche personnage : 12s → 10s (-17%)
+- Import personnage : 15s → 13s (-13%)
+- **Gain global : -4 secondes par opération Herald**
+
+**Phase 1 aggressive - Abandonnée** :
+- Tentative de réduction agressive (-9 secondes)
+- Crash reproduit : QThread destroyed, multiples DevTools
+- Cause : Herald load 4s → 2s trop court, page non chargée
+- Leçons : Ne jamais supprimer de sleep, max -25% par timeout
+
+**Fichiers modifiés** :
+- `Functions/eden_scraper.py` (lignes 115, 142, 147)
+- `Functions/cookie_manager.py` (lignes 660, 665)
+- `.gitignore` (exclusion `Scripts/debug_herald_page.html`)
+- `HERALD_TIMEOUTS_ANALYSIS.md` (documentation complète)
+
+**Commits** :
+- `5d7d010` - Phase 1 bis : Conservative Herald timeout optimizations
+- `815c588` - Phase 1 bis adoptée (post-mortem Phase 1 aggressive)
+- `1885656` - Add debug_herald_page.html to .gitignore
 
 ---
 

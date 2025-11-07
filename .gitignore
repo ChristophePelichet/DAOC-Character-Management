@@ -140,3 +140,6 @@ Configuration/
 Armures/
 main.spec
 #requirements.txt
+
+# Debug files
+Scripts/debug_herald_page.html

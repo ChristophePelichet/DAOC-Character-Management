@@ -139,12 +139,12 @@ class EdenScraper:
             
             self.logger.info("🔄 Rafraîchissement de la page d'accueil pour activer la session...", extra={"action": "COOKIES"})
             self.driver.refresh()
-            time.sleep(3)
+            time.sleep(2)  # Optimisé: 3s → 2s (Phase 1 bis - conservateur)
             
             # Étape 4: Naviguer vers le Herald pour tester la session
             self.logger.info("🔍 Étape 4: Navigation vers le Herald (test de session)...", extra={"action": "COOKIES"})
             self.driver.get("https://eden-daoc.net/herald")
-            time.sleep(4)
+            time.sleep(3)  # Optimisé: 4s → 3s (Phase 1 bis - conservateur)
             
             # Vérifier si on est connecté
             current_url = self.driver.current_url

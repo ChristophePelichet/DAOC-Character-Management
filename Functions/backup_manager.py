@@ -56,8 +56,12 @@ class BackupManager:
     def _ensure_backup_dir(self):
         """Create backup directory if it doesn't exist."""
         try:
+            backup_dir_existed = os.path.exists(self.backup_dir)
             os.makedirs(self.backup_dir, exist_ok=True)
-            log_with_action(self.logger, "debug", f"Backup directory ensured: {self.backup_dir}", action="DIRECTORY")
+            if not backup_dir_existed:
+                log_with_action(self.logger, "info", f"Created backup directory: {self.backup_dir}", action="DIRECTORY")
+            else:
+                log_with_action(self.logger, "debug", f"Backup directory already exists: {self.backup_dir}", action="DIRECTORY")
         except Exception as e:
             error_msg = f"Error creating backup directory: {e}"
             log_with_action(self.logger, "error", error_msg, action="ERROR")
@@ -67,8 +71,12 @@ class BackupManager:
         """Create cookies backup directory if it doesn't exist."""
         cookies_backup_dir = self._get_cookies_backup_dir()
         try:
+            cookies_backup_dir_existed = os.path.exists(cookies_backup_dir)
             os.makedirs(cookies_backup_dir, exist_ok=True)
-            log_with_action(self.logger, "debug", f"Cookies backup directory ensured: {cookies_backup_dir}", action="DIRECTORY")
+            if not cookies_backup_dir_existed:
+                log_with_action(self.logger, "info", f"Created cookies backup directory: {cookies_backup_dir}", action="DIRECTORY")
+            else:
+                log_with_action(self.logger, "debug", f"Cookies backup directory already exists: {cookies_backup_dir}", action="DIRECTORY")
         except Exception as e:
             error_msg = f"Error creating cookies backup directory: {e}"
             log_with_action(self.logger, "error", error_msg, action="ERROR")
@@ -178,14 +186,17 @@ class BackupManager:
             # Get configuration
             should_compress = self.config_manager.get("backup_compress", True)
             
-            # Get characters folder
-            char_folder = self.config_manager.get("character_folder")
-            if not char_folder or not os.path.exists(char_folder):
-                error_msg = "Characters folder not found"
-                log_with_action(self.logger, "error", error_msg, action="CHECK")
+            # Get characters folder - use get_character_dir() which has proper fallback
+            from Functions.character_manager import get_character_dir
+            char_folder = get_character_dir()
+            
+            if not os.path.exists(char_folder):
+                # This is normal on first startup - folder will be created when first character is added
+                info_msg = f"Characters folder does not exist yet: {char_folder}"
+                log_with_action(self.logger, "info", info_msg, action="CHECK")
                 return {
                     "success": False,
-                    "message": error_msg,
+                    "message": "No characters to backup (add characters first)",
                     "file": None
                 }
 
@@ -323,14 +334,17 @@ class BackupManager:
             # Get configuration
             should_compress = self.config_manager.get("cookies_backup_compress", True)
             
-            # Get cookies folder
-            cookies_folder = self.config_manager.get("cookies_folder")
-            if not cookies_folder or not os.path.exists(cookies_folder):
-                error_msg = "Cookies folder not found"
-                log_with_action(self.logger, "error", error_msg, action="COOKIES_INFO")
+            # Get cookies folder - use get_config_dir() which has proper fallback
+            from Functions.config_manager import get_config_dir
+            cookies_folder = self.config_manager.get("cookies_folder") or get_config_dir()
+            
+            if not os.path.exists(cookies_folder):
+                # This is normal on first startup - folder will be created when first cookies are saved
+                info_msg = "Cookies folder does not exist yet (normal on first startup)"
+                log_with_action(self.logger, "info", info_msg, action="COOKIES_INFO")
                 return {
                     "success": False,
-                    "message": error_msg,
+                    "message": "Cookies folder not found",
                     "file": None
                 }
 
@@ -594,7 +608,8 @@ class BackupManager:
             log_with_action(self.logger, "info", f"Starting backup restoration from: {os.path.basename(backup_path)}", action="RESTORE")
             
             if restore_to is None:
-                restore_to = self.config_manager.get("character_folder")
+                from Functions.character_manager import get_character_dir
+                restore_to = get_character_dir()
             
             if not restore_to:
                 error_msg = "Target directory not specified"

@@ -1,6 +1,14 @@
 # v0.106 - Logging System, Cookies Backup & Herald Optimization
 
-## ⚡ Herald Performance Optimization (NEW - Nov 7, 2025)
+## 🔧 Critical Backup Fixes (NEW - Nov 7, 2025)
+✅ **CRITICAL FIX**: Path resolution for backups (completely broken)  
+✅ Automatic backups on create/update/delete now work  
+✅ Manual backup works correctly  
+✅ Improved logs: INFO instead of ERROR on first startup  
+✅ Backup directory creation logs now visible  
+✅ Clear error message: "No characters to backup" instead of "folder not found"  
+
+## ⚡ Herald Performance Optimization (Nov 7, 2025)
 ✅ Herald timeout reduction by 18% (-4 seconds per operation)  
 ✅ Connection test: 11s → 9s (-2 seconds)  
 ✅ Character search: 12s → 10s (-2 seconds)  

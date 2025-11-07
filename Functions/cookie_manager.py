@@ -46,8 +46,11 @@ class CookieManager:
         self.config_dir = config_dir
         self.cookie_file = self.config_dir / "eden_cookies.pkl"
         
-        # Créer le dossier si nécessaire
+        # Créer le dossier si nécessaire - Log if creating for the first time
+        cookies_dir_existed = self.config_dir.exists()
         self.config_dir.mkdir(parents=True, exist_ok=True)
+        if not cookies_dir_existed:
+            eden_logger.info(f"Created cookies directory: {self.config_dir}", extra={"action": "DIRECTORY"})
         
         # Garder une référence aux drivers persistants pour éviter le garbage collection
         self.persistent_drivers = []

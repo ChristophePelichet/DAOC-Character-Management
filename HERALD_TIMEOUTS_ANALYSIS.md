@@ -1,7 +1,93 @@
 # Analyse des Timeouts Herald Eden - Rapport d'Optimisation
 
-**Date**: 6 novembre 2025  
+**Date de création**: 6 novembre 2025  
+**Dernière mise à jour**: 7 novembre 2025  
 **Objectif**: Identifier les opportunités de réduction des temps d'attente pour améliorer l'efficacité
+
+---
+
+## 🎯 Statut du Projet - DÉCISION FINALE
+
+| Phase | Status | Date | Commit | Résultat | Gain | Notes |
+|-------|--------|------|--------|----------|------|-------|
+| **Phase 1 bis** | ✅ **ADOPTÉE** | 7 nov 2025 | 5d7d010 | ✅ Stable | -4s | **SOLUTION RETENUE** |
+| Phase 1 - RETEST | ❌ **ABANDON** | 7 nov 2025 | ce75723 | Crash | -9s | Trop agressif |
+| Phase 1 initiale | ❌ **ABANDON** | 7 nov 2025 | e7a213d | Crash | -9s | Trop agressif |
+
+---
+
+## 📋 DÉCISION : Phase 1 bis est la solution finale
+
+### ✅ **Phase 1 bis - ADOPTÉE DÉFINITIVEMENT**
+
+**Commit** : `5d7d010`  
+**Branche** : `106_opti_herald`  
+**Statut** : ✅ **EN PRODUCTION**
+
+**Modifications appliquées (4 optimisations conservatrices)** :
+1. ✅ Refresh timeout: 3s → 2s (eden_scraper.py ligne 142)
+2. ✅ Herald load: 4s → 3s (eden_scraper.py ligne 147)
+3. ✅ Refresh test: 3s → 2s (cookie_manager.py ligne 660)
+4. ✅ Herald test: 5s → 4s (cookie_manager.py ligne 665)
+
+**Résultats des tests** :
+- [x] ✅ Recherche de personnage - **SUCCÈS**
+- [x] ✅ Connexion Herald - **SUCCÈS**
+- [x] ✅ Import personnage - **SUCCÈS**
+- [x] ✅ Stabilité - **Aucun crash détecté**
+
+**Performance** :
+- **Gain réel** : -4 secondes par opération Herald
+- **Amélioration** : ~18% de réduction des temps d'attente
+- **Risque** : Très faible (réductions conservatrices)
+
+**Pourquoi Phase 1 bis est retenue** :
+- ❌ **AUCUN sleep supprimé** (contrairement aux tentatives agressives)
+- ✅ Réductions minimales et sûres (-1s maximum)
+- ✅ **100% stable** sur tous les tests
+- ✅ Gain significatif sans risque de crash
+
+---
+
+## ❌ Phase 1 Aggressive - POST-MORTEM DÉFINITIF
+
+**Tentatives** : 2 (e7a213d et ce75723)  
+**Résultat** : ❌ **ÉCHEC - Crashes reproductibles**
+
+### 🔍 Diagnostic Final du Crash
+
+**Symptômes observés** :
+```
+DevTools listening on ws://127.0.0.1:57955/...
+DevTools listening on ws://127.0.0.1:49391/...
+DevTools listening on ws://127.0.0.1:49392/...
+DevTools listening on ws://127.0.0.1:54233/...
+QThread: Destroyed while thread is still running
+```
+
+**Analyse technique** :
+1. ❌ **Multiples instances DevTools** → Drivers Selenium non fermés correctement
+2. ❌ **QThread destroyed** → Crash au niveau Qt/PyQt (UI)
+3. ❌ **Aucun log [SEARCH]** → Crash AVANT la recherche, dans `load_cookies()`
+
+**Cause racine identifiée** :
+- **Herald load timeout 4s → 2s TROP COURT** (ligne 147)
+- `driver.page_source` appelé **avant chargement complet** de la page
+- État corrompu du driver → Thread Selenium reste actif
+- Qt crash en tentant de détruire le thread actif
+
+**Modifications problématiques** :
+1. ⚠️ Suppression `sleep(3)` avant refresh → Race condition cookies
+2. ⚠️ Herald load 4s → 2s → **Page non chargée** (-50% trop agressif)
+3. ⚠️ Homepage 2s → 1s → Timing trop serré
+
+**Leçons apprises** :
+- ❌ **NE JAMAIS supprimer de sleep** (seulement réduire)
+- ❌ **NE JAMAIS réduire de plus de 25%** par timeout
+- ❌ **Herald nécessite minimum 3 secondes** pour charger complètement
+- ✅ **Approche conservatrice = stabilité garantie**
+
+**Décision** : ❌ **Phase 1 aggressive ABANDONNÉE DÉFINITIVEMENT**
 
 ---
 

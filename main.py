@@ -459,11 +459,12 @@ class CharacterApp(QMainWindow):
             
             # Trigger backup with reason after character update
             try:
-                print("[BACKUP_TRIGGER] Action: CHARACTER UPDATE - Backup with reason=Update")
-                sys.stderr.write("[BACKUP_TRIGGER] Action: CHARACTER UPDATE - Backup with reason=Update\n")
+                char_name = character_data.get('name', 'Unknown')
+                print(f"[BACKUP_TRIGGER] Action: CHARACTER UPDATE '{char_name}' - Backup with reason=Update")
+                sys.stderr.write(f"[BACKUP_TRIGGER] Action: CHARACTER UPDATE '{char_name}' - Backup with reason=Update\n")
                 sys.stderr.flush()
-                logging.info("[BACKUP_TRIGGER] Action: CHARACTER UPDATE - Backup with reason=Update")
-                self.backup_manager.backup_characters_force(reason="Update")
+                logging.info(f"[BACKUP_TRIGGER] Action: CHARACTER UPDATE '{char_name}' - Backup with reason=Update")
+                self.backup_manager.backup_characters_force(reason="Update", character_name=char_name)
             except Exception as e:
                 print(f"[BACKUP_TRIGGER] Warning: Backup after character update failed: {e}")
                 sys.stderr.write(f"[BACKUP_TRIGGER] Warning: Backup after character update failed: {e}\n")

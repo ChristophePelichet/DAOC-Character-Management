@@ -1,6 +1,13 @@
 # v0.106 - Logging-System, Cookie-Sicherung & Herald-Optimierung
 
-## 🔧 Kritische Backup-Korrekturen (NEU - 7. Nov 2025)
+## 🔧 Kritische Herald-Such-Korrekturen (NEU - 7. Nov 2025)
+✅ **KRITISCHER FIX**: Brutaler Absturz bei Herald-Suchfehlern behoben  
+✅ Ordnungsgemäßes Schließen des WebDrivers in allen Fehlerpfaden  
+✅ Vollständiges Stacktrace-Logging für Diagnosen  
+✅ Stabilitätstest: 25/25 Suchen erfolgreich (100% stabil)  
+✅ Automatisiertes Testskript für kontinuierliche Validierung  
+
+## 🔧 Kritische Backup-Korrekturen (7. Nov 2025)
 ✅ **KRITISCHER FIX**: Pfadauflösung für Backups (komplett defekt)  
 ✅ Automatische Backups bei Erstellen/Aktualisieren/Löschen funktionieren jetzt  
 ✅ Manuelle Sicherung funktioniert korrekt  

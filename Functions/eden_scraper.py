@@ -9,6 +9,7 @@ Intégré depuis eden_scraper/ pour centraliser la gestion
 import logging
 import pickle
 import os
+import traceback
 from datetime import datetime
 from pathlib import Path
 
@@ -458,6 +459,10 @@ def search_herald_character(character_name, realm_filter=""):
         
         if not scraper.initialize_driver(headless=False):
             module_logger.error("Impossible d'initialiser le navigateur", extra={"action": "SEARCH"})
+            try:
+                scraper.close()
+            except:
+                pass
             return False, "Impossible d'initialiser le navigateur Chrome.", ""
         
         module_logger.info("Navigateur initialisé avec succès", extra={"action": "SEARCH"})
@@ -630,6 +635,11 @@ def search_herald_character(character_name, realm_filter=""):
         
     except Exception as e:
         module_logger.error(f"❌ Erreur lors de la recherche Herald: {e}", extra={"action": "SEARCH"})
+        module_logger.error(f"Stacktrace: {traceback.format_exc()}", extra={"action": "SEARCH"})
+        try:
+            scraper.close()
+        except:
+            pass
         return False, f"Erreur: {str(e)}", ""
 
 

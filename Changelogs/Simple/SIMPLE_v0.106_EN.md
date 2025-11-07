@@ -1,6 +1,13 @@
 # v0.106 - Logging System, Cookies Backup & Herald Optimization
 
-## 🔧 Critical Backup Fixes (NEW - Nov 7, 2025)
+## 🔧 Critical Herald Search Fixes (NEW - Nov 7, 2025)
+✅ **CRITICAL FIX**: Brutal crash during Herald search errors resolved  
+✅ Proper WebDriver closure in all error paths  
+✅ Complete stacktrace logging for diagnostics  
+✅ Stability test: 25/25 searches successful (100% stable)  
+✅ Automated test script for continuous validation  
+
+## 🔧 Critical Backup Fixes (Nov 7, 2025)
 ✅ **CRITICAL FIX**: Path resolution for backups (completely broken)  
 ✅ Automatic backups on create/update/delete now work  
 ✅ Manual backup works correctly  

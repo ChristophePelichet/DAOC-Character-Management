@@ -192,11 +192,11 @@ class BackupManager:
             
             if not os.path.exists(char_folder):
                 # This is normal on first startup - folder will be created when first character is added
-                info_msg = "Characters folder does not exist yet (normal on first startup)"
+                info_msg = f"Characters folder does not exist yet: {char_folder}"
                 log_with_action(self.logger, "info", info_msg, action="CHECK")
                 return {
                     "success": False,
-                    "message": "Characters folder not found",
+                    "message": "No characters to backup (add characters first)",
                     "file": None
                 }
 

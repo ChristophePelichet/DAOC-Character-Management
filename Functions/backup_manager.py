@@ -56,8 +56,12 @@ class BackupManager:
     def _ensure_backup_dir(self):
         """Create backup directory if it doesn't exist."""
         try:
+            backup_dir_existed = os.path.exists(self.backup_dir)
             os.makedirs(self.backup_dir, exist_ok=True)
-            log_with_action(self.logger, "debug", f"Backup directory ensured: {self.backup_dir}", action="DIRECTORY")
+            if not backup_dir_existed:
+                log_with_action(self.logger, "info", f"Created backup directory: {self.backup_dir}", action="DIRECTORY")
+            else:
+                log_with_action(self.logger, "debug", f"Backup directory already exists: {self.backup_dir}", action="DIRECTORY")
         except Exception as e:
             error_msg = f"Error creating backup directory: {e}"
             log_with_action(self.logger, "error", error_msg, action="ERROR")
@@ -67,8 +71,12 @@ class BackupManager:
         """Create cookies backup directory if it doesn't exist."""
         cookies_backup_dir = self._get_cookies_backup_dir()
         try:
+            cookies_backup_dir_existed = os.path.exists(cookies_backup_dir)
             os.makedirs(cookies_backup_dir, exist_ok=True)
-            log_with_action(self.logger, "debug", f"Cookies backup directory ensured: {cookies_backup_dir}", action="DIRECTORY")
+            if not cookies_backup_dir_existed:
+                log_with_action(self.logger, "info", f"Created cookies backup directory: {cookies_backup_dir}", action="DIRECTORY")
+            else:
+                log_with_action(self.logger, "debug", f"Cookies backup directory already exists: {cookies_backup_dir}", action="DIRECTORY")
         except Exception as e:
             error_msg = f"Error creating cookies backup directory: {e}"
             log_with_action(self.logger, "error", error_msg, action="ERROR")

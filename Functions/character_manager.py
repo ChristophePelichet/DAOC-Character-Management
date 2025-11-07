@@ -88,7 +88,13 @@ def save_character(character_data, allow_overwrite=False):
     # Create the season/realm-specific directory
     season_dir = os.path.join(base_char_dir, character_season)
     char_dir = os.path.join(season_dir, character_realm)
-    os.makedirs(char_dir, exist_ok=True)
+    
+    # Log if creating the directory structure for the first time
+    if not os.path.exists(char_dir):
+        os.makedirs(char_dir, exist_ok=True)
+        log_with_action(logger, "info", f"Created character directory: {char_dir}", action="DIRECTORY")
+    else:
+        os.makedirs(char_dir, exist_ok=True)
 
     file_path = os.path.join(char_dir, f"{character_name}.json")
 

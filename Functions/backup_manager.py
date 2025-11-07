@@ -181,11 +181,12 @@ class BackupManager:
             # Get characters folder
             char_folder = self.config_manager.get("character_folder")
             if not char_folder or not os.path.exists(char_folder):
-                error_msg = "Characters folder not found"
-                log_with_action(self.logger, "error", error_msg, action="CHECK")
+                # This is normal on first startup - folder will be created when first character is added
+                info_msg = "Characters folder does not exist yet (normal on first startup)"
+                log_with_action(self.logger, "info", info_msg, action="CHECK")
                 return {
                     "success": False,
-                    "message": error_msg,
+                    "message": "Characters folder not found",
                     "file": None
                 }
 
@@ -326,11 +327,12 @@ class BackupManager:
             # Get cookies folder
             cookies_folder = self.config_manager.get("cookies_folder")
             if not cookies_folder or not os.path.exists(cookies_folder):
-                error_msg = "Cookies folder not found"
-                log_with_action(self.logger, "error", error_msg, action="COOKIES_INFO")
+                # This is normal on first startup - folder will be created when first cookies are saved
+                info_msg = "Cookies folder does not exist yet (normal on first startup)"
+                log_with_action(self.logger, "info", info_msg, action="COOKIES_INFO")
                 return {
                     "success": False,
-                    "message": error_msg,
+                    "message": "Cookies folder not found",
                     "file": None
                 }
 

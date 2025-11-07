@@ -1,6 +1,14 @@
 # v0.106 - Logging-System, Cookie-Sicherung & Herald-Optimierung
 
-## ⚡ Herald-Leistungsoptimierung (NEU - 7. Nov 2025)
+## 🔧 Kritische Backup-Korrekturen (NEU - 7. Nov 2025)
+✅ **KRITISCHER FIX**: Pfadauflösung für Backups (komplett defekt)  
+✅ Automatische Backups bei Erstellen/Aktualisieren/Löschen funktionieren jetzt  
+✅ Manuelle Sicherung funktioniert korrekt  
+✅ Verbesserte Logs: INFO statt ERROR beim ersten Start  
+✅ Backup-Verzeichnis-Erstellungslogs jetzt sichtbar  
+✅ Klare Fehlermeldung: "No characters to backup" statt "folder not found"  
+
+## ⚡ Herald-Leistungsoptimierung (7. Nov 2025)
 ✅ Herald-Timeout-Reduzierung um 18% (-4 Sekunden pro Vorgang)  
 ✅ Verbindungstest: 11s → 9s (-2 Sekunden)  
 ✅ Charaktersuche: 12s → 10s (-2 Sekunden)  

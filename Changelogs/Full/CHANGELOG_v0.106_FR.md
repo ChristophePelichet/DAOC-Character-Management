@@ -6,6 +6,78 @@
 
 ---
 
+## 🔧 Corrections Critiques Backup (7 novembre 2025)
+
+### FIX CRITIQUE : Résolution des chemins pour les backups
+
+**Problème** :
+Le système de backup était **complètement cassé** depuis le début de la v0.106 à cause d'une incohérence dans la résolution des chemins de dossiers.
+
+**Symptômes** :
+- ❌ Aucun backup automatique lors de création/modification/suppression
+- ❌ Backup manuel échouait avec "folder not found"
+- ❌ Messages ERROR trompeurs au premier démarrage
+- ❌ Pas de logs de création des dossiers backup
+
+**Cause racine** :
+```python
+# backup_manager.py (CASSÉ)
+char_folder = self.config_manager.get("character_folder")  # Retourne None !
+if not char_folder or not os.path.exists(char_folder):
+    return "folder not found"  # Toujours vrai si config non définie !
+
+# character_manager.py (CORRECT)
+def get_character_dir():
+    return config.get("character_folder") or default_path  # Fallback OK
+```
+
+**Solution** :
+```python
+# backup_manager.py (CORRIGÉ)
+from Functions.character_manager import get_character_dir
+char_folder = get_character_dir()  # Utilise le fallback
+if not os.path.exists(char_folder):
+    return "folder not found"  # Seulement si réellement inexistant
+```
+
+**Corrections appliquées** :
+
+1. **Résolution de chemins** (`backup_manager.py`) :
+   - `backup_character()` : Utilise `get_character_dir()` avec fallback
+   - `backup_cookies()` : Utilise `get_config_dir()` avec fallback
+   - `restore_backup()` : Utilise `get_character_dir()` pour restauration
+
+2. **Amélioration des logs** :
+   - ERROR → INFO quand dossiers n'existent pas au 1er démarrage
+   - Ajout logs INFO lors de création des dossiers
+   - Message clair : "No characters to backup" au lieu de "folder not found"
+
+3. **Logs de création de dossiers** :
+   - `_ensure_backup_dir()` : INFO si création, DEBUG si existe
+   - `_ensure_cookies_backup_dir()` : INFO si création, DEBUG si existe
+   - `character_manager.py` : Log création dossier Characters
+   - `cookie_manager.py` : Log création dossier Configuration
+
+**Fichiers modifiés** :
+- `Functions/backup_manager.py` (résolution chemins + logs améliorés)
+- `Functions/character_manager.py` (log création dossier)
+- `Functions/cookie_manager.py` (log création dossier)
+
+**Commits** :
+- `175c42b` - Improve logging for first startup
+- `9d5158d` - Add INFO logs when backup directories are created
+- `20331d6` - Use proper folder resolution for backups (CRITICAL)
+- `83f99e9` - Improve backup error message when no characters exist
+
+**Impact** :
+- ✅ Backups automatiques fonctionnent (create/update/delete)
+- ✅ Backup manuel fonctionne
+- ✅ Backup quotidien au démarrage fonctionne
+- ✅ Logs clairs et non trompeurs
+- ✅ Traçabilité complète de la création des dossiers
+
+---
+
 ## ⚡ Optimisation Herald Performance (7 novembre 2025)
 
 ### Réduction des Timeouts Herald

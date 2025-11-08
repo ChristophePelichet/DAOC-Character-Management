@@ -428,6 +428,8 @@ def search_herald_character(character_name, realm_filter=""):
     from Functions.cookie_manager import CookieManager
     import time
     
+    scraper = None  # Initialize to None for safe cleanup in finally block
+    
     try:
         module_logger.info(f"Début de la recherche Herald pour: {character_name}", extra={"action": "SEARCH"})
         
@@ -450,16 +452,11 @@ def search_herald_character(character_name, realm_filter=""):
         
         if not scraper.initialize_driver(headless=False):
             module_logger.error("Impossible d'initialiser le navigateur", extra={"action": "SEARCH"})
-            try:
-                scraper.close()
-            except:
-                pass
             return False, "Impossible d'initialiser le navigateur Chrome.", ""
         
         module_logger.info("Navigateur initialisé avec succès", extra={"action": "SEARCH"})
         
         if not scraper.load_cookies():
-            scraper.close()
             module_logger.error("Impossible de charger les cookies dans le navigateur", extra={"action": "SEARCH"})
             return False, "Impossible de charger les cookies.", ""
         
@@ -613,8 +610,6 @@ def search_herald_character(character_name, realm_filter=""):
                 'characters': characters
             }, f, indent=2, ensure_ascii=False)
         
-        scraper.close()
-        
         char_count = len(characters)
         message = f"{char_count} personnage(s) trouvé(s)"
         
@@ -627,11 +622,16 @@ def search_herald_character(character_name, realm_filter=""):
     except Exception as e:
         module_logger.error(f"❌ Erreur lors de la recherche Herald: {e}", extra={"action": "SEARCH"})
         module_logger.error(f"Stacktrace: {traceback.format_exc()}", extra={"action": "SEARCH"})
-        try:
-            scraper.close()
-        except:
-            pass
         return False, f"Erreur: {str(e)}", ""
+    
+    finally:
+        # Always close the scraper/driver properly to prevent crashes
+        if scraper:
+            try:
+                scraper.close()
+                module_logger.debug("Scraper fermé proprement", extra={"action": "CLEANUP"})
+            except Exception as e:
+                module_logger.warning(f"Erreur lors de la fermeture du scraper: {e}", extra={"action": "CLEANUP"})
 
 
 def scrape_character_from_url(character_url, cookie_manager):

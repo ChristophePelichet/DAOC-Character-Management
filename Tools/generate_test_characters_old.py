@@ -17,7 +17,7 @@ from Functions.config_manager import config
 from Functions.path_manager import get_base_path
 
 
-# Prénoms aléatoires pour générer des noms de personnages
+# Prénoms aléatoires for générer des noms of personnages
 FIRST_NAMES = [
     "Aragorn", "Legolas", "Gimli", "Gandalf", "Frodo", "Sam", "Merry", "Pippin",
     "Boromir", "Faramir", "Eowyn", "Eomer", "Theoden", "Arwen", "Elrond", "Galadriel",
@@ -46,11 +46,11 @@ def get_random_realm_points():
     """Génère des realm points aléatoires"""
     # Distribution réaliste des RP
     roll = random.random()
-    if roll < 0.3:  # 30% ont peu de RP (1L0 à 3L9)
+    if roll < 0.3:  # 30% have peu of RP (1L0 à 3L9)
         return random.randint(0, 100000)
-    elif roll < 0.6:  # 30% ont des RP moyens (4L0 à 7L9)
+    elif roll < 0.6:  # 30% have des RP moyens (4L0 à 7L9)
         return random.randint(100001, 500000)
-    elif roll < 0.85:  # 25% ont beaucoup de RP (8L0 à 11L9)
+    elif roll < 0.85:  # 25% have beaucoup of RP (8L0 à 11L9)
         return random.randint(500001, 2000000)
     else:  # 15% sont des vétérans (12L0+)
         return random.randint(2000001, 5000000)
@@ -59,7 +59,7 @@ def get_random_realm_points():
 def generate_character(data_manager, realms, servers, seasons):
     """Génère un personnage avec des attributs aléatoires"""
     
-    # Sélection aléatoire du royaume
+    # Sélection aléatoire of the royaume
     realm = random.choice(realms)
     
     # Obtenir les classes disponibles pour ce royaume
@@ -68,18 +68,18 @@ def generate_character(data_manager, realms, servers, seasons):
         print(f"Aucune classe trouvée pour {realm}")
         return None
     
-    # Sélection aléatoire de la classe
+    # Sélection aléatoire of the classe
     class_data = random.choice(classes)
     class_name = class_data.get("name", "Unknown")
     
-    # Sélection aléatoire de la race (parmi celles disponibles pour cette classe)
+    # Sélection aléatoire of the race (parmi celles disponibles for this classe)
     available_races = class_data.get("races", [])
     if not available_races:
         print(f"Aucune race disponible pour {class_name}")
         return None
     race = random.choice(available_races)
     
-    # Sélection aléatoire de la spécialisation
+    # Sélection aléatoire of the spécialisation
     specializations = class_data.get("specializations", [])
     spec = ""
     if specializations:
@@ -99,11 +99,11 @@ def generate_character(data_manager, realms, servers, seasons):
               "Les Paladins", "Les Dragons", "Les Loups", "Les Aigles"]
     guild = random.choice(guilds) if random.random() > 0.5 else ""
     
-    # Calculer le realm rank basé sur les RP
+    # Calculer the realm rank basé on the RP
     rank_info = data_manager.get_realm_rank_info(realm, realm_points)
     realm_rank = rank_info['level'] if rank_info else "1L1"
     
-    # Créer le dictionnaire du personnage
+    # Create the dictionnaire of the personnage
     character = {
         'id': name,
         'uuid': str(uuid.uuid4()),
@@ -129,7 +129,7 @@ def save_character(character, base_path):
     realm = character['realm']
     name = character['name']
     
-    # Créer le dossier du royaume s'il n'existe pas
+    # Create the Folder of the royaume s'il n'existe not
     realm_dir = os.path.join(base_path, "Characters", realm)
     os.makedirs(realm_dir, exist_ok=True)
     
@@ -137,7 +137,7 @@ def save_character(character, base_path):
     filename = f"{name}.json"
     filepath = os.path.join(realm_dir, filename)
     
-    # Vérifier si le fichier existe déjà
+    # Check if the File existe déjà
     if os.path.exists(filepath):
         print(f"⚠️  Le personnage '{name}' existe déjà, génération d'un nouveau nom...")
         return False
@@ -160,7 +160,7 @@ def main():
     print("📚 Chargement des données...")
     data_manager = DataManager()
     
-    # Récupérer les royaumes, serveurs et saisons
+    # Retrieve the royaumes, serveurs and saisons
     realms = data_manager.get_realms()
     servers = config.get("servers", ["Eden", "Blackthorn"])
     seasons = config.get("seasons", ["S1", "S2", "S3"])

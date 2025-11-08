@@ -22,10 +22,10 @@ def test_combo_data():
     if app is None:
         app = QApplication(sys.argv)
     
-    # Créer un combo de test
+    # Create un combo of test
     combo = QComboBox()
     
-    # Simuler le remplissage avec données traduites
+    # Simuler the remplissage with Data traduites
     data_manager = DataManager()
     classes = data_manager.get_classes("Midgard")
     
@@ -36,7 +36,7 @@ def test_combo_data():
     print(f"Langue actuelle: {current_language}")
     print()
     
-    # Remplir le combo comme dans le code réel
+    # Remplir the combo comme in the code réel
     for cls in classes:
         # Get translated name
         if current_language == "fr" and "name_fr" in cls:
@@ -87,13 +87,13 @@ def test_combo_data():
     print("🧪 Test 3: Simulation du bug avec classe TRADUITE")
     print("=" * 80)
     
-    # Test avec une classe qui a une traduction différente
-    test_translated = "Bonedancer"  # En français: "Prêtre de Bodgar"
+    # Test with une classe qui a une traduction différente
+    test_translated = "Bonedancer"  # En français: "Prêtre of Bodgar"
     
     print(f"Classe à tester: '{test_translated}' (Bonedancer)")
     print()
     
-    # Simuler la sélection d'une classe
+    # Simuler the sélection d'une classe
     print("1. Sélection de 'Bonedancer' par findData (CORRECT):")
     correct_index = combo.findData(test_translated)
     if correct_index >= 0:
@@ -117,7 +117,7 @@ def test_combo_data():
         print(f"   Le texte affiché est 'Prêtre de Bodgar'")
         print(f"   → La classe serait MAL enregistrée si on utilisait findText!")
         
-        # Tester avec le texte français
+        # Tester with the texte français
         print()
         print("3. Sélection de 'Prêtre de Bodgar' par findText:")
         fr_index = combo.findText("Prêtre de Bodgar")

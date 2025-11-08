@@ -8,8 +8,6 @@ Test de la sauvegarde des modifications après mise à jour Herald
 import sys
 from pathlib import Path
 import json
-import tempfile
-import shutil
 
 # Ajouter le dossier parent au path
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -22,7 +20,7 @@ def test_save_after_update():
     print("🔍 Test de sauvegarde après mise à jour")
     print("=" * 80)
     
-    # Créer un personnage de test dans le dossier Characters réel
+    # Create un personnage of test in the Folder Characters réel
     test_char = {
         'id': 'TestUpdateChar',
         'uuid': 'test-uuid-123',
@@ -52,7 +50,7 @@ def test_save_after_update():
     success, msg = save_character(test_char, allow_overwrite=False)
     
     if not success:
-        # Si le fichier existe déjà, le supprimer et réessayer
+        # if the File existe déjà, the supprimer and réessayer
         if "char_exists_error" in msg or "exists" in msg.lower():
             print(f"⚠️  Le fichier existe déjà, suppression...")
             from Functions.path_manager import get_base_path
@@ -69,7 +67,7 @@ def test_save_after_update():
     
     print(f"✅ Sauvegarde réussie")
     
-    # Vérifier le fichier créé
+    # Check the File créé
     from Functions.path_manager import get_base_path
     import os
     char_file = os.path.join(get_base_path(), "Characters", "S1", "Midgard", "TestUpdateChar.json")
@@ -104,7 +102,7 @@ def test_save_after_update():
         old_value = test_char.get(field, '(vide)')
         print(f"  - {field}: {old_value} → {value}")
     
-    # Appliquer les changements (comme dans le code réel)
+    # Appliquer the changements (comme in the code réel)
     for field, value in selected_changes.items():
         test_char[field] = value
     
@@ -117,7 +115,7 @@ def test_save_after_update():
     
     print(f"✅ Sauvegarde réussie: {msg}")
     
-    # Recharger le fichier pour vérifier
+    # Recharger the File for Check
     print("\n📂 Vérification du fichier sauvegardé...")
     with open(char_file, 'r', encoding='utf-8') as f:
         updated_data = json.load(f)

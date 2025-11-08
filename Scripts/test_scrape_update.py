@@ -28,7 +28,7 @@ def test_scrape_update():
     # Initialiser le cookie manager
     cookie_manager = CookieManager()
     
-    # Vérifier les cookies
+    # Check cookies
     if not cookie_manager.cookie_exists():
         print("❌ Aucun cookie trouvé!")
         return

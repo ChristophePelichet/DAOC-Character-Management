@@ -57,7 +57,7 @@ def test_various_urls():
             else:
                 print(f"✅ {url} (Code {response.status_code}){redirect_info}")
                 
-                # Vérifier le contenu de la page
+                # Check the contenu of the page
                 if 'login' in response.text.lower() or 'se connecter' in response.text.lower():
                     print(f"   ⚠️  Contenu suggère qu'on n'est pas connecté")
                     

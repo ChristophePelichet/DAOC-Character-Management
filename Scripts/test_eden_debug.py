@@ -26,7 +26,7 @@ def generate_test_logs():
     
     print("\n🧪 Génération de logs de test pour la fenêtre Debug Eden...\n")
     
-    # Logs de succès (vert)
+    # Logs of succès (vert)
     eden_logger.info("✅ Connexion Herald réussie")
     eden_logger.info("✅ Chrome (Selenium Manager)")
     logger.info("✅ 4 cookies sauvegardés avec succès", extra={"action": "COOKIES"})
@@ -75,11 +75,11 @@ def main():
     """Fonction principale"""
     app = QApplication(sys.argv)
     
-    # Créer la fenêtre Debug Eden
+    # Create the fenêtre Debug Eden
     window = EdenDebugWindow()
     window.show()
     
-    # Générer les logs de test
+    # Générer the logs of test
     generate_test_logs()
     
     print("📝 Fenêtre Debug Eden ouverte")

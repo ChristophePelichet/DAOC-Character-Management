@@ -7,7 +7,6 @@ sys.path.insert(0, '..')
 from Functions.cookie_manager import CookieManager
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 
 def debug_cookies():
@@ -30,13 +29,13 @@ def debug_cookies():
     driver = webdriver.Chrome(service=service)
     
     try:
-        # Étape 1: Aller sur la page d'accueil
+        # Step 1: Aller on the page d'accueil
         print("\n📍 Étape 1: Chargement de la page d'accueil...")
         driver.get("https://eden-daoc.net/")
         print(f"   URL: {driver.current_url}")
         input("   ⏸️  Vérifiez la page d'accueil, puis appuyez sur Entrée...")
         
-        # Étape 2: Ajouter les cookies
+        # Step 2: Add cookies
         print("\n🍪 Étape 2: Ajout des cookies...")
         for cookie in cookies_list:
             try:
@@ -45,7 +44,7 @@ def debug_cookies():
             except Exception as e:
                 print(f"   ❌ Erreur pour {cookie['name']}: {e}")
         
-        # Vérifier les cookies actuels dans le navigateur
+        # Check cookies actuels dans le navigateur
         print("\n🔍 Cookies dans le navigateur:")
         current_cookies = driver.get_cookies()
         for cookie in current_cookies:
@@ -53,12 +52,12 @@ def debug_cookies():
         
         input("   ⏸️  Vérifiez les cookies, puis appuyez sur Entrée...")
         
-        # Étape 3: Recharger la page d'accueil
+        # Step 3: Recharger the page d'accueil
         print("\n🔄 Étape 3: Rechargement de la page d'accueil avec les cookies...")
         driver.get("https://eden-daoc.net/")
         print(f"   URL: {driver.current_url}")
         
-        # Vérifier si on voit un indicateur de connexion
+        # Check if on voit un indicateur of connexion
         page_source = driver.page_source
         if 'se connecter' in page_source.lower() or 'connexion' in page_source.lower():
             print("   ⚠️  Texte 'connexion' trouvé dans la page")
@@ -67,7 +66,7 @@ def debug_cookies():
         
         input("   ⏸️  La page d'accueil affiche-t-elle que vous êtes connecté? Appuyez sur Entrée...")
         
-        # Étape 4: Aller sur le forum
+        # Step 4: Aller on the forum
         print("\n📝 Étape 4: Navigation vers le forum...")
         driver.get("https://eden-daoc.net/forum.php")
         print(f"   URL finale: {driver.current_url}")

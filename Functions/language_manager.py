@@ -1,6 +1,5 @@
 import json
 import os
-import sys
 import logging
 from .config_manager import config
 from .path_manager import get_resource_path

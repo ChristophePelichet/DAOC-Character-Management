@@ -7,7 +7,6 @@ Affiche en détail toutes les données extraites de la page
 """
 
 import sys
-import os
 from pathlib import Path
 
 # Ajouter le dossier parent au path pour importer les modules
@@ -34,13 +33,13 @@ def debug_scrape_character(character_url, output_file=None):
         character_url: URL du personnage sur Herald
         output_file: Fichier de sortie optionnel (sinon sauvegardé dans Logs/)
     """
-    # Créer le fichier de sortie
+    # Create the File of sortie
     if not output_file:
         debug_dir = project_root / "Logs"
         debug_dir.mkdir(exist_ok=True)
         output_file = debug_dir / "debug_scrape_output.txt"
     
-    # Ouvrir le fichier pour écriture
+    # Ouvrir the File for écriture
     with open(output_file, 'w', encoding='utf-8') as f:
         def log(message):
             """Affiche et écrit dans le fichier"""
@@ -87,7 +86,7 @@ def debug_scrape_character(character_url, output_file=None):
             log("⏳ Attente du chargement de la page (5 secondes)...")
             time.sleep(5)
             
-            # Récupérer le HTML
+            # Retrieve HTML
             page_source = scraper.driver.page_source
             soup = BeautifulSoup(page_source, 'html.parser')
             
@@ -99,7 +98,7 @@ def debug_scrape_character(character_url, output_file=None):
             title = soup.title.string if soup.title else "Pas de titre"
             log(f"\n📄 Titre de la page: {title}")
             
-            # Afficher les en-têtes
+            # Afficher the en-têtes
             log("\n📋 En-têtes H1:")
             h1_tags = soup.find_all('h1')
             if h1_tags:
@@ -140,7 +139,7 @@ def debug_scrape_character(character_url, output_file=None):
                 rows = table.find_all('tr')
                 log(f"Nombre de lignes: {len(rows)}\n")
                 
-                # Collecter toutes les données du tableau
+                # Collecter toutes the Data of the tableau
                 table_data = []
                 max_cols = 0
                 
@@ -161,9 +160,9 @@ def debug_scrape_character(character_url, output_file=None):
                     for i, (tag, text) in enumerate(row_data):
                         col_widths[i] = max(col_widths[i], len(text) + 4)  # +4 pour [tag]
                 
-                # Afficher le tableau formaté
+                # Afficher the tableau formaté
                 for row_idx, row_data in enumerate(table_data, 1):
-                    # Ligne de séparation
+                    # Ligne of séparation
                     if row_idx == 1:
                         sep = "┌" + "┬".join("─" * w for w in col_widths) + "┐"
                     else:
@@ -188,7 +187,7 @@ def debug_scrape_character(character_url, output_file=None):
                     sep = "└" + "┴".join("─" * w for w in col_widths) + "┘"
                     log(sep)
             
-            # Extraction des données avec la logique actuelle
+            # Extraction des Data with the logique actuelle
             log("\n" + "=" * 80)
             log("DONNÉES EXTRAITES (avec la logique actuelle)")
             log("=" * 80)
@@ -249,7 +248,7 @@ def debug_scrape_character(character_url, output_file=None):
             for key, value in character_data.items():
                 log(f"  {key}: {value}")
             
-            # Vérifier si on a les données minimales
+            # Check if on a the Data minimales
             if 'name' in character_data or 'class' in character_data:
                 log("\n✅ SUCCÈS: Données minimales extraites")
             else:
@@ -274,7 +273,7 @@ def debug_scrape_character(character_url, output_file=None):
 
 
 if __name__ == "__main__":
-    # URL par défaut - peut être modifiée
+    # URL par défaut - can be modifiée
     default_url = "https://eden-daoc.net/herald?n=player&k=Ewo"
     
     if len(sys.argv) > 1:
@@ -286,7 +285,7 @@ if __name__ == "__main__":
     
     debug_scrape_character(character_url)
     
-    # Afficher où le fichier a été sauvegardé
+    # Afficher où the File a été sauvegardé
     output_file = project_root / "Logs" / "debug_scrape_output.txt"
     print("\n" + "=" * 80)
     print("DÉBOGAGE TERMINÉ")

@@ -5,10 +5,9 @@ Les données incluent les types d'armure et leurs valeurs de résistance
 import requests
 from bs4 import BeautifulSoup
 import json
-import re
 import urllib3
 
-# Désactiver les avertissements SSL
+# Désactiver the avertissements SSL
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 def scrape_armor_resists():
@@ -24,7 +23,7 @@ def scrape_armor_resists():
     
     soup = BeautifulSoup(response.content, 'html.parser')
     
-    # Structure de données
+    # Structure of Data
     armor_data = {
         "armor_types": [],
         "resist_types": [],
@@ -62,7 +61,7 @@ def scrape_armor_resists():
         
         print(f"En-têtes: {headers}")
         
-        # Extraire les données
+        # Extract data
         table_data = []
         for row in rows[1:]:
             cells = row.find_all(['td', 'th'])
@@ -73,7 +72,7 @@ def scrape_armor_resists():
             for idx, cell in enumerate(cells):
                 if idx < len(headers):
                     cell_text = cell.get_text(strip=True)
-                    # Nettoyer les données (enlever % si présent)
+                    # Clean the Data (enlever % if présent)
                     cell_text = cell_text.replace('%', '').strip()
                     row_data[headers[idx]] = cell_text
             
@@ -82,14 +81,14 @@ def scrape_armor_resists():
         
         print(f"Lignes de données: {len(table_data)}")
         
-        # Stocker les données du tableau
+        # Stocker the Data of the tableau
         armor_data["tables"][f"table_{table_idx + 1}"] = {
             "title": table_title,
             "headers": headers,
             "data": table_data
         }
         
-        # Collecter les types d'armure uniques (première colonne généralement)
+        # Collecter the types d'armure uniques (première colonne généralement)
         if headers and table_data:
             first_header = headers[0]
             for row in table_data:
@@ -97,7 +96,7 @@ def scrape_armor_resists():
                 if armor_type and armor_type not in armor_data["armor_types"]:
                     armor_data["armor_types"].append(armor_type)
         
-        # Collecter les types de résistance (autres colonnes)
+        # Collecter the types of résistance (autres colonnes)
         for header in headers[1:]:
             if header and header not in armor_data["resist_types"]:
                 armor_data["resist_types"].append(header)

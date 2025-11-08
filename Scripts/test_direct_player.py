@@ -91,7 +91,7 @@ def test_direct_player_access():
     if title:
         print(f"📌 Titre: {title.get_text(strip=True)}")
     
-    # Afficher les en-têtes de tableaux
+    # Afficher the en-têtes of tableaux
     if tables:
         print(f"\n📋 En-têtes des tableaux:")
         for idx, table in enumerate(tables[:3], 1):

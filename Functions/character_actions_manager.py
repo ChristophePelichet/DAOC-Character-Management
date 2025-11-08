@@ -3,7 +3,7 @@ Character Actions Manager - Gère toutes les actions sur les personnages
 Regroupe: création, suppression, renommage, duplication, ouverture de fiche
 """
 import logging
-from PySide6.QtWidgets import QMessageBox, QInputDialog, QLineEdit, QDialog, QApplication
+from PySide6.QtWidgets import QMessageBox, QInputDialog, QDialog, QLineEdit
 from PySide6.QtCore import Qt
 
 from Functions.character_manager import (
@@ -296,11 +296,11 @@ class CharacterActionsManager:
         if not index.isValid():
             return
             
-        # Ne pas ouvrir si on clique sur la case à cocher
+        # Ne not ouvrir if on clique on the case à cocher
         if index.column() == 0:
             return
         
-        # Mapper l'index du proxy vers le modèle source
+        # Mapper l'index of the proxy vers the modèle source
         source_index = self.tree_manager.proxy_model.mapToSource(index)
         row = source_index.row()
         name_item = self.tree_manager.model.item(row, 2)
@@ -318,26 +318,32 @@ class CharacterActionsManager:
             
     def open_armor_management(self):
         """Ouvre la gestion des armures pour le personnage sélectionné"""
-        char = self.tree_manager.get_selected_character()
-        
-        if not char:
-            QMessageBox.information(
-                self.main_window,
-                lang.get("info_title", default="Information"),
-                "Veuillez sélectionner un personnage dans la liste pour accéder à la gestion de ses armures.\n\n"
-                "Vous pouvez aussi ouvrir la fiche du personnage et cliquer sur '📁 Gérer les armures'."
-            )
-            return
+        try:
+            char = self.tree_manager.get_selected_character()
             
-        character_id = char.get('id', '')
-        if not character_id:
-            QMessageBox.warning(
-                self.main_window,
-                "Erreur",
-                "Impossible de déterminer l'ID du personnage."
-            )
-            return
-            
-        from UI.dialogs import ArmorManagementDialog
-        dialog = ArmorManagementDialog(self.main_window, character_id)
-        dialog.exec()
+            if not char:
+                QMessageBox.information(
+                    self.main_window,
+                    lang.get("info_title", default="Information"),
+                    "Veuillez sélectionner un personnage dans la liste pour accéder à la gestion de ses armures.\n\n"
+                    "Vous pouvez aussi ouvrir la fiche du personnage et cliquer sur '📁 Gérer les armures'."
+                )
+                return
+                
+            character_id = char.get('id', '')
+            if not character_id:
+                QMessageBox.warning(
+                    self.main_window,
+                    "Erreur",
+                    "Impossible de déterminer l'ID du personnage."
+                )
+                return
+                
+            from UI.dialogs import ArmorManagementDialog
+            dialog = ArmorManagementDialog(self.main_window, character_id)
+            dialog.exec()
+        except Exception as e:
+            import traceback
+            error_msg = f"Erreur lors de l'ouverture de la gestion des armures:\n{str(e)}\n\n{traceback.format_exc()}"
+            logging.error(error_msg)
+            QMessageBox.critical(self.main_window, "Erreur", error_msg)

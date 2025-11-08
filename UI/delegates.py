@@ -12,7 +12,7 @@ from PySide6.QtCore import Qt, QRect, QSize, QEvent
 class CenterIconDelegate(QStyledItemDelegate):
     """Custom delegate to center icons in TreeView cells with realm-colored background."""
     
-    # Couleurs de fond par royaume (alpha 25 pour plus de subtilité)
+    # Couleurs of fond par royaume (alpha 25 for plus of subtilité)
     REALM_COLORS = {
         "Albion": QColor(204, 0, 0, 25),      # Rouge clair
         "Midgard": QColor(0, 102, 204, 25),   # Bleu clair
@@ -67,7 +67,7 @@ class CenterIconDelegate(QStyledItemDelegate):
 class CenterCheckboxDelegate(QStyledItemDelegate):
     """Delegate to draw a checkbox in the center of a cell with realm-colored background."""
     
-    # Couleurs de fond par royaume (alpha 25 pour plus de subtilité)
+    # Couleurs of fond par royaume (alpha 25 for plus of subtilité)
     REALM_COLORS = {
         "Albion": QColor(204, 0, 0, 25),      # Rouge clair
         "Midgard": QColor(0, 102, 204, 25),   # Bleu clair
@@ -178,7 +178,7 @@ class RealmTitleDelegate(QStyledItemDelegate):
 class NormalTextDelegate(QStyledItemDelegate):
     """Delegate to force normal (non-bold) text in cells with realm-based row coloring."""
     
-    # Couleurs de fond par royaume (alpha 25 pour plus de subtilité)
+    # Couleurs of fond par royaume (alpha 25 for plus of subtilité)
     REALM_COLORS = {
         "Albion": QColor(204, 0, 0, 25),      # Rouge clair
         "Midgard": QColor(0, 102, 204, 25),   # Bleu clair
@@ -194,7 +194,7 @@ class NormalTextDelegate(QStyledItemDelegate):
         realm_index = index.sibling(index.row(), 1)
         realm = realm_index.data(Qt.UserRole + 1)  # Realm name stored in UserRole + 1
         
-        # Draw background with realm color (même si pas de texte)
+        # Draw background with realm color (même if not of texte)
         painter.save()
         
         # Fill background with realm color if not selected
@@ -211,7 +211,7 @@ class NormalTextDelegate(QStyledItemDelegate):
         style = option.widget.style() if option.widget else QApplication.style()
         style.drawPrimitive(QStyle.PE_PanelItemViewItem, opt, painter, option.widget)
         
-        # Si pas de texte, on s'arrête ici (mais le fond est déjà dessiné)
+        # if not of texte, on s'arrête ici (mais the fond est déjà dessiné)
         if not text:
             return
         
@@ -241,7 +241,7 @@ class NormalTextDelegate(QStyledItemDelegate):
 class UrlButtonDelegate(QStyledItemDelegate):
     """Delegate pour afficher un bouton 'Ouvrir' dans la colonne URL si une URL existe."""
     
-    # Couleurs de fond par royaume (alpha 25 pour plus de subtilité)
+    # Couleurs of fond par royaume (alpha 25 for plus of subtilité)
     REALM_COLORS = {
         "Albion": QColor(204, 0, 0, 25),      # Rouge clair
         "Midgard": QColor(0, 102, 204, 25),   # Bleu clair
@@ -277,7 +277,7 @@ class UrlButtonDelegate(QStyledItemDelegate):
         style = option.widget.style() if option.widget else QApplication.style()
         style.drawPrimitive(QStyle.PE_PanelItemViewItem, opt, painter, option.widget)
         
-        # Si pas d'URL, on s'arrête ici
+        # if not d'URL, on s'arrête ici
         if not url or not url.strip():
             return
         
@@ -299,9 +299,9 @@ class UrlButtonDelegate(QStyledItemDelegate):
     
     def _get_button_rect(self, rect):
         """Calcule le rectangle pour le bouton (aligné à gauche)."""
-        button_width = 100  # Réduit de 120 à 100
+        button_width = 100  # Réduit of 120 à 100
         button_height = rect.height() - 2 * self.button_padding
-        x = rect.x() + self.button_padding  # Aligné à gauche avec padding
+        x = rect.x() + self.button_padding  # Aligné à gauche with padding
         y = rect.y() + self.button_padding
         return QRect(x, y, button_width, button_height)
     
@@ -312,7 +312,7 @@ class UrlButtonDelegate(QStyledItemDelegate):
             if url and url.strip():
                 button_rect = self._get_button_rect(option.rect)
                 if button_rect.contains(event.pos()):
-                    # Vérifier la connexion Herald
+                    # Check the connexion Herald
                     if not self._check_herald_connection():
                         return True
                     
@@ -342,7 +342,7 @@ class UrlButtonDelegate(QStyledItemDelegate):
             return True
         
         try:
-            # Vérifier si les cookies existent (check rapide sans Selenium)
+            # Check if the cookies existent (check rapide sans Selenium)
             from Functions.cookie_manager import CookieManager
             cookie_manager = CookieManager()
             
@@ -376,11 +376,11 @@ class UrlButtonDelegate(QStyledItemDelegate):
         
         result = msg.exec()
         
-        # Si l'utilisateur clique sur "Gérer les Cookies"
+        # if l'utilisateur clique on "Gérer the Cookies"
         if result == QMessageBox.Open and self.parent_app:
             if hasattr(self.parent_app, 'open_cookie_manager'):
                 self.parent_app.open_cookie_manager()
     
     def sizeHint(self, option, index):
         """Retourne la taille recommandée pour la cellule."""
-        return QSize(110, 32)  # Réduit de (130, 40) à (110, 32)
+        return QSize(110, 32)  # Réduit of (130, 40) à (110, 32)

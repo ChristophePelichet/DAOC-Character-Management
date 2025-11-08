@@ -56,7 +56,7 @@ class DataManager:
         if realm not in ranks:
             return None
         
-        # Convertir realm_points en entier (gérer les strings avec espaces)
+        # Convertir realm_points en entier (gérer the strings with espaces)
         try:
             if isinstance(realm_points, str):
                 # Supprimer les espaces et convertir en int
@@ -94,7 +94,7 @@ class DataManager:
         if realm not in ranks:
             return None
         
-        # Convertir current_realm_points en entier (gérer les strings avec espaces)
+        # Convertir current_realm_points en entier (gérer the strings with espaces)
         try:
             if isinstance(current_realm_points, str):
                 # Supprimer les espaces et convertir en int
@@ -357,18 +357,18 @@ class DataManager:
         """
         specs = self.get_specializations(realm, class_name)
         
-        # Déterminer la clé de langue
+        # Déterminer the clé of langue
         lang_key = "name"
         if language == "fr":
             lang_key = "name_fr"
         elif language == "de":
             lang_key = "name_de"
         
-        # Si les specs sont déjà des dicts avec traductions
+        # if the specs sont déjà des dicts with traductions
         if specs and isinstance(specs[0], dict):
             return [spec.get(lang_key, spec.get("name", "")) for spec in specs]
         
-        # Sinon retourner tel quel (anciennes données)
+        # Sinon retourner tel quel (anciennes Data)
         return specs
     
     def is_race_class_compatible(self, realm: str, race_name: str, class_name: str) -> bool:
@@ -429,14 +429,14 @@ if __name__ == "__main__":
         print(f"   RP nécessaires: {next_rank['realm_points']}")
         print(f"   Manquants: {next_rank['realm_points'] - 50000}")
     
-    # Test 3: Résumé de tous les rangs
+    # Test 3: Résumé of all the rangs
     print("\n3. Résumé des rangs Hibernia:")
     summary = dm.get_all_ranks_summary("Hibernia")
     for rank in summary[:5]:  # Afficher les 5 premiers
         print(f"   Rank {rank['rank']}: {rank['title']} "
               f"(+{rank['skill_bonus']} skills, {rank['min_realm_points']:,} RP)")
     
-    # Test 4: Calculer les RP nécessaires
+    # Test 4: Calculer the RP nécessaires
     print("\n4. RP nécessaires pour atteindre Rank 10 depuis 100,000 RP:")
     rp_needed = dm.calculate_rp_needed("Midgard", 100000, 10)
     print(f"   RP à gagner: {rp_needed:,}")
@@ -457,7 +457,7 @@ if __name__ == "__main__":
     # Test 6: Lister les classes d'un royaume
     print("\n6. Classes disponibles en Midgard:")
     midgard_classes = dm.get_classes("Midgard")
-    for class_info in midgard_classes[:5]:  # Afficher les 5 premières
+    for class_info in midgard_classes[:5]:  # Afficher the 5 premières
         print(f"   - {class_info['name']} (FR: {class_info['name_fr']})")
         print(f"     Races: {', '.join(class_info['races'][:3])}...")
     
@@ -475,7 +475,7 @@ if __name__ == "__main__":
     print(f"   Nombre de classes: {len(briton_classes)}")
     print(f"   Exemples: {', '.join([c['name'] for c in briton_classes[:5]])}...")
     
-    # Test 9: Vérifier compatibilité race/classe
+    # Test 9: Check compatibilité race/classe
     print("\n9. Vérification de compatibilité race/classe:")
     print(f"   Briton + Armsman: {dm.is_race_class_compatible('Albion', 'Briton', 'Armsman')}")
     print(f"   Briton + Friar: {dm.is_race_class_compatible('Albion', 'Briton', 'Friar')}")
@@ -493,4 +493,3 @@ if __name__ == "__main__":
     print(f"   Races: {', '.join(druid_races)}")
     
     print("\n" + "=" * 70)
-

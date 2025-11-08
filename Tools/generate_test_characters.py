@@ -8,7 +8,6 @@ Génère des fichiers JSON de test dans les dossiers Albion/Hibernia/Midgard
 import json
 import os
 import random
-from datetime import datetime
 
 def generate_test_characters():
     # Configuration

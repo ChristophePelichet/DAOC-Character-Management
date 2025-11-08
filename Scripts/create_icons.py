@@ -4,7 +4,7 @@ import os
 
 img_dir = r"d:\Projets\Python\DAOC---Gestion-des-personnages\Img"
 
-# Créer des icônes 32x32 avec des couleurs différentes
+# Create des icônes 32x32 with des couleurs différentes
 icons = {
     "albion_logo.png": ("red", "A"),
     "hibernia_logo.png": ("green", "H"),
@@ -14,7 +14,7 @@ icons = {
 print("Création des icônes de royaume...\n")
 
 for filename, (color, letter) in icons.items():
-    # Créer une image 32x32
+    # Create une image 32x32
     img = Image.new('RGBA', (32, 32), (255, 255, 255, 0))
     draw = ImageDraw.Draw(img)
     
@@ -33,7 +33,7 @@ for filename, (color, letter) in icons.items():
         # Essayer d'utiliser une police
         font = ImageFont.truetype("arial.ttf", 16)
     except:
-        # Utiliser la police par défaut
+        # Utiliser the police par défaut
         font = ImageFont.load_default()
     
     # Centrer le texte
@@ -49,7 +49,7 @@ for filename, (color, letter) in icons.items():
     filepath = os.path.join(img_dir, filename)
     img.save(filepath, "PNG")
     
-    # Vérifier
+    # Check
     size = os.path.getsize(filepath)
     print(f"✓ {filename}: {size} octets")
 

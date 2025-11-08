@@ -16,7 +16,6 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
-import json
 
 def simple_search_test(character_name):
     """Test simple sans toutes les options anti-bot"""
@@ -97,7 +96,7 @@ def simple_search_test(character_name):
                     if headers:
                         print(f"Headers: {headers}")
                     
-                    # Quelques lignes de données
+                    # Quelques lignes of Data
                     for row_idx, row in enumerate(rows[1:4], 1):
                         cells = [td.get_text(strip=True) for td in row.find_all('td')]
                         if cells:

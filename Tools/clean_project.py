@@ -6,10 +6,9 @@ Supprime les dossiers temporaires et de données pour démarrer une nouvelle bra
 Usage:
     python Scripts/clean_project.py
     python Scripts/clean_project.py --dry-run  # Affiche ce qui sera supprimé sans rien supprimer
-    python Scripts/clean_project.py --no-git   # Ne crée pas de nouvelle branche Git
+    python Scripts/clean_project.py --no-git   # Ne crée not of nouvelle branche Git
 """
 
-import os
 import sys
 import shutil
 from pathlib import Path
@@ -27,7 +26,7 @@ FOLDERS_TO_CLEAN = [
     "Logs"
 ]
 
-# Dossiers de cache à supprimer
+# Dossiers of cache à supprimer
 CACHE_FOLDERS = [
     "__pycache__",
     "Functions/__pycache__",
@@ -37,7 +36,7 @@ CACHE_FOLDERS = [
     ".ruff_cache"
 ]
 
-# Extensions de fichiers cache à supprimer
+# Extensions of fichiers cache à supprimer
 CACHE_EXTENSIONS = [
     ".pyc",
     ".pyo",
@@ -150,7 +149,7 @@ def create_new_branch(project_root: Path):
     print("🌿 CRÉATION D'UNE NOUVELLE BRANCHE GIT")
     print("=" * 60)
     
-    # Vérifier que c'est un dépôt Git
+    # Check that c'est un dépôt Git
     if not (project_root / ".git").exists():
         print("❌ Ce n'est pas un dépôt Git")
         return
@@ -169,7 +168,7 @@ def create_new_branch(project_root: Path):
         print("❌ Nom de branche vide, création annulée")
         return
     
-    # Vérifier que la branche n'existe pas déjà
+    # Check that the branche n'existe not déjà
     success, branches = run_git_command(["git", "branch", "--list", branch_name], project_root)
     if success and branches:
         print(f"❌ La branche '{branch_name}' existe déjà localement")
@@ -278,7 +277,7 @@ def clean_project(dry_run: bool = False, create_branch: bool = True):
         print(f"\n🎉 Nettoyage terminé!")
     print("=" * 60)
     
-    # Création de branche Git
+    # Creation of branche Git
     if not dry_run and create_branch:
         print("\n")
         response = input("🌿 Voulez-vous créer une nouvelle branche Git? (oui/non): ").strip().lower()
@@ -294,10 +293,10 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Exemples:
-  python Scripts/clean_project.py                 # Nettoie le projet et propose création branche
+  python Scripts/clean_project.py                 # Nettoie the projet and propose Creation branche
   python Scripts/clean_project.py --dry-run       # Simule le nettoyage
   python Scripts/clean_project.py -d              # Simule le nettoyage (forme courte)
-  python Scripts/clean_project.py --no-git        # Nettoie sans créer de branche Git
+  python Scripts/clean_project.py --no-git        # Nettoie sans Create of branche Git
         """
     )
     

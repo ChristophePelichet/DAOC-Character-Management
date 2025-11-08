@@ -11,16 +11,15 @@ import os
 import shutil
 from datetime import datetime
 from pathlib import Path
-import logging
 
 # Import new logging system
 from .logging_manager import get_logger, LOGGER_EDEN
 
-# Logger dédié pour Eden
+# Dedicated logger for Eden
 eden_logger = get_logger(LOGGER_EDEN)
 
 # Variable GLOBALE pour garder les drivers Selenium vivants
-# Cette liste empêche le garbage collection des navigateurs
+# This list prevents browser garbage collection
 _PERSISTENT_DRIVERS = []
 
 class CookieManager:
@@ -36,23 +35,23 @@ class CookieManager:
         if config_dir is None:
             # Utiliser le dossier des cookies depuis la configuration
             from Functions.config_manager import config, get_config_dir
-            # Vérifier si un dossier de cookies a été configuré
+            # Check if a cookies folder has been configured
             config_dir = config.get("cookies_folder")
             if not config_dir:
-                # Fallback sur le dossier de configuration par défaut
+                # Fallback to default configuration folder
                 config_dir = get_config_dir()
         
         config_dir = Path(config_dir)
         self.config_dir = config_dir
         self.cookie_file = self.config_dir / "eden_cookies.pkl"
         
-        # Créer le dossier si nécessaire - Log if creating for the first time
+        # Create folder if needed - Log if creating for the first time
         cookies_dir_existed = self.config_dir.exists()
         self.config_dir.mkdir(parents=True, exist_ok=True)
         if not cookies_dir_existed:
             eden_logger.info(f"Created cookies directory: {self.config_dir}", extra={"action": "DIRECTORY"})
         
-        # Garder une référence aux drivers persistants pour éviter le garbage collection
+        # Keep reference to persistent drivers to avoid garbage collection
         self.persistent_drivers = []
         
         eden_logger.info(f"CookieManager initialisé - Fichier: {self.cookie_file}", extra={"action": "COOKIES"})
@@ -99,7 +98,7 @@ class CookieManager:
                             'hours_remaining': duration.seconds // 3600
                         })
                     else:
-                        # Cookie expiré
+                        # Expired cookie
                         expired_cookies.append({
                             'name': cookie_name,
                             'domain': cookie_domain,
@@ -164,7 +163,7 @@ class CookieManager:
             return False
         
         try:
-            # Vérifier que c'est un fichier pickle valide
+            # Check that it's a valid pickle file
             eden_logger.info(f"Lecture du fichier pickle...", extra={"action": "FILE"})
             with open(source_path, 'rb') as f:
                 cookies = pickle.load(f)
@@ -204,7 +203,7 @@ class CookieManager:
             return True
         
         try:
-            # Créer une sauvegarde avant suppression
+            # Create backup before deletion
             backup_file = self.cookie_file.with_suffix('.pkl.deleted')
             shutil.copy2(self.cookie_file, backup_file)
             
@@ -232,7 +231,7 @@ class CookieManager:
         
         available = []
         
-        # Vérifier Chrome
+        # Check Chrome
         chrome_paths = []
         if platform.system() == "Windows":
             chrome_paths = [
@@ -245,18 +244,18 @@ class CookieManager:
         else:  # Linux
             chrome_paths = ["/usr/bin/google-chrome", "/usr/bin/chromium", "/usr/bin/chromium-browser"]
         
-        # Vérifier si chromedriver local existe
+        # Check if local chromedriver exists
         local_chromedriver = os.path.join(os.getcwd(), "chromedriver.exe")
         if os.path.exists(local_chromedriver):
             available.append('Chrome')
         else:
-            # Vérifier si Chrome est installé
+            # Check if Chrome is installed
             for path in chrome_paths:
                 if os.path.exists(path):
                     available.append('Chrome')
                     break
         
-        # Vérifier Edge (préinstallé sur Windows 10/11)
+        # Check Edge (pre-installed on Windows 10/11)
         if platform.system() == "Windows":
             edge_paths = [
                 os.path.expandvars(r"%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe"),
@@ -267,7 +266,7 @@ class CookieManager:
                     available.append('Edge')
                     break
         
-        # Vérifier Firefox
+        # Check Firefox
         firefox_paths = []
         if platform.system() == "Windows":
             firefox_paths = [
@@ -304,7 +303,7 @@ class CookieManager:
         # Log pour debug
         eden_logger.info(f"🔍 _initialize_browser_driver appelé avec: preferred_browser={preferred_browser},...", extra={"action": "INIT"})
         
-        # Définir l'ordre de priorité
+        # Define priority order
         if preferred_browser:
             browser_order = [preferred_browser]
             # Ajouter les autres comme fallback
@@ -314,7 +313,7 @@ class CookieManager:
                     browser_order.append(browser)
             eden_logger.info(f"📋 Ordre de priorité (avec préféré): {browser_order}")
         else:
-            # Ordre par défaut
+            # Default order
             browser_order = ['Chrome', 'Edge', 'Firefox']
             eden_logger.info(f"📋 Ordre de priorité (par défaut): {browser_order}")
         
@@ -336,7 +335,7 @@ class CookieManager:
                 if driver:
                     return driver, 'Firefox'
         
-        # ===== ÉCHEC TOTAL =====
+        # ===== TOTAL FAILURE =====
         error_summary = "\n".join(errors)
         eden_logger.error(f"❌ Impossible d'initialiser un navigateur:\n{error_summary}")
         return None, None
@@ -345,7 +344,6 @@ class CookieManager:
         """Tente d'initialiser Chrome"""
         try:
             from selenium import webdriver
-            from selenium.webdriver.chrome.service import Service as ChromeService
             from selenium.webdriver.chrome.options import Options as ChromeOptions
             import os
             
@@ -367,7 +365,7 @@ class CookieManager:
             except Exception as e:
                 eden_logger.debug(f"ChromeDriver local: {e}")
             
-            # Chrome système (Selenium Manager)
+            # System Chrome (Selenium Manager)
             try:
                 driver = webdriver.Chrome(options=chrome_options)
                 eden_logger.info("✅ Chrome (Selenium Manager)")
@@ -375,7 +373,7 @@ class CookieManager:
             except Exception as e:
                 eden_logger.debug(f"Chrome système: {e}")
             
-            # Chrome téléchargement (seulement si autorisé)
+            # Chrome download (only if authorized)
             if allow_download:
                 try:
                     from webdriver_manager.chrome import ChromeDriverManager
@@ -478,7 +476,7 @@ class CookieManager:
             
             eden_logger.info("✅ Navigateur initialisé: {browser_name}", extra={"action": "SCRAPE"})
             
-            # Stocker le navigateur utilisé pour affichage
+            # Store browser used for display
             self.last_browser_used = browser_name
             
             try:
@@ -517,7 +515,7 @@ class CookieManager:
             tuple: (success: bool, message: str, cookie_count: int)
         """
         try:
-            # Récupérer tous les cookies
+            # Retrieve all cookies
             cookies = driver.get_cookies()
             
             if not cookies:
@@ -590,7 +588,6 @@ class CookieManager:
             
             try:
                 from selenium import webdriver
-                from selenium.webdriver.chrome.service import Service
                 from selenium.webdriver.chrome.options import Options
                 from webdriver_manager.chrome import ChromeDriverManager
             except ImportError as e:
@@ -613,14 +610,14 @@ class CookieManager:
                     'accessible': False
                 }
             
-            # Lire la configuration pour le navigateur préféré
+            # Read configuration for preferred browser
             from Functions.config_manager import config
             preferred_browser = config.get('preferred_browser', 'Chrome')
             allow_download = config.get('allow_browser_download', False)
             
             eden_logger.info("🔧 test_eden_connection - Configuration lue: preferred_browser=", extra={"action": "TEST"})
             
-            # Créer le driver avec fallback multi-navigateurs (mode headless)
+            # Create driver with multi-browser fallback (headless mode)
             driver, browser_name = self._initialize_browser_driver(
                 headless=True,
                 preferred_browser=preferred_browser,
@@ -636,18 +633,18 @@ class CookieManager:
                     'accessible': False
                 }
             
-            # Stocker le navigateur utilisé pour affichage
+            # Store browser used for display
             self.last_browser_used = browser_name
             eden_logger.debug("✅ Test avec {browser_name} (headless)", extra={"action": "TEST"})
             
-            # TEST ALIGNÉ EXACTEMENT AVEC load_cookies()
+            # TEST ALIGNED EXACTLY WITH load_cookies()
             import time
             
-            # Étape 1: Page d'accueil
+            # Step 1: Homepage
             driver.get("https://eden-daoc.net/")
             time.sleep(1)  # PHASE 1: Optimisé 2s → 1s
             
-            # Étape 2: Ajouter les cookies
+            # Step 2: Add cookies
             eden_logger.info(f"Ajout de {len(cookies_list)} cookies", extra={"action": "TEST"})
             for cookie in cookies_list:
                 try:
@@ -657,17 +654,17 @@ class CookieManager:
             
             time.sleep(1)
             
-            # Étape 3: Refresh
+            # Step 3: Refresh
             eden_logger.info("Refresh pour activer les cookies", extra={"action": "TEST"})
             driver.refresh()
             time.sleep(2)  # PHASE 1: Optimisé 3s → 2s
             
-            # Étape 4: Aller sur le Herald
+            # Step 4: Go to Herald
             eden_logger.info("Navigation vers https://eden-daoc.net/herald", extra={"action": "TEST"})
             driver.get("https://eden-daoc.net/herald")
             time.sleep(3)  # PHASE 1: Optimisé 5s → 3s
             
-            # Récupérer et analyser le HTML
+            # Retrieve and parse HTML
             page_source = driver.page_source
             
             # DEBUG: Sauvegarder pour inspection
@@ -679,14 +676,14 @@ class CookieManager:
             except:
                 pass
             
-            # MÉTHODE DE DÉTECTION SIMPLE ET FIABLE:
-            # Si on n'a pas le message d'erreur "not available" → On est connecté
+            # MÉTHODE DE SIMPLE AND RELIABLE DETECTION:
+            # If we don't have the "not available" error message → We are connected
             error_message = 'The requested page "herald" is not available.'
             has_error = error_message in page_source
             
             eden_logger.debug(f"HTML size: {len(page_source)}, error present: {has_error}", extra={"action": "TEST"})
             
-            # LOGIQUE SIMPLE: Pas d'erreur = Connecté
+            # SIMPLE LOGIC: No error = Connected
             if not has_error:
                 eden_logger.info("CONNECTÉ - Pas de message d'erreur détecté", extra={"action": "TEST"})
                 return {
@@ -705,7 +702,7 @@ class CookieManager:
                 }
                     
         except Exception as e:
-            # Log détaillé de l'exception pour debug
+            # Detailed exception log for debugging
             import traceback
             error_details = traceback.format_exc()
             eden_logger.error(f"CRASH test_eden_connection: {e}\n{error_details}", extra={"action": "TEST"})
@@ -748,7 +745,6 @@ class CookieManager:
         
         try:
             from selenium import webdriver
-            from selenium.webdriver.chrome.service import Service
             from selenium.webdriver.chrome.options import Options
             from webdriver_manager.chrome import ChromeDriverManager
             import time
@@ -762,14 +758,14 @@ class CookieManager:
                     'browser': None
                 }
             
-            # Lire la configuration pour le navigateur préféré
+            # Read configuration for preferred browser
             from Functions.config_manager import config
             preferred_browser = config.get('preferred_browser', 'Chrome')
             allow_download = config.get('allow_browser_download', False)
             
-            # Créer le driver en mode NON-HEADLESS (pour voir le résultat)
+            # Create driver in NON-HEADLESS mode (to see result)
             driver, browser_name = self._initialize_browser_driver(
-                headless=False,  # Important: pas de headless pour voir le résultat
+                headless=False,  # Important: no headless to see result
                 preferred_browser=preferred_browser,
                 allow_download=allow_download
             )
@@ -782,12 +778,12 @@ class CookieManager:
                 }
             
             try:
-                # Étape 1: Aller à la page d'accueil d'abord
+                # Step 1: Go to homepage first
                 eden_logger.info(f"Ouverture de {url} avec cookies", extra={"action": "NAVIGATE"})
                 driver.get("https://eden-daoc.net/")
                 time.sleep(2)
                 
-                # Étape 2: Ajouter les cookies
+                # Step 2: Add cookies
                 eden_logger.info(f"Chargement de {len(cookies_list)} cookies", extra={"action": "NAVIGATE"})
                 for cookie in cookies_list:
                     try:
@@ -797,12 +793,12 @@ class CookieManager:
                 
                 time.sleep(1)
                 
-                # Étape 3: Refresh pour activer les cookies
+                # Step 3: Refresh pour activer les cookies
                 eden_logger.info("Refresh pour activer les cookies", extra={"action": "NAVIGATE"})
                 driver.refresh()
                 time.sleep(2)
                 
-                # Étape 4: Naviguer vers l'URL demandée
+                # Step 4: Navigate to requested URL
                 if not url.startswith(('http://', 'https://')):
                     url = 'https://' + url
                 
@@ -869,7 +865,6 @@ class CookieManager:
         
         try:
             from selenium import webdriver
-            from selenium.webdriver.chrome.service import Service
             from selenium.webdriver.chrome.options import Options
             from webdriver_manager.chrome import ChromeDriverManager
             import time
@@ -883,14 +878,14 @@ class CookieManager:
                     'browser': None
                 }
             
-            # Lire la configuration pour le navigateur préféré
+            # Read configuration for preferred browser
             from Functions.config_manager import config
             preferred_browser = config.get('preferred_browser', 'Chrome')
             allow_download = config.get('allow_browser_download', False)
             
-            # Créer le driver en mode NON-HEADLESS (pour voir le résultat)
+            # Create driver in NON-HEADLESS mode (to see result)
             driver, browser_name = self._initialize_browser_driver(
-                headless=False,  # Important: pas de headless pour voir le résultat
+                headless=False,  # Important: no headless to see result
                 preferred_browser=preferred_browser,
                 allow_download=allow_download
             )
@@ -905,12 +900,12 @@ class CookieManager:
             # NOTE: On ne met PAS le driver dans un try/finally avec quit()
             # pour laisser le navigateur ouvert
             try:
-                # Étape 1: Aller à la page d'accueil d'abord
+                # Step 1: Go to homepage first
                 eden_logger.info(f"Ouverture de {url} avec cookies (persistent)", extra={"action": "NAVIGATE"})
                 driver.get("https://eden-daoc.net/")
-                time.sleep(3)  # Augmenté de 2 à 3
+                time.sleep(3)  # Increased from 2 to 3
                 
-                # Étape 2: Ajouter les cookies
+                # Step 2: Add cookies
                 eden_logger.info(f"Chargement de {len(cookies_list)} cookies", extra={"action": "NAVIGATE"})
                 for cookie in cookies_list:
                     try:
@@ -918,24 +913,24 @@ class CookieManager:
                     except Exception as cookie_err:
                         eden_logger.debug(f"Impossible d'ajouter un cookie: {cookie_err}")
                 
-                time.sleep(2)  # Augmenté de 1 à 2
+                time.sleep(2)  # Increased from 1 to 2
                 
-                # Étape 3: Refresh pour activer les cookies
+                # Step 3: Refresh pour activer les cookies
                 eden_logger.info("Refresh pour activer les cookies", extra={"action": "NAVIGATE"})
                 driver.refresh()
-                time.sleep(4)  # Augmenté de 2 à 4
+                time.sleep(4)  # Augmenté of 2 à 4
                 
-                # Étape 4: Naviguer vers l'URL demandée
+                # Step 4: Navigate to requested URL
                 if not url.startswith(('http://', 'https://')):
                     url = 'https://' + url
                 
                 eden_logger.info(f"Navigation vers {url}", extra={"action": "NAVIGATE"})
                 driver.get(url)
-                time.sleep(5)  # Augmenté de 2 à 5 - laisser le temps au contenu de charger
+                time.sleep(5)  # Augmenté of 2 à 5 - laisser the temps au contenu of Load
                 
                 eden_logger.info(f"✅ Page ouverte avec succès via {browser_name} (navigateur restera ouvert)", extra={"action": "NAVIGATE"})
                 
-                # IMPORTANT: Garder une référence au driver pour éviter le garbage collection
+                # IMPORTANT: Garder une référence au driver for éviter the garbage collection
                 self.persistent_drivers.append(driver)
                 
                 # IMPORTANT: Ne pas fermer le driver pour garder le navigateur ouvert
@@ -947,7 +942,7 @@ class CookieManager:
                 
             except Exception as e:
                 eden_logger.error(f"Erreur lors de la navigation (persistent): {e}")
-                # IMPORTANT: En mode persistent, on ne ferme PAS le driver même en cas d'erreur
+                # IMPORTANT: En mode persistent, on ne ferme not the driver même en cas d'erreur
                 # pour laisser l'utilisateur voir la page actuelle
                 return {
                     'success': False,
@@ -992,7 +987,6 @@ class CookieManager:
         
         try:
             from http.server import HTTPServer, BaseHTTPRequestHandler
-            import json
             import threading
             import webbrowser
             import time
@@ -1014,14 +1008,14 @@ class CookieManager:
                 
                 def do_GET(self):
                     if self.path == '/':
-                        # Générer une page HTML qui injecte les cookies et redirige
+                        # Générer une page HTML qui injecte the cookies and redirige
                         cookies_js = 'document.cookie = "";\n'
                         for cookie in cookies_list:
                             name = cookie.get('name', '')
                             value = cookie.get('value', '')
                             domain = cookie.get('domain', '')
                             path = cookie.get('path', '/')
-                            # Injecter le cookie (simple, pas de domaine spécifique)
+                            # Injecter the cookie (simple, not of domaine spécifique)
                             safe_value = value.replace('"', '\\"')
                             cookies_js += f'document.cookie = "{name}={safe_value}; path={path}; max-age=31536000";\n'
                         
@@ -1049,7 +1043,7 @@ class CookieManager:
                 def log_message(self, format, *args):
                     pass  # Supprimer les logs du serveur
             
-            # Démarrer le serveur dans un thread séparé
+            # Démarrer the serveur in un thread séparé
             server = HTTPServer(('127.0.0.1', 0), CookieInjectorHandler)
             port = server.server_address[1]
             server_thread = threading.Thread(target=server.handle_request, daemon=True)
@@ -1101,7 +1095,6 @@ class CookieManager:
             from selenium.webdriver.chrome.options import Options
             from webdriver_manager.chrome import ChromeDriverManager
             import time
-            import subprocess
             import os
             
             cookies_list = self.get_cookies_for_scraper()
@@ -1111,12 +1104,12 @@ class CookieManager:
                     'message': 'Cookies invalides ou expirés'
                 }
             
-            # Lire la configuration pour le navigateur préféré
+            # Read configuration for preferred browser
             from Functions.config_manager import config
             preferred_browser = config.get('preferred_browser', 'Chrome')
             allow_download = config.get('allow_browser_download', False)
             
-            # Créer le driver
+            # Create the driver
             driver, browser_name = self._initialize_browser_driver(
                 headless=False,
                 preferred_browser=preferred_browser,
@@ -1136,11 +1129,11 @@ class CookieManager:
                 
                 eden_logger.info(f"Ouverture détachée de {url} avec cookies", extra={"action": "NAVIGATE"})
                 
-                # Étape 1: Page d'accueil
+                # Step 1: Homepage
                 driver.get("https://eden-daoc.net/")
                 time.sleep(1)
                 
-                # Étape 2: Ajouter les cookies
+                # Step 2: Add cookies
                 for cookie in cookies_list:
                     try:
                         driver.add_cookie(cookie)
@@ -1149,18 +1142,18 @@ class CookieManager:
                 
                 time.sleep(1)
                 
-                # Étape 3: Refresh
+                # Step 3: Refresh
                 driver.refresh()
                 time.sleep(2)
                 
-                # Étape 4: Navigation vers l'URL
+                # Step 4: Navigation vers l'URL
                 driver.get(url)
                 time.sleep(2)
                 
                 eden_logger.info(f"✅ Page ouverte avec succès via {browser_name} (détaché)", extra={"action": "NAVIGATE"})
                 
                 # IMPORTANT: Ne PAS appeler driver.quit()
-                # Laisser le driver/navigateur ouvert en arrière-plan
+                # Laisser the driver/navigateur ouvert en arrière-plan
                 # Le processus se terminera quand l'utilisateur ferme le navigateur
                 
                 return {
@@ -1207,8 +1200,6 @@ class CookieManager:
             }
         
         try:
-            import subprocess
-            import json
             import tempfile
             import os
             from pathlib import Path
@@ -1224,7 +1215,7 @@ class CookieManager:
             if not url.startswith(('http://', 'https://')):
                 url = 'https://' + url
             
-            # Lire la configuration pour le navigateur préféré
+            # Read configuration for preferred browser
             from Functions.config_manager import config
             preferred_browser = config.get('preferred_browser', 'Chrome')
             
@@ -1259,7 +1250,7 @@ class CookieManager:
                     'message': f'Ouvert via navigateur par défaut (pas de cookies)'
                 }
             
-            # Créer un profil temporaire pour les cookies
+            # Create un profil temporaire for the cookies
             profile_dir = tempfile.mkdtemp(prefix="daoc_")
             cookies_file = os.path.join(profile_dir, "cookies.txt")
             
@@ -1292,8 +1283,6 @@ class CookieManager:
                     edge_options.add_argument("--no-first-run")
                     edge_options.add_argument("--disable-blink-features=AutomationControlled")
                     
-                    from selenium.webdriver.edge.service import Service as EdgeService
-                    from webdriver_manager.microsoft import EdgeChromiumDriverManager
                     driver = webdriver.Edge(options=edge_options)
                 
                 try:
@@ -1316,13 +1305,13 @@ class CookieManager:
                     
                     eden_logger.info(f"✅ Navigateur lancé via Selenium avec cookies chargés", extra={"action": "NAVIGATE"})
                     
-                    # IMPORTANT: Garder une référence GLOBALE au driver pour éviter le garbage collection
+                    # IMPORTANT: Garder une référence GLOBALE au driver for éviter the garbage collection
                     # Utiliser la variable globale, pas self.persistent_drivers
                     global _PERSISTENT_DRIVERS
                     _PERSISTENT_DRIVERS.append(driver)
                     
                     # IMPORTANT: NE PAS appeler quit()
-                    # Laisser le driver/navigateur ouvert indéfiniment
+                    # Laisser the driver/navigateur ouvert indéfiniment
                     return {
                         'success': True,
                         'message': f'Navigateur lancé avec succès et cookies chargés'
@@ -1341,4 +1330,3 @@ class CookieManager:
                 'success': False,
                 'message': f'Erreur: {str(e)[:50]}'
             }
-

@@ -14,14 +14,14 @@ def test_cookie_manager():
     print("TEST DU COOKIE MANAGER")
     print("=" * 60)
     
-    # Créer le gestionnaire
+    # Create the Manager
     manager = CookieManager()
     
     print(f"\n✓ CookieManager initialisé")
     print(f"  Fichier: {manager.cookie_file}")
     print(f"  Existe: {manager.cookie_exists()}")
     
-    # Récupérer les infos
+    # Retrieve the infos
     info = manager.get_cookie_info()
     
     if info is None:

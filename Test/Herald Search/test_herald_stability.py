@@ -29,7 +29,7 @@ TEST_CHARACTERS = [
     ("Galahad", "mid"),     # Midgard
 ]
 
-ITERATIONS = 5  # Nombre de fois qu'on répète tous les tests
+ITERATIONS = 5  # Nombre of fois qu'on répète all the tests
 DELAY_BETWEEN_SEARCHES = 3  # Secondes entre chaque recherche
 
 
@@ -91,12 +91,12 @@ def test_search_stability():
                 errors.append(error_msg)
                 logger.error(f"Test {current_test}/{total_tests} crashé: {char_name} - {str(e)}")
             
-            # Attendre entre les recherches (sauf pour la dernière)
+            # Wait entre the recherches (sauf for the dernière)
             if current_test < total_tests:
                 print(f"   ⏱️  Attente {DELAY_BETWEEN_SEARCHES}s...\n")
                 time.sleep(DELAY_BETWEEN_SEARCHES)
     
-    # Résultats finaux
+    # Results finaux
     total_duration = time.time() - start_time
     
     print("\n" + "="*80)

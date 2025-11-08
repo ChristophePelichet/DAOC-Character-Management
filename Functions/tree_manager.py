@@ -3,9 +3,9 @@ Tree Manager - Gère l'affichage et les interactions avec la liste des personnag
 Extrait de main.py pour améliorer la maintenabilité
 """
 import logging
-from PySide6.QtWidgets import QHeaderView, QMessageBox, QInputDialog, QLineEdit, QTreeView
 from PySide6.QtGui import QStandardItemModel, QStandardItem, QIcon
 from PySide6.QtCore import Qt, QByteArray, QSortFilterProxyModel
+from PySide6.QtWidgets import QHeaderView
 
 from Functions.character_manager import (
     get_all_characters, REALM_ICONS, delete_character, 
@@ -28,7 +28,7 @@ class RealmSortProxyModel(QSortFilterProxyModel):
             if left_data and right_data:
                 return left_data < right_data
         
-        # Pour les autres colonnes, utiliser le comportement par défaut
+        # for the autres colonnes, utiliser the comportement par défaut
         return super().lessThan(left, right)
 
 
@@ -49,7 +49,7 @@ class TreeManager:
         self.data_manager = data_manager
         self.model = QStandardItemModel()
         
-        # Utiliser un proxy model pour le tri personnalisé de la colonne Realm
+        # Utiliser un proxy model for the tri personnalisé of the colonne Realm
         self.proxy_model = RealmSortProxyModel()
         self.proxy_model.setSourceModel(self.model)
         self.tree_view.setModel(self.proxy_model)
@@ -112,7 +112,7 @@ class TreeManager:
         self.model.clear()
         self.characters_by_id.clear()
         
-        # Définir les en-têtes
+        # Définir the en-têtes
         # Ordre: Selection, Realm, Name, Class, Level, Rank, Title, Guild, Page, Server, Race, URL
         headers = [
             lang.get("column_selection"),
@@ -130,7 +130,7 @@ class TreeManager:
         ]
         self.model.setHorizontalHeaderLabels(headers)
         
-        # Centrer les en-têtes de certaines colonnes
+        # Centrer the en-têtes of certaines colonnes
         # Ordre: Selection(0), Realm(1), Name(2), Class(3), Level(4), Rank(5), Title(6), Guild(7), Page(8), Server(9), Race(10), URL(11)
         for col_index in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]:  # Realm, Name, Class, Level, Rank, Title, Guild, Page, Server, Race
             header_item = self.model.horizontalHeaderItem(col_index)
@@ -144,17 +144,17 @@ class TreeManager:
         for char in characters:
             self._add_character_row(char)
         
-        # Restaurer l'état de l'en-tête
+        # Restaurer l'état of l'en-tête
         self._restore_header_state()
         
-        # Appliquer la visibilité des colonnes
+        # Appliquer the visibilité des colonnes
         self.apply_column_visibility()
         
         # Appliquer le mode de redimensionnement
         manual_resize = config.get("manual_column_resize", False)
         self.apply_column_resize_mode(manual_resize)
         
-        # Connecter le signal de changement pour le compteur de sélection
+        # Connecter the signal of changement for the compteur of sélection
         self.model.dataChanged.connect(self.main_window.update_selection_count)
         
     def _add_character_row(self, char):
@@ -163,7 +163,7 @@ class TreeManager:
         char_id = char.get('id')
         self.characters_by_id[char_id] = char
         
-        # Icône de royaume
+        # Icône of royaume
         item_realm = QStandardItem()
         realm_icon = self.realm_icons.get(realm_name)
         if realm_icon:
@@ -258,7 +258,7 @@ class TreeManager:
         font_url.setBold(False)
         item_url.setFont(font_url)
         
-        # Case à cocher pour la sélection
+        # Case à cocher for the sélection
         item_selection = QStandardItem()
         item_selection.setCheckable(True)
         item_selection.setCheckState(Qt.Unchecked)
@@ -303,7 +303,7 @@ class TreeManager:
             "server": 9, "race": 10, "url": 11
         }
         
-        # Appliquer la visibilité
+        # Appliquer the visibilité
         for key, index in column_map.items():
             is_visible = visibility_config.get(key, default_visibility.get(key, True))
             self.tree_view.setColumnHidden(index, not is_visible)
@@ -312,7 +312,7 @@ class TreeManager:
             if is_visible and index != 2:
                 self.tree_view.resizeColumnToContents(index)
         
-        # Réappliquer Stretch sur la colonne Name si visible
+        # Réappliquer Stretch on the colonne Name if visible
         if visibility_config.get("name", True):
             self.tree_view.header().setSectionResizeMode(2, QHeaderView.Stretch)
             
@@ -330,7 +330,7 @@ class TreeManager:
                 else:
                     header.setSectionResizeMode(i, QHeaderView.ResizeToContents)
             
-            # Définir une largeur minimale pour la colonne URL (11) pour éviter que le bouton soit écrasé
+            # Définir une largeur minimale for the colonne URL (11) for éviter that the bouton soit écrasé
             self.tree_view.setColumnWidth(11, 120)
             logging.debug("Column resize mode: Automatic")
             
@@ -375,7 +375,7 @@ class TreeManager:
         if not indexes:
             return None
         
-        # Mapper l'index du proxy vers le modèle source
+        # Mapper l'index of the proxy vers the modèle source
         proxy_index = indexes[0]
         source_index = self.proxy_model.mapToSource(proxy_index)
         row = source_index.row()

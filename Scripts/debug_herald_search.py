@@ -20,7 +20,6 @@ def debug_search_page(character_name):
     """Analyse la page de recherche Herald"""
     
     print("\n" + "=" * 80)
-    print("🔍 DEBUG RECHERCHE HERALD")
     print("=" * 80)
     
     # Initialiser
@@ -45,7 +44,7 @@ def debug_search_page(character_name):
     scraper.driver.get(search_url)
     time.sleep(5)  # Attendre plus longtemps
     
-    # Récupérer le HTML
+    # Retrieve HTML
     page_source = scraper.driver.page_source
     soup = BeautifulSoup(page_source, 'html.parser')
     
@@ -71,7 +70,7 @@ def debug_search_page(character_name):
         rows = table.find_all('tr')
         print(f"Nombre de lignes: {len(rows)}")
         
-        # Afficher les premières lignes
+        # Afficher the premières lignes
         for row_idx, row in enumerate(rows[:5], 1):
             cells = [td.get_text(strip=True) for td in row.find_all('td')]
             if cells:

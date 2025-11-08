@@ -8,7 +8,7 @@ import json
 import re
 import urllib3
 
-# Désactiver les avertissements SSL
+# Désactiver the avertissements SSL
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 def scrape_realm_ranks():
@@ -24,7 +24,7 @@ def scrape_realm_ranks():
     
     soup = BeautifulSoup(response.content, 'html.parser')
     
-    # Structure de données
+    # Structure of Data
     realm_data = {
         "Albion": [],
         "Hibernia": [],
@@ -41,7 +41,7 @@ def scrape_realm_ranks():
     rows = table.find_all('tr')
     print(f"Nombre total de lignes: {len(rows)}")
     
-    # Parser chaque ligne de données (skip header row 0)
+    # Parser chaque ligne of Data (skip header row 0)
     for row_idx, row in enumerate(rows[1:], 1):
         cells = row.find_all(['td', 'th'])
         if len(cells) < 5:
@@ -77,7 +77,7 @@ def scrape_realm_ranks():
         rap_cell = cells[4]
         realm_ability_points = [line.strip() for line in rap_cell.stripped_strings if line.strip()]
         
-        # Créer une entrée pour chaque niveau
+        # Create une entrée for chaque niveau
         num_levels = len(levels)
         print(f"Rank {rank}: {num_levels} niveaux")
         
@@ -86,7 +86,7 @@ def scrape_realm_ranks():
             rp = int(realm_points[i]) if i < len(realm_points) else 0
             rap = int(realm_ability_points[i]) if i < len(realm_ability_points) else 0
             
-            # Créer les entrées pour chaque royaume
+            # Create the entrées for chaque royaume
             realm_data["Albion"].append({
                 "rank": rank,
                 "skill_bonus": skill_bonus,

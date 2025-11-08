@@ -21,7 +21,7 @@ def test_update_dialog():
     if app is None:
         app = QApplication(sys.argv)
     
-    # Données actuelles (anciennes)
+    # Data actuelles (anciennes)
     current_data = {
         'name': 'TestChar',
         'level': 50,
@@ -34,7 +34,7 @@ def test_update_dialog():
         'server': 'Eden'  # IDENTIQUE
     }
     
-    # Nouvelles données (depuis Herald)
+    # Nouvelles Data (depuis Herald)
     new_data = {
         'name': 'TestChar',
         'clean_name': 'TestChar',
@@ -70,7 +70,7 @@ def test_update_dialog():
     print("📋 Ouverture de la fenêtre de validation...")
     print("=" * 80)
     
-    # Créer et afficher le dialogue
+    # Create and afficher the dialogue
     dialog = CharacterUpdateDialog(None, current_data, new_data, 'TestChar')
     result = dialog.exec()
     

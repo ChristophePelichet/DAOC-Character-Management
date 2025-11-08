@@ -30,7 +30,7 @@ if success:
     print(f"📊 {message}")
     print(f"📄 Fichier: {json_path}")
     
-    # Afficher les résultats
+    # Afficher the Results
     import json
     with open(json_path, 'r', encoding='utf-8') as f:
         data = json.load(f)

@@ -13,7 +13,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from PySide6.QtWidgets import QApplication, QTableWidget, QTableWidgetItem, QHeaderView, QVBoxLayout, QWidget
 import json
 
-# Charger le dernier fichier de résultats
+# Load the dernier File of Results
 search_dir = Path(__file__).parent.parent / "Configuration" / "SearchResults"
 json_files = sorted(search_dir.glob("characters_*.json"), key=lambda x: x.stat().st_mtime, reverse=True)
 
@@ -30,17 +30,17 @@ with open(latest_file, 'r', encoding='utf-8') as f:
 characters = data.get('characters', [])
 print(f"📊 {len(characters)} personnage(s) trouvé(s)")
 
-# Créer l'application Qt
+# Create l'application Qt
 app = QApplication(sys.argv)
 
-# Créer la fenêtre
+# Create the fenêtre
 window = QWidget()
 window.setWindowTitle(f"🔍 Résultats: {data['search_query']}")
 window.resize(1000, 400)
 
 layout = QVBoxLayout(window)
 
-# Créer le tableau
+# Create the tableau
 table = QTableWidget()
 table.setAlternatingRowColors(True)
 table.setSelectionBehavior(QTableWidget.SelectRows)

@@ -34,7 +34,7 @@ def test_realm_rank_fix():
     
     print(f"✅ Recherche réussie: {message}")
     
-    # Charger les résultats
+    # Load results
     with open(characters_file, 'r', encoding='utf-8') as f:
         results = json.load(f)
     
@@ -62,7 +62,7 @@ def test_realm_rank_fix():
     print(f"   realm_rank = '{char_data.get('realm_rank')}'")
     print(f"   realm_level = '{char_data.get('realm_level')}'")
     
-    # Normaliser les données
+    # Normaliser the Data
     from Functions.eden_scraper import _normalize_herald_data
     normalized = _normalize_herald_data(char_data)
     
@@ -79,7 +79,7 @@ def test_realm_rank_fix():
     print(f"🔹 Serveur: {normalized.get('server')}")
     print(f"� Points de Royaume: {normalized.get('realm_points')}")
     
-    # LES CHAMPS CRITIQUES À VÉRIFIER
+    # the CHAMPS CRITIQUES À Check
     realm_rank = normalized.get('realm_rank', '')
     realm_title = normalized.get('realm_title', '')
     
@@ -87,7 +87,7 @@ def test_realm_rank_fix():
     print(f"   realm_rank = '{realm_rank}'")
     print(f"   Format attendu: XLY (ex: 5L2, 4L1)")
     
-    # Vérifier le format
+    # Check the format
     import re
     if re.match(r'^\d+L\d+$', realm_rank):
         print(f"   ✅ Format correct!")

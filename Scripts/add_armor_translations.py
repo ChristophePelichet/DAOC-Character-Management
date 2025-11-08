@@ -101,7 +101,7 @@ def add_translations_to_armor_resists():
         for table_key, table_data in data['tables'].items():
             print(f"   Table: {table_key}")
             
-            # Mettre à jour les headers avec traductions
+            # Mettre à jour the headers with traductions
             if 'headers' in table_data:
                 new_headers = []
                 for header in table_data['headers']:
@@ -121,7 +121,7 @@ def add_translations_to_armor_resists():
                         new_headers.append({'name': header, 'name_fr': header, 'name_de': header})
                 table_data['headers'] = new_headers
             
-            # Mettre à jour chaque ligne de données
+            # Mettre à jour chaque ligne of Data
             if 'data' in table_data:
                 for row in table_data['data']:
                     # Classe

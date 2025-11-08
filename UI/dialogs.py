@@ -68,7 +68,7 @@ class CharacterSheetWindow(QDialog):
 
         layout = QVBoxLayout(self)
         
-        # Eden Herald Section - EN HAUT POUR FACILITER LA MISE À JOUR
+        # Eden Herald Section - EN HAUT for FACILITER the MISE À JOUR
         eden_group = QGroupBox("🌐 Eden Herald")
         eden_layout = QVBoxLayout()
         
@@ -94,11 +94,11 @@ class CharacterSheetWindow(QDialog):
         self.update_herald_button.setToolTip("Récupérer et mettre à jour les données depuis Herald")
         self.update_herald_button.clicked.connect(self.update_from_herald)
         self.update_herald_button.setMinimumHeight(30)
-        # Mettre en évidence le bouton de mise à jour
+        # Mettre en évidence the bouton of mise à jour
         self.update_herald_button.setStyleSheet("QPushButton { font-weight: bold; padding: 8px; }")
         herald_buttons_layout.addWidget(self.update_herald_button)
         
-        # Définir des stretch égaux pour les deux boutons
+        # Définir des stretch égaux for the deux boutons
         herald_buttons_layout.setStretch(0, 1)
         herald_buttons_layout.setStretch(1, 1)
         
@@ -136,7 +136,7 @@ class CharacterSheetWindow(QDialog):
         self._populate_classes_sheet()
         current_class = self.character_data.get('class', '')
         if current_class:
-            # Utiliser findData pour sélectionner par itemData (nom anglais) au lieu du texte affiché
+            # Utiliser findData for sélectionner par itemData (nom anglais) au lieu of the texte affiché
             class_index = self.class_combo.findData(current_class)
             if class_index >= 0:
                 self.class_combo.setCurrentIndex(class_index)
@@ -148,7 +148,7 @@ class CharacterSheetWindow(QDialog):
         self._populate_races_sheet()
         current_race = self.character_data.get('race', '')
         if current_race:
-            # Utiliser findData pour sélectionner par itemData (nom anglais) au lieu du texte affiché
+            # Utiliser findData for sélectionner par itemData (nom anglais) au lieu of the texte affiché
             race_index = self.race_combo.findData(current_race)
             if race_index >= 0:
                 self.race_combo.setCurrentIndex(race_index)
@@ -644,13 +644,19 @@ class CharacterSheetWindow(QDialog):
 
     def open_armor_manager(self):
         """Opens the armor management dialog."""
-        character_id = self.character_data.get('id', '')
-        if not character_id:
-            QMessageBox.warning(self, "Erreur", "Impossible de déterminer l'ID du personnage.")
-            return
-        
-        dialog = ArmorManagementDialog(self, character_id)
-        dialog.exec()
+        try:
+            character_id = self.character_data.get('id', '')
+            if not character_id:
+                QMessageBox.warning(self, "Erreur", "Impossible de déterminer l'ID du personnage.")
+                return
+            
+            dialog = ArmorManagementDialog(self, character_id)
+            dialog.exec()
+        except Exception as e:
+            import traceback
+            error_msg = f"Erreur lors de l'ouverture de la gestion des armures:\n{str(e)}\n\n{traceback.format_exc()}"
+            logging.error(error_msg)
+            QMessageBox.critical(self, "Erreur", error_msg)
     
     def open_herald_url(self):
         """Ouvre l'URL du Herald dans le navigateur avec les cookies"""
@@ -664,13 +670,13 @@ class CharacterSheetWindow(QDialog):
             )
             return
         
-        # Vérifier que l'URL commence par http:// ou https://
+        # Check that l'URL commence par http:// or https://
         if not url.startswith(('http://', 'https://')):
             url = 'https://' + url
             self.herald_url_edit.setText(url)
         
         try:
-            # Ouvrir l'URL avec les cookies dans un thread séparé
+            # Ouvrir l'URL with the cookies in un thread séparé
             import threading
             thread = threading.Thread(target=self._open_url_in_thread, args=(url,), daemon=True)
             thread.start()
@@ -707,12 +713,12 @@ class CharacterSheetWindow(QDialog):
             )
             return
         
-        # Vérifier que l'URL commence par http:// ou https://
+        # Check that l'URL commence par http:// or https://
         if not url.startswith(('http://', 'https://')):
             url = 'https://' + url
             self.herald_url_edit.setText(url)
         
-        # Créer une fenêtre de progression personnalisée avec animation
+        # Create une fenêtre of progression personnalisée with animation
         self.progress_dialog = QDialog(self)
         self.progress_dialog.setWindowTitle("⏳ Mise à jour en cours...")
         self.progress_dialog.setModal(True)
@@ -721,20 +727,20 @@ class CharacterSheetWindow(QDialog):
         progress_layout = QVBoxLayout(self.progress_dialog)
         progress_layout.setSpacing(15)
         
-        # Icône et titre
+        # Icône and titre
         title_layout = QHBoxLayout()
         title_label = QLabel("🌐 Récupération des données depuis Eden Herald...")
         title_label.setStyleSheet("font-size: 12pt; font-weight: bold;")
         title_layout.addWidget(title_label)
         progress_layout.addLayout(title_layout)
         
-        # Message de détail
+        # Message of détail
         detail_label = QLabel("Connexion au serveur et extraction des informations du personnage.")
         detail_label.setWordWrap(True)
         detail_label.setStyleSheet("color: #666; font-size: 10pt;")
         progress_layout.addWidget(detail_label)
         
-        # Barre de progression indéterminée (animation)
+        # Barre of progression indéterminée (animation)
         progress_bar = QProgressBar()
         progress_bar.setRange(0, 0)  # Mode indéterminé = animation
         progress_bar.setTextVisible(False)
@@ -749,17 +755,17 @@ class CharacterSheetWindow(QDialog):
         
         progress_layout.addStretch()
         
-        # Créer et démarrer le worker thread
+        # Create and démarrer the worker thread
         self.herald_worker = HeraldScraperWorker(url)
         self.herald_worker.finished.connect(self._on_herald_scraping_finished)
         
-        # Afficher le dialogue et démarrer le worker
+        # Afficher the dialogue and démarrer the worker
         self.progress_dialog.show()
         self.herald_worker.start()
     
     def _on_herald_scraping_finished(self, success, new_data, error_msg):
         """Callback appelé quand le scraping est terminé"""
-        # Fermer et supprimer la fenêtre de progression
+        # Fermer and supprimer the fenêtre of progression
         if hasattr(self, 'progress_dialog'):
             self.progress_dialog.close()
             self.progress_dialog.deleteLater()
@@ -787,12 +793,12 @@ class CharacterSheetWindow(QDialog):
                 )
                 return
             
-            # Appliquer les changements sélectionnés directement dans character_data
+            # Appliquer the changements sélectionnés directement in character_data
             for field, value in selected_changes.items():
                 self.character_data[field] = value
             
-            # Mettre à jour TOUS les champs de l'interface pour l'affichage immédiat
-            # (on reconstruit l'affichage complet plutôt que de mettre à jour champ par champ)
+            # Mettre à jour all the champs of l'interface for l'affichage immédiat
+            # (on reconstruit l'affichage complet plutôt that of mettre à jour champ par champ)
             
             # Level
             if 'level' in selected_changes:
@@ -824,10 +830,10 @@ class CharacterSheetWindow(QDialog):
                 if isinstance(realm_points, str):
                     realm_points = int(realm_points.replace(' ', '').replace('\xa0', '').replace(',', ''))
                 
-                # Mettre à jour l'affichage du rang et du titre
+                # Mettre à jour l'affichage of the rang and of the titre
                 self.update_rank_display(realm_points)
                 
-                # Mettre à jour les dropdowns de rang/niveau
+                # Mettre à jour the dropdowns of rang/niveau
                 if hasattr(self.parent_app, 'data_manager'):
                     rank_info = self.parent_app.data_manager.get_realm_rank_info(self.realm, realm_points)
                     if rank_info:
@@ -837,15 +843,15 @@ class CharacterSheetWindow(QDialog):
                         if level_match:
                             current_level = int(level_match.group(1))
                             
-                            # Mettre à jour le dropdown de rang
+                            # Mettre à jour the dropdown of rang
                             self.rank_combo.blockSignals(True)
                             self.rank_combo.setCurrentIndex(current_rank - 1)
                             self.rank_combo.blockSignals(False)
                             
-                            # Mettre à jour le dropdown de niveau
+                            # Mettre à jour the dropdown of niveau
                             self.update_level_dropdown(current_rank, current_level)
             
-            # Sauvegarder directement character_data (pas via save_basic_info qui récupère depuis l'interface)
+            # Save directement character_data (not via save_basic_info qui récupère depuis l'interface)
             from Functions.character_manager import save_character
             success, msg = save_character(self.character_data, allow_overwrite=True)
             
@@ -874,13 +880,13 @@ class CharacterSheetWindow(QDialog):
                     sys.stderr.flush()
                     logging.warning(f"[BACKUP_TRIGGER] Backup after skills/armor modification failed: {e}")
             
-            # Rafraîchir la liste des personnages dans la fenêtre principale
+            # Rafraîchir the liste des personnages in the fenêtre principale
             if hasattr(self.parent_app, 'tree_manager'):
                 self.parent_app.tree_manager.refresh_character_list()
             elif hasattr(self.parent_app, 'refresh_character_list'):
                 self.parent_app.refresh_character_list()
             
-            # Message de succès
+            # Message of succès
             QMessageBox.information(
                 self,
                 lang.get("success_title", default="Succès"),
@@ -1574,7 +1580,7 @@ class ArmorManagementDialog(QDialog):
 
 class ConnectionTestThread(QThread):
     """Thread pour tester la connexion Eden en arrière-plan"""
-    finished = Signal(dict)  # Signal émis avec le résultat du test
+    finished = Signal(dict)  # Signal émis with the résultat of the test
     
     def __init__(self, cookie_manager):
         super().__init__()
@@ -1625,7 +1631,7 @@ class CookieManagerDialog(QDialog):
         self.expiry_label.setTextFormat(Qt.RichText)
         info_layout.addWidget(self.expiry_label)
         
-        # Label pour afficher le navigateur utilisé
+        # Label for afficher the navigateur utilisé
         self.browser_label = QLabel()
         self.browser_label.setWordWrap(True)
         self.browser_label.setTextFormat(Qt.RichText)
@@ -1691,14 +1697,14 @@ class CookieManagerDialog(QDialog):
             self.connection_thread.quit()
             self.connection_thread.wait()
         
-        # Créer et démarrer un nouveau thread
+        # Create and démarrer un nouveau thread
         self.connection_thread = ConnectionTestThread(self.cookie_manager)
         self.connection_thread.finished.connect(self.on_connection_test_finished)
         self.connection_thread.start()
     
     def on_connection_test_finished(self, result):
         """Appelé quand le test de connexion est terminé"""
-        # Récupérer les infos actuelles pour mettre à jour l'affichage
+        # Retrieve the infos actuelles for mettre à jour l'affichage
         info = self.cookie_manager.get_cookie_info()
         if info and info['is_valid']:
             expiry_date = info['expiry_date']
@@ -1722,7 +1728,7 @@ class CookieManagerDialog(QDialog):
                 f"{connection_status}"
             )
             
-            # Afficher le navigateur utilisé pour le test
+            # Afficher the navigateur utilisé for the test
             if hasattr(self.cookie_manager, 'last_browser_used') and self.cookie_manager.last_browser_used:
                 browser_icon = {'Chrome': '🔵', 'Edge': '🔷', 'Firefox': '🦊'}.get(self.cookie_manager.last_browser_used, '🌐')
                 self.browser_label.setText(
@@ -1788,14 +1794,14 @@ class CookieManagerDialog(QDialog):
             else:
                 self.expiry_label.setStyleSheet("color: green;")
             
-            # Afficher les infos de base immédiatement
+            # Afficher the infos of base immédiatement
             self.expiry_label.setText(
                 f"📅 <b>Date d'expiration:</b> {expiry_date.strftime('%d/%m/%Y à %H:%M')}<br/>"
                 f"⏰ <b>Validité restante:</b> {days} jours<br/>"
                 f"🌐 <b>Accès Eden :</b> <span style='color: gray;'>⏳ Test en cours...</span>"
             )
             
-            # Lancer le test de connexion en arrière-plan
+            # Lancer the test of connexion en arrière-plan
             self.start_connection_test()
             
             details = f"📦 Total: {info['total_cookies']} cookies<br/>"
@@ -1809,7 +1815,7 @@ class CookieManagerDialog(QDialog):
             self.details_label.setText(details)
             self.delete_button.setEnabled(True)
         
-        # Réinitialiser le label du navigateur (sera mis à jour après test/génération)
+        # Réinitialiser the label of the navigateur (sera mis à jour after test/génération)
         if not (info and info.get('is_valid')):
             self.browser_label.setText("")
     
@@ -1824,7 +1830,7 @@ class CookieManagerDialog(QDialog):
         
         if file_path:
             self.cookie_path_edit.setText(file_path)
-            # Importer automatiquement après sélection
+            # Importer automatiquement after sélection
             self.import_from_path()
     
     def import_from_path(self):
@@ -1839,7 +1845,7 @@ class CookieManagerDialog(QDialog):
             )
             return
         
-        # Vérifier que le fichier existe avant d'essayer d'importer
+        # Check that the File existe before d'essayer d'importer
         from pathlib import Path
         import os
         
@@ -1863,7 +1869,7 @@ class CookieManagerDialog(QDialog):
             self.cookie_path_edit.clear()
             self.refresh_status()
             
-            # Rafraîchir le statut Eden dans la fenêtre principale
+            # Rafraîchir the statut Eden in the fenêtre principale
             if self.parent() and hasattr(self.parent(), 'ui_manager'):
                 self.parent().ui_manager.check_eden_status()
         else:
@@ -1897,7 +1903,7 @@ class CookieManagerDialog(QDialog):
                 )
                 self.refresh_status()
                 
-                # Rafraîchir le statut Eden dans la fenêtre principale
+                # Rafraîchir the statut Eden in the fenêtre principale
                 if self.parent() and hasattr(self.parent(), 'ui_manager'):
                     self.parent().ui_manager.check_eden_status()
             else:
@@ -1915,26 +1921,26 @@ class CookieManagerDialog(QDialog):
         preferred_browser = config.get('preferred_browser', 'Chrome')
         allow_download = config.get('allow_browser_download', False)
         
-        # Désactiver les boutons pendant le processus
+        # Désactiver the boutons pendant the processus
         self.generate_button.setEnabled(False)
         self.cookie_path_edit.setEnabled(False)
         self.status_label.setText("⏳ <b>Ouverture du navigateur...</b>")
         self.status_label.setStyleSheet("color: blue;")
         
-        # Forcer la mise à jour de l'interface
+        # Forcer the mise à jour of l'interface
         from PySide6.QtWidgets import QApplication
         QApplication.processEvents()
         
-        # Générer les cookies (ouvre le navigateur immédiatement)
+        # Générer the cookies (ouvre the navigateur immédiatement)
         success, message, driver = self.cookie_manager.generate_cookies_with_browser(
             preferred_browser=preferred_browser,
             allow_download=allow_download
         )
         
         if not success:
-            # Vérifier si c'est un problème de navigateur manquant
+            # Check if c'est un problème of navigateur manquant
             if "Impossible d'initialiser" in message and not allow_download:
-                # Proposer de télécharger un driver
+                # Proposer of télécharger un driver
                 reply = QMessageBox.question(
                     self,
                     "Téléchargement requis",
@@ -1946,7 +1952,7 @@ class CookieManagerDialog(QDialog):
                 )
                 
                 if reply == QMessageBox.Yes:
-                    # Réessayer avec téléchargement autorisé
+                    # Réessayer with téléchargement autorisé
                     success, message, driver = self.cookie_manager.generate_cookies_with_browser(
                         preferred_browser=preferred_browser,
                         allow_download=True
@@ -2001,7 +2007,7 @@ class CookieManagerDialog(QDialog):
         result = wait_msg.exec()
         
         if result == QMessageBox.Ok:
-            # Récupérer et sauvegarder les cookies
+            # Retrieve and Save the cookies
             self.status_label.setText("💾 <b>Sauvegarde des cookies...</b>")
             self.status_label.setStyleSheet("color: blue;")
             QApplication.processEvents()
@@ -2037,19 +2043,19 @@ class CookieManagerDialog(QDialog):
             self.status_label.setText("❌ <b>Génération annulée</b>")
             self.status_label.setStyleSheet("color: red;")
         
-        # Réactiver les boutons et actualiser
+        # Réactiver the boutons and actualiser
         self.generate_button.setEnabled(True)
         self.cookie_path_edit.setEnabled(True)
         self.refresh_status()
         
-        # Afficher le navigateur utilisé après génération réussie
+        # Afficher the navigateur utilisé after génération réussie
         if success and hasattr(self.cookie_manager, 'last_browser_used') and self.cookie_manager.last_browser_used:
             browser_icon = {'Chrome': '🔵', 'Edge': '🔷', 'Firefox': '🦊'}.get(self.cookie_manager.last_browser_used, '🌐')
             self.browser_label.setText(
                 f"{browser_icon} <i>Généré avec: {self.cookie_manager.last_browser_used}</i>"
             )
         
-        # Rafraîchir le statut Eden dans la fenêtre principale si les cookies ont été générés
+        # Rafraîchir the statut Eden in the fenêtre principale if the cookies have été générés
         if success and self.parent() and hasattr(self.parent(), 'ui_manager'):
             self.parent().ui_manager.check_eden_status()
 
@@ -2109,7 +2115,7 @@ class HeraldSearchDialog(QDialog):
         self.resize(700, 600)
         self.search_thread = None
         self.temp_json_path = None  # Stocke le chemin du fichier temp
-        self.current_characters = []  # Stocke les données des personnages trouvés
+        self.current_characters = []  # Stocke the Data des personnages trouvés
         self._load_realm_icons_for_combo()
         
         self.init_ui()
@@ -2129,7 +2135,7 @@ class HeraldSearchDialog(QDialog):
             full_path = Path(logo_path)
             if full_path.exists():
                 pixmap = QPixmap(str(full_path))
-                # Redimensionner l'icône à 20x20 pixels pour le combo
+                # Redimensionner l'icône à 20x20 pixels for the combo
                 scaled_pixmap = pixmap.scaled(20, 20, Qt.KeepAspectRatio, Qt.SmoothTransformation)
                 self.realm_combo_icons[realm] = QIcon(scaled_pixmap)
             else:
@@ -2168,7 +2174,7 @@ class HeraldSearchDialog(QDialog):
         input_layout.addWidget(self.name_input)
         search_layout.addLayout(input_layout)
         
-        # Ligne 2 : Sélection du royaume
+        # Ligne 2 : Sélection of the royaume
         realm_layout = QHBoxLayout()
         realm_label = QLabel("Royaume :")
         self.realm_combo = QComboBox()
@@ -2200,7 +2206,7 @@ class HeraldSearchDialog(QDialog):
         search_group.setLayout(search_layout)
         layout.addWidget(search_group)
         
-        # Zone de résultats
+        # Zone of Results
         results_group = QGroupBox("Résultats")
         results_layout = QVBoxLayout()
         
@@ -2297,7 +2303,7 @@ class HeraldSearchDialog(QDialog):
             )
             return
         
-        # Vérifier le minimum de 3 caractères
+        # Check the minimum of 3 caractères
         if len(character_name) < 3:
             QMessageBox.warning(
                 self,
@@ -2306,10 +2312,10 @@ class HeraldSearchDialog(QDialog):
             )
             return
         
-        # Récupérer le filtre de royaume sélectionné
+        # Retrieve the filtre of royaume sélectionné
         realm_filter = self.realm_combo.currentData()
         
-        # Désactiver les contrôles
+        # Désactiver the contrôles
         self.search_button.setEnabled(False)
         self.name_input.setEnabled(False)
         self.realm_combo.setEnabled(False)
@@ -2329,13 +2335,13 @@ class HeraldSearchDialog(QDialog):
     
     def on_search_finished(self, success, message, json_path):
         """Appelé quand la recherche est terminée"""
-        # Réactiver les contrôles
+        # Réactiver the contrôles
         self.search_button.setEnabled(True)
         self.name_input.setEnabled(True)
         self.realm_combo.setEnabled(True)
         
         if success:
-            # Charger et afficher les résultats
+            # Load and afficher the Results
             try:
                 import json
                 with open(json_path, 'r', encoding='utf-8') as f:
@@ -2344,7 +2350,7 @@ class HeraldSearchDialog(QDialog):
                 all_characters = data.get('characters', [])
                 search_query = data.get('search_query', '').lower()
                 
-                # Filtrer pour ne garder que les personnages dont le nom commence par les caractères recherchés
+                # Filtrer for ne garder that the personnages dont the nom commence par the caractères recherchés
                 characters = []
                 for char in all_characters:
                     char_name = char.get('clean_name', char.get('name', '')).lower()
@@ -2359,14 +2365,14 @@ class HeraldSearchDialog(QDialog):
                     self.results_table.setRowCount(len(characters))
                     
                     for row, char in enumerate(characters):
-                        # Déterminer le royaume à partir de la classe
+                        # Déterminer the royaume à partir of the classe
                         class_name = char.get('class', '')
                         realm = self.CLASS_TO_REALM.get(class_name, "Unknown")
                         realm_color = self.REALM_COLORS.get(realm, "#000000")
                         
-                        # Créer une couleur de fond pour le royaume (version plus claire pour la lisibilité)
+                        # Create une couleur of fond for the royaume (version plus claire for the lisibilité)
                         bg_color = QColor(realm_color)
-                        bg_color.setAlpha(50)  # Transparence pour la lisibilité
+                        bg_color.setAlpha(50)  # Transparence for the lisibilité
                         bg_brush = QBrush(bg_color)
                         
                         # Case à cocher (colonne 0)
@@ -2417,10 +2423,10 @@ class HeraldSearchDialog(QDialog):
                         rr_item.setBackground(bg_brush)
                         self.results_table.setItem(row, 8, rr_item)
                     
-                    # Stocker les données des personnages
+                    # Stocker the Data des personnages
                     self.current_characters = characters
                     
-                    # Mettre à jour le message de statut avec le nombre filtré
+                    # Mettre à jour the message of statut with the nombre filtré
                     count = len(characters)
                     self.status_label.setText(f"✅ {count} personnage(s) trouvé(s) commençant par '{search_query}'")
                     self.status_label.setStyleSheet("padding: 10px; border: 1px solid #ccc; border-radius: 5px; color: green; font-weight: bold;")
@@ -2457,19 +2463,19 @@ class HeraldSearchDialog(QDialog):
         if not self.current_characters:
             return
         
-        # Récupérer la ligne sélectionnée
+        # Retrieve the ligne sélectionnée
         row = self.results_table.rowAt(position.y())
         if row < 0:
             return
         
-        # Créer le menu contextuel
+        # Create the menu contextuel
         context_menu = QMenu(self)
         
         # Action d'import
         import_action = context_menu.addAction("📥 Importer ce personnage")
         import_action.triggered.connect(lambda: self._import_single_character(row))
         
-        # Afficher le menu à la position du curseur
+        # Afficher the menu à the position of the curseur
         context_menu.exec_(self.results_table.viewport().mapToGlobal(position))
     
     def _import_single_character(self, row):
@@ -2497,7 +2503,7 @@ class HeraldSearchDialog(QDialog):
         if not self.current_characters:
             return
         
-        # Récupérer les personnages cochés
+        # Retrieve the personnages cochés
         selected_chars = []
         for row in range(self.results_table.rowCount()):
             checkbox_item = self.results_table.item(row, 0)
@@ -2558,15 +2564,15 @@ class HeraldSearchDialog(QDialog):
         
         for char_data in characters:
             try:
-                # Préparer les données du personnage pour l'import
+                # Préparer the Data of the personnage for l'import
                 name = char_data.get('clean_name', char_data.get('name', ''))
                 char_class = char_data.get('class', '')
                 realm = self.CLASS_TO_REALM.get(char_class, "Unknown")
                 
-                # Récupérer la saison par défaut depuis la configuration
+                # Retrieve the saison par défaut depuis the Configuration
                 default_season = config.get('default_season', 'S1')
                 
-                # Créer le dictionnaire de données du personnage
+                # Create the dictionnaire of Data of the personnage
                 character_data = {
                     'name': name,
                     'class': char_class,
@@ -2578,7 +2584,7 @@ class HeraldSearchDialog(QDialog):
                     'realm_level': char_data.get('realm_level', ''),
                     'realm_points': char_data.get('realm_points', '0'),
                     'url': char_data.get('url', ''),
-                    # Valeurs par défaut pour les champs manquants
+                    # Valeurs par défaut for the champs manquants
                     'server': 'Eden',
                     'season': default_season,
                     'mlevel': '0',
@@ -2586,7 +2592,7 @@ class HeraldSearchDialog(QDialog):
                     'notes': f"Mis à jour depuis le Herald le {datetime.now().strftime('%Y-%m-%d %H:%M')}"
                 }
                 
-                # Vérifier si le personnage existe déjà
+                # Check if the personnage existe déjà
                 existing_chars = get_all_characters()
                 existing_char = None
                 for c in existing_chars:
@@ -2595,7 +2601,7 @@ class HeraldSearchDialog(QDialog):
                         break
                 
                 if existing_char:
-                    # Le personnage existe, on va le mettre à jour
+                    # the personnage existe, on va the mettre à jour
                     # Construire le chemin du fichier existant
                     base_char_dir = get_character_dir()
                     char_season = existing_char.get('season', 'S1')
@@ -2603,12 +2609,12 @@ class HeraldSearchDialog(QDialog):
                     file_path = os.path.join(base_char_dir, char_season, char_realm, f"{name}.json")
                     
                     if os.path.exists(file_path):
-                        # Charger les données existantes pour conserver les infos importantes
+                        # Load the Data existantes for conserver the infos importantes
                         try:
                             with open(file_path, 'r', encoding='utf-8') as f:
                                 existing_data = json.load(f)
                             
-                            # Mettre à jour avec les nouvelles données (seulement les infos pertinentes)
+                            # Mettre à jour with the nouvelles Data (seulement the infos pertinentes)
                             existing_data.update({
                                 'class': character_data['class'],
                                 'race': character_data['race'],
@@ -2648,7 +2654,7 @@ class HeraldSearchDialog(QDialog):
                 errors.append(f"{char_data.get('name', 'Unknown')}: {str(e)}")
                 logging.error(f"Erreur lors de l'import de {char_data.get('name')}: {e}", exc_info=True)
         
-        # Afficher le résultat
+        # Afficher the résultat
         if success_count > 0 or updated_count > 0:
             message = ""
             if success_count > 0:
@@ -2728,12 +2734,12 @@ class CharacterUpdateDialog(QDialog):
         self.changes_table.horizontalHeader().setStretchLastSection(True)
         self.changes_table.setSelectionMode(QTableWidget.NoSelection)
         
-        # Détecter les changements
+        # Détecter the changements
         self._detect_changes()
         
         layout.addWidget(self.changes_table)
         
-        # Boutons de sélection
+        # Boutons of sélection
         button_layout = QHBoxLayout()
         
         select_all_btn = QPushButton("Tout sélectionner")
@@ -2760,7 +2766,7 @@ class CharacterUpdateDialog(QDialog):
     
     def _detect_changes(self):
         """Détecte les changements entre les données actuelles et nouvelles."""
-        # Champs à comparer (TOUS les champs importants)
+        # Champs à comparer (all the champs importants)
         fields_to_check = {
             'level': 'Niveau',
             'class': 'Classe',
@@ -2779,7 +2785,7 @@ class CharacterUpdateDialog(QDialog):
             new_value = self.new_data.get(field, '')
             
             # Normaliser les valeurs pour la comparaison
-            # Cas spécial pour realm_points qui peut contenir des espaces
+            # Cas spécial for realm_points qui can contenir des espaces
             if field == 'realm_points':
                 # Nettoyer les espaces dans les realm_points
                 if isinstance(new_value, str):
@@ -2805,7 +2811,7 @@ class CharacterUpdateDialog(QDialog):
             else:
                 new_value_str = str(new_value) if new_value else ''
             
-            # Déterminer si c'est un changement
+            # Déterminer if c'est un changement
             has_change = (current_value_str != new_value_str and new_value_str)
             
             all_rows.append({
@@ -2821,7 +2827,7 @@ class CharacterUpdateDialog(QDialog):
         self.changes_table.setRowCount(len(all_rows))
         
         for row, data in enumerate(all_rows):
-            # Case à cocher (seulement si changement)
+            # Case à cocher (seulement if changement)
             if data['has_change']:
                 checkbox = QCheckBox()
                 checkbox.setChecked(True)
@@ -2832,7 +2838,7 @@ class CharacterUpdateDialog(QDialog):
                 checkbox_layout.setContentsMargins(0, 0, 0, 0)
                 self.changes_table.setCellWidget(row, 0, checkbox_widget)
                 
-                # Stocker la référence de la checkbox et la valeur brute
+                # Stocker the référence of the checkbox and the valeur brute
                 self.changes_table.setItem(row, 0, QTableWidgetItem())
                 self.changes_table.item(row, 0).setData(Qt.UserRole, checkbox)
                 self.changes_table.item(row, 0).setData(Qt.UserRole + 1, data['field'])
@@ -2906,7 +2912,7 @@ class CharacterUpdateDialog(QDialog):
             if item:
                 checkbox = item.data(Qt.UserRole)
                 field = item.data(Qt.UserRole + 1)
-                value_raw = item.data(Qt.UserRole + 2)  # Récupérer la valeur brute
+                value_raw = item.data(Qt.UserRole + 2)  # Retrieve the valeur brute
                 
                 if checkbox and checkbox.isChecked():
                     selected[field] = value_raw  # Utiliser la valeur brute
@@ -3502,6 +3508,3 @@ class BackupSettingsDialog(QDialog):
             logging.error(f"Error saving backup settings: {e}", exc_info=True)
             QMessageBox.critical(self, lang.get("error_title"),
                                f"{lang.get('backup_settings_error')} : {str(e)}")
-
-
-

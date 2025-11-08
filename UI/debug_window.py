@@ -368,7 +368,7 @@ class EdenDebugWindow(QMainWindow):
         button_layout.addStretch()
         main_layout.addLayout(button_layout)
         
-        # Zone de logs avec syntaxe colorée
+        # Zone of logs with syntaxe colorée
         logs_group = QGroupBox("📋 Logs Eden en temps réel")
         logs_layout = QVBoxLayout()
         
@@ -391,7 +391,7 @@ class EdenDebugWindow(QMainWindow):
         self.info_label.setStyleSheet("color: #666; font-style: italic;")
         main_layout.addWidget(self.info_label)
         
-        # Setup du handler spécifique Eden
+        # Setup of the handler spécifique Eden
         self.eden_handler = QTextEditHandler(self)
         formatter = logging.Formatter('%(asctime)s - %(message)s', datefmt='%H:%M:%S')
         self.eden_handler.setFormatter(formatter)
@@ -416,7 +416,7 @@ class EdenDebugWindow(QMainWindow):
             timestamp = ""
             content = message
         
-        # Colorer selon les mots-clés
+        # Colorer selon the mots-clés
         if '✅' in content or 'succès' in content.lower() or 'réussi' in content.lower():
             color = '#4ec9b0'  # Vert clair
             icon = '✅'
@@ -442,7 +442,7 @@ class EdenDebugWindow(QMainWindow):
             color = '#d4d4d4'  # Blanc
             icon = '•'
         
-        # Construire le message formaté
+        # Construire the message formaté
         html_message = f'<span style="color: #808080;">{timestamp}</span> <span style="color: {color};">{icon} {content}</span>'
         
         self.logs_widget.append(html_message)
@@ -479,4 +479,3 @@ class EdenDebugWindow(QMainWindow):
         eden_logger = logging.getLogger('eden')
         eden_logger.removeHandler(self.eden_handler)
         super().closeEvent(event)
-

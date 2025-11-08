@@ -362,6 +362,11 @@ def mark_migration_done():
     Marks the migration as completed by creating a flag file.
     """
     base_char_dir = get_character_dir()
+    
+    # Check if directory exists before trying to create flag file
+    if not os.path.exists(base_char_dir):
+        return False
+    
     flag_file = os.path.join(base_char_dir, ".migration_done")
     
     try:
@@ -381,6 +386,11 @@ def is_migration_done():
         bool: True if migration was already done, False otherwise
     """
     base_char_dir = get_character_dir()
+    
+    # If directory doesn't exist, migration can't be done yet
+    if not os.path.exists(base_char_dir):
+        return False
+    
     flag_file = os.path.join(base_char_dir, ".migration_done")
     return os.path.exists(flag_file)
 

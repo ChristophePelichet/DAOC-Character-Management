@@ -1,5 +1,17 @@
 # v0.106 - Système de Logging, Sauvegarde Cookies & Optimisation Herald
 
+## 🎯 Refactoring Code Complet & Configuration (8 nov 2025)
+✅ **Code 100% anglais** : 582 commentaires français → anglais (975 modifications)  
+✅ **Optimisation imports** : 51 imports inutilisés supprimés  
+✅ **Nettoyage code** : 74 lignes blanches excessives supprimées  
+✅ **Taille exe réduite** : Estimation -1 à 2 MB (-2 à 4%)  
+✅ **Version corrigée** : Fenêtre "À Propos" affiche maintenant v0.106  
+✅ **Saison par défaut** : S3 au lieu de S1  
+✅ **Colonnes manuelles** : Gestion manuelle activée par défaut  
+✅ **Logs conditionnels** : Dossier Logs et debug.log créés UNIQUEMENT si debug_mode activé  
+✅ **Migration fix** : Plus d'erreur "migration_done" si dossier Characters n'existe pas  
+✅ **67 fichiers production** modifiés pour qualité de code optimale  
+
 ## ✨ Amélioration Backup - Noms de Fichiers Clairs (NOUVEAU - 7 nov 2025)
 ✅ **Nom du personnage** inclus dans les fichiers de backup  
 ✅ Opérations simples : `backup_characters_20251107_143025_Update_Merlin.zip`  

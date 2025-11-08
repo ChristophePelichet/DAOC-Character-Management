@@ -1396,10 +1396,9 @@ class ConfigurationDialog(QDialog):
         current_default_realm = config.get("default_realm", "")
         self.default_realm_combo.setCurrentText(current_default_realm)
 
-        manual_resize = config.get("manual_column_resize", False)
-        self.manual_column_resize_check.setChecked(manual_resize)
         
-        # Browser settings
+        manual_resize = config.get("manual_column_resize", True)
+        self.manual_column_resize_check.setChecked(manual_resize)        # Browser settings
         preferred_browser = config.get("preferred_browser", "Chrome")
         self.browser_combo.setCurrentText(preferred_browser)
         
@@ -2570,7 +2569,7 @@ class HeraldSearchDialog(QDialog):
                 realm = self.CLASS_TO_REALM.get(char_class, "Unknown")
                 
                 # Retrieve the saison par défaut depuis the Configuration
-                default_season = config.get('default_season', 'S1')
+                default_season = config.get('default_season', 'S3')
                 
                 # Create the dictionnaire of Data of the personnage
                 character_data = {

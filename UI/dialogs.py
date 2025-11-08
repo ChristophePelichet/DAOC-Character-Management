@@ -65,6 +65,10 @@ class CharacterSheetWindow(QDialog):
 
         self.setWindowTitle(lang.get("character_sheet_title", name=char_name))
         self.resize(500, 400)
+        
+        # Enable window resizing
+        self.setWindowFlags(self.windowFlags() | Qt.WindowMaximizeButtonHint)
+        self.setSizeGripEnabled(True)  # Add resize grip in bottom-right corner
 
         layout = QVBoxLayout(self)
         
@@ -198,18 +202,163 @@ class CharacterSheetWindow(QDialog):
         statistics_group = QGroupBox(lang.get("armor_group_title"))
         statistics_layout = QVBoxLayout()
         
-        # Coming soon message
-        coming_soon_label = QLabel(lang.get("statistics_coming_soon"))
-        coming_soon_label.setStyleSheet("font-size: 11px; color: gray; text-align: center;")
-        coming_soon_label.setAlignment(Qt.AlignCenter)
-        statistics_layout.addWidget(coming_soon_label)
+        # === RvR Sub-section (Captures only) ===
+        rvr_subgroup = QGroupBox(lang.get("rvr_section_title"))
+        rvr_sublayout = QVBoxLayout()
+        
+        # RvR Captures
+        rvr_captures_form = QFormLayout()
+        
+        # Tower Captures
+        self.tower_captures_label = QLabel("—")
+        self.tower_captures_label.setStyleSheet("font-weight: bold;")
+        rvr_captures_form.addRow(lang.get("tower_captures_label"), self.tower_captures_label)
+        
+        # Keep Captures
+        self.keep_captures_label = QLabel("—")
+        self.keep_captures_label.setStyleSheet("font-weight: bold;")
+        rvr_captures_form.addRow(lang.get("keep_captures_label"), self.keep_captures_label)
+        
+        # Relic Captures
+        self.relic_captures_label = QLabel("—")
+        self.relic_captures_label.setStyleSheet("font-weight: bold;")
+        rvr_captures_form.addRow(lang.get("relic_captures_label"), self.relic_captures_label)
+        
+        rvr_sublayout.addLayout(rvr_captures_form)
+        
+        # Load existing RvR Captures values if available
+        tower_val = self.character_data.get('tower_captures')
+        keep_val = self.character_data.get('keep_captures')
+        relic_val = self.character_data.get('relic_captures')
+        
+        if tower_val is not None:
+            self.tower_captures_label.setText(f"{tower_val:,}")
+        if keep_val is not None:
+            self.keep_captures_label.setText(f"{keep_val:,}")
+        if relic_val is not None:
+            self.relic_captures_label.setText(f"{relic_val:,}")
+        
+        rvr_subgroup.setLayout(rvr_sublayout)
+        statistics_layout.addWidget(rvr_subgroup)
+        
+        # === PvP Sub-section (Kills with realm breakdown) ===
+        pvp_subgroup = QGroupBox(lang.get("pvp_section_title"))
+        pvp_sublayout = QVBoxLayout()
+        
+        # Solo Kills
+        solo_kills_main = QHBoxLayout()
+        solo_kills_label_text = QLabel(lang.get("solo_kills_label"))
+        self.solo_kills_label = QLabel("—")
+        self.solo_kills_label.setStyleSheet("font-weight: bold;")
+        solo_kills_main.addWidget(solo_kills_label_text)
+        solo_kills_main.addWidget(self.solo_kills_label)
+        solo_kills_main.addStretch()
+        pvp_sublayout.addLayout(solo_kills_main)
+        
+        self.solo_kills_detail_label = QLabel("")
+        self.solo_kills_detail_label.setStyleSheet("font-size: 9pt; color: gray; margin-left: 20px;")
+        pvp_sublayout.addWidget(self.solo_kills_detail_label)
+        
+        # Deathblows
+        deathblows_main = QHBoxLayout()
+        deathblows_label_text = QLabel(lang.get("deathblows_label"))
+        self.deathblows_label = QLabel("—")
+        self.deathblows_label.setStyleSheet("font-weight: bold;")
+        deathblows_main.addWidget(deathblows_label_text)
+        deathblows_main.addWidget(self.deathblows_label)
+        deathblows_main.addStretch()
+        pvp_sublayout.addLayout(deathblows_main)
+        
+        self.deathblows_detail_label = QLabel("")
+        self.deathblows_detail_label.setStyleSheet("font-size: 9pt; color: gray; margin-left: 20px;")
+        pvp_sublayout.addWidget(self.deathblows_detail_label)
+        
+        # Kills
+        kills_main = QHBoxLayout()
+        kills_label_text = QLabel(lang.get("kills_label"))
+        self.kills_label = QLabel("—")
+        self.kills_label.setStyleSheet("font-weight: bold;")
+        kills_main.addWidget(kills_label_text)
+        kills_main.addWidget(self.kills_label)
+        kills_main.addStretch()
+        pvp_sublayout.addLayout(kills_main)
+        
+        self.kills_detail_label = QLabel("")
+        self.kills_detail_label.setStyleSheet("font-size: 9pt; color: gray; margin-left: 20px;")
+        pvp_sublayout.addWidget(self.kills_detail_label)
+        
+        # Load existing PvP values if available (with realm breakdown)
+        solo_kills_val = self.character_data.get('solo_kills')
+        solo_kills_alb = self.character_data.get('solo_kills_alb')
+        solo_kills_hib = self.character_data.get('solo_kills_hib')
+        solo_kills_mid = self.character_data.get('solo_kills_mid')
+        
+        deathblows_val = self.character_data.get('deathblows')
+        deathblows_alb = self.character_data.get('deathblows_alb')
+        deathblows_hib = self.character_data.get('deathblows_hib')
+        deathblows_mid = self.character_data.get('deathblows_mid')
+        
+        kills_val = self.character_data.get('kills')
+        kills_alb = self.character_data.get('kills_alb')
+        kills_hib = self.character_data.get('kills_hib')
+        kills_mid = self.character_data.get('kills_mid')
+        
+        if solo_kills_val is not None:
+            self.solo_kills_label.setText(f"{solo_kills_val:,}")
+            if solo_kills_alb is not None and solo_kills_hib is not None and solo_kills_mid is not None:
+                self.solo_kills_detail_label.setText(
+                    f'→ <span style="color: #C41E3A;">Alb</span>: {solo_kills_alb:,}  |  '
+                    f'<span style="color: #228B22;">Hib</span>: {solo_kills_hib:,}  |  '
+                    f'<span style="color: #4169E1;">Mid</span>: {solo_kills_mid:,}'
+                )
+        
+        if deathblows_val is not None:
+            self.deathblows_label.setText(f"{deathblows_val:,}")
+            if deathblows_alb is not None and deathblows_hib is not None and deathblows_mid is not None:
+                self.deathblows_detail_label.setText(
+                    f'→ <span style="color: #C41E3A;">Alb</span>: {deathblows_alb:,}  |  '
+                    f'<span style="color: #228B22;">Hib</span>: {deathblows_hib:,}  |  '
+                    f'<span style="color: #4169E1;">Mid</span>: {deathblows_mid:,}'
+                )
+        
+        if kills_val is not None:
+            self.kills_label.setText(f"{kills_val:,}")
+            if kills_alb is not None and kills_hib is not None and kills_mid is not None:
+                self.kills_detail_label.setText(
+                    f'→ <span style="color: #C41E3A;">Alb</span>: {kills_alb:,}  |  '
+                    f'<span style="color: #228B22;">Hib</span>: {kills_hib:,}  |  '
+                    f'<span style="color: #4169E1;">Mid</span>: {kills_mid:,}'
+                )
+        
+        pvp_subgroup.setLayout(pvp_sublayout)
+        statistics_layout.addWidget(pvp_subgroup)
+        
+        # === PvE Sub-section ===
+        pve_subgroup = QGroupBox(lang.get("pve_section_title"))
+        pve_sublayout = QVBoxLayout()
+        
+        # PvE coming soon message
+        pve_coming_soon = QLabel(lang.get("pve_coming_soon"))
+        pve_coming_soon.setStyleSheet("font-size: 11px; color: gray; text-align: center;")
+        pve_coming_soon.setAlignment(Qt.AlignCenter)
+        pve_sublayout.addWidget(pve_coming_soon)
+        
+        pve_subgroup.setLayout(pve_sublayout)
+        statistics_layout.addWidget(pve_subgroup)
+        
+        # Update button for RvR/PvP stats (below PvE section)
+        self.update_rvr_button = QPushButton(lang.get("update_rvr_pvp_button"))
+        self.update_rvr_button.setToolTip(lang.get("update_rvr_pvp_tooltip"))
+        self.update_rvr_button.clicked.connect(self.update_rvr_stats)
+        self.update_rvr_button.setMaximumWidth(200)
+        statistics_layout.addWidget(self.update_rvr_button)
         
         statistics_group.setLayout(statistics_layout)
         
         # Horizontal layout for Info and Statistics groups side by side
         top_layout = QHBoxLayout()
-        top_layout.addWidget(info_group)
-        top_layout.addWidget(statistics_group)
+        top_layout.addWidget(info_group, 1)  # 50% stretch
+        top_layout.addWidget(statistics_group, 1)  # 50% stretch
         layout.addLayout(top_layout)
         
         # Realm Rank Section
@@ -700,6 +849,288 @@ class CharacterSheetWindow(QDialog):
         except Exception as e:
             import logging
             logging.error(f"Erreur lors de l'ouverture de l'URL avec cookies: {e}")
+    
+    def update_rvr_stats(self):
+        """Met à jour les statistiques RvR depuis le Herald"""
+        url = self.herald_url_edit.text().strip()
+        
+        if not url:
+            QMessageBox.warning(
+                self,
+                "URL manquante",
+                "Veuillez entrer une URL Herald valide pour récupérer les statistiques."
+            )
+            return
+        
+        # Check URL format
+        if not url.startswith(('http://', 'https://')):
+            url = 'https://' + url
+            self.herald_url_edit.setText(url)
+        
+        # Disable button during update
+        self.update_rvr_button.setEnabled(False)
+        self.update_rvr_button.setText("⏳ Récupération...")
+        QApplication.processEvents()
+        
+        try:
+            from Functions.character_profile_scraper import CharacterProfileScraper
+            from Functions.cookie_manager import CookieManager
+            
+            # Check cookies
+            cookie_manager = CookieManager()
+            if not cookie_manager.cookie_exists():
+                QMessageBox.warning(
+                    self,
+                    "Cookies manquants",
+                    "Aucun cookie trouvé. Veuillez générer les cookies via le Cookie Manager."
+                )
+                return
+            
+            # Initialize scraper
+            scraper = CharacterProfileScraper(cookie_manager)
+            
+            if not scraper.initialize_driver(headless=False):
+                QMessageBox.critical(
+                    self,
+                    "Erreur",
+                    "Impossible d'initialiser le navigateur."
+                )
+                return
+            
+            # Load cookies
+            if not scraper.load_cookies():
+                scraper.close()
+                QMessageBox.critical(
+                    self,
+                    "Erreur d'authentification",
+                    "Impossible de charger les cookies. Veuillez régénérer les cookies."
+                )
+                return
+            
+            # Scrape RvR stats (Captures)
+            result_rvr = scraper.scrape_rvr_captures(url)
+            
+            # Scrape PvP stats (Kills, Deathblows, Solo Kills)
+            result_pvp = scraper.scrape_pvp_stats(url)
+            
+            scraper.close()
+            
+            # Check if both succeeded
+            if result_rvr['success'] and result_pvp['success']:
+                # Update UI labels - RvR Captures
+                tower = result_rvr['tower_captures']
+                keep = result_rvr['keep_captures']
+                relic = result_rvr['relic_captures']
+                
+                self.tower_captures_label.setText(f"{tower:,}")
+                self.keep_captures_label.setText(f"{keep:,}")
+                self.relic_captures_label.setText(f"{relic:,}")
+                
+                # Update UI labels - PvP Stats
+                solo_kills = result_pvp['solo_kills']
+                solo_kills_alb = result_pvp['solo_kills_alb']
+                solo_kills_hib = result_pvp['solo_kills_hib']
+                solo_kills_mid = result_pvp['solo_kills_mid']
+                
+                deathblows = result_pvp['deathblows']
+                deathblows_alb = result_pvp['deathblows_alb']
+                deathblows_hib = result_pvp['deathblows_hib']
+                deathblows_mid = result_pvp['deathblows_mid']
+                
+                kills = result_pvp['kills']
+                kills_alb = result_pvp['kills_alb']
+                kills_hib = result_pvp['kills_hib']
+                kills_mid = result_pvp['kills_mid']
+                
+                # Update main labels (totals)
+                self.solo_kills_label.setText(f"{solo_kills:,}")
+                self.deathblows_label.setText(f"{deathblows:,}")
+                self.kills_label.setText(f"{kills:,}")
+                
+                # Update detail labels (realm breakdown with colors)
+                self.solo_kills_detail_label.setText(
+                    f'→ <span style="color: #C41E3A;">Alb</span>: {solo_kills_alb:,}  |  '
+                    f'<span style="color: #228B22;">Hib</span>: {solo_kills_hib:,}  |  '
+                    f'<span style="color: #4169E1;">Mid</span>: {solo_kills_mid:,}'
+                )
+                self.deathblows_detail_label.setText(
+                    f'→ <span style="color: #C41E3A;">Alb</span>: {deathblows_alb:,}  |  '
+                    f'<span style="color: #228B22;">Hib</span>: {deathblows_hib:,}  |  '
+                    f'<span style="color: #4169E1;">Mid</span>: {deathblows_mid:,}'
+                )
+                self.kills_detail_label.setText(
+                    f'→ <span style="color: #C41E3A;">Alb</span>: {kills_alb:,}  |  '
+                    f'<span style="color: #228B22;">Hib</span>: {kills_hib:,}  |  '
+                    f'<span style="color: #4169E1;">Mid</span>: {kills_mid:,}'
+                )
+                
+                # Update character data - RvR Captures
+                self.character_data['tower_captures'] = tower
+                self.character_data['keep_captures'] = keep
+                self.character_data['relic_captures'] = relic
+                
+                # Update character data - PvP Stats (totals)
+                self.character_data['solo_kills'] = solo_kills
+                self.character_data['deathblows'] = deathblows
+                self.character_data['kills'] = kills
+                
+                # Update character data - PvP Stats (realm breakdown)
+                self.character_data['solo_kills_alb'] = solo_kills_alb
+                self.character_data['solo_kills_hib'] = solo_kills_hib
+                self.character_data['solo_kills_mid'] = solo_kills_mid
+                self.character_data['deathblows_alb'] = deathblows_alb
+                self.character_data['deathblows_hib'] = deathblows_hib
+                self.character_data['deathblows_mid'] = deathblows_mid
+                self.character_data['kills_alb'] = kills_alb
+                self.character_data['kills_hib'] = kills_hib
+                self.character_data['kills_mid'] = kills_mid
+                
+                # Save to JSON
+                from Functions.character_manager import save_character
+                success, msg = save_character(self.character_data, allow_overwrite=True)
+                
+                if success:
+                    QMessageBox.information(
+                        self,
+                        "Succès",
+                        f"Statistiques RvR mises à jour :\n\n"
+                        f"🗼 Tower Captures: {tower:,}\n"
+                        f"🏰 Keep Captures: {keep:,}\n"
+                        f"💎 Relic Captures: {relic:,}\n\n"
+                        f"⚔️ Solo Kills: {solo_kills:,}\n"
+                        f"   → Alb: {solo_kills_alb:,}  |  Hib: {solo_kills_hib:,}  |  Mid: {solo_kills_mid:,}\n\n"
+                        f"💀 Deathblows: {deathblows:,}\n"
+                        f"   → Alb: {deathblows_alb:,}  |  Hib: {deathblows_hib:,}  |  Mid: {deathblows_mid:,}\n\n"
+                        f"🎯 Kills: {kills:,}\n"
+                        f"   → Alb: {kills_alb:,}  |  Hib: {kills_hib:,}  |  Mid: {kills_mid:,}"
+                    )
+                    
+                    log_with_action(logger_char, "info", 
+                                  f"RvR stats updated: T={tower}, K={keep}, R={relic}, "
+                                  f"SK={solo_kills}(A:{solo_kills_alb},H:{solo_kills_hib},M:{solo_kills_mid}), "
+                                  f"DB={deathblows}(A:{deathblows_alb},H:{deathblows_hib},M:{deathblows_mid}), "
+                                  f"K={kills}(A:{kills_alb},H:{kills_hib},M:{kills_mid})", 
+                                  action="RVR_UPDATE")
+                else:
+                    QMessageBox.warning(
+                        self,
+                        "Avertissement",
+                        f"Statistiques récupérées mais erreur de sauvegarde : {msg}"
+                    )
+            elif result_rvr['success'] and not result_pvp['success']:
+                # RvR succeeded but PvP failed - partial update
+                QMessageBox.warning(
+                    self,
+                    "Mise à jour partielle",
+                    f"✅ RvR Captures récupérées avec succès\n"
+                    f"❌ Statistiques PvP non disponibles\n\n"
+                    f"Erreur PvP: {result_pvp.get('error', 'Erreur inconnue')}\n\n"
+                    f"Cela peut arriver si le personnage n'a pas encore de statistiques PvP.\n"
+                    f"Les Tower/Keep/Relic Captures ont été sauvegardées."
+                )
+                
+                # Update only RvR data
+                tower = result_rvr['tower_captures']
+                keep = result_rvr['keep_captures']
+                relic = result_rvr['relic_captures']
+                
+                self.tower_captures_label.setText(f"{tower:,}")
+                self.keep_captures_label.setText(f"{keep:,}")
+                self.relic_captures_label.setText(f"{relic:,}")
+                
+                self.character_data['tower_captures'] = tower
+                self.character_data['keep_captures'] = keep
+                self.character_data['relic_captures'] = relic
+                
+                from Functions.character_manager import save_character
+                save_character(self.character_data, allow_overwrite=True)
+                
+            elif not result_rvr['success'] and result_pvp['success']:
+                # PvP succeeded but RvR failed - partial update
+                QMessageBox.warning(
+                    self,
+                    "Mise à jour partielle",
+                    f"❌ RvR Captures non disponibles\n"
+                    f"✅ Statistiques PvP récupérées avec succès\n\n"
+                    f"Erreur RvR: {result_rvr.get('error', 'Erreur inconnue')}\n\n"
+                    f"Les statistiques PvP ont été sauvegardées."
+                )
+                
+                # Update only PvP data
+                solo_kills = result_pvp['solo_kills']
+                solo_kills_alb = result_pvp['solo_kills_alb']
+                solo_kills_hib = result_pvp['solo_kills_hib']
+                solo_kills_mid = result_pvp['solo_kills_mid']
+                
+                deathblows = result_pvp['deathblows']
+                deathblows_alb = result_pvp['deathblows_alb']
+                deathblows_hib = result_pvp['deathblows_hib']
+                deathblows_mid = result_pvp['deathblows_mid']
+                
+                kills = result_pvp['kills']
+                kills_alb = result_pvp['kills_alb']
+                kills_hib = result_pvp['kills_hib']
+                kills_mid = result_pvp['kills_mid']
+                
+                self.solo_kills_label.setText(f"{solo_kills:,}")
+                self.deathblows_label.setText(f"{deathblows:,}")
+                self.kills_label.setText(f"{kills:,}")
+                
+                self.solo_kills_detail_label.setText(
+                    f'→ <span style="color: #C41E3A;">Alb</span>: {solo_kills_alb:,}  |  '
+                    f'<span style="color: #228B22;">Hib</span>: {solo_kills_hib:,}  |  '
+                    f'<span style="color: #4169E1;">Mid</span>: {solo_kills_mid:,}'
+                )
+                self.deathblows_detail_label.setText(
+                    f'→ <span style="color: #C41E3A;">Alb</span>: {deathblows_alb:,}  |  '
+                    f'<span style="color: #228B22;">Hib</span>: {deathblows_hib:,}  |  '
+                    f'<span style="color: #4169E1;">Mid</span>: {deathblows_mid:,}'
+                )
+                self.kills_detail_label.setText(
+                    f'→ <span style="color: #C41E3A;">Alb</span>: {kills_alb:,}  |  '
+                    f'<span style="color: #228B22;">Hib</span>: {kills_hib:,}  |  '
+                    f'<span style="color: #4169E1;">Mid</span>: {kills_mid:,}'
+                )
+                
+                self.character_data['solo_kills'] = solo_kills
+                self.character_data['deathblows'] = deathblows
+                self.character_data['kills'] = kills
+                self.character_data['solo_kills_alb'] = solo_kills_alb
+                self.character_data['solo_kills_hib'] = solo_kills_hib
+                self.character_data['solo_kills_mid'] = solo_kills_mid
+                self.character_data['deathblows_alb'] = deathblows_alb
+                self.character_data['deathblows_hib'] = deathblows_hib
+                self.character_data['deathblows_mid'] = deathblows_mid
+                self.character_data['kills_alb'] = kills_alb
+                self.character_data['kills_hib'] = kills_hib
+                self.character_data['kills_mid'] = kills_mid
+                
+                from Functions.character_manager import save_character
+                save_character(self.character_data, allow_overwrite=True)
+            else:
+                # Show which stats failed
+                error_msg = "Impossible de récupérer les statistiques :\n\n"
+                if not result_rvr['success']:
+                    error_msg += f"RvR Captures: {result_rvr.get('error', 'Erreur inconnue')}\n"
+                if not result_pvp['success']:
+                    error_msg += f"PvP Stats: {result_pvp.get('error', 'Erreur inconnue')}"
+                
+                QMessageBox.critical(
+                    self,
+                    "Erreur",
+                    error_msg
+                )
+        
+        except Exception as e:
+            import traceback
+            error_msg = f"Erreur lors de la mise à jour des stats RvR:\n{str(e)}\n\n{traceback.format_exc()}"
+            log_with_action(logger_char, "error", f"RvR stats update error: {e}", action="ERROR")
+            QMessageBox.critical(self, "Erreur", error_msg)
+        
+        finally:
+            # Re-enable button
+            self.update_rvr_button.setEnabled(True)
+            self.update_rvr_button.setText("🔄 Actualiser Stats RvR")
     
     def update_from_herald(self):
         """Met à jour les données du personnage depuis Herald"""

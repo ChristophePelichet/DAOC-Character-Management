@@ -1,22 +1,51 @@
-# v0.107 - Herald Connection Test Crash Fix
+# v0.107 - RvR/PvP Herald Statistics
 
-## 🔧 Critical Fix (Nov 8, 2025)
-✅ **CRITICAL FIX**: Herald connection test crash resolved  
-✅ Clean WebDriver shutdown in all error paths  
-✅ `finally` block added to guarantee cleanup  
-✅ Same fix pattern as Herald search correction  
-✅ `scraper` variable initialized to `None` to prevent errors  
-✅ No more application crashes during connection errors  
+## 📊 New Herald Statistics (Nov 8, 2025)
 
-## 🧪 Test Script Added
-✅ **New script**: `test_herald_connection_stability.py`  
-✅ Tests Herald connection stability (25 tests by default)  
-✅ Detailed statistics: average/min/max time, success rate  
-✅ Crash and error detection  
-✅ Customizable number of tests  
+### ⚔️ RvR Section
+✅ 🗼 Tower Captures: Number of captured towers  
+✅ 🏰 Keep Captures: Number of captured keeps  
+✅ 💎 Relic Captures: Number of captured relics  
 
-## Technical Details
-- **Problem**: Herald connection test could crash application like search did
-- **Cause**: No `finally` block to close driver, missing `close()` calls in some error paths
-- **Solution**: Identical pattern to `search_herald_character()` fix
-- **Impact**: Stable application, no crashes during connection tests
+### 🗡️ PvP Section with Realm Breakdown
+✅ ⚔️ Solo Kills: Total + Alb/Hib/Mid breakdown  
+✅ 💀 Deathblows: Total + Alb/Hib/Mid breakdown  
+✅ 🎯 Kills: Total + Alb/Hib/Mid breakdown  
+✅ Realm colors (Red/Green/Blue)  
+✅ Display: `Kills: 4,715 → Alb: 1,811 | Hib: 34 | Mid: 2,870`  
+
+### 🔄 "Update Stats" Button
+✅ Fetches RvR and PvP from Herald  
+✅ Partial update handling  
+✅ Explanatory error messages  
+✅ Multilingual support (FR/EN/DE)  
+
+## 🔧 Technical Improvements
+
+### 📥 Herald Scraper
+✅ New module `character_profile_scraper.py`  
+✅ Scrapes Characters and PvP tabs from Herald  
+✅ Handles thousand separators (spaces, commas)  
+✅ Extraction by realm (Albion/Hibernia/Midgard)  
+
+### 🐛 Fixes
+✅ **Fix number parsing**: `"1 811"` → `clean_number()` removes spaces/commas  
+✅ **Fix missing stats**: Precise messages, partial save, debug HTML  
+✅ **Characters without stats**: Informative messages instead of errors  
+
+### 🎨 Interface
+✅ Resizable character sheet  
+✅ Organized Statistics section: RvR / PvP / PvE  
+✅ Bold total values  
+✅ Indented realm details with colors  
+✅ 50/50 layout (Information/Statistics)  
+✅ Complete translations (FR/EN/DE)  
+
+## 📦 Test Scripts
+✅ `Scripts/test_pvp_stats.py`: Isolated PvP scraping test  
+✅ `Scripts/test_rvr_captures.py`: Isolated RvR scraping test  
+
+## ⚠️ Notes
+- Requires valid Herald cookies  
+- Character level 11+ recommended  
+- Visible browser minimized (headless=False)

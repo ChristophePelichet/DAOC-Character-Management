@@ -14,18 +14,18 @@ from Functions.language_manager import lang
 from Functions.logging_manager import ALL_LOGGERS
 
 
-class QTextEditHandler(logging.Handler, QObject):
-    """A custom logging handler that sends log records to a QTextEdit widget."""
-    
-    log_updated = Signal(str)
+class QTextEditHandler(logging.Handler):
+    """A custom logging handler that sends log records to a QTextEdit widget via callback."""
 
-    def __init__(self, parent):
-        super().__init__()
-        QObject.__init__(self, parent)
+    def __init__(self, callback):
+        logging.Handler.__init__(self)
+        self.callback = callback
 
     def emit(self, record):
+        """Override logging.Handler.emit() to send logs via callback."""
         msg = self.format(record)
-        self.log_updated.emit(msg)
+        if self.callback:
+            self.callback(msg)
 
 
 class LogLevelFilter(logging.Filter):
@@ -188,20 +188,18 @@ class DebugWindow(QMainWindow):
         
         # General log handler (INFO and below)
         self.log_filter = LogLevelFilter(logging.DEBUG, logging.INFO)
-        self.log_handler = QTextEditHandler(self)
+        self.log_handler = QTextEditHandler(self.log_widget.append)
         self.log_handler.setFormatter(formatter)
         self.log_handler.addFilter(self.log_filter)
         self.log_handler.addFilter(self.logger_filter)
-        self.log_handler.log_updated.connect(self.log_widget.append)
         logging.getLogger().addHandler(self.log_handler)
 
         # Error log handler (WARNING and above)
         self.error_filter = LogLevelFilter(logging.WARNING, logging.CRITICAL)
-        self.error_handler = QTextEditHandler(self)
+        self.error_handler = QTextEditHandler(self.error_widget.append)
         self.error_handler.setFormatter(formatter)
         self.error_handler.addFilter(self.error_filter)
         self.error_handler.addFilter(self.logger_filter)
-        self.error_handler.log_updated.connect(self.error_widget.append)
         logging.getLogger().addHandler(self.error_handler)
 
     def _create_menus(self):
@@ -392,10 +390,9 @@ class EdenDebugWindow(QMainWindow):
         main_layout.addWidget(self.info_label)
         
         # Setup of the handler spécifique Eden
-        self.eden_handler = QTextEditHandler(self)
+        self.eden_handler = QTextEditHandler(self.append_colored_log)
         formatter = logging.Formatter('%(asctime)s - %(message)s', datefmt='%H:%M:%S')
         self.eden_handler.setFormatter(formatter)
-        self.eden_handler.log_updated.connect(self.append_colored_log)
         
         # Ajouter le handler au logger Eden (utiliser la constante du logging_manager)
         from Functions.logging_manager import LOGGER_EDEN

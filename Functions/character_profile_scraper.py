@@ -702,6 +702,235 @@ class CharacterProfileScraper:
                 'error': error_msg
             }
 
+    def scrape_pve_stats(self, character_url):
+        """
+        Scrape PvE statistics from character profile
+        
+        Args:
+            character_url: Character profile URL (e.g., https://eden-daoc.net/herald?n=player&k=XXX)
+            
+        Returns:
+            dict: PvE statistics
+        """
+        if not self.driver:
+            return {
+                'success': False,
+                'error': 'Driver not initialized'
+            }
+        
+        try:
+            # Ensure URL includes PvE tab parameter
+            base_url = character_url.split('&t=')[0].split('?t=')[0]
+            pve_url = f"{base_url}&t=pve" if '?' in base_url else f"{base_url}?t=pve"
+            
+            log_with_action(profile_logger, "info", 
+                          f"Navigating to PvE tab: {pve_url}", 
+                          action="SCRAPE_PVE")
+            
+            # Navigate to PvE tab
+            self.driver.get(pve_url)
+            
+            # Wait for page to fully load
+            log_with_action(profile_logger, "info", 
+                          "Waiting for page to fully load (5 seconds)...", 
+                          action="SCRAPE_PVE")
+            time.sleep(5)
+            
+            # Extract HTML content
+            page_source = self.driver.page_source
+            soup = BeautifulSoup(page_source, 'html.parser')
+            
+            log_with_action(profile_logger, "info", 
+                          f"Page loaded - Size: {len(page_source)} chars", 
+                          action="SCRAPE_PVE")
+            
+            # Check if we got the error message (not connected)
+            if 'The requested page "herald" is not available.' in page_source:
+                log_with_action(profile_logger, "error", 
+                              "Not connected - Herald page not available", 
+                              action="SCRAPE_PVE")
+                return {
+                    'success': False,
+                    'error': 'Not connected to Herald - please regenerate cookies'
+                }
+            
+            # Look for the player_content div
+            player_content = soup.find('div', id='player_content')
+            
+            if not player_content:
+                log_with_action(profile_logger, "warning", "player_content div not found", action="SCRAPE_PVE")
+                return {
+                    'success': False,
+                    'dragon_kills': None,
+                    'legion_kills': None,
+                    'mini_dragon_kills': None,
+                    'epic_encounters': None,
+                    'epic_dungeons': None,
+                    'sobekite': None,
+                    'error': 'Player content not loaded'
+                }
+            
+            # Helper function to clean number strings
+            def clean_number(text):
+                """Remove thousand separators (spaces, commas, non-breaking spaces) from number string"""
+                return text.replace(',', '').replace(' ', '').replace('\xa0', '')
+            
+            # Search for PvE statistics table
+            result = {
+                'success': False,
+                'dragon_kills': None,
+                'legion_kills': None,
+                'mini_dragon_kills': None,
+                'epic_encounters': None,
+                'epic_dungeons': None,
+                'sobekite': None,
+                'error': None
+            }
+            
+            # Find the PvE stats table (class="pvestats")
+            pve_table = player_content.find('table', class_='pvestats')
+            
+            if not pve_table:
+                log_with_action(profile_logger, "warning", "pvestats table not found", action="SCRAPE_PVE")
+                result['error'] = 'PvE stats table not found'
+                return result
+            
+            # Find all table cells in pvestats table only
+            all_cells = pve_table.find_all('td')
+            
+            for i, cell in enumerate(all_cells):
+                cell_text = cell.get_text(strip=True)
+                
+                # Only process cells with 'bold' class (these are the labels)
+                if 'bold' not in cell.get('class', []):
+                    continue
+                
+                # Check for each PvE stat
+                if cell_text == 'Dragon Kills':
+                    if i + 1 < len(all_cells):
+                        value_text = all_cells[i + 1].get_text(strip=True)
+                        try:
+                            result['dragon_kills'] = int(clean_number(value_text))
+                            log_with_action(profile_logger, "info", 
+                                          f"Found Dragon Kills: {result['dragon_kills']}", 
+                                          action="SCRAPE_PVE")
+                        except ValueError:
+                            log_with_action(profile_logger, "warning", 
+                                          f"Could not parse Dragon Kills value: {value_text}", 
+                                          action="SCRAPE_PVE")
+                
+                elif cell_text == 'Legion Kills':
+                    if i + 1 < len(all_cells):
+                        value_text = all_cells[i + 1].get_text(strip=True)
+                        try:
+                            result['legion_kills'] = int(clean_number(value_text))
+                            log_with_action(profile_logger, "info", 
+                                          f"Found Legion Kills: {result['legion_kills']}", 
+                                          action="SCRAPE_PVE")
+                        except ValueError:
+                            log_with_action(profile_logger, "warning", 
+                                          f"Could not parse Legion Kills value: {value_text}", 
+                                          action="SCRAPE_PVE")
+                
+                elif cell_text == 'Mini Dragon Kills':
+                    if i + 1 < len(all_cells):
+                        value_text = all_cells[i + 1].get_text(strip=True)
+                        try:
+                            result['mini_dragon_kills'] = int(clean_number(value_text))
+                            log_with_action(profile_logger, "info", 
+                                          f"Found Mini Dragon Kills: {result['mini_dragon_kills']}", 
+                                          action="SCRAPE_PVE")
+                        except ValueError:
+                            log_with_action(profile_logger, "warning", 
+                                          f"Could not parse Mini Dragon Kills value: {value_text}", 
+                                          action="SCRAPE_PVE")
+                
+                elif cell_text == 'Epic Encounters':
+                    if i + 1 < len(all_cells):
+                        value_text = all_cells[i + 1].get_text(strip=True)
+                        try:
+                            result['epic_encounters'] = int(clean_number(value_text))
+                            log_with_action(profile_logger, "info", 
+                                          f"Found Epic Encounters: {result['epic_encounters']}", 
+                                          action="SCRAPE_PVE")
+                        except ValueError:
+                            log_with_action(profile_logger, "warning", 
+                                          f"Could not parse Epic Encounters value: {value_text}", 
+                                          action="SCRAPE_PVE")
+                
+                elif cell_text == 'Epic Dungeons':
+                    if i + 1 < len(all_cells):
+                        value_text = all_cells[i + 1].get_text(strip=True)
+                        try:
+                            result['epic_dungeons'] = int(clean_number(value_text))
+                            log_with_action(profile_logger, "info", 
+                                          f"Found Epic Dungeons: {result['epic_dungeons']}", 
+                                          action="SCRAPE_PVE")
+                        except ValueError:
+                            log_with_action(profile_logger, "warning", 
+                                          f"Could not parse Epic Dungeons value: {value_text}", 
+                                          action="SCRAPE_PVE")
+                
+                elif cell_text == 'Sobekite':
+                    if i + 1 < len(all_cells):
+                        value_text = all_cells[i + 1].get_text(strip=True)
+                        try:
+                            result['sobekite'] = int(clean_number(value_text))
+                            log_with_action(profile_logger, "info", 
+                                          f"Found Sobekite: {result['sobekite']}", 
+                                          action="SCRAPE_PVE")
+                        except ValueError:
+                            log_with_action(profile_logger, "warning", 
+                                          f"Could not parse Sobekite value: {value_text}", 
+                                          action="SCRAPE_PVE")
+            
+            # Check if we found all values
+            missing_stats = []
+            if result['dragon_kills'] is None:
+                missing_stats.append('Dragon Kills')
+            if result['legion_kills'] is None:
+                missing_stats.append('Legion Kills')
+            if result['mini_dragon_kills'] is None:
+                missing_stats.append('Mini Dragon Kills')
+            if result['epic_encounters'] is None:
+                missing_stats.append('Epic Encounters')
+            if result['epic_dungeons'] is None:
+                missing_stats.append('Epic Dungeons')
+            if result['sobekite'] is None:
+                missing_stats.append('Sobekite')
+            
+            if not missing_stats:
+                result['success'] = True
+                log_with_action(profile_logger, "info", 
+                              "Successfully extracted all PvE stats", 
+                              action="SCRAPE_PVE")
+            else:
+                result['error'] = f"PvE statistics not found: {', '.join(missing_stats)}"
+                log_with_action(profile_logger, "warning", 
+                              f"Incomplete PvE data - missing: {', '.join(missing_stats)}", 
+                              action="SCRAPE_PVE")
+                
+                # Debug: Save HTML for analysis if stats are missing
+                try:
+                    debug_file = Path(__file__).parent.parent / "debug_pve_missing.html"
+                    debug_file.write_text(page_source, encoding='utf-8')
+                    log_with_action(profile_logger, "info", 
+                                  f"Saved debug HTML to {debug_file}", 
+                                  action="SCRAPE_PVE")
+                except Exception as debug_error:
+                    log_with_action(profile_logger, "warning", 
+                                  f"Could not save debug HTML: {debug_error}", 
+                                  action="SCRAPE_PVE")
+            
+            return result
+            
+        except Exception as e:
+            error_msg = f"Error scraping PvE stats: {e}"
+            log_with_action(profile_logger, "error", error_msg, action="SCRAPE_PVE")
+            return {
+                'success': False,
+                'error': error_msg
+            }
     
     def __enter__(self):
         """Context manager entry"""
@@ -710,3 +939,4 @@ class CharacterProfileScraper:
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Context manager exit - ensure cleanup"""
         self.close()
+

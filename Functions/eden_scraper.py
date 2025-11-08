@@ -113,7 +113,7 @@ class EdenScraper:
             
             # Attendre que la page soit chargée
             import time
-            time.sleep(2)
+            time.sleep(1)  # PHASE 1: Optimisé 2s → 1s
             
             # Étape 2: Ajouter les cookies
             self.logger.info(f"🍪 Étape 2: Ajout de {len(cookies_list)} cookies...", extra={"action": "COOKIES"})
@@ -134,18 +134,15 @@ class EdenScraper:
             
             self.logger.info(f"✅ {cookies_added}/{len(cookies_list)} cookies chargés dans le driver", extra={"action": "COOKIES"})
             
-            # Étape 3: Attendre et rafraîchir la page d'accueil
-            self.logger.info("⏳ Étape 3: Attente de 3 secondes avant rafraîchissement...", extra={"action": "COOKIES"})
-            time.sleep(3)
-            
+            # Étape 3: Rafraîchir la page d'accueil (PHASE 1: sleep supprimé)
             self.logger.info("🔄 Rafraîchissement de la page d'accueil pour activer la session...", extra={"action": "COOKIES"})
             self.driver.refresh()
-            time.sleep(2)  # Optimisé: 3s → 2s (Phase 1 bis - conservateur)
+            time.sleep(2)  # PHASE 1: Optimisé 3s → 2s
             
             # Étape 4: Naviguer vers le Herald pour tester la session
             self.logger.info("🔍 Étape 4: Navigation vers le Herald (test de session)...", extra={"action": "COOKIES"})
             self.driver.get("https://eden-daoc.net/herald")
-            time.sleep(3)  # Optimisé: 4s → 3s (Phase 1 bis - conservateur)
+            time.sleep(2)  # PHASE 1: Optimisé 4s → 2s
             
             # Vérifier si on est connecté
             current_url = self.driver.current_url

@@ -645,7 +645,7 @@ class CookieManager:
             
             # Étape 1: Page d'accueil
             driver.get("https://eden-daoc.net/")
-            time.sleep(2)
+            time.sleep(1)  # PHASE 1: Optimisé 2s → 1s
             
             # Étape 2: Ajouter les cookies
             eden_logger.info(f"Ajout de {len(cookies_list)} cookies", extra={"action": "TEST"})
@@ -660,12 +660,12 @@ class CookieManager:
             # Étape 3: Refresh
             eden_logger.info("Refresh pour activer les cookies", extra={"action": "TEST"})
             driver.refresh()
-            time.sleep(2)  # Optimisé: 3s → 2s (Phase 1 bis - conservateur)
+            time.sleep(2)  # PHASE 1: Optimisé 3s → 2s
             
             # Étape 4: Aller sur le Herald
             eden_logger.info("Navigation vers https://eden-daoc.net/herald", extra={"action": "TEST"})
             driver.get("https://eden-daoc.net/herald")
-            time.sleep(4)  # Optimisé: 5s → 4s (Phase 1 bis - conservateur)
+            time.sleep(3)  # PHASE 1: Optimisé 5s → 3s
             
             # Récupérer et analyser le HTML
             page_source = driver.page_source

@@ -22,13 +22,22 @@
 ✅ Logs de création des dossiers backup visibles  
 ✅ Message d'erreur clair : "No characters to backup" au lieu de "folder not found"  
 
-## ⚡ Optimisation Herald Performance (7 nov 2025)
-✅ Réduction des timeouts Herald de 18% (-4 secondes par opération)  
-✅ Test connexion : 11s → 9s (-2 secondes)  
-✅ Recherche personnage : 12s → 10s (-2 secondes)  
-✅ 100% stable - Approche conservatrice validée  
-✅ Documentation complète du diagnostic (HERALD_TIMEOUTS_ANALYSIS.md)  
-✅ Exclusion fichier debug Herald du versioning (.gitignore)  
+## ⚡ Optimisation Herald Performance - Phase 1 (8 nov 2025)
+✅ **Réduction des timeouts Herald de 17.4%** (-4.6 secondes par recherche)  
+✅ **25/25 tests réussis** (100% stable, 0 crash)  
+✅ **Recherche personnage : 26.5s → 21.9s** (-4.6 secondes, -17.4%)  
+✅ **7 optimisations de timeouts appliquées** :  
+   • Homepage : 2s → 1s  
+   • **Sleep avant refresh SUPPRIMÉ** (gain majeur)  
+   • Refresh : 3s → 2s  
+   • Herald load : 4s → 2s  
+   • Test homepage : 2s → 1s  
+   • Test refresh : 3s → 2s  
+   • Test Herald : 5s → 3s  
+✅ **Total économisé : 1.9 minutes sur 25 recherches**  
+✅ Validation complète après correction du crash WebDriver  
+✅ Documentation : HERALD_PHASE1_TEST_REPORT.md  
+✅ Script de test automatisé : Scripts/test_herald_stability.py  
 
 ## 🍪 Sauvegarde des Cookies Eden
 ✅ Sauvegarde quotidienne automatique des cookies au démarrage  

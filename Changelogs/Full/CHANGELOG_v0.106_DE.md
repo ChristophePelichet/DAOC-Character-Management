@@ -5,6 +5,49 @@
 
 ---
 
+## ⚡ Herald-Leistungsoptimierung - Phase 1 (8. November 2025)
+
+### Herald-Timeout-Reduzierung
+
+**Kontext**:
+- Vollständige Analyse der 21 `time.sleep()`-Vorkommen im Herald-Code
+- WebDriver-Absturz behoben (7. Nov): ordnungsgemäßes Schließen in allen Fehlerpfaden
+- Phase 1 aggressiv validiert nach Cleanup-Bug-Fix
+- Vollständige Dokumentation: `HERALD_TIMEOUTS_ANALYSIS.md` + `HERALD_PHASE1_TEST_REPORT.md`
+
+**Phase 1 - Übernommene Lösung**:
+```python
+# eden_scraper.py
+time.sleep(1)  # Homepage (war: 2s) → -1s
+# ENTFERNT     # Sleep vor Refresh (war: 3s) → -3s ★ HAUPTGEWINN
+time.sleep(2)  # Refresh (war: 3s) → -1s
+time.sleep(2)  # Herald-Laden (war: 4s) → -2s
+
+# cookie_manager.py  
+time.sleep(1)  # Homepage-Test (war: 2s) → -1s
+time.sleep(2)  # Refresh-Test (war: 3s) → -1s
+time.sleep(3)  # Herald-Test (war: 5s) → -2s
+```
+
+**Validierte Leistung (25/25 Tests erfolgreich)**:
+- **Charaktersuche: 26.5s → 21.9s (-17.4%)**
+- **0 Abstürze** (WebDriver-Cleanup-Fix angewendet)
+- Gesamtdauer 25 Suchen: 662.3s → 546.4s (-1.9 Min)
+- **Gewinn pro Suche: -4.6 Sekunden**
+- Stabilität: 100% (Standardabweichung 0.3s, Bereich 18.7-19.6s)
+
+**Geänderte Dateien**:
+- `Functions/eden_scraper.py` (Zeilen 115, 138, 142, 147)
+- `Functions/cookie_manager.py` (Zeilen 645, 660, 665)
+- `Scripts/test_herald_stability.py` (automatisiertes Testskript)
+
+**Warum es jetzt funktioniert**:
+- Phase 1 scheiterte zuvor aufgrund WebDriver-Bug (QThread-Absturz)
+- Bug behoben in Commit 9e84494 (7. Nov): `scraper.close()` in allen Pfaden
+- Phase 1 aggressiv ist sicher mit ordnungsgemäßer Ressourcenverwaltung
+
+---
+
 ## 🔧 Neues Logging-System
 
 ### Einheitliches Format mit ACTION

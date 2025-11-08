@@ -1,16 +1,38 @@
-# CHANGELOG - DAOC Character Manager# CHANGELOG - DAOC Character Manager# 📋 CHANGELOG - DAOC Character Manager
+# 📋 CHANGELOG - DAOC Character Manager
 
+> **Version actuelle** : **0.107** (2025-11-08)
 
+## 🚀 Accès Rapide (v0.107)
 
-Version actuelle : **0.106** (2025-11-01)
+### 📌 Version Simplifiée
+*Liste concise des changements principaux*
 
+- 🇫🇷 [Français](Changelogs/Simple/SIMPLE_v0.107_FR.md)
+- 🇬🇧 [English](Changelogs/Simple/SIMPLE_v0.107_EN.md)
+- 🇩🇪 [Deutsch](Changelogs/Simple/SIMPLE_v0.107_DE.md)
 
+### 📚 Version Complète
+*Documentation détaillée avec exemples techniques*
 
-## Acces Rapide par VersionVersion actuelle : **0.106** (2025-11-01)> **Version actuelle** : **0.106** (2025-11-01)
+- 🇫🇷 [Français](Changelogs/Full/CHANGELOG_v0.107_FR.md)
 
+---
 
+## Acces Rapide par Version
 
-### v0.106 (2025-11-01) - Correction Eden Scraping & Auto-Update
+### v0.107 (2025-11-08) - Fix Crash Test Connexion Herald
+
+**Version Simplifiee** 
+- [Francais](Changelogs/Simple/SIMPLE_v0.107_FR.md)
+- [English](Changelogs/Simple/SIMPLE_v0.107_EN.md)
+- [Deutsch](Changelogs/Simple/SIMPLE_v0.107_DE.md)
+
+**Version Complete** 
+- [Francais](Changelogs/Full/CHANGELOG_v0.107_FR.md)
+
+---
+
+### v0.106 (2025-11-01) - Système Logging, Cookies Backup & Optimisation Herald
 
 **Version Simplifiee** 
 

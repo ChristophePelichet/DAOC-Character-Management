@@ -48,7 +48,7 @@ from UI.dialogs import ColumnsConfigDialog, ConfigurationDialog
 setup_logging()
 
 APP_NAME = "DAOC Character Manager"
-APP_VERSION = "0.104"
+APP_VERSION = "0.106"
 
 
 def global_exception_handler(exc_type, exc_value, exc_traceback):
@@ -681,7 +681,7 @@ class CharacterApp(QMainWindow):
         
         # Mode de redimensionnement des colonnes
         new_manual_resize = dialog.manual_column_resize_check.isChecked()
-        old_manual_resize = config.get("manual_column_resize", False)
+        old_manual_resize = config.get("manual_column_resize", True)
         config.set("manual_column_resize", new_manual_resize)
         if new_manual_resize != old_manual_resize:
             self.tree_manager.apply_column_resize_mode(new_manual_resize)

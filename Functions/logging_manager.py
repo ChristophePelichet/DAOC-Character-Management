@@ -85,24 +85,23 @@ def setup_logging(extra_handlers=None):
             logger.addHandler(handler)
 
     # Determine logging level from config
-    is_debug_mode = config.get("debug_mode", True)
+    is_debug_mode = config.get("debug_mode", False)
 
     # Set the root logger's level to the lowest possible level.
     # This allows individual handlers to control what they display.
     logger.setLevel(logging.DEBUG)
 
-    # Create log directory if it doesn't exist
-    log_dir = get_log_dir()
-    if not os.path.exists(log_dir):
-        os.makedirs(log_dir)
-    
-    # Use the new contextual formatter
-    formatter = ContextualFormatter()
-    log_file_path = os.path.join(log_dir, "debug.log")
-
-    # Create a single RotatingFileHandler for all messages
-    # This avoids file locking issues when rotating
+    # Only create log files if debug mode is enabled
     if is_debug_mode:
+        # Create log directory if it doesn't exist
+        log_dir = get_log_dir()
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
+        
+        # Use the new contextual formatter
+        formatter = ContextualFormatter()
+        log_file_path = os.path.join(log_dir, "debug.log")
+        
         # Full debug file handler
         fh = RotatingFileHandler(log_file_path, maxBytes=1024*1024, backupCount=5, encoding='utf-8')
         fh.setLevel(logging.DEBUG)
@@ -114,11 +113,11 @@ def setup_logging(extra_handlers=None):
         ch.setFormatter(formatter)
         logger.addHandler(ch)
     else:
-        # When debug mode is OFF, still log errors to file
-        fh_errors = RotatingFileHandler(log_file_path, maxBytes=1024*1024, backupCount=5, encoding='utf-8')
-        fh_errors.setLevel(logging.ERROR)  # Only ERROR and CRITICAL
-        fh_errors.setFormatter(formatter)
-        logger.addHandler(fh_errors)
+        # When debug mode is OFF, only log to console for critical errors
+        ch = logging.StreamHandler()
+        ch.setLevel(logging.CRITICAL)
+        ch.setFormatter(ContextualFormatter())
+        logger.addHandler(ch)
 
 
 def get_logger(name):

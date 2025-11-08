@@ -36,7 +36,7 @@ class CharacterActionsManager:
     def create_new_character(self):
         """Ouvre le dialogue de création d'un nouveau personnage"""
         seasons = config.get("seasons", ["S1", "S2", "S3"])
-        default_season = config.get("default_season", "S1")
+        default_season = config.get("default_season", "S3")
         
         dialog = NewCharacterDialog(
             self.main_window, 

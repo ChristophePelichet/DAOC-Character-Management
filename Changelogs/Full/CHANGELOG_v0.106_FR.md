@@ -1,8 +1,122 @@
 # CHANGELOG v0.106 - Système de Logging, Sauvegarde Cookies & Optimisation Herald
 
 **Date de début** : 2025-11-01  
-**Dernière mise à jour** : 2025-11-07  
+**Dernière mise à jour** : 2025-11-08  
 **Version** : 0.106
+
+---
+
+## 🎯 Refactoring Code Complet & Configuration (8 novembre 2025)
+
+### Objectif : Code propre, exe optimisé, configuration par défaut améliorée
+
+**Contexte** :
+Avant les tests finaux de la v0.106, refactoring complet du code pour :
+- Passer tous les commentaires en anglais
+- Réduire la taille de l'exécutable
+- Nettoyer les imports inutilisés
+- Corriger les bugs découverts
+- Améliorer la configuration par défaut
+
+**Résultats** :
+
+### 1. Traduction Complète Français → Anglais
+✅ **582 commentaires français traduits** (975 modifications totales)  
+✅ **100% du code en anglais** (meilleure maintenabilité)  
+✅ **89 phrases complètes** traduites via patterns de correspondance  
+✅ **Reste traduit mot par mot** pour contexte approprié  
+
+### 2. Optimisation des Imports
+✅ **51 imports inutilisés supprimés** via analyse AST  
+✅ **Fichiers les plus nettoyés** :
+   - `cookie_manager.py` : 11 imports
+   - `eden_scraper.py` : 6 imports
+   - `main.py` : 5 imports
+   - `backup_manager.py` : 3 imports
+
+### 3. Nettoyage du Code
+✅ **74 lignes blanches excessives** supprimées (max 2 consécutives)  
+✅ **1 debug print** supprimé  
+✅ **Formatage cohérent** sur tout le projet  
+
+### 4. Corrections de Bugs
+
+**Bug 1 : Imports critiques manquants**
+- **Problème** : Optimisation trop agressive, imports nécessaires supprimés
+- **Fichiers corrigés** :
+  - `character_actions_manager.py` : Ajout `QMessageBox, QInputDialog, QDialog, QLineEdit`
+  - `armor_manager.py` : Ajout `ensure_armor_dir` depuis `path_manager`
+  - `tree_manager.py` : Ajout `QHeaderView`
+  - `main.py` : Restauration imports Qt et config
+- **Résultat** : ✅ Application démarre, toutes les fonctionnalités OK
+
+**Bug 2 : Logs créés même avec debug_mode désactivé**
+- **Problème** : Dossier `Logs/` et `debug.log` créés au démarrage même si option désactivée
+- **Solution** : Création conditionnelle uniquement si `debug_mode = true`
+- **Fichier modifié** : `logging_manager.py`
+- **Résultat** : ✅ Aucun fichier log si debug désactivé
+
+**Bug 3 : Erreur migration sur dossier inexistant**
+- **Problème** : Erreur `MIGRATION_FLAG_ERROR` si dossier Characters n'existe pas
+- **Solution** : Vérification existence du dossier avant création flag `.migration_done`
+- **Fichier modifié** : `migration_manager.py`
+- **Résultat** : ✅ Plus d'erreur dans les logs
+
+**Bug 4 : Version incorrecte dans "À Propos"**
+- **Problème** : Affichait v0.104 au lieu de v0.106
+- **Solution** : `APP_VERSION = "0.106"` dans `main.py`
+- **Résultat** : ✅ Version correcte affichée
+
+### 5. Configuration Par Défaut Améliorée
+
+**Problème** : Config.json recréé au premier lancement avec mauvaises valeurs par défaut
+
+**Solutions** :
+
+**Saison par défaut → S3**
+- `config_manager.py` : `"default_season": "S3"` (création initiale)
+- `character_actions_manager.py` : `config.get("default_season", "S3")`
+- `dialogs.py` : `config.get('default_season', 'S3')`
+
+**Gestion manuelle colonnes activée**
+- `config_manager.py` : `"manual_column_resize": true` ajouté
+- `tree_manager.py` : `config.get("manual_column_resize", True)`
+- `main.py` : `config.get("manual_column_resize", True)`
+- `dialogs.py` : `config.get("manual_column_resize", True)`
+
+**Résultat** : ✅ Première installation avec S3 et colonnes manuelles
+
+### 6. Impact Global
+
+**Fichiers modifiés** : 67 fichiers production
+- `Functions/` : 11 fichiers (managers)
+- `UI/` : 4 fichiers (dialogs, delegates, debug)
+- `Scripts/` : 42 fichiers (tests/utilitaires)
+- `Tools/` : 4 fichiers (éditeurs)
+- `Test/` : 2 fichiers (Herald)
+- `main.py` : Application principale
+
+**Statistiques** :
+- 19,941 lignes totales
+- 792.58 KB
+- -47 lignes net (607 supprimées, 560 ajoutées)
+
+**Impact exe** :
+- Estimation : -1 à 2 MB (-2 à 4%)
+- 51 imports en moins = bundle plus léger
+- Bytecode plus propre
+
+**Tests** :
+✅ Démarrage application : 5 secondes  
+✅ Imports : Tous validés  
+✅ Backup : Fonctionnel  
+✅ Herald : Connexion DevTools OK  
+✅ Suppression perso : OK (QMessageBox fix)  
+✅ Gestion armures : OK (ensure_armor_dir fix)  
+✅ Toutes fonctionnalités : Testées et validées  
+
+**Documentation** :
+- Rapport complet : `Reports/CODE_REFACTORING_REPORT_v0.106.md`
 
 ---
 

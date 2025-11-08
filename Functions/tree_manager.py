@@ -151,7 +151,7 @@ class TreeManager:
         self.apply_column_visibility()
         
         # Appliquer le mode de redimensionnement
-        manual_resize = config.get("manual_column_resize", False)
+        manual_resize = config.get("manual_column_resize", True)
         self.apply_column_resize_mode(manual_resize)
         
         # Connecter the signal of changement for the compteur of sélection

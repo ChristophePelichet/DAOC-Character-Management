@@ -16,7 +16,7 @@ from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QFormLayout, QGroupBox, QLabel, 
     QPushButton, QLineEdit, QComboBox, QCheckBox, QSlider, QMessageBox,
     QDialogButtonBox, QFileDialog, QTableWidget, QTableWidgetItem, QHeaderView,
-    QWidget, QTextEdit, QApplication, QProgressBar, QMenu
+    QWidget, QTextEdit, QApplication, QProgressBar, QMenu, QGridLayout
 )
 from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtGui import QBrush, QColor, QIcon, QPixmap
@@ -62,6 +62,9 @@ class CharacterSheetWindow(QDialog):
         self.parent_app = parent
         char_name = self.character_data.get('name', 'N/A')
         self.realm = self.character_data.get('realm', 'Albion')
+        
+        # Flag pour savoir si un scraping Herald est en cours
+        self.herald_scraping_in_progress = False
 
         self.setWindowTitle(lang.get("character_sheet_title", name=char_name))
         self.resize(500, 400)
@@ -69,6 +72,11 @@ class CharacterSheetWindow(QDialog):
         # Enable window resizing
         self.setWindowFlags(self.windowFlags() | Qt.WindowMaximizeButtonHint)
         self.setSizeGripEnabled(True)  # Add resize grip in bottom-right corner
+        
+        # Connecter au signal de fin de validation Herald si disponible
+        if hasattr(parent, 'ui_manager') and hasattr(parent.ui_manager, 'eden_status_thread'):
+            # Créer une connexion pour réactiver le bouton quand la validation se termine
+            pass  # On gérera ça après la création du bouton
 
         layout = QVBoxLayout(self)
         
@@ -82,6 +90,7 @@ class CharacterSheetWindow(QDialog):
         current_url = self.character_data.get('url', '')
         self.herald_url_edit.setText(current_url)
         self.herald_url_edit.setPlaceholderText("https://eden-daoc.net/herald?n=player&k=NomPersonnage")
+        self.herald_url_edit.textChanged.connect(self.on_herald_url_changed)
         url_form_layout.addRow("URL Herald :", self.herald_url_edit)
         eden_layout.addLayout(url_form_layout)
         
@@ -337,20 +346,120 @@ class CharacterSheetWindow(QDialog):
         pve_subgroup = QGroupBox(lang.get("pve_section_title"))
         pve_sublayout = QVBoxLayout()
         
-        # PvE coming soon message
-        pve_coming_soon = QLabel(lang.get("pve_coming_soon"))
-        pve_coming_soon.setStyleSheet("font-size: 11px; color: gray; text-align: center;")
-        pve_coming_soon.setAlignment(Qt.AlignCenter)
-        pve_sublayout.addWidget(pve_coming_soon)
+        # Create grid layout for 2 columns
+        pve_grid = QGridLayout()
+        pve_grid.setSpacing(8)
+        
+        # Column 1 (left)
+        # Dragon Kills
+        dragon_label = QLabel("🐉 " + lang.get("dragon_kills_label") + ":")
+        self.dragon_kills_value = QLabel("—")
+        self.dragon_kills_value.setStyleSheet("font-weight: bold;")
+        pve_grid.addWidget(dragon_label, 0, 0)
+        pve_grid.addWidget(self.dragon_kills_value, 0, 1)
+        
+        # Mini Dragon Kills
+        mini_dragon_label = QLabel("🐲 " + lang.get("mini_dragon_kills_label") + ":")
+        self.mini_dragon_kills_value = QLabel("—")
+        self.mini_dragon_kills_value.setStyleSheet("font-weight: bold;")
+        pve_grid.addWidget(mini_dragon_label, 1, 0)
+        pve_grid.addWidget(self.mini_dragon_kills_value, 1, 1)
+        
+        # Epic Dungeons
+        epic_dungeons_label = QLabel("🏛️ " + lang.get("epic_dungeons_label") + ":")
+        self.epic_dungeons_value = QLabel("—")
+        self.epic_dungeons_value.setStyleSheet("font-weight: bold;")
+        pve_grid.addWidget(epic_dungeons_label, 2, 0)
+        pve_grid.addWidget(self.epic_dungeons_value, 2, 1)
+        
+        # Column 2 (right)
+        # Legion Kills
+        legion_label = QLabel("👹 " + lang.get("legion_kills_label") + ":")
+        self.legion_kills_value = QLabel("—")
+        self.legion_kills_value.setStyleSheet("font-weight: bold;")
+        pve_grid.addWidget(legion_label, 0, 2)
+        pve_grid.addWidget(self.legion_kills_value, 0, 3)
+        
+        # Epic Encounters
+        epic_encounters_label = QLabel("⚔️ " + lang.get("epic_encounters_label") + ":")
+        self.epic_encounters_value = QLabel("—")
+        self.epic_encounters_value.setStyleSheet("font-weight: bold;")
+        pve_grid.addWidget(epic_encounters_label, 1, 2)
+        pve_grid.addWidget(self.epic_encounters_value, 1, 3)
+        
+        # Sobekite
+        sobekite_label = QLabel("🐊 " + lang.get("sobekite_label") + ":")
+        self.sobekite_value = QLabel("—")
+        self.sobekite_value.setStyleSheet("font-weight: bold;")
+        pve_grid.addWidget(sobekite_label, 2, 2)
+        pve_grid.addWidget(self.sobekite_value, 2, 3)
+        
+        pve_sublayout.addLayout(pve_grid)
+        
+        # Load existing PvE values if available
+        dragon_kills = self.character_data.get('dragon_kills')
+        legion_kills = self.character_data.get('legion_kills')
+        mini_dragon_kills = self.character_data.get('mini_dragon_kills')
+        epic_encounters = self.character_data.get('epic_encounters')
+        epic_dungeons = self.character_data.get('epic_dungeons')
+        sobekite = self.character_data.get('sobekite')
+        
+        if dragon_kills is not None:
+            self.dragon_kills_value.setText(f"{dragon_kills:,}")
+        if legion_kills is not None:
+            self.legion_kills_value.setText(f"{legion_kills:,}")
+        if mini_dragon_kills is not None:
+            self.mini_dragon_kills_value.setText(f"{mini_dragon_kills:,}")
+        if epic_encounters is not None:
+            self.epic_encounters_value.setText(f"{epic_encounters:,}")
+        if epic_dungeons is not None:
+            self.epic_dungeons_value.setText(f"{epic_dungeons:,}")
+        if sobekite is not None:
+            self.sobekite_value.setText(f"{sobekite:,}")
         
         pve_subgroup.setLayout(pve_sublayout)
         statistics_layout.addWidget(pve_subgroup)
         
-        # Update button for RvR/PvP stats (below PvE section)
+        # === Wealth Sub-section ===
+        wealth_subgroup = QGroupBox(lang.get("wealth_section_title"))
+        wealth_layout = QFormLayout()
+        
+        # Money display
+        self.money_label = QLabel("—")
+        self.money_label.setStyleSheet("font-weight: bold; font-size: 9pt;")
+        wealth_layout.addRow(lang.get("total_wealth_label"), self.money_label)
+        
+        # Load existing wealth value if available
+        money_value = self.character_data.get('money')
+        if money_value is not None:
+            # Money is a string like "18p 128g", display as-is
+            self.money_label.setText(str(money_value))
+        
+        wealth_subgroup.setLayout(wealth_layout)
+        statistics_layout.addWidget(wealth_subgroup)
+        
+        # Update button for RvR/PvP/PvE/Wealth stats (below Wealth section)
         self.update_rvr_button = QPushButton(lang.get("update_rvr_pvp_button"))
         self.update_rvr_button.setToolTip(lang.get("update_rvr_pvp_tooltip"))
         self.update_rvr_button.clicked.connect(self.update_rvr_stats)
         self.update_rvr_button.setMaximumWidth(200)
+        
+        # Disable button if no Herald URL or if Herald validation is in progress
+        herald_url = self.character_data.get('url', '').strip()
+        herald_validation_done = self._is_herald_validation_done()
+        
+        if not herald_url:
+            self.update_rvr_button.setEnabled(False)
+            self.update_rvr_button.setToolTip("Veuillez d'abord configurer l'URL Herald")
+        elif not herald_validation_done:
+            self.update_rvr_button.setEnabled(False)
+            self.update_rvr_button.setToolTip("⏳ Validation Herald en cours au démarrage...")
+            # S'abonner au signal de fin de validation pour réactiver le bouton
+            if hasattr(self.parent_app, 'ui_manager') and hasattr(self.parent_app.ui_manager, 'eden_status_thread'):
+                thread = self.parent_app.ui_manager.eden_status_thread
+                if thread:
+                    thread.status_updated.connect(self._on_herald_validation_finished)
+        
         statistics_layout.addWidget(self.update_rvr_button)
         
         statistics_group.setLayout(statistics_layout)
@@ -807,6 +916,41 @@ class CharacterSheetWindow(QDialog):
             logging.error(error_msg)
             QMessageBox.critical(self, "Erreur", error_msg)
     
+    def on_herald_url_changed(self, text):
+        """Active/désactive le bouton de mise à jour des stats selon l'URL Herald"""
+        # Ne pas réactiver les boutons si un scraping Herald est en cours
+        if self.herald_scraping_in_progress:
+            return
+            
+        is_url_valid = bool(text.strip())
+        self.update_rvr_button.setEnabled(is_url_valid)
+        
+        if is_url_valid:
+            self.update_rvr_button.setToolTip(lang.get("update_rvr_pvp_tooltip"))
+        else:
+            self.update_rvr_button.setToolTip("Veuillez d'abord configurer l'URL Herald")
+    
+    def _is_herald_validation_done(self):
+        """Vérifie si la validation Herald du démarrage est terminée"""
+        if not hasattr(self.parent_app, 'ui_manager'):
+            return True  # Si pas de ui_manager, considérer comme fait
+        
+        # Vérifier si le thread de validation est en cours
+        if hasattr(self.parent_app.ui_manager, 'eden_status_thread'):
+            thread = self.parent_app.ui_manager.eden_status_thread
+            if thread and thread.isRunning():
+                return False
+        
+        return True
+    
+    def _on_herald_validation_finished(self, accessible, message):
+        """Appelé quand la validation Herald du démarrage se termine"""
+        # Réactiver le bouton si Herald accessible ET qu'une URL est configurée
+        herald_url = self.character_data.get('url', '').strip()
+        if accessible and herald_url:
+            self.update_rvr_button.setEnabled(True)
+            self.update_rvr_button.setToolTip(lang.get("update_rvr_pvp_tooltip"))
+    
     def open_herald_url(self):
         """Ouvre l'URL du Herald dans le navigateur avec les cookies"""
         url = self.herald_url_edit.text().strip()
@@ -913,10 +1057,18 @@ class CharacterSheetWindow(QDialog):
             # Scrape PvP stats (Kills, Deathblows, Solo Kills)
             result_pvp = scraper.scrape_pvp_stats(url)
             
+            # Scrape PvE stats (Dragon, Legion, etc.)
+            result_pve = scraper.scrape_pve_stats(url)
+            
+            # Scrape Wealth stats (Money)
+            result_wealth = scraper.scrape_wealth_money(url)
+            
             scraper.close()
             
-            # Check if both succeeded
-            if result_rvr['success'] and result_pvp['success']:
+            # Check if all four succeeded
+            all_success = result_rvr['success'] and result_pvp['success'] and result_pve['success'] and result_wealth['success']
+            
+            if all_success:
                 # Update UI labels - RvR Captures
                 tower = result_rvr['tower_captures']
                 keep = result_rvr['keep_captures']
@@ -964,6 +1116,25 @@ class CharacterSheetWindow(QDialog):
                     f'<span style="color: #4169E1;">Mid</span>: {kills_mid:,}'
                 )
                 
+                # Update UI labels - PvE Stats
+                dragon_kills = result_pve['dragon_kills']
+                legion_kills = result_pve['legion_kills']
+                mini_dragon_kills = result_pve['mini_dragon_kills']
+                epic_encounters = result_pve['epic_encounters']
+                epic_dungeons = result_pve['epic_dungeons']
+                sobekite = result_pve['sobekite']
+                
+                self.dragon_kills_value.setText(f"{dragon_kills:,}")
+                self.legion_kills_value.setText(f"{legion_kills:,}")
+                self.mini_dragon_kills_value.setText(f"{mini_dragon_kills:,}")
+                self.epic_encounters_value.setText(f"{epic_encounters:,}")
+                self.epic_dungeons_value.setText(f"{epic_dungeons:,}")
+                self.sobekite_value.setText(f"{sobekite:,}")
+                
+                # Update UI labels - Wealth Stats (money is a string like "18p 128g")
+                money = result_wealth['money']
+                self.money_label.setText(str(money))
+                
                 # Update character data - RvR Captures
                 self.character_data['tower_captures'] = tower
                 self.character_data['keep_captures'] = keep
@@ -985,6 +1156,17 @@ class CharacterSheetWindow(QDialog):
                 self.character_data['kills_hib'] = kills_hib
                 self.character_data['kills_mid'] = kills_mid
                 
+                # Update character data - PvE Stats
+                self.character_data['dragon_kills'] = dragon_kills
+                self.character_data['legion_kills'] = legion_kills
+                self.character_data['mini_dragon_kills'] = mini_dragon_kills
+                self.character_data['epic_encounters'] = epic_encounters
+                self.character_data['epic_dungeons'] = epic_dungeons
+                self.character_data['sobekite'] = sobekite
+                
+                # Update character data - Wealth Stats
+                self.character_data['money'] = money
+                
                 # Save to JSON
                 from Functions.character_manager import save_character
                 success, msg = save_character(self.character_data, allow_overwrite=True)
@@ -993,16 +1175,21 @@ class CharacterSheetWindow(QDialog):
                     QMessageBox.information(
                         self,
                         "Succès",
-                        f"Statistiques RvR mises à jour :\n\n"
+                        f"Statistiques mises à jour :\n\n"
+                        f"⚔️ RvR\n"
                         f"🗼 Tower Captures: {tower:,}\n"
                         f"🏰 Keep Captures: {keep:,}\n"
                         f"💎 Relic Captures: {relic:,}\n\n"
-                        f"⚔️ Solo Kills: {solo_kills:,}\n"
-                        f"   → Alb: {solo_kills_alb:,}  |  Hib: {solo_kills_hib:,}  |  Mid: {solo_kills_mid:,}\n\n"
-                        f"💀 Deathblows: {deathblows:,}\n"
-                        f"   → Alb: {deathblows_alb:,}  |  Hib: {deathblows_hib:,}  |  Mid: {deathblows_mid:,}\n\n"
-                        f"🎯 Kills: {kills:,}\n"
-                        f"   → Alb: {kills_alb:,}  |  Hib: {kills_hib:,}  |  Mid: {kills_mid:,}"
+                        f"🗡️ PvP\n"
+                        f"⚔️ Solo Kills: {solo_kills:,} (Alb: {solo_kills_alb:,}, Hib: {solo_kills_hib:,}, Mid: {solo_kills_mid:,})\n"
+                        f"💀 Deathblows: {deathblows:,} (Alb: {deathblows_alb:,}, Hib: {deathblows_hib:,}, Mid: {deathblows_mid:,})\n"
+                        f"🎯 Kills: {kills:,} (Alb: {kills_alb:,}, Hib: {kills_hib:,}, Mid: {kills_mid:,})\n\n"
+                        f"🐉 PvE\n"
+                        f"🐉 Dragons: {dragon_kills:,}  |  👹 Légions: {legion_kills:,}\n"
+                        f"🐲 Mini Dragons: {mini_dragon_kills:,}  |  ⚔️ Epic Encounters: {epic_encounters:,}\n"
+                        f"🏛️ Epic Dungeons: {epic_dungeons:,}  |  🐊 Sobekite: {sobekite:,}\n\n"
+                        f"💰 Monnaie\n"
+                        f"Total: {money}"  # Money is a string like "18p 128g", display as-is
                     )
                     
                     log_with_action(logger_char, "info", 
@@ -1111,9 +1298,13 @@ class CharacterSheetWindow(QDialog):
                 # Show which stats failed
                 error_msg = "Impossible de récupérer les statistiques :\n\n"
                 if not result_rvr['success']:
-                    error_msg += f"RvR Captures: {result_rvr.get('error', 'Erreur inconnue')}\n"
+                    error_msg += f"❌ RvR Captures: {result_rvr.get('error', 'Erreur inconnue')}\n"
                 if not result_pvp['success']:
-                    error_msg += f"PvP Stats: {result_pvp.get('error', 'Erreur inconnue')}"
+                    error_msg += f"❌ PvP Stats: {result_pvp.get('error', 'Erreur inconnue')}\n"
+                if not result_pve['success']:
+                    error_msg += f"❌ PvE Stats: {result_pve.get('error', 'Erreur inconnue')}\n"
+                if not result_wealth['success']:
+                    error_msg += f"❌ Wealth: {result_wealth.get('error', 'Erreur inconnue')}\n"
                 
                 QMessageBox.critical(
                     self,
@@ -1128,9 +1319,13 @@ class CharacterSheetWindow(QDialog):
             QMessageBox.critical(self, "Erreur", error_msg)
         
         finally:
-            # Re-enable button
-            self.update_rvr_button.setEnabled(True)
-            self.update_rvr_button.setText("🔄 Actualiser Stats RvR")
+            # Restaurer le texte du bouton
+            self.update_rvr_button.setText(lang.get("update_rvr_pvp_button"))
+            
+            # Re-enable button only if Herald scraping is not in progress
+            if not self.herald_scraping_in_progress:
+                self.update_rvr_button.setEnabled(True)
+                QApplication.processEvents()  # Forcer la mise à jour visuelle
     
     def update_from_herald(self):
         """Met à jour les données du personnage depuis Herald"""
@@ -1144,10 +1339,21 @@ class CharacterSheetWindow(QDialog):
             )
             return
         
+        # Marquer qu'un scraping Herald est en cours AVANT toute modification d'URL
+        self.herald_scraping_in_progress = True
+        
         # Check that l'URL commence par http:// or https://
         if not url.startswith(('http://', 'https://')):
             url = 'https://' + url
             self.herald_url_edit.setText(url)
+        
+        # Désactiver tous les boutons pendant la vérification Herald
+        self.update_herald_button.setEnabled(False)
+        self.open_herald_button.setEnabled(False)
+        self.update_rvr_button.setEnabled(False)
+        
+        # Forcer la mise à jour visuelle immédiate de l'interface
+        QApplication.processEvents()
         
         # Create une fenêtre of progression personnalisée with animation
         self.progress_dialog = QDialog(self)
@@ -1196,139 +1402,155 @@ class CharacterSheetWindow(QDialog):
     
     def _on_herald_scraping_finished(self, success, new_data, error_msg):
         """Callback appelé quand le scraping est terminé"""
+        # Marquer que le scraping Herald est terminé
+        self.herald_scraping_in_progress = False
+        
         # Fermer and supprimer the fenêtre of progression
         if hasattr(self, 'progress_dialog'):
             self.progress_dialog.close()
             self.progress_dialog.deleteLater()
             delattr(self, 'progress_dialog')
         
-        if not success:
-            QMessageBox.critical(
-                self,
-                lang.get("update_char_error"),
-                f"{lang.get('update_char_error')}: {error_msg}"
-            )
-            return
-        
-        # Afficher le dialogue de validation des changements
-        dialog = CharacterUpdateDialog(self, self.character_data, new_data, self.character_data['name'])
-        
-        if dialog.exec() == QDialog.Accepted:
-            selected_changes = dialog.get_selected_changes()
-            
-            if not selected_changes:
-                QMessageBox.information(
-                    self,
-                    lang.get("update_char_cancelled"),
-                    lang.get("update_char_no_changes")
-                )
-                return
-            
-            # Appliquer the changements sélectionnés directement in character_data
-            for field, value in selected_changes.items():
-                self.character_data[field] = value
-            
-            # Mettre à jour all the champs of l'interface for l'affichage immédiat
-            # (on reconstruit l'affichage complet plutôt that of mettre à jour champ par champ)
-            
-            # Level
-            if 'level' in selected_changes:
-                self.level_combo.setCurrentText(str(selected_changes['level']))
-            
-            # Class
-            if 'class' in selected_changes:
-                index = self.class_combo.findData(selected_changes['class'])
-                if index >= 0:
-                    self.class_combo.setCurrentIndex(index)
-            
-            # Race
-            if 'race' in selected_changes:
-                index = self.race_combo.findData(selected_changes['race'])
-                if index >= 0:
-                    self.race_combo.setCurrentIndex(index)
-            
-            # Guild
-            if 'guild' in selected_changes:
-                self.guild_edit.setText(selected_changes['guild'])
-            
-            # URL Herald
-            if 'url' in selected_changes:
-                self.herald_url_edit.setText(selected_changes['url'])
-            
-            # Realm Points et Realm Rank
-            if 'realm_points' in selected_changes or 'realm_rank' in selected_changes:
-                realm_points = self.character_data.get('realm_points', 0)
-                if isinstance(realm_points, str):
-                    realm_points = int(realm_points.replace(' ', '').replace('\xa0', '').replace(',', ''))
-                
-                # Mettre à jour l'affichage of the rang and of the titre
-                self.update_rank_display(realm_points)
-                
-                # Mettre à jour the dropdowns of rang/niveau
-                if hasattr(self.parent_app, 'data_manager'):
-                    rank_info = self.parent_app.data_manager.get_realm_rank_info(self.realm, realm_points)
-                    if rank_info:
-                        current_rank = rank_info['rank']
-                        level_str = rank_info['level']  # Format "XLY"
-                        level_match = re.search(r'L(\d+)', level_str)
-                        if level_match:
-                            current_level = int(level_match.group(1))
-                            
-                            # Mettre à jour the dropdown of rang
-                            self.rank_combo.blockSignals(True)
-                            self.rank_combo.setCurrentIndex(current_rank - 1)
-                            self.rank_combo.blockSignals(False)
-                            
-                            # Mettre à jour the dropdown of niveau
-                            self.update_level_dropdown(current_rank, current_level)
-            
-            # Save directement character_data (not via save_basic_info qui récupère depuis l'interface)
-            from Functions.character_manager import save_character
-            success, msg = save_character(self.character_data, allow_overwrite=True)
-            
+        # Utiliser try/finally pour garantir la réactivation des boutons
+        try:
             if not success:
                 QMessageBox.critical(
                     self,
-                    lang.get("error_title", default="Erreur"),
-                    f"Échec de la sauvegarde : {msg}"
+                    lang.get("update_char_error"),
+                    f"{lang.get('update_char_error')}: {error_msg}"
                 )
                 return
             
-            # Trigger backup after character modification
-            if hasattr(self.parent_app, 'backup_manager'):
-                try:
-                    char_name = self.character_data.get('name', 'Unknown')
-                    import sys
-                    import logging
-                    print(f"[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Skills/Armor) '{char_name}' - Backup with reason=Update")
-                    sys.stderr.write(f"[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Skills/Armor) '{char_name}' - Backup with reason=Update\n")
-                    sys.stderr.flush()
-                    logging.info(f"[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Skills/Armor) '{char_name}' - Backup with reason=Update")
-                    self.parent_app.backup_manager.backup_characters_force(reason="Update", character_name=char_name)
-                except Exception as e:
-                    print(f"[BACKUP_TRIGGER] Warning: Backup after skills/armor modification failed: {e}")
-                    sys.stderr.write(f"[BACKUP_TRIGGER] Warning: Backup after skills/armor modification failed: {e}\n")
-                    sys.stderr.flush()
-                    logging.warning(f"[BACKUP_TRIGGER] Backup after skills/armor modification failed: {e}")
+            # Afficher le dialogue de validation des changements
+            dialog = CharacterUpdateDialog(self, self.character_data, new_data, self.character_data['name'])
             
-            # Rafraîchir the liste des personnages in the fenêtre principale
-            if hasattr(self.parent_app, 'tree_manager'):
-                self.parent_app.tree_manager.refresh_character_list()
-            elif hasattr(self.parent_app, 'refresh_character_list'):
-                self.parent_app.refresh_character_list()
+            if dialog.exec() == QDialog.Accepted:
+                selected_changes = dialog.get_selected_changes()
+                
+                if not selected_changes:
+                    QMessageBox.information(
+                        self,
+                        lang.get("update_char_cancelled"),
+                        lang.get("update_char_no_changes")
+                    )
+                    return
+                
+                # Appliquer the changements sélectionnés directement in character_data
+                for field, value in selected_changes.items():
+                    self.character_data[field] = value
+                
+                # Mettre à jour all the champs of l'interface for l'affichage immédiat
+                # (on reconstruit l'affichage complet plutôt that of mettre à jour champ par champ)
+                
+                # Level
+                if 'level' in selected_changes:
+                    self.level_combo.setCurrentText(str(selected_changes['level']))
+                
+                # Class
+                if 'class' in selected_changes:
+                    index = self.class_combo.findData(selected_changes['class'])
+                    if index >= 0:
+                        self.class_combo.setCurrentIndex(index)
+                
+                # Race
+                if 'race' in selected_changes:
+                    index = self.race_combo.findData(selected_changes['race'])
+                    if index >= 0:
+                        self.race_combo.setCurrentIndex(index)
+                
+                # Guild
+                if 'guild' in selected_changes:
+                    self.guild_edit.setText(selected_changes['guild'])
+                
+                # URL Herald
+                if 'url' in selected_changes:
+                    self.herald_url_edit.setText(selected_changes['url'])
+                
+                # Realm Points et Realm Rank
+                if 'realm_points' in selected_changes or 'realm_rank' in selected_changes:
+                    realm_points = self.character_data.get('realm_points', 0)
+                    if isinstance(realm_points, str):
+                        realm_points = int(realm_points.replace(' ', '').replace('\xa0', '').replace(',', ''))
+                    
+                    # Mettre à jour l'affichage of the rang and of the titre
+                    self.update_rank_display(realm_points)
+                    
+                    # Mettre à jour the dropdowns of rang/niveau
+                    if hasattr(self.parent_app, 'data_manager'):
+                        rank_info = self.parent_app.data_manager.get_realm_rank_info(self.realm, realm_points)
+                        if rank_info:
+                            current_rank = rank_info['rank']
+                            level_str = rank_info['level']  # Format "XLY"
+                            level_match = re.search(r'L(\d+)', level_str)
+                            if level_match:
+                                current_level = int(level_match.group(1))
+                                
+                                # Mettre à jour the dropdown of rang
+                                self.rank_combo.blockSignals(True)
+                                self.rank_combo.setCurrentIndex(current_rank - 1)
+                                self.rank_combo.blockSignals(False)
+                                
+                                # Mettre à jour the dropdown of niveau
+                                self.update_level_dropdown(current_rank, current_level)
+                
+                # Save directement character_data (not via save_basic_info qui récupère depuis l'interface)
+                from Functions.character_manager import save_character
+                success, msg = save_character(self.character_data, allow_overwrite=True)
+                
+                if not success:
+                    QMessageBox.critical(
+                        self,
+                        lang.get("error_title", default="Erreur"),
+                        f"Échec de la sauvegarde : {msg}"
+                    )
+                    return
+                
+                # Trigger backup after character modification
+                if hasattr(self.parent_app, 'backup_manager'):
+                    try:
+                        char_name = self.character_data.get('name', 'Unknown')
+                        import sys
+                        import logging
+                        print(f"[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Skills/Armor) '{char_name}' - Backup with reason=Update")
+                        sys.stderr.write(f"[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Skills/Armor) '{char_name}' - Backup with reason=Update\n")
+                        sys.stderr.flush()
+                        logging.info(f"[BACKUP_TRIGGER] Action: CHARACTER MODIFICATION (Skills/Armor) '{char_name}' - Backup with reason=Update")
+                        self.parent_app.backup_manager.backup_characters_force(reason="Update", character_name=char_name)
+                    except Exception as e:
+                        print(f"[BACKUP_TRIGGER] Warning: Backup after skills/armor modification failed: {e}")
+                        sys.stderr.write(f"[BACKUP_TRIGGER] Warning: Backup after skills/armor modification failed: {e}\n")
+                        sys.stderr.flush()
+                        logging.warning(f"[BACKUP_TRIGGER] Backup after skills/armor modification failed: {e}")
+                
+                # Rafraîchir the liste des personnages in the fenêtre principale
+                if hasattr(self.parent_app, 'tree_manager'):
+                    self.parent_app.tree_manager.refresh_character_list()
+                elif hasattr(self.parent_app, 'refresh_character_list'):
+                    self.parent_app.refresh_character_list()
+                
+                # Message of succès
+                QMessageBox.information(
+                    self,
+                    lang.get("success_title", default="Succès"),
+                    lang.get("update_char_success")
+                )
+            else:
+                QMessageBox.information(
+                    self,
+                    lang.get("update_char_cancelled"),
+                    lang.get("update_char_cancelled")
+                )
+        
+        finally:
+            # Réactiver tous les boutons TOUJOURS, même en cas d'erreur ou de return anticipé
+            herald_url = self.herald_url_edit.text().strip()
             
-            # Message of succès
-            QMessageBox.information(
-                self,
-                lang.get("success_title", default="Succès"),
-                lang.get("update_char_success")
-            )
-        else:
-            QMessageBox.information(
-                self,
-                lang.get("update_char_cancelled"),
-                lang.get("update_char_cancelled")
-            )
+            self.update_herald_button.setEnabled(bool(herald_url))
+            self.open_herald_button.setEnabled(bool(herald_url))
+            self.update_rvr_button.setEnabled(bool(herald_url))
+            
+            # Forcer la mise à jour visuelle
+            QApplication.processEvents()
     
     def rename_character(self):
         """Renames the character with validation."""

@@ -1,163 +1,150 @@
-# v0.107 - Statistiques RvR/PvP Herald# v0.107 - Statistiques RvR/PvP Herald# v0.107 - Correction Crash Test Connexion Herald
+# v0.107 - Statistiques RvR/PvP/PvE Herald & Corrections UI
 
+## 🎯 Résumé (8 novembre 2025)
 
+✅ Statistiques complètes RvR/PvP/PvE/Wealth depuis Herald  
+✅ Section Statistiques réorganisée en sous-sections  
+✅ Bouton "Actualiser Stats" désactivé pendant validation Herald  
+✅ Affichage amélioré de la monnaie (taille réduite, gras conservé)  
+✅ Messages d'erreur détaillés (RvR/PvP/PvE/Wealth)  
+✅ Fix crash test connexion Herald  
 
-## 📊 Nouvelles Statistiques Herald (8 nov 2025)
+---
 
+## 📊 Nouvelles Statistiques Herald
 
-
-### ⚔️ Section RvR## 🎯 Résumé (8 nov 2025)##
-✅ 🗼 Tower Captures : Nombre de tours capturées  
-✅ 🏰 Keep Captures : Nombre de forteresses capturées 
-✅ 💎 Relic Captures : Nombre de reliques capturées  
-
-
+### ⚔️ Section RvR
+- 🗼 **Tower Captures** : Nombre de tours capturées  
+- 🏰 **Keep Captures** : Nombre de forteresses capturées  
+- 💎 **Relic Captures** : Nombre de reliques capturées  
 
 ### 🗡️ Section PvP avec Répartition par Royaume
-✅ ⚔️ Solo Kills : Total + détail Alb/Hib/Mid
-✅ 💀 Deathblows : Total + détail Alb/Hib/Mid  
-✅ 🎯 Kills : Total + détail Alb/Hib/Mid  
-✅ Couleurs par royaume (Rouge/Vert/Bleu)  
-✅ Affichage : `Kills: 4,715 → Alb: 1,811 | Hib: 34 | Mid: 2,870`
+- ⚔️ **Solo Kills** : Total + détail Alb/Hib/Mid  
+- 💀 **Deathblows** : Total + détail Alb/Hib/Mid  
+- 🎯 **Kills** : Total + détail Alb/Hib/Mid  
+- Couleurs par royaume : Rouge (Alb) / Vert (Hib) / Bleu (Mid)  
+- Affichage : `Kills: 4,715 → Alb: 1,811 | Hib: 34 | Mid: 2,870`
 
+### � Section PvE
+- 🐉 **Dragons** : Kills de dragons majeurs  
+- 👹 **Légions** : Kills de légionnaires  
+- 🐲 **Mini Dragons** : Kills de jeunes dragons  
+- ⚔️ **Epic Encounters** : Rencontres épiques  
+- 🏛️ **Epic Dungeons** : Donjons épiques complétés  
+- 🐊 **Sobekite** : Boss Sobekite
 
-### 🔄 Bouton "Actualiser les stats"## ✨ Nouvelles Fonctionnalités✅ Plus de crash de l'application lors d'erreurs de connexion  
-
-✅ Récupère RvR et PvP depuis le Herald  
-
-✅ Gestion des mises à jour partielles  
-
-✅ Messages explicatifs en cas d'erreur  
-
-✅ Support multilingue (FR/EN/DE)  ### 📊 Section Statistiques Réorganisée## 🧪 Script de Test Ajouté
-
-
-
-## 🔧 Améliorations Techniques✅ **Nouveau script** : `test_herald_connection_stability.py`  
-
-
-
-### 📥 Scraper Herald**3 sous-sections** :✅ Teste la stabilité de la connexion Herald (25 tests par défaut)  
-
-✅ Nouveau module `character_profile_scraper.py`  
-
-✅ Scraping onglets Characters et PvP du Herald  - ⚔️ **RvR** : Tower Captures, Keep Captures, Relic Captures✅ Statistiques détaillées : temps moyen/min/max, taux de succès  
-
-✅ Gestion séparateurs de milliers (espaces, virgules)  
-
-✅ Extraction par royaume (Albion/Hibernia/Midgard)  - 🗡️ **PvP** : Solo Kills, Deathblows, Kills (avec détails par royaume)✅ Détection de crashs et erreurs  
-
-
-
-### 🐛 Corrections- 🐉 **PvE** : Section préparée (à venir)✅ Nombre de tests personnalisable  
-
-✅ **Fix parsing nombres** : `"1 811"` → fonction `clean_number()` supprime espaces/virgules  
-
-✅ **Fix stats manquantes** : Messages précis, sauvegarde partielle, HTML debug  
-
-✅ **Personnages sans stats** : Messages informatifs au lieu d'erreurs  
-
-### 🔍 Statistiques RvR## Détails Techniques
-
-### 🎨 Interface
-
-✅ Fiche personnage redimensionnable  - 🗼 Tower Captures- **Problème** : Le test de connexion Herald pouvait crasher l'application comme la recherche
-
-✅ Section Statistiques organisée : RvR / PvP / PvE  
-
-✅ Valeurs totales en gras  - 🏰 Keep Captures  - **Cause** : Pas de bloc `finally` pour fermer le driver, appels `close()` manquants dans certains chemins d'erreur
-
-✅ Détails royaume indentés avec couleurs  
-
-✅ Layout 50/50 (Informations/Statistiques)  - 💎 Relic Captures- **Solution** : Pattern identique au fix de `search_herald_character()`
-
-✅ Traductions complètes (FR/EN/DE)  
-
-- **Impact** : Application stable, pas de crash lors des tests de connexion
-
-## 📦 Scripts de Test
-
-✅ `Scripts/test_pvp_stats.py` : Test scraping PvP isolé  ### ⚔️ Statistiques PvP avec Répartition par Royaume
-
-✅ `Scripts/test_rvr_captures.py` : Test scraping RvR isolé  - **Solo Kills** : Kills en 1v1
-
-- **Deathblows** : Coups de grâce
-
-## ⚠️ Notes- **Kills** : Total
-
-- Nécessite cookies Herald valides  
-
-- Personnage niveau 11+ recommandé  **Affichage détaillé** :
-
-- Navigateur visible minimisé (headless=False)```
-
-🎯 Kills: 4,715
-   → Alb: 1,811  |  Hib: 34  |  Mid: 2,870
-```
-
-**Couleurs par royaume** :
-- Alb (Rouge #C41E3A)
-- Hib (Vert #228B22)
-- Mid (Bleu #4169E1)
-
-### 🔄 Bouton "Actualiser les stats"
-- Récupère RvR et PvP depuis le Herald
-- Gestion des mises à jour partielles
-- Messages explicatifs en cas d'erreur
-
-### 🌐 Support Multilingue
-- 🇫🇷 Français
-- 🇬🇧 Anglais  
-- 🇩🇪 Allemand
+### 💰 Section Wealth
+- **Monnaie** : Affichage au format "18p 128g 45s 12c"  
+- Style : Taille 9pt en gras
 
 ---
 
-## 🔧 Améliorations
+## 🔄 Bouton "Actualiser les stats"
+
+### Fonctionnalités
+- Récupère RvR, PvP, PvE et Wealth depuis Herald  
+- Gestion des mises à jour partielles  
+- Messages d'erreur détaillés par catégorie  
+- Désactivé automatiquement pendant :
+  - Validation Herald au démarrage  
+  - Scraping Herald en cours  
+  - Récupération des statistiques  
+
+### État du Bouton
+- ⏳ **Grisé au démarrage** : Validation Herald en cours  
+- ✅ **Activé** : Herald accessible et URL configurée  
+- 🔄 **"⏳ Récupération..."** : Pendant le scraping  
+- ✅ **Réactivé** : Après succès ou erreur  
+
+---
+
+## 🎨 Améliorations Interface
+
+### Organisation Statistiques
+**3 sous-sections claires** :
+- ⚔️ **RvR** : Tower/Keep/Relic Captures  
+- 🗡️ **PvP** : Solo Kills, Deathblows, Kills (avec détails royaume)  
+- 🐉 **PvE** : Dragons, Légions, Epic content  
+
+### Affichage
+- Fiche personnage redimensionnable  
+- Layout 50/50 (Informations / Statistiques)  
+- Valeurs totales en gras  
+- Détails royaume indentés avec couleurs  
+- Monnaie en 9pt gras  
+
+---
+
+## � Corrections
+
+### Fix Bouton "Actualiser Stats" Toujours Actif
+**Problème** : Bouton restait actif pendant :
+- Validation Herald au démarrage  
+- Scraping Herald (dialogue de validation)  
+- Multiples points de sortie réactivaient le bouton  
+
+**Solution** :
+- Flag `herald_scraping_in_progress` pour suivre l'état  
+- Vérification validation Herald terminée avant activation  
+- Bloc `try/finally` garantissant réactivation en toutes circonstances  
+- Signal de fin de validation pour réactivation automatique  
+
+### Fix Messages d'Erreur Incomplets
+**Avant** : Seuls RvR et PvP affichés en cas d'erreur  
+**Maintenant** : Affichage de TOUTES les erreurs (RvR/PvP/PvE/Wealth)
+
+### Fix Affichage Monnaie
+**Avant** : Taille 11pt  
+**Maintenant** : Taille 9pt (gras conservé)
+
+### Fix Formatage Monnaie
+**Problème** : TypeError avec `f"{money:,}"` sur string "18p 128g"  
+**Solution** : Affichage direct `str(money)` sans formatage numérique
+
+### Fix Crash Test Connexion Herald
+**Problème** : Application crashait lors d'erreurs de connexion  
+**Cause** : Pas de bloc `finally` pour fermer le driver  
+**Solution** : Pattern identique au fix de `search_herald_character()`
+
+---
+
+## 🔧 Améliorations Techniques
 
 ### Scraping Herald
-- Nouveau module `character_profile_scraper.py`
-- Gestion des séparateurs de milliers (espaces, virgules)
-- Extraction par royaume (Alb/Hib/Mid)
-- Gestion d'erreurs robuste
+- Nouveau module `character_profile_scraper.py`  
+- 4 fonctions de scraping : RvR, PvP, PvE, Wealth  
+- Gestion des séparateurs de milliers  
+- Extraction par royaume (Alb/Hib/Mid)  
+- Gestion d'erreurs robuste avec messages détaillés  
 
-### Interface
-- Fiche personnage redimensionnable
-- Sections organisées avec icônes
-- Valeurs totales en gras
-- Layout 50/50 (Informations/Statistiques)
-
----
-
-## 🐛 Corrections
-
-### Fix Parsing des Nombres
-**Problème** : Erreur sur "1 811" (espaces dans les nombres)  
-**Solution** : Fonction `clean_number()` supprimant espaces, virgules et `\xa0`
-
-### Fix Stats Manquantes
-**Avant** : Erreur générique  
-**Maintenant** : Message précis + sauvegarde des stats disponibles + HTML debug
+### Gestion État Boutons
+- Flag `herald_scraping_in_progress`  
+- Connexion aux signaux de validation  
+- `processEvents()` pour mise à jour visuelle immédiate  
+- Protection contre réactivation prématurée  
 
 ---
 
 ## 📦 Scripts de Test
 
 ```bash
-python Scripts/test_pvp_stats.py
+python Scripts/test_pvp_stats.py      # Test PvP isolé
+python Scripts/test_rvr_captures.py   # Test RvR isolé
+python Scripts/test_herald_connection_stability.py  # Test stabilité (25 tests)
 ```
 
 ---
 
 ## ⚠️ Prérequis
 
-- Cookies Herald valides
-- Personnage niveau 11+
-- Stats PvP disponibles sur Herald
+- Cookies Herald valides  
+- Personnage niveau 11+ (pour stats PvP)  
+- URL Herald configurée dans la fiche personnage  
 
 ---
 
-## 🔜 Prochaines Étapes
+## 🌐 Support Multilingue
 
-- Section PvE (Quêtes, Donjons, Crafting)
-- Graphiques d'évolution
-- Comparaison entre personnages
+- 🇫🇷 Français  
+- 🇬🇧 Anglais  
+- 🇩🇪 Allemand

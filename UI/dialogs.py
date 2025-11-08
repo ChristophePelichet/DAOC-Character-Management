@@ -438,11 +438,20 @@ class CharacterSheetWindow(QDialog):
         wealth_subgroup.setLayout(wealth_layout)
         statistics_layout.addWidget(wealth_subgroup)
         
-        # Update button for RvR/PvP/PvE/Wealth stats (below Wealth section)
+        # Horizontal layout for buttons (Update Stats + Info)
+        buttons_layout = QHBoxLayout()
+        
+        # Update button for RvR/PvP/PvE/Wealth stats
         self.update_rvr_button = QPushButton(lang.get("update_rvr_pvp_button"))
         self.update_rvr_button.setToolTip(lang.get("update_rvr_pvp_tooltip"))
         self.update_rvr_button.clicked.connect(self.update_rvr_stats)
         self.update_rvr_button.setMaximumWidth(200)
+        
+        # Info button for statistics explanation
+        self.stats_info_button = QPushButton(lang.get("stats_info_button"))
+        self.stats_info_button.setToolTip(lang.get("stats_info_tooltip"))
+        self.stats_info_button.clicked.connect(self.show_stats_info)
+        self.stats_info_button.setMaximumWidth(150)
         
         # Disable button if no Herald URL or if Herald validation is in progress
         herald_url = self.character_data.get('url', '').strip()
@@ -460,7 +469,11 @@ class CharacterSheetWindow(QDialog):
                 if thread:
                     thread.status_updated.connect(self._on_herald_validation_finished)
         
-        statistics_layout.addWidget(self.update_rvr_button)
+        buttons_layout.addWidget(self.update_rvr_button)
+        buttons_layout.addWidget(self.stats_info_button)
+        buttons_layout.addStretch()  # Push buttons to the left
+        
+        statistics_layout.addLayout(buttons_layout)
         
         statistics_group.setLayout(statistics_layout)
         
@@ -950,6 +963,14 @@ class CharacterSheetWindow(QDialog):
         if accessible and herald_url:
             self.update_rvr_button.setEnabled(True)
             self.update_rvr_button.setToolTip(lang.get("update_rvr_pvp_tooltip"))
+    
+    def show_stats_info(self):
+        """Affiche une fenêtre d'information sur les statistiques"""
+        QMessageBox.information(
+            self,
+            lang.get("stats_info_title"),
+            lang.get("stats_info_message")
+        )
     
     def open_herald_url(self):
         """Ouvre l'URL du Herald dans le navigateur avec les cookies"""

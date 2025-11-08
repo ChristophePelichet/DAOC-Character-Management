@@ -16,6 +16,7 @@ Cette version apporte les **statistiques complètes Herald** (RvR/PvP/PvE/Wealth
 - ✅ Affichage Wealth avec format platine/or/argent/cuivre
 - ✅ Section Statistiques réorganisée en 3 sous-sections claires
 - ✅ Gestion intelligente de l'état du bouton "Actualiser Stats"
+- ✅ **Nouveau : Bouton "Informations" explicatif sur les statistiques**
 
 ### Corrections Majeures
 - ✅ Fix crash test connexion Herald
@@ -676,6 +677,119 @@ module_logger.warning(f"Erreur lors de la fermeture du scraper: {e}")
 
 ---
 
+## ℹ️ Nouveau : Bouton "Informations" sur les Statistiques
+
+### Contexte Utilisateur
+
+**Besoin** : Les utilisateurs ne savaient pas que les statistiques affichées sont cumulatives depuis la création du personnage et non par saison.
+
+**Solution** : Ajout d'un bouton "Informations" explicatif placé à côté du bouton "Actualiser Stats".
+
+### Implémentation
+
+**Interface Utilisateur (UI/dialogs.py, lignes ~440-475)** :
+
+```python
+# Layout horizontal pour les boutons
+buttons_layout = QHBoxLayout()
+
+# Bouton Actualiser Stats (existant)
+self.update_rvr_button = QPushButton(lang.get("update_rvr_pvp_button"))
+self.update_rvr_button.setMaximumWidth(200)
+
+# Nouveau bouton Informations
+self.stats_info_button = QPushButton(lang.get("stats_info_button"))  # "ℹ️ Informations"
+self.stats_info_button.setToolTip(lang.get("stats_info_tooltip"))
+self.stats_info_button.clicked.connect(self.show_stats_info)
+self.stats_info_button.setMaximumWidth(150)
+
+buttons_layout.addWidget(self.update_rvr_button)
+buttons_layout.addWidget(self.stats_info_button)
+buttons_layout.addStretch()  # Aligne les boutons à gauche
+```
+
+**Méthode d'Affichage (UI/dialogs.py, lignes ~960-970)** :
+
+```python
+def show_stats_info(self):
+    """Affiche une fenêtre d'information sur les statistiques"""
+    QMessageBox.information(
+        self,
+        lang.get("stats_info_title"),
+        lang.get("stats_info_message")
+    )
+```
+
+### Traductions Multilingues
+
+**Français (Language/fr.json)** :
+```json
+{
+    "stats_info_button": "ℹ️ Informations",
+    "stats_info_tooltip": "Informations sur les statistiques affichées",
+    "stats_info_title": "À propos des statistiques",
+    "stats_info_message": "ℹ️ Information importante\n\nLes statistiques affichées (RvR, PvP, PvE et Monnaie) sont cumulatives depuis la création du personnage.\n\n📊 Données globales :\n• Total depuis la création du personnage\n• Pas de réinitialisation par saison\n• Historique complet de toutes les actions\n\n🌐 Source des données :\nLe site Herald d'Eden ne fournit pas les statistiques par saison, uniquement le cumul total de toute l'existence du personnage.\n\nCela signifie que les valeurs affichées représentent l'ensemble de votre parcours sur ce personnage, toutes saisons confondues."
+}
+```
+
+**Anglais (Language/en.json)** :
+```json
+{
+    "stats_info_button": "ℹ️ Information",
+    "stats_info_tooltip": "Information about displayed statistics",
+    "stats_info_title": "About Statistics",
+    "stats_info_message": "ℹ️ Important Information\n\nThe displayed statistics (RvR, PvP, PvE and Wealth) are cumulative since character creation.\n\n📊 Global Data:\n• Total since character creation\n• No reset per season\n• Complete history of all actions\n\n🌐 Data Source:\nEden's Herald website does not provide statistics per season, only the total cumulative values for the character's entire existence.\n\nThis means that the displayed values represent your entire journey on this character, across all seasons."
+}
+```
+
+**Allemand (Language/de.json)** :
+```json
+{
+    "stats_info_button": "ℹ️ Informationen",
+    "stats_info_tooltip": "Informationen über angezeigte Statistiken",
+    "stats_info_title": "Über Statistiken",
+    "stats_info_message": "ℹ️ Wichtige Information\n\nDie angezeigten Statistiken (RvR, PvP, PvE und Vermögen) sind kumulativ seit der Charaktererstellung.\n\n📊 Globale Daten:\n• Gesamt seit Charaktererstellung\n• Keine Zurücksetzung pro Saison\n• Vollständige Historie aller Aktionen\n\n🌐 Datenquelle:\nEdens Herald-Website liefert keine Statistiken pro Saison, sondern nur die gesamten kumulativen Werte für die gesamte Existenz des Charakters.\n\nDies bedeutet, dass die angezeigten Werte Ihre gesamte Reise auf diesem Charakter repräsentieren, über alle Saisons hinweg."
+}
+```
+
+### Avantages Utilisateur
+
+**Clarté** :
+- ✅ Les utilisateurs comprennent immédiatement la nature cumulative des stats
+- ✅ Évite les confusions avec d'autres jeux qui réinitialisent par saison
+- ✅ Explique pourquoi pas de stats saisonnières disponibles
+
+**Accessibilité** :
+- ✅ Bouton toujours visible et accessible
+- ✅ Icône ℹ️ universellement reconnue
+- ✅ Tooltip explicatif au survol
+
+**Multilingue** :
+- ✅ Message traduit en FR/EN/DE
+- ✅ Même niveau de détail dans toutes les langues
+
+### Interface Visuelle
+
+**Disposition** :
+```
+┌────────────────────────────────────────────┐
+│  📊 Statistiques                           │
+├────────────────────────────────────────────┤
+│  ⚔️ RvR                                    │
+│  • Tower Captures: 142                     │
+│  • Keep Captures: 28                       │
+│  • Relic Captures: 3                       │
+│                                            │
+│  🗡️ PvP                                    │
+│  • Solo Kills: 1,234                       │
+│  ...                                       │
+│                                            │
+│  [🔄 Actualiser Stats] [ℹ️ Informations]   │
+└────────────────────────────────────────────┘
+```
+
+---
+
 ## 🔧 Améliorations Techniques
 
 ### Architecture de Gestion d'État des Boutons
@@ -914,21 +1028,28 @@ if hasattr(self.parent_app, 'ui_manager'):
 
 ### Fichiers Modifiés
 
-**UI/dialogs.py** (MODIFICATIONS MAJEURES - 15+ sections, ~200 lignes) :
+**UI/dialogs.py** (MODIFICATIONS MAJEURES - 16+ sections, ~220 lignes) :
 
 | Section | Lignes | Description | Impact |
 |---------|--------|-------------|--------|
 | Init flag | 66 | `herald_scraping_in_progress = False` | État global |
 | Money style | 429 | Font 11pt → 9pt | UI |
 | Money display | 430, 1146 | `f"{money:,}"` → `str(money)` | Bugfix TypeError |
-| Button init | 447-462 | Validation startup check | Bugfix |
+| Button init | 447-475 | Validation startup check + bouton info | Feature + Bugfix |
 | URL change | 918-931 | Flag check, debug cleanup | Bugfix + Clean |
 | Validation check | 933-949 | Nouvelle méthode `_is_herald_validation_done()` | Feature |
 | Validation callback | 951-958 | Nouvelle méthode `_on_herald_validation_finished()` | Feature |
+| **Stats info** | **960-970** | **Nouvelle méthode `show_stats_info()`** | **Feature** |
 | Error messages | 1298-1309 | 4 scrapers (était 2) | Bugfix |
 | Stats update finally | 1320-1327 | Flag check, debug cleanup | Bugfix + Clean |
 | Herald update start | 1340-1354 | Flag avant setText, debug cleanup | Bugfix + Clean |
 | Herald scraping done | 1400-1548 | try/finally pattern complet | Bugfix majeur |
+
+**Language/fr.json, en.json, de.json** (Nouvelles Clés) :
+- `stats_info_button` : "ℹ️ Informations" / "ℹ️ Information" / "ℹ️ Informationen"
+- `stats_info_tooltip` : Tooltip du bouton
+- `stats_info_title` : Titre de la fenêtre d'information
+- `stats_info_message` : Message complet explicatif (multiligne)
 
 **Functions/eden_scraper.py** (Hérité v0.106) :
 - `test_eden_connection()` : Ajout bloc `finally` pour fermeture driver

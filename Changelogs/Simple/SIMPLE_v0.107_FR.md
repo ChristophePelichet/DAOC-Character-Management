@@ -5,6 +5,7 @@
 ✅ Statistiques complètes RvR/PvP/PvE/Wealth depuis Herald  
 ✅ Section Statistiques réorganisée en sous-sections  
 ✅ Bouton "Actualiser Stats" désactivé pendant validation Herald  
+✅ **Nouveau : Bouton "Informations" sur les statistiques**  
 ✅ Affichage amélioré de la monnaie (taille réduite, gras conservé)  
 ✅ Messages d'erreur détaillés (RvR/PvP/PvE/Wealth)  
 ✅ Fix crash test connexion Herald  
@@ -36,6 +37,22 @@
 ### 💰 Section Wealth
 - **Monnaie** : Affichage au format "18p 128g 45s 12c"  
 - Style : Taille 9pt en gras
+
+---
+
+## ℹ️ Nouveau : Bouton "Informations"
+
+### Fonctionnalité
+- **Bouton ℹ️** : Placé à côté du bouton "Actualiser Stats"  
+- **Message explicatif** : Informe que les statistiques sont cumulatives depuis la création du personnage  
+- **Clarification importante** : Le Herald d'Eden ne fournit pas de stats par saison, uniquement le total global  
+- **Multilingue** : Disponible en FR/EN/DE
+
+### Contenu du message
+- 📊 Données globales depuis la création du personnage  
+- 🚫 Pas de réinitialisation par saison  
+- 📖 Historique complet de toutes les actions  
+- 🌐 Explication de la source des données (Herald Eden)
 
 ---
 

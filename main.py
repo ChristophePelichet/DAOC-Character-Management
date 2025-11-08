@@ -48,7 +48,7 @@ from UI.dialogs import ColumnsConfigDialog, ConfigurationDialog
 setup_logging()
 
 APP_NAME = "DAOC Character Manager"
-APP_VERSION = "0.106"
+APP_VERSION = "0.107"
 
 
 def global_exception_handler(exc_type, exc_value, exc_traceback):

@@ -294,40 +294,46 @@ if not os.path.exists(char_folder):
 
 ---
 
-## ⚡ Optimisation Herald Performance (7 novembre 2025)
+## ⚡ Optimisation Herald Performance - Phase 1 (8 novembre 2025)
 
 ### Réduction des Timeouts Herald
 
 **Contexte** :
 - Analyse complète des 21 occurrences de `time.sleep()` dans le code Herald
-- Tests de 2 approches : agressive (Phase 1) et conservatrice (Phase 1 bis)
-- Documentation complète du processus dans `HERALD_TIMEOUTS_ANALYSIS.md`
+- Crash WebDriver corrigé (7 nov) : fermeture propre dans tous les chemins d'erreur
+- Phase 1 aggressive validée après correction du bug de cleanup
+- Documentation complète : `HERALD_TIMEOUTS_ANALYSIS.md` + `HERALD_PHASE1_TEST_REPORT.md`
 
-**Phase 1 bis - Solution retenue** :
+**Phase 1 - Solution adoptée** :
 ```python
 # eden_scraper.py
+time.sleep(1)  # Homepage (avant: 2s) → -1s
+# SUPPRIMÉ      # Sleep avant refresh (avant: 3s) → -3s ★ GAIN MAJEUR
 time.sleep(2)  # Refresh (avant: 3s) → -1s
-time.sleep(3)  # Herald load (avant: 4s) → -1s
+time.sleep(2)  # Herald load (avant: 4s) → -2s
 
 # cookie_manager.py  
+time.sleep(1)  # Homepage test (avant: 2s) → -1s
 time.sleep(2)  # Refresh test (avant: 3s) → -1s
-time.sleep(4)  # Herald test (avant: 5s) → -1s
+time.sleep(3)  # Herald test (avant: 5s) → -2s
 ```
 
-**Performance** :
-- Test connexion Herald : 11s → 9s (-18%)
-- Recherche personnage : 12s → 10s (-17%)
-- Import personnage : 15s → 13s (-13%)
-- **Gain global : -4 secondes par opération Herald**
-
-**Phase 1 aggressive - Abandonnée** :
-- Tentative de réduction agressive (-9 secondes)
-- Crash reproduit : QThread destroyed, multiples DevTools
-- Cause : Herald load 4s → 2s trop court, page non chargée
-- Leçons : Ne jamais supprimer de sleep, max -25% par timeout
+**Performance validée (25/25 tests réussis)** :
+- **Recherche personnage : 26.5s → 21.9s (-17.4%)**
+- **0 crash** (WebDriver cleanup fix appliqué)
+- Durée totale 25 recherches : 662.3s → 546.4s (-1.9 min)
+- **Gain par recherche : -4.6 secondes**
+- Stabilité : 100% (écart type 0.3s, plage 18.7-19.6s)
 
 **Fichiers modifiés** :
-- `Functions/eden_scraper.py` (lignes 115, 142, 147)
+- `Functions/eden_scraper.py` (lignes 115, 138, 142, 147)
+- `Functions/cookie_manager.py` (lignes 645, 660, 665)
+- `Scripts/test_herald_stability.py` (script de test automatisé)
+
+**Pourquoi ça marche maintenant** :
+- Phase 1 échouait avant à cause du bug WebDriver (crash QThread)
+- Bug corrigé dans commit 9e84494 (7 nov) : `scraper.close()` dans tous les chemins
+- Phase 1 agressive est sûre avec une gestion propre des ressources
 - `Functions/cookie_manager.py` (lignes 660, 665)
 - `.gitignore` (exclusion `Scripts/debug_herald_page.html`)
 - `HERALD_TIMEOUTS_ANALYSIS.md` (documentation complète)

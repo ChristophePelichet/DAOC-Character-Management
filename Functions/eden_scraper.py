@@ -6,8 +6,6 @@ Eden Scraper Manager - Gestion du scraping des données du Herald Eden-DAOC
 Intégré depuis eden_scraper/ pour centraliser la gestion
 """
 
-import logging
-import pickle
 import os
 import traceback
 from datetime import datetime
@@ -19,9 +17,6 @@ from .logging_manager import get_logger, log_with_action, LOGGER_EDEN
 # Logger au niveau du module pour les fonctions qui ne sont pas dans la classe
 module_logger = get_logger(LOGGER_EDEN)
 
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup
 import json
 
@@ -56,13 +51,13 @@ class EdenScraper:
             bool: True si l'initialisation a réussi
         """
         try:
-            # Lire la configuration pour le navigateur préféré
+            # Read configuration for preferred browser
             from Functions.config_manager import config
             preferred_browser = config.get('preferred_browser', 'Chrome')
             allow_download = config.get('allow_browser_download', False)
             
             # Utiliser la fonction helper du cookie_manager
-            # (qui gère le fallback Chrome → Edge → Firefox)
+            # (which handles Chrome → Edge → Firefox fallback)
             driver, browser_name = self.cookie_manager._initialize_browser_driver(
                 headless=headless,
                 preferred_browser=preferred_browser,
@@ -72,7 +67,7 @@ class EdenScraper:
             if driver:
                 self.driver = driver
                 
-                # Minimiser la fenêtre du navigateur si pas en mode headless
+                # Minimize browser window if not in headless mode
                 if not headless:
                     try:
                         self.driver.minimize_window()
@@ -107,21 +102,21 @@ class EdenScraper:
                 self.logger.error("❌ Aucun cookie disponible", extra={"action": "COOKIES"})
                 return False
             
-            # Étape 1: Naviguer vers le domaine racine
+            # Step 1: Navigate to root domain
             self.logger.info("🌐 Étape 1: Navigation vers https://eden-daoc.net/", extra={"action": "COOKIES"})
             self.driver.get("https://eden-daoc.net/")
             
-            # Attendre que la page soit chargée
+            # Wait for page to load
             import time
             time.sleep(1)  # PHASE 1: Optimisé 2s → 1s
             
-            # Étape 2: Ajouter les cookies
+            # Step 2: Add cookies
             self.logger.info(f"🍪 Étape 2: Ajout de {len(cookies_list)} cookies...", extra={"action": "COOKIES"})
             cookies_added = 0
             for cookie in cookies_list:
                 try:
-                    # Certains cookies peuvent avoir des attributs qui causent des problèmes
-                    # On retire 'expiry' si elle est trop dans le passé
+                    # Some cookies may have problematic attributes
+                    # Remove 'expiry' if it's too far in the past
                     if 'expiry' in cookie:
                         import time as time_module
                         if cookie['expiry'] < time_module.time():
@@ -134,17 +129,17 @@ class EdenScraper:
             
             self.logger.info(f"✅ {cookies_added}/{len(cookies_list)} cookies chargés dans le driver", extra={"action": "COOKIES"})
             
-            # Étape 3: Rafraîchir la page d'accueil (PHASE 1: sleep supprimé)
+            # Step 3: Refresh homepage (PHASE 1: sleep removed)
             self.logger.info("🔄 Rafraîchissement de la page d'accueil pour activer la session...", extra={"action": "COOKIES"})
             self.driver.refresh()
             time.sleep(2)  # PHASE 1: Optimisé 3s → 2s
             
-            # Étape 4: Naviguer vers le Herald pour tester la session
+            # Step 4: Navigate to Herald to test session
             self.logger.info("🔍 Étape 4: Navigation vers le Herald (test de session)...", extra={"action": "COOKIES"})
             self.driver.get("https://eden-daoc.net/herald")
             time.sleep(2)  # PHASE 1: Optimisé 4s → 2s
             
-            # Vérifier si on est connecté
+            # Check if connected
             current_url = self.driver.current_url
             html_content = self.driver.page_source
             
@@ -161,9 +156,9 @@ class EdenScraper:
             except:
                 pass
             
-            # DÉTECTION SIMPLE ET FIABLE:
-            # Si on a le message "not available" → Pas connecté
-            # Sinon → Connecté (c'est la seule indication vraiment fiable)
+            # SIMPLE AND RELIABLE DETECTION:
+            # If we have "not available" message → Not connected
+            # Otherwise → Connected (this is the only really reliable indicator)
             error_message = 'The requested page "herald" is not available.'
             has_error = error_message in html_content
             
@@ -214,13 +209,13 @@ class EdenScraper:
             import time
             time.sleep(2)
             
-            # Récupérer le HTML
+            # Retrieve HTML
             html_content = self.driver.page_source
             
             # Parser avec BeautifulSoup
             soup = BeautifulSoup(html_content, 'html.parser')
             
-            # Extraire les données
+            # Extract data
             data = self._extract_character_data(soup)
             data['character_name'] = character_name
             data['scraped_at'] = datetime.now().isoformat()
@@ -266,7 +261,7 @@ class EdenScraper:
             import time
             time.sleep(2)
             
-            # Récupérer le HTML
+            # Retrieve HTML
             html_content = self.driver.page_source
             
             # Parser avec BeautifulSoup
@@ -324,13 +319,13 @@ class EdenScraper:
         """
         characters = []
         
-        # Trouver le tableau des résultats
+        # Find results table
         for table in soup.find_all('table'):
             rows = table.find_all('tr')
             if len(rows) > 1:
                 headers = [th.get_text(strip=True) for th in rows[0].find_all(['th', 'td'])]
                 
-                # Vérifier si c'est le bon tableau (contient Name, Class, etc.)
+                # Check if it's the right table (contains Name, Class, etc.)
                 if 'Name' in headers or 'Nom' in headers:
                     name_idx = headers.index('Name') if 'Name' in headers else headers.index('Nom')
                     
@@ -346,7 +341,7 @@ class EdenScraper:
                             char_url = ""
                             if link and link.get('href'):
                                 href = link.get('href')
-                                # Construire l'URL complète si c'est un lien relatif
+                                # Build complete URL if it's a relative link
                                 if href.startswith('?'):
                                     char_url = f"https://eden-daoc.net/herald{href}"
                                 elif href.startswith('/'):
@@ -431,13 +426,12 @@ def search_herald_character(character_name, realm_filter=""):
         tuple: (success: bool, message: str, json_path: str)
     """
     from Functions.cookie_manager import CookieManager
-    from Functions.config_manager import get_config_dir
     import time
     
     try:
         module_logger.info(f"Début de la recherche Herald pour: {character_name}", extra={"action": "SEARCH"})
         
-        # Vérifier les cookies
+        # Check cookies
         cookie_manager = CookieManager()
         
         if not cookie_manager.cookie_exists():
@@ -481,7 +475,7 @@ def search_herald_character(character_name, realm_filter=""):
         # Naviguer vers la page de recherche
         scraper.driver.get(search_url)
         
-        # Attendre que la page se charge complètement
+        # Wait for page to fully load
         module_logger.info("Attente du chargement de la page de recherche (5 secondes)...", extra={"action": "SEARCH"})
         time.sleep(5)
         
@@ -491,7 +485,7 @@ def search_herald_character(character_name, realm_filter=""):
         
         module_logger.info(f"Page chargée - Taille: {len(page_source)} caractères", extra={"action": "SEARCH"})
         
-        # Extraire les données de recherche
+        # Extract data de recherche
         search_data = {
             'character_name': character_name,
             'search_url': search_url,
@@ -499,7 +493,7 @@ def search_herald_character(character_name, realm_filter=""):
             'results': []
         }
         
-        # Chercher les résultats dans les tableaux
+        # Search results in tables
         tables = soup.find_all('table')
         for table in tables:
             rows = table.find_all('tr')
@@ -529,7 +523,7 @@ def search_herald_character(character_name, realm_filter=""):
         
         module_logger.info(f"Dossier temporaire: {temp_dir}", extra={"action": "CLEANUP"})
         
-        # Nettoyer les anciens fichiers avant de créer les nouveaux
+        # Clean old files before creating new ones
         old_files_list = list(temp_dir.glob("*.json"))
         if old_files_list:
             module_logger.info(f"Nettoyage de {len(old_files_list)} fichier(s) ancien(s)...", extra={"action": "CLEANUP"})
@@ -551,10 +545,10 @@ def search_herald_character(character_name, realm_filter=""):
         with open(json_path, 'w', encoding='utf-8') as f:
             json.dump(search_data, f, indent=2, ensure_ascii=False)
         
-        # Extraire les personnages formatés
+        # Extract formatted characters
         characters = []
         for result in search_data['results']:
-            # Vérifier si c'est une ligne de personnage
+            # Check if it's a character row
             if (result.get('col_1') and 
                 result.get('col_3') and 
                 len(result.get('col_1', '')) > 0 and
@@ -575,7 +569,7 @@ def search_herald_character(character_name, realm_filter=""):
                 url = ""
                 if 'col_1_links' in result and result['col_1_links']:
                     href = result['col_1_links'][0]
-                    # Construire l'URL complète
+                    # Build complete URL
                     if href.startswith('?'):
                         url = f"https://eden-daoc.net/herald{href}"
                     elif href.startswith('/'):
@@ -585,7 +579,7 @@ def search_herald_character(character_name, realm_filter=""):
                     else:
                         url = href
                 else:
-                    # Fallback sur l'URL construite si pas de lien trouvé
+                    # Fallback to built URL if no link found
                     clean_name = name.split()[0]
                     url = f"https://eden-daoc.net/herald?n=player&k={clean_name}"
                 
@@ -607,7 +601,7 @@ def search_herald_character(character_name, realm_filter=""):
                     })
                     module_logger.debug(f"Personnage extrait: {name} - URL: {url}", extra={"action": "PARSE"})
         
-        # Sauvegarder les personnages formatés dans le même dossier temp
+        # Save formatted characters in same temp folder
         characters_filename = f"characters_{character_name}_{timestamp}.json"
         characters_path = temp_dir / characters_filename
         
@@ -672,7 +666,7 @@ def scrape_character_from_url(character_url, cookie_manager):
         if not success:
             return False, None, message
         
-        # Charger les résultats
+        # Load results
         if not characters_file or not Path(characters_file).exists():
             return False, None, "Aucun fichier de résultats trouvé"
         
@@ -699,7 +693,7 @@ def scrape_character_from_url(character_url, cookie_manager):
         if not target_char:
             return False, None, "Personnage non trouvé dans les résultats"
         
-        # Normaliser les données pour correspondre au format attendu
+        # Normalize data to match expected format
         normalized_data = _normalize_herald_data(target_char)
         
         module_logger.info(f"Données récupérées pour: {normalized_data.get('name', 'Unknown')}", extra={"action": "UPDATE"})
@@ -745,7 +739,7 @@ def _normalize_herald_data(char_data):
         'Warlock': 'Midgard', 'Warrior': 'Midgard'
     }
     
-    # Extraire la classe et déterminer le royaume
+    # Extract class and determine realm
     char_class = char_data.get('class', '')
     realm = class_to_realm.get(char_class, 'Unknown')
     
@@ -766,7 +760,7 @@ def _normalize_herald_data(char_data):
         except:
             level = 1
     
-    # Données normalisées
+    # Normalized data
     # ATTENTION : Dans le JSON Herald :
     #   - realm_rank = titre texte (ex: "Stormur Vakten")  
     #   - realm_level = code (ex: "5L2")
@@ -865,5 +859,3 @@ def _parse_character_herald_data(raw_data):
     except Exception as e:
         module_logger.error(f"❌ Erreur lors du parsing des données: {e}", extra={"action": "SCRAPE"})
         return None
-
-

@@ -9,7 +9,6 @@ import logging
 # Add parent directory to Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from Functions.config_manager import config
 from Functions.path_manager import get_armor_dir, ensure_armor_dir
 from Functions.armor_manager import ArmorManager
 

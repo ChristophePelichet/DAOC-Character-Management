@@ -64,7 +64,7 @@ def display_search_result(file_path):
         print(f"📅 Date: {data.get('timestamp', 'N/A')}")
         print(f"📊 Résultats: {len(data.get('results', []))} trouvé(s)")
         
-        # Afficher les résultats
+        # Afficher the Results
         results = data.get('results', [])
         
         if not results:
@@ -81,7 +81,7 @@ def display_search_result(file_path):
             
             # Afficher tous les champs
             for key, value in result.items():
-                if not key.endswith('_links'):  # Ne pas afficher les liens séparément
+                if not key.endswith('_links'):  # Ne not afficher the liens séparément
                     print(f"  {key}: {value}")
                 else:
                     # Afficher les liens
@@ -168,7 +168,7 @@ def main():
     print("🔍 VISUALISEUR DE RÉSULTATS DE RECHERCHE HERALD")
     print("=" * 80)
     
-    # Si un fichier est spécifié en argument
+    # if un File est spécifié en argument
     if len(sys.argv) > 1:
         file_path = Path(sys.argv[1])
         if file_path.exists():

@@ -87,7 +87,7 @@ class CharacterApp(QMainWindow):
         self.setWindowTitle(lang.get("window_title"))
         self.resize(550, 400)
         
-        # Initialisation des managers de données
+        # Initialization des managers of Data
         self.data_manager = DataManager()
         self.available_languages = get_available_languages()
         
@@ -136,7 +136,7 @@ class CharacterApp(QMainWindow):
         self.ui_manager.create_menu_bar()
         self.ui_manager.create_eden_status_bar(main_layout)
         
-        # Création du TreeView
+        # Creation of the TreeView
         from PySide6.QtWidgets import QTreeView
         self.character_tree = QTreeView()
         main_layout.addWidget(self.character_tree)
@@ -173,7 +173,7 @@ class CharacterApp(QMainWindow):
         self.character_tree.doubleClicked.connect(self.actions_manager.open_character_sheet)
         self.character_tree.header().sectionMoved.connect(self._on_section_moved)
         
-        # Création du menu contextuel
+        # Creation of the menu contextuel
         self.ui_manager.create_context_menu()
         
         # Barre de statut
@@ -182,7 +182,7 @@ class CharacterApp(QMainWindow):
         # Chargement des personnages
         self.tree_manager.refresh_character_list()
         
-        # Migration automatique si nécessaire
+        # Migration automatique if nécessaire
         self._run_automatic_migration()
         
         # Disclaimer au démarrage
@@ -261,7 +261,7 @@ class CharacterApp(QMainWindow):
                     if success:
                         logging.info(f"Migration successful: {migration_message}")
                         
-                        # Vérifier et mettre à jour la structure des fichiers JSON
+                        # Check and mettre à jour the structure des fichiers JSON
                         logging.info("Checking JSON structure...")
                         from Functions.migration_manager import check_and_upgrade_json_structures_if_needed
                         
@@ -327,12 +327,12 @@ class CharacterApp(QMainWindow):
     
     def update_character_from_herald(self):
         """Met à jour le personnage sélectionné depuis Herald"""
-        # Récupérer le personnage sélectionné
+        # Retrieve the personnage sélectionné
         selected_indices = self.character_tree.selectedIndexes()
         if not selected_indices:
             return
         
-        # Mapper l'index du proxy vers le modèle source
+        # Mapper l'index of the proxy vers the modèle source
         proxy_index = selected_indices[0]
         source_index = self.tree_manager.proxy_model.mapToSource(proxy_index)
         row = source_index.row()
@@ -342,12 +342,12 @@ class CharacterApp(QMainWindow):
         if not char_id:
             return
         
-        # Récupérer les données du personnage
+        # Retrieve the Data of the personnage
         character_data = self.tree_manager.characters_by_id.get(char_id)
         if not character_data:
             return
         
-        # Vérifier si le personnage a une URL Herald
+        # Check if the personnage a une URL Herald
         herald_url = character_data.get('url', '').strip()
         if not herald_url:
             QMessageBox.warning(
@@ -357,10 +357,10 @@ class CharacterApp(QMainWindow):
             )
             return
         
-        # Stocker les données du personnage pour le callback
+        # Stocker the Data of the personnage for the callback
         self._current_character_data = character_data
         
-        # Créer une fenêtre de progression personnalisée avec animation
+        # Create une fenêtre of progression personnalisée with animation
         self.progress_dialog = QDialog(self)
         self.progress_dialog.setWindowTitle("⏳ Mise à jour en cours...")
         self.progress_dialog.setModal(True)
@@ -369,20 +369,20 @@ class CharacterApp(QMainWindow):
         progress_layout = QVBoxLayout(self.progress_dialog)
         progress_layout.setSpacing(15)
         
-        # Icône et titre
+        # Icône and titre
         title_layout = QHBoxLayout()
         title_label = QLabel("🌐 Récupération des données depuis Eden Herald...")
         title_label.setStyleSheet("font-size: 12pt; font-weight: bold;")
         title_layout.addWidget(title_label)
         progress_layout.addLayout(title_layout)
         
-        # Message de détail
+        # Message of détail
         detail_label = QLabel("Connexion au serveur et extraction des informations du personnage.")
         detail_label.setWordWrap(True)
         detail_label.setStyleSheet("color: #666; font-size: 10pt;")
         progress_layout.addWidget(detail_label)
         
-        # Barre de progression indéterminée (animation)
+        # Barre of progression indéterminée (animation)
         progress_bar = QProgressBar()
         progress_bar.setRange(0, 0)  # Mode indéterminé = animation
         progress_bar.setTextVisible(False)
@@ -397,17 +397,17 @@ class CharacterApp(QMainWindow):
         
         progress_layout.addStretch()
         
-        # Créer et démarrer le worker thread
+        # Create and démarrer the worker thread
         self.herald_worker = HeraldScraperWorker(herald_url)
         self.herald_worker.finished.connect(self._on_herald_scraping_finished_main)
         
-        # Afficher le dialogue et démarrer le worker
+        # Afficher the dialogue and démarrer the worker
         self.progress_dialog.show()
         self.herald_worker.start()
     
     def _on_herald_scraping_finished_main(self, success, new_data, error_msg):
         """Callback appelé quand le scraping est terminé (depuis main)"""
-        # Fermer et supprimer la fenêtre de progression
+        # Fermer and supprimer the fenêtre of progression
         if hasattr(self, 'progress_dialog'):
             self.progress_dialog.close()
             self.progress_dialog.deleteLater()
@@ -421,7 +421,7 @@ class CharacterApp(QMainWindow):
             )
             return
         
-        # Récupérer les données du personnage depuis la variable stockée
+        # Retrieve the Data of the personnage depuis the variable stockée
         character_data = self._current_character_data
         
         # Afficher le dialogue de validation des changements
@@ -438,11 +438,11 @@ class CharacterApp(QMainWindow):
                 )
                 return
             
-            # Appliquer les changements sélectionnés
+            # Appliquer the changements sélectionnés
             for field, value in selected_changes.items():
                 character_data[field] = value
             
-            # Sauvegarder le personnage (allow_overwrite=True pour écraser le fichier existant)
+            # Save the personnage (allow_overwrite=True for écraser the File existant)
             from Functions.character_manager import save_character
             success, msg = save_character(character_data, allow_overwrite=True)
             
@@ -566,7 +566,7 @@ class CharacterApp(QMainWindow):
         if reply != QMessageBox.Yes:
             return
         
-        # Afficher une fenêtre de progression
+        # Afficher une fenêtre of progression
         progress = QMessageBox(self)
         progress.setWindowTitle("Vérification en cours...")
         progress.setText("🔍 Analyse des fichiers JSON en cours...\n\nVeuillez patienter...")
@@ -581,7 +581,7 @@ class CharacterApp(QMainWindow):
             progress.close()
             progress.deleteLater()
         
-        # Afficher le résultat
+        # Afficher the résultat
         if success:
             details = f"\n\n📊 Statistiques :\n"
             details += f"  • Fichiers vérifiés : {stats.get('checked', 0)}\n"
@@ -594,7 +594,7 @@ class CharacterApp(QMainWindow):
                 f"{message}{details}"
             )
             
-            # Rafraîchir la liste si des fichiers ont été modifiés
+            # Rafraîchir the liste if des fichiers have été modifiés
             if stats.get('upgraded', 0) > 0:
                 self.tree_manager.refresh_character_list()
         else:
@@ -609,7 +609,7 @@ class CharacterApp(QMainWindow):
         from Functions.help_manager import HelpManager
         from Functions.config_manager import config
         
-        # Créer le gestionnaire d'aide avec la langue actuelle
+        # Create the Manager d'aide with the langue actuelle
         current_lang = config.get("language", "fr")
         help_manager = HelpManager(language=current_lang)
         
@@ -659,12 +659,12 @@ class CharacterApp(QMainWindow):
         if not new_debug_mode and old_debug_mode:
             logging.info("Debug mode DEACTIVATED")
             
-        # Vérifier si le dossier des personnages a changé
+        # Check if the Folder des personnages a changé
         old_char_folder = config.get("character_folder", "")
         new_char_folder = dialog.char_path_edit.text()
         char_folder_changed = (old_char_folder != new_char_folder)
         
-        # Sauvegarder tous les paramètres
+        # Save all the paramètres
         config.set("character_folder", new_char_folder)
         config.set("config_folder", dialog.config_path_edit.text())
         config.set("log_folder", dialog.log_path_edit.text())
@@ -686,7 +686,7 @@ class CharacterApp(QMainWindow):
         if new_manual_resize != old_manual_resize:
             self.tree_manager.apply_column_resize_mode(new_manual_resize)
         
-        # Navigateur et téléchargement
+        # Navigateur and téléchargement
         config.set("preferred_browser", dialog.browser_combo.currentText())
         config.set("allow_browser_download", dialog.allow_browser_download_check.isChecked())
             
@@ -713,7 +713,7 @@ class CharacterApp(QMainWindow):
             lang.get("config_saved_success")
         )
         
-        # Vérifier la migration si le dossier des personnages a changé
+        # Check the migration if the Folder des personnages a changé
         if char_folder_changed:
             self._check_migration_on_path_change()
             
@@ -862,7 +862,7 @@ class CharacterApp(QMainWindow):
         """Sauvegarde l'état de l'application à la fermeture"""
         logging.info("Main window closing")
         
-        # Sauvegarder l'état de l'en-tête
+        # Save l'état of l'en-tête
         self.tree_manager.save_header_state()
         
         if self.debug_window:
@@ -883,7 +883,7 @@ def apply_theme(app):
 
 def main():
     """Point d'entrée principal de l'application"""
-    # Enregistrement du démarrage
+    # Enregistrement of the démarrage
     start_time = time.perf_counter()
     logging.info(f"Application started at {datetime.now().isoformat()}")
     logging.info(f"Python version: {sys.version}")
@@ -899,7 +899,7 @@ def main():
     if hasattr(signal, 'SIGINT'):
         signal.signal(signal.SIGINT, signal_handler)
     
-    # Vérification des threads actifs au démarrage
+    # Checking des threads actifs au démarrage
     logging.debug(f"Active threads at startup: {threading.active_count()}")
     for thread in threading.enumerate():
         logging.debug(f"  - {thread.name} (daemon: {thread.daemon})")
@@ -921,7 +921,7 @@ def main():
         
         main_window.show()
         
-        # Afficher la fenêtre de debug si configuré
+        # Afficher the fenêtre of debug if configuré
         if config.get("show_debug_window", False):
             main_window.show_debug_window()
         

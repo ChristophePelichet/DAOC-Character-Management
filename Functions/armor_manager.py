@@ -4,8 +4,7 @@ Armor Manager - Gestion des fichiers d'armure uploadés
 import os
 import shutil
 import logging
-from pathlib import Path
-from Functions.path_manager import get_armor_dir, ensure_armor_dir
+from Functions.path_manager import ensure_armor_dir
 
 logger = logging.getLogger(__name__)
 

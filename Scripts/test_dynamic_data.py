@@ -6,7 +6,7 @@ et que les fichiers de personnages existants restent compatibles
 import sys
 from pathlib import Path
 
-# Ajouter le répertoire parent au path
+# Ajouter the répertoire parent au path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from Functions.data_manager import DataManager
@@ -73,7 +73,7 @@ def test_existing_characters():
             print(f"      Race: {race}")
             print(f"      Niveau: {level}")
             
-            # Vérifier que le realm est valide
+            # Check that the realm est valide
             if realm in REALMS:
                 print(f"      ✅ Realm '{realm}' est valide")
             else:
@@ -139,7 +139,7 @@ def main():
     print("\n")
     
     try:
-        # Exécuter les tests
+        # Exécuter the tests
         test_data_manager_realms()
         test_character_manager_realms()
         test_existing_characters()

@@ -18,7 +18,7 @@ proc = subprocess.Popen(
     cwd=r"d:\Projets\Python\DAOC---Gestion-des-personnages"
 )
 
-# Attendre un peu que l'application démarre
+# Wait un peu that l'application démarre
 time.sleep(2)
 
 # Lire et afficher les nouveaux logs

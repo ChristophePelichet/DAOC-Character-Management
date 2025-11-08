@@ -16,7 +16,7 @@ print("4. Appuyez sur Ctrl+C pour arrêter la surveillance")
 print("\n" + "-" * 70)
 print("En attente des logs...\n")
 
-# Créer le fichier s'il n'existe pas
+# Create the File s'il n'existe not
 if not os.path.exists(log_file):
     open(log_file, 'w').close()
 
@@ -25,7 +25,7 @@ last_position = 0
 
 try:
     with open(log_file, 'r', encoding='utf-8', errors='ignore') as f:
-        # Aller à la fin du fichier
+        # Aller à the fin of the File
         f.seek(0, 2)
         last_position = f.tell()
         

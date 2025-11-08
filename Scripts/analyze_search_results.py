@@ -32,8 +32,8 @@ def analyze_search_results(json_path):
     characters = []
     
     for result in data['results']:
-        # Vérifier si c'est une ligne de personnage
-        # Critères: col_1 non vide et col_3 ressemble à une classe
+        # Check if it's a character row
+        # Critères: col_1 non vide and col_3 ressemble à une classe
         if (result.get('col_1') and 
             result.get('col_3') and 
             len(result.get('col_1', '')) > 0 and
@@ -73,7 +73,7 @@ def analyze_search_results(json_path):
                 
                 characters.append(character)
     
-    # Afficher les résultats
+    # Afficher the Results
     print(f"\n✅ {len(characters)} personnage(s) trouvé(s)")
     print("\n" + "=" * 80)
     print("PERSONNAGES TROUVÉS")
@@ -89,7 +89,7 @@ def analyze_search_results(json_path):
         print(f"   Realm Rank: {char['realm_rank']} ({char['realm_level']})")
         print(f"   🔗 URL: {char['url']}")
     
-    # Sauvegarder dans un fichier JSON dédié
+    # Save in un File JSON dedicated
     output_file = Path(json_path).parent / f"characters_{data['character_name']}.json"
     with open(output_file, 'w', encoding='utf-8') as f:
         json.dump({
@@ -129,7 +129,7 @@ def main():
         else:
             print(f"❌ Fichier non trouvé: {target_file}")
     else:
-        # Sinon, prendre le plus récent
+        # Sinon, prendre the plus récent
         latest_file = json_files[0]
         print(f"\n📄 Fichier le plus récent: {latest_file.name}")
         analyze_search_results(latest_file)

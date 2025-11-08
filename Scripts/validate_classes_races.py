@@ -28,7 +28,7 @@ def validate_classes_races():
     
     print("✅ Fichier JSON chargé avec succès\n")
     
-    # Vérifier la structure
+    # Check the structure
     required_realms = ["Albion", "Midgard", "Hibernia"]
     errors = []
     warnings = []
@@ -36,7 +36,7 @@ def validate_classes_races():
     print("📋 VÉRIFICATION DE LA STRUCTURE")
     print("-" * 70)
     
-    # Vérifier les royaumes
+    # Check the royaumes
     for realm in required_realms:
         if realm not in data:
             errors.append(f"Royaume manquant : {realm}")
@@ -44,7 +44,7 @@ def validate_classes_races():
         
         realm_data = data[realm]
         
-        # Vérifier races
+        # Check races
         if 'races' not in realm_data:
             errors.append(f"{realm} : Clé 'races' manquante")
         else:
@@ -59,7 +59,7 @@ def validate_classes_races():
                 if 'name_de' not in race:
                     warnings.append(f"{realm} race {race.get('name', f'#{i+1}')} : 'name_de' manquant")
         
-        # Vérifier classes
+        # Check classes
         if 'classes' not in realm_data:
             errors.append(f"{realm} : Clé 'classes' manquante")
         else:
@@ -86,7 +86,7 @@ def validate_classes_races():
     
     print()
     
-    # Vérifier la cohérence des références
+    # Check the cohérence des références
     print("🔗 VÉRIFICATION DES RÉFÉRENCES")
     print("-" * 70)
     
@@ -137,7 +137,7 @@ def validate_classes_races():
             if len(class_info.get('races', [])) == max_races:
                 print(f"    - {realm} : {class_info['name']} (toutes les races)")
     
-    # Classes les plus spécialisées (peu de races)
+    # Classes the plus spécialisées (peu of races)
     print("\n  Classes les plus exclusives :")
     for realm in required_realms:
         if realm not in data:
@@ -155,7 +155,7 @@ def validate_classes_races():
     
     print()
     
-    # Résultats
+    # Results
     print("=" * 70)
     print("RÉSULTATS")
     print("=" * 70)

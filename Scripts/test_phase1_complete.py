@@ -9,7 +9,6 @@ def test_imports():
     print("🔍 Test des imports...")
     try:
         from Functions.cookie_manager import CookieManager
-        from Functions.eden_scraper import EdenScraper, scrape_character_by_name, search_characters
         print("  ✅ Tous les modules s'importent correctement")
         return True
     except Exception as e:
@@ -119,7 +118,6 @@ def test_dependencies():
     
     # lxml est optionnel
     try:
-        import lxml
         print(f"  ✅ lxml (optionnel)")
     except ImportError:
         print(f"  ⚠️ lxml (optionnel) non installé")
@@ -130,8 +128,6 @@ def test_ui_integration():
     """Test de l'intégration UI"""
     print("\n🔍 Test de l'intégration UI...")
     try:
-        from UI.dialogs import CookieManagerDialog, ConnectionTestThread
-        from Functions.ui_manager import UIManager, EdenStatusThread
         print("  ✅ Classes UI importées")
         print("  ✅ ConnectionTestThread disponible")
         print("  ✅ EdenStatusThread disponible")

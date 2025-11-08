@@ -12,11 +12,11 @@ print("=" * 80)
 print("EXEMPLE PRATIQUE : Création de personnage avec validation")
 print("=" * 80)
 
-# Simulation d'une création de personnage
+# Simulation d'une Creation of personnage
 def create_character_workflow():
     """Simule le workflow de création d'un personnage"""
     
-    # Étape 1 : Sélection du royaume
+    # Step 1 : Sélection of the royaume
     print("\n🏰 ÉTAPE 1 : Sélection du royaume")
     print("-" * 80)
     realms = dm.get_all_realms()
@@ -25,7 +25,7 @@ def create_character_workflow():
     selected_realm = "Albion"  # L'utilisateur sélectionne Albion
     print(f"✓ Royaume sélectionné : {selected_realm}")
     
-    # Étape 2 : Sélection de la race
+    # Step 2 : Sélection of the race
     print("\n👤 ÉTAPE 2 : Sélection de la race")
     print("-" * 80)
     races = dm.get_races(selected_realm)
@@ -36,12 +36,12 @@ def create_character_workflow():
     selected_race = "Briton"  # L'utilisateur sélectionne Briton
     print(f"✓ Race sélectionnée : {selected_race}")
     
-    # Étape 3 : Filtrer les classes disponibles pour cette race
+    # Step 3 : Filtrer the classes disponibles for this race
     print("\n⚔️  ÉTAPE 3 : Sélection de la classe")
     print("-" * 80)
     available_classes = dm.get_available_classes_for_race(selected_realm, selected_race)
     print(f"Classes disponibles pour un {selected_race} :")
-    for i, cls in enumerate(available_classes[:10], 1):  # Afficher les 10 premières
+    for i, cls in enumerate(available_classes[:10], 1):  # Afficher the 10 premières
         print(f"  {i}. {cls['name']} (FR: {cls['name_fr']}, DE: {cls['name_de']})")
     if len(available_classes) > 10:
         print(f"  ... et {len(available_classes) - 10} autres")
@@ -49,7 +49,7 @@ def create_character_workflow():
     selected_class = "Armsman"  # L'utilisateur sélectionne Armsman
     print(f"✓ Classe sélectionnée : {selected_class}")
     
-    # Étape 4 : Validation de la combinaison
+    # Step 4 : Validation of the combinaison
     print("\n✅ ÉTAPE 4 : Validation")
     print("-" * 80)
     is_valid = dm.is_race_class_compatible(selected_realm, selected_race, selected_class)
@@ -59,7 +59,7 @@ def create_character_workflow():
         print(f"✗ ERREUR : {selected_race} ne peut pas être {selected_class}")
         return False
     
-    # Étape 5 : Afficher les spécialisations disponibles
+    # Step 5 : Afficher the spécialisations disponibles
     print("\n📚 ÉTAPE 5 : Spécialisations disponibles")
     print("-" * 80)
     class_info = dm.get_class_info(selected_realm, selected_class)
@@ -68,7 +68,7 @@ def create_character_workflow():
     for spec in specs:
         print(f"  • {spec}")
     
-    # Étape 6 : Résumé du personnage
+    # Step 6 : Résumé of the personnage
     print("\n📋 RÉSUMÉ DU PERSONNAGE")
     print("=" * 80)
     print(f"Royaume    : {selected_realm}")
@@ -88,7 +88,7 @@ if success:
     print("EXEMPLES SUPPLÉMENTAIRES")
     print("=" * 80)
     
-    # Exemple 1 : Vérifier une combinaison invalide
+    # Exemple 1 : Check une combinaison invalide
     print("\n🚫 Exemple 1 : Tentative de combinaison invalide")
     print("-" * 80)
     result = dm.is_race_class_compatible("Albion", "Avalonian", "Friar")
@@ -98,7 +98,7 @@ if success:
         races_for_friar = dm.get_races_for_class("Albion", "Friar")
         print(f"   Races autorisées : {', '.join(races_for_friar)}")
     
-    # Exemple 2 : Comparer les spécialisations entre classes
+    # Exemple 2 : Comparer the spécialisations entre classes
     print("\n🔍 Exemple 2 : Comparaison de classes")
     print("-" * 80)
     healer_specs = dm.get_specializations("Midgard", "Healer")
@@ -106,7 +106,7 @@ if success:
     print(f"Healer : {len(healer_specs)} spécialisations - {', '.join(healer_specs)}")
     print(f"Shaman : {len(shaman_specs)} spécialisations - {', '.join(shaman_specs)}")
     
-    # Exemple 3 : Trouver les classes communes à deux races
+    # Exemple 3 : Find the classes communes à deux races
     print("\n🤝 Exemple 3 : Classes communes entre deux races")
     print("-" * 80)
     briton_classes = set(c['name'] for c in dm.get_available_classes_for_race("Albion", "Briton"))

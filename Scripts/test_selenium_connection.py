@@ -25,7 +25,7 @@ def test_with_selenium():
     
     print(f"✅ {len(cookies_list)} cookies chargés")
     
-    # Créer un driver Selenium
+    # Create un driver Selenium
     print("\n🌐 Ouverture du navigateur...")
     service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service)

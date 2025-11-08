@@ -18,7 +18,7 @@ def scrape_character(character_name):
     data = scraper.scrape_with_session(url)
     
     if data:
-        # Sauvegarder les données
+        # Save the Data
         filename = f"data_{character_name}.json"
         with open(filename, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=2)

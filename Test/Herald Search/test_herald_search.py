@@ -19,7 +19,7 @@ def main():
     print("🔍 TEST DE RECHERCHE HERALD")
     print("=" * 80)
     
-    # Vérifier les cookies
+    # Check cookies
     print("\n📋 Vérification des cookies...")
     cookie_manager = CookieManager()
     

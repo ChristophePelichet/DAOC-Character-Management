@@ -14,18 +14,18 @@ def test_column_visibility():
     app = QApplication(sys.argv)
     window = CharacterApp()
     
-    # Vérifier que la méthode existe
+    # Check that the méthode existe
     assert hasattr(window, 'apply_column_visibility'), "❌ Méthode apply_column_visibility non trouvée"
     print("✅ Méthode apply_column_visibility existe")
     
     assert hasattr(window, 'open_columns_configuration'), "❌ Méthode open_columns_configuration non trouvée"
     print("✅ Méthode open_columns_configuration existe")
     
-    # Vérifier que l'action existe
+    # Check that l'action existe
     assert hasattr(window, 'columns_action'), "❌ Action columns_action non trouvée"
     print("✅ Action columns_action existe")
     
-    # Vérifier la configuration initiale
+    # Check the Configuration initiale
     from Functions.config_manager import config
     visibility = config.get("column_visibility", {})
     print(f"\n📋 Configuration actuelle des colonnes :")
@@ -36,7 +36,7 @@ def test_column_visibility():
     else:
         print("   Aucune configuration personnalisée (toutes visibles par défaut)")
     
-    # Vérifier que le TreeView existe
+    # Check that the TreeView existe
     assert hasattr(window, 'character_tree'), "❌ TreeView non trouvé"
     print("\n✅ TreeView trouvé")
     

@@ -25,7 +25,7 @@ def display_character_realm_info(character_data):
     print(f"Informations de Realm Rank - {character_name} ({realm})")
     print("=" * 70)
     
-    # Récupérer les Realm Points (si disponibles)
+    # Retrieve the Realm Points (if disponibles)
     realm_points = character_data.get('realm_points', 0)
     current_rank_level = character_data.get('realm_rank', '1L1')
     
@@ -128,7 +128,7 @@ def display_rank_summary(realm):
 if __name__ == "__main__":
     print("\n🎮 Exemples d'intégration Data Manager + Character Manager\n")
     
-    # Exemple 1: Afficher les infos d'un personnage spécifique
+    # Exemple 1: Afficher the infos d'un personnage spécifique
     print("\n" + "=" * 70)
     print("EXEMPLE 1: Informations détaillées d'un personnage")
     print("=" * 70)
@@ -139,11 +139,11 @@ if __name__ == "__main__":
     else:
         print("\n⚠️  Aucun personnage disponible. Créez d'abord des personnages.")
     
-    # Exemple 2: Résumé de tous les personnages
+    # Exemple 2: Résumé of all the personnages
     print("\n")
     display_all_characters_ranks()
     
-    # Exemple 3: Afficher le résumé des rangs d'un royaume
+    # Exemple 3: Afficher the résumé des rangs d'un royaume
     print("\n")
     display_rank_summary("Albion")
     

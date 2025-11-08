@@ -37,7 +37,7 @@ class EdenStatusThread(QThread):
             self.status_updated.emit(result['accessible'], result['message'])
             
         except Exception as e:
-            # Log et émettre un signal d'erreur au lieu de crasher
+            # Log and émettre un signal d'erreur au lieu of crasher
             import logging
             import traceback
             logging.error(f"EdenStatusThread crash: {e}\n{traceback.format_exc()}")
@@ -116,7 +116,7 @@ class UIManager:
         eden_debug_action.triggered.connect(self.main_window.open_eden_debug)
         help_menu.addAction(eden_debug_action)
         
-        # Vérifier la structure des fichiers JSON
+        # Check the structure des fichiers JSON
         check_json_action = QAction("🔧 Vérifier la structure des fichiers", self.main_window)
         check_json_action.triggered.connect(self.main_window.check_json_structures)
         help_menu.addAction(check_json_action)
@@ -177,7 +177,7 @@ class UIManager:
         # Conteneur horizontal pour deux colonnes
         container_layout = QHBoxLayout()
         
-        # ===== SECTION GAUCHE : Status Herald Eden (réduite de moitié) =====
+        # ===== SECTION GAUCHE : Status Herald Eden (réduite of moitié) =====
         status_group = QGroupBox("Statut Eden Herald")
         status_layout = QHBoxLayout()
         status_layout.setSpacing(5)
@@ -189,7 +189,7 @@ class UIManager:
         self.eden_status_label.setMinimumHeight(35)
         status_layout.addWidget(self.eden_status_label, 1)
         
-        # Boutons réduits alignés horizontalement - tous la même taille
+        # Boutons réduits alignés horizontalement - all the même taille
         self.refresh_button = QPushButton("🔄 Actualiser")
         self.refresh_button.clicked.connect(self.check_eden_status)
         self.refresh_button.setEnabled(False)
@@ -230,30 +230,30 @@ class UIManager:
         currency_group.setLayout(currency_layout)
         container_layout.addWidget(currency_group, 1)  # Stretch = 1
         
-        # Ajouter le conteneur à la layout principale
+        # Ajouter the conteneur à the layout principale
         parent_layout.addLayout(container_layout)
         
-        # Lancer la vérification initiale
+        # Lancer the Checking initiale
         self.check_eden_status()
     
     def check_eden_status(self):
         """Vérifie le statut de connexion Eden en arrière-plan"""
-        # Arrêter un thread en cours si existant
+        # Arrêter un thread en cours if existant
         if self.eden_status_thread and self.eden_status_thread.isRunning():
             self.eden_status_thread.quit()
             self.eden_status_thread.wait()
         
-        # Afficher le statut de chargement et désactiver les boutons
+        # Afficher the statut of chargement and désactiver the boutons
         self.eden_status_label.setText("⏳ Vérification en cours...")
         self.eden_status_label.setStyleSheet("padding: 5px; color: gray;")
         self.refresh_button.setEnabled(False)
         self.search_button.setEnabled(False)
         
-        # Créer le gestionnaire de cookies
+        # Create the Manager of cookies
         from Functions.cookie_manager import CookieManager
         cookie_manager = CookieManager()
         
-        # Lancer le thread de vérification
+        # Lancer the thread of Checking
         self.eden_status_thread = EdenStatusThread(cookie_manager)
         self.eden_status_thread.status_updated.connect(self.update_eden_status)
         self.eden_status_thread.start()
@@ -263,7 +263,7 @@ class UIManager:
         if accessible:
             self.eden_status_label.setText(f"✅ Herald accessible")
             self.eden_status_label.setStyleSheet("padding: 5px; color: green; font-weight: bold;")
-            # Réactiver les boutons - Herald est accessible
+            # Réactiver the boutons - Herald est accessible
             self.refresh_button.setEnabled(True)
             self.search_button.setEnabled(True)
         else:
@@ -275,7 +275,7 @@ class UIManager:
                 self.refresh_button.setEnabled(False)
                 self.search_button.setEnabled(False)
             else:
-                # Si c'est juste une erreur de connexion, garder les boutons activés
+                # if c'est juste une erreur of connexion, garder the boutons activés
                 self.refresh_button.setEnabled(True)
                 self.search_button.setEnabled(True)
         
@@ -297,7 +297,7 @@ class UIManager:
         """Affiche le menu contextuel à la position spécifiée"""
         index = self.main_window.character_tree.indexAt(position)
         if index.isValid():
-            # Sélectionner la ligne cliquée avant d'afficher le menu
+            # Sélectionner the ligne cliquée before d'afficher the menu
             self.main_window.character_tree.setCurrentIndex(index)
             self.context_menu.exec(self.main_window.character_tree.viewport().mapToGlobal(position))
             

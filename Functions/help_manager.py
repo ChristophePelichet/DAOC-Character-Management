@@ -8,7 +8,6 @@ Gère l'affichage des aides Markdown dans l'application
 
 from pathlib import Path
 from PySide6.QtWidgets import QDialog, QVBoxLayout, QTextBrowser, QPushButton, QHBoxLayout
-from PySide6.QtCore import Qt, QUrl
 from PySide6.QtGui import QFont
 import markdown
 import logging
@@ -242,12 +241,12 @@ class HelpManager:
             logger.warning(f"Aide non trouvée en {self.language}: {help_id}, tentative en anglais")
             help_file = self.help_dir / "en" / f"{help_id}.md"
         
-        # Si toujours pas trouvé, essayer en français
+        # if toujours not trouvé, essayer en français
         if not help_file.exists():
             logger.warning(f"Aide non trouvée en anglais: {help_id}, tentative en français")
             help_file = self.help_dir / "fr" / f"{help_id}.md"
         
-        # Si toujours pas trouvé, afficher une erreur
+        # if toujours not trouvé, afficher une erreur
         if not help_file.exists():
             logger.error(f"Aide introuvable: {help_id}")
             help_file = None
@@ -256,7 +255,7 @@ class HelpManager:
         if title is None:
             title = self._get_default_title(help_id)
         
-        # Créer et afficher la fenêtre
+        # Create and afficher the fenêtre
         help_window = HelpWindow(parent=parent, title=title, markdown_file=help_file)
         help_window.exec()
         

@@ -21,7 +21,7 @@ def test_update_full():
     # URL de test
     url = "https://eden-daoc.net/herald?n=player&k=Odamuss"
     
-    # Données actuelles du personnage (simulées - anciennes données)
+    # Data actuelles of the personnage (simulées - anciennes Data)
     current_data = {
         'name': 'Odamuss',
         'level': 50,
@@ -44,14 +44,14 @@ def test_update_full():
     # Initialiser le cookie manager
     cookie_manager = CookieManager()
     
-    # Vérifier les cookies
+    # Check cookies
     if not cookie_manager.cookie_exists():
         print("\n❌ Aucun cookie trouvé!")
         return
     
     print("\n✅ Cookies trouvés")
     
-    # Récupérer les nouvelles données
+    # Retrieve the nouvelles Data
     print("\n📡 Récupération des données depuis Herald...")
     success, new_data, error_msg = scrape_character_from_url(url, cookie_manager)
     
@@ -63,7 +63,7 @@ def test_update_full():
     print("\n📋 Données NOUVELLES (depuis Herald):")
     print(json.dumps(new_data, indent=2, ensure_ascii=False))
     
-    # Détecter les changements
+    # Détecter the changements
     print("\n" + "=" * 80)
     print("🔍 DÉTECTION DES CHANGEMENTS:")
     print("=" * 80)

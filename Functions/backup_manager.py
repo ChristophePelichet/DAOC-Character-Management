@@ -1,12 +1,10 @@
 import os
-import json
 import shutil
 import zipfile
 import sys
 import logging
 from datetime import datetime
-from pathlib import Path
-from .logging_manager import get_logger, log_with_action, LOGGER_BACKUP, LoggerFactory
+from Functions.logging_manager import get_logger, LOGGER_BACKUP, log_with_action
 
 # Fix for PyInstaller --noconsole mode: sys.stderr can be None
 if sys.stderr is None:

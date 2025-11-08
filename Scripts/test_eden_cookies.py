@@ -6,7 +6,6 @@ Test de validité des cookies Eden
 """
 
 import pickle
-import os
 from datetime import datetime
 from pathlib import Path
 
@@ -61,7 +60,7 @@ def test_cookie_validity():
                         'hours_remaining': hours
                     })
                 else:
-                    # Cookie expiré
+                    # Expired cookie
                     expired_cookies.append({
                         'name': cookie_name,
                         'domain': cookie_domain,
@@ -74,7 +73,7 @@ def test_cookie_validity():
                     'domain': cookie_domain
                 })
         
-        # Affichage des résultats
+        # Affichage des Results
         print("=" * 60)
         print("RÉSULTATS")
         print("=" * 60)

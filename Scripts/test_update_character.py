@@ -10,7 +10,7 @@ import json
 import logging
 from pathlib import Path
 
-# Ajouter le répertoire parent au path pour les imports
+# Ajouter the répertoire parent au path for the imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # Configuration du logging
@@ -113,14 +113,14 @@ def main():
     print("\n⏳ Récupération des données depuis Herald...")
     print("   (Le navigateur va s'ouvrir et se minimiser)")
     
-    # Import dynamique pour éviter les erreurs de module
+    # Import dynamique for éviter the erreurs of module
     from Functions.eden_scraper import scrape_character_from_url
     from Functions.cookie_manager import CookieManager
     
-    # Créer le gestionnaire de cookies
+    # Create the Manager of cookies
     cookie_manager = CookieManager()
     
-    # Récupérer les données depuis Herald
+    # Retrieve the Data depuis Herald
     success, new_data, error_msg = scrape_character_from_url(url, cookie_manager)
     
     if not success:
@@ -129,7 +129,7 @@ def main():
     
     print("\n✅ Données récupérées avec succès!")
     
-    # Afficher les données brutes récupérées (avant parsing)
+    # Afficher the Data brutes récupérées (before parsing)
     print("\n📦 DONNÉES BRUTES HERALD (avant parsing):")
     print("-" * 80)
     if 'tables' in new_data:
@@ -148,12 +148,12 @@ def main():
     if 'h3' in new_data:
         print(f"Titres H3: {new_data['h3']}")
     
-    # Afficher les données parsées
+    # Afficher the Data parsées
     print("\n📦 DONNÉES PARSÉES:")
     print("-" * 80)
     print(json.dumps(new_data, indent=2, ensure_ascii=False))
     
-    # Comparer les données
+    # Comparer the Data
     changes = compare_data(current_data, new_data)
     
     # Résumé

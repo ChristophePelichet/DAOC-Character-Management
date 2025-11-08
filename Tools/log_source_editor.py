@@ -19,7 +19,6 @@ Fonctionnalités:
 """
 
 import sys
-import os
 import re
 import json
 from pathlib import Path
@@ -34,7 +33,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt, Signal, QThread, QTimer
 from PySide6.QtGui import QColor, QFont, QKeySequence, QShortcut
 
-# Import des loggers constants depuis le système de logging
+# Import des loggers constants depuis the système of logging
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from Functions.logging_manager import ALL_LOGGERS, LOGGER_ROOT
 
@@ -47,11 +46,11 @@ class LogEntry:
         self.line_number = line_number
         self.logger_name = logger_name
         self.level = level
-        self.action = action  # Peut être vide
+        self.action = action  # can be vide
         self.message = message
-        self.full_line = full_line  # Ligne complète pour remplacement
+        self.full_line = full_line  # Ligne complète for remplacement
         self.modified = False
-        self.new_logger = logger_name  # Nouveau logger (peut être changé)
+        self.new_logger = logger_name  # Nouveau Logger (can be changé)
         self.new_action = action
         self.new_message = message
     
@@ -79,7 +78,7 @@ class LogScanner(QThread):
         
     def run(self):
         """Scanner tous les fichiers Python"""
-        # Patterns pour détecter les logs
+        # Patterns for détecter the logs
         logger_pattern = re.compile(
             r'(?:self\.)?(?:module_)?logger\.(?P<level>debug|info|warning|error|critical)\s*\(',
             re.IGNORECASE
@@ -124,7 +123,7 @@ class LogScanner(QThread):
                         # Parser le contenu pour extraire message et action
                         action, message = self._parse_log_content(line)
                         
-                        # Créer l'entrée
+                        # Create l'entrée
                         log_entry = LogEntry(
                             file_path=str(file_path),
                             line_number=line_num,
@@ -135,7 +134,7 @@ class LogScanner(QThread):
                             full_line=line.strip()
                         )
                         
-                        # Émettre le log trouvé (sera ajouté dans _on_log_found)
+                        # Émettre the log trouvé (sera ajouté in _on_log_found)
                         self.log_found.emit(log_entry)
                         self.count += 1
                         
@@ -148,7 +147,7 @@ class LogScanner(QThread):
         """Détecte le nom du logger en analysant le fichier"""
         file_str = str(file_path).lower()
         
-        # Mapping basé sur le chemin du fichier
+        # Mapping basé on the chemin of the File
         if 'eden_scraper' in file_str or 'eden' in file_str:
             return 'EDEN'
         elif 'backup' in file_str or 'migration' in file_str:
@@ -180,17 +179,17 @@ class LogScanner(QThread):
         
         # Cas 1: log_with_action(logger, "level", "message", action="ACTION")
         if 'log_with_action' in line:
-            # Extraire l'action du paramètre action="..."
+            # Extract l'action of the paramètre action="..."
             action_match = re.search(r'action\s*=\s*["\']([^"\']+)["\']', line)
             if action_match:
                 action = action_match.group(1)
             
-            # Extraire le message (troisième paramètre)
+            # Extract the message (troisième paramètre)
             msg_match = re.search(r'log_with_action\([^,]+,\s*["\'][^"\']+["\']\s*,\s*([fFrRbB]?["\'])(.+?)(?:\1)', line)
             if msg_match:
                 message = msg_match.group(2)
             else:
-                # Fallback: chercher la première string après la virgule
+                # Fallback: Search the première string after the virgule
                 msg_fallback = re.search(r'log_with_action\([^,]+,\s*["\'][^"\']+["\']\s*,\s*([^,]+)', line)
                 if msg_fallback:
                     message = msg_fallback.group(1).strip()
@@ -201,13 +200,13 @@ class LogScanner(QThread):
             if action_match:
                 action = action_match.group(1)
             
-            # Extraire le message (première string dans l'appel)
-            # Gérer les f-strings, strings normales, et concaténations
+            # Extract the message (première string in l'appel)
+            # Gérer the f-strings, strings normales, and concaténations
             msg_match = re.search(r'logger\.\w+\s*\(\s*([fFrRbB]?["\'])(.*?)(?:["\'])', line)
             if msg_match:
                 message = msg_match.group(2)
             else:
-                # Fallback: prendre tout après la parenthèse jusqu'à la virgule ou fin
+                # Fallback: prendre all after the parenthèse jusqu'à the virgule or fin
                 msg_fallback = re.search(r'logger\.\w+\s*\(\s*(.+?)(?:,|\))', line)
                 if msg_fallback:
                     message = msg_fallback.group(1).strip()
@@ -225,7 +224,7 @@ class LogSourceEditor(QMainWindow):
     Permet de scanner, visualiser et modifier les logs avant compilation
     """
     
-    # Fichier de configuration pour sauvegarder les préférences
+    # File of Configuration for Save the préférences
     CONFIG_FILE = Path(__file__).parent / "log_editor_config.json"
     
     def __init__(self):
@@ -235,8 +234,8 @@ class LogSourceEditor(QMainWindow):
         
         self.logs = []  # Liste de LogEntry
         self.current_log = None
-        self._updating = False  # Flag pour éviter les boucles de mise à jour
-        self.last_project_path = None  # Chemin du dernier projet scanné
+        self._updating = False  # Flag for éviter the boucles of mise à jour
+        self.last_project_path = None  # Chemin of the dernier projet scanné
         
         # Widget central
         central_widget = QWidget()
@@ -278,7 +277,7 @@ class LogSourceEditor(QMainWindow):
                     
                     # Charger automatiquement le dernier projet si le chemin existe
                     if self.last_project_path and Path(self.last_project_path).exists():
-                        # Scanner après un court délai pour permettre à l'UI de se charger
+                        # Scanner after un court délai for permettre à l'UI of se Load
                         from PySide6.QtCore import QTimer
                         QTimer.singleShot(100, lambda: self._scan_path(self.last_project_path))
                         self.status_label.setText(f"📂 Chargement du dernier projet: {self.last_project_path}")
@@ -314,7 +313,7 @@ class LogSourceEditor(QMainWindow):
         toolbar_layout.addWidget(QLabel("Logger:"))
         self.logger_filter = QComboBox()
         self.logger_filter.addItem("Tous", "ALL")
-        # Ajouter les loggers du système
+        # Ajouter the loggers of the système
         for logger_name in ALL_LOGGERS:
             self.logger_filter.addItem(logger_name, logger_name)
         self.logger_filter.addItem(LOGGER_ROOT, LOGGER_ROOT)
@@ -374,7 +373,7 @@ class LogSourceEditor(QMainWindow):
             "Fichier", "Ligne", "Logger", "Level", "Action", "Message", "Modifié"
         ])
         
-        # IMPORTANT: Table en lecture seule - utiliser l'éditeur à droite pour modifier
+        # IMPORTANT: Table en lecture seule - utiliser l'éditeur à droite for modifier
         self.table.setEditTriggers(QTableWidget.NoEditTriggers)
         
         # Configurer les colonnes
@@ -405,7 +404,7 @@ class LogSourceEditor(QMainWindow):
         self.file_label.setWordWrap(True)
         layout.addWidget(self.file_label)
         
-        # Logger (éditable via ComboBox) et Level (lecture seule)
+        # Logger (éditable via ComboBox) and Level (lecture seule)
         info_layout = QHBoxLayout()
         info_layout.addWidget(QLabel("Logger:"))
         self.logger_combo = QComboBox()
@@ -421,7 +420,7 @@ class LogSourceEditor(QMainWindow):
         info_layout.addWidget(self.level_display)
         layout.addLayout(info_layout)
         
-        # Action (combobox éditable avec historique)
+        # Action (combobox éditable with historique)
         layout.addWidget(QLabel("🎯 Action: (Enter pour appliquer)"))
         self.action_combo = QComboBox()
         self.action_combo.setEditable(True)
@@ -470,7 +469,7 @@ class LogSourceEditor(QMainWindow):
     
     def scan_project(self):
         """Scanner le projet pour trouver les logs"""
-        # Par défaut, utiliser le dernier projet ou le dossier parent (racine du projet)
+        # Par défaut, utiliser the dernier projet or the Folder parent (racine of the projet)
         default_path = self.last_project_path if self.last_project_path and Path(self.last_project_path).exists() else str(Path(__file__).parent.parent)
         
         project_root = QFileDialog.getExistingDirectory(
@@ -539,7 +538,7 @@ class LogSourceEditor(QMainWindow):
         self.logs.append(log_entry)
         self._add_log_to_table(log_entry)
         
-        # Mettre à jour les statistiques
+        # Mettre à jour the statistiques
         self._update_stats()
     
     def _add_log_to_table(self, log: LogEntry):
@@ -599,13 +598,13 @@ class LogSourceEditor(QMainWindow):
         self.progress_bar.setVisible(False)
         self._update_stats()
         
-        # Collecter toutes les actions uniques déjà présentes
+        # Collecter toutes the actions uniques déjà présentes
         unique_actions = set()
         for log in self.logs:
             if log.action:  # Ignorer les actions vides
                 unique_actions.add(log.action)
         
-        # Pré-remplir le combobox avec les actions trouvées
+        # Pré-remplir the combobox with the actions trouvées
         self.action_combo.clear()
         for action in sorted(unique_actions):
             self.action_combo.addItem(action)
@@ -624,7 +623,7 @@ class LogSourceEditor(QMainWindow):
             else:
                 without_action += 1
         
-        # Mettre à jour le titre de la fenêtre avec le projet scanné
+        # Mettre à jour the titre of the fenêtre with the projet scanné
         project_name = Path(self.scanner.root_path).name
         self.setWindowTitle(f"🔧 Log Source Editor - {project_name} ({total} logs)")
         
@@ -655,7 +654,7 @@ class LogSourceEditor(QMainWindow):
     
     def on_log_selected(self):
         """Un log a été sélectionné dans la table"""
-        # Ne pas traiter si on est en train de mettre à jour
+        # Ne not traiter if on est en train of mettre à jour
         if self._updating:
             return
         
@@ -663,11 +662,11 @@ class LogSourceEditor(QMainWindow):
         if not selected:
             return
         
-        # Récupérer le log
+        # Retrieve the log
         row = selected[0].row()
         log = self.table.item(row, 0).data(Qt.UserRole)
         
-        # Si c'est le même log, ne pas recharger (pour ne pas écraser les modifications en cours)
+        # if c'est the même log, ne not recharger (for ne not écraser the modifications en cours)
         if self.current_log == log:
             return
         
@@ -683,42 +682,42 @@ class LogSourceEditor(QMainWindow):
     
     def apply_changes(self):
         """Appliquer les modifications au log courant"""
-        # Bloquer les mises à jour pour éviter que on_log_selected écrase les champs
+        # Bloquer the mises à jour for éviter that on_log_selected écrase the champs
         self._updating = True
         
         try:
             if not self.current_log:
                 return
             
-            # Récupérer les nouvelles valeurs
+            # Retrieve the nouvelles valeurs
             new_logger = self.logger_combo.currentData()
             new_action = self.action_combo.currentText().strip()
             new_message = self.message_edit.toPlainText().strip()
             
-            # Ajouter l'action à l'historique si elle n'existe pas et n'est pas vide
+            # Ajouter l'action à l'historique if elle n'existe not and n'est not vide
             if new_action and self.action_combo.findText(new_action) == -1:
                 self.action_combo.addItem(new_action)
             
-            # Vérifier si changé par rapport aux valeurs ORIGINALES
+            # Check if changé par rapport aux valeurs ORIGINALES
             if new_logger != self.current_log.logger_name or new_action != self.current_log.action or new_message != self.current_log.message:
                 self.current_log.new_logger = new_logger
                 self.current_log.new_action = new_action
                 self.current_log.new_message = new_message
                 self.current_log.modified = True
                 
-                # Mettre à jour la table
+                # Mettre à jour the table
                 self._refresh_table_row()
                 self._update_stats()
                 
                 self.status_label.setText(f"✏️ Log modifié : {Path(self.current_log.file_path).name}:{self.current_log.line_number}")
             else:
-                # Pas de changement par rapport à l'original
+                # not of changement par rapport à l'original
                 self.current_log.new_logger = new_logger
                 self.current_log.new_action = new_action
                 self.current_log.new_message = new_message
                 self.current_log.modified = False
                 
-                # Mettre à jour la table
+                # Mettre à jour the table
                 self._refresh_table_row()
                 self._update_stats()
                 
@@ -750,13 +749,13 @@ class LogSourceEditor(QMainWindow):
     
     def _refresh_table_row(self):
         """Rafraîchir la ligne de la table pour le log courant"""
-        # Bloquer les signaux pendant la mise à jour pour éviter les boucles
+        # Bloquer the signaux pendant the mise à jour for éviter the boucles
         self.table.blockSignals(True)
         
         for row in range(self.table.rowCount()):
             log = self.table.item(row, 0).data(Qt.UserRole)
             if log == self.current_log:
-                # Mettre à jour logger si changé
+                # Mettre à jour Logger if changé
                 logger_text = log.new_logger if log.new_logger else log.logger_name
                 self.table.item(row, 2).setText(logger_text)
                 
@@ -774,7 +773,7 @@ class LogSourceEditor(QMainWindow):
                 modified_item.setForeground(QColor("#4CAF50") if log.modified else QColor("#000000"))
                 break
         
-        # Débloquer les signaux
+        # Débloquer the signaux
         self.table.blockSignals(False)
     
     def apply_filter(self):
@@ -811,7 +810,7 @@ class LogSourceEditor(QMainWindow):
             if show:
                 visible_count += 1
         
-        # Mettre à jour les statistiques
+        # Mettre à jour the statistiques
         self._update_stats(visible_count)
     
     def _update_stats(self, visible_count=None):
@@ -888,7 +887,7 @@ class LogSourceEditor(QMainWindow):
                 with open(file_path, 'r', encoding='utf-8') as f:
                     lines = f.readlines()
                 
-                # Modifier les lignes (en ordre inverse pour ne pas décaler les numéros)
+                # Modifier the lignes (en ordre inverse for ne not décaler the numéros)
                 for log in sorted(logs, key=lambda x: x.line_number, reverse=True):
                     line_idx = log.line_number - 1
                     if line_idx < len(lines):
@@ -897,14 +896,14 @@ class LogSourceEditor(QMainWindow):
                         lines[line_idx] = new_line
                         success_count += 1
                 
-                # Écrire le fichier
+                # Écrire the File
                 with open(file_path, 'w', encoding='utf-8') as f:
                     f.writelines(lines)
                     
             except Exception as e:
                 error_files.append(f"{Path(file_path).name}: {str(e)}")
         
-        # Message de résultat
+        # Message of résultat
         result_msg = f"✅ {success_count} log(s) modifié(s) dans {len(files_to_modify)} fichier(s) !"
         
         if error_files:
@@ -919,14 +918,14 @@ class LogSourceEditor(QMainWindow):
             result_msg
         )
         
-        # Réinitialiser les flags "modified"
+        # Réinitialiser the flags "modified"
         for log in modified_logs:
             log.modified = False
             log.action = log.new_action
             log.message = log.new_message
             log.logger_name = log.new_logger
         
-        # Rafraîchir la table
+        # Rafraîchir the table
         for row in range(self.table.rowCount()):
             log = self.table.item(row, 0).data(Qt.UserRole)
             self.table.item(row, 6).setText("")
@@ -940,7 +939,7 @@ class LogSourceEditor(QMainWindow):
         indent = len(original_line) - len(original_line.lstrip())
         indent_str = original_line[:indent]
         
-        # Détecter le préfixe du logger (self., module_, etc.)
+        # Détecter the préfixe of the Logger (self., module_, etc.)
         logger_prefix = ""
         if "self.logger" in original_line:
             logger_prefix = "self."
@@ -952,22 +951,22 @@ class LogSourceEditor(QMainWindow):
         # Garder le format du message original (f-string, string normale, etc.)
         original_msg = original_line.strip()
         
-        # Détecter si c'est une f-string
+        # Détecter if c'est une f-string
         is_fstring = re.search(r'logger\.\w+\s*\(\s*f["\']', original_line)
         
         # Construire le nouveau message
         if is_fstring:
-            # Préserver la f-string
+            # Préserver the f-string
             new_msg = f'f"{log.new_message}"'
         else:
-            # String normale - échapper les guillemets
+            # String normale - échapper the guillemets
             msg_escaped = log.new_message.replace('"', '\\"')
             new_msg = f'"{msg_escaped}"'
         
-        # Vérifier si le logger a changé - utiliser log_with_action si action existe
+        # Check if the Logger a changé - utiliser log_with_action if action existe
         if log.new_action:
             # Format: log_with_action(logger, "level", message, action="ACTION")
-            # Échapper les guillemets dans le message pour log_with_action
+            # Échapper the guillemets in the message for log_with_action
             msg_for_func = log.new_message.replace('"', '\\"')
             new_line = f'{indent_str}log_with_action({log.new_logger}, "{level_lower}", "{msg_for_func}", action="{log.new_action}")\n'
         else:

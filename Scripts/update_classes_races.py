@@ -6,7 +6,7 @@ Script pour mettre à jour classes_races.json :
 """
 import json
 
-# Dictionnaire de traductions pour les spécialisations
+# Dictionnaire of traductions for the spécialisations
 SPEC_TRANSLATIONS = {
     # Albion specializations
     "Crossbow": {"fr": "Arbalète", "de": "Armbrust"},
@@ -134,10 +134,10 @@ for realm_name, realm_data in data.items():
     if removed_classes > 0:
         print(f"   ✓ Supprimé {removed_classes} classe(s) Mauler")
     
-    # Traduire les spécialisations
+    # Traduire the spécialisations
     for class_info in realm_data['classes']:
         if 'specializations' in class_info:
-            # Convertir les spécialisations en format multilingue
+            # Convertir the spécialisations en format multilingue
             old_specs = class_info['specializations']
             new_specs = [translate_specialization(spec) for spec in old_specs]
             class_info['specializations'] = new_specs
@@ -145,7 +145,7 @@ for realm_name, realm_data in data.items():
 
 print(f"\n💾 Sauvegarde du fichier mis à jour...")
 
-# Sauvegarder le fichier mis à jour
+# Save the File mis à jour
 with open('Data/classes_races.json', 'w', encoding='utf-8') as f:
     json.dump(data, f, indent=2, ensure_ascii=False)
 

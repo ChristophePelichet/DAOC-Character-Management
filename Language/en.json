@@ -238,5 +238,11 @@
     "backup_settings_saved_title": "Settings saved",
     "backup_settings_saved_message": "Backup settings have been updated",
     "backup_settings_error": "Error saving backup settings",
-    "backup_no_backups_yet": "No backups yet"
+    "backup_no_backups_yet": "No backups yet",
+    "info_section_title": "ℹ️ Information",
+    "version_check_current": "Current version:",
+    "version_check_latest": "Latest version:",
+    "version_check_update_available": "🎉 Update available!",
+    "version_check_up_to_date": "✅ Up to date",
+    "version_check_error": "⚠️ Check failed"
 }

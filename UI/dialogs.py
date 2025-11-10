@@ -83,9 +83,12 @@ class CharacterSheetWindow(QDialog):
         
         # === LEFT SIDE: Class Banner ===
         self.banner_label = QLabel()
-        self.banner_label.setFixedWidth(150)  # Fixed width for banner
-        self.banner_label.setAlignment(Qt.AlignmentFlag.AlignTop)
-        self.banner_label.setScaledContents(False)
+        self.banner_label.setMinimumWidth(150)  # Minimum width for banner
+        self.banner_label.setMaximumWidth(200)  # Maximum width for banner
+        self.banner_label.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignHCenter)
+        self.banner_label.setScaledContents(True)  # Scale to fill the label
+        from PySide6.QtWidgets import QSizePolicy
+        self.banner_label.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding)
         self._update_class_banner()  # Load initial banner
         main_horizontal.addWidget(self.banner_label)
         
@@ -670,12 +673,8 @@ class CharacterSheetWindow(QDialog):
         if os.path.exists(banner_path):
             pixmap = QPixmap(banner_path)
             if not pixmap.isNull():
-                # Scale pixmap to fit width while maintaining aspect ratio
-                scaled_pixmap = pixmap.scaledToWidth(
-                    self.banner_label.width(),
-                    Qt.TransformationMode.SmoothTransformation
-                )
-                self.banner_label.setPixmap(scaled_pixmap)
+                # Set pixmap without scaling - Qt will handle scaling with setScaledContents(True)
+                self.banner_label.setPixmap(pixmap)
                 self.banner_label.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignHCenter)
                 self.banner_label.setStyleSheet("")
             else:

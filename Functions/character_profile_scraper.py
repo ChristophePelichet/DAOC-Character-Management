@@ -157,14 +157,6 @@ class CharacterProfileScraper:
             log_with_action(profile_logger, "info", f"Current URL: {current_url}", action="LOAD_COOKIES")
             log_with_action(profile_logger, "info", f"HTML size: {len(html_content)} chars", action="LOAD_COOKIES")
             
-            # Save HTML for debugging
-            try:
-                with open("debug_herald_after_cookies.html", 'w', encoding='utf-8') as f:
-                    f.write(html_content)
-                log_with_action(profile_logger, "info", "Saved debug_herald_after_cookies.html", action="LOAD_COOKIES")
-            except:
-                pass
-            
             # Detection: If we have "not available" message → Not connected
             error_message = 'The requested page "herald" is not available.'
             has_error = error_message in html_content
@@ -240,15 +232,6 @@ class CharacterProfileScraper:
                           f"Page loaded - Size: {len(page_source)} chars", 
                           action="SCRAPE_WEALTH")
             
-            # Save HTML for debugging
-            debug_file = "debug_wealth_page.html"
-            try:
-                with open(debug_file, 'w', encoding='utf-8') as f:
-                    f.write(page_source)
-                log_with_action(profile_logger, "info", f"Page HTML saved to {debug_file}", action="SCRAPE_WEALTH")
-            except Exception as e:
-                log_with_action(profile_logger, "warning", f"Could not save debug HTML: {e}", action="SCRAPE_WEALTH")
-            
             # Check if we got the error message (not connected)
             if 'The requested page "herald" is not available.' in page_source:
                 log_with_action(profile_logger, "error", 
@@ -306,16 +289,6 @@ class CharacterProfileScraper:
                 }
             else:
                 log_with_action(profile_logger, "warning", "Money value not found on page", action="SCRAPE_WEALTH")
-                
-                # Debug: Save HTML for analysis if in debug mode
-                try:
-                    if config.get('debug_mode', False):
-                        debug_file = "debug_wealth_page.html"
-                        with open(debug_file, 'w', encoding='utf-8') as f:
-                            f.write(page_source)
-                        log_with_action(profile_logger, "debug", f"HTML saved to {debug_file}", action="SCRAPE_WEALTH")
-                except:
-                    pass
                 
                 return {
                     'success': False,

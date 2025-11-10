@@ -143,3 +143,5 @@ main.spec
 
 # Debug files
 Scripts/debug_herald_page.html
+debug_wealth_page.html
+debug_herald_after_cookies.html

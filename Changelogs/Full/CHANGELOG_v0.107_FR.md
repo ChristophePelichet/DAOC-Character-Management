@@ -26,6 +26,8 @@ Cette version apporte un **système de vérification de version depuis GitHub**,
 - ✅ Fix messages d'erreur incomplets
 - ✅ Fix formatage monnaie (TypeError)
 - ✅ Fix affichage monnaie (taille optimisée)
+- ✅ **Fix affichage statistiques sur petits écrans**
+- ✅ **Fix hauteur complète des sections statistiques**
 
 ---
 
@@ -1824,7 +1826,80 @@ requests>=2.28.0
 
 ---
 
-## 📝 Notes de Migration
+## � Fix Affichage Statistiques sur Petits Écrans
+
+### Problème
+
+Les sections **RvR, PvP, PvE, Wealth et Achievements** utilisaient des `QScrollArea` qui :
+- **Limitaient la hauteur** : Empêchaient l'affichage complet sur grands écrans
+- **Créaient des barres de scroll verticales** : Inutiles en plein écran
+- **Tronquaient le contenu** : Sur petits écrans, les statistiques n'étaient pas visibles
+
+**Symptômes** :
+- Sur grand écran : Sections limitées en hauteur malgré l'espace disponible
+- Sur petit écran : Texte tronqué sans possibilité de scroll horizontal
+- Section PvP : Détails par royaume (→ Alb: X | Hib: Y | Mid: Z) coupés
+
+### Solution Implémentée
+
+**Suppression des QScrollArea** :
+```python
+# AVANT
+rvr_scroll = QScrollArea()
+rvr_scroll.setWidgetResizable(True)
+rvr_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+rvr_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+rvr_scroll.setWidget(rvr_scroll_widget)
+
+# APRÈS
+rvr_sublayout = QVBoxLayout()
+rvr_subgroup.setLayout(rvr_sublayout)
+```
+
+**Labels PvP sans word wrap** :
+```python
+self.solo_kills_detail_label.setWordWrap(False)
+self.deathblows_detail_label.setWordWrap(False)
+self.kills_detail_label.setWordWrap(False)
+```
+
+### Sections Modifiées
+
+1. **RvR** : Suppression scroll area
+2. **PvP** : Suppression scroll area + `setWordWrap(False)` sur détails
+3. **PvE** : Suppression scroll area
+4. **Wealth** : Suppression scroll area
+5. **Achievements** : Suppression scroll area + limite hauteur 200px
+
+### Comportement Final
+
+**Sur grand écran** :
+- ✅ Affichage complet en hauteur de toutes les sections
+- ✅ Pas de scroll vertical inutile
+- ✅ Utilisation optimale de l'espace disponible
+
+**Sur petit écran** :
+- ✅ Scroll horizontal naturel au niveau de la fenêtre
+- ✅ Pas de troncature du texte
+- ✅ Détails PvP par royaume visibles en scrollant
+
+### Fichiers Modifiés
+
+- `UI/dialogs.py` :
+  - Lignes 229-275 : Section RvR (suppression scroll)
+  - Lignes 276-365 : Section PvP (suppression scroll + setWordWrap)
+  - Lignes 373-456 : Section PvE (suppression scroll)
+  - Lignes 463-475 : Section Wealth (suppression scroll)
+  - Lignes 483-504 : Section Achievements (suppression scroll)
+
+### Commits Associés
+
+- `9c4708e` : Fix: Remove scroll areas, preserve full height display
+- `1bec23c` : Fix: Remove scroll area from Achievements section
+
+---
+
+## �📝 Notes de Migration
 
 ### Depuis v0.106 vers v0.107
 

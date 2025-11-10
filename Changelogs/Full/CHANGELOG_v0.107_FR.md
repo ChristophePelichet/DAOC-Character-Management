@@ -287,32 +287,119 @@ dragon_label = QLabel("🐉 " + lang.get("dragon_kills_label") + ":")  # ❌ Dev
 dragon_label = QLabel("🐉 " + lang.get("dragon_kills_label"))  # ✅ Devient "Dragon Kills:"
 ```
 
-### Nouvelle Section Réalisations
+### Nouvelle Section Réalisations (Achievements)
 
-**Fichier** : `UI/dialogs.py` (lignes ~420-440)
+**Fichier** : `UI/dialogs.py` (lignes ~445-477)
 
 **Traductions ajoutées** :
 - FR : `"achievements_section_title": "🏆 Réalisations"`
 - EN : `"achievements_section_title": "🏆 Achievements"`
 - DE : `"achievements_section_title": "🏆 Errungenschaften"`
 
-**Implémentation** :
-```python
-achievements_subgroup = QGroupBox(lang.get("achievements_section_title"))
-achievements_subgroup.setMinimumWidth(250)
-achievements_sublayout = QVBoxLayout()
+**Implémentation Complète** :
 
-# Placeholder temporaire
-achievements_placeholder = QLabel("🔜 " + lang.get("statistics_coming_soon"))
-achievements_placeholder.setStyleSheet("color: gray; font-style: italic; padding: 20px;")
-achievements_placeholder.setAlignment(Qt.AlignmentFlag.AlignCenter)
-achievements_sublayout.addWidget(achievements_placeholder)
+```python
+# Section Réalisations (pleine largeur)
+achievements_group = QGroupBox(lang.get("achievements_section_title"))
+achievements_layout = QVBoxLayout()
+
+# QScrollArea pour liste scrollable
+self.achievements_scroll = QScrollArea()
+self.achievements_scroll.setWidgetResizable(True)
+self.achievements_scroll.setStyleSheet("QScrollArea { border: none; }")
+self.achievements_scroll.setMaximumHeight(200)  # Hauteur limitée
+self.achievements_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+self.achievements_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+
+# Container dynamique pour achievements
+self.achievements_container = QWidget()
+self.achievements_container_layout = QVBoxLayout()
+self.achievements_container.setLayout(self.achievements_container_layout)
+self.achievements_scroll.setWidget(self.achievements_container)
 ```
 
-**Utilité future** :
-- Affichage des titres/récompenses obtenus
-- Progression vers objectifs RvR/PvE
-- Badges spéciaux (premier kill dragon, etc.)
+**Disposition en 2 Colonnes** :
+
+Les achievements s'affichent sur **2 colonnes de 8** avec séparateur vertical :
+
+```
+┌──────────────────────────┬─│─┬──────────────────────────┐
+│ Dragon Kills   19/50     │ │ │ Loyalty        36/50     │
+│   (Dragon Foe)           │ │ │   (Commited)             │
+│ Legion Kills   5/10      │ │ │ Relics Captures 32/50    │
+│   (Demon Killer)         │ │ │   (Relic Captain)        │
+│ ...                      │ │ │ ...                      │
+└──────────────────────────┴─│─┴──────────────────────────┘
+```
+
+**Format QGridLayout (3 colonnes par achievement)** :
+- **Colonne 0** : Titre (ex: "Dragon Kills")
+- **Colonne 1** : Progression en gras (ex: "19 / 50")
+- **Colonne 2** : Tier actuel en gris italique (ex: "(Dragon Foe)")
+
+**Scraping Herald** :
+
+```python
+# Functions/character_profile_scraper.py, lignes ~910-1020
+def scrape_achievements(self, character_url: str) -> dict:
+    """Scrape achievements depuis Herald (&t=achievements)"""
+    
+    # Navigation vers page achievements
+    achievements_url = f"{character_url}&t=achievements"
+    self.driver.get(achievements_url)
+    
+    # Parsing HTML avec BeautifulSoup
+    soup = BeautifulSoup(page_source, 'html.parser')
+    player_content = soup.find('div', id='player_content')
+    
+    # Extraction des achievements (tr.titlerow)
+    titlerows = player_content.find_all('tr', class_='titlerow')
+    
+    for row in titlerows:
+        cells = row.find_all('td')
+        if len(cells) >= 2:
+            title = cells[0].get_text(strip=True)
+            progress = cells[1].get_text(strip=True)
+            
+            # Gestion des "Current:" (tiers débloqués)
+            if title == "Current:":
+                current_tier = progress if progress != "-" else "None"
+                achievements_list[-1]['current'] = current_tier
+            else:
+                achievements_list.append({
+                    'title': title,
+                    'progress': progress,
+                    'current': None
+                })
+```
+
+**Exemples d'Achievements** :
+- 🐉 **Dragon Kills** : 19 / 50 → Current: Dragon Foe
+- 👹 **Legion Kills** : 5 / 10 → Current: Demon Killer
+- 🏰 **Keep Captures** : 116 / 500 → Current: Frontier Vindicator
+- 🗼 **Tower Captures** : 271 / 1 K → Current: Stronghold Soldier
+- 💎 **Loyalty** : 36 / 50 → Current: Commited
+
+**Intégration Automatique** :
+
+Les achievements sont récupérés automatiquement lors du clic "Actualiser Stats" :
+
+```python
+# UI/dialogs.py, ligne ~1125
+result_achievements = scraper.scrape_achievements(url)
+
+# Mise à jour UI si succès
+if result_achievements['success']:
+    achievements = result_achievements['achievements']
+    self._update_achievements_display(achievements)
+    self.character_data['achievements'] = achievements
+```
+
+**Optimisations** :
+- ✅ Espacement vertical réduit (2px) pour compacité
+- ✅ Scrollbar verticale seulement si nécessaire (>16 achievements)
+- ✅ Scrollbar horizontale désactivée
+- ✅ Hauteur maximale 200px pour ne pas surcharger l'UI
 
 ### Amélioration Visuelle Monnaie
 

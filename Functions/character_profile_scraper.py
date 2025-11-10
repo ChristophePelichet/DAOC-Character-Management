@@ -905,6 +905,132 @@ class CharacterProfileScraper:
                 'error': error_msg
             }
     
+    def scrape_achievements(self, character_url):
+        """
+        Scrape achievements from character Herald page.
+        
+        Args:
+            character_url (str): URL of the character Herald page
+            
+        Returns:
+            dict: {
+                'success': bool,
+                'achievements': list of dict with 'title' and 'progress' (e.g., "19/50"),
+                'error': str or None
+            }
+        """
+        try:
+            log_with_action(profile_logger, "info", 
+                          f"Starting achievements scraping for URL: {character_url}", 
+                          action="SCRAPE_ACHIEVEMENTS")
+            
+            # Navigate to Achievements tab (accessed via &t=achievements parameter)
+            if '&t=' in character_url:
+                achievements_url = character_url
+            else:
+                achievements_url = f"{character_url}&t=achievements"
+            
+            log_with_action(profile_logger, "info", 
+                          f"Loading achievements URL: {achievements_url}", 
+                          action="SCRAPE_ACHIEVEMENTS")
+            
+            self.driver.get(achievements_url)
+            
+            # Wait for page to load
+            import time
+            time.sleep(2)
+            
+            # Check if connected
+            page_source = self.driver.page_source
+            
+            if 'The requested page "herald" is not available.' in page_source:
+                log_with_action(profile_logger, "error", 
+                              "Not connected - Herald page not available", 
+                              action="SCRAPE_ACHIEVEMENTS")
+                return {
+                    'success': False,
+                    'achievements': [],
+                    'error': 'Not connected to Herald - please regenerate cookies'
+                }
+            
+            soup = BeautifulSoup(page_source, 'html.parser')
+            
+            # Find player_content div
+            player_content = soup.find('div', id='player_content')
+            
+            if not player_content:
+                log_with_action(profile_logger, "warning", 
+                              "player_content div not found", 
+                              action="SCRAPE_ACHIEVEMENTS")
+                return {
+                    'success': False,
+                    'achievements': [],
+                    'error': 'Player content not loaded'
+                }
+            
+            achievements_list = []
+            
+            # Find all table rows with class "titlerow" - these contain the achievements
+            # Structure: <tr class="titlerow"><td>Title</td><td>X / Y</td></tr>
+            # Note: "Current:" rows show the current achievement tier name
+            titlerows = player_content.find_all('tr', class_='titlerow')
+            
+            log_with_action(profile_logger, "info", 
+                          f"Found {len(titlerows)} titlerow elements", 
+                          action="SCRAPE_ACHIEVEMENTS")
+            
+            i = 0
+            while i < len(titlerows):
+                row = titlerows[i]
+                cells = row.find_all('td')
+                
+                if len(cells) >= 2:
+                    title = cells[0].get_text(strip=True)
+                    progress = cells[1].get_text(strip=True)
+                    
+                    # If this is "Current:", combine it with the tier name
+                    if title == "Current:":
+                        # Format as "Current: Tier Name"
+                        current_tier = progress if progress != "-" else "None"
+                        # Add to the previous achievement if it exists
+                        if achievements_list:
+                            achievements_list[-1]['current'] = current_tier
+                    else:
+                        # Regular achievement with progress
+                        if title and progress:
+                            achievements_list.append({
+                                'title': title,
+                                'progress': progress,
+                                'current': None  # Will be filled by next "Current:" row if exists
+                            })
+                            
+                            log_with_action(profile_logger, "info", 
+                                          f"Achievement found: {title} - {progress}", 
+                                          action="SCRAPE_ACHIEVEMENTS")
+                
+                i += 1
+            
+            log_with_action(profile_logger, "info", 
+                          f"Achievements scraping completed: {len(achievements_list)} achievements found", 
+                          action="SCRAPE_ACHIEVEMENTS")
+            
+            return {
+                'success': True,
+                'achievements': achievements_list,
+                'error': None
+            }
+            
+        except Exception as e:
+            error_msg = f"Error scraping achievements: {e}"
+            log_with_action(profile_logger, "error", 
+                          f"{error_msg}\n{traceback.format_exc()}", 
+                          action="SCRAPE_ACHIEVEMENTS")
+            return {
+                'success': False,
+                'achievements': [],
+                'error': error_msg
+            }
+    
     def __enter__(self):
         """Context manager entry"""
         return self
@@ -912,4 +1038,5 @@ class CharacterProfileScraper:
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Context manager exit - ensure cleanup"""
         self.close()
+
 

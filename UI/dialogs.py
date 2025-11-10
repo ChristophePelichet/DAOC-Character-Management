@@ -16,7 +16,7 @@ from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QFormLayout, QGroupBox, QLabel, 
     QPushButton, QLineEdit, QComboBox, QCheckBox, QSlider, QMessageBox,
     QDialogButtonBox, QFileDialog, QTableWidget, QTableWidgetItem, QHeaderView,
-    QWidget, QTextEdit, QApplication, QProgressBar, QMenu, QGridLayout, QFrame
+    QWidget, QTextEdit, QApplication, QProgressBar, QMenu, QGridLayout, QFrame, QScrollArea
 )
 from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtGui import QBrush, QColor, QIcon, QPixmap
@@ -440,25 +440,9 @@ class CharacterSheetWindow(QDialog):
         pve_subgroup.setLayout(pve_sublayout)
         pve_achievements_horizontal.addWidget(pve_subgroup, 1)  # Stretch factor 1 for 50%
         
-        # === Achievements Sub-section ===
-        achievements_subgroup = QGroupBox(lang.get("achievements_section_title"))
-        achievements_subgroup.setMinimumWidth(250)
-        achievements_sublayout = QVBoxLayout()
-        
-        # Placeholder for future achievements content
-        achievements_placeholder = QLabel("🔜 " + lang.get("statistics_coming_soon"))
-        achievements_placeholder.setStyleSheet("color: gray; font-style: italic; padding: 20px;")
-        achievements_placeholder.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        achievements_sublayout.addWidget(achievements_placeholder)
-        
-        achievements_subgroup.setLayout(achievements_sublayout)
-        pve_achievements_horizontal.addWidget(achievements_subgroup, 1)  # Stretch factor 1 for 50%
-        
-        # Add the horizontal layout containing both PvE and Achievements to statistics
-        statistics_layout.addLayout(pve_achievements_horizontal)
-        
         # === Wealth Sub-section ===
         wealth_subgroup = QGroupBox(lang.get("wealth_section_title"))
+        wealth_subgroup.setMinimumWidth(250)
         wealth_layout = QFormLayout()
         
         # Money display
@@ -473,7 +457,47 @@ class CharacterSheetWindow(QDialog):
             self.money_label.setText(str(money_value))
         
         wealth_subgroup.setLayout(wealth_layout)
-        statistics_layout.addWidget(wealth_subgroup)
+        pve_achievements_horizontal.addWidget(wealth_subgroup, 1)  # Stretch factor 1 for 50%
+        
+        # Add the horizontal layout containing both PvE and Wealth to statistics
+        statistics_layout.addLayout(pve_achievements_horizontal)
+        
+        # === Achievements Section (full width) ===
+        achievements_group = QGroupBox(lang.get("achievements_section_title"))
+        achievements_layout = QVBoxLayout()
+        
+        # Scroll area for achievements list
+        self.achievements_scroll = QScrollArea()
+        self.achievements_scroll.setWidgetResizable(True)
+        self.achievements_scroll.setStyleSheet("QScrollArea { border: none; }")
+        self.achievements_scroll.setMaximumHeight(200)  # Limit height
+        self.achievements_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.achievements_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        
+        # Container widget for achievements
+        self.achievements_container = QWidget()
+        self.achievements_container_layout = QVBoxLayout()
+        self.achievements_container_layout.setSpacing(3)
+        self.achievements_container_layout.setContentsMargins(0, 0, 0, 0)
+        self.achievements_container.setLayout(self.achievements_container_layout)
+        
+        # Initial placeholder
+        achievements_placeholder = QLabel("—")
+        achievements_placeholder.setStyleSheet("color: gray; font-style: italic;")
+        achievements_placeholder.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.achievements_container_layout.addWidget(achievements_placeholder)
+        self.achievements_container_layout.addStretch()
+        
+        self.achievements_scroll.setWidget(self.achievements_container)
+        achievements_layout.addWidget(self.achievements_scroll)
+        
+        # Load existing achievements if available
+        achievements_data = self.character_data.get('achievements', [])
+        if achievements_data and len(achievements_data) > 0:
+            self._update_achievements_display(achievements_data)
+        
+        achievements_group.setLayout(achievements_layout)
+        statistics_layout.addWidget(achievements_group)
         
         # Horizontal layout for buttons (Update Stats + Info)
         buttons_layout = QHBoxLayout()
@@ -1009,6 +1033,121 @@ class CharacterSheetWindow(QDialog):
             lang.get("stats_info_message")
         )
     
+    def _update_achievements_display(self, achievements_list):
+        """
+        Update achievements display with the provided list.
+        Uses QGridLayout in 2 columns of 8 achievements with vertical separator.
+        
+        Args:
+            achievements_list: List of dicts with 'title', 'progress', and 'current' keys
+        """
+        # Clear existing widgets
+        while self.achievements_container_layout.count():
+            item = self.achievements_container_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+            elif item.layout():
+                # Clear nested layouts
+                while item.layout().count():
+                    nested_item = item.layout().takeAt(0)
+                    if nested_item.widget():
+                        nested_item.widget().deleteLater()
+        
+        if not achievements_list or len(achievements_list) == 0:
+            # Show placeholder
+            placeholder = QLabel("—")
+            placeholder.setStyleSheet("color: gray; font-style: italic;")
+            placeholder.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.achievements_container_layout.addWidget(placeholder)
+            self.achievements_container_layout.addStretch()
+            return
+        
+        # Create horizontal layout for 2 columns
+        columns_layout = QHBoxLayout()
+        columns_layout.setSpacing(15)
+        
+        # Split achievements into 2 groups of 8 (or less)
+        mid_point = 8
+        first_column = achievements_list[:mid_point]
+        second_column = achievements_list[mid_point:]
+        
+        # === First column (left) ===
+        first_grid = QGridLayout()
+        first_grid.setHorizontalSpacing(10)
+        first_grid.setVerticalSpacing(2)
+        first_grid.setColumnStretch(0, 3)  # Title column
+        first_grid.setColumnStretch(1, 0)  # Progress column (fixed)
+        first_grid.setColumnStretch(2, 2)  # Current tier column
+        
+        for row, achievement in enumerate(first_column):
+            title = achievement.get('title', 'Unknown')
+            progress = achievement.get('progress', '0/0')
+            current_tier = achievement.get('current', None)
+            
+            # Title
+            title_label = QLabel(title)
+            title_label.setStyleSheet("font-size: 9pt;")
+            first_grid.addWidget(title_label, row, 0, Qt.AlignmentFlag.AlignLeft)
+            
+            # Progress
+            progress_label = QLabel(progress)
+            progress_label.setStyleSheet("font-weight: bold; font-size: 9pt;")
+            first_grid.addWidget(progress_label, row, 1, Qt.AlignmentFlag.AlignRight)
+            
+            # Current tier
+            if current_tier and current_tier != "None":
+                current_label = QLabel(f"({current_tier})")
+                current_label.setStyleSheet("font-size: 8pt; color: #6c757d; font-style: italic;")
+                first_grid.addWidget(current_label, row, 2, Qt.AlignmentFlag.AlignLeft)
+        
+        columns_layout.addLayout(first_grid, 1)  # Stretch factor 1
+        
+        # === Vertical separator ===
+        if second_column:  # Only add separator if there's a second column
+            separator = QFrame()
+            separator.setFrameShape(QFrame.Shape.VLine)
+            separator.setFrameShadow(QFrame.Shadow.Sunken)
+            separator.setStyleSheet("color: #cccccc;")
+            columns_layout.addWidget(separator)
+        
+        # === Second column (right) ===
+        if second_column:
+            second_grid = QGridLayout()
+            second_grid.setHorizontalSpacing(10)
+            second_grid.setVerticalSpacing(2)
+            second_grid.setColumnStretch(0, 3)  # Title column
+            second_grid.setColumnStretch(1, 0)  # Progress column (fixed)
+            second_grid.setColumnStretch(2, 2)  # Current tier column
+            
+            for row, achievement in enumerate(second_column):
+                title = achievement.get('title', 'Unknown')
+                progress = achievement.get('progress', '0/0')
+                current_tier = achievement.get('current', None)
+                
+                # Title
+                title_label = QLabel(title)
+                title_label.setStyleSheet("font-size: 9pt;")
+                second_grid.addWidget(title_label, row, 0, Qt.AlignmentFlag.AlignLeft)
+                
+                # Progress
+                progress_label = QLabel(progress)
+                progress_label.setStyleSheet("font-weight: bold; font-size: 9pt;")
+                second_grid.addWidget(progress_label, row, 1, Qt.AlignmentFlag.AlignRight)
+                
+                # Current tier
+                if current_tier and current_tier != "None":
+                    current_label = QLabel(f"({current_tier})")
+                    current_label.setStyleSheet("font-size: 8pt; color: #6c757d; font-style: italic;")
+                    second_grid.addWidget(current_label, row, 2, Qt.AlignmentFlag.AlignLeft)
+            
+            columns_layout.addLayout(second_grid, 1)  # Stretch factor 1
+        
+        # Add columns layout to container
+        self.achievements_container_layout.addLayout(columns_layout)
+        
+        # Add stretch at the end
+        self.achievements_container_layout.addStretch()
+    
     def open_herald_url(self):
         """Ouvre l'URL du Herald dans le navigateur avec les cookies"""
         url = self.herald_url_edit.text().strip()
@@ -1121,9 +1260,12 @@ class CharacterSheetWindow(QDialog):
             # Scrape Wealth stats (Money)
             result_wealth = scraper.scrape_wealth_money(url)
             
+            # Scrape Achievements
+            result_achievements = scraper.scrape_achievements(url)
+            
             scraper.close()
             
-            # Check if all four succeeded
+            # Check if all succeeded (achievements optional)
             all_success = result_rvr['success'] and result_pvp['success'] and result_pve['success'] and result_wealth['success']
             
             if all_success:
@@ -1192,6 +1334,13 @@ class CharacterSheetWindow(QDialog):
                 # Update UI labels - Wealth Stats (money is a string like "18p 128g")
                 money = result_wealth['money']
                 self.money_label.setText(str(money))
+                
+                # Update UI - Achievements (optional, no error if failed)
+                if result_achievements['success']:
+                    achievements = result_achievements['achievements']
+                    self._update_achievements_display(achievements)
+                    # Update character data
+                    self.character_data['achievements'] = achievements
                 
                 # Update character data - RvR Captures
                 self.character_data['tower_captures'] = tower

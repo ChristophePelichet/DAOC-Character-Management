@@ -3,11 +3,12 @@
 ## 🎯 Résumé (10 novembre 2025)
 
 ✅ Statistiques complètes RvR/PvP/PvE/Wealth depuis Herald  
-✅ **Nouveau : Layout 50/50 pour sections RvR/PvP et PvE/Réalisations**  
-✅ **Nouveau : Section Réalisations (placeholder)**  
+✅ **Nouveau : Layout 50/50 pour sections RvR/PvP et PvE/Monnaies**  
+✅ **Nouveau : Section Réalisations (Achievements) fonctionnelle**  
 ✅ **Amélioration : Alignement PvP avec QGridLayout**  
 ✅ **Amélioration : Détails royaume sur la même ligne**  
 ✅ **Amélioration : Section PvE avec séparateur vertical**  
+✅ **Amélioration : Réalisations en 2 colonnes de 8 avec QGridLayout**  
 ✅ Bouton "Actualiser Stats" désactivé pendant validation Herald  
 ✅ Bouton "Informations" sur les statistiques  
 ✅ Affichage amélioré de la monnaie (taille réduite, gras conservé)  
@@ -86,7 +87,8 @@
 
 **Layout Principal** :
 - ⚔️ **RvR (50%)** et 🗡️ **PvP (50%)** côte à côte  
-- 🐉 **PvE (50%)** et 🏆 **Réalisations (50%)** côte à côte  
+- 🐉 **PvE (50%)** et 💰 **Monnaies (50%)** côte à côte  
+- 🏆 **Réalisations** : Pleine largeur, 2 colonnes de 8
 - Largeur minimale : 250px par section  
 - Répartition équitable de l'espace
 
@@ -95,7 +97,9 @@
 ┌─────────────────────────────────────┐
 │     RvR (50%)    │    PvP (50%)     │
 ├─────────────────────────────────────┤
-│     PvE (50%)    │ Réalisations(50%)│
+│     PvE (50%)    │  Monnaies (50%)  │
+├─────────────────────────────────────┤
+│    Réalisations (100% - 2 colonnes) │
 └─────────────────────────────────────┘
 ```
 
@@ -138,21 +142,46 @@ Solo Kills: 1,234    → Alb: 456 | Hib: 123 | Mid: 655
 🏛️ Epic Dungeons: 2      | 🐊 Sobekite: 1
 ```
 
-### Nouvelle Section Réalisations
+### Nouvelle Section Réalisations (Achievements)
 
-**Emplacement** : À droite de la section PvE (50% de la largeur)
+**Emplacement** : Pleine largeur sous PvE/Monnaies
 
 **Traductions** :
 - FR : 🏆 Réalisations
 - EN : 🏆 Achievements
 - DE : 🏆 Errungenschaften
 
-**Contenu actuel** : Placeholder "🔜 Fonctionnalité bientôt disponible"
+**Fonctionnalités** :
+- ✅ Scraping automatique depuis Herald (`&t=achievements`)
+- ✅ Affichage en 2 colonnes de 8 achievements
+- ✅ Séparateur vertical entre les colonnes
+- ✅ QGridLayout pour alignement parfait (3 colonnes)
+- ✅ QScrollArea avec hauteur max 200px
+- ✅ Scrollbar verticale seulement si nécessaire
 
-**Utilité future** :
-- Affichage des titres/récompenses obtenus
-- Progression vers objectifs RvR/PvE
-- Badges spéciaux
+**Format d'Affichage** :
+```
+Titre Achievement    Progression    (Tier actuel)
+Dragon Kills         19 / 50        (Dragon Foe)
+Legion Kills         5 / 10         (Demon Killer)
+Total Kills          4.71 / 5 K     (Master Soldier)
+```
+
+**Disposition** :
+```
+┌─────────────────────────────┬─│─┬─────────────────────────────┐
+│ Colonne 1 (8 achievements)  │ │ │ Colonne 2 (8 suivants)      │
+│ Dragon Kills   19/50  (...)  │ │ │ Loyalty        36/50  (...)  │
+│ Legion Kills   5/10   (...)  │ │ │ Relics         32/50  (...)  │
+│ ...                         │ │ │ ...                         │
+└─────────────────────────────┴─│─┴─────────────────────────────┘
+```
+
+**Optimisations** :
+- Espacement vertical réduit (2px) pour compacité
+- Tier actuel en gris italique entre parenthèses
+- Scrollbar horizontale désactivée
+- Récupération automatique lors de "Actualiser Stats"
 
 ---
 

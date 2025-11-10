@@ -6,6 +6,10 @@ Vérifie si une nouvelle version est disponible sur GitHub
 import requests
 import logging
 from packaging import version
+import urllib3
+
+# Désactiver les warnings SSL
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 module_logger = logging.getLogger(__name__)
 
@@ -31,7 +35,8 @@ def check_for_updates(current_version: str) -> dict:
         
         module_logger.info(f"Vérification de version : actuelle={current_version}")
         
-        response = requests.get(url, timeout=5)
+        # Désactiver la vérification SSL pour éviter les problèmes de certificat
+        response = requests.get(url, timeout=5, verify=False)
         response.raise_for_status()
         
         latest_version = response.text.strip()

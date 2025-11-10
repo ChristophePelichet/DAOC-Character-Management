@@ -29,6 +29,8 @@
 ✅ Gestion intelligente des boutons Herald  
 ✅ Fix crash test connexion Herald  
 ✅ Suppression fichiers debug HTML automatiques  
+✅ **Fix affichage statistiques sur petits écrans**  
+✅ **Fix hauteur complète des sections statistiques**  
 
 ---
 
@@ -357,6 +359,14 @@ Total Kills          4.71 / 5 K     (Master Soldier)
 **Problème** : Application crashait lors d'erreurs de connexion  
 **Cause** : Pas de bloc `finally` pour fermer le driver  
 **Solution** : Pattern identique au fix de `search_herald_character()`
+
+### Fix Affichage Statistiques sur Petits Écrans
+**Problème** : Sections RvR/PvP/PvE/Wealth/Achievements tronquées sur petits écrans  
+**Solution** :
+- Suppression des `QScrollArea` qui limitaient la hauteur  
+- Ajout `setWordWrap(False)` sur labels PvP pour éviter retour à la ligne  
+- Affichage complet en hauteur sur grands écrans  
+- Scroll naturel au niveau de la fenêtre si nécessaire  
 
 ---
 

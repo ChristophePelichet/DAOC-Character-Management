@@ -24,6 +24,11 @@
 - Bouton "Informations" explicatif
 - Corrections critiques de stabilité des boutons
 
+**🐛 Corrections d'Affichage** (2025-11-10)
+- Fix affichage statistiques sur petits écrans
+- Suppression des scroll areas limitant la hauteur
+- Affichage complet des sections RvR/PvP/PvE/Wealth/Achievements
+
 ### 📌 Version Simplifiée
 *Liste concise des changements principaux*
 

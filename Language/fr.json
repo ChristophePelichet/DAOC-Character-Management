@@ -238,5 +238,13 @@
     "backup_settings_saved_title": "Paramètres sauvegardés",
     "backup_settings_saved_message": "Les paramètres de sauvegarde ont été mis à jour",
     "backup_settings_error": "Erreur lors de la sauvegarde des paramètres",
-    "backup_no_backups_yet": "Aucune sauvegarde pour l'instant"
+    "backup_no_backups_yet": "Aucune sauvegarde pour l'instant",
+    "info_section_title": "ℹ️ Informations",
+    "version_check_current": "Version actuelle:",
+    "version_check_latest": "Dernière version:",
+    "version_check_update_available": "🎉 Mise à jour disponible !",
+    "version_check_up_to_date": "✅ À jour",
+    "version_check_error": "⚠️ Erreur de vérification",
+    "version_check_button": "🔄 Vérifier",
+    "version_check_button_checking": "⏳ Vérification en cours..."
 }

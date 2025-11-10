@@ -238,5 +238,13 @@
     "backup_settings_saved_title": "Einstellungen gespeichert",
     "backup_settings_saved_message": "Sicherungseinstellungen wurden aktualisiert",
     "backup_settings_error": "Fehler beim Speichern der Sicherungseinstellungen",
-    "backup_no_backups_yet": "Noch keine Sicherungen"
+    "backup_no_backups_yet": "Noch keine Sicherungen",
+    "info_section_title": "ℹ️ Informationen",
+    "version_check_current": "Aktuelle Version:",
+    "version_check_latest": "Neueste Version:",
+    "version_check_update_available": "🎉 Update verfügbar!",
+    "version_check_up_to_date": "✅ Aktuell",
+    "version_check_error": "⚠️ Prüfung fehlgeschlagen",
+    "version_check_button": "🔄 Prüfen",
+    "version_check_button_checking": "⏳ Wird geprüft..."
 }

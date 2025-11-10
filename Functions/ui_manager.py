@@ -173,7 +173,9 @@ class UIManager:
         parent_layout.addLayout(delete_button_layout)
     
     def create_eden_status_bar(self, parent_layout):
-        """Crée la barre de statut de connexion Eden et la section Monnaie"""
+        """Crée la barre de statut de connexion Eden et la section Informations"""
+        from Functions.language_manager import lang
+        
         # Conteneur horizontal pour deux colonnes
         container_layout = QHBoxLayout()
         
@@ -216,25 +218,153 @@ class UIManager:
         status_group.setLayout(status_layout)
         container_layout.addWidget(status_group, 1)  # Stretch = 1
         
-        # ===== SECTION DROITE : Monnaie (feature à venir) =====
-        currency_group = QGroupBox("Monnaie")
-        currency_layout = QHBoxLayout()
-        currency_layout.setContentsMargins(5, 5, 5, 5)
+        # ===== SECTION DROITE : Informations (Version) =====
+        info_group = QGroupBox(lang.get("info_section_title"))
+        info_layout = QVBoxLayout()
+        info_layout.setContentsMargins(10, 10, 10, 10)
+        info_layout.setSpacing(5)
         
-        currency_label = QLabel("🔜 Feature à venir")
-        currency_label.setStyleSheet("padding: 3px; text-align: center; font-size: 12px;")
-        currency_label.setAlignment(Qt.AlignCenter)
-        currency_label.setMinimumHeight(35)
-        currency_layout.addWidget(currency_label)
+        # Version actuelle
+        current_layout = QHBoxLayout()
+        current_label = QLabel(lang.get("version_check_current"))
+        current_label.setStyleSheet("font-size: 11px;")
+        current_layout.addWidget(current_label)
         
-        currency_group.setLayout(currency_layout)
-        container_layout.addWidget(currency_group, 1)  # Stretch = 1
+        self.version_current_label = QLabel("—")
+        self.version_current_label.setStyleSheet("font-size: 11px; font-weight: bold;")
+        current_layout.addWidget(self.version_current_label)
+        current_layout.addStretch()
+        
+        info_layout.addLayout(current_layout)
+        
+        # Dernière version
+        latest_layout = QHBoxLayout()
+        latest_label = QLabel(lang.get("version_check_latest"))
+        latest_label.setStyleSheet("font-size: 11px;")
+        latest_layout.addWidget(latest_label)
+        
+        self.version_latest_label = QLabel("—")
+        self.version_latest_label.setStyleSheet("font-size: 11px; font-weight: bold;")
+        latest_layout.addWidget(self.version_latest_label)
+        latest_layout.addStretch()
+        
+        info_layout.addLayout(latest_layout)
+        
+        # Status et bouton de vérification (sur la même ligne)
+        status_button_layout = QHBoxLayout()
+        
+        self.version_status_label = QLabel("⏳ Vérification...")
+        self.version_status_label.setStyleSheet("font-size: 11px; font-style: italic; color: gray;")
+        status_button_layout.addWidget(self.version_status_label)
+        
+        self.version_check_button = QPushButton(lang.get("version_check_button"))
+        self.version_check_button.setStyleSheet("""
+            QPushButton {
+                font-size: 10px;
+                padding: 3px 8px;
+                background-color: #0078d4;
+                color: white;
+                border: none;
+                border-radius: 3px;
+            }
+            QPushButton:hover {
+                background-color: #005a9e;
+            }
+            QPushButton:disabled {
+                background-color: #cccccc;
+                color: #666666;
+            }
+        """)
+        self.version_check_button.clicked.connect(self._start_version_check)
+        status_button_layout.addWidget(self.version_check_button)
+        status_button_layout.addStretch()
+        
+        info_layout.addLayout(status_button_layout)
+        
+        info_group.setLayout(info_layout)
+        container_layout.addWidget(info_group, 1)  # Stretch = 1
         
         # Ajouter the conteneur à the layout principale
         parent_layout.addLayout(container_layout)
         
         # Lancer the Checking initiale
         self.check_eden_status()
+        
+        # Lancer la vérification de version en arrière-plan
+        self._start_version_check()
+    
+    def _start_version_check(self):
+        """Démarre la vérification de version en arrière-plan"""
+        from PySide6.QtCore import QThread, Signal
+        from Functions.version_checker import check_for_updates
+        from Functions.language_manager import lang
+        import os
+        
+        # Désactiver le bouton pendant la vérification
+        self.version_check_button.setEnabled(False)
+        self.version_check_button.setText(lang.get("version_check_button_checking"))
+        self.version_status_label.setText("⏳ Vérification...")
+        self.version_status_label.setStyleSheet("font-size: 11px; font-style: italic; color: gray;")
+        
+        class VersionCheckThread(QThread):
+            version_checked = Signal(dict)
+            
+            def run(self):
+                try:
+                    # Read current version from version.txt
+                    from Functions.path_manager import get_base_path
+                    version_file = os.path.join(get_base_path(), "version.txt")
+                    
+                    if os.path.exists(version_file):
+                        with open(version_file, 'r') as f:
+                            current_version = f.read().strip()
+                    else:
+                        current_version = "0.107"  # Fallback
+                    
+                    result = check_for_updates(current_version)
+                    self.version_checked.emit(result)
+                except Exception as e:
+                    self.version_checked.emit({
+                        'update_available': False,
+                        'current_version': '?',
+                        'latest_version': None,
+                        'error': str(e)
+                    })
+        
+        self.version_thread = VersionCheckThread()
+        self.version_thread.version_checked.connect(self._on_version_checked)
+        self.version_thread.start()
+    
+    def _on_version_checked(self, result):
+        """Gère le résultat de la vérification de version"""
+        from Functions.language_manager import lang
+        
+        current_ver = result['current_version']
+        latest_ver = result['latest_version']
+        
+        # Réactiver le bouton
+        self.version_check_button.setEnabled(True)
+        self.version_check_button.setText(lang.get("version_check_button"))
+        
+        # Mise à jour du label de version actuelle
+        self.version_current_label.setText(current_ver)
+        
+        if result['error']:
+            # Erreur pendant la vérification
+            self.version_latest_label.setText("—")
+            self.version_status_label.setText(lang.get("version_check_error"))
+            self.version_status_label.setStyleSheet("font-size: 11px; font-style: italic; color: orange;")
+        elif result['update_available']:
+            # Mise à jour disponible
+            self.version_latest_label.setText(latest_ver)
+            self.version_latest_label.setStyleSheet("font-size: 11px; font-weight: bold; color: green;")
+            self.version_status_label.setText(lang.get("version_check_update_available"))
+            self.version_status_label.setStyleSheet("font-size: 11px; font-weight: bold; color: green;")
+        else:
+            # À jour
+            self.version_latest_label.setText(latest_ver if latest_ver else current_ver)
+            self.version_status_label.setText(lang.get("version_check_up_to_date"))
+            self.version_status_label.setStyleSheet("font-size: 11px; font-style: italic; color: green;")
     
     def check_eden_status(self):
         """Vérifie le statut de connexion Eden en arrière-plan"""

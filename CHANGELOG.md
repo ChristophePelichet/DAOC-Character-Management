@@ -6,6 +6,12 @@
 
 ### 📌 Dernières Mises à Jour
 
+**🔄 Vérification de Version** (2025-11-10)
+- Système de vérification de version depuis GitHub
+- Affichage de la version actuelle et dernière version disponible
+- Bouton de vérification manuel avec désactivation pendant le check
+- Section "Informations" renommée (anciennement "Monnaie")
+
 **🎨 Système de Bannières de Classe** (2025-11-10)
 - Ajout de bannières visuelles pour chaque classe (44 classes DAOC)
 - Design responsive s'adaptant à la hauteur de la fenêtre
@@ -34,17 +40,20 @@
 
 ## Acces Rapide par Version
 
-### v0.107 (2025-11-10) - Bannières de Classe & Statistiques Complètes
+### v0.107 (2025-11-10) - Vérification Version & Bannières de Classe
 
 **Nouvelles Fonctionnalités**
+- 🔄 Système de vérification de version depuis GitHub
 - 🎨 Système de bannières visuelles pour les 44 classes DAOC
 - 📊 Statistiques Herald complètes (RvR/PvP/PvE/Wealth)
 - 🏆 Section Achievements avec scraping automatique
 - ℹ️ Bouton d'information explicatif sur les statistiques
 
 **Améliorations**
+- 🔄 Vérification automatique au démarrage + bouton manuel
 - 🔄 Bannières responsives (adaptation hauteur fenêtre)
 - ✅ Gestion intelligente des boutons Herald
+- 📝 Section "Monnaie" renommée en "Informations"
 - 🐛 Corrections critiques de stabilité
 
 **Version Simplifiee** 

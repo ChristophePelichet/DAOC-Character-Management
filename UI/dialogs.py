@@ -237,7 +237,7 @@ class CharacterSheetWindow(QDialog):
         rvr_scroll = QScrollArea()
         rvr_scroll.setWidgetResizable(True)
         rvr_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
-        rvr_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        rvr_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         rvr_scroll.setStyleSheet("QScrollArea { border: none; }")
         
         rvr_scroll_widget = QWidget()
@@ -291,7 +291,7 @@ class CharacterSheetWindow(QDialog):
         pvp_scroll = QScrollArea()
         pvp_scroll.setWidgetResizable(True)
         pvp_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
-        pvp_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        pvp_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         pvp_scroll.setStyleSheet("QScrollArea { border: none; }")
         
         pvp_scroll_widget = QWidget()
@@ -404,7 +404,7 @@ class CharacterSheetWindow(QDialog):
         pve_scroll = QScrollArea()
         pve_scroll.setWidgetResizable(True)
         pve_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
-        pve_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        pve_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         pve_scroll.setStyleSheet("QScrollArea { border: none; }")
         
         pve_scroll_widget = QWidget()
@@ -505,7 +505,7 @@ class CharacterSheetWindow(QDialog):
         wealth_scroll = QScrollArea()
         wealth_scroll.setWidgetResizable(True)
         wealth_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
-        wealth_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        wealth_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         wealth_scroll.setStyleSheet("QScrollArea { border: none; }")
         
         wealth_scroll_widget = QWidget()

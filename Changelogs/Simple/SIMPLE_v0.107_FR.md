@@ -1,20 +1,60 @@
-# v0.107 - Statistiques RvR/PvP/PvE Herald & Améliorations UI
+# v0.107 - Bannières de Classe & Statistiques Herald Complètes
 
 ## 🎯 Résumé (10 novembre 2025)
 
+### 🎨 Système de Bannières (Nouveau)
+✅ **Bannières visuelles pour les 44 classes DAOC**  
+✅ **Design responsive s'adaptant à la hauteur de fenêtre**  
+✅ **Mise à jour automatique classe/royaume**  
+✅ **Compatible PyInstaller (.exe)**  
+
+### 📊 Statistiques Herald
 ✅ Statistiques complètes RvR/PvP/PvE/Wealth depuis Herald  
-✅ **Nouveau : Layout 50/50 pour sections RvR/PvP et PvE/Monnaies**  
-✅ **Nouveau : Section Réalisations (Achievements) fonctionnelle**  
-✅ **Amélioration : Alignement PvP avec QGridLayout**  
-✅ **Amélioration : Détails royaume sur la même ligne**  
-✅ **Amélioration : Section PvE avec séparateur vertical**  
-✅ **Amélioration : Réalisations en 2 colonnes de 8 avec QGridLayout**  
-✅ Bouton "Actualiser Stats" désactivé pendant validation Herald  
+✅ **Layout 50/50 pour sections RvR/PvP et PvE/Monnaies**  
+✅ **Section Réalisations (Achievements) fonctionnelle**  
+✅ **Alignement PvP avec QGridLayout**  
+✅ **Réalisations en 2 colonnes de 8**  
 ✅ Bouton "Informations" sur les statistiques  
-✅ Affichage amélioré de la monnaie (taille réduite, gras conservé)  
+
+### 🐛 Corrections
 ✅ Messages d'erreur détaillés (RvR/PvP/PvE/Wealth)  
+✅ Gestion intelligente des boutons Herald  
 ✅ Fix crash test connexion Herald  
-✅ **Fix : Suppression fichiers debug HTML automatiques**  
+✅ Suppression fichiers debug HTML automatiques  
+
+---
+
+## 🎨 Nouveau : Système de Bannières de Classe
+
+### Fonctionnalités
+- **Bannière visuelle** : Affichée sur le côté gauche de la fiche personnage  
+- **44 classes** : Toutes les classes DAOC (Albion, Hibernia, Midgard)  
+- **Design par royaume** :
+  - 🔴 Albion : Rouge  
+  - 🟢 Hibernia : Vert  
+  - 🔵 Midgard : Bleu  
+
+### Caractéristiques Techniques
+- **Dimensions** : 150px largeur × hauteur responsive  
+- **Format** : JPEG  
+- **Localisation** : `Img/Banner/{Royaume}/{classe}.jpg`  
+- **Mise à jour auto** : Change lors de la modification classe/royaume  
+
+### Responsive Design
+- ✅ S'adapte automatiquement à la hauteur de la fenêtre  
+- ✅ Largeur fixe (150px) pour cohérence visuelle  
+- ✅ Pas de déformation grâce au ratio d'aspect conservé  
+
+### Portabilité
+- ✅ Utilise `get_resource_path()` pour compatibilité PyInstaller  
+- ✅ Fonctionne en développement ET en .exe compilé  
+- ✅ Fallback sur PNG si JPG manquant  
+- ✅ Message clair si bannière introuvable  
+
+### Commits Associés
+- `38b310f` : Création système bannières + 44 images  
+- `01bcc44` : Bannières responsives (hauteur)  
+- `883f8c6` : Portabilité PyInstaller avec get_resource_path()  
 
 ---
 

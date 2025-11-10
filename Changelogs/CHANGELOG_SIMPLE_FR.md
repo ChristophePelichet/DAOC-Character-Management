@@ -1,7 +1,5 @@
 # 📋 Changelog Simple - DAOC Character Management
 
----
-
 # ✨ v0.107 - 2025-11-10
 
 ### 🎉 Ajout 

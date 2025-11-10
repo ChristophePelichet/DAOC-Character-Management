@@ -11,6 +11,8 @@ Cette version apporte un **système de vérification de version depuis GitHub**,
 
 ### Nouvelles Fonctionnalités Principales
 - ✅ **Système de vérification de version automatique et manuel**
+- ✅ **Indicateurs visuels (✓/✗) pour statut de version**
+- ✅ **Lien de téléchargement cliquable vers GitHub Releases**
 - ✅ **Section "Informations" (renommée depuis "Monnaie")**
 - ✅ Statistiques RvR complètes (Towers, Keeps, Relics)
 - ✅ Statistiques PvP détaillées par royaume (Solo Kills, Deathblows, Kills)
@@ -54,8 +56,8 @@ Dernière version: 0.107
 
 **États visuels** :
 - ⏳ **Vérification en cours** : Texte gris italique
-- ✅ **À jour** : Texte vert italique "✅ À jour"
-- 🎉 **Mise à jour disponible** : Texte vert gras "🎉 Mise à jour disponible !"
+- ✅ **À jour** : ✓ vert à côté de "Version Actuelle" et "Dernière Version"
+- 🎉 **Mise à jour disponible** : ✗ rouge à côté de "Version Actuelle", ✓ vert à côté de "Dernière Version", lien de téléchargement visible
 - ⚠️ **Erreur** : Texte orange italique "⚠️ Erreur de vérification"
 
 **Bouton de vérification manuelle** :
@@ -66,12 +68,22 @@ Dernière version: 0.107
 
 ### Implémentation Technique
 
+**Fichier version.py (NOUVEAU)** :
+```python
+# Functions/version.py
+__version__ = "0.107"
+```
+- Contient la version actuelle de l'application
+- Utilisé comme source de vérité pour la version en cours
+- Séparé de version.txt qui représente maintenant la dernière version sur GitHub
+
 **Fichier version.txt** :
 ```
 0.107
 ```
 - Localisation : Racine du projet
 - Contenu : Numéro de version simple (pas de "v" préfixe)
+- Représente maintenant la dernière version disponible sur GitHub (branche main)
 
 **Module version_checker.py** :
 ```python
@@ -103,7 +115,7 @@ class VersionCheckThread(QThread):
     version_checked = Signal(dict)
     
     def run(self):
-        # Lecture version.txt local
+        # Lecture __version__ depuis Functions/version.py
         # Appel check_for_updates()
         # Émission du signal avec résultat
 ```
@@ -113,6 +125,36 @@ class VersionCheckThread(QThread):
 - Réactivation dans `_on_version_checked()` (callback)
 - Mise à jour du texte du bouton pendant le check
 - Update du status label avec couleur appropriée
+- Affichage/masquage du lien de téléchargement selon le statut
+
+**Indicateurs visuels** :
+```python
+# UI/dialogs.py - _on_version_checked()
+if result['update_available']:
+    # Version obsolète
+    self.version_current_label.setText(f"✗ {current_ver}")
+    self.version_current_label.setStyleSheet("font-size: 11px; font-weight: bold; color: red;")
+    
+    # Dernière version avec coche verte
+    self.version_latest_label.setText(f"✓ {latest_ver}")
+    self.version_latest_label.setStyleSheet("font-size: 11px; font-weight: bold; color: green;")
+    
+    # Afficher le lien de téléchargement
+    download_url = "https://github.com/ChristophePelichet/DAOC-Character-Management/releases/latest"
+    download_text = lang.get("version_check_download")
+    self.version_download_link.setText(f'<a href="{download_url}">{download_text}</a>')
+    self.version_download_link.show()
+else:
+    # Version à jour
+    self.version_current_label.setText(f"✓ {current_ver}")
+    self.version_current_label.setStyleSheet("font-size: 11px; font-weight: bold; color: green;")
+    
+    self.version_latest_label.setText(f"✓ {latest_ver}")
+    self.version_latest_label.setStyleSheet("font-size: 11px; font-weight: bold; color: green;")
+    
+    # Masquer le lien de téléchargement
+    self.version_download_link.hide()
+```
 
 ### Section "Informations"
 
@@ -128,9 +170,10 @@ class VersionCheckThread(QThread):
 
 **Disposition verticale** :
 ```
-Version actuelle: 0.107
-Dernière version: 0.107
+Version actuelle: ✓ 0.107 (vert si à jour, ✗ rouge si obsolète)
+Dernière version: ✓ 0.107 (toujours vert)
 ⏳ Vérification...  [🔄 Vérifier]
+📥 Télécharger (lien cliquable si mise à jour disponible)
 ```
 
 ### Traductions
@@ -145,7 +188,8 @@ Dernière version: 0.107
   "version_check_up_to_date": "✅ À jour",
   "version_check_error": "⚠️ Erreur de vérification",
   "version_check_button": "🔄 Vérifier",
-  "version_check_button_checking": "⏳ Vérification en cours..."
+  "version_check_button_checking": "⏳ Vérification en cours...",
+  "version_check_download": "📥 Télécharger"
 }
 ```
 
@@ -157,7 +201,8 @@ Dernière version: 0.107
   "version_check_button_checking": "⏳ Checking...",
   "version_check_update_available": "🎉 Update available!",
   "version_check_up_to_date": "✅ Up to date",
-  "version_check_error": "⚠️ Check failed"
+  "version_check_error": "⚠️ Check failed",
+  "version_check_download": "📥 Download"
 }
 ```
 
@@ -169,7 +214,8 @@ Dernière version: 0.107
   "version_check_button_checking": "⏳ Wird geprüft...",
   "version_check_update_available": "🎉 Update verfügbar!",
   "version_check_up_to_date": "✅ Aktuell",
-  "version_check_error": "⚠️ Prüfung fehlgeschlagen"
+  "version_check_error": "⚠️ Prüfung fehlgeschlagen",
+  "version_check_download": "📥 Herunterladen"
 }
 ```
 
@@ -206,12 +252,13 @@ packaging>=23.0
 
 ### Fichiers Modifiés
 
-- ✅ `version.txt` (NOUVEAU) : Version actuelle
+- ✅ `Functions/version.py` (NOUVEAU) : Constante __version__ pour version actuelle
+- ✅ `version.txt` : Représente maintenant la dernière version sur GitHub
 - ✅ `Functions/version_checker.py` (NOUVEAU) : Module de vérification
-- ✅ `Functions/ui_manager.py` : Intégration UI + renommage section
-- ✅ `Language/fr.json` : Traductions françaises
-- ✅ `Language/en.json` : Traductions anglaises
-- ✅ `Language/de.json` : Traductions allemandes
+- ✅ `Functions/ui_manager.py` : Intégration UI + renommage section + indicateurs visuels + lien téléchargement
+- ✅ `Language/fr.json` : Traductions françaises (ajout "version_check_download")
+- ✅ `Language/en.json` : Traductions anglaises (ajout "version_check_download")
+- ✅ `Language/de.json` : Traductions allemandes (ajout "version_check_download")
 - ✅ `requirements.txt` : Ajout requests et packaging
 
 ### Limitations
@@ -220,6 +267,157 @@ packaging>=23.0
 - **Requiert connexion internet** : Affiche erreur si hors ligne
 - **GitHub dépendance** : Nécessite que version.txt soit sur la branche main
 - **Version simple uniquement** : Pas de changelog ou notes de version automatiques
+
+### Améliorations du Système de Vérification de Version
+
+Cette version apporte **trois améliorations majeures** au système de vérification de version introduit dans la v0.107 :
+
+#### 1. Séparation Version Actuelle / Dernière Version
+
+**Problème Initial** :
+Le fichier `version.txt` était utilisé pour déterminer à la fois la version actuelle ET la dernière version depuis GitHub. Modifier `version.txt` localement affectait les deux valeurs, rendant impossible de tester le système de mise à jour.
+
+**Solution Implémentée** :
+- **Fichier `Functions/version.py` (NOUVEAU)** :
+  ```python
+  __version__ = "0.107"
+  ```
+  - Contient la version actuelle de l'application
+  - Utilisé comme source de vérité pour la version en cours d'exécution
+  - Modifié uniquement lors de la création d'une nouvelle version
+
+- **Fichier `version.txt`** :
+  - Représente maintenant la dernière version disponible sur GitHub
+  - Récupéré depuis la branche `main` du dépôt GitHub
+  - Permet de tester le système en modifiant uniquement ce fichier sur GitHub
+
+**Commits Associés** :
+- `42a63a9` : Fix: Use code constant for current version instead of version.txt
+  - Create Functions/version.py with __version__ constant
+  - Modify ui_manager.py to use __version__ instead of reading version.txt
+  - version.txt now only represents the latest version on GitHub
+
+#### 2. Indicateurs Visuels et Lien de Téléchargement
+
+**Problème** :
+L'utilisateur devait lire le texte de statut pour savoir si une mise à jour était disponible. Aucun moyen direct de télécharger la nouvelle version.
+
+**Solution Implémentée** :
+
+**A. Indicateurs Visuels (✓/✗)** :
+- ✓ **Vert** : Version à jour
+  ```
+  Version actuelle: ✓ 0.107 (vert)
+  Dernière version: ✓ 0.107 (vert)
+  ```
+
+- ✗ **Rouge** : Mise à jour disponible
+  ```
+  Version actuelle: ✗ 0.107 (rouge)
+  Dernière version: ✓ 0.108 (vert)
+  ```
+
+**B. Lien de Téléchargement** :
+- **URL** : `https://github.com/ChristophePelichet/DAOC-Character-Management/releases/latest`
+- **Texte** : "📥 Télécharger" (traduit FR/EN/DE)
+- **Comportement** :
+  - Visible uniquement si mise à jour disponible
+  - Cliquable (ouvre le navigateur automatiquement)
+  - Masqué si version à jour ou erreur
+
+**Implémentation Technique** :
+```python
+# UI/dialogs.py - _on_version_checked()
+if result['update_available']:
+    # Mise à jour disponible - croix rouge à côté de la version actuelle
+    self.version_current_label.setText(f"✗ {current_ver}")
+    self.version_current_label.setStyleSheet("font-size: 11px; font-weight: bold; color: red;")
+    
+    # Coche verte à côté de la dernière version
+    self.version_latest_label.setText(f"✓ {latest_ver}")
+    self.version_latest_label.setStyleSheet("font-size: 11px; font-weight: bold; color: green;")
+    
+    # Afficher le lien de téléchargement
+    download_url = "https://github.com/ChristophePelichet/DAOC-Character-Management/releases/latest"
+    download_text = lang.get("version_check_download")
+    self.version_download_link.setText(f'<a href="{download_url}" style="color: #0078d4; text-decoration: none;">{download_text}</a>')
+    self.version_download_link.show()
+else:
+    # À jour - coche verte à côté de la version actuelle
+    self.version_current_label.setText(f"✓ {current_ver}")
+    self.version_current_label.setStyleSheet("font-size: 11px; font-weight: bold; color: green;")
+    
+    # Coche verte à côté de la dernière version
+    self.version_latest_label.setText(f"✓ {latest_ver if latest_ver else current_ver}")
+    self.version_latest_label.setStyleSheet("font-size: 11px; font-weight: bold; color: green;")
+    
+    # Masquer le lien de téléchargement
+    self.version_download_link.hide()
+```
+
+**Commits Associés** :
+- `62fe01d` : Feat: Add download link and red text for outdated version
+  - Show current version in red when update is available
+  - Add clickable download link to GitHub releases/latest
+  - Hide/show download link based on update status
+  - Add translations for download link (FR/EN/DE)
+
+- `8f7148b` : Add visual indicators (✓/✗) for version check status
+  - Add green checkmark (✓) when version is up to date
+  - Add red cross (✗) when update is available
+  - Always show green checkmark next to latest version
+
+#### 3. Corrections de Bugs
+
+**A. TypeError dans lang.get()** :
+
+**Problème** :
+```python
+download_text = lang.get("version_check_download", "📥 Télécharger")
+# TypeError: LanguageManager.get() takes 2 positional arguments but 3 were given
+```
+
+**Cause** :
+La méthode `LanguageManager.get(key, **kwargs)` n'accepte pas de valeur par défaut en deuxième argument positionnel.
+
+**Solution** :
+```python
+download_text = lang.get("version_check_download")  # ✅ Correct
+```
+
+**Commits Associés** :
+- `93f2c54` : Fix: Remove default value from lang.get() call
+  - lang.get() only takes key and **kwargs parameters
+  - Remove second positional argument causing TypeError
+
+### Résumé des Améliorations
+
+| Amélioration | Avant | Après |
+|--------------|-------|-------|
+| **Version Actuelle** | Lue depuis version.txt | Constante __version__ dans version.py |
+| **Dernière Version** | Lue depuis version.txt | Récupérée depuis GitHub (version.txt) |
+| **Indicateur À Jour** | Texte "✅ À jour" | ✓ vert sur les deux versions |
+| **Indicateur Obsolète** | Texte rouge "Mise à jour disponible" | ✗ rouge sur version actuelle, ✓ vert sur dernière |
+| **Téléchargement** | Aucun | Lien cliquable vers GitHub Releases |
+| **Visibilité Lien** | N/A | Visible uniquement si mise à jour disponible |
+| **Traductions Lien** | N/A | FR/EN/DE ("📥 Télécharger" / "Download" / "Herunterladen") |
+
+### Impact Utilisateur
+
+**Clarté Visuelle** :
+- ✅ Reconnaissance instantanée du statut (✓ ou ✗)
+- ✅ Pas besoin de lire le texte de statut
+- ✅ Couleurs universellement comprises (vert = bon, rouge = attention)
+
+**Accessibilité** :
+- ✅ Un seul clic pour télécharger la nouvelle version
+- ✅ Pas de copier-coller d'URL nécessaire
+- ✅ Ouverture automatique du navigateur vers les releases
+
+**Fiabilité** :
+- ✅ Version actuelle toujours correcte (code constant)
+- ✅ Dernière version toujours à jour (GitHub)
+- ✅ Système testable (modification version.txt sur GitHub uniquement)
 
 ---
 

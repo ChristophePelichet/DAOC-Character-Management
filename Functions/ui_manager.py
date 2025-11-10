@@ -257,6 +257,13 @@ class UIManager:
         self.version_status_label.setStyleSheet("font-size: 11px; font-style: italic; color: gray;")
         status_button_layout.addWidget(self.version_status_label)
         
+        # Download link (hidden by default)
+        self.version_download_link = QLabel()
+        self.version_download_link.setStyleSheet("font-size: 11px;")
+        self.version_download_link.setOpenExternalLinks(True)
+        self.version_download_link.hide()
+        status_button_layout.addWidget(self.version_download_link)
+        
         self.version_check_button = QPushButton(lang.get("version_check_button"))
         self.version_check_button.setStyleSheet("""
             QPushButton {
@@ -311,15 +318,9 @@ class UIManager:
             
             def run(self):
                 try:
-                    # Read current version from version.txt
-                    from Functions.path_manager import get_base_path
-                    version_file = os.path.join(get_base_path(), "version.txt")
-                    
-                    if os.path.exists(version_file):
-                        with open(version_file, 'r') as f:
-                            current_version = f.read().strip()
-                    else:
-                        current_version = "0.107"  # Fallback
+                    # Use version from code constant, not from file
+                    from Functions.version import __version__
+                    current_version = __version__
                     
                     result = check_for_updates(current_version)
                     self.version_checked.emit(result)
@@ -346,25 +347,46 @@ class UIManager:
         self.version_check_button.setEnabled(True)
         self.version_check_button.setText(lang.get("version_check_button"))
         
-        # Mise à jour du label de version actuelle
-        self.version_current_label.setText(current_ver)
-        
         if result['error']:
             # Erreur pendant la vérification
+            self.version_current_label.setText(current_ver)
+            self.version_current_label.setStyleSheet("font-size: 11px; font-weight: bold;")
             self.version_latest_label.setText("—")
             self.version_status_label.setText(lang.get("version_check_error"))
             self.version_status_label.setStyleSheet("font-size: 11px; font-style: italic; color: orange;")
+            self.version_status_label.show()
+            self.version_download_link.hide()
         elif result['update_available']:
-            # Mise à jour disponible
-            self.version_latest_label.setText(latest_ver)
+            # Mise à jour disponible - croix rouge à côté de la version actuelle
+            self.version_current_label.setText(f"✗ {current_ver}")
+            self.version_current_label.setStyleSheet("font-size: 11px; font-weight: bold; color: red;")
+            
+            # Coche verte à côté de la dernière version
+            self.version_latest_label.setText(f"✓ {latest_ver}")
             self.version_latest_label.setStyleSheet("font-size: 11px; font-weight: bold; color: green;")
+            
+            # Afficher le lien de téléchargement
+            download_url = "https://github.com/ChristophePelichet/DAOC-Character-Management/releases/latest"
+            download_text = lang.get("version_check_download")
+            self.version_download_link.setText(f'<a href="{download_url}" style="color: #0078d4; text-decoration: none;">{download_text}</a>')
+            self.version_download_link.show()
+            
             self.version_status_label.setText(lang.get("version_check_update_available"))
             self.version_status_label.setStyleSheet("font-size: 11px; font-weight: bold; color: green;")
+            self.version_status_label.show()
         else:
-            # À jour
-            self.version_latest_label.setText(latest_ver if latest_ver else current_ver)
+            # À jour - coche verte à côté de la version actuelle
+            self.version_current_label.setText(f"✓ {current_ver}")
+            self.version_current_label.setStyleSheet("font-size: 11px; font-weight: bold; color: green;")
+            
+            # Coche verte à côté de la dernière version
+            self.version_latest_label.setText(f"✓ {latest_ver if latest_ver else current_ver}")
+            self.version_latest_label.setStyleSheet("font-size: 11px; font-weight: bold; color: green;")
+            
             self.version_status_label.setText(lang.get("version_check_up_to_date"))
             self.version_status_label.setStyleSheet("font-size: 11px; font-style: italic; color: green;")
+            self.version_status_label.show()
+            self.version_download_link.hide()
     
     def check_eden_status(self):
         """Vérifie le statut de connexion Eden en arrière-plan"""

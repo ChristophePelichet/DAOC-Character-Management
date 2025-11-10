@@ -246,5 +246,6 @@
     "version_check_up_to_date": "✅ À jour",
     "version_check_error": "⚠️ Erreur de vérification",
     "version_check_button": "🔄 Vérifier",
-    "version_check_button_checking": "⏳ Vérification en cours..."
+    "version_check_button_checking": "⏳ Vérification en cours...",
+    "version_check_download": "📥 Télécharger"
 }

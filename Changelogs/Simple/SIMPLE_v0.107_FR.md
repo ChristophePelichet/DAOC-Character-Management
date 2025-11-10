@@ -9,6 +9,8 @@
 ✅ **Section "Informations" (renommée depuis "Monnaie")**  
 ✅ **Check depuis GitHub (version.txt)**  
 ✅ **Thread en arrière-plan (non-bloquant)**  
+✅ **Indicateurs visuels : ✓ vert (à jour) ou ✗ rouge (obsolète)**  
+✅ **Lien de téléchargement cliquable si mise à jour disponible**  
 
 ### 🎨 Système de Bannières (Nouveau)
 ✅ **Bannières visuelles pour les 44 classes DAOC**  
@@ -45,7 +47,12 @@
   - ⏳ Vérification en cours...  
   - ✅ À jour  
   - 🎉 Mise à jour disponible !  
-  - ⚠️ Erreur de vérification  
+### États visuels
+- ⏳ **Vérification en cours** : Texte gris italique  
+- ✅ **À jour** : ✓ vert à côté de "Version Actuelle" et "Dernière Version"
+- 🎉 **Mise à jour disponible** : ✗ rouge à côté de "Version Actuelle", ✓ vert à côté de "Dernière Version"
+- 📥 **Lien de téléchargement** : Cliquable vers GitHub Releases (si mise à jour disponible)
+- ⚠️ **Erreur** : Texte orange italique "⚠️ Erreur de vérification"
 
 ### Section Informations
 - **Renommage** : Section "Monnaie" → "ℹ️ Informations"  
@@ -62,7 +69,8 @@
   - `requests` : Récupération version depuis GitHub  
   - `packaging` : Comparaison sémantique des versions  
 - **URL GitHub** : `https://raw.githubusercontent.com/ChristophePelichet/DAOC-Character-Management/main/version.txt`  
-- **Fallback** : Version "0.107" si fichier local manquant  
+- **Version actuelle** : Définie dans `Functions/version.py` (__version__ constant)
+- **Dernière version** : Lue depuis GitHub (version.txt sur branche main)  
 
 ### Gestion des Erreurs
 - **Erreur réseau** : Affiche "⚠️ Erreur de vérification" (orange)  
@@ -73,16 +81,22 @@
 ### Interface Utilisateur
 - **Disposition** :
   ```
-  Version actuelle: 0.107
-  Dernière version: 0.107
+  Version actuelle: ✓ 0.107    (vert si à jour, ✗ rouge si obsolète)
+  Dernière version: ✓ 0.107    (toujours vert)
   ⏳ Vérification...  [🔄 Vérifier]
+  📥 Télécharger      (lien cliquable si mise à jour disponible)
   ```
 - **Bouton désactivé** : Pendant la vérification en cours  
 - **Texte bouton** : Change en "⏳ Vérification en cours..." pendant le check  
 - **Couleurs** :
-  - Vert : À jour ou mise à jour disponible  
+  - Vert : À jour (✓ sur Version Actuelle et Dernière Version)
+  - Rouge : Mise à jour disponible (✗ sur Version Actuelle)
   - Orange : Erreur de vérification  
   - Gris : Vérification en cours  
+- **Lien de téléchargement** :
+  - URL : https://github.com/ChristophePelichet/DAOC-Character-Management/releases/latest
+  - Visible uniquement si mise à jour disponible
+  - Ouvre le navigateur au clic  
 
 ### Traductions
 - 🇫🇷 Français : "🔄 Vérifier", "⏳ Vérification en cours..."  
@@ -90,10 +104,11 @@
 - 🇩🇪 Deutsch : "🔄 Prüfen", "⏳ Wird geprüft..."  
 
 ### Fichiers Modifiés
-- `version.txt` : Version actuelle (0.107)  
+- `Functions/version.py` (NOUVEAU) : Constante __version__ pour version actuelle
+- `version.txt` : Version actuelle (0.107) → Représente maintenant la dernière version sur GitHub
 - `Functions/version_checker.py` : Module de vérification  
 - `Functions/ui_manager.py` : Interface et intégration  
-- `Language/*.json` : Traductions FR/EN/DE  
+- `Language/*.json` : Traductions FR/EN/DE (ajout "version_check_download")  
 
 ---
 

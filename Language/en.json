@@ -246,5 +246,6 @@
     "version_check_up_to_date": "✅ Up to date",
     "version_check_error": "⚠️ Check failed",
     "version_check_button": "🔄 Check",
-    "version_check_button_checking": "⏳ Checking..."
+    "version_check_button_checking": "⏳ Checking...",
+    "version_check_download": "📥 Download"
 }

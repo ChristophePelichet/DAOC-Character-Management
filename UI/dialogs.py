@@ -484,20 +484,10 @@ class CharacterSheetWindow(QDialog):
         achievements_group = QGroupBox(lang.get("achievements_section_title"))
         achievements_layout = QVBoxLayout()
         
-        # Scroll area for achievements list
-        self.achievements_scroll = QScrollArea()
-        self.achievements_scroll.setWidgetResizable(True)
-        self.achievements_scroll.setStyleSheet("QScrollArea { border: none; }")
-        self.achievements_scroll.setMaximumHeight(200)  # Limit height
-        self.achievements_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        self.achievements_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
-        
-        # Container widget for achievements
-        self.achievements_container = QWidget()
+        # Container for achievements (no scroll area)
         self.achievements_container_layout = QVBoxLayout()
         self.achievements_container_layout.setSpacing(3)
         self.achievements_container_layout.setContentsMargins(0, 0, 0, 0)
-        self.achievements_container.setLayout(self.achievements_container_layout)
         
         # Initial placeholder
         achievements_placeholder = QLabel("—")
@@ -506,8 +496,7 @@ class CharacterSheetWindow(QDialog):
         self.achievements_container_layout.addWidget(achievements_placeholder)
         self.achievements_container_layout.addStretch()
         
-        self.achievements_scroll.setWidget(self.achievements_container)
-        achievements_layout.addWidget(self.achievements_scroll)
+        achievements_layout.addLayout(self.achievements_container_layout)
         
         # Load existing achievements if available
         achievements_data = self.character_data.get('achievements', [])

@@ -78,7 +78,19 @@ class CharacterSheetWindow(QDialog):
             # Créer une connexion pour réactiver le bouton quand la validation se termine
             pass  # On gérera ça après la création du bouton
 
-        layout = QVBoxLayout(self)
+        # Main horizontal layout: Banner (left) + Content (right)
+        main_horizontal = QHBoxLayout(self)
+        
+        # === LEFT SIDE: Class Banner ===
+        self.banner_label = QLabel()
+        self.banner_label.setFixedWidth(150)  # Fixed width for banner
+        self.banner_label.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.banner_label.setScaledContents(False)
+        self._update_class_banner()  # Load initial banner
+        main_horizontal.addWidget(self.banner_label)
+        
+        # === RIGHT SIDE: All content ===
+        layout = QVBoxLayout()
         
         # Eden Herald Section - EN HAUT for FACILITER the MISE À JOUR
         eden_group = QGroupBox("🌐 Eden Herald")
@@ -620,6 +632,64 @@ class CharacterSheetWindow(QDialog):
         button_box.accepted.connect(self.save_basic_info)
         button_box.rejected.connect(self.reject)
         layout.addWidget(button_box)
+        
+        # Add content layout to main horizontal layout
+        main_horizontal.addLayout(layout, 1)  # Stretch factor 1 for content
+    
+    def _update_class_banner(self):
+        """Update the class banner image based on current class and realm"""
+        realm = self.character_data.get('realm', 'Albion')
+        class_name = self.character_data.get('class', '')
+        
+        if not class_name:
+            # No class selected, show placeholder or hide
+            self.banner_label.clear()
+            self.banner_label.setText("No\nClass\nSelected")
+            self.banner_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.banner_label.setStyleSheet("color: gray; font-style: italic;")
+            return
+        
+        # Build banner path: Img/Banner/{realm}/{class}.jpg
+        # Normalize realm and class names (handle abbreviations)
+        realm_map = {
+            "Albion": "Alb",
+            "Hibernia": "Hib",
+            "Midgard": "Mid"
+        }
+        realm_folder = realm_map.get(realm, realm)
+        
+        # Class name should be lowercase for filename
+        class_filename = class_name.lower().replace(" ", "_")
+        
+        banner_path = os.path.join("Img", "Banner", realm_folder, f"{class_filename}.jpg")
+        
+        # Try with .png if .jpg doesn't exist
+        if not os.path.exists(banner_path):
+            banner_path = os.path.join("Img", "Banner", realm_folder, f"{class_filename}.png")
+        
+        if os.path.exists(banner_path):
+            pixmap = QPixmap(banner_path)
+            if not pixmap.isNull():
+                # Scale pixmap to fit width while maintaining aspect ratio
+                scaled_pixmap = pixmap.scaledToWidth(
+                    self.banner_label.width(),
+                    Qt.TransformationMode.SmoothTransformation
+                )
+                self.banner_label.setPixmap(scaled_pixmap)
+                self.banner_label.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignHCenter)
+                self.banner_label.setStyleSheet("")
+            else:
+                self._set_banner_placeholder(f"Invalid\nimage:\n{class_name}")
+        else:
+            # Banner not found
+            self._set_banner_placeholder(f"Banner\nnot found:\n{realm}\n{class_name}")
+    
+    def _set_banner_placeholder(self, text):
+        """Set placeholder text for banner"""
+        self.banner_label.clear()
+        self.banner_label.setText(text)
+        self.banner_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.banner_label.setStyleSheet("color: gray; font-style: italic; font-size: 9pt;")
     
     def _populate_classes_sheet(self):
         """Populates class dropdown based on selected realm."""
@@ -678,10 +748,18 @@ class CharacterSheetWindow(QDialog):
         """Called when realm is changed in character sheet."""
         self._populate_classes_sheet()
         self._populate_races_sheet()
+        # Update character_data and banner
+        self.character_data['realm'] = self.realm_combo.currentText()
+        self._update_class_banner()
     
     def _on_class_changed_sheet(self):
         """Called when class is changed in character sheet."""
         self._populate_races_sheet()
+        # Update character_data and banner
+        class_data = self.class_combo.currentData()
+        if class_data:
+            self.character_data['class'] = class_data
+            self._update_class_banner()
     
     def _on_race_changed_sheet(self):
         """Called when race is changed in character sheet (no action needed)."""

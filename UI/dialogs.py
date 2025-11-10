@@ -641,6 +641,8 @@ class CharacterSheetWindow(QDialog):
     
     def _update_class_banner(self):
         """Update the class banner image based on current class and realm"""
+        from Functions.path_manager import get_resource_path
+        
         realm = self.character_data.get('realm', 'Albion')
         class_name = self.character_data.get('class', '')
         
@@ -664,11 +666,12 @@ class CharacterSheetWindow(QDialog):
         # Class name should be lowercase for filename
         class_filename = class_name.lower().replace(" ", "_")
         
-        banner_path = os.path.join("Img", "Banner", realm_folder, f"{class_filename}.jpg")
+        # Use get_resource_path for PyInstaller compatibility
+        banner_path = get_resource_path(os.path.join("Img", "Banner", realm_folder, f"{class_filename}.jpg"))
         
         # Try with .png if .jpg doesn't exist
         if not os.path.exists(banner_path):
-            banner_path = os.path.join("Img", "Banner", realm_folder, f"{class_filename}.png")
+            banner_path = get_resource_path(os.path.join("Img", "Banner", realm_folder, f"{class_filename}.png"))
         
         if os.path.exists(banner_path):
             pixmap = QPixmap(banner_path)

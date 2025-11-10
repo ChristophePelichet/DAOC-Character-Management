@@ -1,8 +1,22 @@
 # 📋 CHANGELOG - DAOC Character Manager
 
-> **Version actuelle** : **0.107** (2025-11-08)
+> **Version actuelle** : **0.107** (2025-11-10)
 
 ## 🚀 Accès Rapide (v0.107)
+
+### 📌 Dernières Mises à Jour
+
+**🎨 Système de Bannières de Classe** (2025-11-10)
+- Ajout de bannières visuelles pour chaque classe (44 classes DAOC)
+- Design responsive s'adaptant à la hauteur de la fenêtre
+- Mise à jour automatique lors du changement de classe/royaume
+- Compatible PyInstaller pour compilation .exe
+
+**📊 Statistiques Herald Complètes** (2025-11-08)
+- Nouvelles statistiques : RvR, PvP (par royaume), PvE, Wealth
+- Section Achievements avec scraping Herald
+- Bouton "Informations" explicatif
+- Corrections critiques de stabilité des boutons
 
 ### 📌 Version Simplifiée
 *Liste concise des changements principaux*
@@ -20,7 +34,18 @@
 
 ## Acces Rapide par Version
 
-### v0.107 (2025-11-08) - Fix Crash Test Connexion Herald
+### v0.107 (2025-11-10) - Bannières de Classe & Statistiques Complètes
+
+**Nouvelles Fonctionnalités**
+- 🎨 Système de bannières visuelles pour les 44 classes DAOC
+- 📊 Statistiques Herald complètes (RvR/PvP/PvE/Wealth)
+- 🏆 Section Achievements avec scraping automatique
+- ℹ️ Bouton d'information explicatif sur les statistiques
+
+**Améliorations**
+- 🔄 Bannières responsives (adaptation hauteur fenêtre)
+- ✅ Gestion intelligente des boutons Herald
+- 🐛 Corrections critiques de stabilité
 
 **Version Simplifiee** 
 - [Francais](Changelogs/Simple/SIMPLE_v0.107_FR.md)

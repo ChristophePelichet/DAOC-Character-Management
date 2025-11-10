@@ -27,6 +27,182 @@ Cette version apporte les **statistiques complètes Herald** (RvR/PvP/PvE/Wealth
 
 ---
 
+## 🎨 Système de Bannières de Classe
+
+### Vue d'Ensemble
+
+Ajout d'un **système de bannières visuelles** affichant la classe du personnage sur le côté gauche de la fiche personnage. Les bannières sont **responsives** et s'adaptent automatiquement à la hauteur de la fenêtre.
+
+### Implémentation Visuelle
+
+**Disposition** :
+```
+┌─────────────────────────────────────────────────────────┐
+│  [Bannière]  │  Fiche Personnage (Nom, Stats, etc.)    │
+│     150px    │                                          │
+│   (Classe)   │                                          │
+│              │                                          │
+│   Responsive │                                          │
+│   Verticale  │                                          │
+└─────────────────────────────────────────────────────────┘
+```
+
+**Caractéristiques** :
+- 📐 **Largeur fixe** : 150px
+- 📏 **Hauteur dynamique** : S'adapte à la taille de la fenêtre
+- 🎨 **Design par royaume** : Couleurs Albion (rouge), Hibernia (vert), Midgard (bleu)
+- 🔄 **Mise à jour automatique** : Change lors de la modification de classe/royaume
+
+### Génération des Bannières
+
+**Script** : `Scripts/create_class_banners.py`
+
+**Spécifications Techniques** :
+- Dimensions : 150x400 pixels
+- Format : JPEG
+- Style : Dégradé de couleur + bordure dorée + texte
+- Total : 44 bannières (toutes les classes DAOC)
+
+**Structure Fichiers** :
+```
+Img/Banner/
+├── Alb/
+│   ├── armsman.jpg
+│   ├── cabalist.jpg
+│   ├── cleric.jpg
+│   └── ... (15 classes)
+├── Hib/
+│   ├── animist.jpg
+│   ├── bard.jpg
+│   ├── druid.jpg
+│   └── ... (15 classes)
+└── Mid/
+    ├── berserker.jpg
+    ├── healer.jpg
+    ├── runemaster.jpg
+    └── ... (14 classes)
+```
+
+### Comportement Dynamique
+
+**Mise à jour automatique** :
+1. Changement de royaume → Bannière mise à jour
+2. Changement de classe → Bannière mise à jour
+3. Personnage sans classe → Placeholder "No Class Selected"
+4. Bannière manquante → Message "Banner not found"
+
+**Code d'intégration** :
+```python
+# UI/dialogs.py, lignes 641-697
+def _update_class_banner(self):
+    """Update the class banner image based on current class and realm"""
+    from Functions.path_manager import get_resource_path
+    
+    realm = self.character_data.get('realm', 'Albion')
+    class_name = self.character_data.get('class', '')
+    
+    # Build banner path with PyInstaller compatibility
+    banner_path = get_resource_path(os.path.join("Img", "Banner", realm_folder, f"{class_filename}.jpg"))
+```
+
+### Responsive Design
+
+**SizePolicy** :
+```python
+# UI/dialogs.py, lignes 84-88
+self.banner_label.setSizePolicy(
+    QSizePolicy.Policy.Expanding,  # Horizontal : Expanding
+    QSizePolicy.Policy.Expanding   # Vertical : Expanding
+)
+self.banner_label.setScaledContents(True)  # Scale image to fit
+```
+
+**Résultat** :
+- ✅ La bannière s'étire verticalement pour remplir l'espace disponible
+- ✅ La largeur reste fixe à 150px
+- ✅ L'image se redimensionne proportionnellement
+- ✅ Pas de déformation grâce au ratio d'aspect conservé
+
+### Portabilité PyInstaller
+
+**Problème Initial** :
+Les bannières utilisaient des chemins relatifs qui ne fonctionnent pas dans un exécutable compilé.
+
+**Solution** :
+Utilisation de `get_resource_path()` de `path_manager.py` :
+```python
+# ✅ Compatible développement ET .exe
+banner_path = get_resource_path(os.path.join("Img", "Banner", realm_folder, f"{class_filename}.jpg"))
+```
+
+**Fichier .spec** :
+```python
+# DAOC-Character-Manager.spec, ligne 11
+datas=[
+    ('Img', 'Img'),  # ✅ Inclut automatiquement Img/Banner/
+]
+```
+
+**Gestion sys._MEIPASS** :
+```python
+# Functions/path_manager.py
+def get_resource_path(relative_path):
+    if getattr(sys, 'frozen', False):
+        base_path = sys._MEIPASS  # ✅ Dossier temporaire PyInstaller
+    else:
+        base_path = project_root  # ✅ Développement
+    return os.path.join(base_path, relative_path)
+```
+
+### Commits Associés
+
+**38b310f** - Feat: Add class banners to character sheet
+- Création du système de bannières
+- Génération des 44 images de classes
+- Intégration dans CharacterSheet
+- Documentation complète
+
+**01bcc44** - Fix: Make class banner responsive to window height
+- Ajout QSizePolicy(Expanding, Expanding)
+- Suppression largeur fixe
+- Amélioration du redimensionnement
+
+**883f8c6** - Fix: Use get_resource_path() for banner loading to ensure PyInstaller compatibility
+- Import de get_resource_path()
+- Correction des chemins relatifs
+- Garantie de fonctionnement en .exe
+
+### Documentation
+
+**Fichiers créés** :
+- `Img/Banner/README.md` : Guide d'utilisation des bannières
+- `Documentation/CLASS_BANNERS_IMPLEMENTATION.md` : Documentation technique complète
+
+**Contenu** :
+- Architecture du système
+- Détails d'implémentation
+- Cas d'usage
+- Guide de maintenance
+
+### Avantages Utilisateur
+
+**Identification Visuelle** :
+- ✅ Reconnaissance instantanée de la classe du personnage
+- ✅ Couleurs de royaume clairement identifiables
+- ✅ Design cohérent avec l'univers DAOC
+
+**Expérience Améliorée** :
+- ✅ Interface plus attractive visuellement
+- ✅ Navigation facilitée entre plusieurs personnages
+- ✅ Personnalisation visuelle par classe
+
+**Robustesse** :
+- ✅ Fallback sur PNG si JPG manquant
+- ✅ Message clair si bannière introuvable
+- ✅ Fonctionne en développement ET en .exe compilé
+
+---
+
 ## 📊 Nouvelles Statistiques Herald
 
 ### ⚔️ Section RvR (Realm vs Realm)

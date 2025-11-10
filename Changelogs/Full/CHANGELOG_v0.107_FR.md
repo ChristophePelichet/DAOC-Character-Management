@@ -182,24 +182,137 @@ finally: Restauration texte + réactivation ✅
 ```
 📊 Statistiques
 │
-├─ ⚔️ RvR
-│   ├─ 🗼 Tower Captures: 142
-│   ├─ 🏰 Keep Captures: 28
-│   └─ 💎 Relic Captures: 3
+├─ ⚔️ RvR (50%)            │ 🗡️ PvP (50%)
+│   ├─ 🗼 Tower: 142       │   ├─ ⚔️ Solo Kills: 1,234 → Alb: 456 | Hib: 123 | Mid: 655
+│   ├─ 🏰 Keep: 28         │   ├─ 💀 Deathblows: 5,678 → Alb: 2,100 | Hib: 890 | Mid: 2,688
+│   └─ 💎 Relic: 3         │   └─ 🎯 Kills: 9,999 → Alb: 3,500 | Hib: 1,200 | Mid: 5,299
 │
-├─ 🗡️ PvP
-│   ├─ ⚔️ Solo Kills: 1,234
-│   │   └─ Alb: 456 | Hib: 123 | Mid: 655
-│   ├─ 💀 Deathblows: 5,678
-│   │   └─ Alb: 2,100 | Hib: 890 | Mid: 2,688
-│   └─ 🎯 Kills: 9,999
-│       └─ Alb: 3,500 | Hib: 1,200 | Mid: 5,299
-│
-└─ 🐉 PvE
-    ├─ 🐉 Dragons: 12  |  👹 Légions: 45
-    ├─ 🐲 Mini Dragons: 8  |  ⚔️ Epic: 156
-    └─ 🏛️ Dungeons: 23  |  🐊 Sobekite: 5
+├─ � PvE (50%)            │ 🏆 Réalisations (50%)
+│   ├─ 🐉 Dragons: 12      │ 👹 Légions: 45  │   └─ 🔜 Fonctionnalité bientôt disponible
+│   ├─ 🐲 Mini: 8          │ ⚔️ Epic: 156
+│   └─ 🏛️ Dungeons: 23     │ 🐊 Sobekite: 5
 ```
+
+### Disposition 50/50
+
+**Layout Principal** :
+- RvR et PvP côte à côte (50% chacun)
+- PvE et Réalisations côte à côte (50% chacun)
+- Largeur minimale : 250px par section
+- Stretch factor égal pour répartition équitable
+
+**Section RvR/PvP** :
+```python
+rvr_pvp_horizontal = QHBoxLayout()
+rvr_subgroup.setMinimumWidth(250)
+pvp_subgroup.setMinimumWidth(250)
+rvr_pvp_horizontal.addWidget(rvr_subgroup, 1)  # 50%
+rvr_pvp_horizontal.addWidget(pvp_subgroup, 1)  # 50%
+```
+
+**Section PvE/Réalisations** :
+```python
+pve_achievements_horizontal = QHBoxLayout()
+pve_subgroup.setMinimumWidth(250)
+achievements_subgroup.setMinimumWidth(250)
+pve_achievements_horizontal.addWidget(pve_subgroup, 1)  # 50%
+pve_achievements_horizontal.addWidget(achievements_subgroup, 1)  # 50%
+```
+
+### Alignement PvP avec QGridLayout
+
+**Avant** : Labels et valeurs mal alignés avec des HBoxLayout
+
+**Maintenant** : QGridLayout pour alignement parfait
+```python
+pvp_grid = QGridLayout()
+pvp_grid.setSpacing(5)
+
+# Colonne 0: Label | Colonne 1: Valeur | Colonne 2: Détails royaume
+pvp_grid.addWidget(solo_kills_label_text, 0, 0)
+pvp_grid.addWidget(self.solo_kills_label, 0, 1)  # Aligné à droite
+pvp_grid.addWidget(self.solo_kills_detail_label, 0, 2)
+```
+
+**Résultat** :
+```
+⚔️ Solo Kills:     1,234    → Alb: 456 | Hib: 123 | Mid: 655
+💀 Deathblows:     5,678    → Alb: 2,100 | Hib: 890 | Mid: 2,688
+🎯 Kills:          9,999    → Alb: 3,500 | Hib: 1,200 | Mid: 5,299
+```
+
+### Détails Royaume sur la Même Ligne
+
+**Avant** : Détails en dessous (2 lignes par stat)
+```
+Solo Kills: 1,234
+  → Alb: 456 | Hib: 123 | Mid: 655
+```
+
+**Maintenant** : Tout sur 1 ligne
+```
+Solo Kills: 1,234    → Alb: 456 | Hib: 123 | Mid: 655
+```
+
+### Section PvE Améliorée
+
+**Espacement réduit** :
+```python
+pve_grid.setHorizontalSpacing(5)  # Au lieu de 8
+pve_grid.setVerticalSpacing(5)
+```
+
+**Séparateur vertical** :
+```python
+separator = QFrame()
+separator.setFrameShape(QFrame.Shape.VLine)
+separator.setFrameShadow(QFrame.Shadow.Sunken)
+separator.setStyleSheet("color: gray;")
+pve_grid.addWidget(separator, 0, 2, 3, 1)  # Spans 3 lignes
+```
+
+**Résultat** :
+```
+🐉 Dragon Kills: 9       | 👹 Legion Kills: 5
+🐲 Mini Dragon: 38       | ⚔️ Epic Encounters: 3
+🏛️ Epic Dungeons: 2      | 🐊 Sobekite: 1
+```
+
+**Fix ":" doublés** :
+```python
+# Avant
+dragon_label = QLabel("🐉 " + lang.get("dragon_kills_label") + ":")  # ❌ Devient "Dragon Kills::"
+
+# Maintenant
+dragon_label = QLabel("🐉 " + lang.get("dragon_kills_label"))  # ✅ Devient "Dragon Kills:"
+```
+
+### Nouvelle Section Réalisations
+
+**Fichier** : `UI/dialogs.py` (lignes ~420-440)
+
+**Traductions ajoutées** :
+- FR : `"achievements_section_title": "🏆 Réalisations"`
+- EN : `"achievements_section_title": "🏆 Achievements"`
+- DE : `"achievements_section_title": "🏆 Errungenschaften"`
+
+**Implémentation** :
+```python
+achievements_subgroup = QGroupBox(lang.get("achievements_section_title"))
+achievements_subgroup.setMinimumWidth(250)
+achievements_sublayout = QVBoxLayout()
+
+# Placeholder temporaire
+achievements_placeholder = QLabel("🔜 " + lang.get("statistics_coming_soon"))
+achievements_placeholder.setStyleSheet("color: gray; font-style: italic; padding: 20px;")
+achievements_placeholder.setAlignment(Qt.AlignmentFlag.AlignCenter)
+achievements_sublayout.addWidget(achievements_placeholder)
+```
+
+**Utilité future** :
+- Affichage des titres/récompenses obtenus
+- Progression vers objectifs RvR/PvE
+- Badges spéciaux (premier kill dragon, etc.)
 
 ### Amélioration Visuelle Monnaie
 
@@ -674,6 +787,51 @@ module_logger.warning(f"Erreur lors de la fermeture du scraper: {e}")
 - `_on_herald_scraping_finished()` (14 logs supprimés)
 
 **Résultat** : Code production-ready, logs propres et informatifs.
+
+---
+
+### 7. Nettoyage Fichiers Debug HTML
+
+**Problème** :
+
+**Symptôme** :
+Deux fichiers HTML de débogage étaient créés automatiquement à la racine du projet lors de l'utilisation du scraper Herald :
+- `debug_herald_after_cookies.html` - Créé lors du chargement des cookies
+- `debug_wealth_page.html` - Créé lors du scraping de la monnaie
+
+**Cause Racine** :
+
+Code de débogage laissé actif en production dans `character_profile_scraper.py`.
+
+**Solution** :
+
+Suppression complète des 3 sections de création de fichiers debug :
+
+```python
+# ✅ Functions/character_profile_scraper.py (ligne ~155)
+# Section debug_herald_after_cookies.html supprimée
+
+# ✅ Functions/character_profile_scraper.py (ligne ~235)
+# Section debug_wealth_page.html supprimée (création systématique)
+
+# ✅ Functions/character_profile_scraper.py (ligne ~295)
+# Section debug_wealth_page.html supprimée (mode debug conditionnel)
+```
+
+**Ajout au .gitignore** :
+
+```gitignore
+# Debug files
+Scripts/debug_herald_page.html
+debug_wealth_page.html
+debug_herald_after_cookies.html
+```
+
+**Résultat** :
+- ✅ Plus de fichiers HTML créés automatiquement
+- ✅ Racine du projet propre
+- ✅ .gitignore protège contre réintroduction accidentelle
+- ✅ Logs conservés pour le débogage (taille HTML, URL, etc.)
 
 ---
 

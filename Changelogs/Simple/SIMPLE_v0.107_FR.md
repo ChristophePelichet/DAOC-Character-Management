@@ -1,14 +1,19 @@
-# v0.107 - Statistiques RvR/PvP/PvE Herald & Corrections UI
+# v0.107 - Statistiques RvR/PvP/PvE Herald & Améliorations UI
 
-## 🎯 Résumé (8 novembre 2025)
+## 🎯 Résumé (10 novembre 2025)
 
 ✅ Statistiques complètes RvR/PvP/PvE/Wealth depuis Herald  
-✅ Section Statistiques réorganisée en sous-sections  
+✅ **Nouveau : Layout 50/50 pour sections RvR/PvP et PvE/Réalisations**  
+✅ **Nouveau : Section Réalisations (placeholder)**  
+✅ **Amélioration : Alignement PvP avec QGridLayout**  
+✅ **Amélioration : Détails royaume sur la même ligne**  
+✅ **Amélioration : Section PvE avec séparateur vertical**  
 ✅ Bouton "Actualiser Stats" désactivé pendant validation Herald  
-✅ **Nouveau : Bouton "Informations" sur les statistiques**  
+✅ Bouton "Informations" sur les statistiques  
 ✅ Affichage amélioré de la monnaie (taille réduite, gras conservé)  
 ✅ Messages d'erreur détaillés (RvR/PvP/PvE/Wealth)  
 ✅ Fix crash test connexion Herald  
+✅ **Fix : Suppression fichiers debug HTML automatiques**  
 
 ---
 
@@ -76,6 +81,96 @@
 ---
 
 ## 🎨 Améliorations Interface
+
+### Disposition 50/50
+
+**Layout Principal** :
+- ⚔️ **RvR (50%)** et 🗡️ **PvP (50%)** côte à côte  
+- 🐉 **PvE (50%)** et 🏆 **Réalisations (50%)** côte à côte  
+- Largeur minimale : 250px par section  
+- Répartition équitable de l'espace
+
+**Résultat Visuel** :
+```
+┌─────────────────────────────────────┐
+│     RvR (50%)    │    PvP (50%)     │
+├─────────────────────────────────────┤
+│     PvE (50%)    │ Réalisations(50%)│
+└─────────────────────────────────────┘
+```
+
+### Alignement PvP avec QGridLayout
+
+**Avant** : Labels et valeurs mal alignés  
+
+**Maintenant** : QGridLayout pour alignement parfait
+```
+⚔️ Solo Kills:     1,234    → Alb: 456 | Hib: 123 | Mid: 655
+💀 Deathblows:     5,678    → Alb: 2,100 | Hib: 890 | Mid: 2,688
+🎯 Kills:          9,999    → Alb: 3,500 | Hib: 1,200 | Mid: 5,299
+```
+
+### Détails Royaume sur la Même Ligne
+
+**Avant** : Détails en dessous (2 lignes par stat)
+```
+Solo Kills: 1,234
+  → Alb: 456 | Hib: 123 | Mid: 655
+```
+
+**Maintenant** : Tout sur 1 ligne (plus compact)
+```
+Solo Kills: 1,234    → Alb: 456 | Hib: 123 | Mid: 655
+```
+
+### Section PvE Améliorée
+
+**Améliorations** :
+- Espacement réduit (5px au lieu de 8px)
+- Séparateur vertical entre les 2 colonnes
+- Suppression des ":" doublés dans les labels
+- Nombres plus proches des titres
+
+**Résultat** :
+```
+🐉 Dragon Kills: 9       | 👹 Legion Kills: 5
+🐲 Mini Dragon: 38       | ⚔️ Epic Encounters: 3
+🏛️ Epic Dungeons: 2      | 🐊 Sobekite: 1
+```
+
+### Nouvelle Section Réalisations
+
+**Emplacement** : À droite de la section PvE (50% de la largeur)
+
+**Traductions** :
+- FR : 🏆 Réalisations
+- EN : 🏆 Achievements
+- DE : 🏆 Errungenschaften
+
+**Contenu actuel** : Placeholder "🔜 Fonctionnalité bientôt disponible"
+
+**Utilité future** :
+- Affichage des titres/récompenses obtenus
+- Progression vers objectifs RvR/PvE
+- Badges spéciaux
+
+---
+
+## 🐛 Corrections
+
+### Fix Fichiers Debug HTML
+
+**Problème** : Deux fichiers HTML créés automatiquement à la racine :
+- `debug_herald_after_cookies.html`
+- `debug_wealth_page.html`
+
+**Cause** : Code de débogage actif en production
+
+**Solution** :
+- ✅ Suppression des 3 sections de création de fichiers
+- ✅ Ajout au .gitignore
+- ✅ Nettoyage des fichiers existants
+- ✅ Logs conservés pour le débogage
 
 ### Organisation Statistiques
 **3 sous-sections claires** :

@@ -244,5 +244,7 @@
     "version_check_latest": "Neueste Version:",
     "version_check_update_available": "🎉 Update verfügbar!",
     "version_check_up_to_date": "✅ Aktuell",
-    "version_check_error": "⚠️ Prüfung fehlgeschlagen"
+    "version_check_error": "⚠️ Prüfung fehlgeschlagen",
+    "version_check_button": "🔄 Prüfen",
+    "version_check_button_checking": "⏳ Wird geprüft..."
 }

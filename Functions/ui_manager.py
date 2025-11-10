@@ -224,34 +224,62 @@ class UIManager:
         info_layout.setContentsMargins(10, 10, 10, 10)
         info_layout.setSpacing(5)
         
-        # Version labels
-        version_layout = QHBoxLayout()
-        
+        # Version actuelle
+        current_layout = QHBoxLayout()
         current_label = QLabel(lang.get("version_check_current"))
         current_label.setStyleSheet("font-size: 11px;")
-        version_layout.addWidget(current_label)
+        current_layout.addWidget(current_label)
         
         self.version_current_label = QLabel("—")
         self.version_current_label.setStyleSheet("font-size: 11px; font-weight: bold;")
-        version_layout.addWidget(self.version_current_label)
+        current_layout.addWidget(self.version_current_label)
+        current_layout.addStretch()
         
-        version_layout.addStretch()
+        info_layout.addLayout(current_layout)
         
+        # Dernière version
+        latest_layout = QHBoxLayout()
         latest_label = QLabel(lang.get("version_check_latest"))
         latest_label.setStyleSheet("font-size: 11px;")
-        version_layout.addWidget(latest_label)
+        latest_layout.addWidget(latest_label)
         
         self.version_latest_label = QLabel("—")
         self.version_latest_label.setStyleSheet("font-size: 11px; font-weight: bold;")
-        version_layout.addWidget(self.version_latest_label)
+        latest_layout.addWidget(self.version_latest_label)
+        latest_layout.addStretch()
         
-        info_layout.addLayout(version_layout)
+        info_layout.addLayout(latest_layout)
         
-        # Status label
+        # Status et bouton de vérification (sur la même ligne)
+        status_button_layout = QHBoxLayout()
+        
         self.version_status_label = QLabel("⏳ Vérification...")
         self.version_status_label.setStyleSheet("font-size: 11px; font-style: italic; color: gray;")
-        self.version_status_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        info_layout.addWidget(self.version_status_label)
+        status_button_layout.addWidget(self.version_status_label)
+        
+        self.version_check_button = QPushButton(lang.get("version_check_button"))
+        self.version_check_button.setStyleSheet("""
+            QPushButton {
+                font-size: 10px;
+                padding: 3px 8px;
+                background-color: #0078d4;
+                color: white;
+                border: none;
+                border-radius: 3px;
+            }
+            QPushButton:hover {
+                background-color: #005a9e;
+            }
+            QPushButton:disabled {
+                background-color: #cccccc;
+                color: #666666;
+            }
+        """)
+        self.version_check_button.clicked.connect(self._start_version_check)
+        status_button_layout.addWidget(self.version_check_button)
+        status_button_layout.addStretch()
+        
+        info_layout.addLayout(status_button_layout)
         
         info_group.setLayout(info_layout)
         container_layout.addWidget(info_group, 1)  # Stretch = 1
@@ -269,7 +297,14 @@ class UIManager:
         """Démarre la vérification de version en arrière-plan"""
         from PySide6.QtCore import QThread, Signal
         from Functions.version_checker import check_for_updates
+        from Functions.language_manager import lang
         import os
+        
+        # Désactiver le bouton pendant la vérification
+        self.version_check_button.setEnabled(False)
+        self.version_check_button.setText(lang.get("version_check_button_checking"))
+        self.version_status_label.setText("⏳ Vérification...")
+        self.version_status_label.setStyleSheet("font-size: 11px; font-style: italic; color: gray;")
         
         class VersionCheckThread(QThread):
             version_checked = Signal(dict)
@@ -306,6 +341,10 @@ class UIManager:
         
         current_ver = result['current_version']
         latest_ver = result['latest_version']
+        
+        # Réactiver le bouton
+        self.version_check_button.setEnabled(True)
+        self.version_check_button.setText(lang.get("version_check_button"))
         
         # Mise à jour du label de version actuelle
         self.version_current_label.setText(current_ver)

@@ -1,15 +1,17 @@
-# CHANGELOG v0.107 - Statistiques Herald Complètes & Corrections UI
+# CHANGELOG v0.107 - Vérification Version & Statistiques Herald
 
-**Date** : 2025-11-08  
+**Date** : 2025-11-10  
 **Version** : 0.107
 
 ---
 
 ## 🎯 Vue d'Ensemble
 
-Cette version apporte les **statistiques complètes Herald** (RvR/PvP/PvE/Wealth), une **réorganisation de l'interface** et plusieurs **corrections critiques** pour la stabilité et l'expérience utilisateur.
+Cette version apporte un **système de vérification de version depuis GitHub**, les **statistiques complètes Herald** (RvR/PvP/PvE/Wealth), une **réorganisation de l'interface** et plusieurs **corrections critiques** pour la stabilité et l'expérience utilisateur.
 
 ### Nouvelles Fonctionnalités Principales
+- ✅ **Système de vérification de version automatique et manuel**
+- ✅ **Section "Informations" (renommée depuis "Monnaie")**
 - ✅ Statistiques RvR complètes (Towers, Keeps, Relics)
 - ✅ Statistiques PvP détaillées par royaume (Solo Kills, Deathblows, Kills)
 - ✅ Statistiques PvE complètes (Dragons, Légions, Epic content)
@@ -24,6 +26,198 @@ Cette version apporte les **statistiques complètes Herald** (RvR/PvP/PvE/Wealth
 - ✅ Fix messages d'erreur incomplets
 - ✅ Fix formatage monnaie (TypeError)
 - ✅ Fix affichage monnaie (taille optimisée)
+
+---
+
+## 🔄 Système de Vérification de Version
+
+### Vue d'Ensemble
+
+Ajout d'un **système de vérification de version** permettant de savoir si l'utilisateur travaille avec la dernière version du logiciel. La vérification se fait **automatiquement au démarrage** et peut être relancée **manuellement** via un bouton.
+
+### Fonctionnalités
+
+**Vérification automatique** :
+- Lancée en arrière-plan au démarrage de l'application
+- Non-bloquante grâce à l'utilisation de QThread
+- Timeout de 5 secondes pour éviter les blocages réseau
+
+**Affichage** :
+```
+ℹ️ Informations
+Version actuelle: 0.107
+Dernière version: 0.107
+⏳ Vérification...  [🔄 Vérifier]
+```
+
+**États visuels** :
+- ⏳ **Vérification en cours** : Texte gris italique
+- ✅ **À jour** : Texte vert italique "✅ À jour"
+- 🎉 **Mise à jour disponible** : Texte vert gras "🎉 Mise à jour disponible !"
+- ⚠️ **Erreur** : Texte orange italique "⚠️ Erreur de vérification"
+
+**Bouton de vérification manuelle** :
+- Texte : "🔄 Vérifier"
+- Désactivé pendant la vérification (affiche "⏳ Vérification en cours...")
+- Style : Bleu (#0078d4) avec hover (#005a9e)
+- Grisé quand désactivé
+
+### Implémentation Technique
+
+**Fichier version.txt** :
+```
+0.107
+```
+- Localisation : Racine du projet
+- Contenu : Numéro de version simple (pas de "v" préfixe)
+
+**Module version_checker.py** :
+```python
+def check_for_updates(current_version: str) -> dict:
+    """
+    Vérifie si une mise à jour est disponible depuis GitHub
+    
+    Returns:
+        {
+            'update_available': bool,
+            'current_version': str,
+            'latest_version': str,
+            'error': str|None
+        }
+    """
+```
+
+**Fonctionnalités** :
+- Requête HTTP GET vers GitHub raw file
+- URL : `https://raw.githubusercontent.com/ChristophePelichet/DAOC-Character-Management/main/version.txt`
+- Timeout : 5 secondes
+- Comparaison sémantique avec `packaging.version.parse()`
+- Fallback : Comparaison de chaînes si parsing échoue
+- Gestion d'erreurs : Timeout, RequestException, exceptions générales
+
+**Thread en arrière-plan** :
+```python
+class VersionCheckThread(QThread):
+    version_checked = Signal(dict)
+    
+    def run(self):
+        # Lecture version.txt local
+        # Appel check_for_updates()
+        # Émission du signal avec résultat
+```
+
+**Gestion de l'état** :
+- Désactivation du bouton au début de `_start_version_check()`
+- Réactivation dans `_on_version_checked()` (callback)
+- Mise à jour du texte du bouton pendant le check
+- Update du status label avec couleur appropriée
+
+### Section "Informations"
+
+**Renommage** :
+- Anciennement : "💰 Monnaie"
+- Maintenant : "ℹ️ Informations"
+
+**Contenu** :
+- Version actuelle
+- Dernière version disponible
+- Status de vérification
+- Bouton de vérification manuelle
+
+**Disposition verticale** :
+```
+Version actuelle: 0.107
+Dernière version: 0.107
+⏳ Vérification...  [🔄 Vérifier]
+```
+
+### Traductions
+
+**Français** :
+```json
+{
+  "info_section_title": "ℹ️ Informations",
+  "version_check_current": "Version actuelle:",
+  "version_check_latest": "Dernière version:",
+  "version_check_update_available": "🎉 Mise à jour disponible !",
+  "version_check_up_to_date": "✅ À jour",
+  "version_check_error": "⚠️ Erreur de vérification",
+  "version_check_button": "🔄 Vérifier",
+  "version_check_button_checking": "⏳ Vérification en cours..."
+}
+```
+
+**Anglais** :
+```json
+{
+  "info_section_title": "ℹ️ Information",
+  "version_check_button": "🔄 Check",
+  "version_check_button_checking": "⏳ Checking...",
+  "version_check_update_available": "🎉 Update available!",
+  "version_check_up_to_date": "✅ Up to date",
+  "version_check_error": "⚠️ Check failed"
+}
+```
+
+**Allemand** :
+```json
+{
+  "info_section_title": "ℹ️ Informationen",
+  "version_check_button": "🔄 Prüfen",
+  "version_check_button_checking": "⏳ Wird geprüft...",
+  "version_check_update_available": "🎉 Update verfügbar!",
+  "version_check_up_to_date": "✅ Aktuell",
+  "version_check_error": "⚠️ Prüfung fehlgeschlagen"
+}
+```
+
+### Gestion des Erreurs
+
+**Cas d'erreur** :
+- Timeout réseau (>5s)
+- Erreur HTTP (404, 500, etc.)
+- Exception générale
+
+**Affichage en cas d'erreur** :
+```
+Version actuelle: 0.107
+Dernière version: —
+⚠️ Erreur de vérification
+```
+
+**Logs** :
+- Info : Succès de la vérification
+- Warning : Erreur réseau ou timeout
+- Error : Exception inattendue
+
+### Dépendances
+
+**Nouvelles bibliothèques** :
+- `requests` : Requêtes HTTP vers GitHub
+- `packaging` : Comparaison sémantique des versions
+
+**requirements.txt** :
+```
+requests>=2.31.0
+packaging>=23.0
+```
+
+### Fichiers Modifiés
+
+- ✅ `version.txt` (NOUVEAU) : Version actuelle
+- ✅ `Functions/version_checker.py` (NOUVEAU) : Module de vérification
+- ✅ `Functions/ui_manager.py` : Intégration UI + renommage section
+- ✅ `Language/fr.json` : Traductions françaises
+- ✅ `Language/en.json` : Traductions anglaises
+- ✅ `Language/de.json` : Traductions allemandes
+- ✅ `requirements.txt` : Ajout requests et packaging
+
+### Limitations
+
+- **Pas de mise à jour automatique** : Le système informe uniquement l'utilisateur
+- **Requiert connexion internet** : Affiche erreur si hors ligne
+- **GitHub dépendance** : Nécessite que version.txt soit sur la branche main
+- **Version simple uniquement** : Pas de changelog ou notes de version automatiques
 
 ---
 

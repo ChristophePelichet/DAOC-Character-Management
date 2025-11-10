@@ -1,6 +1,14 @@
-# v0.107 - Bannières de Classe & Statistiques Herald Complètes
+# v0.107 - Vérification Version & Bannières de Classe
 
 ## 🎯 Résumé (10 novembre 2025)
+
+### 🔄 Système de Vérification de Version (Nouveau)
+✅ **Vérification automatique au démarrage**  
+✅ **Affichage version actuelle et dernière version disponible**  
+✅ **Bouton manuel de vérification avec désactivation pendant le check**  
+✅ **Section "Informations" (renommée depuis "Monnaie")**  
+✅ **Check depuis GitHub (version.txt)**  
+✅ **Thread en arrière-plan (non-bloquant)**  
 
 ### 🎨 Système de Bannières (Nouveau)
 ✅ **Bannières visuelles pour les 44 classes DAOC**  
@@ -21,6 +29,69 @@
 ✅ Gestion intelligente des boutons Herald  
 ✅ Fix crash test connexion Herald  
 ✅ Suppression fichiers debug HTML automatiques  
+
+---
+
+## 🔄 Nouveau : Système de Vérification de Version
+
+### Fonctionnalités
+- **Vérification automatique** : Au démarrage de l'application  
+- **Version actuelle** : Affichée depuis `version.txt` local  
+- **Dernière version** : Récupérée depuis GitHub (version.txt sur branche main)  
+- **Bouton manuel** : "🔄 Vérifier" pour relancer la vérification  
+- **États visuels** :
+  - ⏳ Vérification en cours...  
+  - ✅ À jour  
+  - 🎉 Mise à jour disponible !  
+  - ⚠️ Erreur de vérification  
+
+### Section Informations
+- **Renommage** : Section "Monnaie" → "ℹ️ Informations"  
+- **Contenu** :
+  - Version actuelle : 0.107  
+  - Dernière version : 0.107  
+  - Status de vérification  
+  - Bouton de vérification manuel  
+
+### Caractéristiques Techniques
+- **Thread en arrière-plan** : Utilise QThread (non-bloquant)  
+- **Timeout** : 5 secondes pour les requêtes HTTP  
+- **Bibliothèques** :
+  - `requests` : Récupération version depuis GitHub  
+  - `packaging` : Comparaison sémantique des versions  
+- **URL GitHub** : `https://raw.githubusercontent.com/ChristophePelichet/DAOC-Character-Management/main/version.txt`  
+- **Fallback** : Version "0.107" si fichier local manquant  
+
+### Gestion des Erreurs
+- **Erreur réseau** : Affiche "⚠️ Erreur de vérification" (orange)  
+- **Timeout** : 5 secondes maximum pour éviter le blocage  
+- **Comparaison** : Utilise `packaging.version.parse()` avec fallback sur comparaison de chaînes  
+- **Messages** : Logs détaillés pour debugging  
+
+### Interface Utilisateur
+- **Disposition** :
+  ```
+  Version actuelle: 0.107
+  Dernière version: 0.107
+  ⏳ Vérification...  [🔄 Vérifier]
+  ```
+- **Bouton désactivé** : Pendant la vérification en cours  
+- **Texte bouton** : Change en "⏳ Vérification en cours..." pendant le check  
+- **Couleurs** :
+  - Vert : À jour ou mise à jour disponible  
+  - Orange : Erreur de vérification  
+  - Gris : Vérification en cours  
+
+### Traductions
+- 🇫🇷 Français : "🔄 Vérifier", "⏳ Vérification en cours..."  
+- 🇬🇧 English : "🔄 Check", "⏳ Checking..."  
+- 🇩🇪 Deutsch : "🔄 Prüfen", "⏳ Wird geprüft..."  
+
+### Fichiers Modifiés
+- `version.txt` : Version actuelle (0.107)  
+- `Functions/version_checker.py` : Module de vérification  
+- `Functions/ui_manager.py` : Interface et intégration  
+- `Language/*.json` : Traductions FR/EN/DE  
 
 ---
 

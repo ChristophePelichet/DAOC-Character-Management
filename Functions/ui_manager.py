@@ -365,7 +365,7 @@ class UIManager:
             
             # Afficher le lien de téléchargement
             download_url = "https://github.com/ChristophePelichet/DAOC-Character-Management/releases/latest"
-            download_text = lang.get("version_check_download", "📥 Télécharger")
+            download_text = lang.get("version_check_download")
             self.version_download_link.setText(f'<a href="{download_url}" style="color: #0078d4; text-decoration: none;">{download_text}</a>')
             self.version_download_link.show()
             

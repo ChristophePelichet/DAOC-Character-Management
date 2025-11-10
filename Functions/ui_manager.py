@@ -311,15 +311,9 @@ class UIManager:
             
             def run(self):
                 try:
-                    # Read current version from version.txt
-                    from Functions.path_manager import get_base_path
-                    version_file = os.path.join(get_base_path(), "version.txt")
-                    
-                    if os.path.exists(version_file):
-                        with open(version_file, 'r') as f:
-                            current_version = f.read().strip()
-                    else:
-                        current_version = "0.107"  # Fallback
+                    # Use version from code constant, not from file
+                    from Functions.version import __version__
+                    current_version = __version__
                     
                     result = check_for_updates(current_version)
                     self.version_checked.emit(result)

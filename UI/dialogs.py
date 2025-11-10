@@ -289,12 +289,13 @@ class CharacterSheetWindow(QDialog):
         
         # Scroll area for PvP
         pvp_scroll = QScrollArea()
-        pvp_scroll.setWidgetResizable(True)
+        pvp_scroll.setWidgetResizable(False)  # Disable auto-resize to allow horizontal scroll
         pvp_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         pvp_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         pvp_scroll.setStyleSheet("QScrollArea { border: none; }")
         
         pvp_scroll_widget = QWidget()
+        pvp_scroll_widget.setMinimumWidth(400)  # Set minimum width to ensure all content is visible
         pvp_sublayout = QVBoxLayout()
         
         # Use QGridLayout for proper alignment

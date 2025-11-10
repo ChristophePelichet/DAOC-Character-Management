@@ -347,20 +347,22 @@ class UIManager:
         self.version_check_button.setEnabled(True)
         self.version_check_button.setText(lang.get("version_check_button"))
         
-        # Mise à jour du label de version actuelle
-        self.version_current_label.setText(current_ver)
-        
         if result['error']:
             # Erreur pendant la vérification
+            self.version_current_label.setText(current_ver)
+            self.version_current_label.setStyleSheet("font-size: 11px; font-weight: bold;")
             self.version_latest_label.setText("—")
             self.version_status_label.setText(lang.get("version_check_error"))
             self.version_status_label.setStyleSheet("font-size: 11px; font-style: italic; color: orange;")
             self.version_status_label.show()
             self.version_download_link.hide()
         elif result['update_available']:
-            # Mise à jour disponible - version actuelle en rouge
+            # Mise à jour disponible - croix rouge à côté de la version actuelle
+            self.version_current_label.setText(f"✗ {current_ver}")
             self.version_current_label.setStyleSheet("font-size: 11px; font-weight: bold; color: red;")
-            self.version_latest_label.setText(latest_ver)
+            
+            # Coche verte à côté de la dernière version
+            self.version_latest_label.setText(f"✓ {latest_ver}")
             self.version_latest_label.setStyleSheet("font-size: 11px; font-weight: bold; color: green;")
             
             # Afficher le lien de téléchargement
@@ -373,10 +375,14 @@ class UIManager:
             self.version_status_label.setStyleSheet("font-size: 11px; font-weight: bold; color: green;")
             self.version_status_label.show()
         else:
-            # À jour - version actuelle en style normal
-            self.version_current_label.setStyleSheet("font-size: 11px; font-weight: bold;")
-            self.version_latest_label.setText(latest_ver if latest_ver else current_ver)
-            self.version_latest_label.setStyleSheet("font-size: 11px; font-weight: bold;")
+            # À jour - coche verte à côté de la version actuelle
+            self.version_current_label.setText(f"✓ {current_ver}")
+            self.version_current_label.setStyleSheet("font-size: 11px; font-weight: bold; color: green;")
+            
+            # Coche verte à côté de la dernière version
+            self.version_latest_label.setText(f"✓ {latest_ver if latest_ver else current_ver}")
+            self.version_latest_label.setStyleSheet("font-size: 11px; font-weight: bold; color: green;")
+            
             self.version_status_label.setText(lang.get("version_check_up_to_date"))
             self.version_status_label.setStyleSheet("font-size: 11px; font-style: italic; color: green;")
             self.version_status_label.show()

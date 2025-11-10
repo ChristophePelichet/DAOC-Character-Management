@@ -232,15 +232,6 @@ class CharacterSheetWindow(QDialog):
         # === RvR Sub-section (Captures only) ===
         rvr_subgroup = QGroupBox(lang.get("rvr_section_title"))
         rvr_subgroup.setMinimumWidth(250)
-        
-        # Scroll area for RvR
-        rvr_scroll = QScrollArea()
-        rvr_scroll.setWidgetResizable(True)
-        rvr_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
-        rvr_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        rvr_scroll.setStyleSheet("QScrollArea { border: none; }")
-        
-        rvr_scroll_widget = QWidget()
         rvr_sublayout = QVBoxLayout()
         
         # RvR Captures
@@ -275,27 +266,12 @@ class CharacterSheetWindow(QDialog):
         if relic_val is not None:
             self.relic_captures_label.setText(f"{relic_val:,}")
         
-        rvr_scroll_widget.setLayout(rvr_sublayout)
-        rvr_scroll.setWidget(rvr_scroll_widget)
-        
-        rvr_outer_layout = QVBoxLayout()
-        rvr_outer_layout.addWidget(rvr_scroll)
-        rvr_subgroup.setLayout(rvr_outer_layout)
+        rvr_subgroup.setLayout(rvr_sublayout)
         rvr_pvp_horizontal.addWidget(rvr_subgroup, 1)  # Stretch factor 1 for 50%
         
         # === PvP Sub-section (Kills with realm breakdown) ===
         pvp_subgroup = QGroupBox(lang.get("pvp_section_title"))
         pvp_subgroup.setMinimumWidth(250)
-        
-        # Scroll area for PvP
-        pvp_scroll = QScrollArea()
-        pvp_scroll.setWidgetResizable(False)  # Disable auto-resize to allow horizontal scroll
-        pvp_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
-        pvp_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        pvp_scroll.setStyleSheet("QScrollArea { border: none; }")
-        
-        pvp_scroll_widget = QWidget()
-        pvp_scroll_widget.setMinimumWidth(400)  # Set minimum width to ensure all content is visible
         pvp_sublayout = QVBoxLayout()
         
         # Use QGridLayout for proper alignment
@@ -309,6 +285,7 @@ class CharacterSheetWindow(QDialog):
         self.solo_kills_label.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.solo_kills_detail_label = QLabel("")
         self.solo_kills_detail_label.setStyleSheet("font-size: 9pt; color: gray;")
+        self.solo_kills_detail_label.setWordWrap(False)  # Prevent wrapping for horizontal scroll
         pvp_grid.addWidget(solo_kills_label_text, 0, 0)
         pvp_grid.addWidget(self.solo_kills_label, 0, 1)
         pvp_grid.addWidget(self.solo_kills_detail_label, 0, 2)
@@ -320,6 +297,7 @@ class CharacterSheetWindow(QDialog):
         self.deathblows_label.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.deathblows_detail_label = QLabel("")
         self.deathblows_detail_label.setStyleSheet("font-size: 9pt; color: gray;")
+        self.deathblows_detail_label.setWordWrap(False)  # Prevent wrapping for horizontal scroll
         pvp_grid.addWidget(deathblows_label_text, 1, 0)
         pvp_grid.addWidget(self.deathblows_label, 1, 1)
         pvp_grid.addWidget(self.deathblows_detail_label, 1, 2)
@@ -331,6 +309,7 @@ class CharacterSheetWindow(QDialog):
         self.kills_label.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.kills_detail_label = QLabel("")
         self.kills_detail_label.setStyleSheet("font-size: 9pt; color: gray;")
+        self.kills_detail_label.setWordWrap(False)  # Prevent wrapping for horizontal scroll
         pvp_grid.addWidget(kills_label_text, 2, 0)
         pvp_grid.addWidget(self.kills_label, 2, 1)
         pvp_grid.addWidget(self.kills_detail_label, 2, 2)
@@ -383,12 +362,7 @@ class CharacterSheetWindow(QDialog):
                     f'<span style="color: #4169E1;">Mid</span>: {kills_mid:,}'
                 )
         
-        pvp_scroll_widget.setLayout(pvp_sublayout)
-        pvp_scroll.setWidget(pvp_scroll_widget)
-        
-        pvp_outer_layout = QVBoxLayout()
-        pvp_outer_layout.addWidget(pvp_scroll)
-        pvp_subgroup.setLayout(pvp_outer_layout)
+        pvp_subgroup.setLayout(pvp_sublayout)
         rvr_pvp_horizontal.addWidget(pvp_subgroup, 1)  # Stretch factor 1 for 50%
         
         # Add the horizontal layout containing both RvR and PvP to statistics
@@ -400,15 +374,6 @@ class CharacterSheetWindow(QDialog):
         # === PvE Sub-section ===
         pve_subgroup = QGroupBox(lang.get("pve_section_title"))
         pve_subgroup.setMinimumWidth(250)
-        
-        # Scroll area for PvE
-        pve_scroll = QScrollArea()
-        pve_scroll.setWidgetResizable(True)
-        pve_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
-        pve_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        pve_scroll.setStyleSheet("QScrollArea { border: none; }")
-        
-        pve_scroll_widget = QWidget()
         pve_sublayout = QVBoxLayout()
         
         # Create grid layout for 2 columns with separator
@@ -490,26 +455,12 @@ class CharacterSheetWindow(QDialog):
         if sobekite is not None:
             self.sobekite_value.setText(f"{sobekite:,}")
         
-        pve_scroll_widget.setLayout(pve_sublayout)
-        pve_scroll.setWidget(pve_scroll_widget)
-        
-        pve_outer_layout = QVBoxLayout()
-        pve_outer_layout.addWidget(pve_scroll)
-        pve_subgroup.setLayout(pve_outer_layout)
+        pve_subgroup.setLayout(pve_sublayout)
         pve_achievements_horizontal.addWidget(pve_subgroup, 1)  # Stretch factor 1 for 50%
         
         # === Wealth Sub-section ===
         wealth_subgroup = QGroupBox(lang.get("wealth_section_title"))
         wealth_subgroup.setMinimumWidth(250)
-        
-        # Scroll area for Wealth
-        wealth_scroll = QScrollArea()
-        wealth_scroll.setWidgetResizable(True)
-        wealth_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
-        wealth_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        wealth_scroll.setStyleSheet("QScrollArea { border: none; }")
-        
-        wealth_scroll_widget = QWidget()
         wealth_layout = QFormLayout()
         
         # Money display
@@ -523,12 +474,7 @@ class CharacterSheetWindow(QDialog):
             # Money is a string like "18p 128g", display as-is
             self.money_label.setText(str(money_value))
         
-        wealth_scroll_widget.setLayout(wealth_layout)
-        wealth_scroll.setWidget(wealth_scroll_widget)
-        
-        wealth_outer_layout = QVBoxLayout()
-        wealth_outer_layout.addWidget(wealth_scroll)
-        wealth_subgroup.setLayout(wealth_outer_layout)
+        wealth_subgroup.setLayout(wealth_layout)
         pve_achievements_horizontal.addWidget(wealth_subgroup, 1)  # Stretch factor 1 for 50%
         
         # Add the horizontal layout containing both PvE and Wealth to statistics

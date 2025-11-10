@@ -16,7 +16,7 @@ from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QFormLayout, QGroupBox, QLabel, 
     QPushButton, QLineEdit, QComboBox, QCheckBox, QSlider, QMessageBox,
     QDialogButtonBox, QFileDialog, QTableWidget, QTableWidgetItem, QHeaderView,
-    QWidget, QTextEdit, QApplication, QProgressBar, QMenu, QGridLayout
+    QWidget, QTextEdit, QApplication, QProgressBar, QMenu, QGridLayout, QFrame
 )
 from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtGui import QBrush, QColor, QIcon, QPixmap
@@ -211,8 +211,12 @@ class CharacterSheetWindow(QDialog):
         statistics_group = QGroupBox(lang.get("armor_group_title"))
         statistics_layout = QVBoxLayout()
         
+        # === RvR and PvP Sub-sections (side by side with equal width) ===
+        rvr_pvp_horizontal = QHBoxLayout()
+        
         # === RvR Sub-section (Captures only) ===
         rvr_subgroup = QGroupBox(lang.get("rvr_section_title"))
+        rvr_subgroup.setMinimumWidth(250)
         rvr_sublayout = QVBoxLayout()
         
         # RvR Captures
@@ -248,53 +252,54 @@ class CharacterSheetWindow(QDialog):
             self.relic_captures_label.setText(f"{relic_val:,}")
         
         rvr_subgroup.setLayout(rvr_sublayout)
-        statistics_layout.addWidget(rvr_subgroup)
+        rvr_pvp_horizontal.addWidget(rvr_subgroup, 1)  # Stretch factor 1 for 50%
         
         # === PvP Sub-section (Kills with realm breakdown) ===
         pvp_subgroup = QGroupBox(lang.get("pvp_section_title"))
+        pvp_subgroup.setMinimumWidth(250)
         pvp_sublayout = QVBoxLayout()
         
-        # Solo Kills
-        solo_kills_main = QHBoxLayout()
+        # Use QGridLayout for proper alignment
+        pvp_grid = QGridLayout()
+        pvp_grid.setSpacing(5)
+        
+        # Solo Kills (row 0)
         solo_kills_label_text = QLabel(lang.get("solo_kills_label"))
         self.solo_kills_label = QLabel("—")
         self.solo_kills_label.setStyleSheet("font-weight: bold;")
-        solo_kills_main.addWidget(solo_kills_label_text)
-        solo_kills_main.addWidget(self.solo_kills_label)
-        solo_kills_main.addStretch()
-        pvp_sublayout.addLayout(solo_kills_main)
-        
+        self.solo_kills_label.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.solo_kills_detail_label = QLabel("")
-        self.solo_kills_detail_label.setStyleSheet("font-size: 9pt; color: gray; margin-left: 20px;")
-        pvp_sublayout.addWidget(self.solo_kills_detail_label)
+        self.solo_kills_detail_label.setStyleSheet("font-size: 9pt; color: gray;")
+        pvp_grid.addWidget(solo_kills_label_text, 0, 0)
+        pvp_grid.addWidget(self.solo_kills_label, 0, 1)
+        pvp_grid.addWidget(self.solo_kills_detail_label, 0, 2)
         
-        # Deathblows
-        deathblows_main = QHBoxLayout()
+        # Deathblows (row 1)
         deathblows_label_text = QLabel(lang.get("deathblows_label"))
         self.deathblows_label = QLabel("—")
         self.deathblows_label.setStyleSheet("font-weight: bold;")
-        deathblows_main.addWidget(deathblows_label_text)
-        deathblows_main.addWidget(self.deathblows_label)
-        deathblows_main.addStretch()
-        pvp_sublayout.addLayout(deathblows_main)
-        
+        self.deathblows_label.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.deathblows_detail_label = QLabel("")
-        self.deathblows_detail_label.setStyleSheet("font-size: 9pt; color: gray; margin-left: 20px;")
-        pvp_sublayout.addWidget(self.deathblows_detail_label)
+        self.deathblows_detail_label.setStyleSheet("font-size: 9pt; color: gray;")
+        pvp_grid.addWidget(deathblows_label_text, 1, 0)
+        pvp_grid.addWidget(self.deathblows_label, 1, 1)
+        pvp_grid.addWidget(self.deathblows_detail_label, 1, 2)
         
-        # Kills
-        kills_main = QHBoxLayout()
+        # Kills (row 2)
         kills_label_text = QLabel(lang.get("kills_label"))
         self.kills_label = QLabel("—")
         self.kills_label.setStyleSheet("font-weight: bold;")
-        kills_main.addWidget(kills_label_text)
-        kills_main.addWidget(self.kills_label)
-        kills_main.addStretch()
-        pvp_sublayout.addLayout(kills_main)
-        
+        self.kills_label.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.kills_detail_label = QLabel("")
-        self.kills_detail_label.setStyleSheet("font-size: 9pt; color: gray; margin-left: 20px;")
-        pvp_sublayout.addWidget(self.kills_detail_label)
+        self.kills_detail_label.setStyleSheet("font-size: 9pt; color: gray;")
+        pvp_grid.addWidget(kills_label_text, 2, 0)
+        pvp_grid.addWidget(self.kills_label, 2, 1)
+        pvp_grid.addWidget(self.kills_detail_label, 2, 2)
+        
+        # Add stretch to column 3 to push everything to the left
+        pvp_grid.setColumnStretch(3, 1)
+        
+        pvp_sublayout.addLayout(pvp_grid)
         
         # Load existing PvP values if available (with realm breakdown)
         solo_kills_val = self.character_data.get('solo_kills')
@@ -340,59 +345,74 @@ class CharacterSheetWindow(QDialog):
                 )
         
         pvp_subgroup.setLayout(pvp_sublayout)
-        statistics_layout.addWidget(pvp_subgroup)
+        rvr_pvp_horizontal.addWidget(pvp_subgroup, 1)  # Stretch factor 1 for 50%
+        
+        # Add the horizontal layout containing both RvR and PvP to statistics
+        statistics_layout.addLayout(rvr_pvp_horizontal)
+        
+        # === PvE and Achievements Sub-sections (side by side with equal width) ===
+        pve_achievements_horizontal = QHBoxLayout()
         
         # === PvE Sub-section ===
         pve_subgroup = QGroupBox(lang.get("pve_section_title"))
+        pve_subgroup.setMinimumWidth(250)
         pve_sublayout = QVBoxLayout()
         
-        # Create grid layout for 2 columns
+        # Create grid layout for 2 columns with separator
         pve_grid = QGridLayout()
-        pve_grid.setSpacing(8)
+        pve_grid.setHorizontalSpacing(5)
+        pve_grid.setVerticalSpacing(5)
         
         # Column 1 (left)
         # Dragon Kills
-        dragon_label = QLabel("🐉 " + lang.get("dragon_kills_label") + ":")
+        dragon_label = QLabel("🐉 " + lang.get("dragon_kills_label"))
         self.dragon_kills_value = QLabel("—")
         self.dragon_kills_value.setStyleSheet("font-weight: bold;")
         pve_grid.addWidget(dragon_label, 0, 0)
         pve_grid.addWidget(self.dragon_kills_value, 0, 1)
         
         # Mini Dragon Kills
-        mini_dragon_label = QLabel("🐲 " + lang.get("mini_dragon_kills_label") + ":")
+        mini_dragon_label = QLabel("🐲 " + lang.get("mini_dragon_kills_label"))
         self.mini_dragon_kills_value = QLabel("—")
         self.mini_dragon_kills_value.setStyleSheet("font-weight: bold;")
         pve_grid.addWidget(mini_dragon_label, 1, 0)
         pve_grid.addWidget(self.mini_dragon_kills_value, 1, 1)
         
         # Epic Dungeons
-        epic_dungeons_label = QLabel("🏛️ " + lang.get("epic_dungeons_label") + ":")
+        epic_dungeons_label = QLabel("🏛️ " + lang.get("epic_dungeons_label"))
         self.epic_dungeons_value = QLabel("—")
         self.epic_dungeons_value.setStyleSheet("font-weight: bold;")
         pve_grid.addWidget(epic_dungeons_label, 2, 0)
         pve_grid.addWidget(self.epic_dungeons_value, 2, 1)
         
+        # Vertical separator
+        separator = QFrame()
+        separator.setFrameShape(QFrame.Shape.VLine)
+        separator.setFrameShadow(QFrame.Shadow.Sunken)
+        separator.setStyleSheet("color: gray;")
+        pve_grid.addWidget(separator, 0, 2, 3, 1)  # Spans 3 rows
+        
         # Column 2 (right)
         # Legion Kills
-        legion_label = QLabel("👹 " + lang.get("legion_kills_label") + ":")
+        legion_label = QLabel("👹 " + lang.get("legion_kills_label"))
         self.legion_kills_value = QLabel("—")
         self.legion_kills_value.setStyleSheet("font-weight: bold;")
-        pve_grid.addWidget(legion_label, 0, 2)
-        pve_grid.addWidget(self.legion_kills_value, 0, 3)
+        pve_grid.addWidget(legion_label, 0, 3)
+        pve_grid.addWidget(self.legion_kills_value, 0, 4)
         
         # Epic Encounters
-        epic_encounters_label = QLabel("⚔️ " + lang.get("epic_encounters_label") + ":")
+        epic_encounters_label = QLabel("⚔️ " + lang.get("epic_encounters_label"))
         self.epic_encounters_value = QLabel("—")
         self.epic_encounters_value.setStyleSheet("font-weight: bold;")
-        pve_grid.addWidget(epic_encounters_label, 1, 2)
-        pve_grid.addWidget(self.epic_encounters_value, 1, 3)
+        pve_grid.addWidget(epic_encounters_label, 1, 3)
+        pve_grid.addWidget(self.epic_encounters_value, 1, 4)
         
         # Sobekite
-        sobekite_label = QLabel("🐊 " + lang.get("sobekite_label") + ":")
+        sobekite_label = QLabel("🐊 " + lang.get("sobekite_label"))
         self.sobekite_value = QLabel("—")
         self.sobekite_value.setStyleSheet("font-weight: bold;")
-        pve_grid.addWidget(sobekite_label, 2, 2)
-        pve_grid.addWidget(self.sobekite_value, 2, 3)
+        pve_grid.addWidget(sobekite_label, 2, 3)
+        pve_grid.addWidget(self.sobekite_value, 2, 4)
         
         pve_sublayout.addLayout(pve_grid)
         
@@ -418,7 +438,24 @@ class CharacterSheetWindow(QDialog):
             self.sobekite_value.setText(f"{sobekite:,}")
         
         pve_subgroup.setLayout(pve_sublayout)
-        statistics_layout.addWidget(pve_subgroup)
+        pve_achievements_horizontal.addWidget(pve_subgroup, 1)  # Stretch factor 1 for 50%
+        
+        # === Achievements Sub-section ===
+        achievements_subgroup = QGroupBox(lang.get("achievements_section_title"))
+        achievements_subgroup.setMinimumWidth(250)
+        achievements_sublayout = QVBoxLayout()
+        
+        # Placeholder for future achievements content
+        achievements_placeholder = QLabel("🔜 " + lang.get("statistics_coming_soon"))
+        achievements_placeholder.setStyleSheet("color: gray; font-style: italic; padding: 20px;")
+        achievements_placeholder.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        achievements_sublayout.addWidget(achievements_placeholder)
+        
+        achievements_subgroup.setLayout(achievements_sublayout)
+        pve_achievements_horizontal.addWidget(achievements_subgroup, 1)  # Stretch factor 1 for 50%
+        
+        # Add the horizontal layout containing both PvE and Achievements to statistics
+        statistics_layout.addLayout(pve_achievements_horizontal)
         
         # === Wealth Sub-section ===
         wealth_subgroup = QGroupBox(lang.get("wealth_section_title"))

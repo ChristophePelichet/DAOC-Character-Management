@@ -2,147 +2,53 @@
 
 ---
 
-# ✨ v0.107 - 2025-11-11
+# ✨ v0.107
 
 ### 🎉 Added
 
 **Configurable Theme System**
-- 🎨 JSON-based theme system with configurable files
-- 📁 `Themes/` folder containing theme definitions
-- 🌓 Two available themes: Light (default) and Dark
+-  Two available themes: Light (default) and Dark
 - ⚙️ Theme selector in configuration menu
 - 🔄 Instant theme switching without restart
-- 💾 Theme persistence in config.json
-- 🌍 Multilingual support (FR: Clair/Sombre, EN: Light/Dark, DE: Hell/Dunkel)
-- 📦 Portable for .exe compilation (PyInstaller compatible)
-- 🎭 Native Qt styles support (windowsvista, Fusion)
-- 🎨 Color palette customization via QPalette
-- 📝 Optional CSS stylesheets for advanced customization
-- 🔧 `Functions/theme_manager.py` module for theme management
-- 🔤 Alphabetical sorting of themes in dropdown menu
 
 **Font Scaling System**
-- 🔤 Complete font scaling system with user choice
-- 📊 ComboBox selector with 5 scale options: 100%, 125%, 150%, 175%, 200%
-- 💾 Persistent configuration in config.json (font_scale key)
-- ⚡ Instant application without restart
-- 🔤 Base font scaling (QApplication.setFont)
-- 🎨 CSS stylesheet scaling (themes + inline Python styles)
-- 📝 Inline stylesheet scaling (18 labels modified)
-- 🌍 Multilingual labels (FR: Taille du texte, EN: Text size, DE: Textgröße)
+- � Text size dropdown menu with 5 levels: 100%, 125%, 150%, 175%, 200%
+- � Instant application without restart
+- 🎯 Base font scaling (9pt Segoe UI on Windows)
+- � Automatic CSS stylesheet scaling for themes
+- 🖋️ Scaling of all inline Python styles (18 labels modified)
 
-**Scaling Functions Added**
-- 📏 `get_scaled_size(base_size_pt)`: Returns scaled size from config
-- 🎨 `get_scaled_stylesheet(stylesheet)`: Returns CSS with scaled fonts
-- ⚙️ `scale_stylesheet_fonts(stylesheet, scale)`: Internal regex scaling engine
-
-**Responsive Configuration Interface**
-- 📜 QScrollArea for scrollable content
-- 📐 Increased minimum size: 500×400 → 600×500 pixels
+**Responsive Interface**
+- 📜 Scrollable area in configuration window
+- 📐 Increased minimum size: 600×500 pixels (instead of 500×400)
 - 🖥️ Comfortable initial size: 700×700 pixels
-- ↕️ Automatic scrolling if window resized (prevents content overlap)
-- 🏗️ Hierarchical architecture: main_layout → scroll_area → content_widget
-- 🔲 Optimized margins (0px main, 10px content)
-
-### 🧰 Modified
-
-**Font Scaling System**
-- 🔄 Replaced QSlider with QComboBox for scale selection
-- 📊 Changed values: [100%, 110%, 125%, 150%] → [100%, 125%, 150%, 175%, 200%]
-- 🎯 More intuitive interface with direct value selection
-- 📍 Positioned in "General" section below theme selector
-
-**Configuration Window**
-- 📜 Added QScrollArea wrapping all QGroupBox elements
-- 🏗️ Hierarchical layout: scroll area contains all groups, buttons below
-- 🔲 Optimized margins: 0px around scroll, 10px around content
-- ↕️ No content overlap even at 200% scaling
-
-**Scaled UI Elements**
-- 📊 Herald progress dialog: 3 labels scaled (main.py)
-- 📈 RvR statistics: 3 detail labels scaled
-- 💰 Money label: 9pt bold scaled
-- 🏴 Banner placeholder: 9pt italic scaled  
-- 👑 Rank title: 16pt bold scaled (largest)
-- 🏆 Achievements panel: 12 labels scaled in visual hierarchy
-
-### 🐛 Fixed
-
-**Font Scaling System**
-- 🔧 Fixed CSS scaling regex IndexError
-- ⚙️ Separate functions for pt and px scaling (scale_pt, scale_px)
-- 📐 Correct regex patterns: `r'(\d+(?:\.\d+)?)pt\b'` and `r'font-size:\s*(\d+(?:\.\d+)?)px\b'`
-- ✅ Applied in two regex.sub() calls (prevents group index errors)
-- 📝 Added get_scaled_size import in UI/dialogs.py (line 28)
-
-**Configuration Window**
-- 📐 Fixed content overlap: "plus on agrandi plus les informations se marchent dessus"
-- 📜 QScrollArea solution for high scaling factors
-- 🔲 Increased minimum size: 500×400 → 600×500 pixels
-- ↕️ Automatic scrolling prevents label overlapping
-
-**PyInstaller Configuration**
-- 📦 Added `Themes/` folder to bundled data
-- 🔌 Added `Functions.theme_manager` to hiddenimports
-- 🛠️ Using `get_resource_path()` for .exe portability
-
-**Path Management**
-- 🗂️ Adapted `theme_manager.py` to use `path_manager.get_resource_path()`
-- ✅ Compatible with development and frozen modes (PyInstaller)
-
-### 🐛 Fixed
-
-**Theme System**
-- 🌍 Fixed automatic translation of theme names
-- 🔧 Correct usage of `lang.get()` without default parameter
-- 📋 Translation keys in JSON files (`theme_light`, `theme_dark`)
-
----
-
-# ✨ v0.107 - 2025-11-10
-
-### 🎉 Added
+- ↕️ Automatic scrolling if window too small
 
 **Version Check System**
 - 🔄 Automatic check on application startup
-- 📊 Display current version (from `Functions/version.py`)
-- 🌐 Display latest available version (from GitHub)
-- 🔘 Manual "🔄 Check" button to relaunch verification
-- ⚡ Background thread (non-blocking, 5s timeout)
+- � Display of current version
+- 🌐 Display of latest available version (from GitHub)
+- � Manual "🔄 Check" button to relaunch verification
 - ✅ Visual indicators: ✓ green (up to date) or ✗ red (outdated)
-- 🔗 Clickable download link to GitHub Releases (if update available)
-- ℹ️ "Information" section (renamed from "Currency")
-- 🌍 Multilingual support (FR/EN/DE)
+- � Clickable download link to GitHub Releases (if update available)
 
 **Class Banner System**
-- 🖼️ Visual banners for 44 DAOC classes (Albion, Hibernia, Midgard)
-- 📱 Responsive design adapting to window height
+- �️ Visual banners for 44 DAOC classes (Albion, Hibernia, Midgard) [©️Eden Daoc](https://eden-daoc.net/)
+- � Responsive design adapting to window height
 - 🔄 Automatic update when class/realm changes
-- 📦 PyInstaller compatible (.exe)
-- 🔁 Fallback to PNG if JPG missing
 
 **Complete Herald Statistics**
 - ⚔️ RvR Section: Tower Captures, Keep Captures, Relic Captures
-- 🗡️ PvP Section: Solo Kills, Deathblows, Kills (with realm detail Alb/Hib/Mid)
-- 🐉 PvE Section: Dragons, Legions, Mini Dragons, Epic Encounters, Epic Dungeons, Sobekite
-- 💰 Wealth Section: Currency in "18p 128g 45s 12c" format
-- 🏆 Achievements Section: 16 achievements displayed in 2 columns of 8
+- �️ PvP Section: Solo Kills, Deathblows, Kills (with realm detail Alb/Hib/Mid)
+- � PvE Section: Dragons, Legions, Mini Dragons, Epic Encounters, Epic Dungeons, Sobekite
+- � Wealth Section: Currency in "18p 128g 45s 12c" format
+- 🏆 Achievements Section: 16 achievements displayed
 
 **"Information" Button**
 - ℹ️ Button next to "Refresh Stats" button
 - 📝 Explanatory message about cumulative nature of statistics
-- ⚠️ Clarification: no seasonal stats, only global total
-- 🌍 Multilingual support (FR/EN/DE)
 
 ### 🧰 Modified
-
-**Statistics Interface**
-- 📐 50/50 layout for RvR/PvP and PvE/Currency sections
-- 📏 PvP alignment with QGridLayout for perfect display
-- 📊 Realm details on same line (more compact)
-- 🔲 PvE section with reduced spacing (5px) and vertical separator
-- 📋 Achievements section in full width with 2 columns
-- 🖥️ Removed QScrollArea (full height display)
 
 **"Refresh Stats" Button**
 - 🎯 Smart state management (grayed during Herald validation at startup)
@@ -151,41 +57,31 @@
 - 📢 Detailed error messages for RvR/PvP/PvE/Wealth
 
 **Currency Display**
-- 🔤 Font size reduced from 11pt to 9pt (better visual harmony)
-- 💪 Bold style preserved
+- � Font size reduced from 11pt to 9pt (better visual harmony)
+- � Bold style preserved
 
 ### 🐛 Fixed
 
-**Version Check System**
-- 🔧 Fix TypeError in `lang.get()` (removed default parameter)
-- 📁 Fix current/latest version separation (created `Functions/version.py`)
-
-**"Refresh Stats" Button**
-- 🔘 Fix button remaining active during Herald validation at startup
-- 🚫 Fix button remaining grayed after update dialog cancellation
-- ♻️ Fix reactivation with `try/finally` block for all execution paths
-- 🏁 Fix `herald_scraping_in_progress` flag positioned before `setText()`
-
 **Error Messages**
-- 📝 Fix incomplete error messages (added missing PvE and Wealth)
+- � Fix incomplete error messages (added missing PvE and Wealth)
 - 📢 Display ALL errors (RvR/PvP/PvE/Wealth)
 
 **Currency Formatting**
-- 🔢 Fix TypeError with `f"{money:,}"` on string
-- 💱 Use `str(money)` for direct display
+- � Fix TypeError with `f"{money:,}"` on string
+- � Use `str(money)` for direct display
 
 **Herald Connection Test**
-- 💥 Fix crash on connection errors
+- � Fix crash on connection errors
 - 🔐 Add `finally` block to properly close driver
 
 **Statistics Display**
 - 📱 Fix RvR/PvP/PvE/Wealth/Achievements sections truncated on small screens
 - 📏 Fix full height of statistics sections (removed QScrollArea)
-- 📄 Add `setWordWrap(False)` on PvP labels to prevent line wrapping
+- � Add `setWordWrap(False)` on PvP labels to prevent line wrapping
 
 **Debug Files**
 - 🗑️ Remove automatically created HTML files
-- 📝 Add to .gitignore
+- � Add to .gitignore
 
 ### 🔚 Removed
 
@@ -194,6 +90,311 @@ No features removed in this version.
 ---
 
 # ✨ v0.106 - 2025-11-07
+
+# ✨ v0.106 - 2025-11-07
+
+### 🎉 Added
+
+**Logging System**
+- � Unified format: `LOGGER - LEVEL - ACTION - MESSAGE`
+- 🏷️ BACKUP Logger: all backup module logs tagged
+- 🏷️ EDEN Logger: all Eden scraper logs tagged
+- 🎯 Standardized actions for each module
+- 🔍 Improved debug window with logger filter
+
+**Eden Cookies Backup**
+- � Automatic daily cookie backup at startup
+- 📂 Dedicated "Eden Cookies" section in backup window
+- ⚙️ Same options as Characters: compression, storage limit
+- � "Save Now" button for immediate force backup
+- 📁 "Open Folder" button for direct access
+- 🔄 Automatic refresh after save
+- 📊 Display number of backups and last backup date
+
+**Interface**
+- 🖥️ Redesign main window layout with Currency section
+- 📏 Herald status bar optimizations (750px × 35px buttons)
+- 📋 Redesign character sheet (renamed Statistics, removed Resistances)
+- � Moved "Manage Armor" button
+
+### 🧰 Modified
+
+**Backup Module**
+- 🏷️ Character name included in backup files
+- 📝 Format: `backup_characters_20251107_143025_Update_Merlin.zip`
+- 📝 Multiple: `backup_characters_20251107_143025_Update_multi.zip`
+- 🔍 Immediate character identification
+- 📊 Improved logs: INFO instead of ERROR on first startup
+- ✅ Clear error message: "No characters to backup"
+- �️ 46+ logs tagged with clear actions
+
+**Herald Performance**
+- ⚡ Herald timeout reduction of 17.4% (-4.6 seconds per search)
+- 🎯 Character search: 26.5s → 21.9s (-4.6 seconds)
+- ✅ 25/25 tests successful (100% stable, 0 crash)
+
+**Interface**
+- 📏 Herald URL column width optimized (120px minimum)
+- � Herald buttons uniform size in sheet
+- 🖥️ Backup window enlarged (1400x800)
+- � Side-by-side layout: Characters and Eden Cookies
+
+**Configuration**
+- 🎯 Default season: S3 instead of S1
+- ⚙️ Manual columns: Manual management enabled by default
+- � Conditional logs: Created ONLY if debug_mode enabled
+
+### 🐛 Fixed
+
+**Eden Herald**
+- 💥 Fix brutal crash on Herald search errors
+- 🔐 Proper WebDriver closure in all error paths
+- � Full stacktrace logging for diagnosis
+- ✅ Stability test: 25/25 searches successful (100% stable)
+- 🛠️ Automated test script for continuous validation
+- � Cookie path correction (PyInstaller fix)
+- 🔄 Auto-update during character import
+- 📂 Configurable Herald cookies folder
+- � Herald connection test protection
+- 📦 Selenium import error handling
+- 🔒 Driver cleanup protection
+
+**Interface**
+- 🔧 Column configuration correction (12 columns)
+- 🏷️ Label unification ("Directory")
+- 📊 Display path beginnings
+- 🔍 Robust diagnostic system for unexpected stops
+- ↕️ Functional realm sorting (added RealmSortProxyModel)
+- 🗺️ Proxy model mapping for sorted operations
+- ✅ Save button no longer closes sheet
+
+**Code Quality**
+- 🧹 Code cleanup: 74 excessive blank lines removed
+- 📦 Reduced exe size: Estimated -1 to 2 MB (-2 to 4%)
+- 📋 Fixed version: "About" window now displays v0.106
+- 🔧 Migration fix: No more "migration_done" error
+- 💻 67 production files modified for optimal quality
+- 🔒 sys.stderr/stdout None handling
+- 🧵 Thread exception capture
+- 📝 Full traceback logging
+- ✅ Backup logging errors corrected
+
+### 🔚 Removed
+
+No features removed in this version.
+
+---
+
+# ✨ v0.105 - 2025-11-01
+
+### 🎉 Added
+
+**Eden Scraper**
+- 🌐 Complete Eden Scraper module
+- 🍪 Cookie manager with GUI interface
+- � Bulk character import
+- 🌐 Multi-browser support (Chrome, Edge, Firefox)
+- 🔧 3-tier ChromeDriver system
+- ⚙️ Browser configuration in settings
+- � Herald status bar
+- 💬 Herald import dialog
+- 🐛 Eden debug window
+- 🎨 Log syntax highlighting
+- 🔄 Character update from Herald
+- 📝 Dedicated Eden logger
+
+**Interface**
+- 🎯 Automatic default season assignment
+- 🖱️ Context menu for quick import (right-click)
+- ❓ Integrated help system with Markdown
+- ✅ Automatic JSON structure validation
+- 🔍 Manual structure verification (Help menu)
+
+### 🧰 Modified
+
+No major modifications in this version.
+
+### � Fixed
+
+**Eden Scraper**
+- 🔧 Fixed changing class during rank modification
+- 📝 Herald data normalization
+- 💾 Fixed Herald modification save
+- � Optimized browser detection
+
+### 🔚 Removed
+
+No features removed in this version.
+
+---
+
+# ✨ v0.104 - 2025-10-25
+
+### 🎉 Added
+
+**Complete Refactoring**
+- 🔧 Complete refactoring into 3 managers
+- ⚡ Performance optimization (-22% loading)
+- 📉 Code reduction (-61% main.py)
+- 🗂️ New Season/Realm structure
+
+**Automatic Migration**
+- 🔄 Automatic migration with ZIP backup
+- 💬 Trilingual confirmation popup
+- � Compressed backups (70-90% savings)
+- ✅ Automatic integrity verification
+- ↩️ Automatic rollback on error
+- 📝 Complete JSON validation
+
+**Interface**
+- � Class and Race columns
+- 👑 Realm Rank with dropdown menus
+- � Automatic rank save
+- � Traditional Windows menu
+
+**Documentation**
+- 🧹 Project cleanup script
+- � MIGRATION_SECURITY documentation
+- 🧪 Migration test scripts
+- 📖 Complete documentation reorganization
+
+### 🧰 Modified
+
+No major modifications in this version.
+
+### � Fixed
+
+No bugs fixed in this version.
+
+### 🔚 Removed
+
+No features removed in this version.
+
+---
+
+# ✨ v0.103 - 2025-10-20
+
+### 🎉 Added
+
+**Races and Classes**
+- 🧬 Race and class selection
+- � Dynamic race/class filtering
+- ✅ Automatic race/class validation
+- 🌍 Specialization translations (FR/EN/DE)
+- 📊 Complete data system (44 classes, 18 races)
+- � 188 translated specializations
+- 🎮 Eden support (adapted classes)
+
+**Interface**
+- 📏 Column width management
+- 🤖 Automatic/manual mode for columns
+
+### 🧰 Modified
+
+No major modifications in this version.
+
+### 🐛 Fixed
+
+No bugs fixed in this version.
+
+### 🔚 Removed
+
+No features removed in this version.
+
+---
+
+# ✨ v0.102 - 2025-10-15
+
+### 🎉 Added
+
+**Multi-Server**
+- 🌐 Server column restoration (Eden/Blackthorn)
+- ⚙️ Default server configuration
+- 📋 Server dropdown in character sheet
+- 👁️ Server column hidden by default
+
+**Renaming**
+- ✏️ Simplified renaming
+- ⚡ Quick rename (Enter key)
+
+### 🧰 Modified
+
+No major modifications in this version.
+
+### � Fixed
+
+- 💬 Simplified error messages
+- 🔧 RealmTitleDelegate correction
+
+### 🔚 Removed
+
+No features removed in this version.
+
+---
+
+# ✨ v0.101 - 2025-10-10
+
+### 🎉 Added
+
+**Windows Menu Interface**
+- 📂 File menu (New character, Settings)
+- �️ View menu (Columns)
+- ❓ Help menu (About)
+- 🌍 Menu translations (FR/EN/DE)
+
+**Editing**
+- ✏️ Realm, level, season, page, guild editing
+- � Automatic move on realm change
+- 🖱️ Rename via context menu
+
+**Optimization**
+- ⚡ Icon loading optimization
+- 🎨 Interface simplification
+
+### 🧰 Modified
+
+- 🌐 Server automatically set to "Eden"
+
+### � Fixed
+
+No bugs fixed in this version.
+
+### 🔚 Removed
+
+- ❌ Server column removal
+
+---
+
+# ✨ v0.1 - 2025-10-01
+
+### 🎉 Added
+
+**Core Features**
+- � Complete character management
+- ➕ Create, modify, delete, duplicate
+- 👑 Realm rank system
+- 🌍 Multilingual interface (FR/EN/DE)
+- 📋 Column configuration
+- 🐛 Debug mode with integrated console
+- � Bulk actions
+- 🏰 Realm organization (Albion, Hibernia, Midgard)
+- 🌐 Multi-server support
+- � Season system
+- 🔗 Web data extraction
+- 🖥️ PySide6 interface
+- 💾 Configuration persistence
+
+### 🧰 Modified
+
+No modifications (initial version).
+
+### � Fixed
+
+No bugs fixed (initial version).
+
+### 🔚 Removed
+
+No features removed (initial version).
 
 ### 🎉 Added
 

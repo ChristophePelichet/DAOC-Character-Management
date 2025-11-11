@@ -2,8 +2,6 @@
 
 Application de gestion de personnages pour Dark Age of Camelot (DAOC), développée en Python avec PySide6.
 
-**🌍 Disponible en :** **Français** | [English](Documentation/README_EN.md) | [Deutsch](Documentation/README_DE.md)
-
 ## 📦 Téléchargement
 
 **Version actuelle : v0.107** 🎉
@@ -59,12 +57,16 @@ Consultez le [journal des modifications](CHANGELOG.md) pour l'historique complet
 - 📋 **Liste des armures** avec métadonnées (nom, taille, date de modification)
 - 🔍 **Ouverture rapide** des fichiers avec l'application par défaut
 - 🗑️ **Suppression** de fichiers avec confirmation
-- ⚙️ **Configuration** du chemin du dossier d'armures
 - 🔄 **Gestion des doublons** automatique (suffixes _1, _2, etc.)
 
 ### Configuration Avancée
 - 🌍 **Multi-langue** : Français, English, Deutsch
+- 🎨 **Thèmes Configurable** : 2 thèmes disponibles : Clair (par défaut) et Sombre
 - 🔧 **Personnalisation** des chemins (personnages, logs, config, armures)
 - 📋 **Colonnes configurables** : Masquer/afficher les colonnes souhaitées
-- 🐛 **Mode Debug** avec console intégrée
-- ℹ️ **Disclaimer configurable** : Message d'avertissement au démarrage (désactivable)
+
+### Système de Sauvegarde
+- 💾 **Personnages** : Sauvegarde des personnages (Modification, Suppression)
+- 💾 **Cookies** : Sauvegarde des cookies
+- 📊 **Rétention** : Système de rétention basé sur la taille
+- 🔧 **Compression** : Possibiliter de compresser les sauvegardes

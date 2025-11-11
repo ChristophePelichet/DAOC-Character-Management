@@ -2185,6 +2185,16 @@ class ConfigurationDialog(QDialog):
         self.language_combo.addItems(self.available_languages.values())
         general_layout.addRow(lang.get("config_language_label"), self.language_combo)
         
+        # Theme
+        from Functions.theme_manager import get_available_themes
+        self.theme_combo = QComboBox()
+        self.available_themes = get_available_themes()
+        # Trier les thèmes par nom (alphabétique)
+        sorted_themes = sorted(self.available_themes.items(), key=lambda x: x[1])
+        for theme_id, theme_name in sorted_themes:
+            self.theme_combo.addItem(theme_name, theme_id)
+        general_layout.addRow(lang.get("config_theme_label"), self.theme_combo)
+        
         # Column resize mode
         self.manual_column_resize_check = QCheckBox(lang.get("config_manual_column_resize_label", 
                                                               default="Gestion manuelle de la taille des colonnes"))
@@ -2318,6 +2328,12 @@ class ConfigurationDialog(QDialog):
         current_lang_code = config.get("language", "fr")
         current_lang_name = self.available_languages.get(current_lang_code, "Français")
         self.language_combo.setCurrentText(current_lang_name)
+
+        # Theme
+        current_theme = config.get("theme", "default")
+        theme_index = self.theme_combo.findData(current_theme)
+        if theme_index >= 0:
+            self.theme_combo.setCurrentIndex(theme_index)
 
         current_default_server = config.get("default_server", "")
         self.default_server_combo.setCurrentText(current_default_server)

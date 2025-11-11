@@ -690,7 +690,8 @@ class CookieManager:
                     'success': True,
                     'status_code': 200,
                     'message': 'Connecté à Herald',
-                    'accessible': True
+                    'accessible': True,
+                    'browser_used': browser_name  # Inclure le navigateur utilisé
                 }
             else:
                 eden_logger.warning('NON CONNECTÉ - Message d\'erreur détecté', extra={"action": "TEST"})
@@ -698,7 +699,8 @@ class CookieManager:
                     'success': True,
                     'status_code': 200,
                     'message': 'Non connecté à Herald',
-                    'accessible': False
+                    'accessible': False,
+                    'browser_used': browser_name  # Inclure le navigateur utilisé
                 }
                     
         except Exception as e:

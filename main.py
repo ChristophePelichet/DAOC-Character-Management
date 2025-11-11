@@ -874,6 +874,20 @@ class CharacterApp(QMainWindow):
         """Sauvegarde l'état de l'application à la fermeture"""
         logging.info("Main window closing")
         
+        # Arrêter le thread de vérification Eden s'il est en cours
+        if hasattr(self, 'ui_manager') and self.ui_manager.eden_status_thread:
+            if self.ui_manager.eden_status_thread.isRunning():
+                logging.info("Stopping Eden status thread...")
+                try:
+                    self.ui_manager.eden_status_thread.status_updated.disconnect()
+                except:
+                    pass
+                self.ui_manager.eden_status_thread.quit()
+                if not self.ui_manager.eden_status_thread.wait(2000):
+                    self.ui_manager.eden_status_thread.terminate()
+                    self.ui_manager.eden_status_thread.wait()
+                logging.info("Eden status thread stopped")
+        
         # Save l'état of l'en-tête
         self.tree_manager.save_header_state()
         

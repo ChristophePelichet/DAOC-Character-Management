@@ -2570,13 +2570,18 @@ class ConnectionTestThread(QThread):
     """Thread pour tester la connexion Eden en arrière-plan"""
     finished = Signal(dict)  # Signal émis with the résultat of the test
     
-    def __init__(self, cookie_manager):
-        super().__init__()
-        self.cookie_manager = cookie_manager
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        # Ne pas stocker de référence à cookie_manager
+        # pour éviter les problèmes si la fenêtre est détruite
     
     def run(self):
         """Exécute le test de connexion"""
-        result = self.cookie_manager.test_eden_connection()
+        # Créer une instance locale de CookieManager pour éviter les références
+        # à des objets détruits si la fenêtre est fermée pendant le test
+        from Functions.cookie_manager import CookieManager
+        cookie_manager = CookieManager()
+        result = cookie_manager.test_eden_connection()
         self.finished.emit(result)
 
 
@@ -2682,11 +2687,17 @@ class CookieManagerDialog(QDialog):
         """Lance le test de connexion en arrière-plan"""
         # Annuler un test en cours si existant
         if self.connection_thread and self.connection_thread.isRunning():
+            try:
+                self.connection_thread.finished.disconnect()
+            except:
+                pass
             self.connection_thread.quit()
             self.connection_thread.wait()
         
-        # Create and démarrer un nouveau thread
-        self.connection_thread = ConnectionTestThread(self.cookie_manager)
+        # Créer un nouveau thread avec la fenêtre principale comme parent
+        # pour qu'il survive à la fermeture de cette fenêtre de dialog
+        main_window = self.parent() if self.parent() else None
+        self.connection_thread = ConnectionTestThread(parent=main_window)
         self.connection_thread.finished.connect(self.on_connection_test_finished)
         self.connection_thread.start()
     
@@ -2716,11 +2727,12 @@ class CookieManagerDialog(QDialog):
                 f"{connection_status}"
             )
             
-            # Afficher the navigateur utilisé for the test
-            if hasattr(self.cookie_manager, 'last_browser_used') and self.cookie_manager.last_browser_used:
-                browser_icon = {'Chrome': '🔵', 'Edge': '🔷', 'Firefox': '🦊'}.get(self.cookie_manager.last_browser_used, '🌐')
+            # Afficher le navigateur utilisé pour le test (si disponible dans le résultat)
+            browser_used = result.get('browser_used')
+            if browser_used:
+                browser_icon = {'Chrome': '🔵', 'Edge': '🔷', 'Firefox': '🦊'}.get(browser_used, '🌐')
                 self.browser_label.setText(
-                    f"{browser_icon} <i>Test effectué avec: {self.cookie_manager.last_browser_used}</i>"
+                    f"{browser_icon} <i>Test effectué avec: {browser_used}</i>"
                 )
             else:
                 self.browser_label.setText("")
@@ -3046,6 +3058,24 @@ class CookieManagerDialog(QDialog):
         # Rafraîchir the statut Eden in the fenêtre principale if the cookies have été générés
         if success and self.parent() and hasattr(self.parent(), 'ui_manager'):
             self.parent().ui_manager.check_eden_status()
+    
+    def closeEvent(self, event):
+        """
+        Gère la fermeture de la fenêtre.
+        Le thread continue en arrière-plan (avec parent=main_window) jusqu'à sa fin naturelle.
+        """
+        # Si un thread de connexion est en cours, déconnecter notre callback
+        # Le thread continuera avec son parent (main_window) et se terminera proprement
+        if self.connection_thread and self.connection_thread.isRunning():
+            try:
+                self.connection_thread.finished.disconnect(self.on_connection_test_finished)
+            except:
+                pass
+            # Ne plus garder de référence au thread
+            self.connection_thread = None
+        
+        # Accepter la fermeture
+        event.accept()
 
 
 # ============================================================================

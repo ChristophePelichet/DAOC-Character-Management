@@ -137,8 +137,116 @@ def apply_theme(app, theme_id="default"):
     
     # Appliquer le stylesheet personnalisé
     stylesheet = theme_data.get("stylesheet", "")
-    app.setStyleSheet(stylesheet)
+    
+    # Charger le font_scale depuis la config pour l'appliquer au stylesheet
+    try:
+        from Functions.config_manager import config
+        font_scale = config.get("font_scale", 1.0)
+        if stylesheet and font_scale != 1.0:
+            stylesheet = scale_stylesheet_fonts(stylesheet, font_scale)
+    except Exception as e:
+        logging.warning(f"Impossible d'appliquer le scaling au stylesheet: {e}")
+    
     if stylesheet:
+        app.setStyleSheet(stylesheet)
         logging.debug("Stylesheet personnalisé appliqué")
     
     logging.info(f"Thème '{theme_data.get('name', theme_id)}' appliqué avec succès")
+
+
+def apply_font_scale(app, scale=1.0):
+    """
+    Applique un facteur d'échelle à la police de base de l'application
+    
+    Args:
+        app: Instance de QApplication
+        scale: Facteur d'échelle (1.0 = 100%, 1.25 = 125%, etc.)
+    """
+    if scale <= 0:
+        logging.warning(f"Facteur d'échelle invalide: {scale}, utilisation de 1.0")
+        scale = 1.0
+    
+    # Police de base (Segoe UI 9pt par défaut sur Windows)
+    base_font = app.font()
+    base_size = 9  # Taille de base en points
+    
+    # Appliquer le scaling
+    new_size = base_size * scale
+    base_font.setPointSizeF(new_size)
+    app.setFont(base_font)
+    
+    # Appliquer le scaling au stylesheet existant si présent
+    current_stylesheet = app.styleSheet()
+    if current_stylesheet:
+        scaled_stylesheet = scale_stylesheet_fonts(current_stylesheet, scale)
+        app.setStyleSheet(scaled_stylesheet)
+    
+    logging.info(f"Échelle de police appliquée: {scale:.0%} ({new_size:.1f}pt)")
+
+
+def scale_stylesheet_fonts(stylesheet, scale):
+    """
+    Applique un facteur d'échelle à toutes les tailles de police dans un stylesheet
+    
+    Args:
+        stylesheet: Le stylesheet CSS à modifier
+        scale: Facteur d'échelle
+    
+    Returns:
+        Le stylesheet avec les tailles ajustées
+    """
+    import re
+    
+    def scale_pt(match):
+        size = float(match.group(1))
+        new_size = size * scale
+        return f"{new_size:.1f}pt"
+    
+    def scale_px(match):
+        size = float(match.group(1))
+        new_size = size * scale
+        return f"font-size: {new_size:.1f}px"
+    
+    # Remplacer les tailles en pt
+    stylesheet = re.sub(r'(\d+(?:\.\d+)?)pt\b', scale_pt, stylesheet)
+    # Remplacer les tailles en px dans font-size
+    stylesheet = re.sub(r'font-size:\s*(\d+(?:\.\d+)?)px\b', scale_px, stylesheet)
+    
+    return stylesheet
+
+
+def get_scaled_size(base_size_pt):
+    """
+    Retourne une taille de police scalée selon la configuration
+    
+    Args:
+        base_size_pt: Taille de base en points
+    
+    Returns:
+        Taille scalée en points (float)
+    """
+    try:
+        from Functions.config_manager import config
+        scale = config.get("font_scale", 1.0)
+        return base_size_pt * scale
+    except:
+        return base_size_pt
+
+
+def get_scaled_stylesheet(stylesheet):
+    """
+    Retourne un stylesheet avec les tailles de police scalées
+    
+    Args:
+        stylesheet: Le stylesheet CSS
+    
+    Returns:
+        Le stylesheet scalé
+    """
+    try:
+        from Functions.config_manager import config
+        scale = config.get("font_scale", 1.0)
+        return scale_stylesheet_fonts(stylesheet, scale)
+    except:
+        return stylesheet
+

@@ -365,14 +365,15 @@ class CharacterApp(QMainWindow):
         # Icône and titre
         title_layout = QHBoxLayout()
         title_label = QLabel("🌐 Récupération des données depuis Eden Herald...")
-        title_label.setStyleSheet("font-size: 12pt; font-weight: bold;")
+        from Functions.theme_manager import get_scaled_size
+        title_label.setStyleSheet(f"font-size: {get_scaled_size(12):.1f}pt; font-weight: bold;")
         title_layout.addWidget(title_label)
         progress_layout.addLayout(title_layout)
         
         # Message of détail
         detail_label = QLabel("Connexion au serveur et extraction des informations du personnage.")
         detail_label.setWordWrap(True)
-        detail_label.setStyleSheet("color: #666; font-size: 10pt;")
+        detail_label.setStyleSheet(f"color: #666; font-size: {get_scaled_size(10):.1f}pt;")
         progress_layout.addWidget(detail_label)
         
         # Barre of progression indéterminée (animation)
@@ -384,7 +385,7 @@ class CharacterApp(QMainWindow):
         
         # Message d'attente
         wait_label = QLabel("⏱️ Veuillez patienter, cette opération peut prendre quelques secondes...")
-        wait_label.setStyleSheet("color: #888; font-size: 9pt; font-style: italic;")
+        wait_label.setStyleSheet(f"color: #888; font-size: {get_scaled_size(9):.1f}pt; font-style: italic;")
         wait_label.setWordWrap(True)
         progress_layout.addWidget(wait_label)
         
@@ -691,6 +692,15 @@ class CharacterApp(QMainWindow):
             config.set("theme", new_theme)
             from Functions.theme_manager import apply_theme
             apply_theme(QApplication.instance(), new_theme)
+        
+        # Font Scale
+        old_font_scale = config.get("font_scale", 1.0)
+        new_font_scale = dialog.font_scale_combo.currentData()  # Récupérer la valeur du ComboBox
+        font_scale_changed = (old_font_scale != new_font_scale)
+        if font_scale_changed:
+            config.set("font_scale", new_font_scale)
+            from Functions.theme_manager import apply_font_scale
+            apply_font_scale(QApplication.instance(), new_font_scale)
             
         # Langue
         selected_lang_name = dialog.language_combo.currentText()
@@ -880,6 +890,13 @@ def apply_theme(app):
     apply_theme_manager(app, theme_id)
 
 
+def apply_font_scale(app):
+    """Applique l'échelle de police configurée"""
+    from Functions.theme_manager import apply_font_scale as apply_font_scale_manager
+    font_scale = config.get("font_scale", 1.0)
+    apply_font_scale_manager(app, font_scale)
+
+
 def main():
     """Point d'entrée principal de l'application"""
     # Enregistrement of the démarrage
@@ -906,6 +923,7 @@ def main():
     try:
         app = QApplication(sys.argv)
         apply_theme(app)
+        apply_font_scale(app)
         
         main_window = CharacterApp()
         

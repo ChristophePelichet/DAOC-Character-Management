@@ -54,7 +54,8 @@ class ConfigManager:
                 "backup_size_limit_mb": 20,
                 "backup_compress": True,
                 "backup_last_date": None,
-                "theme": "default"
+                "theme": "default",
+                "font_scale": 1.0
             }
             self.save_config()
 

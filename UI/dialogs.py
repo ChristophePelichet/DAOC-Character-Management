@@ -25,6 +25,7 @@ from Functions.config_manager import config, get_config_dir
 from Functions.character_manager import get_character_dir
 from Functions.logging_manager import get_log_dir, get_logger, log_with_action, LOGGER_CHARACTER
 from Functions.data_manager import DataManager
+from Functions.theme_manager import get_scaled_size
 
 # Get CHARACTER logger
 logger_char = get_logger(LOGGER_CHARACTER)
@@ -284,7 +285,7 @@ class CharacterSheetWindow(QDialog):
         self.solo_kills_label.setStyleSheet("font-weight: bold;")
         self.solo_kills_label.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.solo_kills_detail_label = QLabel("")
-        self.solo_kills_detail_label.setStyleSheet("font-size: 9pt; color: gray;")
+        self.solo_kills_detail_label.setStyleSheet(f"font-size: {get_scaled_size(9):.1f}pt; color: gray;")
         self.solo_kills_detail_label.setWordWrap(False)  # Prevent wrapping for horizontal scroll
         pvp_grid.addWidget(solo_kills_label_text, 0, 0)
         pvp_grid.addWidget(self.solo_kills_label, 0, 1)
@@ -296,7 +297,7 @@ class CharacterSheetWindow(QDialog):
         self.deathblows_label.setStyleSheet("font-weight: bold;")
         self.deathblows_label.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.deathblows_detail_label = QLabel("")
-        self.deathblows_detail_label.setStyleSheet("font-size: 9pt; color: gray;")
+        self.deathblows_detail_label.setStyleSheet(f"font-size: {get_scaled_size(9):.1f}pt; color: gray;")
         self.deathblows_detail_label.setWordWrap(False)  # Prevent wrapping for horizontal scroll
         pvp_grid.addWidget(deathblows_label_text, 1, 0)
         pvp_grid.addWidget(self.deathblows_label, 1, 1)
@@ -308,7 +309,7 @@ class CharacterSheetWindow(QDialog):
         self.kills_label.setStyleSheet("font-weight: bold;")
         self.kills_label.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.kills_detail_label = QLabel("")
-        self.kills_detail_label.setStyleSheet("font-size: 9pt; color: gray;")
+        self.kills_detail_label.setStyleSheet(f"font-size: {get_scaled_size(9):.1f}pt; color: gray;")
         self.kills_detail_label.setWordWrap(False)  # Prevent wrapping for horizontal scroll
         pvp_grid.addWidget(kills_label_text, 2, 0)
         pvp_grid.addWidget(self.kills_label, 2, 1)
@@ -465,7 +466,7 @@ class CharacterSheetWindow(QDialog):
         
         # Money display
         self.money_label = QLabel("—")
-        self.money_label.setStyleSheet("font-weight: bold; font-size: 9pt;")
+        self.money_label.setStyleSheet(f"font-weight: bold; font-size: {get_scaled_size(9):.1f}pt;")
         wealth_layout.addRow(lang.get("total_wealth_label"), self.money_label)
         
         # Load existing wealth value if available
@@ -683,7 +684,7 @@ class CharacterSheetWindow(QDialog):
         self.banner_label.clear()
         self.banner_label.setText(text)
         self.banner_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.banner_label.setStyleSheet("color: gray; font-style: italic; font-size: 9pt;")
+        self.banner_label.setStyleSheet(f"color: gray; font-style: italic; font-size: {get_scaled_size(9):.1f}pt;")
     
     def _populate_classes_sheet(self):
         """Populates class dropdown based on selected realm."""
@@ -993,7 +994,7 @@ class CharacterSheetWindow(QDialog):
                     "Midgard": "#0066CC"
                 }
                 color = realm_colors.get(self.realm, "#000000")
-                self.rank_title_label.setStyleSheet(f"font-size: 16pt; font-weight: bold; color: {color};")
+                self.rank_title_label.setStyleSheet(f"font-size: {get_scaled_size(16):.1f}pt; font-weight: bold; color: {color};")
             
             # Update character data
             self.character_data['realm'] = new_realm
@@ -1158,18 +1159,18 @@ class CharacterSheetWindow(QDialog):
             
             # Title
             title_label = QLabel(title)
-            title_label.setStyleSheet("font-size: 9pt;")
+            title_label.setStyleSheet(f"font-size: {get_scaled_size(9):.1f}pt;")
             first_grid.addWidget(title_label, row, 0, Qt.AlignmentFlag.AlignLeft)
             
             # Progress
             progress_label = QLabel(progress)
-            progress_label.setStyleSheet("font-weight: bold; font-size: 9pt;")
+            progress_label.setStyleSheet(f"font-weight: bold; font-size: {get_scaled_size(9):.1f}pt;")
             first_grid.addWidget(progress_label, row, 1, Qt.AlignmentFlag.AlignRight)
             
             # Current tier
             if current_tier and current_tier != "None":
                 current_label = QLabel(f"({current_tier})")
-                current_label.setStyleSheet("font-size: 8pt; color: #6c757d; font-style: italic;")
+                current_label.setStyleSheet(f"font-size: {get_scaled_size(8):.1f}pt; color: #6c757d; font-style: italic;")
                 first_grid.addWidget(current_label, row, 2, Qt.AlignmentFlag.AlignLeft)
         
         columns_layout.addLayout(first_grid, 1)  # Stretch factor 1
@@ -1198,18 +1199,18 @@ class CharacterSheetWindow(QDialog):
                 
                 # Title
                 title_label = QLabel(title)
-                title_label.setStyleSheet("font-size: 9pt;")
+                title_label.setStyleSheet(f"font-size: {get_scaled_size(9):.1f}pt;")
                 second_grid.addWidget(title_label, row, 0, Qt.AlignmentFlag.AlignLeft)
                 
                 # Progress
                 progress_label = QLabel(progress)
-                progress_label.setStyleSheet("font-weight: bold; font-size: 9pt;")
+                progress_label.setStyleSheet(f"font-weight: bold; font-size: {get_scaled_size(9):.1f}pt;")
                 second_grid.addWidget(progress_label, row, 1, Qt.AlignmentFlag.AlignRight)
                 
                 # Current tier
                 if current_tier and current_tier != "None":
                     current_label = QLabel(f"({current_tier})")
-                    current_label.setStyleSheet("font-size: 8pt; color: #6c757d; font-style: italic;")
+                    current_label.setStyleSheet(f"font-size: {get_scaled_size(8):.1f}pt; color: #6c757d; font-style: italic;")
                     second_grid.addWidget(current_label, row, 2, Qt.AlignmentFlag.AlignLeft)
             
             columns_layout.addLayout(second_grid, 1)  # Stretch factor 1
@@ -1646,14 +1647,14 @@ class CharacterSheetWindow(QDialog):
         # Icône and titre
         title_layout = QHBoxLayout()
         title_label = QLabel("🌐 Récupération des données depuis Eden Herald...")
-        title_label.setStyleSheet("font-size: 12pt; font-weight: bold;")
+        title_label.setStyleSheet(f"font-size: {get_scaled_size(12):.1f}pt; font-weight: bold;")
         title_layout.addWidget(title_label)
         progress_layout.addLayout(title_layout)
         
         # Message of détail
         detail_label = QLabel("Connexion au serveur et extraction des informations du personnage.")
         detail_label.setWordWrap(True)
-        detail_label.setStyleSheet("color: #666; font-size: 10pt;")
+        detail_label.setStyleSheet(f"color: #666; font-size: {get_scaled_size(10):.1f}pt;")
         progress_layout.addWidget(detail_label)
         
         # Barre of progression indéterminée (animation)
@@ -1665,7 +1666,7 @@ class CharacterSheetWindow(QDialog):
         
         # Message d'attente
         wait_label = QLabel("⏱️ Veuillez patienter, cette opération peut prendre quelques secondes...")
-        wait_label.setStyleSheet("color: #888; font-size: 9pt; font-style: italic;")
+        wait_label.setStyleSheet(f"color: #888; font-size: {get_scaled_size(9):.1f}pt; font-style: italic;")
         wait_label.setWordWrap(True)
         progress_layout.addWidget(wait_label)
         
@@ -2113,14 +2114,27 @@ class ConfigurationDialog(QDialog):
     def __init__(self, parent=None, available_languages=None, available_seasons=None, available_servers=None, available_realms=None):
         super().__init__(parent)
         self.setWindowTitle(lang.get("configuration_window_title"))
-        self.setMinimumSize(500, 400)
+        self.setMinimumSize(600, 500)
+        self.resize(700, 700)  # Taille initiale confortable
         self.parent_app = parent
         self.available_languages = available_languages or {}
         self.available_seasons = available_seasons or []
         self.available_servers = available_servers or []
         self.available_realms = available_realms or []
 
+        # Layout principal
         main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        
+        # Zone scrollable pour tout le contenu
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setFrameShape(QFrame.NoFrame)
+        
+        # Widget conteneur pour le contenu scrollable
+        content_widget = QWidget()
+        content_layout = QVBoxLayout(content_widget)
+        content_layout.setContentsMargins(10, 10, 10, 10)
 
         # Paths Settings Group (Position 1)
         paths_group = QGroupBox(lang.get("config_paths_group_title", 
@@ -2173,7 +2187,7 @@ class ConfigurationDialog(QDialog):
         paths_layout.addRow(lang.get("config_cookies_path_label"), cookies_path_layout)
 
         paths_group.setLayout(paths_layout)
-        main_layout.addWidget(paths_group)
+        content_layout.addWidget(paths_group)
 
         # General Settings (Position 2)
         general_group = QGroupBox(lang.get("config_general_group_title", 
@@ -2194,6 +2208,13 @@ class ConfigurationDialog(QDialog):
         for theme_id, theme_name in sorted_themes:
             self.theme_combo.addItem(theme_name, theme_id)
         general_layout.addRow(lang.get("config_theme_label"), self.theme_combo)
+        
+        # Font Scale ComboBox (100% à 200% par pas de 25%)
+        self.font_scale_combo = QComboBox()
+        self.font_scale_values = [1.0, 1.25, 1.5, 1.75, 2.0]  # 100%, 125%, 150%, 175%, 200%
+        for scale in self.font_scale_values:
+            self.font_scale_combo.addItem(f"{int(scale * 100)}%", scale)
+        general_layout.addRow(lang.get("config_font_scale_label"), self.font_scale_combo)
         
         # Column resize mode
         self.manual_column_resize_check = QCheckBox(lang.get("config_manual_column_resize_label", 
@@ -2230,7 +2251,7 @@ class ConfigurationDialog(QDialog):
         general_layout.addRow(self.allow_browser_download_check)
         
         general_group.setLayout(general_layout)
-        main_layout.addWidget(general_group)
+        content_layout.addWidget(general_group)
 
         # Server Settings (Position 3)
         server_group = QGroupBox(lang.get("config_season_group_title", 
@@ -2259,7 +2280,7 @@ class ConfigurationDialog(QDialog):
                             self.default_realm_combo)
 
         server_group.setLayout(server_layout)
-        main_layout.addWidget(server_group)
+        content_layout.addWidget(server_group)
 
         # Debug Settings (Position 4 - Last)
         debug_group = QGroupBox(lang.get("config_debug_group_title", 
@@ -2275,7 +2296,7 @@ class ConfigurationDialog(QDialog):
         debug_layout.addRow(self.show_debug_window_check)
         
         debug_group.setLayout(debug_layout)
-        main_layout.addWidget(debug_group)
+        content_layout.addWidget(debug_group)
 
         # Miscellaneous Settings Group (Position 5)
         misc_group = QGroupBox(lang.get("config_misc_group_title", 
@@ -2288,9 +2309,13 @@ class ConfigurationDialog(QDialog):
         misc_layout.addRow(self.disable_disclaimer_check)
         
         misc_group.setLayout(misc_layout)
-        main_layout.addWidget(misc_group)
+        content_layout.addWidget(misc_group)
 
-        main_layout.addStretch()
+        content_layout.addStretch()
+        
+        # Ajouter le widget de contenu à la zone scrollable
+        scroll_area.setWidget(content_widget)
+        main_layout.addWidget(scroll_area)
 
         # Buttons
         button_box = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel)
@@ -2334,6 +2359,22 @@ class ConfigurationDialog(QDialog):
         theme_index = self.theme_combo.findData(current_theme)
         if theme_index >= 0:
             self.theme_combo.setCurrentIndex(theme_index)
+        
+        # Font Scale
+        current_font_scale = config.get("font_scale", 1.0)
+        # Trouver l'index correspondant à la valeur dans le ComboBox
+        scale_index = self.font_scale_combo.findData(current_font_scale)
+        if scale_index == -1:  # Si la valeur exacte n'existe pas, trouver la plus proche
+            closest_index = 0
+            min_diff = abs(self.font_scale_values[0] - current_font_scale)
+            for i, scale_value in enumerate(self.font_scale_values):
+                diff = abs(scale_value - current_font_scale)
+                if diff < min_diff:
+                    min_diff = diff
+                    closest_index = i
+            self.font_scale_combo.setCurrentIndex(closest_index)
+        else:
+            self.font_scale_combo.setCurrentIndex(scale_index)
 
         current_default_server = config.get("default_server", "")
         self.default_server_combo.setCurrentText(current_default_server)

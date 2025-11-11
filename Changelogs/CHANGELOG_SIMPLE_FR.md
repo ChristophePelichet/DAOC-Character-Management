@@ -1,8 +1,22 @@
 # 📋 Changelog Simple - DAOC Character Management
 
-# ✨ v0.107 - 2025-11-10
+# ✨ v0.107
 
 ### 🎉 Ajout 
+
+**Système de Thèmes Configurable**
+- 🎨 Système de thèmes basé sur fichiers JSON configurables
+- 📁 Dossier `Themes/` contenant les définitions de thèmes
+- 🌓 Deux thèmes disponibles : Clair (par défaut) et Sombre
+- ⚙️ Sélecteur de thème dans le menu de configuration
+- 🔄 Changement de thème instantané sans redémarrage
+- 💾 Persistance du thème choisi dans config.json
+- 🌍 Support multilingue (FR: Clair/Sombre, EN: Light/Dark, DE: Hell/Dunkel)
+- 🎭 Support des styles Qt natifs (windowsvista, Fusion)
+- 🎨 Personnalisation palette de couleurs via QPalette
+- 📝 Feuilles de style CSS optionnelles pour personnalisation avancée
+- 🔧 Module `Functions/theme_manager.py` pour gestion des thèmes
+- 🔤 Tri alphabétique des thèmes dans le menu déroulant
 
 **Système de Vérification de Version**
 - 🔄 Vérification automatique au démarrage de l'application

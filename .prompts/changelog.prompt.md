@@ -37,5 +37,10 @@ Liste de toutes les fonctionnalités retirées dans cette versio
 **Tâches Post-Processing :**
 * Une fois les fichier simple et full en _FR terminé , tu peux mettre à jour les fichiers _EN en traduisant le contenu français que tu viens de créer.
 
+**Tâche de mise à jour du fichier principal CHANGELOG.md :**
+* Cette tâche doit se passer en dernier , une fois que tous les fichiers simples et full dans les 2 langues sont terminées.
+* Mettre à jour le fichier CHANGELOG.md en y ajoutant au début les liens sur la version simeple et full en français et en anglais de la verison en cours.
+* Ne rien rajouter d'autre dans ce fichier.
+
 
 

@@ -9,6 +9,7 @@ a = Analysis(
         ('Language', 'Language'),
         ('Img', 'Img'),
         ('Data', 'Data'),  # Include Data folder with realm ranks and other static game data
+        ('Themes', 'Themes'),  # Include Themes folder with theme JSON files
     ],
     hiddenimports=[
         'UI.delegates',
@@ -25,6 +26,7 @@ a = Analysis(
         'Functions.migration_manager',
         'Functions.path_manager',
         'Functions.armor_manager',
+        'Functions.theme_manager',
     ],
     hookspath=[],
     hooksconfig={},

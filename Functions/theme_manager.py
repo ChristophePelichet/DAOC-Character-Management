@@ -10,11 +10,12 @@ from pathlib import Path
 from PySide6.QtWidgets import QStyleFactory
 from PySide6.QtGui import QPalette, QColor
 from PySide6.QtCore import Qt
+from Functions.path_manager import get_resource_path
 
 
 def get_themes_dir():
     """Retourne le chemin vers le dossier des thèmes"""
-    return Path(__file__).parent.parent / "Themes"
+    return Path(get_resource_path("Themes"))
 
 
 def get_available_themes():
@@ -22,24 +23,31 @@ def get_available_themes():
     Retourne la liste des thèmes disponibles
     Returns: dict {theme_id: theme_name}
     """
+    from Functions.language_manager import lang
+    
     themes = {}
     themes_dir = get_themes_dir()
     
     if not themes_dir.exists():
         logging.warning(f"Dossier Themes introuvable: {themes_dir}")
-        return {"default": "Windows Vista (Par défaut)"}
+        return {"default": lang.get("theme_light")}
     
     for theme_file in themes_dir.glob("*.json"):
         try:
             with open(theme_file, 'r', encoding='utf-8') as f:
                 theme_data = json.load(f)
                 theme_id = theme_file.stem
-                theme_name = theme_data.get("name", theme_id)
+                theme_name_key = theme_data.get("name", theme_id)
+                # Si c'est une clé de traduction (commence par "theme_"), traduire
+                if theme_name_key.startswith("theme_"):
+                    theme_name = lang.get(theme_name_key)
+                else:
+                    theme_name = theme_name_key
                 themes[theme_id] = theme_name
         except Exception as e:
             logging.error(f"Erreur lors du chargement du thème {theme_file}: {e}")
     
-    return themes if themes else {"default": "Windows Vista (Par défaut)"}
+    return themes if themes else {"default": lang.get("theme_light")}
 
 
 def load_theme(theme_id):

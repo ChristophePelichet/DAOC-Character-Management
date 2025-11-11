@@ -3,6 +3,7 @@ DAOC Character Manager - Main Application Entry Point
 """
 
 import sys
+import os
 import traceback
 import logging
 import time
@@ -18,14 +19,14 @@ if sys.stdout is None:
     sys.stdout = open('nul', 'w') if sys.platform == 'win32' else open('/dev/null', 'w')
 
 from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QMessageBox, QDialog, QStyleFactory, QHBoxLayout, QLabel, QProgressBar
-from PySide6.QtGui import QStandardItemModel
+from PySide6.QtGui import QStandardItemModel, QIcon
 from PySide6.QtCore import Qt, Slot, QTimer
 
 # Import des managers fonctionnels
 from Functions.config_manager import config, get_config_dir
 from Functions.language_manager import lang, get_available_languages
 from Functions.logging_manager import setup_logging, get_log_dir
-from Functions.path_manager import get_base_path
+from Functions.path_manager import get_base_path, get_resource_path
 from Functions.data_manager import DataManager
 
 # Import des managers UI
@@ -78,6 +79,12 @@ class CharacterApp(QMainWindow):
         super().__init__()
         
         self.setWindowTitle(lang.get("window_title"))
+        
+        # Set application icon
+        icon_path = get_resource_path("Img/app_icon.ico")
+        if os.path.exists(icon_path):
+            self.setWindowIcon(QIcon(icon_path))
+        
         self.resize(550, 400)
         
         # Initialization des managers of Data

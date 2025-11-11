@@ -71,4 +71,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon='Img/app_icon.ico',  # Icône de l'application
 )

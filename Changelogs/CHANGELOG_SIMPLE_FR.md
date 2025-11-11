@@ -5,59 +5,48 @@
 ### 🎉 Ajout 
 
 **Système de Thèmes Configurable**
-- 🎨 Système de thèmes basé sur fichiers JSON configurables
-- 📁 Dossier `Themes/` contenant les définitions de thèmes
 - 🌓 Deux thèmes disponibles : Clair (par défaut) et Sombre
 - ⚙️ Sélecteur de thème dans le menu de configuration
 - 🔄 Changement de thème instantané sans redémarrage
-- 💾 Persistance du thème choisi dans config.json
-- 🌍 Support multilingue (FR: Clair/Sombre, EN: Light/Dark, DE: Hell/Dunkel)
-- 🎭 Support des styles Qt natifs (windowsvista, Fusion)
-- 🎨 Personnalisation palette de couleurs via QPalette
-- 📝 Feuilles de style CSS optionnelles pour personnalisation avancée
-- 🔧 Module `Functions/theme_manager.py` pour gestion des thèmes
-- 🔤 Tri alphabétique des thèmes dans le menu déroulant
+
+**Système de Scaling de Texte**
+- 📏 Menu déroulant de taille de texte avec 5 niveaux : 100%, 125%, 150%, 175%, 200%
+- 🔄 Application instantanée sans redémarrage de l'application
+- 🎯 Scaling de la police de base (9pt Segoe UI sur Windows)
+- 📐 Scaling automatique des feuilles de style CSS des thèmes
+- 🖋️ Scaling de tous les styles inline Python (18 labels modifiés)
+
+**Interface Responsive**
+- 📜 Zone scrollable dans la fenêtre de configuration
+- 📐 Taille minimale augmentée : 600×500 pixels (au lieu de 500×400)
+- 🖥️ Taille initiale confortable : 700×700 pixels
+- ↕️ Scroll automatique si fenêtre trop petite
 
 **Système de Vérification de Version**
 - 🔄 Vérification automatique au démarrage de l'application
-- 📊 Affichage de la version actuelle (depuis `Functions/version.py`)
+- 📊 Affichage de la version actuelle
 - 🌐 Affichage de la dernière version disponible (depuis GitHub)
 - 🔘 Bouton manuel "🔄 Vérifier" pour relancer la vérification
-- ⚡ Thread en arrière-plan (non-bloquant, timeout 5s)
 - ✅ Indicateurs visuels : ✓ vert (à jour) ou ✗ rouge (obsolète)
 - 🔗 Lien de téléchargement cliquable vers GitHub Releases (si mise à jour disponible)
-- ℹ️ Section "Informations" (renommage de "Monnaie")
-- 🌍 Support multilingue (FR/EN/DE)
 
 **Système de Bannières de Classe**
-- 🖼️ Bannières visuelles pour les 44 classes DAOC (Albion, Hibernia, Midgard)
+- 🖼️ Bannières visuelles pour les 44 classes DAOC (Albion, Hibernia, Midgard) [©️Eden Daoc](https://eden-daoc.net/)
 - 📱 Design responsive s'adaptant à la hauteur de fenêtre
 - 🔄 Mise à jour automatique lors du changement classe/royaume
-- 📦 Compatible PyInstaller (.exe)
-- 🔁 Fallback sur PNG si JPG manquant
 
 **Statistiques Herald Complètes**
 - ⚔️ Section RvR : Tower Captures, Keep Captures, Relic Captures
 - 🗡️ Section PvP : Solo Kills, Deathblows, Kills (avec détail par royaume Alb/Hib/Mid)
 - 🐉 Section PvE : Dragons, Légions, Mini Dragons, Epic Encounters, Epic Dungeons, Sobekite
 - 💰 Section Wealth : Monnaie au format "18p 128g 45s 12c"
-- 🏆 Section Achievements : 16 réalisations affichées en 2 colonnes de 8
+- 🏆 Section Achievements : 16 réalisations affichées
 
 **Bouton "Informations"**
 - ℹ️ Bouton à côté du bouton "Actualiser Stats"
 - 📝 Message explicatif sur la nature cumulative des statistiques
-- ⚠️ Clarification : pas de stats par saison, uniquement total global
-- 🌍 Support multilingue (FR/EN/DE)
 
 ### 🧰 Modification
-
-**Interface Statistiques**
-- 📐 Layout 50/50 pour sections RvR/PvP et PvE/Monnaies
-- 📏 Alignement PvP avec QGridLayout pour un affichage parfait
-- 📊 Détails royaume sur la même ligne (plus compact)
-- 🔲 Section PvE avec espacement réduit (5px) et séparateur vertical
-- 📋 Section Réalisations en pleine largeur avec 2 colonnes
-- 🖥️ Suppression des QScrollArea (affichage complet en hauteur)
 
 **Bouton "Actualiser Stats"**
 - 🎯 Gestion intelligente de l'état (grisé pendant validation Herald au démarrage)
@@ -70,16 +59,6 @@
 - 💪 Style gras conservé
 
 ### 🐛 Correction
-
-**Système de Vérification de Version**
-- 🔧 Fix TypeError dans `lang.get()` (suppression paramètre par défaut)
-- 📁 Fix séparation version actuelle/dernière version (création `Functions/version.py`)
-
-**Bouton "Actualiser Stats"**
-- 🔘 Fix bouton restant actif pendant validation Herald au démarrage
-- 🚫 Fix bouton restant grisé après annulation dialogue de mise à jour
-- ♻️ Fix réactivation avec bloc `try/finally` pour tous les chemins d'exécution
-- 🏁 Fix flag `herald_scraping_in_progress` positionné avant `setText()`
 
 **Messages d'Erreur**
 - 📝 Fix messages d'erreur incomplets (ajout PvE et Wealth manquants)

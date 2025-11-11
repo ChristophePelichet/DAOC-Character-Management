@@ -21,7 +21,65 @@
 - 🔧 `Functions/theme_manager.py` module for theme management
 - 🔤 Alphabetical sorting of themes in dropdown menu
 
+**Font Scaling System**
+- 🔤 Complete font scaling system with user choice
+- 📊 ComboBox selector with 5 scale options: 100%, 125%, 150%, 175%, 200%
+- 💾 Persistent configuration in config.json (font_scale key)
+- ⚡ Instant application without restart
+- 🔤 Base font scaling (QApplication.setFont)
+- 🎨 CSS stylesheet scaling (themes + inline Python styles)
+- 📝 Inline stylesheet scaling (18 labels modified)
+- 🌍 Multilingual labels (FR: Taille du texte, EN: Text size, DE: Textgröße)
+
+**Scaling Functions Added**
+- 📏 `get_scaled_size(base_size_pt)`: Returns scaled size from config
+- 🎨 `get_scaled_stylesheet(stylesheet)`: Returns CSS with scaled fonts
+- ⚙️ `scale_stylesheet_fonts(stylesheet, scale)`: Internal regex scaling engine
+
+**Responsive Configuration Interface**
+- 📜 QScrollArea for scrollable content
+- 📐 Increased minimum size: 500×400 → 600×500 pixels
+- 🖥️ Comfortable initial size: 700×700 pixels
+- ↕️ Automatic scrolling if window resized (prevents content overlap)
+- 🏗️ Hierarchical architecture: main_layout → scroll_area → content_widget
+- 🔲 Optimized margins (0px main, 10px content)
+
 ### 🧰 Modified
+
+**Font Scaling System**
+- 🔄 Replaced QSlider with QComboBox for scale selection
+- 📊 Changed values: [100%, 110%, 125%, 150%] → [100%, 125%, 150%, 175%, 200%]
+- 🎯 More intuitive interface with direct value selection
+- 📍 Positioned in "General" section below theme selector
+
+**Configuration Window**
+- 📜 Added QScrollArea wrapping all QGroupBox elements
+- 🏗️ Hierarchical layout: scroll area contains all groups, buttons below
+- 🔲 Optimized margins: 0px around scroll, 10px around content
+- ↕️ No content overlap even at 200% scaling
+
+**Scaled UI Elements**
+- 📊 Herald progress dialog: 3 labels scaled (main.py)
+- 📈 RvR statistics: 3 detail labels scaled
+- 💰 Money label: 9pt bold scaled
+- 🏴 Banner placeholder: 9pt italic scaled  
+- 👑 Rank title: 16pt bold scaled (largest)
+- 🏆 Achievements panel: 12 labels scaled in visual hierarchy
+
+### 🐛 Fixed
+
+**Font Scaling System**
+- 🔧 Fixed CSS scaling regex IndexError
+- ⚙️ Separate functions for pt and px scaling (scale_pt, scale_px)
+- 📐 Correct regex patterns: `r'(\d+(?:\.\d+)?)pt\b'` and `r'font-size:\s*(\d+(?:\.\d+)?)px\b'`
+- ✅ Applied in two regex.sub() calls (prevents group index errors)
+- 📝 Added get_scaled_size import in UI/dialogs.py (line 28)
+
+**Configuration Window**
+- 📐 Fixed content overlap: "plus on agrandi plus les informations se marchent dessus"
+- 📜 QScrollArea solution for high scaling factors
+- 🔲 Increased minimum size: 500×400 → 600×500 pixels
+- ↕️ Automatic scrolling prevents label overlapping
 
 **PyInstaller Configuration**
 - 📦 Added `Themes/` folder to bundled data

@@ -50,7 +50,253 @@ Complete version history of the character manager for Dark Age of Camelot (Eden)
   - Stylesheet: Custom CSS for dropdowns, tooltips and comboboxes
   - Effects: Subtle borders, consistent dark backgrounds
 
+**Complete Font Scaling System**
+- 🔤 Comprehensive font scaling system with user control
+- 📊 QComboBox selector with 5 scale levels: 100%, 125%, 150%, 175%, 200%
+- 💾 Persistent configuration in config.json (font_scale key, default 1.0)
+- ⚡ Instant application without restart
+- 🎯 Positioning: Configuration window, "General" section, below theme selector
+- 🌍 Multilingual labels:
+  - 🇫🇷 French: "Taille du texte"
+  - 🇬🇧 English: "Text size"
+  - 🇩🇪 German: "Textgröße"
+
+**Two-Tier Scaling Architecture**
+- 🔤 **Tier 1 - Base Font Scaling**:
+  - Uses `QApplication.setFont()` to scale global base font
+  - Base: 9pt Segoe UI × scale factor
+  - Examples: 9pt → 11.2pt@125%, 13.5pt@150%, 18.0pt@200%
+  - Affects all widgets without explicit stylesheets
+  
+- 🎨 **Tier 2 - CSS Stylesheet Scaling**:
+  - Regex parsing of CSS stylesheets (theme JSON + inline Python styles)
+  - Two patterns: `r'(\d+(?:\.\d+)?)pt\b'` for pt units, `r'font-size:\s*(\d+(?:\.\d+)?)px\b'` for px units
+  - Applied in `apply_theme()` and `apply_font_scale()`
+  - Affects themed widgets and custom-styled elements
+
+**Scaling Functions Added** (`Functions/theme_manager.py`, 253 lines total, +115 lines):
+- ⚙️ `scale_stylesheet_fonts(stylesheet, scale)` (33 lines, 179-211):
+  - Internal regex engine for CSS font scaling
+  - Parameters: stylesheet (string), scale (float)
+  - Returns: Modified stylesheet (string)
+  - Two separate callback functions to avoid IndexError:
+    - `scale_pt(match)`: Scales pt values → `f"{size * scale:.1f}pt"`
+    - `scale_px(match)`: Scales px values → `f"font-size: {size * scale:.1f}px"`
+  - Two regex.sub() calls for pt and px patterns
+  - Example: "9pt" → "13.5pt" @ 150% scaling ✓
+  - Preserves CSS formatting with 1 decimal precision
+
+- 🔧 `apply_font_scale(app, scale=1.0)` (23 lines, 154-176):
+  - Applies scaling to base font and all stylesheets
+  - Parameters: app (QApplication), scale (float, default 1.0)
+  - Scale validation: if scale <= 0, defaults to 1.0
+  - Base font calculation: 9pt × scale → setPointSizeF()
+  - CSS scaling: app.styleSheet() → scale_stylesheet_fonts() → setStyleSheet()
+  - Called at startup (main.py line 917) and on config change
+  
+- 📏 `get_scaled_size(base_size_pt)` (13 lines, 214-226):
+  - Helper for inline Python stylesheets
+  - Parameters: base_size_pt (int/float)
+  - Returns: Scaled size (float)
+  - Reads font_scale from config (default 1.0)
+  - Usage: `f"font-size: {get_scaled_size(9):.1f}pt"`
+  - Error handling: returns base_size_pt if config unavailable
+  
+- 📊 `get_scaled_stylesheet(stylesheet)` (12 lines, 229-240):
+  - Helper to scale complete stylesheets
+  - Parameters: stylesheet (string)
+  - Returns: Scaled stylesheet (string)
+  - Reads font_scale from config, applies scale_stylesheet_fonts()
+  - Error handling: returns original stylesheet if config unavailable
+  - Usage: `get_scaled_stylesheet("font-size: 10pt")` → "font-size: 15.0pt" @ scale=1.5
+
+**Interface Modifications for Scaling**
+- 📝 **Herald Progress Dialog** (`main.py`, 3 labels modified):
+  - Title label: 12pt → `get_scaled_size(12)` (14.4pt@125%, 18.0pt@150%, 24.0pt@200%)
+  - Detail label: 10pt → `get_scaled_size(10)` (12.0pt@125%, 15.0pt@150%, 20.0pt@200%)
+  - Wait label: 9pt → `get_scaled_size(9)` (10.8pt@125%, 13.5pt@150%, 18.0pt@200%)
+  
+- 📊 **RvR Statistics** (`UI/dialogs.py`, 3 detail labels):
+  - Solo Kills detail: 9pt → `get_scaled_size(9)`
+  - Deathblows detail: 9pt → `get_scaled_size(9)`
+  - Kills detail: 9pt → `get_scaled_size(9)`
+  
+- 💰 **Other Labels** (`UI/dialogs.py`, 12 labels modified):
+  - Money label: 9pt bold → `get_scaled_size(9)`
+  - Banner placeholder: 9pt italic → `get_scaled_size(9)`
+  - Rank title: 16pt bold → `get_scaled_size(16)` (19.2pt@125%, 24.0pt@150%, 32.0pt@200%)
+  
+- 🏆 **Achievements Panel** (`UI/dialogs.py`, 12 labels modified):
+  - Titles (6 labels): 9pt → `get_scaled_size(9)`
+  - Progression (6 labels): 9pt bold → `get_scaled_size(9)`
+  - Current tier (6 labels): 8pt italic → `get_scaled_size(8)` (9.6pt@125%, 12.0pt@150%, 16.0pt@200%)
+
+**Responsive Configuration Interface**
+- 📜 Added QScrollArea for scrollable content area
+- 📐 Minimum size increased: 500×400 → 600×500 pixels
+- 🖥️ Comfortable initial size: 700×700 pixels (instead of minimal)
+- ↕️ Automatic scrolling if window resized (prevents compression)
+- 🔲 Optimized margins:
+  - Main layout: 0px (no margin around scroll)
+  - Content widget: 10px (spacing around content)
+- 🏗️ Hierarchical architecture:
+  ```
+  QDialog
+  └── QVBoxLayout (main_layout)
+      ├── QScrollArea (widgetResizable=True)
+      │   └── QWidget (content_widget)
+      │       └── QVBoxLayout (content_layout)
+      │           ├── QGroupBox (Paths)
+      │           ├── QGroupBox (General) ← Font Scale ComboBox here
+      │           ├── QGroupBox (Server)
+      │           ├── QGroupBox (Debug)
+      │           └── QGroupBox (Misc)
+      └── QDialogButtonBox (Save/Cancel)
+  ```
+
+**Integration in main.py**
+- 🔧 `apply_font_scale(app)` function (lines 881-888):
+  - Wrapper to apply scaling at startup
+  - Retrieves font_scale from config (default 1.0)
+  - Calls `apply_font_scale_manager()` from theme_manager
+  - Called after `apply_theme()` in `main()`
+  
+- 💾 Configuration save (lines 697-703):
+  - Change detection: Compares old_font_scale vs new_font_scale
+  - Value retrieval: `dialog.font_scale_combo.currentData()`
+  - Save: `config.set("font_scale", new_font_scale)`
+  - Immediate application: `apply_font_scale(QApplication.instance(), new_font_scale)`
+
+**Compatibility Management**
+- 📦 Compatibility with existing config.json:
+  - Default value: 1.0 (100%)
+  - Automatic migration: Old configs without font_scale use 1.0
+  - Intermediate values (e.g. 1.1): Rounded to nearest value (1.0 or 1.25)
+- 🔄 Loading in UI:
+  - `findData()` to find exact value in ComboBox
+  - If not found: Nearest neighbor search algorithm
+  - Minimum distance calculation: `abs(scale_value - current_font_scale)`
+
 ### 🧰 Modified
+
+**Font Scaling System**
+- 🔄 **Slider Replacement with ComboBox** (`UI/dialogs.py`, lines 2212-2217):
+  - ❌ **Old system (QSlider)**: 4 positions, range 100-150, step 10
+  - ❌ Possible values: [100%, 110%, 125%, 150%]
+  - ❌ Complex retrieval: `slider.value() / 100`
+  - ✅ **New system (QComboBox)**: 5 items with associated data
+  - ✅ Possible values: [100%, 125%, 150%, 175%, 200%]
+  - ✅ Direct retrieval: `currentData()` returns float (1.0, 1.25, etc.)
+  - 📊 More intuitive interface and extended range (100% → 200% instead of 100% → 150%)
+
+- 🎨 **UI/dialogs.py Modification - ComboBox Structure**:
+  - Removed old slider code (lines ~2212-2241, previous version)
+  - Added QComboBox with values:
+    ```python
+    self.font_scale_combo = QComboBox()
+    self.font_scale_values = [1.0, 1.25, 1.5, 1.75, 2.0]
+    for scale in self.font_scale_values:
+        self.font_scale_combo.addItem(f"{int(scale * 100)}%", scale)
+    ```
+  - Position: In "General" QGroupBox, below theme selector
+  - Translated label: `lang.get("config_font_scale_label")`
+
+- 🔄 **update_fields() Modification - Loading Logic** (`UI/dialogs.py`, lines 2363-2378):
+  - Read current config: `current_font_scale = config.get("font_scale", 1.0)`
+  - Exact value search: `scale_index = self.font_scale_combo.findData(current_font_scale)`
+  - If found (`scale_index != -1`): `setCurrentIndex(scale_index)`
+  - **If not found** (compatibility with old values):
+    - Nearest neighbor search algorithm
+    - Minimum distance calculation: `min_diff = abs(self.font_scale_values[0] - current_font_scale)`
+    - Iterate through all values to find closest
+    - Select index with minimum distance
+  - Examples: 1.1 → 1.0, 1.3 → 1.25, 1.6 → 1.5, 1.9 → 2.0
+
+- 💾 **save_configuration() Modification - Save** (`main.py`, line 698):
+  - ❌ **Old**: `new_font_scale = dialog.font_scale_slider.value() / 100`
+  - ✅ **New**: `new_font_scale = dialog.font_scale_combo.currentData()`
+  - Change detection: `if old_font_scale != new_font_scale`
+  - Immediate save: `config.set("font_scale", new_font_scale)`
+  - Immediate application: `apply_font_scale(QApplication.instance(), new_font_scale)`
+
+**Responsive Configuration Window**
+- 📜 **QScrollArea for Scrollable Content** (`UI/dialogs.py`, lines 2126-2146):
+  - Added QScrollArea with `widgetResizable=True`
+  - Frameless border: `setFrameShape(QFrame.NoFrame)`
+  - All QGroupBox moved into scrollable content_widget
+  - Buttons (Save/Cancel) stay at bottom (non-scrollable)
+
+- 📐 **Optimized Window Sizes**:
+  - ❌ **Old minimum size**: 500×400 pixels (too small with scaling)
+  - ✅ **New minimum size**: 600×500 pixels
+  - ✅ **Initial size**: 700×700 pixels (comfortable instead of minimal)
+  - Automatic scrolling if window resized (prevents content overlap)
+
+- 🔲 **Optimized Margins**:
+  - Main layout (QVBoxLayout): `setContentsMargins(0, 0, 0, 0)`
+  - Content widget (QWidget): `setContentsMargins(10, 10, 10, 10)`
+  - No margin around scroll → Optimized content
+
+- 🏗️ **Hierarchical Architecture**:
+  ```
+  ConfigurationDialog (QDialog)
+  └── main_layout (QVBoxLayout, margins 0px)
+      ├── scroll_area (QScrollArea, widgetResizable, NoFrame)
+      │   └── content_widget (QWidget, margins 10px)
+      │       └── content_layout (QVBoxLayout)
+      │           ├── paths_group (QGroupBox "Paths")
+      │           ├── general_group (QGroupBox "General")
+      │           │   ├── theme_combo (QComboBox)
+      │           │   └── font_scale_combo (QComboBox) ← New
+      │           ├── server_group (QGroupBox "Server")
+      │           ├── debug_group (QGroupBox "Debug")
+      │           └── misc_group (QGroupBox "Misc")
+      └── buttons (QDialogButtonBox) ← Bottom, fixed
+  ```
+
+**Scaled Elements - Preserved Visual Hierarchy**
+- 📊 **Herald Progress Dialog** (`main.py`, lines 368, 375, 387):
+  - 3 labels modified with `get_scaled_size()`
+  - Import added: `from Functions.theme_manager import get_scaled_size`
+  - Title (12pt): Larger than detail
+  - Detail (10pt): Normal size
+  - Wait (9pt): Smaller but readable
+
+- 📈 **RvR Statistics** (`UI/dialogs.py`, lines 288, 300, 312):
+  - 3 detail labels modified: Solo Kills, Deathblows, Kills
+  - All 9pt × scale → Uniform text for visual consistency
+
+- 💰 **Money Label** (`UI/dialogs.py`, line 469):
+  - 9pt bold → `get_scaled_size(9)`
+  - Style preserved: "font-weight: bold"
+
+- 🏴 **Banner Label** (`UI/dialogs.py`, line 687):
+  - 9pt italic → `get_scaled_size(9)`
+  - Style preserved: "font-style: italic"
+
+- 👑 **Rank Title** (`UI/dialogs.py`, line 997):
+  - 16pt bold → `get_scaled_size(16)`
+  - Largest: 19.2pt@125%, 24.0pt@150%, 32.0pt@200%
+  - Maximum visual emphasis
+
+- 🏆 **Achievements Panel** (`UI/dialogs.py`, lines 1162-1213):
+  - **12 labels modified** organized in visual hierarchy:
+    - 📊 **Titles** (6 labels, lines 1162, 1167, 1173, 1202, 1207, 1213):
+      - 9pt × scale → `get_scaled_size(9)`
+      - First column: Master Level, Champion Level, Realm Rank
+      - Second column: Bounty Points, Kills, Deathblows
+    - 📈 **Progression** (6 labels, adjacent positions):
+      - 9pt bold × scale → `get_scaled_size(9)`
+      - Style: "font-weight: bold"
+      - Highlights current values
+    - 🎯 **Current tier** (6 labels, adjacent positions):
+      - 8pt italic × scale → `get_scaled_size(8)`
+      - Style: "font-style: italic; color: #666"
+      - Smallest but remains readable: 9.6pt@125%, 12.0pt@150%, 16.0pt@200%
+
+- 📄 **Progress Dialog** (`UI/dialogs.py`, lines 1650, 1657, 1669):
+  - 3 labels with hierarchy: Title (12pt) > Text (10pt) > Detail (9pt)
+  - Proportional scaling preserves visual ratio
 
 **Application Configuration**
 - 📝 `Functions/config_manager.py` (line 57):
@@ -96,6 +342,80 @@ Complete version history of the character manager for Dark Age of Camelot (Eden)
 
 ### 🐛 Fixed
 
+**Font Scaling System**
+- 🔧 **CSS Scaling Regex Fix** (`Functions/theme_manager.py`, lines 179-211):
+  - ❌ **Initial problem**: IndexError during CSS parsing
+  - 🐞 **Cause**: Regex `r'(\d+(?:\.\d+)?)pt\b'` has only one capture group (size)
+  - 🐞 **Error**: Attempted access `match.group(2)` in single `scale_font_size()` function
+  - ✅ **Solution**: Separated into two distinct functions with dedicated callbacks
+    - `scale_pt(match)`: Handles only `pt` sizes
+    - `scale_px(match)`: Handles only `px` sizes (font-size property)
+  - ✅ **Regex patterns**:
+    - Points: `r'(\d+(?:\.\d+)?)pt\b'` → Captures "9.5" in "9.5pt"
+    - Pixels: `r'font-size:\s*(\d+(?:\.\d+)?)px\b'` → Captures "10" in "font-size: 10px"
+  - ✅ **Stylesheet application**:
+    ```python
+    stylesheet = re.sub(r'(\d+(?:\.\d+)?)pt\b', scale_pt, stylesheet)
+    stylesheet = re.sub(r'font-size:\s*(\d+(?:\.\d+)?)px\b', scale_px, stylesheet)
+    ```
+  - ✅ **Validated test**: "9pt" → "13.5pt" @ 150% scaling ✓
+
+- 📐 **Configuration Window Overlap Fix** (`UI/dialogs.py`, lines 2126-2146):
+  - ❌ **Problem**: "the bigger you make it, the more the information overlaps"
+  - 🐞 **Cause**: QFormLayout compresses content instead of scrolling
+  - 🐞 **Symptoms**:
+    - Minimum size 500×400 too small with high font scaling
+    - No scrolling → Overlapping labels
+    - Unreadable content at 150%+ on small screens
+  - ✅ **Solution 1 - QScrollArea**:
+    - Added QScrollArea with `widgetResizable=True`
+    - All QGroupBox in scrollable content_widget
+    - Save/Cancel buttons stay at bottom (fixed)
+  - ✅ **Solution 2 - Optimized Sizes**:
+    - Minimum: 500×400 → 600×500 pixels (+100×100)
+    - Initial: 500×400 → 700×700 pixels (comfortable)
+  - ✅ **Solution 3 - Margins**:
+    - main_layout: 0px (no margin around scroll)
+    - content_layout: 10px (content spacing)
+  - ✅ **Result**: No overlap even at 200% scaling on small screens
+
+- 📝 **get_scaled_size Import Fix** (`UI/dialogs.py`, line 28):
+  - ❌ **Problem**: NameError when using get_scaled_size() in labels
+  - 🐞 **Cause**: Function not imported at file beginning
+  - ✅ **Solution**: Added global import:
+    ```python
+    from Functions.theme_manager import get_scaled_size
+    ```
+  - ✅ **Impact**: 15 labels in UI/dialogs.py can now use the function
+  - ✅ **Location**: Line 28 after other Functions.* imports
+
+- 🔄 **Startup Scaling Application Fix** (`main.py`, lines 881-888):
+  - ❌ **Problem**: Font scale not applied at application launch
+  - 🐞 **Cause**: No call to apply_font_scale() in main()
+  - ✅ **Solution**: Added wrapper function and call after apply_theme()
+    ```python
+    def apply_font_scale(app):
+        from Functions.theme_manager import apply_font_scale as apply_font_scale_manager
+        font_scale = config.get("font_scale", 1.0)
+        apply_font_scale_manager(app, font_scale)
+    ```
+  - ✅ **Call**: Line 917 in main() after apply_theme(app)
+  - ✅ **Execution order**:
+    1. apply_theme(app) → Applies theme + scales theme CSS
+    2. apply_font_scale(app) → Applies base scaling + rescales global CSS
+  - ✅ **Result**: Scaling active from application opening
+
+- 🎨 **Inline Stylesheet Scaling Fix** (18 labels modified):
+  - ❌ **Problem**: Labels with inline Python stylesheets not scaled
+  - 🐞 **Cause**: Stylesheets built with hardcoded sizes (e.g. "font-size: 9pt")
+  - ✅ **Solution**: Replaced with f-strings using get_scaled_size()
+    - **Before**: `label.setStyleSheet("font-size: 9pt; font-weight: bold;")`
+    - **After**: `label.setStyleSheet(f"font-size: {get_scaled_size(9):.1f}pt; font-weight: bold;")`
+  - ✅ **Modified files**:
+    - `main.py`: 3 labels (Herald progress dialog)
+    - `UI/dialogs.py`: 15 labels (RvR stats, money, banner, rank, achievements, progress)
+  - ✅ **Format**: `.1f` for 1 decimal (consistent with regex scaling)
+
 **Theme System**
 - 🌍 Fixed automatic translation of theme names:
   - Correct usage of `lang.get(key)` without second parameter
@@ -114,7 +434,71 @@ Complete version history of the character manager for Dark Age of Camelot (Eden)
   - Works in development and frozen modes
   - Correct access to JSON files in .exe bundle
 
-### 🔚 Removed
+### � Technical Information - Font Scaling System
+
+**Associated Commits for Font Scaling:**
+- `a6fdec0` - feat: Add comprehensive font scaling system with ComboBox selector
+- `3f059cf` - Merge branch '107_Imp_Text_Size' into main (--no-ff)
+
+**Modified Files (7 files, +198/-27 lines):**
+1. **Functions/theme_manager.py** (+115 lines):
+   - 138 → 253 total lines
+   - 4 new functions (apply_font_scale, scale_stylesheet_fonts, get_scaled_size, get_scaled_stylesheet)
+   - 2 regex patterns for CSS parsing (pt and px)
+   - Separate callbacks to avoid IndexError
+
+2. **UI/dialogs.py** (+42 lines, -15 lines):
+   - 4494 total lines
+   - QComboBox replaces QSlider (lines 2212-2217)
+   - QScrollArea responsive architecture (lines 2126-2146)
+   - update_fields() with findData() (lines 2363-2378)
+   - 15 labels modified with get_scaled_size()
+   - Import get_scaled_size (line 28)
+
+3. **main.py** (+18 lines, -3 lines):
+   - 958 total lines
+   - apply_font_scale() wrapper (lines 881-888)
+   - save_configuration() with currentData() (line 698)
+   - 3 Herald dialog labels modified (lines 368, 375, 387)
+   - apply_font_scale(app) call at startup (line 917)
+
+4. **Configuration/config.json** (+1 line):
+   - Added "font_scale": 1.0 key
+
+5. **Language/fr.json** (+1 line):
+   - "config_font_scale_label": "Taille du texte"
+
+6. **Language/en.json** (+1 line):
+   - "config_font_scale_label": "Text size"
+
+7. **Language/de.json** (+1 line):
+   - "config_font_scale_label": "Textgröße"
+
+**Scaling Statistics:**
+- **Scaled UI elements**: 18 labels total
+  - Herald dialog: 3 labels (main.py)
+  - RvR stats: 3 labels (UI/dialogs.py)
+  - Miscellaneous: 12 labels (money, banner, rank, achievements, progress)
+- **Scale values**: 5 options (1.0, 1.25, 1.5, 1.75, 2.0)
+- **Scaling range**: 100% → 200% (doubling possible)
+- **Regex patterns**: 2 patterns (pt units and px units)
+- **Helper functions**: 2 functions (get_scaled_size, get_scaled_stylesheet)
+- **Core functions**: 2 functions (apply_font_scale, scale_stylesheet_fonts)
+
+**Technical Architecture:**
+- **Two-Tier Scaling**:
+  - Tier 1 (Base): QApplication.setFont() for global base font
+  - Tier 2 (CSS): Regex parsing for CSS stylesheets (themes + inline)
+- **Compatibility**:
+  - Config without font_scale → Default 1.0 (100%)
+  - Intermediate values → Nearest neighbor algorithm
+  - Old configs → Transparent automatic migration
+- **Responsive UI**:
+  - QScrollArea for high scaling
+  - Adaptive sizes (600×500 min, 700×700 initial)
+  - No overlap up to 200%
+
+### �🔚 Removed
 
 **External Libraries**
 - ❌ Removed qt-material usage attempt (conflicts with custom styles)

@@ -2,6 +2,45 @@
 
 ---
 
+# ✨ v0.107 - 2025-11-11
+
+### 🎉 Added
+
+**Configurable Theme System**
+- 🎨 JSON-based theme system with configurable files
+- 📁 `Themes/` folder containing theme definitions
+- 🌓 Two available themes: Light (default) and Dark
+- ⚙️ Theme selector in configuration menu
+- 🔄 Instant theme switching without restart
+- 💾 Theme persistence in config.json
+- 🌍 Multilingual support (FR: Clair/Sombre, EN: Light/Dark, DE: Hell/Dunkel)
+- 📦 Portable for .exe compilation (PyInstaller compatible)
+- 🎭 Native Qt styles support (windowsvista, Fusion)
+- 🎨 Color palette customization via QPalette
+- 📝 Optional CSS stylesheets for advanced customization
+- 🔧 `Functions/theme_manager.py` module for theme management
+- 🔤 Alphabetical sorting of themes in dropdown menu
+
+### 🧰 Modified
+
+**PyInstaller Configuration**
+- 📦 Added `Themes/` folder to bundled data
+- 🔌 Added `Functions.theme_manager` to hiddenimports
+- 🛠️ Using `get_resource_path()` for .exe portability
+
+**Path Management**
+- 🗂️ Adapted `theme_manager.py` to use `path_manager.get_resource_path()`
+- ✅ Compatible with development and frozen modes (PyInstaller)
+
+### 🐛 Fixed
+
+**Theme System**
+- 🌍 Fixed automatic translation of theme names
+- 🔧 Correct usage of `lang.get()` without default parameter
+- 📋 Translation keys in JSON files (`theme_light`, `theme_dark`)
+
+---
+
 # ✨ v0.107 - 2025-11-10
 
 ### 🎉 Added

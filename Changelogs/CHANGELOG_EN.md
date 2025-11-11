@@ -4,6 +4,130 @@ Complete version history of the character manager for Dark Age of Camelot (Eden)
 
 ---
 
+# ✨✨ v0.107 - 2025-11-11
+
+### 🎉 Added
+
+**Configurable Theme System**
+- 🎨 JSON-based theme system stored in `Themes/` folder
+- 🌓 Two available themes: Light (windowsvista) and Dark (Fusion with custom CSS)
+- ⚙️ Theme selector integrated in ConfigurationDialog (`UI/dialogs.py`)
+- 🔄 Instant theme application without restart (via `apply_theme()` in `main.py`)
+- 💾 Theme persistence in `Configuration/config.json` ("theme" key)
+- 🌍 Complete multilingual support with automatic translations:
+  - 🇫🇷 French: Clair / Sombre
+  - 🇬🇧 English: Light / Dark
+  - 🇩🇪 German: Hell / Dunkel
+- 📦 Full portability for .exe compilation via PyInstaller
+- 🎭 Native Qt styles support: windowsvista, Fusion, Windows, windows11
+- 🎨 Color palette customization (QPalette) with 17 color roles
+- 🖌️ Disabled state colors support (`Disabled_` prefix in palette)
+- 📝 Optional CSS stylesheets for fine customization
+- 🔧 `Functions/theme_manager.py` module (138 lines):
+  - `get_themes_dir()`: Returns Themes/ folder path
+  - `get_available_themes()`: Lists themes with automatic translation
+  - `load_theme(theme_id)`: Loads theme JSON
+  - `apply_theme(app, theme_id)`: Applies style, palette and CSS
+- 🔤 Automatic alphabetical sorting of themes in ComboBox
+- 🗂️ Theme JSON structure:
+  ```json
+  {
+    "name": "theme_light",  // Translation key
+    "style": "windowsvista",  // Qt style
+    "palette": { "Window": "#F0F0F0", ... },  // QPalette colors
+    "stylesheet": ""  // Optional CSS
+  }
+  ```
+
+**Included Themes**
+- 🌞 **Light Theme** (`Themes/default.json`):
+  - Style: windowsvista (native Windows)
+  - Palette: Standard light colors (#F0F0F0 window, #FFFFFF base)
+  - Stylesheet: None (uses native styles)
+- 🌙 **Dark Theme** (`Themes/dark.json`):
+  - Style: Fusion (cross-platform)
+  - Palette: Dark colors (#2D2D30 window, #1E1E1E base, #DCDCDC text)
+  - Stylesheet: Custom CSS for dropdowns, tooltips and comboboxes
+  - Effects: Subtle borders, consistent dark backgrounds
+
+### 🧰 Modified
+
+**Application Configuration**
+- 📝 `Functions/config_manager.py` (line 57):
+  - Added `"theme": "default"` key to default configuration
+  - Automatic save on theme change
+
+**Configuration Interface**
+- 🎛️ `UI/dialogs.py` (lines 2186-2196):
+  - Added QComboBox for theme selection
+  - Import `get_available_themes` from `Functions.theme_manager`
+  - Alphabetical sorting of themes by translated name
+  - Translated label via `lang.get("config_theme_label")`
+- 🔄 `UI/dialogs.py` (lines 2332-2338):
+  - Loading current theme in update_fields()
+  - Automatic selection of current theme in ComboBox
+
+**Main Application**
+- 🚀 `main.py` (lines 685-694):
+  - Theme change detection in save_configuration()
+  - Immediate application of new theme if modified
+  - Call to `apply_theme()` with QApplication.instance()
+- 🎨 `main.py` (lines 883-887):
+  - New `apply_theme(app)` function for startup loading
+  - Theme reading from config.json
+  - Call to `theme_manager.apply_theme()`
+
+**PyInstaller Configuration**
+- 📦 `DAOC-Character-Manager.spec`:
+  - Added `('Themes', 'Themes')` in `datas` section for bundling
+  - Added `'Functions.theme_manager'` to `hiddenimports`
+  - Ensures JSON files inclusion in executable
+
+**Path Management**
+- 🗂️ `Functions/theme_manager.py`:
+  - Using `get_resource_path("Themes")` instead of `Path(__file__).parent.parent`
+  - Compatible with development (absolute path) and frozen modes (`sys._MEIPASS`)
+  - Import from `Functions.path_manager.get_resource_path`
+
+**Translations**
+- 🌍 Language files (`Language/*.json`):
+  - Existing keys reused: `theme_light`, `theme_dark`, `config_theme_label`
+  - No modifications needed (keys already present)
+
+### 🐛 Fixed
+
+**Theme System**
+- 🌍 Fixed automatic translation of theme names:
+  - Correct usage of `lang.get(key)` without second parameter
+  - LanguageManager.get() accepts 2 arguments: self and key
+  - Returns key itself if translation missing (automatic fallback)
+- 📋 Replaced hardcoded names with translation keys in JSON:
+  - `default.json`: "Windows Vista (Par défaut)" → "theme_light"
+  - `dark.json`: "Sombre" → "theme_dark"
+- 🔧 Automatic detection of translation keys ("theme_" prefix):
+  - If key starts with "theme_", calls `lang.get()`
+  - Otherwise, direct name usage (custom themes compatibility)
+
+**Portability**
+- 📦 Fixed absolute path for PyInstaller:
+  - Using `get_resource_path()` in `get_themes_dir()`
+  - Works in development and frozen modes
+  - Correct access to JSON files in .exe bundle
+
+### 🔚 Removed
+
+**External Libraries**
+- ❌ Removed qt-material usage attempt (conflicts with custom styles)
+- ✅ Native solution without additional dependencies
+
+---
+
+**Associated commits:**
+- `c2f97c1` - feat: Add JSON-based theme system with two themes
+- `317bd16` - fix: Make theme system portable and multilingual
+
+---
+
 # ✨✨ v0.107 - 2025-11-10
 
 ### 🎉 Added

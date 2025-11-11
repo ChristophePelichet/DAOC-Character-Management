@@ -1,0 +1,20 @@
+{
+  "name": "theme_light",
+  "style": "windowsvista",
+  "palette": {
+    "Window": "#F0F0F0",
+    "WindowText": "#000000",
+    "Base": "#FFFFFF",
+    "AlternateBase": "#F5F5F5",
+    "ToolTipBase": "#FFFFDC",
+    "ToolTipText": "#000000",
+    "Text": "#000000",
+    "Button": "#F0F0F0",
+    "ButtonText": "#000000",
+    "BrightText": "#FF0000",
+    "Link": "#0000FF",
+    "Highlight": "#0078D7",
+    "HighlightedText": "#FFFFFF"
+  },
+  "stylesheet": ""
+}

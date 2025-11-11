@@ -1,12 +1,5 @@
 """
-DAOC Character Manager - Main Application Entry Point (Refactored v0.104)
-Application PySide6 de gestion de personnages pour Dark Age of Camelot
-
-Refactoring complet:
-- Code extrait vers des managers dédiés (UIManager, TreeManager, CharacterActionsManager)
-- Optimisations des performances (cache, chargement lazy)
-- Code nettoyé et documenté
-- Architecture modulaire et maintenable
+DAOC Character Manager - Main Application Entry Point
 """
 
 import sys
@@ -689,6 +682,15 @@ class CharacterApp(QMainWindow):
         # Navigateur and téléchargement
         config.set("preferred_browser", dialog.browser_combo.currentText())
         config.set("allow_browser_download", dialog.allow_browser_download_check.isChecked())
+        
+        # Theme
+        old_theme = config.get("theme", "default")
+        new_theme = dialog.theme_combo.currentData()
+        theme_changed = (old_theme != new_theme)
+        if theme_changed:
+            config.set("theme", new_theme)
+            from Functions.theme_manager import apply_theme
+            apply_theme(QApplication.instance(), new_theme)
             
         # Langue
         selected_lang_name = dialog.language_combo.currentText()
@@ -873,12 +875,9 @@ class CharacterApp(QMainWindow):
 
 def apply_theme(app):
     """Applique le thème configuré"""
-    app.setStyleSheet("")
-    if "windowsvista" in QStyleFactory.keys():
-        logging.info("Applying 'windowsvista' style")
-        app.setStyle("windowsvista")
-    else:
-        logging.info("Applying default system style")
+    from Functions.theme_manager import apply_theme as apply_theme_manager
+    theme_id = config.get("theme", "default")
+    apply_theme_manager(app, theme_id)
 
 
 def main():

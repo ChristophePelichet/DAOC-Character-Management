@@ -59,6 +59,7 @@
     "debug_level_all": "DEBUG",
     "status_bar_loaded": "Bereit. Geladen in {duration:.2f} Sekunden.",
     "config_theme_label": "Thema",
+    "config_font_scale_label": "Textgröße",
     "theme_light": "Hell",
     "theme_dark": "Dunkel",
     "debug_font_size_menu": "Schrift",

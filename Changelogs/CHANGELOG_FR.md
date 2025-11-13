@@ -6,6 +6,57 @@ Historique complet des versions du gestionnaire de personnages pour Dark Age of 
 
 # ✨✨ v0.108 - 2025-11-13
 
+### 📚 Documentation
+
+**Documentation Technique Complète des Fonctions de Scraping Eden**
+- 📝 Création de 3 documentations techniques détaillées en anglais avec schémas graphiques :
+  1. **SEARCH_HERALD_CHARACTER_EN.md** (600+ lignes) :
+     - Diagramme de flux ASCII en 6 phases d'exécution
+     - Détails complets de chaque phase (connexion, recherche, parsing, sauvegarde)
+     - 4 exemples d'utilisation (basique, avec filtre realm, gestion d'erreurs, intégration UI)
+     - Tableau des caractéristiques de performance (11-14 secondes total)
+     - Guide de résolution de problèmes (cookies expirés, aucun résultat, timeout)
+     - Recommandations de tests unitaires et d'intégration
+     - Exemples de logs et séquences d'exécution
+  2. **SCRAPE_CHARACTER_FROM_URL_EN.md** (600+ lignes) :
+     - Diagramme de flux détaillé en 16 étapes (parsing URL → normalisation)
+     - Explication de la décision de conception : pourquoi recherche au lieu d'accès direct (évite bot check)
+     - Détails de la normalisation des données avec swap realm_rank ↔ realm_title (inconsistance Herald)
+     - Comparaison technique avec search_herald_character() (table comparative)
+     - 3 exemples d'utilisation (update basique, intégration Character Manager, batch update)
+     - Documentation du matching de personnages (exact match + fallback)
+  3. **CHARACTER_PROFILE_SCRAPER_EN.md** (800+ lignes) :
+     - Architecture de classe complète avec diagramme ASCII
+     - Documentation détaillée de la méthode connect() (utilise _connect_to_eden_herald)
+     - Documentation des 5 méthodes de scraping avec flux d'exécution :
+       * scrape_wealth_money() - Extraction valeur Money (tab Wealth)
+       * scrape_rvr_captures() - Tower/Keep/Relic captures (tab Characters)
+       * scrape_pvp_stats() - Solo Kills/Deathblows/Kills avec breakdown par realm (tab PvP)
+       * scrape_pve_stats() - Dragon/Legion/Epic stats (tab PvE)
+       * scrape_achievements() - Progress avec tiers (tab Achievements)
+     - Structures HTML annotées pour chaque type de donnée
+     - 4 exemples d'utilisation (profil complet, context manager, batch analysis, intégration UI)
+     - Analyse des performances (30-35 secondes pour profil complet)
+- 🎯 Architecture unifiée documentée :
+  - Toutes les fonctions utilisent _connect_to_eden_herald() (connexion centralisée)
+  - ~450 lignes de code dupliqué éliminées (refactoring v0.107)
+  - Pattern de connexion consistent à travers tous les scrapers
+- 📊 Diagrammes graphiques ASCII inclus :
+  - Flux d'exécution avec timings précis pour chaque phase
+  - Structures de données (input/output) annotées
+  - Séquences de navigation entre tabs Herald
+- 💡 Documentation pratique :
+  - Exemples de code complets et fonctionnels
+  - Messages d'erreur courants et solutions
+  - Bonnes pratiques de gestion des ressources (cleanup)
+  - Intégration avec le système de logs (action tags)
+- 📝 Fichiers créés :
+  - `Documentation/Eden/SEARCH_HERALD_CHARACTER_EN.md` (600+ lignes)
+  - `Documentation/Eden/SCRAPE_CHARACTER_FROM_URL_EN.md` (600+ lignes)
+  - `Documentation/Eden/CHARACTER_PROFILE_SCRAPER_EN.md` (800+ lignes)
+- 🔗 Cross-références entre documentations pour navigation facile
+- 🎯 Impact : Documentation complète et minutieuse permettant de comprendre l'architecture de scraping Eden, facilite la maintenance future et peut être utilisée comme contexte pour l'IA
+
 ### 🐛 Correction
 
 **URL Manquante lors de l'Import Herald**

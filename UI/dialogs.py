@@ -3501,14 +3501,48 @@ class HeraldSearchDialog(QDialog):
         layout.addLayout(button_layout)
     
     def closeEvent(self, event):
-        """Appelé à la fermeture de la fenêtre - nettoie les fichiers temporaires"""
+        """Appelé à la fermeture de la fenêtre - nettoie les fichiers temporaires et arrête le thread"""
+        self._stop_search_thread()
         self._cleanup_temp_files()
         super().closeEvent(event)
     
     def accept(self):
         """Appelé quand on ferme avec le bouton Fermer"""
+        self._stop_search_thread()
         self._cleanup_temp_files()
         super().accept()
+    
+    def _stop_search_thread(self):
+        """Arrête le thread de recherche s'il est en cours d'exécution"""
+        if hasattr(self, 'search_thread') and self.search_thread is not None:
+            if self.search_thread.isRunning():
+                # Déconnecter les signaux pour éviter les erreurs
+                try:
+                    self.search_thread.search_finished.disconnect()
+                    self.search_thread.progress_update.disconnect()
+                except:
+                    pass
+                
+                # Attendre que le thread se termine (avec timeout de 2 secondes)
+                self.search_thread.wait(2000)
+                
+                # Si le thread ne s'est pas terminé, le forcer (déconseillé mais nécessaire)
+                if self.search_thread.isRunning():
+                    self.search_thread.terminate()
+                    self.search_thread.wait()
+                
+                logging.info("Thread de recherche Herald arrêté proprement")
+            
+            self.search_thread = None
+        
+        # Fermer la fenêtre de progression si elle existe
+        if hasattr(self, 'progress_dialog'):
+            try:
+                self.progress_dialog.close()
+                self.progress_dialog.deleteLater()
+            except:
+                pass
+            delattr(self, 'progress_dialog')
     
     def _cleanup_temp_files(self):
         """Supprime les fichiers temporaires de recherche"""
@@ -3644,7 +3678,16 @@ class HeraldSearchDialog(QDialog):
     
     def _on_search_progress_update(self, status_message):
         """Met à jour le message de progression pendant la recherche"""
-        if not hasattr(self, 'progress_steps'):
+        # Vérifier que la fenêtre de dialogue existe toujours
+        if not hasattr(self, 'progress_dialog') or not hasattr(self, 'progress_steps'):
+            return
+        
+        # Vérifier que le dialogue n'a pas été fermé
+        try:
+            if not self.progress_dialog.isVisible():
+                return
+        except RuntimeError:
+            # Le dialogue a été détruit
             return
         
         # Mapping des messages aux indices d'étapes
@@ -3662,10 +3705,14 @@ class HeraldSearchDialog(QDialog):
         
         # Cas spécial : message de succès final (marquer toutes les étapes comme terminées)
         if status_message.startswith("✅") and "terminée" in status_message.lower():
-            for step in self.progress_steps:
-                step['icon_label'].setText("✅")
-                step['icon_label'].setStyleSheet("color: green;")
-                step['text_label'].setStyleSheet(f"color: #4CAF50; font-size: {self._get_scaled_size(9):.1f}pt;")
+            try:
+                for step in self.progress_steps:
+                    step['icon_label'].setText("✅")
+                    step['icon_label'].setStyleSheet("color: green;")
+                    step['text_label'].setStyleSheet(f"color: #4CAF50; font-size: {self._get_scaled_size(9):.1f}pt;")
+            except RuntimeError:
+                # Les widgets ont été détruits
+                pass
             return
         
         # Trouver l'étape correspondante
@@ -3676,19 +3723,23 @@ class HeraldSearchDialog(QDialog):
                 break
         
         if step_index >= 0 and step_index < len(self.progress_steps):
-            step = self.progress_steps[step_index]
-            
-            # Marquer toutes les étapes précédentes comme terminées
-            for i in range(step_index):
-                prev_step = self.progress_steps[i]
-                prev_step['icon_label'].setText("✅")
-                prev_step['icon_label'].setStyleSheet("color: green;")
-                prev_step['text_label'].setStyleSheet(f"color: #4CAF50; font-size: {self._get_scaled_size(9):.1f}pt;")
-            
-            # Mettre en évidence l'étape en cours
-            step['icon_label'].setText("⏳")
-            step['icon_label'].setStyleSheet("color: blue;")
-            step['text_label'].setStyleSheet(f"color: #2196F3; font-size: {self._get_scaled_size(9):.1f}pt; font-weight: bold;")
+            try:
+                step = self.progress_steps[step_index]
+                
+                # Marquer toutes les étapes précédentes comme terminées
+                for i in range(step_index):
+                    prev_step = self.progress_steps[i]
+                    prev_step['icon_label'].setText("✅")
+                    prev_step['icon_label'].setStyleSheet("color: green;")
+                    prev_step['text_label'].setStyleSheet(f"color: #4CAF50; font-size: {self._get_scaled_size(9):.1f}pt;")
+                
+                # Mettre en évidence l'étape en cours
+                step['icon_label'].setText("⏳")
+                step['icon_label'].setStyleSheet("color: blue;")
+                step['text_label'].setStyleSheet(f"color: #2196F3; font-size: {self._get_scaled_size(9):.1f}pt; font-weight: bold;")
+            except RuntimeError:
+                # Les widgets ont été détruits
+                pass
     
     def _get_scaled_size(self, base_size):
         """Helper pour obtenir la taille scalée"""

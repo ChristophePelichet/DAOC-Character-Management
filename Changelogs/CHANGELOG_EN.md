@@ -8,6 +8,20 @@ Complete version history of the character manager for Dark Age of Camelot (Eden)
 
 ### 🐛 Fixed
 
+**Missing URL During Herald Import**
+- 🛡️ Fixed critical bug where Herald URL was not saved when importing characters from search results
+- 🔧 Problem identified: During commit 0a8bb8f (SearchThread refactoring), the URL fallback code was forgotten when copying from eden_scraper.py
+- 🔧 Solution implemented:
+  - Added missing URL fallback in SearchThread.run() (UI/dialogs.py lines 3255-3268)
+  - If HTML links are not extracted, automatically construct URL: `https://eden-daoc.net/herald?n=player&k={name}`
+  - Logic identical to eden_scraper.py (lines 577-583)
+  - Ensures URL is always present, either extracted from HTML or constructed
+- 🎯 Impact: Characters imported from Herald now always contain their URL, enabling automatic Herald updates without manual JSON editing
+- 📝 Modified file: `UI/dialogs.py` (SearchThread.run() method)
+  - Lines 3255-3268: Added URL fallback logic
+  - URL construction from name if col_1_links empty or missing
+  - Harmonized with eden_scraper.py code
+
 **Herald Window Close Crash**
 - 🛡️ Fixed critical crash when closing Herald search window
 - 🔧 Three-layer protection implemented:

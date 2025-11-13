@@ -4,6 +4,11 @@
 
 ### 🐛 Correction
 
+**URL Manquante à l'Import**
+- 🛡️ Correction bug URL Herald non sauvegardée lors de l'import de personnages
+- 🔧 Ajout du fallback URL oublié lors du refactoring SearchThread
+- 🎯 Les personnages importés contiennent maintenant leur URL pour les mises à jour auto
+
 **Crash Fermeture Herald**
 - 🛡️ Correction crash lors de la fermeture de la fenêtre de recherche
 - 🔧 Protection complète : arrêt du thread, déconnexion signaux, gestion exceptions

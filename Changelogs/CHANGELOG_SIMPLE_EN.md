@@ -6,6 +6,11 @@
 
 ### 🐛 Fixed
 
+**Missing URL on Import**
+- 🛡️ Fixed bug where Herald URL was not saved when importing characters
+- 🔧 Added URL fallback forgotten during SearchThread refactoring
+- 🎯 Imported characters now contain their URL for automatic updates
+
 **Herald Close Crash**
 - 🛡️ Fixed crash when closing search window
 - 🔧 Complete protection: thread stopping, signal disconnection, exception handling

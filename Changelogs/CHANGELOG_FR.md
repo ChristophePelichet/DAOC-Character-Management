@@ -8,6 +8,20 @@ Historique complet des versions du gestionnaire de personnages pour Dark Age of 
 
 ### 🐛 Correction
 
+**URL Manquante lors de l'Import Herald**
+- 🛡️ Correction d'un bug critique où l'URL Herald n'était pas sauvegardée lors de l'import de personnages depuis la recherche
+- 🔧 Problème identifié : Lors du commit 0a8bb8f (refonte SearchThread), le code de fallback URL a été oublié lors de la copie depuis eden_scraper.py
+- 🔧 Solution implémentée :
+  - Ajout du fallback URL manquant dans SearchThread.run() (UI/dialogs.py lignes 3255-3268)
+  - Si les liens HTML ne sont pas extraits, construction automatique de l'URL : `https://eden-daoc.net/herald?n=player&k={nom}`
+  - Logique identique à celle de eden_scraper.py (lignes 577-583)
+  - Garantit que l'URL est toujours présente, soit extraite du HTML, soit construite
+- 🎯 Impact : Les personnages importés depuis le Herald contiennent maintenant toujours leur URL, permettant les mises à jour automatiques depuis le Herald sans modification manuelle du JSON
+- 📝 Fichier modifié : `UI/dialogs.py` (méthode SearchThread.run())
+  - Lignes 3255-3268 : Ajout de la logique de fallback URL
+  - Construction de l'URL à partir du nom si col_1_links vide ou absent
+  - Harmonisation avec le code de eden_scraper.py
+
 **Crash Fermeture Fenêtre Herald**
 - 🛡️ Correction d'un crash critique lors de la fermeture de la fenêtre de recherche Herald
 - 🔧 Protection à 3 couches implémentée :

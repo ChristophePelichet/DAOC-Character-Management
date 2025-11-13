@@ -3256,9 +3256,18 @@ class SearchThread(QThread):
                     # Extraire l'URL depuis les liens (col_1 contient le nom avec le lien)
                     url = ""
                     if 'col_1_links' in result and result['col_1_links']:
-                        url = result['col_1_links'][0]
-                        if not url.startswith('http'):
-                            url = f"https://eden-daoc.net{url}"
+                        href = result['col_1_links'][0]
+                        if href.startswith('?'):
+                            url = f"https://eden-daoc.net/herald{href}"
+                        elif href.startswith('http'):
+                            url = href
+                        else:
+                            url = f"https://eden-daoc.net{href}"
+                    else:
+                        # Fallback : construire l'URL à partir du nom si aucun lien trouvé
+                        clean_name = name.split()[0] if name else ""
+                        if clean_name:
+                            url = f"https://eden-daoc.net/herald?n=player&k={clean_name}"
                     
                     # Nettoyer le nom (retirer les codes couleur HTML)
                     import re

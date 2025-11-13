@@ -6,6 +6,35 @@ Complete version history of the character manager for Dark Age of Camelot (Eden)
 
 # ✨✨ v0.108 - 2025-11-13
 
+### 🐛 Fixed
+
+**Herald Window Close Crash**
+- 🛡️ Fixed critical crash when closing Herald search window
+- 🔧 Three-layer protection implemented:
+  1. **Thread Lifecycle Management**:
+     - New `_stop_search_thread()` method with comprehensive cleanup (~44 lines)
+     - Graceful shutdown with 2-second timeout (thread.wait(2000))
+     - Forced termination if timeout exceeded (terminate + wait)
+     - Signal disconnection (search_finished, progress_update)
+     - Progress dialog cleanup with exception handling
+     - Thread reference nullification
+  2. **Event Handler Protection**:
+     - Modified `closeEvent()` to call `_stop_search_thread()`
+     - Modified `accept()` to call `_stop_search_thread()`
+     - Ensures thread stops before dialog destruction
+  3. **Signal Handler Safety**:
+     - Enhanced `_on_search_progress_update()` with safety checks
+     - Added hasattr checks for progress_dialog and progress_steps
+     - Added isVisible() check with RuntimeError catch
+     - Wrapped all widget updates in try-except RuntimeError blocks
+     - Early return if widgets destroyed
+- 🎯 Impact: Users can now safely close Herald search window at any time (during search, after results, etc.) without causing crashes
+- 📝 Modified file: `UI/dialogs.py` (HeraldSearchDialog class)
+  - New method: `_stop_search_thread()` (~44 lines)
+  - Modified: `closeEvent()` - added thread stop call
+  - Modified: `accept()` - added thread stop call
+  - Modified: `_on_search_progress_update()` - added 3 safety check layers
+
 ### 🧰 Modified
 
 **Enhanced Herald Search Window**

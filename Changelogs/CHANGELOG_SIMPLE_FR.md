@@ -2,6 +2,13 @@
 
 # ✨ v0.108
 
+### 🐛 Correction
+
+**Crash Fermeture Herald**
+- 🛡️ Correction crash lors de la fermeture de la fenêtre de recherche
+- 🔧 Protection complète : arrêt du thread, déconnexion signaux, gestion exceptions
+- 🎯 Fermeture sécurisée à tout moment sans crash
+
 ### 🧰 Modification
 
 **Amélioration Recherche Herald**

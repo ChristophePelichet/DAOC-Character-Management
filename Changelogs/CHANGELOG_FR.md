@@ -6,6 +6,35 @@ Historique complet des versions du gestionnaire de personnages pour Dark Age of 
 
 # ✨✨ v0.108 - 2025-11-13
 
+### 🐛 Correction
+
+**Crash Fermeture Fenêtre Herald**
+- 🛡️ Correction d'un crash critique lors de la fermeture de la fenêtre de recherche Herald
+- 🔧 Protection à 3 couches implémentée :
+  1. **Gestion du cycle de vie du thread** :
+     - Nouvelle méthode `_stop_search_thread()` avec nettoyage complet (~44 lignes)
+     - Arrêt gracieux avec timeout de 2 secondes (thread.wait(2000))
+     - Terminaison forcée si dépassement du timeout (terminate + wait)
+     - Déconnexion des signaux (search_finished, progress_update)
+     - Nettoyage du dialog de progression avec gestion d'exceptions
+     - Nullification de la référence au thread
+  2. **Protection des gestionnaires d'événements** :
+     - Modification de `closeEvent()` pour appeler `_stop_search_thread()`
+     - Modification de `accept()` pour appeler `_stop_search_thread()`
+     - Garantit l'arrêt du thread avant la destruction du dialog
+  3. **Sécurisation du gestionnaire de signaux** :
+     - Amélioration de `_on_search_progress_update()` avec vérifications de sécurité
+     - Ajout de vérifications hasattr pour progress_dialog et progress_steps
+     - Ajout de vérification isVisible() avec capture RuntimeError
+     - Encapsulation de toutes les mises à jour de widgets dans des blocs try-except RuntimeError
+     - Retour anticipé si widgets détruits
+- 🎯 Impact : Les utilisateurs peuvent maintenant fermer la fenêtre de recherche Herald à tout moment (pendant recherche, après résultats, etc.) sans provoquer de crash
+- 📝 Fichier modifié : `UI/dialogs.py` (classe HeraldSearchDialog)
+  - Nouvelle méthode : `_stop_search_thread()` (~44 lignes)
+  - Modifiée : `closeEvent()` - ajout appel arrêt thread
+  - Modifiée : `accept()` - ajout appel arrêt thread
+  - Modifiée : `_on_search_progress_update()` - ajout 3 couches de vérifications de sécurité
+
 ### 🧰 Modification
 
 **Amélioration Fenêtre de Recherche Herald**

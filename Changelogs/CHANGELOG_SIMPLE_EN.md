@@ -4,6 +4,13 @@
 
 # ✨ v0.108
 
+### 🐛 Fixed
+
+**Herald Close Crash**
+- 🛡️ Fixed crash when closing search window
+- 🔧 Complete protection: thread stopping, signal disconnection, exception handling
+- 🎯 Safe closing at any time without crashes
+
 ### 🧰 Modified
 
 **Enhanced Herald Search**

@@ -119,14 +119,24 @@ Lors de l'ajout/modification d'une fonctionnalité :
 - Mettre à jour `CHANGELOG.md` racine avec liens vers la nouvelle version
 - Utiliser les emojis contextuels appropriés
 
-### Étape 4 : Git Commit & Push
-- Exécuter `git add -A` pour ajouter tous les fichiers modifiés
-- Créer un commit structuré en anglais (voir PARTIE 3)
+### Étape 4 : Git Commit & Push (AUTOMATIQUE)
+- **EXÉCUTER IMMÉDIATEMENT** `git add -A` pour ajouter tous les fichiers modifiés
+- **EXÉCUTER IMMÉDIATEMENT** le commit structuré en anglais (voir PARTIE 3)
 - Utiliser le type conventionnel approprié (feat/fix/docs/etc.)
 - Inclure toutes les sections (UI/Technical/Translations/Documentation/Files/Impact)
-- Exécuter `git push origin <branch_name>` pour push vers la branche actuelle
+- **EXÉCUTER IMMÉDIATEMENT** `git push origin <branch_name>` pour push vers la branche actuelle
+- **NE JAMAIS DEMANDER CONFIRMATION** - Exécuter automatiquement dès que le prompt est invoqué
 
-### Étape 5 : Confirmation Finale
+### Étape 5 : Merge sur Main (OPTIONNEL - SI DEMANDÉ)
+- Basculer sur main : `git checkout main`
+- Récupérer les dernières modifications : `git pull origin main`
+- Merger avec --no-ff : `git merge --no-ff <branch_name> -m "Merge branch '<branch_name>' into main"`
+- Pousser le merge : `git push origin main`
+- Nettoyer la branche locale : `git branch -d <branch_name>`
+- Nettoyer la branche distante : `git push origin --delete <branch_name>`
+- **NE JAMAIS DEMANDER CONFIRMATION** pour le merge si explicitement demandé
+
+### Étape 6 : Confirmation Finale
 - Résumer les modifications apportées
 - Lister les fichiers créés/modifiés avec nombre de lignes
 - Indiquer les traductions ajoutées (nombre de clés × langues)
@@ -135,7 +145,16 @@ Lors de l'ajout/modification d'une fonctionnalité :
 
 ---
 
-## 📦 PARTIE 3 : GIT COMMIT STRUCTURÉ
+## 📦 PARTIE 3 : GIT COMMIT STRUCTURÉ (AUTOMATIQUE)
+
+**🚀 EXÉCUTION AUTOMATIQUE - Ne JAMAIS demander confirmation**
+
+Dès que ce prompt est invoqué et que les modifications sont terminées :
+1. Exécuter automatiquement `git add -A`
+2. Créer et exécuter automatiquement le commit structuré
+3. Exécuter automatiquement `git push origin <branch_name>`
+
+**Aucune confirmation ne doit être demandée à l'utilisateur pour ces étapes.**
 
 ### Format Standard du Message de Commit
 
@@ -381,14 +400,22 @@ Avant de finaliser, vérifier :
 - [ ] Emojis contextuels appropriés utilisés
 - [ ] Section correcte (Ajout/Modification/Correction/Retrait)
 
-**Git Commit :**
-- [ ] `git add -A` exécuté
-- [ ] Message de commit structuré en anglais
+**Git Commit (AUTOMATIQUE) :**
+- [ ] `git add -A` **EXÉCUTÉ AUTOMATIQUEMENT**
+- [ ] Message de commit structuré en anglais **CRÉÉ ET EXÉCUTÉ AUTOMATIQUEMENT**
 - [ ] Type conventionnel correct (feat/fix/docs/etc.)
 - [ ] Sections organisées (UI/Technical/Translations/etc.)
 - [ ] Tous les fichiers modifiés listés
 - [ ] Impact utilisateur décrit
-- [ ] `git push origin <branch>` exécuté
+- [ ] `git push origin <branch>` **EXÉCUTÉ AUTOMATIQUEMENT**
+
+**Merge (SI DEMANDÉ) :**
+- [ ] Checkout sur main exécuté
+- [ ] Pull origin main exécuté
+- [ ] Merge --no-ff exécuté
+- [ ] Push origin main exécuté
+- [ ] Branche locale supprimée
+- [ ] Branche distante supprimée
 
 ---
 
@@ -481,14 +508,26 @@ Files Modified:
 Impact: Users can now export all character data to CSV format with a single click, enabling external data analysis and backup capabilities.
 ```
 
-#### 5. **Commandes Git Exécutées**
+#### 5. **Commandes Git Exécutées (AUTOMATIQUEMENT)**
 ```bash
+# EXÉCUTÉ AUTOMATIQUEMENT - Pas de confirmation demandée
 git add -A
 git commit -m "feat: Add CSV export functionality for all characters" -m "<message body>"
 git push origin 109_Add_CSV_Export
 ```
 
-#### 6. **Confirmation Finale**
+#### 6. **Merge sur Main (SI DEMANDÉ)**
+```bash
+# EXÉCUTÉ AUTOMATIQUEMENT si l'utilisateur demande le merge
+git checkout main
+git pull origin main
+git merge --no-ff 109_Add_CSV_Export -m "Merge branch '109_Add_CSV_Export' into main"
+git push origin main
+git branch -d 109_Add_CSV_Export
+git push origin --delete 109_Add_CSV_Export
+```
+
+#### 7. **Confirmation Finale**
 ```
 ✅ Fonctionnalité Implémentée - CSV Export
 
@@ -510,6 +549,59 @@ git push origin 109_Add_CSV_Export
 
 ---
 
+## 🔀 PARTIE 4 : MERGE SUR MAIN (SI DEMANDÉ)
+
+### Quand Exécuter le Merge
+
+Le merge est exécuté **UNIQUEMENT** si l'utilisateur le demande explicitement avec des termes comme :
+- "merge"
+- "fusionner sur main"
+- "intégrer dans main"
+- Référence au fichier merge.prompt.md
+
+### Processus de Merge Automatique
+
+**Aucune confirmation ne doit être demandée - Exécuter automatiquement :**
+
+1. **Basculer sur main** :
+   ```bash
+   git checkout main
+   ```
+
+2. **Récupérer les dernières modifications** :
+   ```bash
+   git pull origin main
+   ```
+
+3. **Merger avec --no-ff** (préserve l'historique de la branche) :
+   ```bash
+   git merge --no-ff <branch_name> -m "Merge branch '<branch_name>' into main"
+   ```
+
+4. **Pousser le merge** :
+   ```bash
+   git push origin main
+   ```
+
+5. **Nettoyer la branche locale** :
+   ```bash
+   git branch -d <branch_name>
+   ```
+
+6. **Nettoyer la branche distante** :
+   ```bash
+   git push origin --delete <branch_name>
+   ```
+
+### Confirmation Post-Merge
+
+Après le merge, afficher :
+- ✅ Branche mergée sur main avec commit hash
+- ✅ Statistiques du merge (fichiers, insertions, suppressions)
+- ✅ Confirmation de la suppression des branches (locale + distante)
+
+---
+
 ## ⚡ RÈGLES D'AUTOMATISATION
 
 **IMPORTANT - À respecter systématiquement :**
@@ -518,12 +610,15 @@ git push origin 109_Add_CSV_Export
    - Les traductions (toujours FR/EN/DE automatiquement)
    - La mise à jour des changelogs (toujours 4 fichiers + racine)
    - Le format du commit (toujours structuré en anglais)
+   - **L'exécution de `git add -A`, `git commit`, `git push`** (AUTOMATIQUE dès invocation du prompt)
+   - **Le processus de merge complet** (AUTOMATIQUE si explicitement demandé)
 
 2. **Toujours inclure** :
    - Les 3 langues pour chaque texte UI
    - Les 5 fichiers changelog (4 détaillés + 1 racine)
    - Le commit structuré complet avec toutes les sections
    - Le push automatique vers la branche
+   - **L'exécution immédiate de Git add/commit/push**
 
 3. **Toujours vérifier** :
    - Cohérence des clés JSON entre les 3 fichiers
@@ -537,6 +632,32 @@ git push origin 109_Add_CSV_Export
    - Message en anglais uniquement
    - Détails techniques spécifiques (méthodes, classes, fichiers)
 
+5. **Workflow Git Automatique** :
+   - Dès que les modifications sont terminées : **exécuter immédiatement** git add, commit, push
+   - Si merge demandé : **exécuter immédiatement** le processus complet de merge
+   - Ne **JAMAIS** attendre de confirmation utilisateur pour les commandes Git
+
 ---
 
-**Ce workflow doit être appliqué automatiquement et complètement pour chaque fonctionnalité, sans exception ni omission.**
+## 🎯 OPTIONS AVANCÉES
+
+### Option 1 : Commit Uniquement (par défaut)
+Lorsque le prompt est invoqué sans mention de merge :
+- Exécuter le workflow complet jusqu'à l'étape 4 (commit + push)
+- S'arrêter après le push, ne pas merger
+
+### Option 2 : Commit + Merge (si demandé explicitement)
+Lorsque l'utilisateur demande explicitement le merge :
+- Exécuter le workflow complet jusqu'à l'étape 4 (commit + push)
+- **Puis automatiquement** exécuter l'étape 5 (merge sur main)
+- Nettoyer les branches obsolètes
+
+### Option 3 : Vérification Pré-Merge (optionnel)
+Si des conflits potentiels sont détectés :
+- Informer l'utilisateur des conflits
+- Proposer de résoudre manuellement avant le merge
+- Attendre confirmation uniquement dans ce cas spécifique
+
+---
+
+**Ce workflow doit être appliqué automatiquement et complètement pour chaque fonctionnalité, sans exception ni omission. Les commandes Git doivent être exécutées immédiatement sans demander de confirmation.**

@@ -42,7 +42,9 @@ Pour TOUT texte visible par l'utilisateur :
 
 ---
 
-## 📝 PARTIE 2 : DOCUMENTATION CHANGELOG
+## 📝 PARTIE 2 : DOCUMENTATION CHANGELOG (OBLIGATOIRE)
+
+**⚠️ IMPORTANT : Cette étape est OBLIGATOIRE pour TOUT changement, même les corrections techniques pures sans UI.**
 
 ### Format Standard
 
@@ -50,15 +52,31 @@ Utiliser la structure à 4 sections avec émojis contextuels :
 
 #### 🎉 Ajout
 Nouvelles fonctionnalités ajoutées dans cette version
+- Nouveaux modules, nouvelles classes
+- Nouvelles interfaces utilisateur
+- Nouvelles fonctionnalités visibles
 
 #### 🧰 Modification
 Modifications apportées aux fonctionnalités existantes
+- Améliorations d'interfaces existantes
+- Refactoring avec impact visible
+- Optimisations de performance visibles
 
 #### 🐛 Correction
-Bugs corrigés dans cette version
+**Bugs corrigés dans cette version** (OBLIGATOIRE pour tous les fix)
+- **Format obligatoire pour corrections** :
+  - 🛡️ Description du problème (ce qui crashait/ne fonctionnait pas)
+  - 🔧 Solution implémentée (protection, correctif, modification)
+  - 🎯 Impact utilisateur (ce qui est maintenant possible/sécurisé)
+- Crashes, erreurs, exceptions
+- Problèmes de sécurité
+- Bugs fonctionnels
+- Correctifs techniques
 
 #### 🔚 Retrait
 Fonctionnalités supprimées dans cette version
+- Code obsolète supprimé
+- Fonctionnalités dépréciées retirées
 
 ### Règles de Documentation
 
@@ -110,14 +128,22 @@ Lors de l'ajout/modification d'une fonctionnalité :
 - Vérifier la cohérence des traductions
 - Ne PAS traduire les termes DAOC (Albion, Herald, RvR, etc.)
 
-### Étape 3 : Documentation Changelog
-- Déterminer la section appropriée (Ajout/Modification/Correction/Retrait)
-- Mettre à jour `Changelogs/CHANGELOG_FR.md` (version Full)
-- Mettre à jour `Changelogs/CHANGELOG_EN.md` (version Full)
-- Mettre à jour `Changelogs/CHANGELOG_SIMPLE_FR.md`
-- Mettre à jour `Changelogs/CHANGELOG_SIMPLE_EN.md`
-- Mettre à jour `CHANGELOG.md` racine avec liens vers la nouvelle version
+### Étape 3 : Documentation Changelog (OBLIGATOIRE)
+- **TOUJOURS mettre à jour les changelogs**, même pour des corrections techniques sans UI
+- Déterminer la section appropriée :
+  - 🎉 **Ajout** : Nouvelles fonctionnalités, nouveaux modules, nouvelles UI
+  - 🧰 **Modification** : Améliorations de fonctionnalités existantes, refactoring visible
+  - 🐛 **Correction** : Bugs, crashes, erreurs, problèmes de sécurité, correctifs techniques
+  - 🔚 **Retrait** : Suppression de fonctionnalités, nettoyage de code obsolète
+- **OBLIGATOIRE** - Mettre à jour les 5 fichiers suivants :
+  1. `Changelogs/CHANGELOG_FR.md` (version Full - détails techniques complets)
+  2. `Changelogs/CHANGELOG_EN.md` (version Full - traduction anglaise complète)
+  3. `Changelogs/CHANGELOG_SIMPLE_FR.md` (version Simple - résumé utilisateur)
+  4. `Changelogs/CHANGELOG_SIMPLE_EN.md` (version Simple - résumé anglais)
+  5. `CHANGELOG.md` racine (uniquement si nouvelle version)
 - Utiliser les emojis contextuels appropriés
+- **Pour les corrections de bugs** : Décrire le problème, la cause, et la solution
+- **Ne JAMAIS ignorer cette étape**, même si aucune traduction n'a été ajoutée
 
 ### Étape 4 : Git Commit & Push (AUTOMATIQUE)
 - **EXÉCUTER IMMÉDIATEMENT** `git add -A` pour ajouter tous les fichiers modifiés
@@ -391,14 +417,16 @@ Avant de finaliser, vérifier :
 - [ ] Clés en snake_case descriptives
 - [ ] Termes DAOC non traduits (Albion, Herald, etc.)
 
-**Documentation :**
-- [ ] CHANGELOG_FR.md mis à jour (version Full)
-- [ ] CHANGELOG_EN.md mis à jour (version Full)
-- [ ] CHANGELOG_SIMPLE_FR.md mis à jour
-- [ ] CHANGELOG_SIMPLE_EN.md mis à jour
-- [ ] CHANGELOG.md racine mis à jour avec liens
+**Documentation (OBLIGATOIRE - MÊME POUR CORRECTIONS TECHNIQUES) :**
+- [ ] CHANGELOG_FR.md mis à jour (version Full) - **OBLIGATOIRE**
+- [ ] CHANGELOG_EN.md mis à jour (version Full) - **OBLIGATOIRE**
+- [ ] CHANGELOG_SIMPLE_FR.md mis à jour - **OBLIGATOIRE**
+- [ ] CHANGELOG_SIMPLE_EN.md mis à jour - **OBLIGATOIRE**
+- [ ] CHANGELOG.md racine mis à jour avec liens (si nouvelle version)
 - [ ] Emojis contextuels appropriés utilisés
-- [ ] Section correcte (Ajout/Modification/Correction/Retrait)
+- [ ] Section correcte (🎉 Ajout / 🧰 Modification / 🐛 Correction / 🔚 Retrait)
+- [ ] Pour bugs : Problème + Cause + Solution documentés
+- [ ] Détails techniques dans Full, résumé utilisateur dans Simple
 
 **Git Commit (AUTOMATIQUE) :**
 - [ ] `git add -A` **EXÉCUTÉ AUTOMATIQUEMENT**
@@ -608,14 +636,16 @@ Après le merge, afficher :
 
 1. **Ne JAMAIS demander confirmation** pour :
    - Les traductions (toujours FR/EN/DE automatiquement)
-   - La mise à jour des changelogs (toujours 4 fichiers + racine)
+   - **La mise à jour des changelogs (TOUJOURS 4 fichiers minimum, OBLIGATOIRE même pour corrections techniques)**
    - Le format du commit (toujours structuré en anglais)
    - **L'exécution de `git add -A`, `git commit`, `git push`** (AUTOMATIQUE dès invocation du prompt)
    - **Le processus de merge complet** (AUTOMATIQUE si explicitement demandé)
 
 2. **Toujours inclure** :
-   - Les 3 langues pour chaque texte UI
-   - Les 5 fichiers changelog (4 détaillés + 1 racine)
+   - Les 3 langues pour chaque texte UI (si applicable)
+   - **Les 4 fichiers changelog minimum (OBLIGATOIRE dans TOUS les cas, même corrections pures)**
+   - Le 5ème fichier racine si nouvelle version
+   - **Section 🐛 Correction obligatoire pour tous les bug fixes avec Problème/Cause/Solution**
    - Le commit structuré complet avec toutes les sections
    - Le push automatique vers la branche
    - **L'exécution immédiate de Git add/commit/push**

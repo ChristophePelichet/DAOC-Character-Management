@@ -154,13 +154,59 @@ Lors de l'ajout/modification d'une fonctionnalité :
 - **NE JAMAIS DEMANDER CONFIRMATION** - Exécuter automatiquement dès que le prompt est invoqué
 
 ### Étape 5 : Merge sur Main (OPTIONNEL - SI DEMANDÉ)
-- Basculer sur main : `git checkout main`
-- Récupérer les dernières modifications : `git pull origin main`
-- Merger avec --no-ff : `git merge --no-ff <branch_name> -m "Merge branch '<branch_name>' into main"`
-- Pousser le merge : `git push origin main`
-- Nettoyer la branche locale : `git branch -d <branch_name>`
-- Nettoyer la branche distante : `git push origin --delete <branch_name>`
-- **NE JAMAIS DEMANDER CONFIRMATION** pour le merge si explicitement demandé
+
+**⚠️ IMPORTANT : Le flag --no-ff est OBLIGATOIRE pour préserver l'historique de la branche**
+
+Exécuter automatiquement si l'utilisateur demande le merge avec des termes comme :
+- "merge", "fusionner", "intégrer dans main"
+- Référence explicite au fichier merge.prompt.md
+
+**Processus de Merge Automatique (AUCUNE CONFIRMATION) :**
+
+1. **Basculer sur main** :
+   ```bash
+   git checkout main
+   ```
+
+2. **Récupérer les dernières modifications** :
+   ```bash
+   git pull origin main
+   ```
+
+3. **Vérifier les conflits potentiels** (optionnel) :
+   - Si des conflits sont détectés : informer l'utilisateur
+   - Sinon : continuer automatiquement
+
+4. **Merger avec --no-ff (OBLIGATOIRE)** :
+   ```bash
+   git merge --no-ff <branch_name> -m "Merge branch '<branch_name>' into main - <description courte>"
+   ```
+   - Le flag `--no-ff` (no fast-forward) préserve l'historique complet de la branche
+   - Crée un commit de merge même si un fast-forward est possible
+   - Permet de voir clairement quelle fonctionnalité a été développée sur quelle branche
+
+5. **Pousser le merge** :
+   ```bash
+   git push origin main
+   ```
+
+6. **Nettoyer la branche locale** :
+   ```bash
+   git branch -d <branch_name>
+   ```
+
+7. **Nettoyer la branche distante** :
+   ```bash
+   git push origin --delete <branch_name>
+   ```
+
+**Confirmation Post-Merge :**
+- ✅ Commit merge avec hash
+- ✅ Statistiques du merge (fichiers, insertions, suppressions)
+- ✅ Confirmation suppression branches (locale + distante)
+- ✅ État final (branche courante : main)
+
+**NE JAMAIS DEMANDER CONFIRMATION** pour le merge si explicitement demandé
 
 ### Étape 6 : Confirmation Finale
 - Résumer les modifications apportées
@@ -437,13 +483,17 @@ Avant de finaliser, vérifier :
 - [ ] Impact utilisateur décrit
 - [ ] `git push origin <branch>` **EXÉCUTÉ AUTOMATIQUEMENT**
 
-**Merge (SI DEMANDÉ) :**
-- [ ] Checkout sur main exécuté
-- [ ] Pull origin main exécuté
-- [ ] Merge --no-ff exécuté
-- [ ] Push origin main exécuté
-- [ ] Branche locale supprimée
-- [ ] Branche distante supprimée
+**Merge sur Main (SI DEMANDÉ) :**
+- [ ] Checkout sur main exécuté **AUTOMATIQUEMENT**
+- [ ] Pull origin main exécuté **AUTOMATIQUEMENT**
+- [ ] Vérification des conflits (optionnel)
+- [ ] Merge --no-ff exécuté **AUTOMATIQUEMENT** (flag --no-ff OBLIGATOIRE)
+- [ ] Message de merge descriptif avec contexte
+- [ ] Push origin main exécuté **AUTOMATIQUEMENT**
+- [ ] Branche locale supprimée **AUTOMATIQUEMENT**
+- [ ] Branche distante supprimée **AUTOMATIQUEMENT**
+- [ ] Historique de branche préservé grâce à --no-ff
+- [ ] Confirmation post-merge affichée (hash, stats, état final)
 
 ---
 
@@ -582,51 +632,174 @@ git push origin --delete 109_Add_CSV_Export
 ### Quand Exécuter le Merge
 
 Le merge est exécuté **UNIQUEMENT** si l'utilisateur le demande explicitement avec des termes comme :
-- "merge"
-- "fusionner sur main"
-- "intégrer dans main"
+- "merge", "fusionner", "intégrer dans main", "merger sur main"
 - Référence au fichier merge.prompt.md
+- Demande explicite de fusionner la branche
+
+### 🚨 RÈGLE ABSOLUE : Flag --no-ff OBLIGATOIRE
+
+**Le flag `--no-ff` (no fast-forward) est PRIMORDIAL et NON NÉGOCIABLE**
+
+**Pourquoi --no-ff est crucial :**
+- ✅ Préserve l'historique complet de la branche de fonctionnalité
+- ✅ Crée un commit de merge explicite avec message descriptif
+- ✅ Permet de voir clairement quelle fonctionnalité a été développée sur quelle branche
+- ✅ Facilite le revert d'une fonctionnalité complète si nécessaire
+- ✅ Maintient la traçabilité du développement
+- ❌ Sans --no-ff : historique linéaire illisible, perte de contexte des branches
+
+**Comparaison :**
+```bash
+# ❌ MAUVAIS : Fast-forward (historique linéaire)
+git merge feature_branch
+# Résultat : commits de la branche ajoutés directement sur main (historique confus)
+
+# ✅ BON : No fast-forward (historique structuré avec --no-ff)
+git merge --no-ff feature_branch -m "Merge branch 'feature_branch' into main"
+# Résultat : commit de merge visible + historique de branche préservé
+```
 
 ### Processus de Merge Automatique
 
 **Aucune confirmation ne doit être demandée - Exécuter automatiquement :**
 
-1. **Basculer sur main** :
-   ```bash
-   git checkout main
-   ```
+#### Étape 1 : Préparation
+```bash
+# Basculer sur main
+git checkout main
 
-2. **Récupérer les dernières modifications** :
-   ```bash
-   git pull origin main
-   ```
+# Récupérer les dernières modifications
+git pull origin main
+```
 
-3. **Merger avec --no-ff** (préserve l'historique de la branche) :
-   ```bash
-   git merge --no-ff <branch_name> -m "Merge branch '<branch_name>' into main"
-   ```
+#### Étape 2 : Vérification Pré-Merge (Optionnel)
+- Vérifier si des conflits potentiels existent
+- Si conflits détectés :
+  * Informer l'utilisateur des fichiers en conflit
+  * Proposer résolution manuelle
+  * Attendre confirmation uniquement dans ce cas
+- Si aucun conflit : continuer automatiquement
 
-4. **Pousser le merge** :
-   ```bash
-   git push origin main
-   ```
+#### Étape 3 : Merge avec --no-ff (OBLIGATOIRE)
+```bash
+# ⚠️ TOUJOURS utiliser --no-ff
+git merge --no-ff <branch_name> -m "Merge branch '<branch_name>' into main - <description>"
+```
 
-5. **Nettoyer la branche locale** :
-   ```bash
-   git branch -d <branch_name>
-   ```
+**Format du message de merge :**
+```
+Merge branch '<branch_name>' into main - <courte description>
 
-6. **Nettoyer la branche distante** :
-   ```bash
-   git push origin --delete <branch_name>
-   ```
+Exemples :
+- "Merge branch '108_Fix_Url' into main - Fix missing Herald URL during character import"
+- "Merge branch '109_Add_CSV_Export' into main - Add CSV export for all characters"
+- "Merge branch '110_Improve_Performance' into main - Optimize database queries"
+```
+
+#### Étape 4 : Push du Merge
+```bash
+# Pousser le commit de merge sur origin/main
+git push origin main
+```
+
+#### Étape 5 : Nettoyage des Branches Obsolètes
+```bash
+# Supprimer la branche locale
+git branch -d <branch_name>
+
+# Supprimer la branche distante
+git push origin --delete <branch_name>
+```
 
 ### Confirmation Post-Merge
 
-Après le merge, afficher :
-- ✅ Branche mergée sur main avec commit hash
-- ✅ Statistiques du merge (fichiers, insertions, suppressions)
-- ✅ Confirmation de la suppression des branches (locale + distante)
+Afficher un résumé complet du merge :
+
+```
+✅ Merge Complété avec Succès
+
+🔀 Opérations Effectuées :
+- Checkout sur main : ✅
+- Pull origin main : ✅
+- Merge --no-ff : ✅ (commit: <hash>)
+- Push origin main : ✅
+- Suppression branche locale : ✅
+- Suppression branche distante : ✅
+
+📊 Statistiques du Merge :
+- Commit merge : <hash>
+- Fichiers modifiés : <count>
+- Insertions : +<count>
+- Suppressions : -<count>
+
+🎯 État Final :
+- Branche courante : main
+- Branche <branch_name> : ✅ Supprimée (local + remote)
+- Historique : ✅ Préservé avec --no-ff
+```
+
+### Gestion des Conflits
+
+**Si des conflits sont détectés pendant le merge :**
+
+1. **Arrêter le processus automatique**
+2. **Informer l'utilisateur** :
+   ```
+   ⚠️ Conflits Détectés
+
+   Les fichiers suivants sont en conflit :
+   - <file1>
+   - <file2>
+
+   Actions recommandées :
+   1. Résoudre les conflits manuellement
+   2. git add <fichiers résolus>
+   3. git commit
+   4. git push origin main
+   5. Nettoyer les branches avec :
+      - git branch -d <branch_name>
+      - git push origin --delete <branch_name>
+   ```
+3. **Attendre action manuelle de l'utilisateur**
+
+### Commandes Git Complètes
+
+**Séquence complète pour un merge propre :**
+```bash
+# 1. Préparation
+git checkout main
+git pull origin main
+
+# 2. Merge avec --no-ff (OBLIGATOIRE)
+git merge --no-ff <branch_name> -m "Merge branch '<branch_name>' into main - <description>"
+
+# 3. Push
+git push origin main
+
+# 4. Nettoyage
+git branch -d <branch_name>
+git push origin --delete <branch_name>
+
+# 5. Vérification
+git log --oneline --graph --all -10  # Voir l'historique avec le merge commit
+```
+
+### Bonnes Pratiques du Merge
+
+**✅ À FAIRE :**
+- Toujours utiliser `--no-ff` (préserve l'historique)
+- Message de merge descriptif avec contexte
+- Vérifier qu'on est sur main avant le merge
+- Pull origin main avant le merge (éviter les conflits)
+- Nettoyer les branches après merge réussi
+- Vérifier le graph de commit après merge
+
+**❌ À ÉVITER :**
+- Merge sans --no-ff (perte d'historique)
+- Messages de merge génériques ("Merge branch X")
+- Merge sans pull préalable (risque de conflits)
+- Laisser des branches obsolètes après merge
+- Merger sans vérifier la branche courante
 
 ---
 
@@ -664,8 +837,10 @@ Après le merge, afficher :
 
 5. **Workflow Git Automatique** :
    - Dès que les modifications sont terminées : **exécuter immédiatement** git add, commit, push
-   - Si merge demandé : **exécuter immédiatement** le processus complet de merge
+   - Si merge demandé : **exécuter immédiatement** le processus complet de merge avec --no-ff
    - Ne **JAMAIS** attendre de confirmation utilisateur pour les commandes Git
+   - **Le flag --no-ff est OBLIGATOIRE** pour tous les merges (préserve l'historique)
+   - Nettoyer automatiquement les branches obsolètes après merge réussi
 
 ---
 
@@ -677,16 +852,21 @@ Lorsque le prompt est invoqué sans mention de merge :
 - S'arrêter après le push, ne pas merger
 
 ### Option 2 : Commit + Merge (si demandé explicitement)
-Lorsque l'utilisateur demande explicitement le merge :
+Lorsque l'utilisateur demande explicitement le merge avec termes comme "merge", "fusionner", ou référence à merge.prompt.md :
 - Exécuter le workflow complet jusqu'à l'étape 4 (commit + push)
-- **Puis automatiquement** exécuter l'étape 5 (merge sur main)
-- Nettoyer les branches obsolètes
+- **Puis automatiquement** exécuter l'étape 5 (merge sur main avec --no-ff)
+- Nettoyer les branches obsolètes (local + remote)
+- Afficher confirmation complète avec statistiques
+
+**⚠️ RAPPEL CRITIQUE : Le flag --no-ff est OBLIGATOIRE et NON NÉGOCIABLE**
 
 ### Option 3 : Vérification Pré-Merge (optionnel)
-Si des conflits potentiels sont détectés :
-- Informer l'utilisateur des conflits
-- Proposer de résoudre manuellement avant le merge
-- Attendre confirmation uniquement dans ce cas spécifique
+Si des conflits potentiels sont détectés lors du merge :
+- Arrêter le processus automatique
+- Informer l'utilisateur des fichiers en conflit
+- Fournir les commandes de résolution manuelle
+- Attendre action manuelle uniquement dans ce cas spécifique
+- Si aucun conflit : continuer automatiquement avec --no-ff
 
 ---
 

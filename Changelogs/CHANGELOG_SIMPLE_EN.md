@@ -4,6 +4,14 @@
 
 # ✨ v0.108
 
+### 📚 Documentation
+
+**Eden Scraping Technical Documentation**
+- 📝 3 detailed English documentations (2000+ lines)
+- 📊 ASCII graphical diagrams of execution flows
+- 💡 Practical examples and troubleshooting guides
+- 🎯 Unified architecture documented
+
 ### 🐛 Fixed
 
 **Missing URL on Import**

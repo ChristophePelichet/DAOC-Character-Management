@@ -2,6 +2,14 @@
 
 # ✨ v0.108
 
+### 📚 Documentation
+
+**Documentation Technique Eden Scraping**
+- 📝 3 documentations détaillées en anglais (2000+ lignes)
+- 📊 Schémas graphiques ASCII des flux d'exécution
+- 💡 Exemples pratiques et guides de dépannage
+- 🎯 Architecture unifiée documentée
+
 ### 🐛 Correction
 
 **URL Manquante à l'Import**

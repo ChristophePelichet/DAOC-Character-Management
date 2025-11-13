@@ -1288,36 +1288,18 @@ class CharacterSheetWindow(QDialog):
         
         try:
             from Functions.character_profile_scraper import CharacterProfileScraper
-            from Functions.cookie_manager import CookieManager
             
-            # Check cookies
-            cookie_manager = CookieManager()
-            if not cookie_manager.cookie_exists():
-                QMessageBox.warning(
-                    self,
-                    "Cookies manquants",
-                    "Aucun cookie trouvé. Veuillez générer les cookies via le Cookie Manager."
-                )
-                return
+            # Initialize scraper (cookie_manager created automatically if needed)
+            scraper = CharacterProfileScraper()
             
-            # Initialize scraper
-            scraper = CharacterProfileScraper(cookie_manager)
+            # Connect to Herald using centralized function
+            success, error_message = scraper.connect(headless=False)
             
-            if not scraper.initialize_driver(headless=False):
+            if not success:
                 QMessageBox.critical(
                     self,
-                    "Erreur",
-                    "Impossible d'initialiser le navigateur."
-                )
-                return
-            
-            # Load cookies
-            if not scraper.load_cookies():
-                scraper.close()
-                QMessageBox.critical(
-                    self,
-                    "Erreur d'authentification",
-                    "Impossible de charger les cookies. Veuillez régénérer les cookies."
+                    "Erreur de connexion",
+                    f"Impossible de se connecter au Herald Eden:\n{error_message}"
                 )
                 return
             

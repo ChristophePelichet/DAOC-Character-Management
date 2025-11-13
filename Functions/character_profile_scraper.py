@@ -36,150 +36,64 @@ class CharacterProfileScraper:
     Does not interfere with existing EdenScraper functionality.
     """
     
-    def __init__(self, cookie_manager):
+    def __init__(self, cookie_manager=None):
         """
         Initialize the character profile scraper
         
         Args:
-            cookie_manager: CookieManager instance for authentication
+            cookie_manager: CookieManager instance for authentication (optional, created if None)
         """
         self.cookie_manager = cookie_manager
         self.driver = None
+        self._eden_scraper = None  # Will store EdenScraper instance from connection
         
         log_with_action(profile_logger, "info", "CharacterProfileScraper initialized", action="INIT")
     
-    def initialize_driver(self, headless=False):
+    def connect(self, headless=False):
         """
-        Initialize Selenium WebDriver for profile scraping
-        USES EXACT SAME METHOD AS eden_scraper.py
+        Establish connection to Eden Herald using centralized connection function.
+        Replaces initialize_driver() + load_cookies() with single unified call.
         
         Args:
-            headless: Whether to run browser in headless mode
+            headless: Whether to run browser in headless mode (False recommended for bot check avoidance)
             
         Returns:
-            bool: True if initialization successful
+            tuple: (success: bool, error_message: str)
+                   If success: (True, "")
+                   If failure: (False, "error description")
         """
         try:
-            # EXACT SAME AS eden_scraper.py
-            from Functions.config_manager import config
-            preferred_browser = config.get('preferred_browser', 'Chrome')
-            allow_download = config.get('allow_browser_download', False)
-            
-            # Use cookie_manager's browser initialization (SAME AS eden_scraper.py)
-            driver, browser_name = self.cookie_manager._initialize_browser_driver(
-                headless=headless,
-                preferred_browser=preferred_browser,
-                allow_download=allow_download
-            )
-            
-            if driver:
-                self.driver = driver
-                
-                # Minimize browser window if not in headless mode (SAME AS eden_scraper.py)
-                if not headless:
-                    try:
-                        self.driver.minimize_window()
-                        log_with_action(profile_logger, "info", "Browser window minimized", action="INIT")
-                    except Exception as e:
-                        log_with_action(profile_logger, "warning", f"Could not minimize window: {e}", action="INIT")
-                
-                log_with_action(profile_logger, "info", f"Driver initialized: {browser_name}", action="INIT")
-                return True
-            else:
-                log_with_action(profile_logger, "error", "Could not initialize any browser", action="INIT")
-                return False
-            
-        except Exception as e:
-            log_with_action(profile_logger, "error", f"Failed to initialize driver: {e}", action="INIT")
-            return False
-    
-    def load_cookies(self):
-        """
-        Load cookies from cookie manager into the browser
-        
-        Returns:
-            bool: True if cookies loaded successfully and session is active
-        """
-        if not self.driver:
-            log_with_action(profile_logger, "error", "Driver not initialized", action="LOAD_COOKIES")
-            return False
-        
-        try:
-            cookies_list = self.cookie_manager.get_cookies_for_scraper()
-            if not cookies_list:
-                log_with_action(profile_logger, "error", "No cookies available", action="LOAD_COOKIES")
-                return False
-            
-            log_with_action(profile_logger, "info", f"Loading {len(cookies_list)} cookies...", action="LOAD_COOKIES")
-            
-            # Step 1: Navigate to homepage
-            log_with_action(profile_logger, "info", "Step 1: Navigating to https://eden-daoc.net/", action="LOAD_COOKIES")
-            self.driver.get("https://eden-daoc.net/")
-            time.sleep(1)
-            
-            # Step 2: Add cookies
-            log_with_action(profile_logger, "info", "Step 2: Adding cookies to browser", action="LOAD_COOKIES")
-            cookies_added = 0
-            for cookie in cookies_list:
-                try:
-                    # Remove expired cookies
-                    if 'expiry' in cookie:
-                        if cookie['expiry'] < time.time():
-                            log_with_action(profile_logger, "debug", 
-                                          f"Cookie {cookie.get('name')} expired, trying anyway", 
-                                          action="LOAD_COOKIES")
-                    
-                    self.driver.add_cookie(cookie)
-                    cookies_added += 1
-                except Exception as e:
-                    log_with_action(profile_logger, "warning", 
-                                  f"Failed to add cookie {cookie.get('name')}: {e}", 
-                                  action="LOAD_COOKIES")
+            from Functions.eden_scraper import _connect_to_eden_herald
             
             log_with_action(profile_logger, "info", 
-                          f"Added {cookies_added}/{len(cookies_list)} cookies", 
-                          action="LOAD_COOKIES")
+                          "Connecting to Eden Herald using centralized function", 
+                          action="CONNECT")
             
-            # Step 3: Refresh to activate cookies
-            log_with_action(profile_logger, "info", "Step 3: Refreshing page to activate session", action="LOAD_COOKIES")
-            self.driver.refresh()
-            time.sleep(2)
+            # Use centralized connection function
+            scraper, error_message = _connect_to_eden_herald(
+                cookie_manager=self.cookie_manager,
+                headless=headless
+            )
             
-            # Step 4: Navigate to Herald to test session (CRITICAL STEP)
-            log_with_action(profile_logger, "info", "Step 4: Navigating to Herald to test session", action="LOAD_COOKIES")
-            self.driver.get("https://eden-daoc.net/herald")
-            time.sleep(2)
-            
-            # Check if connected
-            current_url = self.driver.current_url
-            html_content = self.driver.page_source
-            
-            log_with_action(profile_logger, "info", f"Current URL: {current_url}", action="LOAD_COOKIES")
-            log_with_action(profile_logger, "info", f"HTML size: {len(html_content)} chars", action="LOAD_COOKIES")
-            
-            # Detection: If we have "not available" message → Not connected
-            error_message = 'The requested page "herald" is not available.'
-            has_error = error_message in html_content
-            
-            log_with_action(profile_logger, "info", f"Error message present: {has_error}", action="LOAD_COOKIES")
-            
-            if has_error:
+            if not scraper:
                 log_with_action(profile_logger, "error", 
-                              'NOT CONNECTED - Herald page not available', 
-                              action="LOAD_COOKIES")
-                log_with_action(profile_logger, "error", 
-                              'Please regenerate cookies using Cookie Manager', 
-                              action="LOAD_COOKIES")
-                return False
-            else:
-                log_with_action(profile_logger, "info", 
-                              "Successfully connected to Herald", 
-                              action="LOAD_COOKIES")
-                return True
+                              f"Connection failed: {error_message}", 
+                              action="CONNECT")
+                return False, error_message
+            
+            # Store scraper and its driver
+            self._eden_scraper = scraper
+            self.driver = scraper.driver
+            
+            log_with_action(profile_logger, "info", 
+                          "✅ Successfully connected to Eden Herald", 
+                          action="CONNECT")
+            return True, ""
             
         except Exception as e:
-            log_with_action(profile_logger, "error", f"Failed to load cookies: {e}", action="LOAD_COOKIES")
-            return False
+            error_msg = f"Connection error: {str(e)}"
+            log_with_action(profile_logger, "error", error_msg, action="CONNECT")
+            return False, error_msg
     
     def scrape_wealth_money(self, character_url):
         """
@@ -307,10 +221,20 @@ class CharacterProfileScraper:
     
     def close(self):
         """Close the WebDriver cleanly"""
-        if self.driver:
+        if self._eden_scraper:
+            try:
+                self._eden_scraper.close()
+                log_with_action(profile_logger, "info", "EdenScraper closed", action="CLEANUP")
+            except Exception as e:
+                log_with_action(profile_logger, "warning", f"Error closing scraper: {e}", action="CLEANUP")
+            finally:
+                self._eden_scraper = None
+                self.driver = None
+        elif self.driver:
+            # Fallback: close driver directly if not using EdenScraper
             try:
                 self.driver.quit()
-                log_with_action(profile_logger, "info", "Driver closed", action="CLEANUP")
+                log_with_action(profile_logger, "info", "Driver closed directly", action="CLEANUP")
             except Exception as e:
                 log_with_action(profile_logger, "warning", f"Error closing driver: {e}", action="CLEANUP")
             finally:

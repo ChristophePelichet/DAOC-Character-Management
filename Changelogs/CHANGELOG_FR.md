@@ -4,6 +4,57 @@ Historique complet des versions du gestionnaire de personnages pour Dark Age of 
 
 ---
 
+# ✨✨ v0.108 - 2025-11-13
+
+### 🧰 Modification
+
+**Amélioration Fenêtre de Recherche Herald**
+- 🎨 Interface de progression moderne avec affichage des étapes (550×350px)
+- ✅ Système de statuts visuels à 3 états :
+  - ⏺️ En attente (gris) : Étape pas encore commencée
+  - ⏳ En cours (bleu) : Étape actuellement en exécution avec texte en gras
+  - ✅ Terminée (vert) : Étape complétée avec succès
+- 📋 9 étapes de progression détaillées et visibles en permanence :
+  1. 🔐 Vérification des cookies d'authentification
+  2. 🌐 Initialisation du navigateur Chrome
+  3. 🍪 Chargement des cookies dans le navigateur
+  4. 🔍 Recherche sur Eden Herald
+  5. ⏳ Chargement de la page de recherche
+  6. 📊 Extraction des résultats de recherche
+  7. 💾 Sauvegarde des résultats
+  8. 🎯 Formatage des personnages trouvés
+  9. 🔄 Fermeture du navigateur
+- 🔄 Mise à jour automatique des étapes précédentes en ✅ lors de la progression
+- 📊 Zone de progression groupée dans QGroupBox "Progression"
+- 🎯 Feedback visuel complet : l'utilisateur voit le statut de toutes les étapes
+- ⏱️ Message d'attente informatif en bas de la fenêtre
+- 🔧 Refactorisation complète de `SearchThread` dans `UI/dialogs.py` :
+  - Nouveau signal `progress_update = Signal(str)` pour mises à jour en temps réel
+  - Intégration de toute la logique de recherche dans le thread
+  - Émission de messages de progression à chaque étape clé
+  - Gestion propre de la fermeture du navigateur dans bloc `finally`
+- 📝 Nouvelle méthode `_on_search_progress_update(status_message)` :
+  - Détection automatique de l'étape en cours via mapping d'icônes
+  - Marquage automatique des étapes précédentes comme terminées
+  - Cas spécial pour message final "✅ Recherche terminée avec succès !"
+  - Support du scaling de polices via `_get_scaled_size()`
+- 🌍 13 nouvelles traductions ajoutées (FR/EN/DE) :
+  - `herald_search_progress_title` : Titre de la fenêtre
+  - `herald_search_progress_checking_cookies` : Vérification cookies
+  - `herald_search_progress_init_browser` : Initialisation navigateur
+  - `herald_search_progress_loading_cookies` : Chargement cookies
+  - `herald_search_progress_searching` : Recherche sur Herald
+  - `herald_search_progress_loading_page` : Chargement page
+  - `herald_search_progress_extracting` : Extraction résultats
+  - `herald_search_progress_saving` : Sauvegarde résultats
+  - `herald_search_progress_formatting` : Formatage personnages
+  - `herald_search_progress_complete` : Recherche terminée
+  - `herald_search_progress_closing` : Fermeture navigateur
+  - `herald_search_wait_message` : Message d'attente
+- 🎨 Design cohérent avec la fenêtre "Mise à jour depuis Herald"
+
+---
+
 # ✨✨ v0.107 - 2025-11-11
 
 ### 🎉 Ajout

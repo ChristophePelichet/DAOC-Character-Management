@@ -248,5 +248,17 @@
     "version_check_error": "⚠️ Prüfung fehlgeschlagen",
     "version_check_button": "🔄 Prüfen",
     "version_check_button_checking": "⏳ Wird geprüft...",
-    "version_check_download": "📥 Herunterladen"
+    "version_check_download": "📥 Herunterladen",
+    "herald_search_progress_title": "⏳ Suche läuft...",
+    "herald_search_progress_checking_cookies": "🔐 Überprüfung der Authentifizierungs-Cookies...",
+    "herald_search_progress_init_browser": "🌐 Initialisierung des Chrome-Browsers...",
+    "herald_search_progress_loading_cookies": "🍪 Laden der Cookies in den Browser...",
+    "herald_search_progress_searching": "🔍 Suche nach '{0}' auf Eden Herald...",
+    "herald_search_progress_loading_page": "⏳ Laden der Suchseite...",
+    "herald_search_progress_extracting": "📊 Extrahieren der Suchergebnisse...",
+    "herald_search_progress_saving": "💾 Speichern der Ergebnisse...",
+    "herald_search_progress_formatting": "🎯 Formatierung gefundener Charaktere...",
+    "herald_search_progress_complete": "✅ Suche erfolgreich abgeschlossen!",
+    "herald_search_progress_closing": "🔄 Browser wird geschlossen...",
+    "herald_search_wait_message": "⏱️ Bitte warten Sie, dieser Vorgang kann einige Sekunden dauern..."
 }

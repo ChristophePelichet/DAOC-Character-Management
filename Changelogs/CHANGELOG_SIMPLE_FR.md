@@ -1,5 +1,18 @@
 # 📋 Changelog Simple - DAOC Character Management
 
+# ✨ v0.108
+
+### 🧰 Modification
+
+**Amélioration Recherche Herald**
+- 🎨 Nouvelle fenêtre de progression avec 9 étapes détaillées
+- ✅ Système de statuts visuels : En attente (⏺️), En cours (⏳), Terminée (✅)
+- 📋 Toutes les étapes restent visibles avec indication de leur statut
+- 🔄 Mise à jour automatique des étapes au fur et à mesure de la progression
+- 🎯 Feedback visuel complet pour l'utilisateur
+
+---
+
 # ✨ v0.107
 
 ### 🎉 Ajout 

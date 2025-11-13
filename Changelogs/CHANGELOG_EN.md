@@ -4,6 +4,57 @@ Complete version history of the character manager for Dark Age of Camelot (Eden)
 
 ---
 
+# ✨✨ v0.108 - 2025-11-13
+
+### 🧰 Modified
+
+**Enhanced Herald Search Window**
+- 🎨 Modern progress interface with step display (550×350px)
+- ✅ 3-state visual status system:
+  - ⏺️ Waiting (gray): Step not yet started
+  - ⏳ In Progress (blue): Currently executing step with bold text
+  - ✅ Completed (green): Successfully completed step
+- 📋 9 detailed progress steps permanently visible:
+  1. 🔐 Checking authentication cookies
+  2. 🌐 Initializing Chrome browser
+  3. 🍪 Loading cookies into browser
+  4. 🔍 Searching on Eden Herald
+  5. ⏳ Loading search page
+  6. 📊 Extracting search results
+  7. 💾 Saving results
+  8. 🎯 Formatting found characters
+  9. 🔄 Closing browser
+- 🔄 Automatic update of previous steps to ✅ during progression
+- 📊 Progress area grouped in QGroupBox "Progress"
+- 🎯 Complete visual feedback: user sees status of all steps
+- ⏱️ Informative wait message at bottom of window
+- 🔧 Complete refactoring of `SearchThread` in `UI/dialogs.py`:
+  - New signal `progress_update = Signal(str)` for real-time updates
+  - Integration of all search logic into thread
+  - Progress message emission at each key step
+  - Clean browser closure handling in `finally` block
+- 📝 New method `_on_search_progress_update(status_message)`:
+  - Automatic detection of current step via icon mapping
+  - Automatic marking of previous steps as completed
+  - Special case for final message "✅ Search completed successfully!"
+  - Font scaling support via `_get_scaled_size()`
+- 🌍 13 new translations added (FR/EN/DE):
+  - `herald_search_progress_title`: Window title
+  - `herald_search_progress_checking_cookies`: Checking cookies
+  - `herald_search_progress_init_browser`: Browser initialization
+  - `herald_search_progress_loading_cookies`: Loading cookies
+  - `herald_search_progress_searching`: Herald search
+  - `herald_search_progress_loading_page`: Page loading
+  - `herald_search_progress_extracting`: Results extraction
+  - `herald_search_progress_saving`: Results saving
+  - `herald_search_progress_formatting`: Characters formatting
+  - `herald_search_progress_complete`: Search completed
+  - `herald_search_progress_closing`: Browser closing
+  - `herald_search_wait_message`: Wait message
+- 🎨 Consistent design with "Update from Herald" window
+
+---
+
 # ✨✨ v0.107 - 2025-11-11
 
 ### 🎉 Added

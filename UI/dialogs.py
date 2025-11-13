@@ -3085,6 +3085,7 @@ class CookieManagerDialog(QDialog):
 class SearchThread(QThread):
     """Thread pour effectuer la recherche Herald en arrière-plan"""
     search_finished = Signal(bool, str, str)  # (success, message, json_path)
+    progress_update = Signal(str)  # (status_message)
     
     def __init__(self, character_name, realm_filter=""):
         super().__init__()
@@ -3092,10 +3093,227 @@ class SearchThread(QThread):
         self.realm_filter = realm_filter
     
     def run(self):
-        """Exécute la recherche"""
-        from Functions.eden_scraper import search_herald_character
-        success, message, json_path = search_herald_character(self.character_name, realm_filter=self.realm_filter)
-        self.search_finished.emit(success, message, json_path)
+        """Exécute la recherche avec des mises à jour de progression"""
+        from Functions.cookie_manager import CookieManager
+        from Functions.eden_scraper import EdenScraper
+        from bs4 import BeautifulSoup
+        from datetime import datetime
+        from pathlib import Path
+        import tempfile
+        import time
+        import json
+        import logging
+        
+        module_logger = logging.getLogger(__name__)
+        scraper = None
+        
+        try:
+            # Étape 1 : Vérification des cookies
+            self.progress_update.emit("🔐 Vérification des cookies d'authentification...")
+            module_logger.info(f"Début de la recherche Herald pour: {self.character_name}", extra={"action": "SEARCH"})
+            
+            cookie_manager = CookieManager()
+            
+            if not cookie_manager.cookie_exists():
+                module_logger.error("Aucun cookie trouvé", extra={"action": "SEARCH"})
+                self.search_finished.emit(False, "Aucun cookie trouvé. Veuillez générer ou importer des cookies d'abord.", "")
+                return
+            
+            info = cookie_manager.get_cookie_info()
+            if not info or not info.get('is_valid'):
+                module_logger.error("Cookies expirés", extra={"action": "SEARCH"})
+                self.search_finished.emit(False, "Les cookies ont expiré. Veuillez les regénérer.", "")
+                return
+            
+            module_logger.info(f"Cookies valides - {info.get('cookie_count', 0)} cookies chargés", extra={"action": "SEARCH"})
+            
+            # Étape 2 : Initialisation du navigateur
+            self.progress_update.emit("🌐 Initialisation du navigateur Chrome...")
+            scraper = EdenScraper(cookie_manager)
+            
+            if not scraper.initialize_driver(headless=False):
+                module_logger.error("Impossible d'initialiser le navigateur", extra={"action": "SEARCH"})
+                self.search_finished.emit(False, "Impossible d'initialiser le navigateur Chrome.", "")
+                return
+            
+            module_logger.info("Navigateur initialisé avec succès", extra={"action": "SEARCH"})
+            
+            # Étape 3 : Chargement des cookies
+            self.progress_update.emit("🍪 Chargement des cookies dans le navigateur...")
+            if not scraper.load_cookies():
+                module_logger.error("Impossible de charger les cookies dans le navigateur", extra={"action": "SEARCH"})
+                self.search_finished.emit(False, "Impossible de charger les cookies.", "")
+                return
+            
+            module_logger.info("Cookies chargés dans le navigateur - Authentification complétée", extra={"action": "SEARCH"})
+            
+            # Étape 4 : Navigation vers la page de recherche
+            if self.realm_filter:
+                search_url = f"https://eden-daoc.net/herald?n=search&r={self.realm_filter}&s={self.character_name}"
+            else:
+                search_url = f"https://eden-daoc.net/herald?n=search&s={self.character_name}"
+            
+            self.progress_update.emit(f"🔍 Recherche de '{self.character_name}' sur Eden Herald...")
+            module_logger.info(f"Recherche Herald: {search_url}", extra={"action": "SEARCH"})
+            
+            scraper.driver.get(search_url)
+            
+            # Étape 5 : Attente du chargement de la page
+            self.progress_update.emit("⏳ Chargement de la page de recherche...")
+            module_logger.info("Attente du chargement de la page de recherche (5 secondes)...", extra={"action": "SEARCH"})
+            time.sleep(5)
+            
+            # Étape 6 : Extraction des données
+            self.progress_update.emit("📊 Extraction des résultats de recherche...")
+            page_source = scraper.driver.page_source
+            soup = BeautifulSoup(page_source, 'html.parser')
+            
+            module_logger.info(f"Page chargée - Taille: {len(page_source)} caractères", extra={"action": "SEARCH"})
+            
+            # Extract data de recherche
+            search_data = {
+                'character_name': self.character_name,
+                'search_url': search_url,
+                'timestamp': datetime.now().isoformat(),
+                'results': []
+            }
+            
+            # Search results in tables
+            tables = soup.find_all('table')
+            for table in tables:
+                rows = table.find_all('tr')
+                if len(rows) > 1:  # Au moins un header et une ligne
+                    headers = [th.get_text(strip=True) for th in rows[0].find_all('th')]
+                    
+                    for row in rows[1:]:
+                        cells = row.find_all('td')
+                        if cells:
+                            result = {}
+                            for idx, cell in enumerate(cells):
+                                header = headers[idx] if idx < len(headers) else f"col_{idx}"
+                                result[header] = cell.get_text(strip=True)
+                                
+                                # Extraire les liens
+                                links = cell.find_all('a')
+                                if links:
+                                    result[f"{header}_links"] = [a.get('href', '') for a in links]
+                            
+                            if result:
+                                search_data['results'].append(result)
+            
+            # Étape 7 : Sauvegarde des résultats
+            self.progress_update.emit("💾 Sauvegarde des résultats...")
+            
+            # Utiliser le dossier temporaire de l'OS
+            temp_dir = Path(tempfile.gettempdir()) / "EdenSearchResult"
+            temp_dir.mkdir(exist_ok=True)
+            
+            module_logger.info(f"Dossier temporaire: {temp_dir}", extra={"action": "CLEANUP"})
+            
+            # Clean old files before creating new ones
+            old_files_list = list(temp_dir.glob("*.json"))
+            if old_files_list:
+                module_logger.info(f"Nettoyage de {len(old_files_list)} fichier(s) ancien(s)...", extra={"action": "CLEANUP"})
+                
+                for old_file in old_files_list:
+                    try:
+                        module_logger.debug(f"Suppression: {old_file.name}", extra={"action": "CLEANUP"})
+                        old_file.unlink()
+                        module_logger.info(f"✅ Fichier supprimé: {old_file.name}", extra={"action": "CLEANUP"})
+                    except Exception as e:
+                        module_logger.warning(f"❌ Impossible de supprimer {old_file.name}: {e}", extra={"action": "CLEANUP"})
+            else:
+                module_logger.info("Aucun ancien fichier à nettoyer", extra={"action": "CLEANUP"})
+            
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            json_filename = f"search_{self.character_name}_{timestamp}.json"
+            json_path = temp_dir / json_filename
+            
+            with open(json_path, 'w', encoding='utf-8') as f:
+                json.dump(search_data, f, indent=2, ensure_ascii=False)
+            
+            # Extract formatted characters
+            self.progress_update.emit("🎯 Formatage des personnages trouvés...")
+            characters = []
+            for result in search_data['results']:
+                # Check if it's a character row
+                if (result.get('col_1') and 
+                    result.get('col_3') and 
+                    len(result.get('col_1', '')) > 0 and
+                    result.get('col_0') and
+                    result.get('col_0', '').isdigit()):
+                    
+                    rank = result.get('col_0', '')
+                    name = result.get('col_1', '').strip()
+                    char_class = result.get('col_3', '').strip()
+                    race = result.get('col_5', '').strip()
+                    guild = result.get('col_7', '').strip()
+                    level = result.get('col_8', '').strip()
+                    rp = result.get('col_9', '').strip()
+                    realm_rank = result.get('col_10', '').strip()
+                    realm_level = result.get('col_11', '').strip()
+                    
+                    # Extraire l'URL depuis les liens (col_1 contient le nom avec le lien)
+                    url = ""
+                    if 'col_1_links' in result and result['col_1_links']:
+                        url = result['col_1_links'][0]
+                        if not url.startswith('http'):
+                            url = f"https://eden-daoc.net{url}"
+                    
+                    # Nettoyer le nom (retirer les codes couleur HTML)
+                    import re
+                    clean_name = re.sub(r'<[^>]+>', '', name)
+                    
+                    characters.append({
+                        'rank': rank,
+                        'name': name,
+                        'clean_name': clean_name,
+                        'class': char_class,
+                        'race': race,
+                        'guild': guild,
+                        'level': level,
+                        'realm_points': rp,
+                        'realm_rank': realm_rank,
+                        'realm_level': realm_level,
+                        'url': url
+                    })
+            
+            # Ajouter la liste formatée au JSON
+            search_data['characters'] = characters
+            search_data['search_query'] = self.character_name
+            
+            # Re-sauvegarder avec les données formatées
+            with open(json_path, 'w', encoding='utf-8') as f:
+                json.dump(search_data, f, indent=2, ensure_ascii=False)
+            
+            module_logger.info(f"{len(characters)} personnage(s) trouvé(s) et sauvegardé(s) dans: {json_path}", extra={"action": "SEARCH"})
+            
+            # Étape finale : Terminé
+            self.progress_update.emit("✅ Recherche terminée avec succès !")
+            
+            self.search_finished.emit(
+                True, 
+                f"{len(characters)} personnage(s) trouvé(s)",
+                str(json_path)
+            )
+            
+        except Exception as e:
+            module_logger.error(f"Erreur lors de la recherche: {str(e)}", extra={"action": "SEARCH"}, exc_info=True)
+            self.search_finished.emit(False, f"Erreur: {str(e)}", "")
+            
+        finally:
+            # Fermer le navigateur proprement
+            if scraper and scraper.driver:
+                try:
+                    self.progress_update.emit("🔄 Fermeture du navigateur...")
+                    scraper.driver.quit()
+                    module_logger.info("Navigateur fermé", extra={"action": "SEARCH"})
+                    # Marquer comme terminé après un court délai pour que l'utilisateur voie le message
+                    import time
+                    time.sleep(0.3)
+                    self.progress_update.emit("✅ Navigateur fermé avec succès")
+                except Exception as e:
+                    module_logger.warning(f"Erreur lors de la fermeture du navigateur: {e}", extra={"action": "SEARCH"})
 
 
 class HeraldSearchDialog(QDialog):
@@ -3338,21 +3556,156 @@ class HeraldSearchDialog(QDialog):
         self.name_input.setEnabled(False)
         self.realm_combo.setEnabled(False)
         
-        # Message de statut avec info du royaume
+        # Créer une fenêtre de progression personnalisée avec animation
+        self.progress_dialog = QDialog(self)
+        self.progress_dialog.setWindowTitle("⏳ Recherche en cours...")
+        self.progress_dialog.setModal(True)
+        self.progress_dialog.setFixedSize(550, 350)
+        
+        progress_layout = QVBoxLayout(self.progress_dialog)
+        progress_layout.setSpacing(15)
+        
+        # Icône et titre
+        title_layout = QHBoxLayout()
         realm_text = self.realm_combo.currentText()
         if realm_filter:
-            self.status_label.setText(f"⏳ Recherche de '{character_name}' dans {realm_text}...")
+            title_text = f"🔍 Recherche de '{character_name}' dans {realm_text}..."
         else:
-            self.status_label.setText(f"⏳ Recherche de '{character_name}' en cours...")
-        self.status_label.setStyleSheet("padding: 10px; border: 1px solid #ccc; border-radius: 5px; color: blue;")
+            title_text = f"🔍 Recherche de '{character_name}' sur Eden Herald..."
+        title_label = QLabel(title_text)
+        from Functions.theme_manager import get_scaled_size
+        title_label.setStyleSheet(f"font-size: {get_scaled_size(12):.1f}pt; font-weight: bold;")
+        title_layout.addWidget(title_label)
+        progress_layout.addLayout(title_layout)
+        
+        # Zone d'étapes avec scroll
+        steps_group = QGroupBox("Progression")
+        steps_layout = QVBoxLayout()
+        
+        # Liste des étapes (stockée pour mise à jour)
+        self.progress_steps = []
+        step_texts = [
+            ("🔐", "Vérification des cookies d'authentification"),
+            ("🌐", "Initialisation du navigateur Chrome"),
+            ("🍪", "Chargement des cookies dans le navigateur"),
+            ("🔍", "Recherche sur Eden Herald"),
+            ("⏳", "Chargement de la page de recherche"),
+            ("📊", "Extraction des résultats de recherche"),
+            ("💾", "Sauvegarde des résultats"),
+            ("🎯", "Formatage des personnages trouvés"),
+            ("🔄", "Fermeture du navigateur")
+        ]
+        
+        for icon, text in step_texts:
+            step_layout = QHBoxLayout()
+            step_icon_label = QLabel("⏺️")  # Icône par défaut (en attente)
+            step_icon_label.setFixedWidth(25)
+            step_text_label = QLabel(f"{icon} {text}")
+            step_text_label.setStyleSheet(f"color: #888; font-size: {get_scaled_size(9):.1f}pt;")
+            step_layout.addWidget(step_icon_label)
+            step_layout.addWidget(step_text_label)
+            step_layout.addStretch()
+            steps_layout.addLayout(step_layout)
+            
+            # Stocker les labels pour mise à jour
+            self.progress_steps.append({
+                'icon_label': step_icon_label,
+                'text_label': step_text_label,
+                'icon': icon,
+                'text': text
+            })
+        
+        steps_group.setLayout(steps_layout)
+        progress_layout.addWidget(steps_group)
+        
+        # Barre de progression indéterminée (animation)
+        progress_bar = QProgressBar()
+        progress_bar.setRange(0, 0)  # Mode indéterminé = animation
+        progress_bar.setTextVisible(False)
+        progress_bar.setFixedHeight(20)
+        progress_layout.addWidget(progress_bar)
+        
+        # Message d'attente
+        wait_label = QLabel("⏱️ Veuillez patienter, cette opération peut prendre quelques secondes...")
+        wait_label.setStyleSheet(f"color: #888; font-size: {get_scaled_size(9):.1f}pt; font-style: italic;")
+        wait_label.setWordWrap(True)
+        progress_layout.addWidget(wait_label)
+        
+        progress_layout.addStretch()
         
         # Lancer le thread avec le filtre de royaume
         self.search_thread = SearchThread(character_name, realm_filter)
         self.search_thread.search_finished.connect(self.on_search_finished)
+        self.search_thread.progress_update.connect(self._on_search_progress_update)
+        
+        # Afficher le dialogue et démarrer le worker
+        self.progress_dialog.show()
         self.search_thread.start()
+    
+    def _on_search_progress_update(self, status_message):
+        """Met à jour le message de progression pendant la recherche"""
+        if not hasattr(self, 'progress_steps'):
+            return
+        
+        # Mapping des messages aux indices d'étapes
+        step_mapping = {
+            "🔐": 0,  # Vérification des cookies
+            "🌐": 1,  # Initialisation du navigateur
+            "🍪": 2,  # Chargement des cookies
+            "🔍": 3,  # Recherche
+            "⏳": 4,  # Chargement de la page
+            "📊": 5,  # Extraction
+            "💾": 6,  # Sauvegarde
+            "🎯": 7,  # Formatage
+            "🔄": 8   # Fermeture
+        }
+        
+        # Cas spécial : message de succès final (marquer toutes les étapes comme terminées)
+        if status_message.startswith("✅") and "terminée" in status_message.lower():
+            for step in self.progress_steps:
+                step['icon_label'].setText("✅")
+                step['icon_label'].setStyleSheet("color: green;")
+                step['text_label'].setStyleSheet(f"color: #4CAF50; font-size: {self._get_scaled_size(9):.1f}pt;")
+            return
+        
+        # Trouver l'étape correspondante
+        step_index = -1
+        for icon, index in step_mapping.items():
+            if status_message.startswith(icon):
+                step_index = index
+                break
+        
+        if step_index >= 0 and step_index < len(self.progress_steps):
+            step = self.progress_steps[step_index]
+            
+            # Marquer toutes les étapes précédentes comme terminées
+            for i in range(step_index):
+                prev_step = self.progress_steps[i]
+                prev_step['icon_label'].setText("✅")
+                prev_step['icon_label'].setStyleSheet("color: green;")
+                prev_step['text_label'].setStyleSheet(f"color: #4CAF50; font-size: {self._get_scaled_size(9):.1f}pt;")
+            
+            # Mettre en évidence l'étape en cours
+            step['icon_label'].setText("⏳")
+            step['icon_label'].setStyleSheet("color: blue;")
+            step['text_label'].setStyleSheet(f"color: #2196F3; font-size: {self._get_scaled_size(9):.1f}pt; font-weight: bold;")
+    
+    def _get_scaled_size(self, base_size):
+        """Helper pour obtenir la taille scalée"""
+        try:
+            from Functions.theme_manager import get_scaled_size
+            return get_scaled_size(base_size)
+        except:
+            return base_size
     
     def on_search_finished(self, success, message, json_path):
         """Appelé quand la recherche est terminée"""
+        # Fermer et supprimer la fenêtre de progression
+        if hasattr(self, 'progress_dialog'):
+            self.progress_dialog.close()
+            self.progress_dialog.deleteLater()
+            delattr(self, 'progress_dialog')
+        
         # Réactiver the contrôles
         self.search_button.setEnabled(True)
         self.name_input.setEnabled(True)

@@ -2,6 +2,19 @@
 
 ---
 
+# ✨ v0.108
+
+### 🧰 Modified
+
+**Enhanced Herald Search**
+- 🎨 New progress window with 9 detailed steps
+- ✅ Visual status system: Waiting (⏺️), In Progress (⏳), Completed (✅)
+- 📋 All steps remain visible with status indication
+- 🔄 Automatic step updates as progress advances
+- 🎯 Complete visual feedback for user
+
+---
+
 # ✨ v0.107
 
 ### 🎉 Added

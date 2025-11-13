@@ -248,5 +248,17 @@
     "version_check_error": "⚠️ Erreur de vérification",
     "version_check_button": "🔄 Vérifier",
     "version_check_button_checking": "⏳ Vérification en cours...",
-    "version_check_download": "📥 Télécharger"
+    "version_check_download": "📥 Télécharger",
+    "herald_search_progress_title": "⏳ Recherche en cours...",
+    "herald_search_progress_checking_cookies": "🔐 Vérification des cookies d'authentification...",
+    "herald_search_progress_init_browser": "🌐 Initialisation du navigateur Chrome...",
+    "herald_search_progress_loading_cookies": "🍪 Chargement des cookies dans le navigateur...",
+    "herald_search_progress_searching": "🔍 Recherche de '{0}' sur Eden Herald...",
+    "herald_search_progress_loading_page": "⏳ Chargement de la page de recherche...",
+    "herald_search_progress_extracting": "📊 Extraction des résultats de recherche...",
+    "herald_search_progress_saving": "💾 Sauvegarde des résultats...",
+    "herald_search_progress_formatting": "🎯 Formatage des personnages trouvés...",
+    "herald_search_progress_complete": "✅ Recherche terminée avec succès !",
+    "herald_search_progress_closing": "🔄 Fermeture du navigateur...",
+    "herald_search_wait_message": "⏱️ Veuillez patienter, cette opération peut prendre quelques secondes..."
 }

@@ -28,6 +28,17 @@ Historique complet des versions du gestionnaire de personnages pour Dark Age of 
 - 📝 Fichiers modifiés : `main.py` (MainWindow)
 - 🎯 Impact : Comportement uniforme des deux chemins de mise à jour, meilleure expérience utilisateur
 
+### 🗑️ Retrait
+
+**Suppression de la Fonctionnalité "Vérifier la Structure des Fichiers"**
+- 🛡️ **Raison** : Fonctionnalité de migration devenue obsolète en version alpha/beta, données correctes par défaut en production
+- 🔧 **Modifications** :
+  - Suppression du menu "🔧 Vérifier la structure des fichiers" du menu Aide
+  - Suppression de la méthode `check_json_structures()` dans MainWindow
+  - Code de migration conservé dans `Functions/migration_manager.py` pour usage futur si nécessaire
+- 📝 Fichiers modifiés : `Functions/ui_manager.py`, `main.py`
+- 🎯 Impact : Interface simplifiée, option de migration manuelle retirée
+
 **Affichage Incorrect du Rang de Royaume dans la Comparaison de Mise à Jour**
 - 🛡️ **Problème** : Lors de la mise à jour d'un personnage depuis Herald (via fiche ou menu contextuel), la fenêtre de comparaison affichait le titre du rang (ex: "Raven Ardent") au lieu du code XLY (ex: "5L9") dans la colonne "Valeur actuelle", causant une détection erronée de changement alors que le rang était identique
 - 🔧 **Cause Racine** : Le fichier JSON local peut contenir soit le code XLY (format correct), soit le titre texte (ancien format ou sauvegarde incorrecte). La méthode `CharacterUpdateDialog._detect_changes()` comparait directement les valeurs sans valider le format du rang de royaume

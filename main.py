@@ -639,62 +639,6 @@ class CharacterApp(QMainWindow):
         self.eden_debug_window.raise_()
         self.eden_debug_window.activateWindow()
     
-    def check_json_structures(self):
-        """Vérifie et met à jour la structure des fichiers JSON"""
-        from Functions.migration_manager import check_and_upgrade_json_structures_if_needed
-        
-        # Confirmation
-        reply = QMessageBox.question(
-            self,
-            "Vérification de structure",
-            "Cette opération va vérifier tous les fichiers de personnages et ajouter les champs manquants si nécessaire.\n\n"
-            "Un backup de chaque fichier sera créé avant modification.\n\n"
-            "Voulez-vous continuer ?",
-            QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.Yes
-        )
-        
-        if reply != QMessageBox.Yes:
-            return
-        
-        # Afficher une fenêtre of progression
-        progress = QMessageBox(self)
-        progress.setWindowTitle("Vérification en cours...")
-        progress.setText("🔍 Analyse des fichiers JSON en cours...\n\nVeuillez patienter...")
-        progress.setStandardButtons(QMessageBox.NoButton)
-        progress.setModal(True)
-        progress.show()
-        QApplication.processEvents()
-        
-        try:
-            success, message, stats = check_and_upgrade_json_structures_if_needed()
-        finally:
-            progress.close()
-            progress.deleteLater()
-        
-        # Afficher the résultat
-        if success:
-            details = f"\n\n📊 Statistiques :\n"
-            details += f"  • Fichiers vérifiés : {stats.get('checked', 0)}\n"
-            details += f"  • Fichiers mis à jour : {stats.get('upgraded', 0)}\n"
-            details += f"  • Erreurs : {stats.get('errors', 0)}"
-            
-            QMessageBox.information(
-                self,
-                "✅ Vérification terminée",
-                f"{message}{details}"
-            )
-            
-            # Rafraîchir the liste if des fichiers have été modifiés
-            if stats.get('upgraded', 0) > 0:
-                self.tree_manager.refresh_character_list()
-        else:
-            QMessageBox.critical(
-                self,
-                "❌ Erreur",
-                f"Une erreur est survenue :\n\n{message}"
-            )
-    
     def show_help_create_character(self):
         """Affiche l'aide pour créer un nouveau personnage"""
         from Functions.help_manager import HelpManager

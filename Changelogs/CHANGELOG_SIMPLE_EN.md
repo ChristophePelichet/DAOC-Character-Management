@@ -16,6 +16,12 @@
 - 🔧 Added `has_changes()` check in context menu handler
 - 🎯 Uniform behavior between character sheet and context menu
 
+### 🗑️ Removal
+
+**"Check File Structure" Option**
+- 🛡️ Obsolete migration feature removed
+- 🎯 Simplified interface, manual option removed
+
 **Incorrect Realm Rank in Comparison**
 - 🛡️ Displayed title ("Raven Ardent") instead of code (5L9) causing false changes
 - 🔧 Automatic detection and recalculation from realm points

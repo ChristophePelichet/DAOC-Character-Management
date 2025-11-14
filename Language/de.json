@@ -93,6 +93,8 @@
     "update_char_progress": "Daten vom Herald werden abgerufen...",
     "update_char_error": "Fehler beim Abrufen der Daten",
     "update_char_no_changes": "Keine Änderungen erkannt. Der Charakter ist bereits aktuell.",
+    "update_char_no_changes_title": "Keine Aktualisierung",
+    "update_char_already_uptodate": "Der Charakter ist bereits aktuell. Keine Änderungen erkannt.",
     "update_char_success": "Charakter erfolgreich aktualisiert!",
     "update_char_cancelled": "Aktualisierung abgebrochen.",
     "duplicate_char_dialog_title": "Charakter duplizieren",

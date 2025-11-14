@@ -1902,9 +1902,19 @@ class CharacterSheetWindow(QDialog):
                 )
                 return
             
-            # Afficher le dialogue de validation des changements
+            # Créer le dialogue pour détecter les changements
             dialog = CharacterUpdateDialog(self, self.character_data, new_data, self.character_data['name'])
             
+            # Vérifier s'il y a au moins un changement
+            if not dialog.has_changes():
+                QMessageBox.information(
+                    self,
+                    lang.get("update_char_no_changes_title", default="Aucune mise à jour"),
+                    lang.get("update_char_already_uptodate", default="Le personnage est déjà à jour. Aucune modification détectée.")
+                )
+                return
+            
+            # Afficher le dialogue de validation des changements
             if dialog.exec() == QDialog.Accepted:
                 selected_changes = dialog.get_selected_changes()
                 
@@ -5356,6 +5366,32 @@ class CharacterUpdateDialog(QDialog):
                     except:
                         pass
             
+            # Cas spécial pour realm_rank : s'assurer qu'on compare les codes (XLY) et pas les titres
+            # Le fichier JSON peut contenir soit le code (correct), soit le titre (ancien format)
+            # Le Herald retourne toujours le code via _normalize_character_data()
+            if field == 'realm_rank':
+                # Vérifier si current_value est un titre (contient des espaces/lettres non-format XLY)
+                if isinstance(current_value, str) and current_value:
+                    # Format XLY: chiffre(s) + L + chiffre(s) (ex: "5L9", "10L3")
+                    import re
+                    if not re.match(r'^\d+L\d+$', current_value.strip()):
+                        # current_value est probablement un titre (ex: "Raven Ardent")
+                        # Recalculer le rang depuis realm_points si disponible
+                        realm_points = self.current_data.get('realm_points', 0)
+                        realm = self.current_data.get('realm', 'Albion')
+                        if realm_points and hasattr(self.parent(), 'data_manager'):
+                            try:
+                                # Convertir realm_points en int si nécessaire
+                                if isinstance(realm_points, str):
+                                    realm_points = int(realm_points.replace(' ', '').replace(',', ''))
+                                
+                                rank_info = self.parent().data_manager.get_realm_rank_info(realm, realm_points)
+                                if rank_info:
+                                    current_value = rank_info['level']  # Code XLY correct
+                            except Exception as e:
+                                import logging
+                                logging.warning(f"Impossible de recalculer realm_rank depuis realm_points: {e}")
+            
             if isinstance(current_value, (int, float)):
                 current_value_str = str(current_value)
             else:
@@ -5473,6 +5509,16 @@ class CharacterUpdateDialog(QDialog):
                     selected[field] = value_raw  # Utiliser la valeur brute
         
         return selected
+    
+    def has_changes(self):
+        """Retourne True s'il y a au moins un changement détecté."""
+        for row in range(self.changes_table.rowCount()):
+            item = self.changes_table.item(row, 0)
+            if item:
+                checkbox = item.data(Qt.UserRole)
+                if checkbox:  # S'il y a une checkbox, c'est qu'il y a un changement
+                    return True
+        return False
 
 
 class BackupSettingsDialog(QDialog):

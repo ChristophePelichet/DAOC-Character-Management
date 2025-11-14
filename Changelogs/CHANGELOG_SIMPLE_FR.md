@@ -14,6 +14,12 @@
 - 🔧 Ajout vérification `has_changes()` dans gestionnaire menu contextuel
 - 🎯 Comportement uniforme entre feuille personnage et menu contextuel
 
+### 🗑️ Retrait
+
+**Option "Vérifier la Structure"**
+- 🛡️ Fonctionnalité de migration obsolète retirée
+- 🎯 Interface simplifiée, option manuelle supprimée
+
 **Rang de Royaume Incorrect dans Comparaison**
 - 🛡️ Affichage du titre ("Raven Ardent") au lieu du code (5L9) causant faux changements
 - 🔧 Détection automatique et recalcul depuis points de royaume

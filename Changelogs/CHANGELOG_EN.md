@@ -28,6 +28,17 @@ Complete version history of the character manager for Dark Age of Camelot (Eden)
 - 📝 Modified files: `main.py` (MainWindow)
 - 🎯 Impact: Uniform behavior for both update paths, improved user experience
 
+### 🗑️ Removal
+
+**Removed "Check File Structure" Feature**
+- 🛡️ **Reason**: Migration feature became obsolete in alpha/beta version, data correct by default in production
+- 🔧 **Changes**:
+  - Removed "🔧 Check file structure" menu from Help menu
+  - Removed `check_json_structures()` method from MainWindow
+  - Migration code kept in `Functions/migration_manager.py` for future use if needed
+- 📝 Modified files: `Functions/ui_manager.py`, `main.py`
+- 🎯 Impact: Simplified interface, manual migration option removed
+
 **Incorrect Realm Rank Display in Update Comparison**
 - 🛡️ **Problem**: When updating a character from Herald (via character sheet or context menu), the comparison window displayed the realm rank title (e.g., "Raven Ardent") instead of the XLY code (e.g., "5L9") in the "Current value" column, causing false change detection even when the rank was identical
 - 🔧 **Root Cause**: Local JSON file may contain either XLY code (correct format) or text title (old format or incorrect save). The `CharacterUpdateDialog._detect_changes()` method compared values directly without validating realm rank format

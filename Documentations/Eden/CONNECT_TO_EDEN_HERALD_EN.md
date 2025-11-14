@@ -540,10 +540,9 @@ def test_full_connection_workflow():
 
 ## Related Documentation
 
-- **Cookie Manager**: `Documentation/COOKIE_MANAGER_EN.md` (if exists)
-- **Eden Scraper Class**: `Documentation/Eden/EDEN_SCRAPER_CLASS_EN.md` (to be created)
-- **Search Function**: See `search_herald_character()` in `eden_scraper.py`
-- **Update Function**: See `scrape_character_from_url()` in `eden_scraper.py`
+- **Character Search**: [CHARACTER_SEARCH_SCRAPER_EN.md](CHARACTER_SEARCH_SCRAPER_EN.md) - `search_herald_character()` function
+- **Character Update**: [CHARACTER_PROFILE_SCRAPER_EN.md](CHARACTER_PROFILE_SCRAPER_EN.md) - `scrape_character_from_url()` function
+- **Stats & Wealth**: [CHARACTER_STATS_SCRAPER_EN.md](CHARACTER_STATS_SCRAPER_EN.md) - `CharacterProfileScraper` class and `WealthManager` module
 
 ---
 

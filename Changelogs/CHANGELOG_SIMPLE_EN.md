@@ -2,6 +2,19 @@
 
 ---
 
+# ✨ v0.109
+
+### 🧰 Modified
+
+**Copilot Configuration + Technical Documentation**
+- ⚙️ VS Code Copilot configuration for automatic workflow (translations, changelogs, commit, merge)
+- 📝 2 Copilot instruction files (`.github/copilot-instructions.md` and `.copilot-instructions.md`)
+- 📐 Progress window architecture reflection document (ARCHI_WINDOWS.md, 1200+ lines)
+- 📊 Complete CharacterProfileScraper + WealthManager documentation (CHARACTER_STATS_SCRAPER_EN.md, 2000+ lines)
+- 🔧 Refactored wealth_manager.py to centralized `_connect_to_eden_herald()` function
+
+---
+
 # ✨ v0.108
 
 ### 📚 Documentation

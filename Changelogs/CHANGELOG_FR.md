@@ -4,6 +4,55 @@ Historique complet des versions du gestionnaire de personnages pour Dark Age of 
 
 ---
 
+# ✨✨ v0.109 - 2025-11-14
+
+### 🧰 Modification
+
+**Configuration VS Code Copilot avec Instructions de Workflow Automatique**
+- ⚙️ Ajout de la configuration VS Code Copilot (`.vscode/settings.json`) :
+  - Activation de `github.copilot.chat.codeGeneration.useInstructionFiles` pour chargement automatique
+  - Permet à Copilot de suivre automatiquement le workflow défini dans `.prompts/feature_complete.prompt.md`
+- 📝 Création de 2 fichiers d'instructions Copilot pour automatisation complète :
+  1. **`.github/copilot-instructions.md`** (format officiel) :
+     - Résumé du workflow en 7 étapes automatiques (Implémentation → Merge)
+     - Règles strictes (traductions FR/EN/DE, 4 changelogs minimum, --no-ff obligatoire)
+     - Référence au prompt complet pour détails
+  2. **`.copilot-instructions.md`** (backup racine) :
+     - Instructions détaillées avec contexte projet (Python/PyQt6 DAOC)
+     - Format changelog (4 sections : Ajout/Modification/Correction/Retrait)
+     - Structure commit (9 sections en anglais)
+     - Workflow complet automatique sans confirmation
+- 🔧 Refactoring `Functions/wealth_manager.py` :
+  - Migration vers fonction centralisée `_connect_to_eden_herald()` pour cohérence
+  - Remplacement de `initialize_driver() + load_cookies()` par `connect()`
+  - Élimination de ~15 lignes de code dupliqué
+  - Meilleure gestion d'erreurs avec messages détaillés
+
+### 📚 Documentation
+
+**Nouvelle Documentation Technique et Architecturale**
+- 📐 **Documentations/ARCHI_WINDOWS.md** (1200+ lignes) :
+  - Document de réflexion sur l'uniformisation des fenêtres de progression
+  - Architecture proposée : `ProgressStepsDialog` (classe de base réutilisable)
+  - 5 cas d'usage identifiés : Recherche Herald, Mise à Jour Stats, Update Personnage, Génération Cookies, Richesse Multi-Royaumes
+  - Design avec états d'étapes (pending, running, completed, skipped, error)
+  - Configurations prédéfinies réutilisables (HERALD_CONNECTION, STATS_SCRAPING, CLEANUP, etc.)
+  - Plan de migration progressive en 4 phases
+- 📝 **Documentations/Eden/CHARACTER_SEARCH_SCRAPER_EN.md** (renommé depuis SEARCH_HERALD_CHARACTER_EN.md) :
+  - Nom plus cohérent avec l'architecture de documentation
+  - Mise à jour des références croisées vers CHARACTER_STATS_SCRAPER_EN.md
+- 📊 **Documentations/Eden/CHARACTER_STATS_SCRAPER_EN.md** (nouveau, 2000+ lignes) :
+  - Documentation complète de CharacterProfileScraper + WealthManager
+  - Architecture de classe avec diagrammes ASCII détaillés
+  - Documentation de toutes les méthodes de scraping (Wealth, RvR, PvP, PvE, Achievements)
+  - Section WealthManager : `get_realm_money()` et `get_first_character_per_realm()`
+  - Flux d'exécution détaillés avec structures HTML annotées
+  - 4 exemples d'utilisation pratiques (profil complet, context manager, batch analysis, UI integration)
+  - Analyse des performances (24 secondes pour richesse 3 royaumes, 30-35 secondes profil complet)
+  - Guide de troubleshooting complet
+
+---
+
 # ✨✨ v0.108 - 2025-11-13
 
 ### 📚 Documentation

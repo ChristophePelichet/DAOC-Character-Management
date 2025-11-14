@@ -803,12 +803,12 @@ from Functions.eden_scraper import _connect_to_eden_herald  # Connection functio
 ### 2. `scrape_character_from_url()`
 - **Purpose**: Updates character data from Herald URL
 - **Relation**: Uses same connection logic, different scraping target
-- **Documentation**: [SCRAPE_CHARACTER_FROM_URL_EN.md](SCRAPE_CHARACTER_FROM_URL_EN.md)
-
-### 3. `CharacterProfileScraper.connect()`
-- **Purpose**: Profile scraping for RvR/PvP/PvE stats
-- **Relation**: Uses same connection logic via wrapper
 - **Documentation**: [CHARACTER_PROFILE_SCRAPER_EN.md](CHARACTER_PROFILE_SCRAPER_EN.md)
+
+### 3. `CharacterProfileScraper`
+- **Purpose**: Profile scraping for RvR/PvP/PvE stats and Wealth management
+- **Relation**: Uses same connection logic via wrapper
+- **Documentation**: [CHARACTER_STATS_SCRAPER_EN.md](CHARACTER_STATS_SCRAPER_EN.md)
 
 ---
 
@@ -983,9 +983,8 @@ def test_full_search_workflow():
 ## Related Documentation
 
 - **Connection Function**: [CONNECT_TO_EDEN_HERALD_EN.md](CONNECT_TO_EDEN_HERALD_EN.md)
-- **Update Function**: [SCRAPE_CHARACTER_FROM_URL_EN.md](SCRAPE_CHARACTER_FROM_URL_EN.md)
-- **Profile Scraper**: [CHARACTER_PROFILE_SCRAPER_EN.md](CHARACTER_PROFILE_SCRAPER_EN.md)
-- **Cookie Manager**: `Documentation/COOKIE_MANAGER_EN.md` (if exists)
+- **Update Function**: [CHARACTER_PROFILE_SCRAPER_EN.md](CHARACTER_PROFILE_SCRAPER_EN.md) - `scrape_character_from_url()`
+- **Stats & Wealth Scraper**: [CHARACTER_STATS_SCRAPER_EN.md](CHARACTER_STATS_SCRAPER_EN.md) - `CharacterProfileScraper` class
 
 ---
 

@@ -1,11 +1,12 @@
-# Workflow Complet de Fonctionnalité
+# Workflow Complet de Fonctionnalité (avec Merge Automatique)
 
-Instructions pour le développement complet d'une fonctionnalité avec gestion automatique des traductions et du changelog.
+Instructions pour le développement complet d'une fonctionnalité avec gestion automatique des traductions, changelog, commit structuré et **merge sur main**.
 
 **Contexte :**
-* Ce workflow combine la gestion des traductions multilingues ET la documentation dans le changelog
-* À utiliser lors de l'ajout ou modification de fonctionnalités complètes
-* Toutes les étapes sont appliquées automatiquement
+* Ce workflow combine TOUTES les étapes : traductions multilingues, documentation changelog, commit/push ET merge sur main
+* À utiliser lors de l'ajout ou modification de fonctionnalités complètes à fusionner immédiatement
+* **Toutes les étapes sont appliquées AUTOMATIQUEMENT** (y compris le merge avec --no-ff)
+* Aucune confirmation n'est demandée (sauf en cas de conflits lors du merge)
 
 ---
 
@@ -112,9 +113,9 @@ Fonctionnalités supprimées dans cette version
 
 ---
 
-## 🔄 WORKFLOW D'EXÉCUTION
+## 🔄 WORKFLOW D'EXÉCUTION COMPLET (Automatique jusqu'au Merge)
 
-Lors de l'ajout/modification d'une fonctionnalité :
+Lors de l'ajout/modification d'une fonctionnalité, **toutes les étapes s'exécutent automatiquement** :
 
 ### Étape 1 : Implémentation
 - Développer la fonctionnalité demandée
@@ -153,67 +154,31 @@ Lors de l'ajout/modification d'une fonctionnalité :
 - **EXÉCUTER IMMÉDIATEMENT** `git push origin <branch_name>` pour push vers la branche actuelle
 - **NE JAMAIS DEMANDER CONFIRMATION** - Exécuter automatiquement dès que le prompt est invoqué
 
-### Étape 5 : Merge sur Main (OPTIONNEL - SI DEMANDÉ)
+### Étape 5 : Merge sur Main (AUTOMATIQUE)
 
-**⚠️ IMPORTANT : Le flag --no-ff est OBLIGATOIRE pour préserver l'historique de la branche**
+**⚠️ IMPORTANT : Cette étape s'exécute AUTOMATIQUEMENT après le push**
 
-Exécuter automatiquement si l'utilisateur demande le merge avec des termes comme :
-- "merge", "fusionner", "intégrer dans main"
-- Référence explicite au fichier merge.prompt.md
-
-**Processus de Merge Automatique (AUCUNE CONFIRMATION) :**
-
-1. **Basculer sur main** :
-   ```bash
-   git checkout main
-   ```
-
-2. **Récupérer les dernières modifications** :
-   ```bash
-   git pull origin main
-   ```
-
-3. **Vérifier les conflits potentiels** (optionnel) :
-   - Si des conflits sont détectés : informer l'utilisateur
-   - Sinon : continuer automatiquement
-
-4. **Merger avec --no-ff (OBLIGATOIRE)** :
-   ```bash
-   git merge --no-ff <branch_name> -m "Merge branch '<branch_name>' into main - <description courte>"
-   ```
-   - Le flag `--no-ff` (no fast-forward) préserve l'historique complet de la branche
-   - Crée un commit de merge même si un fast-forward est possible
-   - Permet de voir clairement quelle fonctionnalité a été développée sur quelle branche
-
-5. **Pousser le merge** :
-   ```bash
-   git push origin main
-   ```
-
-6. **Nettoyer la branche locale** :
-   ```bash
-   git branch -d <branch_name>
-   ```
-
-7. **Nettoyer la branche distante** :
-   ```bash
-   git push origin --delete <branch_name>
-   ```
-
-**Confirmation Post-Merge :**
-- ✅ Commit merge avec hash
-- ✅ Statistiques du merge (fichiers, insertions, suppressions)
-- ✅ Confirmation suppression branches (locale + distante)
-- ✅ État final (branche courante : main)
-
-**NE JAMAIS DEMANDER CONFIRMATION** pour le merge si explicitement demandé
+- **EXÉCUTER IMMÉDIATEMENT** le processus de merge complet (voir PARTIE 4 pour les détails)
+- Le flag `--no-ff` est **OBLIGATOIRE** (préserve l'historique de la branche)
+- Processus en 7 étapes automatiques :
+  1. Checkout main
+  2. Pull origin main
+  3. Merge --no-ff avec message descriptif
+  4. Push origin main
+  5. Retour sur la branche d'origine
+  6. Suppression branche locale (optionnel si obsolète)
+  7. Suppression branche distante (optionnel si obsolète)
+- **NE JAMAIS DEMANDER CONFIRMATION** sauf en cas de conflits
+- En cas de conflits : informer l'utilisateur et proposer résolution manuelle
 
 ### Étape 6 : Confirmation Finale
 - Résumer les modifications apportées
 - Lister les fichiers créés/modifiés avec nombre de lignes
 - Indiquer les traductions ajoutées (nombre de clés × langues)
-- Confirmer le commit hash et le push réussi
-- Afficher les statistiques (insertions/suppressions)
+- Confirmer le commit hash et le push réussi sur la branche
+- **Confirmer le merge réussi sur main** avec le commit hash du merge
+- Afficher les statistiques complètes (insertions/suppressions pour commit + merge)
+- Indiquer si les branches obsolètes ont été supprimées (local + remote)
 
 ---
 
@@ -627,14 +592,20 @@ git push origin --delete 109_Add_CSV_Export
 
 ---
 
-## 🔀 PARTIE 4 : MERGE SUR MAIN (SI DEMANDÉ)
+## 🔀 PARTIE 4 : MERGE SUR MAIN (AUTOMATIQUE)
 
-### Quand Exécuter le Merge
+### ⚠️ Exécution Systématique
 
-Le merge est exécuté **UNIQUEMENT** si l'utilisateur le demande explicitement avec des termes comme :
-- "merge", "fusionner", "intégrer dans main", "merger sur main"
-- Référence au fichier merge.prompt.md
-- Demande explicite de fusionner la branche
+**Le merge s'exécute AUTOMATIQUEMENT après le commit/push de la branche.**
+
+Ce prompt effectue un workflow complet de développement incluant :
+- Implémentation des modifications
+- Traductions multilingues (FR/EN/DE)
+- Documentation changelog
+- Commit structuré + push
+- **Merge automatique sur main avec --no-ff**
+
+**Aucune confirmation n'est demandée** - tout s'exécute automatiquement sauf en cas de conflits.
 
 ### 🚨 RÈGLE ABSOLUE : Flag --no-ff OBLIGATOIRE
 
@@ -835,32 +806,34 @@ git log --oneline --graph --all -10  # Voir l'historique avec le merge commit
    - Message en anglais uniquement
    - Détails techniques spécifiques (méthodes, classes, fichiers)
 
-5. **Workflow Git Automatique** :
+5. **Workflow Git Automatique Complet** :
    - Dès que les modifications sont terminées : **exécuter immédiatement** git add, commit, push
-   - Si merge demandé : **exécuter immédiatement** le processus complet de merge avec --no-ff
-   - Ne **JAMAIS** attendre de confirmation utilisateur pour les commandes Git
+   - **PUIS automatiquement** exécuter le processus complet de merge avec --no-ff
+   - Ne **JAMAIS** attendre de confirmation utilisateur (sauf conflits)
    - **Le flag --no-ff est OBLIGATOIRE** pour tous les merges (préserve l'historique)
    - Nettoyer automatiquement les branches obsolètes après merge réussi
 
 ---
 
-## 🎯 OPTIONS AVANCÉES
+## 🎯 WORKFLOW AUTOMATIQUE COMPLET
 
-### Option 1 : Commit Uniquement (par défaut)
-Lorsque le prompt est invoqué sans mention de merge :
-- Exécuter le workflow complet jusqu'à l'étape 4 (commit + push)
-- S'arrêter après le push, ne pas merger
+### Exécution Systématique (par défaut)
+Lorsque ce prompt est invoqué, il exécute **AUTOMATIQUEMENT** toutes les étapes :
+1. ✅ Implémentation des modifications demandées
+2. ✅ Traductions multilingues (FR/EN/DE)
+3. ✅ Documentation changelog (4-5 fichiers minimum)
+4. ✅ Commit structuré + push sur la branche
+5. ✅ **Merge automatique sur main avec --no-ff**
+6. ✅ Nettoyage des branches obsolètes (local + remote)
+7. ✅ Affichage confirmation complète avec statistiques
 
-### Option 2 : Commit + Merge (si demandé explicitement)
-Lorsque l'utilisateur demande explicitement le merge avec termes comme "merge", "fusionner", ou référence à merge.prompt.md :
-- Exécuter le workflow complet jusqu'à l'étape 4 (commit + push)
-- **Puis automatiquement** exécuter l'étape 5 (merge sur main avec --no-ff)
-- Nettoyer les branches obsolètes (local + remote)
-- Afficher confirmation complète avec statistiques
+**Aucune confirmation n'est demandée** - tout s'exécute de bout en bout.
+
+**Exception** : En cas de conflits lors du merge, informer l'utilisateur et proposer résolution manuelle.
 
 **⚠️ RAPPEL CRITIQUE : Le flag --no-ff est OBLIGATOIRE et NON NÉGOCIABLE**
 
-### Option 3 : Vérification Pré-Merge (optionnel)
+### Option : Vérification Pré-Merge (optionnel)
 Si des conflits potentiels sont détectés lors du merge :
 - Arrêter le processus automatique
 - Informer l'utilisateur des fichiers en conflit

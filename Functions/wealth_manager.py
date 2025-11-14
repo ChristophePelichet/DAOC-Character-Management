@@ -170,18 +170,14 @@ def get_realm_money(character_folder, cookie_manager=None, headless=False):
         # Initialize scraper
         scraper = CharacterProfileScraper(cookie_manager)
         
-        if not scraper.initialize_driver(headless=headless):
-            log_with_action(wealth_logger, "error", 
-                          "Failed to initialize scraper driver", 
-                          action="GET_MONEY")
-            result['errors'].append("Failed to initialize browser")
-            return result
+        # Connect using centralized function (replaces initialize_driver + load_cookies)
+        success, error_message = scraper.connect(headless=headless)
         
-        if not scraper.load_cookies():
+        if not success:
             log_with_action(wealth_logger, "error", 
-                          "Failed to load cookies", 
+                          f"Failed to connect to Eden Herald: {error_message}", 
                           action="GET_MONEY")
-            result['errors'].append("Failed to load cookies")
+            result['errors'].append(f"Connection failed: {error_message}")
             return result
         
         # Scrape money for each realm

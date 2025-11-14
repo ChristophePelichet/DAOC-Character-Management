@@ -1,5 +1,18 @@
 # 📋 Changelog Simple - DAOC Character Management
 
+# ✨ v0.109
+
+### 🧰 Modification
+
+**Configuration Copilot + Documentation Technique**
+- ⚙️ Configuration VS Code Copilot pour workflow automatique (traductions, changelogs, commit, merge)
+- 📝 2 fichiers instructions Copilot (`.github/copilot-instructions.md` et `.copilot-instructions.md`)
+- 📐 Document réflexion architecture fenêtres progression (ARCHI_WINDOWS.md, 1200+ lignes)
+- 📊 Documentation complète CharacterProfileScraper + WealthManager (CHARACTER_STATS_SCRAPER_EN.md, 2000+ lignes)
+- 🔧 Refactoring wealth_manager.py vers fonction centralisée `_connect_to_eden_herald()`
+
+---
+
 # ✨ v0.108
 
 ### 📚 Documentation

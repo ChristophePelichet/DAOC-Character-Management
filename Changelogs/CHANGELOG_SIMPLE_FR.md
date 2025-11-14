@@ -1,6 +1,6 @@
 # 📋 Changelog Simple - DAOC Character Management
 
-# ✨ v0.108
+# ✨ v0.108 - 14/11/2025
 
 ### ✨ Ajout
 
@@ -26,12 +26,12 @@
 ### 🔚 Retrait
 
 **Nettoyage Documentation**
-- 🗑️ Suppression de 6 fichiers temporaires de développement (1985+ lignes)
+- 🗑️ Suppression de 20+ fichiers obsolètes (~4000 lignes)
 - 🧹 Documentation finale propre et consolidée
 
 ---
 
-# ✨ v0.109
+# ✨ v0.107 - 11/11/2025
 
 ### 🧰 Modification
 

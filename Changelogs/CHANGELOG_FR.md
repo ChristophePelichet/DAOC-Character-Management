@@ -39,6 +39,10 @@ Historique complet des versions du gestionnaire de personnages pour Dark Age of 
   - Exemples d'usage pratiques (simple, custom, error handling)
   - Support multilingue et caractéristiques de performance
   - Résumé de migration (Before/After) avec statistiques
+- 📚 Nouvelle documentation : Documentations/Dialog/THREAD_SAFETY_PATTERNS.md :
+  - Patterns de sécurité pour threads Qt
+  - Gestion du cycle de vie des dialogues
+  - Bonnes pratiques RuntimeError protection
 
 ### 🧰 Modification
 
@@ -52,18 +56,12 @@ Historique complet des versions du gestionnaire de personnages pour Dark Age of 
   - Ajout traduction automatique dans `_update_step_ui()` (mise à jour états)
   - Import `lang` depuis Functions.language_manager
 - 🌐 Mise à jour UI/dialogs.py (4 dialogues) :
-  - **CharacterSheetDialog.update_rvr_stats()** :
-    - Titre/description traduits : `progress_stats_update_title/desc`
-    - Messages succès/erreur : `progress_stats_complete`, `progress_error`
-  - **CharacterSheetDialog.update_from_herald()** :
-    - Titre/description traduits : `progress_character_update_title/desc`
-    - Messages succès/erreur : `progress_character_complete`, `progress_error`
-  - **CookieManagerDialog.generate_cookies()** :
-    - Titre/description traduits : `progress_cookie_gen_title/desc`
-    - Messages succès/erreur : `progress_cookie_success`, `progress_error`
+  - **CharacterSheetDialog.update_rvr_stats()** : Titre/description/messages traduits
+  - **CharacterSheetDialog.update_from_herald()** : Titre/description/messages traduits
+  - **CookieManagerDialog.generate_cookies()** : Titre/description/messages traduits avec paramètre count
 - 🔧 Mise à jour main.py (CharacterApp.update_character_from_herald()) :
   - Titre/description traduits avec nom personnage dynamique
-  - Messages succès/erreur : `progress_character_complete`, `progress_error`
+  - Messages succès/erreur traduits
   - Import lang depuis Functions.language_manager
 
 ### 🐛 Correction
@@ -84,81 +82,30 @@ Historique complet des versions du gestionnaire de personnages pour Dark Age of 
 ### 🔚 Retrait
 
 **Nettoyage Documentation Temporaire de Développement**
-- 🗑️ Suppression de 6 fichiers de documentation temporaire (1985+ lignes) :
-  - `PROGRESS_DIALOGS_PLANNING.md` (902 lignes) : Planning développement Sessions 1-4
-  - `PROGRESS_DIALOGS_SESSION1_COMPLETE.md` (393 lignes) : Rapport Session 1
-  - `ARCHI_WINDOWS.md` (690 lignes) : Réflexion initiale architecture
-  - `MIGRATION_SECURITY.md` : Patterns de sécurité (consolidés dans doc finale)
-  - `MIGRATION_CONFIRMATION_UPDATE.md` : Update confirmation migration
-  - `MIGRATION_MULTILANG_UPDATE.md` : Update multilingue migration
-- 📚 Consolidation : Toutes informations intégrées dans PROGRESS_DIALOG_SYSTEM_EN.md
+- 🗑️ Suppression de 20+ fichiers de documentation obsolètes (~4000 lignes) :
+  - Documentations temporaires de développement (PROGRESS_DIALOGS_PLANNING.md, SESSION1_COMPLETE.md, etc.)
+  - Guides Cookie Manager obsolètes (COOKIE_MANAGER_*.md, COOKIE_PATH_FIX.md, etc.)
+  - Tests Herald obsolètes (test_herald_search.py, HERALD_PHASE1_TEST_REPORT.md, etc.)
+  - Documentations migration consolidées (MIGRATION_SECURITY.md, MIGRATION_CONFIRMATION_UPDATE.md, etc.)
+- 📚 Consolidation : Toutes informations intégrées dans PROGRESS_DIALOG_SYSTEM_EN.md et THREAD_SAFETY_PATTERNS.md
 - 🧹 Résultat : Documentation finale propre et complète (1900+ lignes avec diagrammes)
 
 ### 📊 Statistiques
 
-- **Fichiers modifiés** : 7 (3 JSON traductions + 3 Python + 1 main.py)
-- **Documentation créée** : 1 (PROGRESS_DIALOG_SYSTEM_EN.md, 1900+ lignes)
-- **Documentation supprimée** : 6 (1985+ lignes temporaires)
-- **Lignes ajoutées** : ~2200 (156 traductions + ~50 code + 1900 doc)
-- **Langues supportées** : FR/EN/DE (100% couverture, 52 clés)
+- **Fichiers modifiés** : 37 fichiers (3 JSON traductions + 3 Python + 1 main.py + 5 changelogs + 25 suppressions)
+- **Documentation créée** : 2 (PROGRESS_DIALOG_SYSTEM_EN.md 1900+ lignes, THREAD_SAFETY_PATTERNS.md)
+- **Documentation supprimée** : 20+ fichiers obsolètes (~4000 lignes)
+- **Lignes totales** : +4975 insertions, -6471 suppressions (net: -1496 lignes)
+- **Traductions** : 52 clés × 3 langues = 156 entrées (FR/EN/DE 100% couverture)
 - **Dialogues traduits** : 4 (StatsUpdate, CharacterUpdate×2, CookieGen)
-- **Bugs corrigés** : 1 (IndexError double .format())
-- **Locations fixes** : 5 (main.py × 2, UI/dialogs.py × 3)
+- **Bugs corrigés** : 1 (IndexError double .format(), 5 locations)
+- **Architecture** : UI/progress_dialog_base.py (600+ lignes, classe réutilisable)
 
 ---
 
-# ✨✨ v0.109 - 2025-11-14
+# ✨✨ v0.107 - 2025-11-11
 
-### 🧰 Modification
-
-**Configuration VS Code Copilot avec Instructions de Workflow Automatique**
-- ⚙️ Ajout de la configuration VS Code Copilot (`.vscode/settings.json`) :
-  - Activation de `github.copilot.chat.codeGeneration.useInstructionFiles` pour chargement automatique
-  - Permet à Copilot de suivre automatiquement le workflow défini dans `.prompts/feature_complete.prompt.md`
-- 📝 Création de 2 fichiers d'instructions Copilot pour automatisation complète :
-  1. **`.github/copilot-instructions.md`** (format officiel) :
-     - Résumé du workflow en 7 étapes automatiques (Implémentation → Merge)
-     - Règles strictes (traductions FR/EN/DE, 4 changelogs minimum, --no-ff obligatoire)
-     - Référence au prompt complet pour détails
-  2. **`.copilot-instructions.md`** (backup racine) :
-     - Instructions détaillées avec contexte projet (Python/PyQt6 DAOC)
-     - Format changelog (4 sections : Ajout/Modification/Correction/Retrait)
-     - Structure commit (9 sections en anglais)
-     - Workflow complet automatique sans confirmation
-- 🔧 Refactoring `Functions/wealth_manager.py` :
-  - Migration vers fonction centralisée `_connect_to_eden_herald()` pour cohérence
-  - Remplacement de `initialize_driver() + load_cookies()` par `connect()`
-  - Élimination de ~15 lignes de code dupliqué
-  - Meilleure gestion d'erreurs avec messages détaillés
-
-### 📚 Documentation
-
-**Nouvelle Documentation Technique et Architecturale**
-- 📐 **Documentations/ARCHI_WINDOWS.md** (1200+ lignes) :
-  - Document de réflexion sur l'uniformisation des fenêtres de progression
-  - Architecture proposée : `ProgressStepsDialog` (classe de base réutilisable)
-  - 5 cas d'usage identifiés : Recherche Herald, Mise à Jour Stats, Update Personnage, Génération Cookies, Richesse Multi-Royaumes
-  - Design avec états d'étapes (pending, running, completed, skipped, error)
-  - Configurations prédéfinies réutilisables (HERALD_CONNECTION, STATS_SCRAPING, CLEANUP, etc.)
-  - Plan de migration progressive en 4 phases
-- 📝 **Documentations/Eden/CHARACTER_SEARCH_SCRAPER_EN.md** (renommé depuis SEARCH_HERALD_CHARACTER_EN.md) :
-  - Nom plus cohérent avec l'architecture de documentation
-  - Mise à jour des références croisées vers CHARACTER_STATS_SCRAPER_EN.md
-- 📊 **Documentations/Eden/CHARACTER_STATS_SCRAPER_EN.md** (nouveau, 2000+ lignes) :
-  - Documentation complète de CharacterProfileScraper + WealthManager
-  - Architecture de classe avec diagrammes ASCII détaillés
-  - Documentation de toutes les méthodes de scraping (Wealth, RvR, PvP, PvE, Achievements)
-  - Section WealthManager : `get_realm_money()` et `get_first_character_per_realm()`
-  - Flux d'exécution détaillés avec structures HTML annotées
-  - 4 exemples d'utilisation pratiques (profil complet, context manager, batch analysis, UI integration)
-  - Analyse des performances (24 secondes pour richesse 3 royaumes, 30-35 secondes profil complet)
-  - Guide de troubleshooting complet
-
----
-
-# ✨✨ v0.108 - 2025-11-13
-
-### 📚 Documentation
+### 🎉 Ajout
 
 **Documentation Technique Complète des Fonctions de Scraping Eden**
 - 📝 Création de 3 documentations techniques détaillées en anglais avec schémas graphiques :

@@ -2,7 +2,7 @@
 
 ---
 
-# ✨ v0.108
+# ✨ v0.108 - 11/14/2025
 
 ### ✨ Added
 
@@ -28,12 +28,12 @@
 ### 🔚 Removed
 
 **Documentation Cleanup**
-- 🗑️ Removed 6 temporary development files (1985+ lines)
+- 🗑️ Removed 20+ obsolete files (~4000 lines)
 - 🧹 Clean and consolidated final documentation
 
 ---
 
-# ✨ v0.109
+# ✨ v0.107 - 11/11/2025
 
 ### 🧰 Modified
 

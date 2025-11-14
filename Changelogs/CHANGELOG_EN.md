@@ -39,6 +39,10 @@ Complete version history of the character manager for Dark Age of Camelot (Eden)
   - Practical usage examples (simple, custom, error handling)
   - Multilingual support and performance characteristics
   - Migration summary (Before/After) with statistics
+- 📚 New documentation: Documentations/Dialog/THREAD_SAFETY_PATTERNS.md:
+  - Security patterns for Qt threads
+  - Dialog lifecycle management
+  - RuntimeError protection best practices
 
 ### 🧰 Modification
 
@@ -52,18 +56,12 @@ Complete version history of the character manager for Dark Age of Camelot (Eden)
   - Added automatic translation in `_update_step_ui()` (state updates)
   - Import `lang` from Functions.language_manager
 - 🌐 Updated UI/dialogs.py (4 dialogs):
-  - **CharacterSheetDialog.update_rvr_stats()**:
-    - Translated title/description: `progress_stats_update_title/desc`
-    - Success/error messages: `progress_stats_complete`, `progress_error`
-  - **CharacterSheetDialog.update_from_herald()**:
-    - Translated title/description: `progress_character_update_title/desc`
-    - Success/error messages: `progress_character_complete`, `progress_error`
-  - **CookieManagerDialog.generate_cookies()**:
-    - Translated title/description: `progress_cookie_gen_title/desc`
-    - Success/error messages: `progress_cookie_success`, `progress_error`
+  - **CharacterSheetDialog.update_rvr_stats()**: Translated title/description/messages
+  - **CharacterSheetDialog.update_from_herald()**: Translated title/description/messages
+  - **CookieManagerDialog.generate_cookies()**: Translated title/description/messages with count parameter
 - 🔧 Updated main.py (CharacterApp.update_character_from_herald()):
   - Translated title/description with dynamic character name
-  - Success/error messages: `progress_character_complete`, `progress_error`
+  - Translated success/error messages
   - Import lang from Functions.language_manager
 
 ### 🐛 Fix
@@ -84,220 +82,24 @@ Complete version history of the character manager for Dark Age of Camelot (Eden)
 ### 🔚 Removal
 
 **Cleanup of Temporary Development Documentation**
-- 🗑️ Removed 6 temporary documentation files (1985+ lines):
-  - `PROGRESS_DIALOGS_PLANNING.md` (902 lines): Development planning Sessions 1-4
-  - `PROGRESS_DIALOGS_SESSION1_COMPLETE.md` (393 lines): Session 1 report
-  - `ARCHI_WINDOWS.md` (690 lines): Initial architecture reflection
-  - `MIGRATION_SECURITY.md`: Security patterns (consolidated in final doc)
-  - `MIGRATION_CONFIRMATION_UPDATE.md`: Migration confirmation update
-  - `MIGRATION_MULTILANG_UPDATE.md`: Multilingual migration update
-- 📚 Consolidation: All information integrated into PROGRESS_DIALOG_SYSTEM_EN.md
+- 🗑️ Removed 20+ obsolete documentation files (~4000 lines):
+  - Temporary development documentation (PROGRESS_DIALOGS_PLANNING.md, SESSION1_COMPLETE.md, etc.)
+  - Obsolete Cookie Manager guides (COOKIE_MANAGER_*.md, COOKIE_PATH_FIX.md, etc.)
+  - Obsolete Herald tests (test_herald_search.py, HERALD_PHASE1_TEST_REPORT.md, etc.)
+  - Consolidated migration docs (MIGRATION_SECURITY.md, MIGRATION_CONFIRMATION_UPDATE.md, etc.)
+- 📚 Consolidation: All information integrated into PROGRESS_DIALOG_SYSTEM_EN.md and THREAD_SAFETY_PATTERNS.md
 - 🧹 Result: Clean and complete final documentation (1900+ lines with diagrams)
 
 ### 📊 Statistics
 
-- **Files modified**: 7 (3 JSON translations + 3 Python + 1 main.py)
-- **Documentation created**: 1 (PROGRESS_DIALOG_SYSTEM_EN.md, 1900+ lines)
-- **Documentation removed**: 6 (1985+ temporary lines)
-- **Lines added**: ~2200 (156 translations + ~50 code + 1900 doc)
-- **Languages supported**: FR/EN/DE (100% coverage, 52 keys)
+- **Files modified**: 37 files (3 JSON translations + 3 Python + 1 main.py + 5 changelogs + 25 deletions)
+- **Documentation created**: 2 (PROGRESS_DIALOG_SYSTEM_EN.md 1900+ lines, THREAD_SAFETY_PATTERNS.md)
+- **Documentation removed**: 20+ obsolete files (~4000 lines)
+- **Total lines**: +4975 insertions, -6471 deletions (net: -1496 lines)
+- **Translations**: 52 keys × 3 languages = 156 entries (FR/EN/DE 100% coverage)
 - **Dialogs translated**: 4 (StatsUpdate, CharacterUpdate×2, CookieGen)
-- **Bugs fixed**: 1 (IndexError double .format())
-- **Fix locations**: 5 (main.py × 2, UI/dialogs.py × 3)
-
----
-
-# ✨✨ v0.109 - 2025-11-14
-
-### 🧰 Modification
-
-**VS Code Copilot Configuration with Automatic Workflow Instructions**
-- ⚙️ Added VS Code Copilot configuration (`.vscode/settings.json`):
-  - Enabled `github.copilot.chat.codeGeneration.useInstructionFiles` for automatic loading
-  - Allows Copilot to automatically follow the workflow defined in `.prompts/feature_complete.prompt.md`
-- 📝 Created 2 Copilot instruction files for complete automation:
-  1. **`.github/copilot-instructions.md`** (official format):
-     - Workflow summary in 7 automatic steps (Implementation → Merge)
-     - Strict rules (FR/EN/DE translations, 4 minimum changelogs, --no-ff mandatory)
-     - Reference to full prompt for details
-  2. **`.copilot-instructions.md`** (root backup):
-     - Detailed instructions with project context (Python/PyQt6 DAOC)
-     - Changelog format (4 sections: Addition/Modification/Fix/Removal)
-     - Commit structure (9 sections in English)
-     - Complete automatic workflow without confirmation
-- 🔧 Refactoring `Functions/wealth_manager.py`:
-  - Migrated to centralized `_connect_to_eden_herald()` function for consistency
-  - Replaced `initialize_driver() + load_cookies()` with `connect()`
-  - Eliminated ~15 lines of duplicated code
-  - Better error handling with detailed messages
-
-### 📚 Documentation
-
-**New Technical and Architectural Documentation**
-- 📐 **Documentations/ARCHI_WINDOWS.md** (1200+ lines):
-  - Reflection document on progress window standardization
-  - Proposed architecture: `ProgressStepsDialog` (reusable base class)
-  - 5 identified use cases: Herald Search, Stats Update, Character Update, Cookie Generation, Multi-Realm Wealth
-  - Design with step states (pending, running, completed, skipped, error)
-  - Reusable predefined configurations (HERALD_CONNECTION, STATS_SCRAPING, CLEANUP, etc.)
-  - Progressive migration plan in 4 phases
-- 📝 **Documentations/Eden/CHARACTER_SEARCH_SCRAPER_EN.md** (renamed from SEARCH_HERALD_CHARACTER_EN.md):
-  - More consistent name with documentation architecture
-  - Updated cross-references to CHARACTER_STATS_SCRAPER_EN.md
-- 📊 **Documentations/Eden/CHARACTER_STATS_SCRAPER_EN.md** (new, 2000+ lines):
-  - Complete documentation of CharacterProfileScraper + WealthManager
-  - Class architecture with detailed ASCII diagrams
-  - Documentation of all scraping methods (Wealth, RvR, PvP, PvE, Achievements)
-  - WealthManager section: `get_realm_money()` and `get_first_character_per_realm()`
-  - Detailed execution flows with annotated HTML structures
-  - 4 practical usage examples (full profile, context manager, batch analysis, UI integration)
-  - Performance analysis (24 seconds for 3-realm wealth, 30-35 seconds full profile)
-  - Complete troubleshooting guide
-
----
-
-# ✨✨ v0.108 - 2025-11-13
-
-### 📚 Documentation
-
-**Complete Technical Documentation of Eden Scraping Functions**
-- 📝 Created 3 detailed technical documentations in English with graphical diagrams:
-  1. **SEARCH_HERALD_CHARACTER_EN.md** (600+ lines):
-     - ASCII flow diagram with 6 execution phases
-     - Complete details of each phase (connection, search, parsing, save)
-     - 4 usage examples (basic, realm filter, error handling, UI integration)
-     - Performance characteristics table (11-14 seconds total)
-     - Troubleshooting guide (expired cookies, no results, timeout)
-     - Unit and integration testing recommendations
-     - Log examples and execution sequences
-  2. **SCRAPE_CHARACTER_FROM_URL_EN.md** (600+ lines):
-     - Detailed 16-step flow diagram (URL parsing → normalization)
-     - Design decision explanation: why search instead of direct access (avoids bot check)
-     - Data normalization details with realm_rank ↔ realm_title swap (Herald inconsistency)
-     - Technical comparison with search_herald_character() (comparative table)
-     - 3 usage examples (basic update, Character Manager integration, batch update)
-     - Character matching documentation (exact match + fallback)
-  3. **CHARACTER_PROFILE_SCRAPER_EN.md** (800+ lines):
-     - Complete class architecture with ASCII diagram
-     - Detailed documentation of connect() method (uses _connect_to_eden_herald)
-     - Documentation of 5 scraping methods with execution flows:
-       * scrape_wealth_money() - Money value extraction (Wealth tab)
-       * scrape_rvr_captures() - Tower/Keep/Relic captures (Characters tab)
-       * scrape_pvp_stats() - Solo Kills/Deathblows/Kills with realm breakdown (PvP tab)
-       * scrape_pve_stats() - Dragon/Legion/Epic stats (PvE tab)
-       * scrape_achievements() - Progress with tiers (Achievements tab)
-     - Annotated HTML structures for each data type
-     - 4 usage examples (full profile, context manager, batch analysis, UI integration)
-     - Performance analysis (30-35 seconds for full profile)
-- 🎯 Documented unified architecture:
-  - All functions use _connect_to_eden_herald() (centralized connection)
-  - ~450 lines of duplicated code eliminated (v0.107 refactoring)
-  - Consistent connection pattern across all scrapers
-- 📊 ASCII graphical diagrams included:
-  - Execution flows with precise timings for each phase
-  - Annotated data structures (input/output)
-  - Navigation sequences between Herald tabs
-- 💡 Practical documentation:
-  - Complete and functional code examples
-  - Common error messages and solutions
-  - Resource management best practices (cleanup)
-  - Integration with logging system (action tags)
-- 📝 Created files:
-  - `Documentation/Eden/SEARCH_HERALD_CHARACTER_EN.md` (600+ lines)
-  - `Documentation/Eden/SCRAPE_CHARACTER_FROM_URL_EN.md` (600+ lines)
-  - `Documentation/Eden/CHARACTER_PROFILE_SCRAPER_EN.md` (800+ lines)
-- 🔗 Cross-references between documentations for easy navigation
-- 🎯 Impact: Complete and detailed documentation enabling understanding of Eden scraping architecture, facilitates future maintenance and can be used as AI context
-
-### 🐛 Fixed
-
-**Missing URL During Herald Import**
-- 🛡️ Fixed critical bug where Herald URL was not saved when importing characters from search results
-- 🔧 Problem identified: During commit 0a8bb8f (SearchThread refactoring), the URL fallback code was forgotten when copying from eden_scraper.py
-- 🔧 Solution implemented:
-  - Added missing URL fallback in SearchThread.run() (UI/dialogs.py lines 3255-3268)
-  - If HTML links are not extracted, automatically construct URL: `https://eden-daoc.net/herald?n=player&k={name}`
-  - Logic identical to eden_scraper.py (lines 577-583)
-  - Ensures URL is always present, either extracted from HTML or constructed
-- 🎯 Impact: Characters imported from Herald now always contain their URL, enabling automatic Herald updates without manual JSON editing
-- 📝 Modified file: `UI/dialogs.py` (SearchThread.run() method)
-  - Lines 3255-3268: Added URL fallback logic
-  - URL construction from name if col_1_links empty or missing
-  - Harmonized with eden_scraper.py code
-
-**Herald Window Close Crash**
-- 🛡️ Fixed critical crash when closing Herald search window
-- 🔧 Three-layer protection implemented:
-  1. **Thread Lifecycle Management**:
-     - New `_stop_search_thread()` method with comprehensive cleanup (~44 lines)
-     - Graceful shutdown with 2-second timeout (thread.wait(2000))
-     - Forced termination if timeout exceeded (terminate + wait)
-     - Signal disconnection (search_finished, progress_update)
-     - Progress dialog cleanup with exception handling
-     - Thread reference nullification
-  2. **Event Handler Protection**:
-     - Modified `closeEvent()` to call `_stop_search_thread()`
-     - Modified `accept()` to call `_stop_search_thread()`
-     - Ensures thread stops before dialog destruction
-  3. **Signal Handler Safety**:
-     - Enhanced `_on_search_progress_update()` with safety checks
-     - Added hasattr checks for progress_dialog and progress_steps
-     - Added isVisible() check with RuntimeError catch
-     - Wrapped all widget updates in try-except RuntimeError blocks
-     - Early return if widgets destroyed
-- 🎯 Impact: Users can now safely close Herald search window at any time (during search, after results, etc.) without causing crashes
-- 📝 Modified file: `UI/dialogs.py` (HeraldSearchDialog class)
-  - New method: `_stop_search_thread()` (~44 lines)
-  - Modified: `closeEvent()` - added thread stop call
-  - Modified: `accept()` - added thread stop call
-  - Modified: `_on_search_progress_update()` - added 3 safety check layers
-
-### 🧰 Modified
-
-**Enhanced Herald Search Window**
-- 🎨 Modern progress interface with step display (550×350px)
-- ✅ 3-state visual status system:
-  - ⏺️ Waiting (gray): Step not yet started
-  - ⏳ In Progress (blue): Currently executing step with bold text
-  - ✅ Completed (green): Successfully completed step
-- 📋 9 detailed progress steps permanently visible:
-  1. 🔐 Checking authentication cookies
-  2. 🌐 Initializing Chrome browser
-  3. 🍪 Loading cookies into browser
-  4. 🔍 Searching on Eden Herald
-  5. ⏳ Loading search page
-  6. 📊 Extracting search results
-  7. 💾 Saving results
-  8. 🎯 Formatting found characters
-  9. 🔄 Closing browser
-- 🔄 Automatic update of previous steps to ✅ during progression
-- 📊 Progress area grouped in QGroupBox "Progress"
-- 🎯 Complete visual feedback: user sees status of all steps
-- ⏱️ Informative wait message at bottom of window
-- 🔧 Complete refactoring of `SearchThread` in `UI/dialogs.py`:
-  - New signal `progress_update = Signal(str)` for real-time updates
-  - Integration of all search logic into thread
-  - Progress message emission at each key step
-  - Clean browser closure handling in `finally` block
-- 📝 New method `_on_search_progress_update(status_message)`:
-  - Automatic detection of current step via icon mapping
-  - Automatic marking of previous steps as completed
-  - Special case for final message "✅ Search completed successfully!"
-  - Font scaling support via `_get_scaled_size()`
-- 🌍 13 new translations added (FR/EN/DE):
-  - `herald_search_progress_title`: Window title
-  - `herald_search_progress_checking_cookies`: Checking cookies
-  - `herald_search_progress_init_browser`: Browser initialization
-  - `herald_search_progress_loading_cookies`: Loading cookies
-  - `herald_search_progress_searching`: Herald search
-  - `herald_search_progress_loading_page`: Page loading
-  - `herald_search_progress_extracting`: Results extraction
-  - `herald_search_progress_saving`: Results saving
-  - `herald_search_progress_formatting`: Characters formatting
-  - `herald_search_progress_complete`: Search completed
-  - `herald_search_progress_closing`: Browser closing
-  - `herald_search_wait_message`: Wait message
-- 🎨 Consistent design with "Update from Herald" window
+- **Bugs fixed**: 1 (IndexError double .format(), 5 locations)
+- **Architecture**: UI/progress_dialog_base.py (600+ lines, reusable class)
 
 ---
 

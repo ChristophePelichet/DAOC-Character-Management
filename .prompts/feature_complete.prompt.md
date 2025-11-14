@@ -374,20 +374,57 @@ Impact: Greatly improved user experience with complete visual feedback during He
 
 ### Commandes Git Automatiques
 
-```bash
+**⚠️ IMPORTANT pour PowerShell : Messages longs avec array/here-string**
+
+Les messages de commit structurés dépassent souvent la limite de longueur de PowerShell.
+**TOUJOURS utiliser une variable PowerShell avec here-string (@"..."@) pour les messages multilignes.**
+
+```powershell
 # Étape 1 : Ajouter tous les fichiers modifiés
 git add -A
 
 # Étape 2 : Commit avec message structuré
-git commit -m "<type>: <titre>" -m "<corps du message>"
-# OU utiliser un éditeur pour message multiligne
-git commit
+# ⚠️ OBLIGATOIRE : Utiliser here-string PowerShell pour messages longs
+$msg = @"
+<type>: <titre court en anglais>
+
+<description détaillée>
+
+UI Enhancements:
+- <changement 1>
+- <changement 2>
+
+Technical Changes:
+- <changement technique>
+
+Translations:
+- Added <X> new translation keys in FR/EN/DE:
+  * <key_1>
+  * <key_2>
+
+Documentation:
+- Updated <file1>
+- Updated <file2>
+
+Files Modified:
+- <file1>
+- <file2>
+
+Impact: <résumé impact utilisateur>
+"@
+
+git commit -m $msg
 
 # Étape 3 : Push vers la branche actuelle
-git push origin $(git branch --show-current)
-# OU explicitement
 git push origin <branch_name>
 ```
+
+**Pourquoi cette approche :**
+- ✅ Évite les erreurs "command too long" de PowerShell
+- ✅ Préserve tous les sauts de ligne et formatage
+- ✅ Permet messages détaillés avec toutes les sections
+- ✅ Pas de problème avec caractères spéciaux
+- ❌ **Ne JAMAIS utiliser** : `git commit -m "..." -m "..." -m "..."` (trop long pour PowerShell)
 
 ### Bonnes Pratiques
 
@@ -402,6 +439,7 @@ git push origin <branch_name>
 - ✅ Toujours inclure la section "Impact" en fin de message
 - ✅ Mentionner toutes les traductions ajoutées
 - ✅ Lister les changelogs mis à jour
+- ✅ **PowerShell : TOUJOURS utiliser here-string (@"..."@) pour messages multilignes**
 
 **À ÉVITER :**
 - ❌ Messages vagues ("fix stuff", "update code")
@@ -409,6 +447,7 @@ git push origin <branch_name>
 - ❌ Oublier de mentionner les traductions
 - ❌ Omettre les fichiers de documentation modifiés
 - ❌ Ne pas indiquer l'impact utilisateur
+- ❌ **PowerShell : Utiliser -m multiples** (dépasse limite longueur, provoque erreurs)
 
 ---
 
@@ -513,8 +552,10 @@ def export_all_to_csv(self):
 - 🌍 Traductions complètes FR/EN/DE (3 nouvelles clés)
 ```
 
-#### 4. **Git Commit** - Message structuré
-```
+#### 4. **Git Commit** - Message structuré (PowerShell)
+```powershell
+# ⚠️ Utiliser here-string PowerShell pour messages longs
+$msg = @"
 feat: Add CSV export functionality for all characters
 
 Added export button and comprehensive CSV export feature for bulk character data export.
@@ -549,13 +590,24 @@ Files Modified:
 - Changelogs/*.md (4 files + root CHANGELOG.md)
 
 Impact: Users can now export all character data to CSV format with a single click, enabling external data analysis and backup capabilities.
+"@
+
+git commit -m $msg
 ```
 
 #### 5. **Commandes Git Exécutées (AUTOMATIQUEMENT)**
-```bash
+```powershell
 # EXÉCUTÉ AUTOMATIQUEMENT - Pas de confirmation demandée
 git add -A
-git commit -m "feat: Add CSV export functionality for all characters" -m "<message body>"
+
+# Message multiligne avec here-string PowerShell
+$msg = @"
+feat: Add CSV export functionality for all characters
+
+[... message complet structuré ...]
+"@
+git commit -m $msg
+
 git push origin 109_Add_CSV_Export
 ```
 

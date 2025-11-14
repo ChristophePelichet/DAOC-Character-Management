@@ -1,10 +1,10 @@
-# DAOC - Gestionnaire de Personnages v0.107
+# DAOC - Gestionnaire de Personnages v0.108
 
 Application de gestion de personnages pour Dark Age of Camelot (DAOC), développée en Python avec PySide6.
 
 ## 📦 Téléchargement
 
-**Version actuelle : v0.107** 🎉
+**Version actuelle : v0.108** 🎉
 
 [![Télécharger l'exécutable](https://img.shields.io/badge/T%C3%A9l%C3%A9charger-EXE-blue?style=for-the-badge&logo=windows)](https://github.com/ChristophePelichet/DAOC-Character-Management/releases/latest)
 

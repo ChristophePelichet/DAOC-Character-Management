@@ -43,7 +43,7 @@ from UI.progress_dialog_base import ProgressStepsDialog, StepConfiguration
 setup_logging()
 
 APP_NAME = "DAOC Character Manager"
-APP_VERSION = "0.107"
+APP_VERSION = "0.108"
 
 
 def global_exception_handler(exc_type, exc_value, exc_traceback):

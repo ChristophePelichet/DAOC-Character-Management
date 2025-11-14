@@ -4,6 +4,41 @@ Complete version history of the character manager for Dark Age of Camelot (Eden)
 
 ---
 
+# ✨✨ v0.109 - 11/14/2025
+
+### 🐛 Fix
+
+**Incorrect Realm Rank Display in Update Comparison**
+- 🛡️ **Problem**: When updating a character from Herald (via character sheet or context menu), the comparison window displayed the realm rank title (e.g., "Raven Ardent") instead of the XLY code (e.g., "5L9") in the "Current value" column, causing false change detection even when the rank was identical
+- 🔧 **Root Cause**: Local JSON file may contain either XLY code (correct format) or text title (old format or incorrect save). The `CharacterUpdateDialog._detect_changes()` method compared values directly without validating realm rank format
+- 🔧 **Solution Implemented**:
+  - Added XLY format regex validation (`^\d+L\d+$`) to detect if `realm_rank` contains a title instead of a code
+  - If title detected: automatic recalculation of XLY code from `realm_points` via `data_manager.get_realm_rank_info(realm, realm_points)`
+  - Consistent comparison between XLY codes only (recalculated current vs new from Herald)
+  - Import `re` module for regex validation
+  - Error handling with logging if recalculation fails
+- 🎯 **Impact**: Comparison now always displays rank code (5L9) in both columns, eliminating false positive change detection. Users no longer see proposed updates for realm rank when only the format differs
+
+**Empty Comparison Window During Update**
+- 🛡️ **Problem**: Comparison window opened systematically even when no changes were detected between local and Herald data, displaying an empty table with only green checkmarks, forcing the user to close manually
+- 🔧 **Root Cause**: `CharacterUpdateDialog` was created and displayed via `exec()` without prior verification of actual changes existence
+- 🔧 **Solution Implemented**:
+  - New `has_changes()` method in `CharacterUpdateDialog`: traverses table and detects presence of at least one checkbox (= change)
+  - Pre-display verification: dialog creation, `has_changes()` call, conditional display
+  - If no changes: `QMessageBox.information()` with message "Character already up to date"
+  - Dialog not displayed, immediate return
+- 🎯 **Impact**: Improved user experience - clear message "Character already up to date" instead of empty window. Time savings and clarity for users
+
+### ✨ Addition
+
+**Multilingual Translations for Update Messages**
+- 🌍 Added 2 new FR/EN/DE translation keys (Language/*.json):
+  - `update_char_no_changes_title`: Message title "No Update" / "Aucune mise à jour" / "Keine Aktualisierung"
+  - `update_char_already_uptodate`: Detailed message "The character is already up to date..." / "Le personnage est déjà à jour..." / "Der Charakter ist bereits aktuell..."
+- 🎯 **Impact**: 100% multilingual interface for all Herald update scenarios
+
+---
+
 # ✨✨ v0.108 - 11/14/2025
 
 ### ✨ Addition

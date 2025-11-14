@@ -2,6 +2,28 @@
 
 ---
 
+# ✨ v0.109 - 11/14/2025
+
+### 🐛 Fixed
+
+**Incorrect Realm Rank in Comparison**
+- 🛡️ Displayed title ("Raven Ardent") instead of code (5L9) causing false changes
+- 🔧 Automatic detection and recalculation from realm points
+- 🎯 Correct comparison, no more false positives
+
+**Empty Comparison Window**
+- 🛡️ Window opened even when no changes detected
+- 🔧 Pre-check + "Character already up to date" message
+- 🎯 No empty window, clear message
+
+### ✨ Added
+
+**Update Message Translations**
+- 🌍 2 new FR/EN/DE translations
+- 🎯 100% multilingual interface
+
+---
+
 # ✨ v0.108 - 11/14/2025
 
 ### ✨ Added

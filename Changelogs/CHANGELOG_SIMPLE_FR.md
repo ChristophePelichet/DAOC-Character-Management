@@ -1,5 +1,27 @@
 # 📋 Changelog Simple - DAOC Character Management
 
+# ✨ v0.109 - 14/11/2025
+
+### 🐛 Correction
+
+**Rang de Royaume Incorrect dans Comparaison**
+- 🛡️ Affichage du titre ("Raven Ardent") au lieu du code (5L9) causant faux changements
+- 🔧 Détection automatique et recalcul depuis points de royaume
+- 🎯 Comparaison correcte, plus de faux positifs
+
+**Fenêtre Comparaison Vide**
+- 🛡️ Fenêtre s'ouvrait même sans changement détecté
+- 🔧 Vérification préalable + message "Personnage déjà à jour"
+- 🎯 Pas de fenêtre vide, message clair
+
+### ✨ Ajout
+
+**Traductions Messages Mise à Jour**
+- 🌍 2 nouvelles traductions FR/EN/DE
+- 🎯 Interface 100% multilingue
+
+---
+
 # ✨ v0.108 - 14/11/2025
 
 ### ✨ Ajout

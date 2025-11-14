@@ -4,6 +4,41 @@ Historique complet des versions du gestionnaire de personnages pour Dark Age of 
 
 ---
 
+# ✨✨ v0.109 - 14/11/2025
+
+### 🐛 Correction
+
+**Affichage Incorrect du Rang de Royaume dans la Comparaison de Mise à Jour**
+- 🛡️ **Problème** : Lors de la mise à jour d'un personnage depuis Herald (via fiche ou menu contextuel), la fenêtre de comparaison affichait le titre du rang (ex: "Raven Ardent") au lieu du code XLY (ex: "5L9") dans la colonne "Valeur actuelle", causant une détection erronée de changement alors que le rang était identique
+- 🔧 **Cause Racine** : Le fichier JSON local peut contenir soit le code XLY (format correct), soit le titre texte (ancien format ou sauvegarde incorrecte). La méthode `CharacterUpdateDialog._detect_changes()` comparait directement les valeurs sans valider le format du rang de royaume
+- 🔧 **Solution Implémentée** :
+  - Ajout validation regex du format XLY (`^\d+L\d+$`) pour détecter si `realm_rank` contient un titre au lieu d'un code
+  - Si titre détecté : recalcul automatique du code XLY depuis `realm_points` via `data_manager.get_realm_rank_info(realm, realm_points)`
+  - Comparaison cohérente entre codes XLY uniquement (actuel recalculé vs nouveau du Herald)
+  - Import du module `re` pour validation regex
+  - Gestion d'erreur avec logging si recalcul impossible
+- 🎯 **Impact** : La comparaison affiche maintenant toujours le code de rang (5L9) dans les deux colonnes, éliminant les faux positifs de détection de changement. Les utilisateurs ne voient plus de mise à jour proposée pour le rang de royaume quand seul le format diffère
+
+**Fenêtre de Comparaison Vide Lors de Mise à Jour**
+- 🛡️ **Problème** : La fenêtre de comparaison s'ouvrait systématiquement même quand aucun changement n'était détecté entre les données locales et Herald, affichant un tableau vide avec uniquement des ✓ verts, forçant l'utilisateur à fermer manuellement
+- 🔧 **Cause Racine** : Le dialogue `CharacterUpdateDialog` était créé et affiché via `exec()` sans vérification préalable de l'existence de changements réels
+- 🔧 **Solution Implémentée** :
+  - Nouvelle méthode `has_changes()` dans `CharacterUpdateDialog` : parcourt le tableau et détecte la présence d'au moins une checkbox (= changement)
+  - Vérification pré-affichage : création du dialogue, appel `has_changes()`, affichage conditionnel
+  - Si aucun changement : `QMessageBox.information()` avec message "Personnage déjà à jour"
+  - Dialogue non affiché, retour immédiat
+- 🎯 **Impact** : Expérience utilisateur améliorée - message clair "Personnage déjà à jour" au lieu d'une fenêtre vide. Gain de temps et clarté pour l'utilisateur
+
+### ✨ Ajout
+
+**Traductions Multilingues pour Messages de Mise à Jour**
+- 🌍 Ajout de 2 nouvelles clés de traduction FR/EN/DE (Language/*.json) :
+  - `update_char_no_changes_title` : Titre du message "Aucune mise à jour" / "No Update" / "Keine Aktualisierung"
+  - `update_char_already_uptodate` : Message détaillé "Le personnage est déjà à jour..." / "The character is already up to date..." / "Der Charakter ist bereits aktuell..."
+- 🎯 **Impact** : Interface 100% multilingue pour tous les scénarios de mise à jour Herald
+
+---
+
 # ✨✨ v0.108 - 14/11/2025
 
 ### ✨ Ajout

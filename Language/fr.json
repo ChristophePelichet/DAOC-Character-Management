@@ -99,6 +99,8 @@
     "update_char_progress": "Récupération des données depuis Herald...",
     "update_char_error": "Erreur lors de la récupération des données",
     "update_char_no_changes": "Aucune modification détectée. Le personnage est déjà à jour.",
+    "update_char_no_changes_title": "Aucune mise à jour",
+    "update_char_already_uptodate": "Le personnage est déjà à jour. Aucune modification détectée.",
     "update_char_success": "Le personnage a été mis à jour avec succès !",
     "update_char_cancelled": "Mise à jour annulée.",
     "duplicate_char_dialog_title": "Dupliquer le personnage",

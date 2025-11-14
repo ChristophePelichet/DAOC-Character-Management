@@ -92,6 +92,8 @@
     "update_char_progress": "Fetching data from Herald...",
     "update_char_error": "Error fetching data",
     "update_char_no_changes": "No changes detected. The character is already up to date.",
+    "update_char_no_changes_title": "No Update",
+    "update_char_already_uptodate": "The character is already up to date. No changes detected.",
     "update_char_success": "Character updated successfully!",
     "update_char_cancelled": "Update cancelled.",
     "duplicate_char_dialog_title": "Duplicate Character",

@@ -509,6 +509,15 @@ class CharacterApp(QMainWindow):
         # Afficher le dialogue de validation des changements
         dialog = CharacterUpdateDialog(self, character_data, new_data, character_data['name'])
         
+        # ✅ Check if there are any changes before showing dialog
+        if not dialog.has_changes():
+            QMessageBox.information(
+                self,
+                lang.get("update_char_no_changes_title", default="Aucune mise à jour"),
+                lang.get("update_char_already_uptodate", default="Le personnage est déjà à jour. Aucune modification détectée.")
+            )
+            return
+        
         if dialog.exec() == QDialog.Accepted:
             selected_changes = dialog.get_selected_changes()
             

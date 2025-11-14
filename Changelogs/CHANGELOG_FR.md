@@ -8,6 +8,26 @@ Historique complet des versions du gestionnaire de personnages pour Dark Age of 
 
 ### 🐛 Correction
 
+**Freeze de la Fenêtre après Mise à Jour Herald**
+- 🛡️ **Problème** : La fenêtre du personnage (CharacterSheetWindow) se figeait après fermeture du dialogue "Aucune mise à jour", empêchant toute interaction pendant plusieurs secondes
+- 🔧 **Cause Racine** : Le thread de mise à jour Herald (`char_update_thread`) continuait à tourner en arrière-plan après l'affichage des dialogues (erreur/succès/aucun changement), bloquant l'interface
+- 🔧 **Solution Implémentée** :
+  - Nettoyage automatique du thread (`_stop_char_update_thread()`) AVANT l'affichage de tout dialogue dans `_on_herald_scraping_finished()`
+  - Ajout de `closeEvent()` dans CharacterSheetWindow pour arrêter proprement le thread à la fermeture
+  - Protection dans le bloc `finally` pour garantir le nettoyage même en cas d'erreur
+- 📝 Fichiers modifiés : `UI/dialogs.py` (CharacterSheetWindow)
+- 🎯 Impact : Fermeture instantanée des dialogues et de la fenêtre, interface réactive immédiatement
+
+**Comportement Incohérent "Aucune Mise à Jour" entre Feuille Personnage et Menu Contextuel**
+- 🛡️ **Problème** : Le menu contextuel (clic droit sur personnage) affichait une fenêtre de comparaison vide quand aucun changement détecté, alors que la feuille personnage affichait un message informatif
+- 🔧 **Cause Racine** : Vérification `has_changes()` implémentée uniquement dans `CharacterSheetWindow.update_from_herald()`, mais absente du gestionnaire du menu contextuel dans `main.py._process_herald_update_result()`
+- 🔧 **Solution Implémentée** :
+  - Ajout de la vérification pré-affichage `if not dialog.has_changes()` dans `_process_herald_update_result()`
+  - Affichage du message "Personnage déjà à jour" au lieu de la fenêtre vide
+  - Nettoyage du thread avant affichage du message pour éviter le freeze
+- 📝 Fichiers modifiés : `main.py` (MainWindow)
+- 🎯 Impact : Comportement uniforme des deux chemins de mise à jour, meilleure expérience utilisateur
+
 **Affichage Incorrect du Rang de Royaume dans la Comparaison de Mise à Jour**
 - 🛡️ **Problème** : Lors de la mise à jour d'un personnage depuis Herald (via fiche ou menu contextuel), la fenêtre de comparaison affichait le titre du rang (ex: "Raven Ardent") au lieu du code XLY (ex: "5L9") dans la colonne "Valeur actuelle", causant une détection erronée de changement alors que le rang était identique
 - 🔧 **Cause Racine** : Le fichier JSON local peut contenir soit le code XLY (format correct), soit le titre texte (ancien format ou sauvegarde incorrecte). La méthode `CharacterUpdateDialog._detect_changes()` comparait directement les valeurs sans valider le format du rang de royaume

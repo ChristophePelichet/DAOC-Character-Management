@@ -1874,6 +1874,17 @@ class CharacterSheetWindow(QDialog):
             if hasattr(self, 'progress_dialog'):
                 delattr(self, 'progress_dialog')
     
+    def closeEvent(self, event):
+        """✅ Pattern 5: Cleanup threads when closing character sheet window"""
+        import logging
+        logging.info("CharacterSheetWindow closing - Stopping update thread if running")
+        
+        # Stop character update thread if running
+        self._stop_char_update_thread()
+        
+        # Accept close event
+        event.accept()
+    
     def _on_herald_scraping_finished(self, success, new_data, error_msg):
         """Callback appelé quand le scraping est terminé"""
         from PySide6.QtCore import QTimer
@@ -1892,9 +1903,12 @@ class CharacterSheetWindow(QDialog):
                 self.progress_dialog.set_status_message(error_text, "#F44336")
                 QTimer.singleShot(2000, self.progress_dialog.close)
         
-        # Utiliser try/finally pour garantir la réactivation des boutons
+        # Utiliser try/finally pour garantir la réactivation des boutons et le nettoyage du thread
         try:
             if not success:
+                # ✅ CRITICAL: Arrêter le thread AVANT d'afficher l'erreur
+                self._stop_char_update_thread()
+                
                 QMessageBox.critical(
                     self,
                     lang.get("update_char_error"),
@@ -1907,6 +1921,9 @@ class CharacterSheetWindow(QDialog):
             
             # Vérifier s'il y a au moins un changement
             if not dialog.has_changes():
+                # ✅ CRITICAL: Arrêter le thread AVANT d'afficher le message
+                self._stop_char_update_thread()
+                
                 QMessageBox.information(
                     self,
                     lang.get("update_char_no_changes_title", default="Aucune mise à jour"),
@@ -2033,6 +2050,10 @@ class CharacterSheetWindow(QDialog):
                 )
         
         finally:
+            # ✅ Nettoyage final si pas déjà fait (sécurité)
+            if hasattr(self, 'char_update_thread') and self.char_update_thread:
+                self._stop_char_update_thread()
+            
             # Réactiver tous les boutons TOUJOURS, même en cas d'erreur ou de return anticipé
             herald_url = self.herald_url_edit.text().strip()
             

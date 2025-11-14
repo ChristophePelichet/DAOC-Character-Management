@@ -8,6 +8,26 @@ Complete version history of the character manager for Dark Age of Camelot (Eden)
 
 ### 🐛 Fix
 
+**Window Freeze After Herald Update**
+- 🛡️ **Problem**: Character sheet window (CharacterSheetWindow) froze after closing "No update" dialog, preventing any interaction for several seconds
+- 🔧 **Root Cause**: Herald update thread (`char_update_thread`) continued running in background after displaying dialogs (error/success/no changes), blocking the interface
+- 🔧 **Solution Implemented**:
+  - Automatic thread cleanup (`_stop_char_update_thread()`) BEFORE displaying any dialog in `_on_herald_scraping_finished()`
+  - Added `closeEvent()` in CharacterSheetWindow to properly stop thread on window close
+  - Protection in `finally` block to guarantee cleanup even on error
+- 📝 Modified files: `UI/dialogs.py` (CharacterSheetWindow)
+- 🎯 Impact: Instant dialog and window closure, immediately responsive interface
+
+**Inconsistent "No Update" Behavior Between Character Sheet and Context Menu**
+- 🛡️ **Problem**: Context menu (right-click on character) showed empty comparison window when no changes detected, while character sheet displayed an informative message
+- 🔧 **Root Cause**: `has_changes()` check implemented only in `CharacterSheetWindow.update_from_herald()`, but missing in context menu handler in `main.py._process_herald_update_result()`
+- 🔧 **Solution Implemented**:
+  - Added pre-display check `if not dialog.has_changes()` in `_process_herald_update_result()`
+  - Display "Character already up to date" message instead of empty window
+  - Thread cleanup before message display to prevent freeze
+- 📝 Modified files: `main.py` (MainWindow)
+- 🎯 Impact: Uniform behavior for both update paths, improved user experience
+
 **Incorrect Realm Rank Display in Update Comparison**
 - 🛡️ **Problem**: When updating a character from Herald (via character sheet or context menu), the comparison window displayed the realm rank title (e.g., "Raven Ardent") instead of the XLY code (e.g., "5L9") in the "Current value" column, causing false change detection even when the rank was identical
 - 🔧 **Root Cause**: Local JSON file may contain either XLY code (correct format) or text title (old format or incorrect save). The `CharacterUpdateDialog._detect_changes()` method compared values directly without validating realm rank format

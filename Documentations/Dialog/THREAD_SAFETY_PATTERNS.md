@@ -12,8 +12,9 @@
 2. [Pattern 2 : Cleanup Ressources Externes](#pattern-2--cleanup-ressources-externes)
 3. [Pattern 3 : Interruption Gracieuse](#pattern-3--interruption-gracieuse)
 4. [Pattern 4 : Signal Dialog Rejected](#pattern-4--signal-dialog-rejected)
-5. [Checklist de Validation](#checklist-de-validation)
-6. [Exemple Complet](#exemple-complet)
+5. [Pattern 5 : Cleanup Asynchrone pour Fermeture Rapide](#pattern-5--cleanup-asynchrone-pour-fermeture-rapide)
+6. [Checklist de Validation](#checklist-de-validation)
+7. [Exemple Complet](#exemple-complet)
 
 ---
 
@@ -596,6 +597,220 @@ class SafeDialog(QDialog):
 
 ---
 
+## Pattern 5 : Cleanup Asynchrone pour Fermeture Rapide
+
+### 🚨 Problème
+```python
+# ❌ BLOQUANT : Fermeture de fenêtre lente (2-3 clics nécessaires)
+def closeEvent(self, event):
+    self._stop_search_thread()  # wait(3000) → bloque 3 secondes !
+    self._cleanup_temp_files()  # I/O peut être lent
+    super().closeEvent(event)
+```
+
+**Symptômes** :
+- L'utilisateur clique sur la croix mais la fenêtre ne se ferme pas immédiatement
+- Nécessite 2-3 clics avant que la fenêtre réponde
+- UI freeze pendant plusieurs secondes après l'import de personnages
+
+**Causes** :
+1. `thread.wait(timeout)` bloque l'event loop Qt pendant le timeout
+2. Operations I/O synchrones (cleanup fichiers, refresh UI, backup)
+3. `closeEvent()` attend la fin des opérations avant d'appeler `super().closeEvent()`
+
+### ✅ Solution : Cleanup via QTimer (Non-Bloquant)
+
+#### 1️⃣ Fermeture Immédiate avec Cleanup Asynchrone
+
+```python
+from PySide6.QtCore import QTimer
+
+def closeEvent(self, event):
+    """Appelé à la fermeture - ACCEPTE IMMÉDIATEMENT"""
+    # Cleanup asynchrone sans bloquer la fermeture
+    QTimer.singleShot(0, self._async_full_cleanup)
+    
+    # Appeler super() IMMÉDIATEMENT pour fermer la fenêtre
+    super().closeEvent(event)
+
+def _async_full_cleanup(self):
+    """Cleanup complet en arrière-plan"""
+    try:
+        self._stop_search_thread_async()
+        self._cleanup_temp_files()
+    except Exception as e:
+        logging.warning(f"Erreur pendant cleanup async: {e}")
+```
+
+#### 2️⃣ Stop Thread Asynchrone (Capture de Référence)
+
+```python
+def _stop_search_thread_async(self):
+    """Version non-bloquante de stop thread"""
+    if hasattr(self, 'search_thread') and self.search_thread is not None:
+        # ✅ Capturer la référence AVANT de passer à l'async
+        thread_ref = self.search_thread
+        
+        if thread_ref.isRunning():
+            # Demander arrêt gracieux
+            thread_ref.request_stop()
+            
+            # Déconnecter signaux
+            try:
+                thread_ref.search_finished.disconnect()
+                thread_ref.step_started.disconnect()
+                thread_ref.step_completed.disconnect()
+                thread_ref.step_error.disconnect()
+            except:
+                pass
+            
+            # Cleanup asynchrone du thread
+            def _async_thread_cleanup():
+                try:
+                    if thread_ref and thread_ref.isRunning():
+                        # Wait court (100ms au lieu de 3000ms)
+                        thread_ref.wait(100)
+                        
+                        if thread_ref.isRunning():
+                            logging.warning("Thread actif - Cleanup forcé")
+                            try:
+                                thread_ref.cleanup_driver()
+                                thread_ref.terminate()
+                                thread_ref.wait()
+                            except:
+                                pass
+                        
+                        logging.info("Thread arrêté (async)")
+                except Exception as e:
+                    logging.warning(f"Erreur cleanup async thread: {e}")
+            
+            # Exécuter après 50ms (non-bloquant)
+            QTimer.singleShot(50, _async_thread_cleanup)
+        
+        # Nettoyer référence immédiatement
+        self.search_thread = None
+    
+    # Cleanup progress dialog
+    if hasattr(self, 'progress_dialog'):
+        try:
+            self.progress_dialog.close()
+            self.progress_dialog.deleteLater()
+        except:
+            pass
+        
+        try:
+            delattr(self, 'progress_dialog')
+        except:
+            pass
+```
+
+#### 3️⃣ Operations Lourdes en Asynchrone (Refresh + Backup)
+
+```python
+def _import_characters(self, characters):
+    """Importe personnages depuis Herald"""
+    # ... code d'import ...
+    
+    # Afficher résultat immédiatement
+    QMessageBox.information(self, "Import terminé", message)
+    
+    # ✅ Refresh UI de manière asynchrone (ne bloque pas)
+    if hasattr(self.parent(), 'tree_manager'):
+        QTimer.singleShot(100, self.parent().tree_manager.refresh_character_list)
+    
+    # ✅ Backup asynchrone (ne bloque pas)
+    parent_app = self.parent()
+    if hasattr(parent_app, 'backup_manager'):
+        def _async_backup():
+            try:
+                logging.info("[BACKUP] Démarrage backup asynchrone")
+                parent_app.backup_manager.backup_characters_force(
+                    reason="Update", 
+                    character_name="multi"
+                )
+            except Exception as e:
+                logging.warning(f"[BACKUP] Erreur backup async: {e}")
+        
+        QTimer.singleShot(200, _async_backup)
+```
+
+### 📝 Règles du Pattern 5
+
+#### ✅ À FAIRE
+- Toujours appeler `super().closeEvent(event)` **IMMÉDIATEMENT**
+- Utiliser `QTimer.singleShot(0, ...)` pour cleanup en arrière-plan
+- **Capturer les références** (thread, dialog) avant lambda/fonction interne
+- Réduire les timeouts (100ms au lieu de 3000ms)
+- Wrapper toutes les opérations I/O dans try/except
+
+#### ❌ À ÉVITER
+- `thread.wait(3000)` dans closeEvent (bloque 3 secondes!)
+- `event.accept()` sans appeler `super().closeEvent()`
+- Utiliser `self.thread` dans lambda (peut être None/détruit)
+- Opérations synchrones lourdes (refresh UI, backup) après MessageBox
+- Oublier la déconnexion des signaux avant cleanup async
+
+### 🎯 Résultats Attendus
+- ✅ Fermeture instantanée au 1er clic (< 100ms)
+- ✅ Pas de freeze après import de personnages
+- ✅ Cleanup complet en arrière-plan sans bloquer l'utilisateur
+- ✅ Pas d'erreurs RuntimeError ou de ressources orphelines
+
+### 📊 Exemple Complet : HeraldSearchDialog
+
+```python
+class HeraldSearchDialog(QDialog):
+    """Fenêtre de recherche Herald avec fermeture rapide"""
+    
+    def closeEvent(self, event):
+        """Fermeture immédiate + cleanup async"""
+        QTimer.singleShot(0, self._async_full_cleanup)
+        super().closeEvent(event)
+    
+    def accept(self):
+        """Fermeture via bouton Fermer"""
+        self._stop_search_thread_async()
+        self._cleanup_temp_files()
+        super().accept()
+    
+    def _async_full_cleanup(self):
+        """Cleanup complet non-bloquant"""
+        try:
+            self._stop_search_thread_async()
+            self._cleanup_temp_files()
+        except Exception as e:
+            logging.warning(f"Erreur cleanup async: {e}")
+    
+    def _stop_search_thread_async(self):
+        """Stop thread sans bloquer (voir code complet ci-dessus)"""
+        # ... code du pattern 5 ...
+    
+    def _import_characters(self, characters):
+        """Import avec refresh/backup asynchrones"""
+        # ... import sync ...
+        
+        QMessageBox.information(self, "Import terminé", message)
+        
+        # Refresh + Backup en arrière-plan
+        QTimer.singleShot(100, self.parent().tree_manager.refresh_character_list)
+        QTimer.singleShot(200, lambda: self._async_backup(success_count))
+```
+
+### 🔍 Debugging
+Si la fermeture est toujours lente, ajoutez des logs :
+```python
+def closeEvent(self, event):
+    logging.info("[CLOSE] Début closeEvent")
+    QTimer.singleShot(0, self._async_full_cleanup)
+    logging.info("[CLOSE] Avant super().closeEvent()")
+    super().closeEvent(event)
+    logging.info("[CLOSE] Après super().closeEvent()")
+```
+
+Chronométrez chaque opération pour identifier les blocages.
+
+---
+
 ## 📚 Ressources Complémentaires
 
 - **Planning complet** : `Documentations/PROGRESS_DIALOGS_PLANNING.md`
@@ -632,8 +847,57 @@ time.sleep(10)  # Thread ne répond pas pendant 10s
 dialog.show()  # Si user ferme → pas de cleanup
 ```
 
+### ❌ Wait bloquant dans closeEvent
+```python
+# DANGEREUX - Freeze de 3 secondes !
+def closeEvent(self, event):
+    if self.thread.isRunning():
+        self.thread.wait(3000)  # ⚠️ BLOQUE l'UI !
+    super().closeEvent(event)
+```
+
+### ❌ Operations lourdes synchrones après MessageBox
+```python
+# DANGEREUX - UI freeze après la MessageBox
+QMessageBox.information(self, "Terminé", "Import OK")
+self.refresh_character_list()  # ⚠️ Peut prendre 2-3 secondes !
+self.backup_all_characters()   # ⚠️ BLOQUE l'UI !
+```
+
 ---
 
-**Version** : 1.0  
+## Checklist de Validation
+
+### ✅ Pattern 1 (RuntimeError)
+- [ ] Tous les signaux thread → dialog passent par des wrappers
+- [ ] Chaque wrapper vérifie `hasattr()` ET `self.progress_dialog`
+- [ ] Chaque wrapper enveloppe dans `try/except RuntimeError`
+
+### ✅ Pattern 2 (Cleanup Ressources)
+- [ ] Thread a une méthode `cleanup_external_resources()` publique
+- [ ] Cleanup appelé AVANT `terminate()` depuis le thread principal
+- [ ] Attribut `_external_resource` pour stocker la référence
+
+### ✅ Pattern 3 (Interruption)
+- [ ] Thread a un flag `_stop_requested = False`
+- [ ] Méthode `request_stop()` pour demander l'arrêt
+- [ ] Boucles longues vérifient `if self._stop_requested: return`
+- [ ] Sleep remplacés par boucles de 0.5s avec vérification
+
+### ✅ Pattern 4 (Dialog Rejected)
+- [ ] Signal `rejected` connecté AVANT `show()` ou `exec()`
+- [ ] Handler appelle `_stop_thread()` puis réactive les contrôles
+- [ ] Pas de fuite de ressources si dialog fermé prématurément
+
+### ✅ Pattern 5 (Cleanup Asynchrone)
+- [ ] `closeEvent()` appelle `super().closeEvent(event)` IMMÉDIATEMENT
+- [ ] Cleanup via `QTimer.singleShot(0, self._async_full_cleanup)`
+- [ ] Références thread/dialog capturées avant lambda/fonction interne
+- [ ] Timeouts réduits (100ms au lieu de 3000ms)
+- [ ] Operations I/O lourdes (refresh, backup) via QTimer après MessageBox
+
+---
+
+**Version** : 2.0  
 **Dernière mise à jour** : 14 novembre 2025  
-**Validé sur** : HeraldSearchDialog (Session 2)
+**Validé sur** : HeraldSearchDialog (Pattern 1-5 complets)

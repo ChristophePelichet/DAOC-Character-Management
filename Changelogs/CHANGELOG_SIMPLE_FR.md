@@ -5,7 +5,7 @@
 ### ✨ Ajout
 
 **Support Multilingue des Dialogues de Progression**
-- 🌍 52 nouvelles traductions FR/EN/DE pour tous les dialogues de progression
+- 🌍 58 nouvelles traductions FR/EN/DE pour tous les dialogues de progression et messages d'import
 - 📚 Documentation technique complète avec diagrammes (PROGRESS_DIALOG_SYSTEM_EN.md, 1900+ lignes)
 - 🎯 Support complet de 3 langues pour l'interface utilisateur
 
@@ -22,6 +22,16 @@
 - 🛡️ Correction crash "Index out of range" lors affichage messages
 - 🔧 Migration vers paramètres nommés ({char_name}, {count}, {error})
 - 🎯 Messages traduits affichés correctement avec valeurs dynamiques
+
+**Freeze Fenêtre Recherche Herald**
+- 🛡️ Correction fermeture lente (2-3 clics nécessaires) + freeze après import
+- 🔧 Cleanup asynchrone des threads et ressources (QTimer.singleShot)
+- 🎯 Fermeture instantanée (<100ms), plus de freeze, refresh/backup en arrière-plan
+
+**Messages Import Non Traduits**
+- 🛡️ Messages "Import terminé" codés en dur en français
+- 🔧 6 nouvelles clés de traduction FR/EN/DE
+- 🎯 Interface Herald 100% multilingue
 
 ### 🔚 Retrait
 

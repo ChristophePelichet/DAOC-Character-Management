@@ -300,5 +300,11 @@
     "progress_stats_complete": "✅ Statistics retrieved",
     "progress_character_complete": "✅ Data retrieved",
     "progress_cookie_success": "✅ {count} cookies generated!",
-    "progress_error": "❌ {error}"
+    "progress_error": "❌ {error}",
+    "herald_import_complete_title": "Import Complete",
+    "herald_import_success": "✅ {count} character(s) imported successfully!",
+    "herald_import_updated": "🔄 {count} character(s) updated!",
+    "herald_import_errors": "⚠️ {count} error(s):",
+    "herald_import_more_errors": "... and {count} more error(s)",
+    "herald_import_no_success": "❌ No characters could be imported or updated."
 }

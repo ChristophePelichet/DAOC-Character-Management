@@ -7,7 +7,7 @@
 ### ✨ Added
 
 **Multilingual Support for Progress Dialogs**
-- 🌍 52 new FR/EN/DE translations for all progress dialogs
+- 🌍 58 new FR/EN/DE translations for all progress dialogs and import messages
 - 📚 Complete technical documentation with diagrams (PROGRESS_DIALOG_SYSTEM_EN.md, 1900+ lines)
 - 🎯 Full support for 3 languages in user interface
 
@@ -24,6 +24,16 @@
 - 🛡️ Fixed "Index out of range" crash when displaying messages
 - 🔧 Migrated to named parameters ({char_name}, {count}, {error})
 - 🎯 Translated messages displayed correctly with dynamic values
+
+**Herald Search Window Freeze**
+- 🛡️ Fixed slow window close (2-3 clicks required) + freeze after import
+- 🔧 Async cleanup of threads and resources (QTimer.singleShot)
+- 🎯 Instant close (<100ms), no freeze, background refresh/backup
+
+**Untranslated Import Messages**
+- 🛡️ "Import terminé" messages hardcoded in French
+- 🔧 6 new FR/EN/DE translation keys
+- 🎯 Herald interface 100% multilingual
 
 ### 🔚 Removed
 

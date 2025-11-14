@@ -300,5 +300,11 @@
     "progress_stats_complete": "✅ Statistiques récupérées",
     "progress_character_complete": "✅ Données récupérées",
     "progress_cookie_success": "✅ {count} cookies générés !",
-    "progress_error": "❌ {error}"
+    "progress_error": "❌ {error}",
+    "herald_import_complete_title": "Import terminé",
+    "herald_import_success": "✅ {count} personnage(s) importé(s) avec succès !",
+    "herald_import_updated": "🔄 {count} personnage(s) mis à jour !",
+    "herald_import_errors": "⚠️ {count} erreur(s):",
+    "herald_import_more_errors": "... et {count} autre(s) erreur(s)",
+    "herald_import_no_success": "❌ Aucun personnage n'a pu être importé ou mis à jour."
 }

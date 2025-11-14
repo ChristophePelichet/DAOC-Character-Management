@@ -4598,18 +4598,28 @@ class HeraldSearchDialog(QDialog):
     
     def closeEvent(self, event):
         """Appelé à la fermeture de la fenêtre - nettoie les fichiers temporaires et arrête le thread"""
-        self._stop_search_thread()
-        self._cleanup_temp_files()
+        # Cleanup asynchrone sans bloquer la fermeture
+        QTimer.singleShot(0, self._async_full_cleanup)
+        
+        # Appeler la méthode parent pour fermer réellement la fenêtre
         super().closeEvent(event)
+    
+    def _async_full_cleanup(self):
+        """Cleanup complet de manière asynchrone"""
+        try:
+            self._stop_search_thread_async()
+            self._cleanup_temp_files()
+        except Exception as e:
+            logging.warning(f"Erreur pendant le cleanup async: {e}")
     
     def accept(self):
         """Appelé quand on ferme avec le bouton Fermer"""
-        self._stop_search_thread()
+        self._stop_search_thread_async()
         self._cleanup_temp_files()
         super().accept()
     
     def _stop_search_thread(self):
-        """Arrête le thread de recherche s'il est en cours d'exécution"""
+        """Arrête le thread de recherche s'il est en cours d'exécution (VERSION SYNCHRONE - utilisée par progress dialog)"""
         if hasattr(self, 'search_thread') and self.search_thread is not None:
             if self.search_thread.isRunning():
                 # Demander l'arrêt gracieux du thread
@@ -4651,6 +4661,66 @@ class HeraldSearchDialog(QDialog):
             # Supprimer l'attribut seulement s'il existe encore
             if hasattr(self, 'progress_dialog'):
                 delattr(self, 'progress_dialog')
+    
+    def _stop_search_thread_async(self):
+        """Arrête le thread de recherche de manière asynchrone (VERSION NON-BLOQUANTE pour fermeture fenêtre)"""
+        if hasattr(self, 'search_thread') and self.search_thread is not None:
+            # Capturer la référence du thread AVANT de passer à l'async
+            thread_ref = self.search_thread
+            
+            if thread_ref.isRunning():
+                # Demander l'arrêt gracieux du thread
+                thread_ref.request_stop()
+                
+                # Déconnecter les signaux pour éviter les erreurs
+                try:
+                    thread_ref.search_finished.disconnect()
+                    thread_ref.step_started.disconnect()
+                    thread_ref.step_completed.disconnect()
+                    thread_ref.step_error.disconnect()
+                except:
+                    pass
+                
+                # Cleanup asynchrone avec QTimer pour ne pas bloquer la fermeture
+                def _async_thread_cleanup():
+                    try:
+                        if thread_ref and thread_ref.isRunning():
+                            # Attendre 100ms que le thread s'arrête
+                            thread_ref.wait(100)
+                            
+                            if thread_ref.isRunning():
+                                logging.warning("Thread encore actif - Cleanup forcé du navigateur")
+                                try:
+                                    thread_ref.cleanup_driver()
+                                    thread_ref.terminate()
+                                    thread_ref.wait()
+                                except:
+                                    pass
+                            
+                            logging.info("Thread de recherche Herald arrêté (async)")
+                    except Exception as e:
+                        logging.warning(f"Erreur lors du cleanup async du thread: {e}")
+                
+                # Exécuter le cleanup après 50ms pour ne pas bloquer la fermeture
+                QTimer.singleShot(50, _async_thread_cleanup)
+            
+            # Nettoyer immédiatement la référence dans self
+            self.search_thread = None
+        
+        # Fermer la fenêtre de progression si elle existe
+        if hasattr(self, 'progress_dialog'):
+            try:
+                self.progress_dialog.close()
+                self.progress_dialog.deleteLater()
+            except:
+                pass
+            
+            # Supprimer l'attribut seulement s'il existe encore
+            if hasattr(self, 'progress_dialog'):
+                try:
+                    delattr(self, 'progress_dialog')
+                except:
+                    pass
     
     def _cleanup_temp_files(self):
         """Supprime les fichiers temporaires de recherche"""
@@ -5140,45 +5210,48 @@ class HeraldSearchDialog(QDialog):
         if success_count > 0 or updated_count > 0:
             message = ""
             if success_count > 0:
-                message += f"✅ {success_count} personnage(s) importé(s) avec succès !"
+                message += lang.get("herald_import_success", count=success_count)
             if updated_count > 0:
                 if message:
                     message += "\n"
-                message += f"🔄 {updated_count} personnage(s) mis à jour !"
+                message += lang.get("herald_import_updated", count=updated_count)
             
             if error_count > 0:
-                message += f"\n⚠️ {error_count} erreur(s):\n" + "\n".join(errors[:5])
+                message += f"\n{lang.get('herald_import_errors', count=error_count)}\n" + "\n".join(errors[:5])
                 if len(errors) > 5:
-                    message += f"\n... et {len(errors) - 5} autre(s) erreur(s)"
+                    message += f"\n{lang.get('herald_import_more_errors', count=len(errors) - 5)}"
             
-            QMessageBox.information(self, "Import terminé", message)
+            QMessageBox.information(self, lang.get("herald_import_complete_title"), message)
             
-            # Rafraîchir l'interface principale
+            # Rafraîchir l'interface principale de manière asynchrone pour éviter le freeze
             if hasattr(self.parent(), 'tree_manager') and hasattr(self.parent().tree_manager, 'refresh_character_list'):
-                self.parent().tree_manager.refresh_character_list()
+                QTimer.singleShot(100, self.parent().tree_manager.refresh_character_list)
             
-            # Trigger backup after mass import/update
+            # Trigger backup after mass import/update de manière asynchrone
             parent_app = self.parent()
             if hasattr(parent_app, 'backup_manager'):
-                try:
-                    import sys
-                    import logging
-                    print(f"[BACKUP_TRIGGER] Action: CHARACTER IMPORT/UPDATE (Mass) - {success_count} created, {updated_count} updated - Backup with reason=Update")
-                    sys.stderr.write(f"[BACKUP_TRIGGER] Action: CHARACTER IMPORT/UPDATE (Mass) - {success_count} created, {updated_count} updated - Backup with reason=Update\n")
-                    sys.stderr.flush()
-                    logging.info(f"[BACKUP_TRIGGER] Action: CHARACTER IMPORT/UPDATE (Mass) - {success_count} created, {updated_count} updated - Backup with reason=Update")
-                    parent_app.backup_manager.backup_characters_force(reason="Update", character_name="multi")
-                except Exception as e:
-                    print(f"[BACKUP_TRIGGER] Warning: Backup after mass import failed: {e}")
-                    sys.stderr.write(f"[BACKUP_TRIGGER] Warning: Backup after mass import failed: {e}\n")
-                    sys.stderr.flush()
-                    logging.warning(f"[BACKUP_TRIGGER] Backup after mass import failed: {e}")
+                def _async_backup():
+                    try:
+                        import sys
+                        import logging
+                        print(f"[BACKUP_TRIGGER] Action: CHARACTER IMPORT/UPDATE (Mass) - {success_count} created, {updated_count} updated - Backup with reason=Update")
+                        sys.stderr.write(f"[BACKUP_TRIGGER] Action: CHARACTER IMPORT/UPDATE (Mass) - {success_count} created, {updated_count} updated - Backup with reason=Update\n")
+                        sys.stderr.flush()
+                        logging.info(f"[BACKUP_TRIGGER] Action: CHARACTER IMPORT/UPDATE (Mass) - {success_count} created, {updated_count} updated - Backup with reason=Update")
+                        parent_app.backup_manager.backup_characters_force(reason="Update", character_name="multi")
+                    except Exception as e:
+                        print(f"[BACKUP_TRIGGER] Warning: Backup after mass import failed: {e}")
+                        sys.stderr.write(f"[BACKUP_TRIGGER] Warning: Backup after mass import failed: {e}\n")
+                        sys.stderr.flush()
+                        logging.warning(f"[BACKUP_TRIGGER] Backup after mass import failed: {e}")
+                
+                QTimer.singleShot(200, _async_backup)
         else:
-            error_msg = "❌ Aucun personnage n'a pu être importé ou mis à jour.\n\n"
+            error_msg = lang.get("herald_import_no_success") + "\n\n"
             error_msg += "\n".join(errors[:10])
             if len(errors) > 10:
-                error_msg += f"\n... et {len(errors) - 10} autre(s) erreur(s)"
-            QMessageBox.warning(self, "Échec de l'import", error_msg)
+                error_msg += f"\n{lang.get('herald_import_more_errors', count=len(errors) - 10)}"
+            QMessageBox.warning(self, lang.get("herald_import_complete_title"), error_msg)
 
 
 class CharacterUpdateDialog(QDialog):

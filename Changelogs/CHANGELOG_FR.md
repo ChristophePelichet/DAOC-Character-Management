@@ -28,6 +28,13 @@ Historique complet des versions du gestionnaire de personnages pour Dark Age of 
     - `progress_character_complete` : ✅ Données récupérées
     - `progress_cookie_success` : ✅ {count} cookies générés !
     - `progress_error` : ❌ {error} (message erreur générique)
+  - **Messages d'import Herald** (6 clés) :
+    - `herald_import_complete_title` : Titre dialogue import
+    - `herald_import_success` : ✅ {count} personnage(s) importé(s)
+    - `herald_import_updated` : 🔄 {count} personnage(s) mis à jour
+    - `herald_import_errors` : ⚠️ {count} erreur(s)
+    - `herald_import_more_errors` : ... et {count} autre(s) erreur(s)
+    - `herald_import_no_success` : ❌ Aucun import réussi
 
 **Documentation Technique Complète**
 - 📚 Nouvelle documentation : Documentations/Dialog/PROGRESS_DIALOG_SYSTEM_EN.md (1900+ lignes) :
@@ -79,6 +86,32 @@ Historique complet des versions du gestionnaire de personnages pour Dark Age of 
   - Messages traduits affichés correctement avec valeurs dynamiques
   - Système compatible avec tous les dialogues de progression
 
+### 🐛 Correction
+
+**Freeze Interface lors Fermeture Fenêtre Recherche Herald**
+- 🛡️ **Problème** : Fenêtre de recherche Herald nécessitait 2-3 clics pour se fermer + freeze de plusieurs secondes après import de personnages
+- 🔧 **Cause identifiée** :
+  - `closeEvent()` appelait `thread.wait(3000)` de manière synchrone (bloquait l'UI 3 secondes)
+  - `refresh_character_list()` et `backup_characters_force()` exécutés de manière bloquante après MessageBox
+  - `super().closeEvent()` non appelé → Qt ne fermait pas réellement la fenêtre
+- 🔧 **Solution implémentée** :
+  - Créé `_stop_search_thread_async()` : cleanup thread via QTimer.singleShot() (non-bloquant)
+  - Créé `_async_full_cleanup()` : cleanup complet en arrière-plan
+  - `closeEvent()` appelle `super().closeEvent()` IMMÉDIATEMENT puis cleanup async
+  - Capture de référence thread avant lambda (évite accès à objet détruit)
+  - Timeout réduit de 3000ms à 100ms pour cleanup thread
+  - Refresh UI et backup via QTimer.singleShot(100/200ms) après MessageBox
+- 🎯 **Impact** : Fermeture instantanée au 1er clic (< 100ms), plus de freeze après import, cleanup en arrière-plan
+- 📝 **Fichiers modifiés** :
+  - `UI/dialogs.py` (HeraldSearchDialog._stop_search_thread_async, _async_full_cleanup, closeEvent)
+  - `UI/dialogs.py` (_import_characters : refresh/backup asynchrones)
+- 📚 **Documentation** : Pattern 5 ajouté dans THREAD_SAFETY_PATTERNS.md (cleanup asynchrone pour fermeture rapide)
+
+**Messages d'Import Herald Non Traduits**
+- 🛡️ **Problème** : Messages "Import terminé", textes de succès/erreur codés en dur en français dans HeraldSearchDialog
+- 🔧 **Solution** : Ajout de 6 nouvelles clés de traduction FR/EN/DE + utilisation de lang.get() dans le code
+- 🎯 **Impact** : Interface Herald 100% multilingue (FR/EN/DE)
+
 ### 🔚 Retrait
 
 **Nettoyage Documentation Temporaire de Développement**
@@ -92,13 +125,15 @@ Historique complet des versions du gestionnaire de personnages pour Dark Age of 
 
 ### 📊 Statistiques
 
-- **Fichiers modifiés** : 37 fichiers (3 JSON traductions + 3 Python + 1 main.py + 5 changelogs + 25 suppressions)
+- **Fichiers modifiés** : 42 fichiers (6 JSON traductions + 3 Python + 1 main.py + 5 changelogs + 1 doc + 25 suppressions)
 - **Documentation créée** : 2 (PROGRESS_DIALOG_SYSTEM_EN.md 1900+ lignes, THREAD_SAFETY_PATTERNS.md)
+- **Documentation mise à jour** : 1 (THREAD_SAFETY_PATTERNS.md - Pattern 5 cleanup asynchrone)
 - **Documentation supprimée** : 20+ fichiers obsolètes (~4000 lignes)
-- **Lignes totales** : +4975 insertions, -6471 suppressions (net: -1496 lignes)
-- **Traductions** : 52 clés × 3 langues = 156 entrées (FR/EN/DE 100% couverture)
+- **Lignes totales** : +5100 insertions, -6471 suppressions (net: -1371 lignes)
+- **Traductions** : 58 clés × 3 langues = 174 entrées (FR/EN/DE 100% couverture)
 - **Dialogues traduits** : 4 (StatsUpdate, CharacterUpdate×2, CookieGen)
-- **Bugs corrigés** : 1 (IndexError double .format(), 5 locations)
+- **Bugs corrigés** : 2 (IndexError double .format() 5 locations, Freeze fermeture Herald)
+- **Performance** : Fermeture fenêtre Herald < 100ms (vs 3000ms+), pas de freeze post-import
 - **Architecture** : UI/progress_dialog_base.py (600+ lignes, classe réutilisable)
 
 ---

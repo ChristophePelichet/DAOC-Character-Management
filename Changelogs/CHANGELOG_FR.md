@@ -4,7 +4,7 @@ Historique complet des versions du gestionnaire de personnages pour Dark Age of 
 
 ---
 
-# ✨✨ v0.109 - 14/11/2025
+# ✨✨ v0.108 - 14/11/2025
 
 ### 🐛 Correction
 

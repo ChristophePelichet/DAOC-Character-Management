@@ -4,7 +4,7 @@ Complete version history of the character manager for Dark Age of Camelot (Eden)
 
 ---
 
-# ✨✨ v0.109 - 11/14/2025
+# ✨✨ v0.108 - 11/14/2025
 
 ### 🐛 Fix
 

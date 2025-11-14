@@ -4,6 +4,16 @@
 
 ### 🐛 Correction
 
+**Freeze Fenêtre après Mise à Jour Herald**
+- 🛡️ Interface bloquée plusieurs secondes après dialogue "Aucune mise à jour"
+- 🔧 Nettoyage automatique du thread avant affichage dialogues
+- 🎯 Fermeture instantanée, interface réactive immédiatement
+
+**Comportement Incohérent Menu Contextuel**
+- 🛡️ Menu contextuel affichait fenêtre vide, feuille personnage affichait message
+- 🔧 Ajout vérification `has_changes()` dans gestionnaire menu contextuel
+- 🎯 Comportement uniforme entre feuille personnage et menu contextuel
+
 **Rang de Royaume Incorrect dans Comparaison**
 - 🛡️ Affichage du titre ("Raven Ardent") au lieu du code (5L9) causant faux changements
 - 🔧 Détection automatique et recalcul depuis points de royaume

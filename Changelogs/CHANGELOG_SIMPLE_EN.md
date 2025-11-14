@@ -6,6 +6,16 @@
 
 ### 🐛 Fixed
 
+**Window Freeze After Herald Update**
+- 🛡️ Interface blocked for several seconds after "No update" dialog
+- 🔧 Automatic thread cleanup before displaying dialogs
+- 🎯 Instant closure, immediately responsive interface
+
+**Inconsistent Context Menu Behavior**
+- 🛡️ Context menu showed empty window, character sheet showed message
+- 🔧 Added `has_changes()` check in context menu handler
+- 🎯 Uniform behavior between character sheet and context menu
+
 **Incorrect Realm Rank in Comparison**
 - 🛡️ Displayed title ("Raven Ardent") instead of code (5L9) causing false changes
 - 🔧 Automatic detection and recalculation from realm points

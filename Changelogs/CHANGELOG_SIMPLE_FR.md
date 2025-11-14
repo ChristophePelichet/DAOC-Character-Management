@@ -1,5 +1,36 @@
 # 📋 Changelog Simple - DAOC Character Management
 
+# ✨ v0.108
+
+### ✨ Ajout
+
+**Support Multilingue des Dialogues de Progression**
+- 🌍 52 nouvelles traductions FR/EN/DE pour tous les dialogues de progression
+- 📚 Documentation technique complète avec diagrammes (PROGRESS_DIALOG_SYSTEM_EN.md, 1900+ lignes)
+- 🎯 Support complet de 3 langues pour l'interface utilisateur
+
+### 🧰 Modification
+
+**Migration vers Système de Traduction**
+- 🔄 Tous les textes des dialogues maintenant traduits automatiquement
+- 🌐 4 dialogues migrés : Mise à jour stats, Mise à jour personnage (×2), Génération cookies
+- ✅ Interface entièrement multilingue (FR/EN/DE)
+
+### 🐛 Correction
+
+**Erreur Formatage Messages**
+- 🛡️ Correction crash "Index out of range" lors affichage messages
+- 🔧 Migration vers paramètres nommés ({char_name}, {count}, {error})
+- 🎯 Messages traduits affichés correctement avec valeurs dynamiques
+
+### 🔚 Retrait
+
+**Nettoyage Documentation**
+- 🗑️ Suppression de 6 fichiers temporaires de développement (1985+ lignes)
+- 🧹 Documentation finale propre et consolidée
+
+---
+
 # ✨ v0.109
 
 ### 🧰 Modification

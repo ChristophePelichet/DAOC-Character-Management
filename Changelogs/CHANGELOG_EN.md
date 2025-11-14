@@ -4,6 +4,109 @@ Complete version history of the character manager for Dark Age of Camelot (Eden)
 
 ---
 
+# ✨✨ v0.108 - 11/14/2025
+
+### ✨ Addition
+
+**Multilingual Translation System for Progress Dialogs**
+- 🌐 Added 52 new FR/EN/DE translation keys (Language/*.json):
+  - **Progress steps** (35 keys):
+    - `step_herald_connection_*`: Checking cookies, initializing browser, loading
+    - `step_scraper_init`: Initializing Herald scraper
+    - `step_herald_search_*`: Searching, loading, extracting, saving, formatting
+    - `step_stats_scraping_*`: RvR, PvP, PvE, wealth, achievements
+    - `step_character_update_*`: 8 steps from extraction → browser closure
+    - `step_cookie_gen_*`: Configuration, opening, user wait, extraction, saving, validation
+    - `step_cleanup`: Common browser closure
+  - **Dialog titles and descriptions** (8 keys):
+    - `progress_stats_update_title/desc`: Stats update
+    - `progress_character_update_title/desc`: Update from Herald
+    - `progress_character_update_main_desc`: Description with character name (context menu)
+    - `progress_cookie_gen_title/desc`: Discord cookie generation
+  - **Status messages** (5 keys):
+    - `progress_stats_complete`: ✅ Statistics retrieved
+    - `progress_character_complete`: ✅ Data retrieved
+    - `progress_cookie_success`: ✅ {count} cookies generated!
+    - `progress_error`: ❌ {error} (generic error message)
+
+**Complete Technical Documentation**
+- 📚 New documentation: Documentations/Dialog/PROGRESS_DIALOG_SYSTEM_EN.md (1900+ lines):
+  - Complete system architecture with ASCII diagrams
+  - Detailed documentation of 3 classes (ProgressStep, StepConfiguration, ProgressStepsDialog)
+  - 9 predefined configurations explained (HERALD_CONNECTION, SCRAPER_INIT, etc.)
+  - Worker Thread Pattern with 4 security patterns
+  - 3 implemented dialogs documented (Stats Update, Character Update, Cookie Generation)
+  - Practical usage examples (simple, custom, error handling)
+  - Multilingual support and performance characteristics
+  - Migration summary (Before/After) with statistics
+
+### 🧰 Modification
+
+**Migration from Hardcoded Texts to Translation System**
+- 🔄 Refactoring UI/progress_dialog_base.py (StepConfiguration):
+  - Migrated 45+ hardcoded FR strings → translation keys
+  - Classes HERALD_CONNECTION, SCRAPER_INIT, HERALD_SEARCH, STATS_SCRAPING, CHARACTER_UPDATE, COOKIE_GENERATION, CLEANUP
+  - Texts now dynamically translated via lang.get()
+- 🎨 ProgressStepsDialog improvements:
+  - Added automatic translation in `__init__()` (label creation)
+  - Added automatic translation in `_update_step_ui()` (state updates)
+  - Import `lang` from Functions.language_manager
+- 🌐 Updated UI/dialogs.py (4 dialogs):
+  - **CharacterSheetDialog.update_rvr_stats()**:
+    - Translated title/description: `progress_stats_update_title/desc`
+    - Success/error messages: `progress_stats_complete`, `progress_error`
+  - **CharacterSheetDialog.update_from_herald()**:
+    - Translated title/description: `progress_character_update_title/desc`
+    - Success/error messages: `progress_character_complete`, `progress_error`
+  - **CookieManagerDialog.generate_cookies()**:
+    - Translated title/description: `progress_cookie_gen_title/desc`
+    - Success/error messages: `progress_cookie_success`, `progress_error`
+- 🔧 Updated main.py (CharacterApp.update_character_from_herald()):
+  - Translated title/description with dynamic character name
+  - Success/error messages: `progress_character_complete`, `progress_error`
+  - Import lang from Functions.language_manager
+
+### 🐛 Fix
+
+**Fixed Double Formatting of Translated Messages**
+- 🛡️ **Problem**: IndexError "Replacement index 0 out of range" when using progress dialogs
+  - Cause: Double .format() call - lang.get() already formats strings, then .format() was called again
+  - Error example: `lang.get("key", default="text {0}").format(value)` → lang.get() returns text without {0}, .format() fails
+- 🔧 **Solution**: Using named parameters in lang.get() kwargs
+  - Changed placeholders: {0} → {char_name}, {count}, {error}
+  - Removed .format() after lang.get()
+  - Pass values directly via kwargs: `lang.get(key, char_name=name, count=nb)`
+- 🎯 **Impact**: 5 fixes applied (main.py × 2, UI/dialogs.py × 3)
+  - No more IndexError when displaying messages
+  - Translated messages displayed correctly with dynamic values
+  - System compatible with all progress dialogs
+
+### 🔚 Removal
+
+**Cleanup of Temporary Development Documentation**
+- 🗑️ Removed 6 temporary documentation files (1985+ lines):
+  - `PROGRESS_DIALOGS_PLANNING.md` (902 lines): Development planning Sessions 1-4
+  - `PROGRESS_DIALOGS_SESSION1_COMPLETE.md` (393 lines): Session 1 report
+  - `ARCHI_WINDOWS.md` (690 lines): Initial architecture reflection
+  - `MIGRATION_SECURITY.md`: Security patterns (consolidated in final doc)
+  - `MIGRATION_CONFIRMATION_UPDATE.md`: Migration confirmation update
+  - `MIGRATION_MULTILANG_UPDATE.md`: Multilingual migration update
+- 📚 Consolidation: All information integrated into PROGRESS_DIALOG_SYSTEM_EN.md
+- 🧹 Result: Clean and complete final documentation (1900+ lines with diagrams)
+
+### 📊 Statistics
+
+- **Files modified**: 7 (3 JSON translations + 3 Python + 1 main.py)
+- **Documentation created**: 1 (PROGRESS_DIALOG_SYSTEM_EN.md, 1900+ lines)
+- **Documentation removed**: 6 (1985+ temporary lines)
+- **Lines added**: ~2200 (156 translations + ~50 code + 1900 doc)
+- **Languages supported**: FR/EN/DE (100% coverage, 52 keys)
+- **Dialogs translated**: 4 (StatsUpdate, CharacterUpdate×2, CookieGen)
+- **Bugs fixed**: 1 (IndexError double .format())
+- **Fix locations**: 5 (main.py × 2, UI/dialogs.py × 3)
+
+---
+
 # ✨✨ v0.109 - 2025-11-14
 
 ### 🧰 Modification

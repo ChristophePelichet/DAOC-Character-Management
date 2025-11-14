@@ -4,6 +4,109 @@ Historique complet des versions du gestionnaire de personnages pour Dark Age of 
 
 ---
 
+# ✨✨ v0.108 - 14/11/2025
+
+### ✨ Ajout
+
+**Système de Traductions Multilingues pour Dialogues de Progression**
+- 🌐 Ajout de 52 nouvelles clés de traduction FR/EN/DE (Language/*.json) :
+  - **Étapes de progression** (35 clés) :
+    - `step_herald_connection_*` : Vérification cookies, initialisation navigateur, chargement
+    - `step_scraper_init` : Initialisation scraper Herald
+    - `step_herald_search_*` : Recherche, chargement, extraction, sauvegarde, formatage
+    - `step_stats_scraping_*` : RvR, PvP, PvE, richesse, achievements
+    - `step_character_update_*` : 8 étapes extraction → fermeture navigateur
+    - `step_cookie_gen_*` : Configuration, ouverture, attente utilisateur, extraction, sauvegarde, validation
+    - `step_cleanup` : Fermeture navigateur commune
+  - **Titres et descriptions de dialogues** (8 clés) :
+    - `progress_stats_update_title/desc` : Mise à jour statistiques
+    - `progress_character_update_title/desc` : Mise à jour depuis Herald
+    - `progress_character_update_main_desc` : Description avec nom personnage (contexte menu)
+    - `progress_cookie_gen_title/desc` : Génération cookies Discord
+  - **Messages de statut** (5 clés) :
+    - `progress_stats_complete` : ✅ Statistiques récupérées
+    - `progress_character_complete` : ✅ Données récupérées
+    - `progress_cookie_success` : ✅ {count} cookies générés !
+    - `progress_error` : ❌ {error} (message erreur générique)
+
+**Documentation Technique Complète**
+- 📚 Nouvelle documentation : Documentations/Dialog/PROGRESS_DIALOG_SYSTEM_EN.md (1900+ lignes) :
+  - Architecture complète du système avec diagrammes ASCII
+  - Documentation détaillée des 3 classes (ProgressStep, StepConfiguration, ProgressStepsDialog)
+  - 9 configurations prédéfinies expliquées (HERALD_CONNECTION, SCRAPER_INIT, etc.)
+  - Worker Thread Pattern avec 4 patterns de sécurité
+  - 3 dialogues implémentés documentés (Stats Update, Character Update, Cookie Generation)
+  - Exemples d'usage pratiques (simple, custom, error handling)
+  - Support multilingue et caractéristiques de performance
+  - Résumé de migration (Before/After) avec statistiques
+
+### 🧰 Modification
+
+**Migration des Textes Hardcodés vers Système de Traduction**
+- 🔄 Refactoring UI/progress_dialog_base.py (StepConfiguration) :
+  - Migration de 45+ chaînes hardcodées FR → clés de traduction
+  - Classes HERALD_CONNECTION, SCRAPER_INIT, HERALD_SEARCH, STATS_SCRAPING, CHARACTER_UPDATE, COOKIE_GENERATION, CLEANUP
+  - Textes maintenant traduits dynamiquement via lang.get()
+- 🎨 Amélioration ProgressStepsDialog :
+  - Ajout traduction automatique dans `__init__()` (création labels)
+  - Ajout traduction automatique dans `_update_step_ui()` (mise à jour états)
+  - Import `lang` depuis Functions.language_manager
+- 🌐 Mise à jour UI/dialogs.py (4 dialogues) :
+  - **CharacterSheetDialog.update_rvr_stats()** :
+    - Titre/description traduits : `progress_stats_update_title/desc`
+    - Messages succès/erreur : `progress_stats_complete`, `progress_error`
+  - **CharacterSheetDialog.update_from_herald()** :
+    - Titre/description traduits : `progress_character_update_title/desc`
+    - Messages succès/erreur : `progress_character_complete`, `progress_error`
+  - **CookieManagerDialog.generate_cookies()** :
+    - Titre/description traduits : `progress_cookie_gen_title/desc`
+    - Messages succès/erreur : `progress_cookie_success`, `progress_error`
+- 🔧 Mise à jour main.py (CharacterApp.update_character_from_herald()) :
+  - Titre/description traduits avec nom personnage dynamique
+  - Messages succès/erreur : `progress_character_complete`, `progress_error`
+  - Import lang depuis Functions.language_manager
+
+### 🐛 Correction
+
+**Correction Double Formatage des Messages Traduits**
+- 🛡️ **Problème** : IndexError "Replacement index 0 out of range" lors de l'utilisation des dialogues de progression
+  - Cause : Double appel .format() - lang.get() formate déjà les chaînes, puis .format() était rappelé
+  - Exemple erreur : `lang.get("key", default="texte {0}").format(valeur)` → lang.get() retourne texte sans {0}, .format() échoue
+- 🔧 **Solution** : Utilisation de paramètres nommés dans lang.get() kwargs
+  - Changement placeholders : {0} → {char_name}, {count}, {error}
+  - Suppression des .format() après lang.get()
+  - Passage valeurs directement via kwargs : `lang.get(key, char_name=nom, count=nb)`
+- 🎯 **Impact** : 5 corrections appliquées (main.py × 2, UI/dialogs.py × 3)
+  - Plus d'erreur IndexError lors affichage messages
+  - Messages traduits affichés correctement avec valeurs dynamiques
+  - Système compatible avec tous les dialogues de progression
+
+### 🔚 Retrait
+
+**Nettoyage Documentation Temporaire de Développement**
+- 🗑️ Suppression de 6 fichiers de documentation temporaire (1985+ lignes) :
+  - `PROGRESS_DIALOGS_PLANNING.md` (902 lignes) : Planning développement Sessions 1-4
+  - `PROGRESS_DIALOGS_SESSION1_COMPLETE.md` (393 lignes) : Rapport Session 1
+  - `ARCHI_WINDOWS.md` (690 lignes) : Réflexion initiale architecture
+  - `MIGRATION_SECURITY.md` : Patterns de sécurité (consolidés dans doc finale)
+  - `MIGRATION_CONFIRMATION_UPDATE.md` : Update confirmation migration
+  - `MIGRATION_MULTILANG_UPDATE.md` : Update multilingue migration
+- 📚 Consolidation : Toutes informations intégrées dans PROGRESS_DIALOG_SYSTEM_EN.md
+- 🧹 Résultat : Documentation finale propre et complète (1900+ lignes avec diagrammes)
+
+### 📊 Statistiques
+
+- **Fichiers modifiés** : 7 (3 JSON traductions + 3 Python + 1 main.py)
+- **Documentation créée** : 1 (PROGRESS_DIALOG_SYSTEM_EN.md, 1900+ lignes)
+- **Documentation supprimée** : 6 (1985+ lignes temporaires)
+- **Lignes ajoutées** : ~2200 (156 traductions + ~50 code + 1900 doc)
+- **Langues supportées** : FR/EN/DE (100% couverture, 52 clés)
+- **Dialogues traduits** : 4 (StatsUpdate, CharacterUpdate×2, CookieGen)
+- **Bugs corrigés** : 1 (IndexError double .format())
+- **Locations fixes** : 5 (main.py × 2, UI/dialogs.py × 3)
+
+---
+
 # ✨✨ v0.109 - 2025-11-14
 
 ### 🧰 Modification

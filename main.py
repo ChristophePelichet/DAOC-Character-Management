@@ -35,8 +35,9 @@ from Functions.tree_manager import TreeManager
 from Functions.character_actions_manager import CharacterActionsManager
 
 # Import des composants UI
-from UI import DebugWindow, CenterIconDelegate, CenterCheckboxDelegate, RealmTitleDelegate, NormalTextDelegate, UrlButtonDelegate, CharacterUpdateDialog, HeraldScraperWorker
-from UI.dialogs import ColumnsConfigDialog, ConfigurationDialog
+from UI import DebugWindow, CenterIconDelegate, CenterCheckboxDelegate, RealmTitleDelegate, NormalTextDelegate, UrlButtonDelegate, CharacterUpdateDialog
+from UI.dialogs import ColumnsConfigDialog, ConfigurationDialog, CharacterUpdateThread
+from UI.progress_dialog_base import ProgressStepsDialog, StepConfiguration
 
 # Configuration de l'application
 setup_logging()
@@ -326,7 +327,7 @@ class CharacterApp(QMainWindow):
         self.actions_manager.duplicate_selected_character()
     
     def update_character_from_herald(self):
-        """Met à jour le personnage sélectionné depuis Herald"""
+        """Met à jour le personnage sélectionné depuis Herald (avec ProgressStepsDialog)"""
         # Retrieve the personnage sélectionné
         selected_indices = self.character_tree.selectedIndexes()
         if not selected_indices:
@@ -360,59 +361,139 @@ class CharacterApp(QMainWindow):
         # Stocker the Data of the personnage for the callback
         self._current_character_data = character_data
         
-        # Create une fenêtre of progression personnalisée with animation
-        self.progress_dialog = QDialog(self)
-        self.progress_dialog.setWindowTitle("⏳ Mise à jour en cours...")
-        self.progress_dialog.setModal(True)
-        self.progress_dialog.setFixedSize(450, 150)
+        # Build progress steps (8 steps: Extract name → Init → Load cookies → Navigate → Wait → Extract data → Format → Close)
+        steps = StepConfiguration.build_steps(
+            StepConfiguration.CHARACTER_UPDATE
+        )
         
-        progress_layout = QVBoxLayout(self.progress_dialog)
-        progress_layout.setSpacing(15)
+        # Create progress dialog with new system
+        from Functions.language_manager import lang
+        char_name = character_data.get('name', 'personnage')
+        self.progress_dialog = ProgressStepsDialog(
+            parent=self,
+            title=lang.get("progress_character_update_title", default="🔄 Mise à jour depuis Herald..."),
+            steps=steps,
+            description=lang.get("progress_character_update_main_desc", default=f"Récupération des données de {char_name} depuis le Herald Eden", char_name=char_name),
+            show_progress_bar=True,
+            determinate_progress=True,
+            allow_cancel=False
+        )
         
-        # Icône and titre
-        title_layout = QHBoxLayout()
-        title_label = QLabel("🌐 Récupération des données depuis Eden Herald...")
-        from Functions.theme_manager import get_scaled_size
-        title_label.setStyleSheet(f"font-size: {get_scaled_size(12):.1f}pt; font-weight: bold;")
-        title_layout.addWidget(title_label)
-        progress_layout.addLayout(title_layout)
+        # Create thread
+        self.char_update_thread = CharacterUpdateThread(herald_url)
         
-        # Message of détail
-        detail_label = QLabel("Connexion au serveur et extraction des informations du personnage.")
-        detail_label.setWordWrap(True)
-        detail_label.setStyleSheet(f"color: #666; font-size: {get_scaled_size(10):.1f}pt;")
-        progress_layout.addWidget(detail_label)
+        # ✅ Pattern 1: Connect via thread-safe wrappers
+        self.char_update_thread.step_started.connect(self._on_main_char_update_step_started)
+        self.char_update_thread.step_completed.connect(self._on_main_char_update_step_completed)
+        self.char_update_thread.step_error.connect(self._on_main_char_update_step_error)
+        self.char_update_thread.update_finished.connect(self._on_herald_scraping_finished_main)
         
-        # Barre of progression indéterminée (animation)
-        progress_bar = QProgressBar()
-        progress_bar.setRange(0, 0)  # Mode indéterminé = animation
-        progress_bar.setTextVisible(False)
-        progress_bar.setFixedHeight(25)
-        progress_layout.addWidget(progress_bar)
+        # ✅ Pattern 4: Connect rejected signal
+        self.progress_dialog.rejected.connect(self._on_main_char_update_progress_dialog_closed)
         
-        # Message d'attente
-        wait_label = QLabel("⏱️ Veuillez patienter, cette opération peut prendre quelques secondes...")
-        wait_label.setStyleSheet(f"color: #888; font-size: {get_scaled_size(9):.1f}pt; font-style: italic;")
-        wait_label.setWordWrap(True)
-        progress_layout.addWidget(wait_label)
-        
-        progress_layout.addStretch()
-        
-        # Create and démarrer the worker thread
-        self.herald_worker = HeraldScraperWorker(herald_url)
-        self.herald_worker.finished.connect(self._on_herald_scraping_finished_main)
-        
-        # Afficher the dialogue and démarrer the worker
+        # Show dialog and start thread
         self.progress_dialog.show()
-        self.herald_worker.start()
+        self.char_update_thread.start()
+    
+    # ============================================================================
+    # WRAPPERS THREAD-SAFE POUR CHARACTER UPDATE (MAIN WINDOW)
+    # ============================================================================
+    
+    def _on_main_char_update_step_started(self, step_index):
+        """✅ Pattern 1: Wrapper thread-safe pour step_started"""
+        if hasattr(self, 'progress_dialog') and self.progress_dialog:
+            try:
+                self.progress_dialog.start_step(step_index)
+            except RuntimeError:
+                pass  # Dialog déjà supprimé
+    
+    def _on_main_char_update_step_completed(self, step_index):
+        """✅ Pattern 1: Wrapper thread-safe pour step_completed"""
+        if hasattr(self, 'progress_dialog') and self.progress_dialog:
+            try:
+                self.progress_dialog.complete_step(step_index)
+            except RuntimeError:
+                pass
+    
+    def _on_main_char_update_step_error(self, step_index, error_message):
+        """✅ Pattern 1: Wrapper thread-safe pour step_error"""
+        if hasattr(self, 'progress_dialog') and self.progress_dialog:
+            try:
+                self.progress_dialog.error_step(step_index, error_message)
+            except RuntimeError:
+                pass
+    
+    def _on_main_char_update_progress_dialog_closed(self):
+        """✅ Pattern 4: Arrêt propre quand dialog fermé par utilisateur"""
+        logging.info("Dialogue char update fermé par utilisateur (main) - Arrêt mise à jour")
+        self._stop_main_char_update_thread()
+    
+    def _stop_main_char_update_thread(self):
+        """✅ Pattern 2+3: Arrêt propre du thread avec cleanup AVANT terminate"""
+        if hasattr(self, 'char_update_thread') and self.char_update_thread:
+            if self.char_update_thread.isRunning():
+                # ✅ Pattern 3: Demander arrêt gracieux
+                self.char_update_thread.request_stop()
+                
+                # Déconnecter les signaux
+                try:
+                    self.char_update_thread.step_started.disconnect()
+                    self.char_update_thread.step_completed.disconnect()
+                    self.char_update_thread.step_error.disconnect()
+                    self.char_update_thread.update_finished.disconnect()
+                except:
+                    pass
+                
+                # Attendre 3 secondes
+                self.char_update_thread.wait(3000)
+                
+                # ✅ Pattern 2: Cleanup AVANT terminate si toujours running
+                if self.char_update_thread.isRunning():
+                    logging.warning("Thread char update non terminé (main) - Cleanup forcé")
+                    self.char_update_thread.cleanup_external_resources()
+                    self.char_update_thread.terminate()
+                    self.char_update_thread.wait()
+                
+                logging.info("Thread char update arrêté proprement (main)")
+            
+            self.char_update_thread = None
+        
+        # Nettoyer le dialogue
+        if hasattr(self, 'progress_dialog'):
+            try:
+                self.progress_dialog.close()
+                self.progress_dialog.deleteLater()
+            except:
+                pass
+            
+            # Supprimer l'attribut seulement s'il existe encore
+            if hasattr(self, 'progress_dialog'):
+                delattr(self, 'progress_dialog')
     
     def _on_herald_scraping_finished_main(self, success, new_data, error_msg):
-        """Callback appelé quand le scraping est terminé (depuis main)"""
-        # Fermer and supprimer the fenêtre of progression
-        if hasattr(self, 'progress_dialog'):
-            self.progress_dialog.close()
-            self.progress_dialog.deleteLater()
-            delattr(self, 'progress_dialog')
+        """Callback appelé quand le scraping est terminé (depuis main) - VERSION MIGRÉE"""
+        # Afficher succès/erreur dans le dialogue avant fermeture
+        if hasattr(self, 'progress_dialog') and self.progress_dialog:
+            try:
+                if success:
+                    success_text = lang.get("progress_character_complete", default="✅ Données récupérées")
+                    self.progress_dialog.set_status_message(f"{success_text} !", "#4CAF50")
+                else:
+                    error_text = lang.get("progress_error", default="❌ {error}", error=f"Erreur: {error_msg}")
+                    self.progress_dialog.set_status_message(error_text, "#f44336")
+                
+                # Attendre 1.5s pour que l'utilisateur voie le message
+                QTimer.singleShot(1500, lambda: self._process_herald_update_result(success, new_data, error_msg))
+            except RuntimeError:
+                # Dialog déjà supprimé
+                self._process_herald_update_result(success, new_data, error_msg)
+        else:
+            self._process_herald_update_result(success, new_data, error_msg)
+    
+    def _process_herald_update_result(self, success, new_data, error_msg):
+        """Traiter le résultat de la mise à jour Herald après affichage du status"""
+        # Fermer et nettoyer le thread + dialogue
+        self._stop_main_char_update_thread()
         
         if not success:
             QMessageBox.critical(

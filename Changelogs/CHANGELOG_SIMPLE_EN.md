@@ -2,6 +2,37 @@
 
 ---
 
+# ✨ v0.108
+
+### ✨ Added
+
+**Multilingual Support for Progress Dialogs**
+- 🌍 52 new FR/EN/DE translations for all progress dialogs
+- 📚 Complete technical documentation with diagrams (PROGRESS_DIALOG_SYSTEM_EN.md, 1900+ lines)
+- 🎯 Full support for 3 languages in user interface
+
+### 🧰 Modified
+
+**Migration to Translation System**
+- 🔄 All dialog texts now automatically translated
+- 🌐 4 migrated dialogs: Stats update, Character update (×2), Cookie generation
+- ✅ Fully multilingual interface (FR/EN/DE)
+
+### 🐛 Fixed
+
+**Message Formatting Error**
+- 🛡️ Fixed "Index out of range" crash when displaying messages
+- 🔧 Migrated to named parameters ({char_name}, {count}, {error})
+- 🎯 Translated messages displayed correctly with dynamic values
+
+### 🔚 Removed
+
+**Documentation Cleanup**
+- 🗑️ Removed 6 temporary development files (1985+ lines)
+- 🧹 Clean and consolidated final documentation
+
+---
+
 # ✨ v0.109
 
 ### 🧰 Modified

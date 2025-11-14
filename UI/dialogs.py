@@ -18,7 +18,7 @@ from PySide6.QtWidgets import (
     QDialogButtonBox, QFileDialog, QTableWidget, QTableWidgetItem, QHeaderView,
     QWidget, QTextEdit, QApplication, QProgressBar, QMenu, QGridLayout, QFrame, QScrollArea
 )
-from PySide6.QtCore import Qt, QThread, Signal
+from PySide6.QtCore import Qt, QThread, Signal, QTimer
 from PySide6.QtGui import QBrush, QColor, QIcon, QPixmap
 from Functions.language_manager import lang
 from Functions.config_manager import config, get_config_dir
@@ -1281,313 +1281,452 @@ class CharacterSheetWindow(QDialog):
             url = 'https://' + url
             self.herald_url_edit.setText(url)
         
-        # Disable button during update
+        # Désactiver le bouton pendant la mise à jour
         self.update_rvr_button.setEnabled(False)
-        self.update_rvr_button.setText("⏳ Récupération...")
-        QApplication.processEvents()
         
-        try:
-            from Functions.character_profile_scraper import CharacterProfileScraper
+        # Import des composants nécessaires
+        from UI.progress_dialog_base import ProgressStepsDialog, StepConfiguration
+        
+        # Construire les étapes (SCRAPER_INIT + STATS_SCRAPING + CLEANUP)
+        steps = StepConfiguration.build_steps(
+            StepConfiguration.SCRAPER_INIT,   # Step 0: Init scraper
+            StepConfiguration.STATS_SCRAPING, # Steps 1-5: RvR, PvP, PvE, Wealth, Achievements
+            StepConfiguration.CLEANUP         # Step 6: Close browser
+        )
+        
+        # Créer le dialogue de progression
+        self.progress_dialog = ProgressStepsDialog(
+            parent=self,
+            title=lang.get("progress_stats_update_title", default="📊 Mise à jour des statistiques..."),
+            steps=steps,
+            description=lang.get("progress_stats_update_desc", default="Récupération des statistiques RvR, PvP, PvE et Wealth depuis le Herald Eden"),
+            show_progress_bar=True,
+            determinate_progress=True,  # Mode avec pourcentage
+            allow_cancel=False
+        )
+        
+        # Créer le thread de mise à jour
+        self.stats_update_thread = StatsUpdateThread(url)
+        
+        # ✅ Pattern 1 : Connecter via wrappers thread-safe
+        self.stats_update_thread.step_started.connect(self._on_stats_step_started)
+        self.stats_update_thread.step_completed.connect(self._on_stats_step_completed)
+        self.stats_update_thread.step_error.connect(self._on_stats_step_error)
+        
+        # Connecter les signaux de fin
+        self.stats_update_thread.stats_updated.connect(self._on_stats_updated)
+        self.stats_update_thread.update_failed.connect(self._on_stats_failed)
+        
+        # ✅ Pattern 4 : Connecter rejected AVANT show()
+        self.progress_dialog.rejected.connect(self._on_stats_progress_dialog_closed)
+        
+        # Afficher le dialogue et démarrer le worker
+        self.progress_dialog.show()
+        self.stats_update_thread.start()
+    
+    # ✅ Pattern 1 : Wrappers thread-safe pour stats update
+    def _on_stats_step_started(self, step_index):
+        """Wrapper thread-safe pour start_step"""
+        if hasattr(self, 'progress_dialog') and self.progress_dialog:
+            try:
+                self.progress_dialog.start_step(step_index)
+            except RuntimeError:
+                pass
+    
+    def _on_stats_step_completed(self, step_index):
+        """Wrapper thread-safe pour complete_step"""
+        if hasattr(self, 'progress_dialog') and self.progress_dialog:
+            try:
+                self.progress_dialog.complete_step(step_index)
+            except RuntimeError:
+                pass
+    
+    def _on_stats_step_error(self, step_index, error_message):
+        """Wrapper thread-safe pour error_step"""
+        if hasattr(self, 'progress_dialog') and self.progress_dialog:
+            try:
+                self.progress_dialog.error_step(step_index, error_message)
+            except RuntimeError:
+                pass
+    
+    def _on_stats_progress_dialog_closed(self):
+        """✅ Pattern 4 : Appelé quand utilisateur ferme le dialogue de stats"""
+        import logging
+        logging.info("Dialogue stats fermé par utilisateur - Arrêt mise à jour")
+        
+        # Arrêter le thread proprement
+        self._stop_stats_thread()
+        
+        # Réactiver le bouton
+        if not self.herald_scraping_in_progress:
+            self.update_rvr_button.setEnabled(True)
+    
+    def _stop_stats_thread(self):
+        """✅ Pattern 2 + 3 : Arrête le thread stats avec cleanup complet"""
+        if hasattr(self, 'stats_update_thread') and self.stats_update_thread:
+            if self.stats_update_thread.isRunning():
+                # 1. Demander arrêt gracieux
+                self.stats_update_thread.request_stop()
+                
+                # 2. Déconnecter signaux
+                try:
+                    self.stats_update_thread.step_started.disconnect()
+                    self.stats_update_thread.step_completed.disconnect()
+                    self.stats_update_thread.step_error.disconnect()
+                    self.stats_update_thread.stats_updated.disconnect()
+                    self.stats_update_thread.update_failed.disconnect()
+                except:
+                    pass
+                
+                # 3. Attendre 3s
+                self.stats_update_thread.wait(3000)
+                
+                # 4. ✅ CRITIQUE : Cleanup AVANT terminate()
+                if self.stats_update_thread.isRunning():
+                    import logging
+                    logging.warning("Thread stats non terminé - Cleanup forcé")
+                    self.stats_update_thread.cleanup_external_resources()
+                    self.stats_update_thread.terminate()
+                    self.stats_update_thread.wait()
+                
+                import logging
+                logging.info("Thread stats arrêté proprement")
             
-            # Initialize scraper (cookie_manager created automatically if needed)
-            scraper = CharacterProfileScraper()
+            self.stats_update_thread = None
+        
+        # Fermer le dialogue
+        if hasattr(self, 'progress_dialog'):
+            try:
+                self.progress_dialog.close()
+                self.progress_dialog.deleteLater()
+            except:
+                pass
             
-            # Connect to Herald using centralized function
-            success, error_message = scraper.connect(headless=False)
+            # Supprimer l'attribut seulement s'il existe encore
+            if hasattr(self, 'progress_dialog'):
+                delattr(self, 'progress_dialog')
+    
+    def _on_stats_updated(self, results):
+        """Appelé quand les stats sont mises à jour (succès ou partiel)"""
+        from PySide6.QtCore import QTimer
+        
+        # Fermer le dialogue de progression
+        if hasattr(self, 'progress_dialog'):
+            success_text = lang.get("progress_stats_complete", default="✅ Statistiques récupérées")
+            self.progress_dialog.complete_all(success_text)
+            QTimer.singleShot(1500, self.progress_dialog.close)
+        
+        # Extraire les résultats
+        result_rvr = results.get('rvr', {})
+        result_pvp = results.get('pvp', {})
+        result_pve = results.get('pve', {})
+        result_wealth = results.get('wealth', {})
+        result_achievements = results.get('achievements', {})
+        
+        all_success = result_rvr.get('success') and result_pvp.get('success') and result_pve.get('success') and result_wealth.get('success')
+        
+        if all_success:
+            # Mise à jour complète réussie
+            self._update_all_stats_ui(result_rvr, result_pvp, result_pve, result_wealth, result_achievements)
             
-            if not success:
-                QMessageBox.critical(
-                    self,
-                    "Erreur de connexion",
-                    f"Impossible de se connecter au Herald Eden:\n{error_message}"
-                )
-                return
+            # Sauvegarder dans le JSON
+            from Functions.character_manager import save_character
+            success, msg = save_character(self.character_data, allow_overwrite=True)
             
-            # Scrape RvR stats (Captures)
-            result_rvr = scraper.scrape_rvr_captures(url)
-            
-            # Scrape PvP stats (Kills, Deathblows, Solo Kills)
-            result_pvp = scraper.scrape_pvp_stats(url)
-            
-            # Scrape PvE stats (Dragon, Legion, etc.)
-            result_pve = scraper.scrape_pve_stats(url)
-            
-            # Scrape Wealth stats (Money)
-            result_wealth = scraper.scrape_wealth_money(url)
-            
-            # Scrape Achievements
-            result_achievements = scraper.scrape_achievements(url)
-            
-            scraper.close()
-            
-            # Check if all succeeded (achievements optional)
-            all_success = result_rvr['success'] and result_pvp['success'] and result_pve['success'] and result_wealth['success']
-            
-            if all_success:
-                # Update UI labels - RvR Captures
+            if success:
+                # Message de succès
                 tower = result_rvr['tower_captures']
                 keep = result_rvr['keep_captures']
                 relic = result_rvr['relic_captures']
-                
-                self.tower_captures_label.setText(f"{tower:,}")
-                self.keep_captures_label.setText(f"{keep:,}")
-                self.relic_captures_label.setText(f"{relic:,}")
-                
-                # Update UI labels - PvP Stats
                 solo_kills = result_pvp['solo_kills']
                 solo_kills_alb = result_pvp['solo_kills_alb']
                 solo_kills_hib = result_pvp['solo_kills_hib']
                 solo_kills_mid = result_pvp['solo_kills_mid']
-                
                 deathblows = result_pvp['deathblows']
                 deathblows_alb = result_pvp['deathblows_alb']
                 deathblows_hib = result_pvp['deathblows_hib']
                 deathblows_mid = result_pvp['deathblows_mid']
-                
                 kills = result_pvp['kills']
                 kills_alb = result_pvp['kills_alb']
                 kills_hib = result_pvp['kills_hib']
                 kills_mid = result_pvp['kills_mid']
-                
-                # Update main labels (totals)
-                self.solo_kills_label.setText(f"{solo_kills:,}")
-                self.deathblows_label.setText(f"{deathblows:,}")
-                self.kills_label.setText(f"{kills:,}")
-                
-                # Update detail labels (realm breakdown with colors)
-                self.solo_kills_detail_label.setText(
-                    f'→ <span style="color: #C41E3A;">Alb</span>: {solo_kills_alb:,}  |  '
-                    f'<span style="color: #228B22;">Hib</span>: {solo_kills_hib:,}  |  '
-                    f'<span style="color: #4169E1;">Mid</span>: {solo_kills_mid:,}'
-                )
-                self.deathblows_detail_label.setText(
-                    f'→ <span style="color: #C41E3A;">Alb</span>: {deathblows_alb:,}  |  '
-                    f'<span style="color: #228B22;">Hib</span>: {deathblows_hib:,}  |  '
-                    f'<span style="color: #4169E1;">Mid</span>: {deathblows_mid:,}'
-                )
-                self.kills_detail_label.setText(
-                    f'→ <span style="color: #C41E3A;">Alb</span>: {kills_alb:,}  |  '
-                    f'<span style="color: #228B22;">Hib</span>: {kills_hib:,}  |  '
-                    f'<span style="color: #4169E1;">Mid</span>: {kills_mid:,}'
-                )
-                
-                # Update UI labels - PvE Stats
                 dragon_kills = result_pve['dragon_kills']
                 legion_kills = result_pve['legion_kills']
                 mini_dragon_kills = result_pve['mini_dragon_kills']
                 epic_encounters = result_pve['epic_encounters']
                 epic_dungeons = result_pve['epic_dungeons']
                 sobekite = result_pve['sobekite']
-                
-                self.dragon_kills_value.setText(f"{dragon_kills:,}")
-                self.legion_kills_value.setText(f"{legion_kills:,}")
-                self.mini_dragon_kills_value.setText(f"{mini_dragon_kills:,}")
-                self.epic_encounters_value.setText(f"{epic_encounters:,}")
-                self.epic_dungeons_value.setText(f"{epic_dungeons:,}")
-                self.sobekite_value.setText(f"{sobekite:,}")
-                
-                # Update UI labels - Wealth Stats (money is a string like "18p 128g")
                 money = result_wealth['money']
-                self.money_label.setText(str(money))
                 
-                # Update UI - Achievements (optional, no error if failed)
-                if result_achievements['success']:
-                    achievements = result_achievements['achievements']
-                    self._update_achievements_display(achievements)
-                    # Update character data
-                    self.character_data['achievements'] = achievements
-                
-                # Update character data - RvR Captures
-                self.character_data['tower_captures'] = tower
-                self.character_data['keep_captures'] = keep
-                self.character_data['relic_captures'] = relic
-                
-                # Update character data - PvP Stats (totals)
-                self.character_data['solo_kills'] = solo_kills
-                self.character_data['deathblows'] = deathblows
-                self.character_data['kills'] = kills
-                
-                # Update character data - PvP Stats (realm breakdown)
-                self.character_data['solo_kills_alb'] = solo_kills_alb
-                self.character_data['solo_kills_hib'] = solo_kills_hib
-                self.character_data['solo_kills_mid'] = solo_kills_mid
-                self.character_data['deathblows_alb'] = deathblows_alb
-                self.character_data['deathblows_hib'] = deathblows_hib
-                self.character_data['deathblows_mid'] = deathblows_mid
-                self.character_data['kills_alb'] = kills_alb
-                self.character_data['kills_hib'] = kills_hib
-                self.character_data['kills_mid'] = kills_mid
-                
-                # Update character data - PvE Stats
-                self.character_data['dragon_kills'] = dragon_kills
-                self.character_data['legion_kills'] = legion_kills
-                self.character_data['mini_dragon_kills'] = mini_dragon_kills
-                self.character_data['epic_encounters'] = epic_encounters
-                self.character_data['epic_dungeons'] = epic_dungeons
-                self.character_data['sobekite'] = sobekite
-                
-                # Update character data - Wealth Stats
-                self.character_data['money'] = money
-                
-                # Save to JSON
-                from Functions.character_manager import save_character
-                success, msg = save_character(self.character_data, allow_overwrite=True)
-                
-                if success:
-                    QMessageBox.information(
-                        self,
-                        "Succès",
-                        f"Statistiques mises à jour :\n\n"
-                        f"⚔️ RvR\n"
-                        f"🗼 Tower Captures: {tower:,}\n"
-                        f"🏰 Keep Captures: {keep:,}\n"
-                        f"💎 Relic Captures: {relic:,}\n\n"
-                        f"🗡️ PvP\n"
-                        f"⚔️ Solo Kills: {solo_kills:,} (Alb: {solo_kills_alb:,}, Hib: {solo_kills_hib:,}, Mid: {solo_kills_mid:,})\n"
-                        f"💀 Deathblows: {deathblows:,} (Alb: {deathblows_alb:,}, Hib: {deathblows_hib:,}, Mid: {deathblows_mid:,})\n"
-                        f"🎯 Kills: {kills:,} (Alb: {kills_alb:,}, Hib: {kills_hib:,}, Mid: {kills_mid:,})\n\n"
-                        f"🐉 PvE\n"
-                        f"🐉 Dragons: {dragon_kills:,}  |  👹 Légions: {legion_kills:,}\n"
-                        f"🐲 Mini Dragons: {mini_dragon_kills:,}  |  ⚔️ Epic Encounters: {epic_encounters:,}\n"
-                        f"🏛️ Epic Dungeons: {epic_dungeons:,}  |  🐊 Sobekite: {sobekite:,}\n\n"
-                        f"💰 Monnaie\n"
-                        f"Total: {money}"  # Money is a string like "18p 128g", display as-is
-                    )
-                    
-                    log_with_action(logger_char, "info", 
-                                  f"RvR stats updated: T={tower}, K={keep}, R={relic}, "
-                                  f"SK={solo_kills}(A:{solo_kills_alb},H:{solo_kills_hib},M:{solo_kills_mid}), "
-                                  f"DB={deathblows}(A:{deathblows_alb},H:{deathblows_hib},M:{deathblows_mid}), "
-                                  f"K={kills}(A:{kills_alb},H:{kills_hib},M:{kills_mid})", 
-                                  action="RVR_UPDATE")
-                else:
-                    QMessageBox.warning(
-                        self,
-                        "Avertissement",
-                        f"Statistiques récupérées mais erreur de sauvegarde : {msg}"
-                    )
-            elif result_rvr['success'] and not result_pvp['success']:
-                # RvR succeeded but PvP failed - partial update
-                QMessageBox.warning(
+                QMessageBox.information(
                     self,
-                    "Mise à jour partielle",
-                    f"✅ RvR Captures récupérées avec succès\n"
-                    f"❌ Statistiques PvP non disponibles\n\n"
-                    f"Erreur PvP: {result_pvp.get('error', 'Erreur inconnue')}\n\n"
-                    f"Cela peut arriver si le personnage n'a pas encore de statistiques PvP.\n"
-                    f"Les Tower/Keep/Relic Captures ont été sauvegardées."
+                    "Succès",
+                    f"Statistiques mises à jour :\n\n"
+                    f"⚔️ RvR\n"
+                    f"🗼 Tower Captures: {tower:,}\n"
+                    f"🏰 Keep Captures: {keep:,}\n"
+                    f"💎 Relic Captures: {relic:,}\n\n"
+                    f"🗡️ PvP\n"
+                    f"⚔️ Solo Kills: {solo_kills:,} (Alb: {solo_kills_alb:,}, Hib: {solo_kills_hib:,}, Mid: {solo_kills_mid:,})\n"
+                    f"💀 Deathblows: {deathblows:,} (Alb: {deathblows_alb:,}, Hib: {deathblows_hib:,}, Mid: {deathblows_mid:,})\n"
+                    f"🎯 Kills: {kills:,} (Alb: {kills_alb:,}, Hib: {kills_hib:,}, Mid: {kills_mid:,})\n\n"
+                    f"🐉 PvE\n"
+                    f"🐉 Dragons: {dragon_kills:,}  |  👹 Légions: {legion_kills:,}\n"
+                    f"🐲 Mini Dragons: {mini_dragon_kills:,}  |  ⚔️ Epic Encounters: {epic_encounters:,}\n"
+                    f"🏛️ Epic Dungeons: {epic_dungeons:,}  |  🐊 Sobekite: {sobekite:,}\n\n"
+                    f"💰 Monnaie\n"
+                    f"Total: {money}"
                 )
                 
-                # Update only RvR data
-                tower = result_rvr['tower_captures']
-                keep = result_rvr['keep_captures']
-                relic = result_rvr['relic_captures']
-                
-                self.tower_captures_label.setText(f"{tower:,}")
-                self.keep_captures_label.setText(f"{keep:,}")
-                self.relic_captures_label.setText(f"{relic:,}")
-                
-                self.character_data['tower_captures'] = tower
-                self.character_data['keep_captures'] = keep
-                self.character_data['relic_captures'] = relic
-                
-                from Functions.character_manager import save_character
-                save_character(self.character_data, allow_overwrite=True)
-                
-            elif not result_rvr['success'] and result_pvp['success']:
-                # PvP succeeded but RvR failed - partial update
-                QMessageBox.warning(
-                    self,
-                    "Mise à jour partielle",
-                    f"❌ RvR Captures non disponibles\n"
-                    f"✅ Statistiques PvP récupérées avec succès\n\n"
-                    f"Erreur RvR: {result_rvr.get('error', 'Erreur inconnue')}\n\n"
-                    f"Les statistiques PvP ont été sauvegardées."
-                )
-                
-                # Update only PvP data
-                solo_kills = result_pvp['solo_kills']
-                solo_kills_alb = result_pvp['solo_kills_alb']
-                solo_kills_hib = result_pvp['solo_kills_hib']
-                solo_kills_mid = result_pvp['solo_kills_mid']
-                
-                deathblows = result_pvp['deathblows']
-                deathblows_alb = result_pvp['deathblows_alb']
-                deathblows_hib = result_pvp['deathblows_hib']
-                deathblows_mid = result_pvp['deathblows_mid']
-                
-                kills = result_pvp['kills']
-                kills_alb = result_pvp['kills_alb']
-                kills_hib = result_pvp['kills_hib']
-                kills_mid = result_pvp['kills_mid']
-                
-                self.solo_kills_label.setText(f"{solo_kills:,}")
-                self.deathblows_label.setText(f"{deathblows:,}")
-                self.kills_label.setText(f"{kills:,}")
-                
-                self.solo_kills_detail_label.setText(
-                    f'→ <span style="color: #C41E3A;">Alb</span>: {solo_kills_alb:,}  |  '
-                    f'<span style="color: #228B22;">Hib</span>: {solo_kills_hib:,}  |  '
-                    f'<span style="color: #4169E1;">Mid</span>: {solo_kills_mid:,}'
-                )
-                self.deathblows_detail_label.setText(
-                    f'→ <span style="color: #C41E3A;">Alb</span>: {deathblows_alb:,}  |  '
-                    f'<span style="color: #228B22;">Hib</span>: {deathblows_hib:,}  |  '
-                    f'<span style="color: #4169E1;">Mid</span>: {deathblows_mid:,}'
-                )
-                self.kills_detail_label.setText(
-                    f'→ <span style="color: #C41E3A;">Alb</span>: {kills_alb:,}  |  '
-                    f'<span style="color: #228B22;">Hib</span>: {kills_hib:,}  |  '
-                    f'<span style="color: #4169E1;">Mid</span>: {kills_mid:,}'
-                )
-                
-                self.character_data['solo_kills'] = solo_kills
-                self.character_data['deathblows'] = deathblows
-                self.character_data['kills'] = kills
-                self.character_data['solo_kills_alb'] = solo_kills_alb
-                self.character_data['solo_kills_hib'] = solo_kills_hib
-                self.character_data['solo_kills_mid'] = solo_kills_mid
-                self.character_data['deathblows_alb'] = deathblows_alb
-                self.character_data['deathblows_hib'] = deathblows_hib
-                self.character_data['deathblows_mid'] = deathblows_mid
-                self.character_data['kills_alb'] = kills_alb
-                self.character_data['kills_hib'] = kills_hib
-                self.character_data['kills_mid'] = kills_mid
-                
-                from Functions.character_manager import save_character
-                save_character(self.character_data, allow_overwrite=True)
+                log_with_action(logger_char, "info", 
+                              f"RvR stats updated: T={tower}, K={keep}, R={relic}, "
+                              f"SK={solo_kills}(A:{solo_kills_alb},H:{solo_kills_hib},M:{solo_kills_mid}), "
+                              f"DB={deathblows}(A:{deathblows_alb},H:{deathblows_hib},M:{deathblows_mid}), "
+                              f"K={kills}(A:{kills_alb},H:{kills_hib},M:{kills_mid})", 
+                              action="RVR_UPDATE")
             else:
-                # Show which stats failed
-                error_msg = "Impossible de récupérer les statistiques :\n\n"
-                if not result_rvr['success']:
-                    error_msg += f"❌ RvR Captures: {result_rvr.get('error', 'Erreur inconnue')}\n"
-                if not result_pvp['success']:
-                    error_msg += f"❌ PvP Stats: {result_pvp.get('error', 'Erreur inconnue')}\n"
-                if not result_pve['success']:
-                    error_msg += f"❌ PvE Stats: {result_pve.get('error', 'Erreur inconnue')}\n"
-                if not result_wealth['success']:
-                    error_msg += f"❌ Wealth: {result_wealth.get('error', 'Erreur inconnue')}\n"
-                
-                QMessageBox.critical(
+                QMessageBox.warning(
                     self,
-                    "Erreur",
-                    error_msg
+                    "Avertissement",
+                    f"Statistiques récupérées mais erreur de sauvegarde : {msg}"
                 )
         
-        except Exception as e:
-            import traceback
-            error_msg = f"Erreur lors de la mise à jour des stats RvR:\n{str(e)}\n\n{traceback.format_exc()}"
-            log_with_action(logger_char, "error", f"RvR stats update error: {e}", action="ERROR")
+        elif result_rvr.get('success') and not result_pvp.get('success'):
+            # Mise à jour partielle : RvR OK, PvP KO
+            self._update_partial_stats_ui(result_rvr, None, None, None, None)
+            
+            QMessageBox.warning(
+                self,
+                "Mise à jour partielle",
+                f"✅ RvR Captures récupérées avec succès\n"
+                f"❌ Statistiques PvP non disponibles\n\n"
+                f"Erreur PvP: {result_pvp.get('error', 'Erreur inconnue')}\n\n"
+                f"Cela peut arriver si le personnage n'a pas encore de statistiques PvP.\n"
+                f"Les Tower/Keep/Relic Captures ont été sauvegardées."
+            )
+        
+        elif not result_rvr.get('success') and result_pvp.get('success'):
+            # Mise à jour partielle : PvP OK, RvR KO
+            self._update_partial_stats_ui(None, result_pvp, None, None, None)
+            
+            QMessageBox.warning(
+                self,
+                "Mise à jour partielle",
+                f"❌ RvR Captures non disponibles\n"
+                f"✅ Statistiques PvP récupérées avec succès\n\n"
+                f"Erreur RvR: {result_rvr.get('error', 'Erreur inconnue')}\n\n"
+                f"Les statistiques PvP ont été sauvegardées."
+            )
+        
+        else:
+            # Échec complet ou multiple
+            error_msg = "Impossible de récupérer les statistiques :\n\n"
+            if not result_rvr.get('success'):
+                error_msg += f"❌ RvR Captures: {result_rvr.get('error', 'Erreur inconnue')}\n"
+            if not result_pvp.get('success'):
+                error_msg += f"❌ PvP Stats: {result_pvp.get('error', 'Erreur inconnue')}\n"
+            if not result_pve.get('success'):
+                error_msg += f"❌ PvE Stats: {result_pve.get('error', 'Erreur inconnue')}\n"
+            if not result_wealth.get('success'):
+                error_msg += f"❌ Wealth: {result_wealth.get('error', 'Erreur inconnue')}\n"
+            
             QMessageBox.critical(self, "Erreur", error_msg)
         
-        finally:
-            # Restaurer le texte du bouton
-            self.update_rvr_button.setText(lang.get("update_rvr_pvp_button"))
+        # Réactiver le bouton
+        if not self.herald_scraping_in_progress:
+            self.update_rvr_button.setEnabled(True)
+    
+    def _on_stats_failed(self, error_message):
+        """Appelé en cas d'échec complet de la mise à jour"""
+        from PySide6.QtCore import QTimer
+        
+        # Fermer le dialogue de progression
+        if hasattr(self, 'progress_dialog'):
+            error_text = lang.get("progress_error", default="❌ {error}", error=error_message)
+            self.progress_dialog.set_status_message(error_text, "#F44336")
+            QTimer.singleShot(2000, self.progress_dialog.close)
+        
+        # Afficher l'erreur
+        QMessageBox.critical(
+            self,
+            "Erreur",
+            f"Erreur lors de la mise à jour des stats:\n{error_message}"
+        )
+        
+        # Réactiver le bouton
+        if not self.herald_scraping_in_progress:
+            self.update_rvr_button.setEnabled(True)
+        
+        log_with_action(logger_char, "error", f"Stats update error: {error_message}", action="ERROR")
+    
+    def _update_all_stats_ui(self, result_rvr, result_pvp, result_pve, result_wealth, result_achievements):
+        """Met à jour tous les labels UI avec les stats complètes"""
+        # RvR Captures
+        tower = result_rvr['tower_captures']
+        keep = result_rvr['keep_captures']
+        relic = result_rvr['relic_captures']
+        
+        self.tower_captures_label.setText(f"{tower:,}")
+        self.keep_captures_label.setText(f"{keep:,}")
+        self.relic_captures_label.setText(f"{relic:,}")
+        
+        # PvP Stats
+        solo_kills = result_pvp['solo_kills']
+        solo_kills_alb = result_pvp['solo_kills_alb']
+        solo_kills_hib = result_pvp['solo_kills_hib']
+        solo_kills_mid = result_pvp['solo_kills_mid']
+        
+        deathblows = result_pvp['deathblows']
+        deathblows_alb = result_pvp['deathblows_alb']
+        deathblows_hib = result_pvp['deathblows_hib']
+        deathblows_mid = result_pvp['deathblows_mid']
+        
+        kills = result_pvp['kills']
+        kills_alb = result_pvp['kills_alb']
+        kills_hib = result_pvp['kills_hib']
+        kills_mid = result_pvp['kills_mid']
+        
+        self.solo_kills_label.setText(f"{solo_kills:,}")
+        self.deathblows_label.setText(f"{deathblows:,}")
+        self.kills_label.setText(f"{kills:,}")
+        
+        self.solo_kills_detail_label.setText(
+            f'→ <span style="color: #C41E3A;">Alb</span>: {solo_kills_alb:,}  |  '
+            f'<span style="color: #228B22;">Hib</span>: {solo_kills_hib:,}  |  '
+            f'<span style="color: #4169E1;">Mid</span>: {solo_kills_mid:,}'
+        )
+        self.deathblows_detail_label.setText(
+            f'→ <span style="color: #C41E3A;">Alb</span>: {deathblows_alb:,}  |  '
+            f'<span style="color: #228B22;">Hib</span>: {deathblows_hib:,}  |  '
+            f'<span style="color: #4169E1;">Mid</span>: {deathblows_mid:,}'
+        )
+        self.kills_detail_label.setText(
+            f'→ <span style="color: #C41E3A;">Alb</span>: {kills_alb:,}  |  '
+            f'<span style="color: #228B22;">Hib</span>: {kills_hib:,}  |  '
+            f'<span style="color: #4169E1;">Mid</span>: {kills_mid:,}'
+        )
+        
+        # PvE Stats
+        dragon_kills = result_pve['dragon_kills']
+        legion_kills = result_pve['legion_kills']
+        mini_dragon_kills = result_pve['mini_dragon_kills']
+        epic_encounters = result_pve['epic_encounters']
+        epic_dungeons = result_pve['epic_dungeons']
+        sobekite = result_pve['sobekite']
+        
+        self.dragon_kills_value.setText(f"{dragon_kills:,}")
+        self.legion_kills_value.setText(f"{legion_kills:,}")
+        self.mini_dragon_kills_value.setText(f"{mini_dragon_kills:,}")
+        self.epic_encounters_value.setText(f"{epic_encounters:,}")
+        self.epic_dungeons_value.setText(f"{epic_dungeons:,}")
+        self.sobekite_value.setText(f"{sobekite:,}")
+        
+        # Wealth
+        money = result_wealth['money']
+        self.money_label.setText(str(money))
+        
+        # Achievements (optionnel)
+        if result_achievements.get('success'):
+            achievements = result_achievements['achievements']
+            self._update_achievements_display(achievements)
+            self.character_data['achievements'] = achievements
+        
+        # Mettre à jour character_data
+        self.character_data['tower_captures'] = tower
+        self.character_data['keep_captures'] = keep
+        self.character_data['relic_captures'] = relic
+        
+        self.character_data['solo_kills'] = solo_kills
+        self.character_data['deathblows'] = deathblows
+        self.character_data['kills'] = kills
+        self.character_data['solo_kills_alb'] = solo_kills_alb
+        self.character_data['solo_kills_hib'] = solo_kills_hib
+        self.character_data['solo_kills_mid'] = solo_kills_mid
+        self.character_data['deathblows_alb'] = deathblows_alb
+        self.character_data['deathblows_hib'] = deathblows_hib
+        self.character_data['deathblows_mid'] = deathblows_mid
+        self.character_data['kills_alb'] = kills_alb
+        self.character_data['kills_hib'] = kills_hib
+        self.character_data['kills_mid'] = kills_mid
+        
+        self.character_data['dragon_kills'] = dragon_kills
+        self.character_data['legion_kills'] = legion_kills
+        self.character_data['mini_dragon_kills'] = mini_dragon_kills
+        self.character_data['epic_encounters'] = epic_encounters
+        self.character_data['epic_dungeons'] = epic_dungeons
+        self.character_data['sobekite'] = sobekite
+        
+        self.character_data['money'] = money
+    
+    def _update_partial_stats_ui(self, result_rvr, result_pvp, result_pve, result_wealth, result_achievements):
+        """Met à jour UI et character_data pour mise à jour partielle"""
+        from Functions.character_manager import save_character
+        
+        if result_rvr and result_rvr.get('success'):
+            tower = result_rvr['tower_captures']
+            keep = result_rvr['keep_captures']
+            relic = result_rvr['relic_captures']
             
-            # Re-enable button only if Herald scraping is not in progress
-            if not self.herald_scraping_in_progress:
-                self.update_rvr_button.setEnabled(True)
-                QApplication.processEvents()  # Forcer la mise à jour visuelle
+            self.tower_captures_label.setText(f"{tower:,}")
+            self.keep_captures_label.setText(f"{keep:,}")
+            self.relic_captures_label.setText(f"{relic:,}")
+            
+            self.character_data['tower_captures'] = tower
+            self.character_data['keep_captures'] = keep
+            self.character_data['relic_captures'] = relic
+            
+            save_character(self.character_data, allow_overwrite=True)
+        
+        if result_pvp and result_pvp.get('success'):
+            solo_kills = result_pvp['solo_kills']
+            solo_kills_alb = result_pvp['solo_kills_alb']
+            solo_kills_hib = result_pvp['solo_kills_hib']
+            solo_kills_mid = result_pvp['solo_kills_mid']
+            
+            deathblows = result_pvp['deathblows']
+            deathblows_alb = result_pvp['deathblows_alb']
+            deathblows_hib = result_pvp['deathblows_hib']
+            deathblows_mid = result_pvp['deathblows_mid']
+            
+            kills = result_pvp['kills']
+            kills_alb = result_pvp['kills_alb']
+            kills_hib = result_pvp['kills_hib']
+            kills_mid = result_pvp['kills_mid']
+            
+            self.solo_kills_label.setText(f"{solo_kills:,}")
+            self.deathblows_label.setText(f"{deathblows:,}")
+            self.kills_label.setText(f"{kills:,}")
+            
+            self.solo_kills_detail_label.setText(
+                f'→ <span style="color: #C41E3A;">Alb</span>: {solo_kills_alb:,}  |  '
+                f'<span style="color: #228B22;">Hib</span>: {solo_kills_hib:,}  |  '
+                f'<span style="color: #4169E1;">Mid</span>: {solo_kills_mid:,}'
+            )
+            self.deathblows_detail_label.setText(
+                f'→ <span style="color: #C41E3A;">Alb</span>: {deathblows_alb:,}  |  '
+                f'<span style="color: #228B22;">Hib</span>: {deathblows_hib:,}  |  '
+                f'<span style="color: #4169E1;">Mid</span>: {deathblows_mid:,}'
+            )
+            self.kills_detail_label.setText(
+                f'→ <span style="color: #C41E3A;">Alb</span>: {kills_alb:,}  |  '
+                f'<span style="color: #228B22;">Hib</span>: {kills_hib:,}  |  '
+                f'<span style="color: #4169E1;">Mid</span>: {kills_mid:,}'
+            )
+            
+            self.character_data['solo_kills'] = solo_kills
+            self.character_data['deathblows'] = deathblows
+            self.character_data['kills'] = kills
+            self.character_data['solo_kills_alb'] = solo_kills_alb
+            self.character_data['solo_kills_hib'] = solo_kills_hib
+            self.character_data['solo_kills_mid'] = solo_kills_mid
+            self.character_data['deathblows_alb'] = deathblows_alb
+            self.character_data['deathblows_hib'] = deathblows_hib
+            self.character_data['deathblows_mid'] = deathblows_mid
+            self.character_data['kills_alb'] = kills_alb
+            self.character_data['kills_hib'] = kills_hib
+            self.character_data['kills_mid'] = kills_mid
+            
+            save_character(self.character_data, allow_overwrite=True)
     
     def update_from_herald(self):
         """Met à jour les données du personnage depuis Herald"""
@@ -1604,74 +1743,154 @@ class CharacterSheetWindow(QDialog):
         # Marquer qu'un scraping Herald est en cours AVANT toute modification d'URL
         self.herald_scraping_in_progress = True
         
-        # Check that l'URL commence par http:// or https://
+        # Check URL format
         if not url.startswith(('http://', 'https://')):
             url = 'https://' + url
             self.herald_url_edit.setText(url)
         
-        # Désactiver tous les boutons pendant la vérification Herald
+        # Désactiver tous les boutons pendant la mise à jour
         self.update_herald_button.setEnabled(False)
         self.open_herald_button.setEnabled(False)
         self.update_rvr_button.setEnabled(False)
         
-        # Forcer la mise à jour visuelle immédiate de l'interface
-        QApplication.processEvents()
+        # Import des composants nécessaires
+        from UI.progress_dialog_base import ProgressStepsDialog, StepConfiguration
         
-        # Create une fenêtre of progression personnalisée with animation
-        self.progress_dialog = QDialog(self)
-        self.progress_dialog.setWindowTitle("⏳ Mise à jour en cours...")
-        self.progress_dialog.setModal(True)
-        self.progress_dialog.setFixedSize(450, 150)
+        # Construire les étapes (CHARACTER_UPDATE)
+        steps = StepConfiguration.build_steps(
+            StepConfiguration.CHARACTER_UPDATE  # 8 steps: Extract name → Init → Load cookies → Navigate → Wait → Extract data → Format → Close
+        )
         
-        progress_layout = QVBoxLayout(self.progress_dialog)
-        progress_layout.setSpacing(15)
+        # Créer le dialogue de progression
+        self.progress_dialog = ProgressStepsDialog(
+            parent=self,
+            title=lang.get("progress_character_update_title", default="🌐 Mise à jour depuis Herald..."),
+            steps=steps,
+            description=lang.get("progress_character_update_desc", default="Récupération des informations du personnage depuis Eden Herald"),
+            show_progress_bar=True,
+            determinate_progress=True,
+            allow_cancel=False
+        )
         
-        # Icône and titre
-        title_layout = QHBoxLayout()
-        title_label = QLabel("🌐 Récupération des données depuis Eden Herald...")
-        title_label.setStyleSheet(f"font-size: {get_scaled_size(12):.1f}pt; font-weight: bold;")
-        title_layout.addWidget(title_label)
-        progress_layout.addLayout(title_layout)
+        # Créer le thread de mise à jour
+        self.char_update_thread = CharacterUpdateThread(url)
         
-        # Message of détail
-        detail_label = QLabel("Connexion au serveur et extraction des informations du personnage.")
-        detail_label.setWordWrap(True)
-        detail_label.setStyleSheet(f"color: #666; font-size: {get_scaled_size(10):.1f}pt;")
-        progress_layout.addWidget(detail_label)
+        # ✅ Pattern 1 : Connecter via wrappers thread-safe
+        self.char_update_thread.step_started.connect(self._on_char_update_step_started)
+        self.char_update_thread.step_completed.connect(self._on_char_update_step_completed)
+        self.char_update_thread.step_error.connect(self._on_char_update_step_error)
         
-        # Barre of progression indéterminée (animation)
-        progress_bar = QProgressBar()
-        progress_bar.setRange(0, 0)  # Mode indéterminé = animation
-        progress_bar.setTextVisible(False)
-        progress_bar.setFixedHeight(25)
-        progress_layout.addWidget(progress_bar)
+        # Connecter signal de fin
+        self.char_update_thread.update_finished.connect(self._on_herald_scraping_finished)
         
-        # Message d'attente
-        wait_label = QLabel("⏱️ Veuillez patienter, cette opération peut prendre quelques secondes...")
-        wait_label.setStyleSheet(f"color: #888; font-size: {get_scaled_size(9):.1f}pt; font-style: italic;")
-        wait_label.setWordWrap(True)
-        progress_layout.addWidget(wait_label)
+        # ✅ Pattern 4 : Connecter rejected AVANT show()
+        self.progress_dialog.rejected.connect(self._on_char_update_progress_dialog_closed)
         
-        progress_layout.addStretch()
-        
-        # Create and démarrer the worker thread
-        self.herald_worker = HeraldScraperWorker(url)
-        self.herald_worker.finished.connect(self._on_herald_scraping_finished)
-        
-        # Afficher the dialogue and démarrer the worker
+        # Afficher le dialogue et démarrer le worker
         self.progress_dialog.show()
-        self.herald_worker.start()
+        self.char_update_thread.start()
+    
+    # ✅ Pattern 1 : Wrappers thread-safe pour character update
+    def _on_char_update_step_started(self, step_index):
+        """Wrapper thread-safe pour start_step"""
+        if hasattr(self, 'progress_dialog') and self.progress_dialog:
+            try:
+                self.progress_dialog.start_step(step_index)
+            except RuntimeError:
+                pass
+    
+    def _on_char_update_step_completed(self, step_index):
+        """Wrapper thread-safe pour complete_step"""
+        if hasattr(self, 'progress_dialog') and self.progress_dialog:
+            try:
+                self.progress_dialog.complete_step(step_index)
+            except RuntimeError:
+                pass
+    
+    def _on_char_update_step_error(self, step_index, error_message):
+        """Wrapper thread-safe pour error_step"""
+        if hasattr(self, 'progress_dialog') and self.progress_dialog:
+            try:
+                self.progress_dialog.error_step(step_index, error_message)
+            except RuntimeError:
+                pass
+    
+    def _on_char_update_progress_dialog_closed(self):
+        """✅ Pattern 4 : Appelé quand utilisateur ferme le dialogue de character update"""
+        import logging
+        logging.info("Dialogue character update fermé par utilisateur - Arrêt mise à jour")
+        
+        # Arrêter le thread proprement
+        self._stop_char_update_thread()
+        
+        # Réactiver les boutons
+        self.herald_scraping_in_progress = False
+        self.update_herald_button.setEnabled(True)
+        self.open_herald_button.setEnabled(True)
+        if not self.herald_scraping_in_progress:
+            self.update_rvr_button.setEnabled(True)
+    
+    def _stop_char_update_thread(self):
+        """✅ Pattern 2 + 3 : Arrête le thread character update avec cleanup complet"""
+        if hasattr(self, 'char_update_thread') and self.char_update_thread:
+            if self.char_update_thread.isRunning():
+                # 1. Demander arrêt gracieux
+                self.char_update_thread.request_stop()
+                
+                # 2. Déconnecter signaux
+                try:
+                    self.char_update_thread.step_started.disconnect()
+                    self.char_update_thread.step_completed.disconnect()
+                    self.char_update_thread.step_error.disconnect()
+                    self.char_update_thread.update_finished.disconnect()
+                except:
+                    pass
+                
+                # 3. Attendre 3s
+                self.char_update_thread.wait(3000)
+                
+                # 4. ✅ CRITIQUE : Cleanup AVANT terminate()
+                if self.char_update_thread.isRunning():
+                    import logging
+                    logging.warning("Thread character update non terminé - Cleanup forcé")
+                    self.char_update_thread.cleanup_external_resources()
+                    self.char_update_thread.terminate()
+                    self.char_update_thread.wait()
+                
+                import logging
+                logging.info("Thread character update arrêté proprement")
+            
+            self.char_update_thread = None
+        
+        # Fermer le dialogue
+        if hasattr(self, 'progress_dialog'):
+            try:
+                self.progress_dialog.close()
+                self.progress_dialog.deleteLater()
+            except:
+                pass
+            
+            # Supprimer l'attribut seulement s'il existe encore
+            if hasattr(self, 'progress_dialog'):
+                delattr(self, 'progress_dialog')
     
     def _on_herald_scraping_finished(self, success, new_data, error_msg):
         """Callback appelé quand le scraping est terminé"""
+        from PySide6.QtCore import QTimer
+        
         # Marquer que le scraping Herald est terminé
         self.herald_scraping_in_progress = False
         
-        # Fermer and supprimer the fenêtre of progression
+        # Fermer le dialogue de progression avec message de succès ou erreur
         if hasattr(self, 'progress_dialog'):
-            self.progress_dialog.close()
-            self.progress_dialog.deleteLater()
-            delattr(self, 'progress_dialog')
+            if success:
+                success_text = lang.get("progress_character_complete", default="✅ Données récupérées")
+                self.progress_dialog.complete_all(success_text)
+                QTimer.singleShot(1500, self.progress_dialog.close)
+            else:
+                error_text = lang.get("progress_error", default="❌ {error}", error=error_msg)
+                self.progress_dialog.set_status_message(error_text, "#F44336")
+                QTimer.singleShot(2000, self.progress_dialog.close)
         
         # Utiliser try/finally pour garantir la réactivation des boutons
         try:
@@ -2896,148 +3115,208 @@ class CookieManagerDialog(QDialog):
                 )
     
     def generate_cookies(self):
-        """Génère de nouveaux cookies via authentification navigateur"""
+        """Génère de nouveaux cookies via authentification navigateur (VERSION MIGRÉE)"""
         
         # Lire la configuration
         from Functions.config_manager import config
         preferred_browser = config.get('preferred_browser', 'Chrome')
         allow_download = config.get('allow_browser_download', False)
         
-        # Désactiver the boutons pendant the processus
-        self.generate_button.setEnabled(False)
-        self.cookie_path_edit.setEnabled(False)
-        self.status_label.setText("⏳ <b>Ouverture du navigateur...</b>")
-        self.status_label.setStyleSheet("color: blue;")
+        # Import des composants
+        from UI.progress_dialog_base import ProgressStepsDialog, StepConfiguration
         
-        # Forcer the mise à jour of l'interface
-        from PySide6.QtWidgets import QApplication
-        QApplication.processEvents()
-        
-        # Générer the cookies (ouvre the navigateur immédiatement)
-        success, message, driver = self.cookie_manager.generate_cookies_with_browser(
-            preferred_browser=preferred_browser,
-            allow_download=allow_download
+        # Construire les étapes (PAS de connexion Herald - génération cookies)
+        steps = StepConfiguration.build_steps(
+            StepConfiguration.COOKIE_GENERATION  # 6 étapes
         )
         
-        if not success:
-            # Check if c'est un problème of navigateur manquant
-            if "Impossible d'initialiser" in message and not allow_download:
-                # Proposer of télécharger un driver
-                reply = QMessageBox.question(
-                    self,
-                    "Téléchargement requis",
-                    f"Aucun navigateur compatible n'a été trouvé.\n\n"
-                    f"Voulez-vous autoriser le téléchargement automatique d'un driver de navigateur ?\n\n"
-                    f"Cela nécessite une connexion Internet.",
-                    QMessageBox.Yes | QMessageBox.No,
-                    QMessageBox.No
-                )
-                
-                if reply == QMessageBox.Yes:
-                    # Réessayer with téléchargement autorisé
-                    success, message, driver = self.cookie_manager.generate_cookies_with_browser(
-                        preferred_browser=preferred_browser,
-                        allow_download=True
-                    )
-                    
-                    if not success:
-                        QMessageBox.critical(
-                            self,
-                            "Erreur",
-                            f"Impossible d'ouvrir le navigateur même après téléchargement :\n\n{message}"
-                        )
-                        self.generate_button.setEnabled(True)
-                        self.cookie_path_edit.setEnabled(True)
-                        self.refresh_status()
-                        return
-                else:
-                    self.generate_button.setEnabled(True)
-                    self.cookie_path_edit.setEnabled(True)
-                    self.refresh_status()
-                    return
-            else:
-                # Autre erreur
-                QMessageBox.critical(
-                    self,
-                    "Erreur",
-                    f"Impossible d'ouvrir le navigateur :\n\n{message}"
-                )
-                self.generate_button.setEnabled(True)
-                self.cookie_path_edit.setEnabled(True)
-                self.refresh_status()
-                return
+        # Créer le dialogue de progression
+        self.progress_dialog = ProgressStepsDialog(
+            parent=self,
+            title=lang.get("progress_cookie_gen_title", default="🍪 Génération des cookies..."),
+            steps=steps,
+            description=lang.get("progress_cookie_gen_desc", default="Ouverture du navigateur pour authentification Discord"),
+            show_progress_bar=True,
+            determinate_progress=True,
+            allow_cancel=True  # Permet annulation
+        )
         
-        # Le navigateur est ouvert
-        browser_name = getattr(self.cookie_manager, 'last_browser_used', 'le navigateur')
-        self.status_label.setText(f"🌐 <b>{browser_name} ouvert - Connectez-vous avec Discord</b>")
-        self.status_label.setStyleSheet("color: orange;")
-        QApplication.processEvents()
+        # Créer le thread
+        self.cookie_gen_thread = CookieGenThread(preferred_browser, allow_download)
         
-        # Dialogue d'attente
-        wait_msg = QMessageBox()
+        # ✅ Pattern 1: Connect via wrappers thread-safe
+        self.cookie_gen_thread.step_started.connect(self._on_cookie_step_started)
+        self.cookie_gen_thread.step_completed.connect(self._on_cookie_step_completed)
+        self.cookie_gen_thread.step_error.connect(self._on_cookie_step_error)
+        self.cookie_gen_thread.generation_finished.connect(self._on_cookie_generation_finished)
+        self.cookie_gen_thread.user_action_required.connect(self._on_cookie_user_action_required)
+        
+        # ✅ Pattern 4: Connect rejected signal
+        self.progress_dialog.rejected.connect(self._on_cookie_progress_dialog_closed)
+        
+        # Désactiver boutons pendant génération
+        self.generate_button.setEnabled(False)
+        self.cookie_path_edit.setEnabled(False)
+        
+        # Show dialog and start thread
+        self.progress_dialog.show()
+        self.cookie_gen_thread.start()
+    
+    # ============================================================================
+    # WRAPPERS THREAD-SAFE POUR COOKIE GENERATION
+    # ============================================================================
+    
+    def _on_cookie_step_started(self, step_index):
+        """✅ Pattern 1: Wrapper thread-safe pour step_started"""
+        if hasattr(self, 'progress_dialog') and self.progress_dialog:
+            try:
+                self.progress_dialog.start_step(step_index)
+            except RuntimeError:
+                pass
+    
+    def _on_cookie_step_completed(self, step_index):
+        """✅ Pattern 1: Wrapper thread-safe pour step_completed"""
+        if hasattr(self, 'progress_dialog') and self.progress_dialog:
+            try:
+                self.progress_dialog.complete_step(step_index)
+            except RuntimeError:
+                pass
+    
+    def _on_cookie_step_error(self, step_index, error_message):
+        """✅ Pattern 1: Wrapper thread-safe pour step_error"""
+        if hasattr(self, 'progress_dialog') and self.progress_dialog:
+            try:
+                self.progress_dialog.error_step(step_index, error_message)
+            except RuntimeError:
+                pass
+    
+    def _on_cookie_user_action_required(self, browser_name, message):
+        """Dialogue interactif pour confirmer connexion utilisateur (Étape 2)"""
+        from PySide6.QtWidgets import QMessageBox
+        
+        # Créer dialogue de confirmation
+        wait_msg = QMessageBox(self)
         wait_msg.setIcon(QMessageBox.Information)
         wait_msg.setWindowTitle("En attente de connexion")
         wait_msg.setTextFormat(Qt.RichText)
         wait_msg.setText("<b>Connectez-vous maintenant</b>")
-        wait_msg.setInformativeText(
-            f"Le navigateur <b>{browser_name}</b> est ouvert.<br/><br/>"
-            "Veuillez vous connecter avec Discord dans le navigateur,<br/>"
-            "puis cliquez sur OK une fois connecté."
-        )
+        wait_msg.setInformativeText(message)
         wait_msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
         
         result = wait_msg.exec()
         
+        # Informer le thread de la décision utilisateur
         if result == QMessageBox.Ok:
-            # Retrieve and Save the cookies
-            self.status_label.setText("💾 <b>Sauvegarde des cookies...</b>")
-            self.status_label.setStyleSheet("color: blue;")
-            QApplication.processEvents()
-            
-            success, message, count = self.cookie_manager.save_cookies_from_driver(driver)
-            
-            # Fermer le navigateur
-            try:
-                driver.quit()
-            except:
-                pass
-            
-            if success:
-                QMessageBox.information(
-                    self,
-                    "Succès",
-                    f"Les cookies ont été générés avec succès !\n\n"
-                    f"{message}"
-                )
-            else:
-                QMessageBox.critical(
-                    self,
-                    "Erreur",
-                    f"Erreur lors de la sauvegarde des cookies :\n\n{message}"
-                )
+            self.cookie_gen_thread.set_user_confirmation(True)
         else:
-            # Annulation - fermer le navigateur
+            # Annulation
+            self.cookie_gen_thread.set_user_confirmation(False)
+            self._stop_cookie_gen_thread()
+    
+    def _on_cookie_progress_dialog_closed(self):
+        """✅ Pattern 4: Arrêt propre quand dialog fermé par utilisateur"""
+        import logging
+        logging.info("Dialogue cookie gen fermé par utilisateur - Arrêt génération")
+        self._stop_cookie_gen_thread()
+    
+    def _stop_cookie_gen_thread(self):
+        """✅ Pattern 2+3: Arrêt propre du thread avec cleanup AVANT terminate"""
+        if hasattr(self, 'cookie_gen_thread') and self.cookie_gen_thread:
+            if self.cookie_gen_thread.isRunning():
+                # ✅ Pattern 3: Demander arrêt gracieux
+                self.cookie_gen_thread.request_stop()
+                
+                # Déconnecter les signaux
+                try:
+                    self.cookie_gen_thread.step_started.disconnect()
+                    self.cookie_gen_thread.step_completed.disconnect()
+                    self.cookie_gen_thread.step_error.disconnect()
+                    self.cookie_gen_thread.generation_finished.disconnect()
+                    self.cookie_gen_thread.user_action_required.disconnect()
+                except:
+                    pass
+                
+                # Attendre 3 secondes
+                self.cookie_gen_thread.wait(3000)
+                
+                # ✅ Pattern 2: Cleanup AVANT terminate si toujours running
+                if self.cookie_gen_thread.isRunning():
+                    import logging
+                    logging.warning("Thread cookie gen non terminé - Cleanup forcé")
+                    self.cookie_gen_thread.cleanup_external_resources()
+                    self.cookie_gen_thread.terminate()
+                    self.cookie_gen_thread.wait()
+                
+                import logging
+                logging.info("Thread cookie gen arrêté proprement")
+            
+            self.cookie_gen_thread = None
+        
+        # Nettoyer le dialogue
+        if hasattr(self, 'progress_dialog'):
             try:
-                driver.quit()
+                self.progress_dialog.close()
+                self.progress_dialog.deleteLater()
             except:
                 pass
             
-            self.status_label.setText("❌ <b>Génération annulée</b>")
-            self.status_label.setStyleSheet("color: red;")
+            # Supprimer l'attribut seulement s'il existe encore
+            if hasattr(self, 'progress_dialog'):
+                delattr(self, 'progress_dialog')
         
-        # Réactiver the boutons and actualiser
+        # Réactiver boutons
         self.generate_button.setEnabled(True)
         self.cookie_path_edit.setEnabled(True)
-        self.refresh_status()
+    
+    def _on_cookie_generation_finished(self, success, message, cookie_count):
+        """Callback appelé quand la génération est terminée"""
+        from PySide6.QtCore import QTimer
+        from PySide6.QtWidgets import QMessageBox
         
-        # Afficher the navigateur utilisé after génération réussie
-        if success and hasattr(self.cookie_manager, 'last_browser_used') and self.cookie_manager.last_browser_used:
-            browser_icon = {'Chrome': '🔵', 'Edge': '🔷', 'Firefox': '🦊'}.get(self.cookie_manager.last_browser_used, '🌐')
-            self.browser_label.setText(
-                f"{browser_icon} <i>Généré avec: {self.cookie_manager.last_browser_used}</i>"
+        # Afficher succès/erreur dans le dialogue
+        if hasattr(self, 'progress_dialog') and self.progress_dialog:
+            try:
+                if success:
+                    success_text = lang.get("progress_cookie_success", default="✅ {count} cookies générés !", count=cookie_count)
+                    self.progress_dialog.set_status_message(success_text, "#4CAF50")
+                else:
+                    error_text = lang.get("progress_error", default="❌ {error}", error=message)
+                    self.progress_dialog.set_status_message(error_text, "#f44336")
+                
+                # Attendre 1.5s puis fermer
+                QTimer.singleShot(1500, lambda: self._process_cookie_result(success, message, cookie_count))
+            except RuntimeError:
+                # Dialog déjà supprimé
+                self._process_cookie_result(success, message, cookie_count)
+        else:
+            self._process_cookie_result(success, message, cookie_count)
+    
+    def _process_cookie_result(self, success, message, cookie_count):
+        """Traiter le résultat de la génération après affichage du status"""
+        # Fermer et nettoyer
+        self._stop_cookie_gen_thread()
+        
+        # Afficher résultat final
+        if success:
+            from PySide6.QtWidgets import QMessageBox
+            QMessageBox.information(
+                self,
+                "Succès",
+                f"Les cookies ont été générés avec succès !\n\n{message}"
+            )
+        elif message and "Annulé" not in message:
+            # Afficher erreur seulement si pas annulé
+            from PySide6.QtWidgets import QMessageBox
+            QMessageBox.critical(
+                self,
+                "Erreur",
+                f"Erreur lors de la génération des cookies :\n\n{message}"
             )
         
-        # Rafraîchir the statut Eden in the fenêtre principale if the cookies have été générés
+        # Actualiser le statut
+        self.refresh_status()
+        
+        # Rafraîchir le statut Eden dans la fenêtre principale si cookies générés
         if success and self.parent() and hasattr(self.parent(), 'ui_manager'):
             self.parent().ui_manager.check_eden_status()
     
@@ -3061,18 +3340,260 @@ class CookieManagerDialog(QDialog):
 
 
 # ============================================================================
+# COOKIE GENERATION THREAD
+# ============================================================================
+
+class CookieGenThread(QThread):
+    """Thread pour générer les cookies Eden avec interaction utilisateur"""
+    
+    # Signaux
+    generation_finished = Signal(bool, str, int)  # (success, message, cookie_count)
+    step_started = Signal(int)  # (step_index)
+    step_completed = Signal(int)  # (step_index)
+    step_error = Signal(int, str)  # (step_index, error_message)
+    user_action_required = Signal(str, str)  # (browser_name, message) - Pour dialogue interactif
+    
+    def __init__(self, preferred_browser=None, allow_download=False):
+        super().__init__()
+        self.preferred_browser = preferred_browser or 'Chrome'
+        self.allow_download = allow_download
+        
+        # ✅ Pattern 3 : Flag d'interruption
+        self._stop_requested = False
+        
+        # ✅ Pattern 2 : Référence ressource externe (driver Selenium)
+        self._driver = None
+        
+        # Variable pour stocker si l'utilisateur a confirmé la connexion
+        self._user_confirmed = False
+    
+    def request_stop(self):
+        """✅ Pattern 3 : Demande arrêt gracieux"""
+        self._stop_requested = True
+    
+    def cleanup_external_resources(self):
+        """✅ Pattern 2 : Cleanup forcé du driver (appelé depuis thread principal)"""
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        if self._driver:
+            try:
+                logger.info("Cleanup forcé : Fermeture navigateur cookies")
+                self._driver.quit()
+                logger.info("Navigateur fermé avec succès")
+            except Exception as e:
+                logger.warning(f"Erreur cleanup driver: {e}")
+            finally:
+                self._driver = None
+    
+    def set_user_confirmation(self, confirmed):
+        """Appelé depuis le thread principal quand l'utilisateur confirme/annule"""
+        self._user_confirmed = confirmed
+    
+    def run(self):
+        """Exécute la génération de cookies avec sécurité thread"""
+        import logging
+        import time
+        logger = logging.getLogger(__name__)
+        
+        from Functions.cookie_manager import CookieManager
+        
+        cookie_manager = CookieManager()
+        driver = None
+        
+        # Variables pour résultat (émis APRÈS toutes les étapes)
+        result_success = False
+        result_message = ""
+        result_count = 0
+        
+        try:
+            # Étape 0 : Configuration du navigateur
+            self.step_started.emit(0)
+            logger.info(f"Configuration navigateur: {self.preferred_browser}, download={self.allow_download}")
+            time.sleep(0.5)  # Simuler configuration
+            self.step_completed.emit(0)
+            
+            if self._stop_requested:
+                return
+            
+            # Étape 1 : Ouverture de la page de connexion
+            self.step_started.emit(1)
+            logger.info("Initialisation navigateur pour génération cookies...")
+            
+            success, message, driver = cookie_manager.generate_cookies_with_browser(
+                preferred_browser=self.preferred_browser,
+                allow_download=self.allow_download
+            )
+            
+            if not success:
+                error_msg = f"Impossible d'ouvrir le navigateur: {message}"
+                logger.error(error_msg)
+                self.step_error.emit(1, error_msg)
+                result_message = error_msg
+                return
+            
+            self._driver = driver  # ✅ Pattern 2 : Stocker pour cleanup externe
+            browser_name = getattr(cookie_manager, 'last_browser_used', 'navigateur')
+            
+            logger.info(f"Navigateur {browser_name} ouvert avec succès")
+            self.step_completed.emit(1)
+            
+            if self._stop_requested:
+                return
+            
+            # Étape 2 : En attente de la connexion utilisateur (INTERACTIF)
+            self.step_started.emit(2)
+            logger.info("Attente connexion utilisateur...")
+            
+            # Émettre signal pour demander confirmation utilisateur
+            self.user_action_required.emit(
+                browser_name,
+                f"Le navigateur {browser_name} est ouvert.\n\nConnectez-vous avec Discord, puis cliquez sur OK."
+            )
+            
+            # Attendre confirmation avec sleep interruptible (max 5 minutes)
+            wait_seconds = 0
+            max_wait = 300  # 5 minutes
+            
+            while not self._user_confirmed and wait_seconds < max_wait:
+                if self._stop_requested:
+                    logger.info("Arrêt demandé pendant attente utilisateur")
+                    result_message = "Annulé par l'utilisateur"
+                    return
+                
+                time.sleep(0.5)
+                wait_seconds += 0.5
+            
+            if not self._user_confirmed:
+                error_msg = "Timeout : Aucune confirmation utilisateur après 5 minutes"
+                logger.warning(error_msg)
+                self.step_error.emit(2, "Timeout")
+                result_message = error_msg
+                return
+            
+            logger.info("Connexion utilisateur confirmée")
+            self.step_completed.emit(2)
+            
+            if self._stop_requested:
+                return
+            
+            # Étape 3 : Extraction des cookies
+            self.step_started.emit(3)
+            logger.info("Extraction des cookies depuis le navigateur...")
+            
+            # Les cookies sont déjà dans le driver, on passe à la sauvegarde
+            time.sleep(0.5)  # Petit délai pour laisser les cookies se stabiliser
+            
+            logger.info("Cookies extraits")
+            self.step_completed.emit(3)
+            
+            if self._stop_requested:
+                return
+            
+            # Étape 4 : Sauvegarde des cookies
+            self.step_started.emit(4)
+            logger.info("Sauvegarde des cookies...")
+            
+            success, message, count = cookie_manager.save_cookies_from_driver(driver)
+            
+            if not success:
+                error_msg = f"Erreur sauvegarde cookies: {message}"
+                logger.error(error_msg)
+                self.step_error.emit(4, error_msg)
+                result_message = error_msg
+                return
+            
+            logger.info(f"Cookies sauvegardés: {count}")
+            self.step_completed.emit(4)
+            
+            if self._stop_requested:
+                return
+            
+            # Étape 5 : Validation et vérification
+            self.step_started.emit(5)
+            logger.info("Validation des cookies...")
+            
+            # Vérifier que les cookies sont valides
+            info = cookie_manager.get_cookie_info()
+            if info and info.get('is_valid'):
+                logger.info("Cookies validés avec succès")
+                self.step_completed.emit(5)
+                
+                # Stocker le succès
+                result_success = True
+                result_message = message
+                result_count = count
+            else:
+                error_msg = "Les cookies sauvegardés ne sont pas valides"
+                logger.error(error_msg)
+                self.step_error.emit(5, error_msg)
+                result_message = error_msg
+        
+        except Exception as e:
+            logger.error(f"Erreur génération cookies: {e}", exc_info=True)
+            result_message = f"Erreur: {str(e)}"
+        
+        finally:
+            # Fermeture du navigateur (pas d'étape dédiée dans COOKIE_GENERATION)
+            if driver:
+                try:
+                    logger.info("Fermeture navigateur cookies...")
+                    driver.quit()
+                    logger.info("Navigateur fermé")
+                except Exception as e:
+                    logger.warning(f"Erreur fermeture navigateur: {e}")
+            
+            # Émettre le signal final
+            logger.info(f"Émission signal generation_finished - success={result_success}, count={result_count}")
+            self.generation_finished.emit(result_success, result_message, result_count)
+
+
+# ============================================================================
 # HERALD SEARCH DIALOG
 # ============================================================================
 
 class SearchThread(QThread):
     """Thread pour effectuer la recherche Herald en arrière-plan"""
     search_finished = Signal(bool, str, str)  # (success, message, json_path)
-    progress_update = Signal(str)  # (status_message)
+    progress_update = Signal(str)  # (status_message) - LEGACY pour compatibilité
+    step_started = Signal(int)  # (step_index) - NOUVEAU pour ProgressStepsDialog
+    step_completed = Signal(int)  # (step_index) - NOUVEAU pour ProgressStepsDialog
+    step_error = Signal(int, str)  # (step_index, error_message) - NOUVEAU pour ProgressStepsDialog
     
     def __init__(self, character_name, realm_filter=""):
         super().__init__()
         self.character_name = character_name
         self.realm_filter = realm_filter
+        self._stop_requested = False  # Flag pour arrêt gracieux
+        self._scraper = None  # Référence au scraper pour cleanup externe
+    
+    def request_stop(self):
+        """Demande l'arrêt du thread (appelé depuis le thread principal)"""
+        self._stop_requested = True
+    
+    def cleanup_driver(self):
+        """Ferme le navigateur de manière sécurisée (appelé depuis thread principal)"""
+        import logging
+        module_logger = logging.getLogger(__name__)
+        
+        if self._scraper and hasattr(self._scraper, 'driver') and self._scraper.driver:
+            try:
+                module_logger.info("Cleanup: Fermeture forcée du navigateur")
+                self._scraper.driver.quit()
+                module_logger.info("Cleanup: Navigateur fermé avec succès")
+            except Exception as e:
+                module_logger.warning(f"Cleanup: Erreur lors de la fermeture: {e}")
+            finally:
+                self._scraper = None
+    
+    def _emit_step_start(self, step_index, message):
+        """Émet les signaux de début d'étape (nouveau + legacy)"""
+        self.step_started.emit(step_index)
+        self.progress_update.emit(message)  # Garde compatibilité
+    
+    def _emit_step_complete(self, step_index):
+        """Émet le signal de fin d'étape"""
+        self.step_completed.emit(step_index)
     
     def run(self):
         """Exécute la recherche avec des mises à jour de progression"""
@@ -3089,64 +3610,101 @@ class SearchThread(QThread):
         module_logger = logging.getLogger(__name__)
         scraper = None
         
+        # Variables pour résultat (signal émis APRÈS Step 8 dans finally)
+        result_success = False
+        result_message = ""
+        result_json_path = ""
+        
         try:
-            # Étape 1 : Vérification des cookies
-            self.progress_update.emit("🔐 Vérification des cookies d'authentification...")
+            # Étape 0 : Vérification des cookies
+            self._emit_step_start(0, "🔐 Vérification des cookies d'authentification...")
             module_logger.info(f"Début de la recherche Herald pour: {self.character_name}", extra={"action": "SEARCH"})
             
             cookie_manager = CookieManager()
             
             if not cookie_manager.cookie_exists():
                 module_logger.error("Aucun cookie trouvé", extra={"action": "SEARCH"})
-                self.search_finished.emit(False, "Aucun cookie trouvé. Veuillez générer ou importer des cookies d'abord.", "")
+                self.step_error.emit(0, "Aucun cookie trouvé")
+                result_message = "Aucun cookie trouvé. Veuillez générer ou importer des cookies d'abord."
                 return
             
             info = cookie_manager.get_cookie_info()
             if not info or not info.get('is_valid'):
                 module_logger.error("Cookies expirés", extra={"action": "SEARCH"})
-                self.search_finished.emit(False, "Les cookies ont expiré. Veuillez les regénérer.", "")
+                self.step_error.emit(0, "Cookies expirés")
+                result_message = "Les cookies ont expiré. Veuillez les regénérer."
                 return
             
             module_logger.info(f"Cookies valides - {info.get('cookie_count', 0)} cookies chargés", extra={"action": "SEARCH"})
+            self._emit_step_complete(0)
             
-            # Étape 2 : Initialisation du navigateur
-            self.progress_update.emit("🌐 Initialisation du navigateur Chrome...")
+            # Étape 1 : Initialisation du navigateur
+            self._emit_step_start(1, "🌐 Initialisation du navigateur Chrome...")
             scraper = EdenScraper(cookie_manager)
+            self._scraper = scraper  # Stocke référence pour cleanup externe
             
             if not scraper.initialize_driver(headless=False):
                 module_logger.error("Impossible d'initialiser le navigateur", extra={"action": "SEARCH"})
-                self.search_finished.emit(False, "Impossible d'initialiser le navigateur Chrome.", "")
+                self.step_error.emit(1, "Impossible d'initialiser le navigateur")
+                result_message = "Impossible d'initialiser le navigateur Chrome."
                 return
             
             module_logger.info("Navigateur initialisé avec succès", extra={"action": "SEARCH"})
+            self._emit_step_complete(1)
             
-            # Étape 3 : Chargement des cookies
-            self.progress_update.emit("🍪 Chargement des cookies dans le navigateur...")
+            # Étape 2 : Chargement des cookies
+            self._emit_step_start(2, "🍪 Chargement des cookies dans le navigateur...")
             if not scraper.load_cookies():
                 module_logger.error("Impossible de charger les cookies dans le navigateur", extra={"action": "SEARCH"})
-                self.search_finished.emit(False, "Impossible de charger les cookies.", "")
+                self.step_error.emit(2, "Impossible de charger les cookies")
+                result_message = "Impossible de charger les cookies."
                 return
             
             module_logger.info("Cookies chargés dans le navigateur - Authentification complétée", extra={"action": "SEARCH"})
+            self._emit_step_complete(2)
             
-            # Étape 4 : Navigation vers la page de recherche
+            # Vérifier si arrêt demandé
+            if self._stop_requested:
+                module_logger.info("Arrêt demandé par l'utilisateur (après étape 2)", extra={"action": "SEARCH"})
+                return
+            
+            # Étape 3 : Navigation vers la page de recherche
             if self.realm_filter:
                 search_url = f"https://eden-daoc.net/herald?n=search&r={self.realm_filter}&s={self.character_name}"
             else:
                 search_url = f"https://eden-daoc.net/herald?n=search&s={self.character_name}"
             
-            self.progress_update.emit(f"🔍 Recherche de '{self.character_name}' sur Eden Herald...")
+            self._emit_step_start(3, f"🔍 Recherche de '{self.character_name}' sur Eden Herald...")
             module_logger.info(f"Recherche Herald: {search_url}", extra={"action": "SEARCH"})
             
             scraper.driver.get(search_url)
+            self._emit_step_complete(3)
             
-            # Étape 5 : Attente du chargement de la page
-            self.progress_update.emit("⏳ Chargement de la page de recherche...")
+            # Vérifier si arrêt demandé
+            if self._stop_requested:
+                module_logger.info("Arrêt demandé par l'utilisateur (après étape 3)", extra={"action": "SEARCH"})
+                return
+            
+            # Étape 4 : Attente du chargement de la page
+            self._emit_step_start(4, "⏳ Chargement de la page de recherche...")
             module_logger.info("Attente du chargement de la page de recherche (5 secondes)...", extra={"action": "SEARCH"})
-            time.sleep(5)
             
-            # Étape 6 : Extraction des données
-            self.progress_update.emit("📊 Extraction des résultats de recherche...")
+            # Sleep interruptible (vérifier le flag toutes les 0.5 secondes)
+            for i in range(10):  # 10 x 0.5s = 5s
+                if self._stop_requested:
+                    module_logger.info("Arrêt demandé par l'utilisateur (pendant sleep)", extra={"action": "SEARCH"})
+                    return
+                time.sleep(0.5)
+            
+            self._emit_step_complete(4)
+            
+            # Vérifier si arrêt demandé
+            if self._stop_requested:
+                module_logger.info("Arrêt demandé par l'utilisateur (après étape 4)", extra={"action": "SEARCH"})
+                return
+            
+            # Étape 5 : Extraction des données
+            self._emit_step_start(5, "📊 Extraction des résultats de recherche...")
             page_source = scraper.driver.page_source
             soup = BeautifulSoup(page_source, 'html.parser')
             
@@ -3183,8 +3741,10 @@ class SearchThread(QThread):
                             if result:
                                 search_data['results'].append(result)
             
-            # Étape 7 : Sauvegarde des résultats
-            self.progress_update.emit("💾 Sauvegarde des résultats...")
+            self._emit_step_complete(5)
+            
+            # Étape 6 : Sauvegarde des résultats
+            self._emit_step_start(6, "💾 Sauvegarde des résultats...")
             
             # Utiliser le dossier temporaire de l'OS
             temp_dir = Path(tempfile.gettempdir()) / "EdenSearchResult"
@@ -3214,8 +3774,10 @@ class SearchThread(QThread):
             with open(json_path, 'w', encoding='utf-8') as f:
                 json.dump(search_data, f, indent=2, ensure_ascii=False)
             
-            # Extract formatted characters
-            self.progress_update.emit("🎯 Formatage des personnages trouvés...")
+            self._emit_step_complete(6)
+            
+            # Étape 7 : Formatage des personnages
+            self._emit_step_start(7, "🎯 Formatage des personnages trouvés...")
             characters = []
             for result in search_data['results']:
                 # Check if it's a character row
@@ -3278,33 +3840,576 @@ class SearchThread(QThread):
                 json.dump(search_data, f, indent=2, ensure_ascii=False)
             
             module_logger.info(f"{len(characters)} personnage(s) trouvé(s) et sauvegardé(s) dans: {json_path}", extra={"action": "SEARCH"})
+            self._emit_step_complete(7)
             
-            # Étape finale : Terminé
-            self.progress_update.emit("✅ Recherche terminée avec succès !")
+            # Pas d'étape 8 ici (fermeture navigateur) - sera dans finally
             
-            self.search_finished.emit(
-                True, 
-                f"{len(characters)} personnage(s) trouvé(s)",
-                str(json_path)
-            )
+            # Stocker le succès (signal émis APRÈS Step 8 dans finally)
+            result_success = True
+            result_message = f"{len(characters)} personnage(s) trouvé(s)"
+            result_json_path = str(json_path)
             
         except Exception as e:
             module_logger.error(f"Erreur lors de la recherche: {str(e)}", extra={"action": "SEARCH"}, exc_info=True)
-            self.search_finished.emit(False, f"Erreur: {str(e)}", "")
+            result_message = f"Erreur: {str(e)}"
             
         finally:
-            # Fermer le navigateur proprement
+            # Étape 8 : Fermer le navigateur proprement
             if scraper and scraper.driver:
                 try:
-                    self.progress_update.emit("🔄 Fermeture du navigateur...")
+                    self._emit_step_start(8, "🔄 Fermeture du navigateur...")
                     scraper.driver.quit()
                     module_logger.info("Navigateur fermé", extra={"action": "SEARCH"})
-                    # Marquer comme terminé après un court délai pour que l'utilisateur voie le message
-                    import time
-                    time.sleep(0.3)
-                    self.progress_update.emit("✅ Navigateur fermé avec succès")
+                    self._emit_step_complete(8)
                 except Exception as e:
                     module_logger.warning(f"Erreur lors de la fermeture du navigateur: {e}", extra={"action": "SEARCH"})
+                    self.step_error.emit(8, f"Erreur fermeture: {str(e)}")
+            
+            # Émettre le signal APRÈS Step 8 (fermeture complète)
+            module_logger.info(f"Émission signal search_finished - success={result_success}, message={result_message}")
+            self.search_finished.emit(result_success, result_message, result_json_path)
+
+
+# ============================================================================
+# STATS UPDATE THREAD (RvR/PvP/PvE/Wealth/Achievements)
+# ============================================================================
+
+class StatsUpdateThread(QThread):
+    """Thread pour mettre à jour les statistiques depuis le Herald"""
+    
+    # Signaux
+    stats_updated = Signal(dict)  # (results_dict) - Émis quand mise à jour terminée avec succès
+    update_failed = Signal(str)  # (error_message) - Émis en cas d'échec complet
+    step_started = Signal(int)  # (step_index) - NOUVEAU pour ProgressStepsDialog
+    step_completed = Signal(int)  # (step_index) - NOUVEAU pour ProgressStepsDialog
+    step_error = Signal(int, str)  # (step_index, error_message) - NOUVEAU pour ProgressStepsDialog
+    
+    def __init__(self, character_url):
+        super().__init__()
+        self.character_url = character_url
+        
+        # ✅ Pattern 3 : Flag d'interruption
+        self._stop_requested = False
+        
+        # ✅ Pattern 2 : Référence ressource externe (scraper)
+        self._scraper = None
+    
+    def request_stop(self):
+        """✅ Pattern 3 : Demande arrêt gracieux"""
+        self._stop_requested = True
+    
+    def cleanup_external_resources(self):
+        """✅ Pattern 2 : Cleanup forcé du scraper (appelé depuis thread principal)"""
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        if self._scraper:
+            try:
+                logger.info("Cleanup forcé : Fermeture scraper stats")
+                self._scraper.close()
+                logger.info("Scraper fermé avec succès")
+            except Exception as e:
+                logger.warning(f"Erreur cleanup scraper: {e}")
+            finally:
+                self._scraper = None
+    
+    def run(self):
+        """Exécute la mise à jour des statistiques avec sécurité thread"""
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        from Functions.character_profile_scraper import CharacterProfileScraper
+        
+        scraper = None
+        results = {
+            'success': False,
+            'rvr': None,
+            'pvp': None,
+            'pve': None,
+            'wealth': None,
+            'achievements': None,
+            'error': None
+        }
+        
+        # Variables pour signal (émis APRÈS Step 6 dans finally)
+        emit_signal = None  # 'stats_updated' ou 'update_failed'
+        emit_data = None    # results ou error_message
+        
+        try:
+            # Étape 0 : Initialisation du scraper
+            self.step_started.emit(0)
+            logger.info(f"Initialisation scraper pour {self.character_url}")
+            
+            scraper = CharacterProfileScraper()
+            self._scraper = scraper  # ✅ Pattern 2 : Stocker pour cleanup externe
+            
+            success, error_message = scraper.connect(headless=False)
+            
+            if not success:
+                logger.error(f"Échec connexion scraper: {error_message}")
+                self.step_error.emit(0, f"Connexion impossible: {error_message}")
+                emit_signal = 'update_failed'
+                emit_data = f"Impossible de se connecter au Herald Eden:\n{error_message}"
+                return
+            
+            logger.info("Scraper initialisé avec succès")
+            self.step_completed.emit(0)
+            
+            # ✅ Pattern 3 : Check après opération critique
+            if self._stop_requested:
+                logger.info("Arrêt demandé après init scraper")
+                return
+            
+            # Étape 1 : Scraping RvR Captures
+            self.step_started.emit(1)
+            logger.info("Scraping RvR captures...")
+            
+            results['rvr'] = scraper.scrape_rvr_captures(self.character_url)
+            
+            if results['rvr']['success']:
+                logger.info(f"RvR captures récupérées: T={results['rvr']['tower_captures']}, K={results['rvr']['keep_captures']}, R={results['rvr']['relic_captures']}")
+                self.step_completed.emit(1)
+            else:
+                logger.warning(f"Échec RvR: {results['rvr'].get('error', 'Erreur inconnue')}")
+                self.step_error.emit(1, f"RvR: {results['rvr'].get('error', 'Erreur inconnue')}")
+            
+            if self._stop_requested:
+                return
+            
+            # Étape 2 : Scraping PvP Stats
+            self.step_started.emit(2)
+            logger.info("Scraping PvP stats...")
+            
+            results['pvp'] = scraper.scrape_pvp_stats(self.character_url)
+            
+            if results['pvp']['success']:
+                logger.info(f"PvP stats récupérées: SK={results['pvp']['solo_kills']}, DB={results['pvp']['deathblows']}, K={results['pvp']['kills']}")
+                self.step_completed.emit(2)
+            else:
+                logger.warning(f"Échec PvP: {results['pvp'].get('error', 'Erreur inconnue')}")
+                self.step_error.emit(2, f"PvP: {results['pvp'].get('error', 'Erreur inconnue')}")
+            
+            if self._stop_requested:
+                return
+            
+            # Étape 3 : Scraping PvE Stats
+            self.step_started.emit(3)
+            logger.info("Scraping PvE stats...")
+            
+            results['pve'] = scraper.scrape_pve_stats(self.character_url)
+            
+            if results['pve']['success']:
+                logger.info(f"PvE stats récupérées: Dragons={results['pve']['dragon_kills']}, Legion={results['pve']['legion_kills']}")
+                self.step_completed.emit(3)
+            else:
+                logger.warning(f"Échec PvE: {results['pve'].get('error', 'Erreur inconnue')}")
+                self.step_error.emit(3, f"PvE: {results['pve'].get('error', 'Erreur inconnue')}")
+            
+            if self._stop_requested:
+                return
+            
+            # Étape 4 : Scraping Wealth (Money)
+            self.step_started.emit(4)
+            logger.info("Scraping wealth...")
+            
+            results['wealth'] = scraper.scrape_wealth_money(self.character_url)
+            
+            if results['wealth']['success']:
+                logger.info(f"Wealth récupérée: {results['wealth']['money']}")
+                self.step_completed.emit(4)
+            else:
+                logger.warning(f"Échec Wealth: {results['wealth'].get('error', 'Erreur inconnue')}")
+                self.step_error.emit(4, f"Wealth: {results['wealth'].get('error', 'Erreur inconnue')}")
+            
+            if self._stop_requested:
+                return
+            
+            # Étape 5 : Scraping Achievements (conditionnel - ne bloque pas si échec)
+            self.step_started.emit(5)
+            logger.info("Scraping achievements...")
+            
+            results['achievements'] = scraper.scrape_achievements(self.character_url)
+            
+            if results['achievements']['success']:
+                logger.info(f"Achievements récupérés: {len(results['achievements']['achievements'])} achievements")
+                self.step_completed.emit(5)
+            else:
+                logger.warning(f"Échec Achievements: {results['achievements'].get('error', 'Erreur inconnue')}")
+                # Pas d'erreur bloquante pour achievements
+                self.step_completed.emit(5)  # Marqué complété même si échec (conditionnel)
+            
+            # Vérifier si au moins RvR/PvP/PvE/Wealth ont réussi
+            all_critical_success = (
+                results['rvr']['success'] and 
+                results['pvp']['success'] and 
+                results['pve']['success'] and 
+                results['wealth']['success']
+            )
+            
+            if all_critical_success:
+                results['success'] = True
+                logger.info("Toutes les stats critiques récupérées avec succès")
+                emit_signal = 'stats_updated'
+                emit_data = results
+            else:
+                # Échec partiel ou complet
+                error_parts = []
+                if not results['rvr']['success']:
+                    error_parts.append(f"RvR: {results['rvr'].get('error', '?')}")
+                if not results['pvp']['success']:
+                    error_parts.append(f"PvP: {results['pvp'].get('error', '?')}")
+                if not results['pve']['success']:
+                    error_parts.append(f"PvE: {results['pve'].get('error', '?')}")
+                if not results['wealth']['success']:
+                    error_parts.append(f"Wealth: {results['wealth'].get('error', '?')}")
+                
+                error_msg = "Échec de récupération:\n" + "\n".join(error_parts)
+                results['error'] = error_msg
+                logger.error(f"Échec mise à jour stats: {error_msg}")
+                
+                # Émettre quand même results pour mise à jour partielle possible
+                emit_signal = 'stats_updated'
+                emit_data = results
+        
+        except Exception as e:
+            logger.error(f"Erreur update stats: {e}", exc_info=True)
+            emit_signal = 'update_failed'
+            emit_data = f"Erreur inattendue: {str(e)}"
+        
+        finally:
+            # ✅ Pattern 2 : Cleanup normal (s'exécute si pas terminate())
+            # Étape 6 : Fermeture scraper
+            if scraper:
+                try:
+                    self.step_started.emit(6)
+                    logger.info("Fermeture scraper...")
+                    scraper.close()
+                    logger.info("Scraper fermé")
+                    self.step_completed.emit(6)
+                except Exception as e:
+                    logger.warning(f"Erreur fermeture scraper: {e}")
+                    self.step_error.emit(6, f"Erreur fermeture: {str(e)}")
+            
+            # Émettre le signal APRÈS Step 6 (fermeture complète)
+            if emit_signal == 'stats_updated':
+                logger.info(f"Émission signal stats_updated - success={emit_data.get('success', False)}")
+                self.stats_updated.emit(emit_data)
+            elif emit_signal == 'update_failed':
+                logger.info(f"Émission signal update_failed - error={emit_data}")
+                self.update_failed.emit(emit_data)
+
+
+# ============================================================================
+# CHARACTER UPDATE THREAD (Herald Character Data Update)
+# ============================================================================
+
+class CharacterUpdateThread(QThread):
+    """Thread pour mettre à jour les données d'un personnage depuis Herald"""
+    
+    # Signaux
+    update_finished = Signal(bool, object, str)  # (success, new_data, error_msg)
+    step_started = Signal(int)  # (step_index) - NOUVEAU pour ProgressStepsDialog
+    step_completed = Signal(int)  # (step_index) - NOUVEAU pour ProgressStepsDialog  
+    step_error = Signal(int, str)  # (step_index, error_message) - NOUVEAU pour ProgressStepsDialog
+    
+    def __init__(self, character_url):
+        super().__init__()
+        self.character_url = character_url
+        
+        # ✅ Pattern 3 : Flag d'interruption
+        self._stop_requested = False
+        
+        # ✅ Pattern 2 : Référence ressource externe (scraper Selenium)
+        self._scraper = None
+    
+    def request_stop(self):
+        """✅ Pattern 3 : Demande arrêt gracieux"""
+        self._stop_requested = True
+    
+    def cleanup_external_resources(self):
+        """✅ Pattern 2 : Cleanup forcé du scraper Selenium (appelé depuis thread principal)"""
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        if self._scraper:
+            try:
+                logger.info("Cleanup forcé : Fermeture scraper character update")
+                self._scraper.close()
+                logger.info("Scraper fermé avec succès")
+            except Exception as e:
+                logger.warning(f"Erreur cleanup scraper: {e}")
+            finally:
+                self._scraper = None
+    
+    def run(self):
+        """Exécute la mise à jour du personnage avec sécurité thread"""
+        import logging
+        import time
+        import traceback
+        from datetime import datetime
+        from urllib.parse import urlparse, parse_qs
+        from bs4 import BeautifulSoup
+        
+        logger = logging.getLogger(__name__)
+        
+        from Functions.cookie_manager import CookieManager
+        from Functions.eden_scraper import EdenScraper, _normalize_herald_data
+        
+        scraper = None
+        
+        # Variables pour stocker le résultat (émis APRÈS Step 7 dans finally)
+        result_success = False
+        result_data = None
+        result_error = ""
+        
+        try:
+            # Étape 0 : Extraction du nom du personnage depuis URL
+            self.step_started.emit(0)
+            logger.info(f"Extraction nom depuis URL: {self.character_url}")
+            
+            parsed_url = urlparse(self.character_url)
+            query_params = parse_qs(parsed_url.query)
+            character_name = query_params.get('k', [''])[0]
+            
+            if not character_name:
+                error_msg = "Impossible d'extraire le nom du personnage de l'URL"
+                logger.error(error_msg)
+                self.step_error.emit(0, error_msg)
+                result_error = error_msg
+                return
+            
+            logger.info(f"Nom extrait: {character_name}")
+            self.step_completed.emit(0)
+            
+            # ✅ Pattern 3 : Check après opération critique
+            if self._stop_requested:
+                logger.info("Arrêt demandé après extraction nom")
+                return
+            
+            # Étape 1 : Initialisation du scraper
+            self.step_started.emit(1)
+            logger.info("Initialisation scraper Herald...")
+            
+            cookie_manager = CookieManager()
+            scraper = EdenScraper(cookie_manager)
+            self._scraper = scraper  # ✅ Pattern 2 : Stocker pour cleanup externe
+            
+            if not scraper.initialize_driver(headless=False):
+                error_msg = "Impossible d'initialiser le navigateur"
+                logger.error(error_msg)
+                self.step_error.emit(1, error_msg)
+                result_error = error_msg
+                return
+            
+            logger.info("Scraper initialisé")
+            self.step_completed.emit(1)
+            
+            if self._stop_requested:
+                return
+            
+            # Étape 2 : Chargement des cookies
+            self.step_started.emit(2)
+            logger.info("Chargement des cookies...")
+            
+            if not scraper.load_cookies():
+                error_msg = "Impossible de charger les cookies"
+                logger.error(error_msg)
+                self.step_error.emit(2, error_msg)
+                result_error = error_msg
+                return
+            
+            logger.info("Cookies chargés")
+            self.step_completed.emit(2)
+            
+            if self._stop_requested:
+                return
+            
+            # Étape 3 : Navigation vers la page de recherche
+            self.step_started.emit(3)
+            search_url = f"https://eden-daoc.net/herald?n=search&s={character_name}"
+            logger.info(f"Navigation vers: {search_url}")
+            
+            scraper.driver.get(search_url)
+            
+            logger.info("Page chargée")
+            self.step_completed.emit(3)
+            
+            if self._stop_requested:
+                return
+            
+            # Étape 4 : Attente du chargement (interruptible)
+            self.step_started.emit(4)
+            logger.info("Attente chargement page...")
+            
+            # ✅ Pattern 3 : Sleep interruptible (5 secondes)
+            for i in range(10):  # 10 x 0.5s = 5s
+                if self._stop_requested:
+                    logger.info("Arrêt demandé pendant sleep")
+                    return
+                time.sleep(0.5)
+            
+            logger.info("Chargement terminé")
+            self.step_completed.emit(4)
+            
+            if self._stop_requested:
+                return
+            
+            # Étape 5 : Extraction des données
+            self.step_started.emit(5)
+            logger.info("Extraction données HTML...")
+            
+            page_source = scraper.driver.page_source
+            soup = BeautifulSoup(page_source, 'html.parser')
+            
+            logger.info(f"Page analysée: {len(page_source)} caractères")
+            
+            # Parser les résultats
+            search_data = {
+                'character_name': character_name,
+                'search_url': search_url,
+                'timestamp': datetime.now().isoformat(),
+                'results': []
+            }
+            
+            tables = soup.find_all('table')
+            for table in tables:
+                rows = table.find_all('tr')
+                if len(rows) > 1:
+                    headers = [th.get_text(strip=True) for th in rows[0].find_all('th')]
+                    
+                    for row in rows[1:]:
+                        cells = row.find_all('td')
+                        if cells:
+                            result = {}
+                            for idx, cell in enumerate(cells):
+                                header = headers[idx] if idx < len(headers) else f"col_{idx}"
+                                result[header] = cell.get_text(strip=True)
+                                
+                                links = cell.find_all('a')
+                                if links:
+                                    result[f"{header}_links"] = [a.get('href', '') for a in links]
+                            
+                            if result:
+                                search_data['results'].append(result)
+            
+            logger.info(f"Extraction terminée: {len(search_data['results'])} résultats")
+            self.step_completed.emit(5)
+            
+            if self._stop_requested:
+                return
+            
+            # Étape 6 : Formatage des résultats
+            self.step_started.emit(6)
+            logger.info("Formatage des personnages...")
+            
+            characters = []
+            for result in search_data['results']:
+                if (result.get('col_1') and 
+                    result.get('col_3') and 
+                    len(result.get('col_1', '')) > 0 and
+                    result.get('col_0') and
+                    result.get('col_0', '').isdigit()):
+                    
+                    rank = result.get('col_0', '')
+                    name = result.get('col_1', '').strip()
+                    char_class = result.get('col_3', '').strip()
+                    race = result.get('col_5', '').strip()
+                    guild = result.get('col_7', '').strip()
+                    level = result.get('col_8', '').strip()
+                    rp = result.get('col_9', '').strip()
+                    realm_rank = result.get('col_10', '').strip()
+                    realm_level = result.get('col_11', '').strip()
+                    
+                    # Extraire l'URL
+                    url = ""
+                    if 'col_1_links' in result and result['col_1_links']:
+                        href = result['col_1_links'][0]
+                        if href.startswith('?'):
+                            url = f"https://eden-daoc.net/herald{href}"
+                        elif href.startswith('/'):
+                            url = f"https://eden-daoc.net{href}"
+                        elif not href.startswith('http'):
+                            url = f"https://eden-daoc.net/herald?{href}"
+                        else:
+                            url = href
+                    else:
+                        clean_name = name.split()[0]
+                        url = f"https://eden-daoc.net/herald?n=player&k={clean_name}"
+                    
+                    if name and char_class:
+                        clean_name = name.split()[0]
+                        
+                        characters.append({
+                            'rank': rank,
+                            'name': name,
+                            'clean_name': clean_name,
+                            'class': char_class,
+                            'race': race,
+                            'guild': guild,
+                            'level': level,
+                            'realm_points': rp,
+                            'realm_rank': realm_rank,
+                            'realm_level': realm_level,
+                            'url': url
+                        })
+            
+            if not characters:
+                error_msg = f"Aucun personnage trouvé pour '{character_name}'"
+                logger.error(error_msg)
+                self.step_error.emit(6, error_msg)
+                result_error = error_msg
+                return
+            
+            # Trouver le personnage exact
+            target_char = None
+            for char in characters:
+                if char.get('clean_name', '').lower() == character_name.lower():
+                    target_char = char
+                    break
+            
+            if not target_char and characters:
+                target_char = characters[0]
+                logger.warning(f"Pas de correspondance exacte, utilisation du premier résultat: {target_char.get('name', 'Unknown')}")
+            
+            if not target_char:
+                error_msg = "Personnage non trouvé dans les résultats"
+                logger.error(error_msg)
+                self.step_error.emit(6, error_msg)
+                result_error = error_msg
+                return
+            
+            # Normaliser les données
+            normalized_data = _normalize_herald_data(target_char)
+            
+            logger.info(f"Formatage terminé pour: {normalized_data.get('name', 'Unknown')}")
+            self.step_completed.emit(6)
+            
+            # Stocker le succès (signal émis APRÈS Step 7 dans finally)
+            logger.info("Mise à jour personnage réussie")
+            result_success = True
+            result_data = normalized_data
+        
+        except Exception as e:
+            logger.error(f"Erreur mise à jour personnage: {e}", exc_info=True)
+            result_error = f"Erreur: {str(e)}"
+        
+        finally:
+            # ✅ Pattern 2 : Cleanup normal (s'exécute si pas terminate())
+            # Étape 7 : Fermeture scraper
+            if scraper and scraper.driver:
+                try:
+                    self.step_started.emit(7)
+                    logger.info("Fermeture navigateur...")
+                    scraper.driver.quit()
+                    logger.info("Navigateur fermé")
+                    self.step_completed.emit(7)
+                except Exception as e:
+                    logger.warning(f"Erreur fermeture navigateur: {e}")
+                    self.step_error.emit(7, f"Erreur fermeture: {str(e)}")
+            
+            # Émettre le signal APRÈS Step 7 (fermeture complète)
+            logger.info(f"Émission signal update_finished - success={result_success}, error={result_error}")
+            self.update_finished.emit(result_success, result_data, result_error)
 
 
 class HeraldSearchDialog(QDialog):
@@ -3507,18 +4612,27 @@ class HeraldSearchDialog(QDialog):
         """Arrête le thread de recherche s'il est en cours d'exécution"""
         if hasattr(self, 'search_thread') and self.search_thread is not None:
             if self.search_thread.isRunning():
+                # Demander l'arrêt gracieux du thread
+                self.search_thread.request_stop()
+                
                 # Déconnecter les signaux pour éviter les erreurs
                 try:
                     self.search_thread.search_finished.disconnect()
-                    self.search_thread.progress_update.disconnect()
+                    # Déconnecter les NOUVEAUX signaux (step_started, step_completed, step_error)
+                    self.search_thread.step_started.disconnect()
+                    self.search_thread.step_completed.disconnect()
+                    self.search_thread.step_error.disconnect()
                 except:
                     pass
                 
-                # Attendre que le thread se termine (avec timeout de 2 secondes)
-                self.search_thread.wait(2000)
+                # Attendre que le thread se termine (avec timeout de 3 secondes)
+                # Le thread devrait s'arrêter rapidement grâce au flag _stop_requested
+                self.search_thread.wait(3000)
                 
-                # Si le thread ne s'est pas terminé, le forcer (déconseillé mais nécessaire)
+                # Si le thread ne s'est pas terminé, forcer le cleanup du navigateur AVANT terminate()
                 if self.search_thread.isRunning():
+                    logging.warning("Thread non terminé après 3s - Cleanup forcé du navigateur")
+                    self.search_thread.cleanup_driver()  # ✅ Ferme le navigateur depuis thread principal
                     self.search_thread.terminate()
                     self.search_thread.wait()
                 
@@ -3533,7 +4647,10 @@ class HeraldSearchDialog(QDialog):
                 self.progress_dialog.deleteLater()
             except:
                 pass
-            delattr(self, 'progress_dialog')
+            
+            # Supprimer l'attribut seulement s'il existe encore
+            if hasattr(self, 'progress_dialog'):
+                delattr(self, 'progress_dialog')
     
     def _cleanup_temp_files(self):
         """Supprime les fichiers temporaires de recherche"""
@@ -3581,156 +4698,99 @@ class HeraldSearchDialog(QDialog):
         self.name_input.setEnabled(False)
         self.realm_combo.setEnabled(False)
         
-        # Créer une fenêtre de progression personnalisée avec animation
-        self.progress_dialog = QDialog(self)
-        self.progress_dialog.setWindowTitle("⏳ Recherche en cours...")
-        self.progress_dialog.setModal(True)
-        self.progress_dialog.setFixedSize(550, 350)
+        # === NOUVEAU SYSTÈME : Utiliser ProgressStepsDialog ===
+        from UI.progress_dialog_base import ProgressStepsDialog, StepConfiguration
         
-        progress_layout = QVBoxLayout(self.progress_dialog)
-        progress_layout.setSpacing(15)
+        # Créer les étapes pour la recherche Herald
+        steps = StepConfiguration.build_steps(
+            StepConfiguration.HERALD_CONNECTION,
+            StepConfiguration.HERALD_SEARCH,
+            StepConfiguration.CLEANUP
+        )
         
-        # Icône et titre
-        title_layout = QHBoxLayout()
+        # Construire le titre et la description
         realm_text = self.realm_combo.currentText()
         if realm_filter:
-            title_text = f"🔍 Recherche de '{character_name}' dans {realm_text}..."
+            title = f"🔍 Recherche de '{character_name}' dans {realm_text}..."
+            description = f"Connexion à Eden Herald et recherche de personnages dans le royaume {realm_text}"
         else:
-            title_text = f"🔍 Recherche de '{character_name}' sur Eden Herald..."
-        title_label = QLabel(title_text)
-        from Functions.theme_manager import get_scaled_size
-        title_label.setStyleSheet(f"font-size: {get_scaled_size(12):.1f}pt; font-weight: bold;")
-        title_layout.addWidget(title_label)
-        progress_layout.addLayout(title_layout)
+            title = f"🔍 Recherche de '{character_name}' sur Eden Herald..."
+            description = "Connexion à Eden Herald et recherche de personnages dans tous les royaumes"
         
-        # Zone d'étapes avec scroll
-        steps_group = QGroupBox("Progression")
-        steps_layout = QVBoxLayout()
-        
-        # Liste des étapes (stockée pour mise à jour)
-        self.progress_steps = []
-        step_texts = [
-            ("🔐", "Vérification des cookies d'authentification"),
-            ("🌐", "Initialisation du navigateur Chrome"),
-            ("🍪", "Chargement des cookies dans le navigateur"),
-            ("🔍", "Recherche sur Eden Herald"),
-            ("⏳", "Chargement de la page de recherche"),
-            ("📊", "Extraction des résultats de recherche"),
-            ("💾", "Sauvegarde des résultats"),
-            ("🎯", "Formatage des personnages trouvés"),
-            ("🔄", "Fermeture du navigateur")
-        ]
-        
-        for icon, text in step_texts:
-            step_layout = QHBoxLayout()
-            step_icon_label = QLabel("⏺️")  # Icône par défaut (en attente)
-            step_icon_label.setFixedWidth(25)
-            step_text_label = QLabel(f"{icon} {text}")
-            step_text_label.setStyleSheet(f"color: #888; font-size: {get_scaled_size(9):.1f}pt;")
-            step_layout.addWidget(step_icon_label)
-            step_layout.addWidget(step_text_label)
-            step_layout.addStretch()
-            steps_layout.addLayout(step_layout)
-            
-            # Stocker les labels pour mise à jour
-            self.progress_steps.append({
-                'icon_label': step_icon_label,
-                'text_label': step_text_label,
-                'icon': icon,
-                'text': text
-            })
-        
-        steps_group.setLayout(steps_layout)
-        progress_layout.addWidget(steps_group)
-        
-        # Barre de progression indéterminée (animation)
-        progress_bar = QProgressBar()
-        progress_bar.setRange(0, 0)  # Mode indéterminé = animation
-        progress_bar.setTextVisible(False)
-        progress_bar.setFixedHeight(20)
-        progress_layout.addWidget(progress_bar)
-        
-        # Message d'attente
-        wait_label = QLabel("⏱️ Veuillez patienter, cette opération peut prendre quelques secondes...")
-        wait_label.setStyleSheet(f"color: #888; font-size: {get_scaled_size(9):.1f}pt; font-style: italic;")
-        wait_label.setWordWrap(True)
-        progress_layout.addWidget(wait_label)
-        
-        progress_layout.addStretch()
+        # Créer le dialogue de progression
+        self.progress_dialog = ProgressStepsDialog(
+            parent=self,
+            title=title,
+            steps=steps,
+            description=description,
+            show_progress_bar=True,
+            determinate_progress=True,  # Mode avec pourcentage
+            allow_cancel=False  # Pas d'annulation pour l'instant
+        )
         
         # Lancer le thread avec le filtre de royaume
         self.search_thread = SearchThread(character_name, realm_filter)
+        
+        # Connecter les NOUVEAUX signaux step_started/step_completed
+        self.search_thread.step_started.connect(self._on_step_started)
+        self.search_thread.step_completed.connect(self._on_step_completed)
+        self.search_thread.step_error.connect(self._on_step_error)
+        
+        # Connecter le signal de fin
         self.search_thread.search_finished.connect(self.on_search_finished)
-        self.search_thread.progress_update.connect(self._on_search_progress_update)
+        
+        # IMPORTANT : Connecter le signal rejected pour gérer la fermeture du dialogue
+        self.progress_dialog.rejected.connect(self._on_progress_dialog_closed)
         
         # Afficher le dialogue et démarrer le worker
         self.progress_dialog.show()
         self.search_thread.start()
     
-    def _on_search_progress_update(self, status_message):
-        """Met à jour le message de progression pendant la recherche"""
-        # Vérifier que la fenêtre de dialogue existe toujours
-        if not hasattr(self, 'progress_dialog') or not hasattr(self, 'progress_steps'):
-            return
-        
-        # Vérifier que le dialogue n'a pas été fermé
-        try:
-            if not self.progress_dialog.isVisible():
-                return
-        except RuntimeError:
-            # Le dialogue a été détruit
-            return
-        
-        # Mapping des messages aux indices d'étapes
-        step_mapping = {
-            "🔐": 0,  # Vérification des cookies
-            "🌐": 1,  # Initialisation du navigateur
-            "🍪": 2,  # Chargement des cookies
-            "🔍": 3,  # Recherche
-            "⏳": 4,  # Chargement de la page
-            "📊": 5,  # Extraction
-            "💾": 6,  # Sauvegarde
-            "🎯": 7,  # Formatage
-            "🔄": 8   # Fermeture
-        }
-        
-        # Cas spécial : message de succès final (marquer toutes les étapes comme terminées)
-        if status_message.startswith("✅") and "terminée" in status_message.lower():
+    def _on_step_started(self, step_index):
+        """Wrapper thread-safe pour start_step"""
+        if hasattr(self, 'progress_dialog') and self.progress_dialog:
             try:
-                for step in self.progress_steps:
-                    step['icon_label'].setText("✅")
-                    step['icon_label'].setStyleSheet("color: green;")
-                    step['text_label'].setStyleSheet(f"color: #4CAF50; font-size: {self._get_scaled_size(9):.1f}pt;")
+                self.progress_dialog.start_step(step_index)
             except RuntimeError:
-                # Les widgets ont été détruits
+                # Le dialogue a été détruit
                 pass
-            return
-        
-        # Trouver l'étape correspondante
-        step_index = -1
-        for icon, index in step_mapping.items():
-            if status_message.startswith(icon):
-                step_index = index
-                break
-        
-        if step_index >= 0 and step_index < len(self.progress_steps):
+    
+    def _on_step_completed(self, step_index):
+        """Wrapper thread-safe pour complete_step"""
+        if hasattr(self, 'progress_dialog') and self.progress_dialog:
             try:
-                step = self.progress_steps[step_index]
-                
-                # Marquer toutes les étapes précédentes comme terminées
-                for i in range(step_index):
-                    prev_step = self.progress_steps[i]
-                    prev_step['icon_label'].setText("✅")
-                    prev_step['icon_label'].setStyleSheet("color: green;")
-                    prev_step['text_label'].setStyleSheet(f"color: #4CAF50; font-size: {self._get_scaled_size(9):.1f}pt;")
-                
-                # Mettre en évidence l'étape en cours
-                step['icon_label'].setText("⏳")
-                step['icon_label'].setStyleSheet("color: blue;")
-                step['text_label'].setStyleSheet(f"color: #2196F3; font-size: {self._get_scaled_size(9):.1f}pt; font-weight: bold;")
+                self.progress_dialog.complete_step(step_index)
             except RuntimeError:
-                # Les widgets ont été détruits
+                # Le dialogue a été détruit
                 pass
+    
+    def _on_step_error(self, step_index, error_message):
+        """Wrapper thread-safe pour error_step"""
+        if hasattr(self, 'progress_dialog') and self.progress_dialog:
+            try:
+                self.progress_dialog.error_step(step_index, error_message)
+            except RuntimeError:
+                # Le dialogue a été détruit
+                pass
+    
+    def _on_progress_dialog_closed(self):
+        """Appelé quand l'utilisateur ferme le dialogue de progression"""
+        logging.info("Dialogue de progression fermé par l'utilisateur - Arrêt de la recherche")
+        
+        # Arrêter le thread de recherche proprement
+        self._stop_search_thread()
+        
+        # Réactiver les contrôles
+        self.search_button.setEnabled(True)
+        self.name_input.setEnabled(True)
+        self.realm_combo.setEnabled(True)
+    
+    # === ANCIENNE MÉTHODE (LEGACY - Conservée pour référence) ===
+    # def _on_search_progress_update(self, status_message):
+    #     """Met à jour le message de progression pendant la recherche"""
+    #     # REMPLACÉE par le système ProgressStepsDialog
+    #     # Les signaux step_started/step_completed sont maintenant utilisés
+    #     pass
     
     def _get_scaled_size(self, base_size):
         """Helper pour obtenir la taille scalée"""
@@ -3742,11 +4802,20 @@ class HeraldSearchDialog(QDialog):
     
     def on_search_finished(self, success, message, json_path):
         """Appelé quand la recherche est terminée"""
-        # Fermer et supprimer la fenêtre de progression
+        # === NOUVEAU : Utiliser complete_all() ou afficher erreur ===
         if hasattr(self, 'progress_dialog'):
-            self.progress_dialog.close()
-            self.progress_dialog.deleteLater()
-            delattr(self, 'progress_dialog')
+            if success:
+                # Succès : compléter toutes les étapes
+                self.progress_dialog.complete_all(f"✅ {message}")
+            else:
+                # Erreur : afficher le message d'erreur
+                self.progress_dialog.set_status_message(f"❌ {message}", "#F44336")
+            
+            # Le dialogue se fermera automatiquement après complete_all()
+            # Mais on le ferme manuellement si erreur
+            if not success:
+                import time
+                QTimer.singleShot(2000, self.progress_dialog.close)
         
         # Réactiver the contrôles
         self.search_button.setEnabled(True)

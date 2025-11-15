@@ -1,30 +1,55 @@
 # Folder Move System - Technical Documentation
 
+**Version**: 2.0  
+**Last Updated**: 2025-11-15  
+**Status**: ✅ Production Ready
+
+---
+
 ## Overview
 
-The **Folder Move System** allows users to physically relocate application data folders (Characters, Armor, Logs, Cookies) or create them if they don't exist yet. It provides a unified interface for folder management with safety features and user confirmations.
+The **Folder Move System** allows users to physically relocate application data folders (Characters, Armor, Logs, Cookies, Backups) or create them if they don't exist yet. It provides a unified interface for folder management with **fixed folder names** and safety features.
 
 **Location**: `UI/settings_dialog.py`  
 **Method**: `_move_folder(line_edit, config_key, folder_label)`  
-**Lines**: ~115 lines of code
+**Lines**: ~95 lines of code (optimized)
+
+---
+
+## Key Features (v2.0)
+
+✅ **Fixed Folder Names** - No user input for folder names (predefined by application)  
+✅ **Backup Special Handling** - Automatic `/Backups/` intermediate folder for backup paths  
+✅ **Open Folder Buttons** - Quick access to all folders via 📂 button  
+✅ **Consistent UI** - Same design pattern for all folder configurations  
+✅ **Multi-language** - FR/EN/DE support with standardized translations
 
 ---
 
 ## Supported Folders
 
-| Folder | Configurable | Move Button | Browse Button |
-|--------|--------------|-------------|---------------|
-| **Characters** | ✅ Yes | ✅ Yes | ✅ Yes |
-| **Configuration** | ❌ No | ❌ No | ❌ No |
-| **Armor** | ✅ Yes | ✅ Yes | ✅ Yes |
-| **Logs** | ✅ Yes | ✅ Yes | ✅ Yes |
-| **Cookies** | ✅ Yes | ✅ Yes | ✅ Yes |
+| Folder | Configurable | Move Button | Open Button | Browse Button | Fixed Name |
+|--------|--------------|-------------|-------------|---------------|------------|
+| **Characters** | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | `Characters` |
+| **Configuration** | ❌ No | ❌ No | ❌ No | ❌ No | N/A |
+| **Armor** | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | `Armor` |
+| **Logs** | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | `Logs` |
+| **Cookies** | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | `Cookies` |
+| **Backups (Characters)** | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | `Backups/Characters` |
+| **Backups (Cookies)** | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | `Backups/Cookies` |
 
 **Note**: Configuration folder is NOT configurable to avoid circular dependency (config.json needs to know where it is stored).
 
 ---
 
 ## Workflow Diagram
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                 User clicks "📦 Déplacer"                    │
+---
+
+## Workflow Diagram (v2.0)
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -44,14 +69,27 @@ The **Folder Move System** allows users to physically relocate application data 
       │               │
       ▼               ▼
 ┌──────────┐    ┌──────────┐
-│ Source:  │    │ Suggest  │
-│ existing │    │ default  │
+│ Source:  │    │ Use      │
+│ existing │    │ FIXED    │
 │ folder   │    │ name     │
 └────┬─────┘    └────┬─────┘
      │               │
      └───────┬───────┘
              │
              ▼
+    ┌────────────────────┐
+    │ Get FIXED name     │
+    │ from config_key:   │
+    │ - character_folder │
+    │   → "Characters"   │
+    │ - armor_folder     │
+    │   → "Armor"        │
+    │ - backup_path      │
+    │   → "Backups"      │
+    │   → /Characters    │
+    └────┬───────────────┘
+         │
+         ▼
     ┌────────────────┐
     │ Select parent  │
     │ destination    │
@@ -60,9 +98,9 @@ The **Folder Move System** allows users to physically relocate application data 
          │
          ▼
     ┌────────────────┐
-    │ Enter folder   │
-    │ name (or keep  │
-    │ suggested)     │
+    │ Build path:    │
+    │ parent + name  │
+    │ (NO user input)│
     └────┬───────────┘
          │
          ▼
@@ -75,60 +113,61 @@ The **Folder Move System** allows users to physically relocate application data 
      │       │
 EXISTS│       │AVAILABLE
      ▼       ▼
- ┌─────┐  ┌──────────────┐
- │ERROR│  │Confirm action│
- │ Stop│  │(Move/Create) │
- └─────┘  └──────┬───────┘
-                 │
-                 ▼
-         ┌───────────────┐
-         │ Progress      │
-         │ Dialog        │
-         └───┬───────────┘
-             │
-      ┌──────┴──────┐
-      │             │
-   MOVE│            │CREATE
-      ▼             ▼
-┌──────────┐  ┌──────────┐
-│Copy with │  │ mkdir()  │
-│shutil.   │  │          │
-│copytree()│  │          │
-└────┬─────┘  └────┬─────┘
-     │             │
-     └──────┬──────┘
-            │
-            ▼
-    ┌────────────────┐
-    │ Update line    │
-    │ edit with new  │
-    │ path           │
-    └────┬───────────┘
-         │
-         ▼
-    ┌────────────────┐
-    │ Ask to delete  │◄─────(MOVE only)
-    │ old folder?    │
-    └────┬───────────┘
-         │
-     ┌───┴───┐
-     │       │
-    YES      NO
-     │       │
-     ▼       ▼
-┌─────────┐ ┌──────────┐
-│ Delete  │ │ Keep old │
-│ with    │ │ folder   │
-│rmtree() │ │          │
-└────┬────┘ └────┬─────┘
-     │           │
-     └─────┬─────┘
-           │
-           ▼
-    ┌─────────────┐
-    │  Success    │
-    │  Message    │
-    └─────────────┘
+ ┌─────────┐  ┌──────────────┐
+ │ Ask to  │  │Confirm action│
+ │ use     │  │(Move/Create) │
+ │ existing│  └──────┬───────┘
+ └────┬────┘         │
+      │              │
+      ▼              ▼
+   Update       ┌───────────────┐
+   Config       │ Progress      │
+                │ Dialog        │
+                └───┬───────────┘
+                    │
+             ┌──────┴──────┐
+             │             │
+          MOVE│            │CREATE
+             ▼             ▼
+       ┌──────────┐  ┌──────────┐
+       │Copy with │  │ mkdir()  │
+       │shutil.   │  │ (with    │
+       │copytree()│  │ parents) │
+       └────┬─────┘  └────┬─────┘
+            │             │
+            └──────┬──────┘
+                   │
+                   ▼
+           ┌────────────────┐
+           │ Update line    │
+           │ edit with new  │
+           │ path           │
+           └────┬───────────┘
+                │
+                ▼
+           ┌────────────────┐
+           │ Ask to delete  │◄─────(MOVE only)
+           │ old folder?    │
+           └────┬───────────┘
+                │
+            ┌───┴───┐
+            │       │
+           YES      NO
+            │       │
+            ▼       ▼
+       ┌─────────┐ ┌──────────┐
+       │ Delete  │ │ Keep old │
+       │ with    │ │ folder   │
+       │rmtree() │ │          │
+       └────┬────┘ └────┬─────┘
+            │           │
+            └─────┬─────┘
+                  │
+                  ▼
+           ┌─────────────┐
+           │  Success    │
+           │  Message    │
+           └─────────────┘
 ```
 
 ---

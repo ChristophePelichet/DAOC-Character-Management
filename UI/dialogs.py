@@ -2562,14 +2562,14 @@ class ConfigurationDialog(QDialog):
         from Functions.path_manager import get_armor_dir
         
         char_folder = config.get("character_folder") or get_character_dir()
-        config_folder = config.get("config_folder") or get_config_dir()
+        # Config folder is NOT configurable - always next to executable
         log_folder = config.get("log_folder") or get_log_dir()
         armor_folder = config.get("armor_folder") or get_armor_dir()
         cookies_folder = config.get("cookies_folder") or get_config_dir()
         
         self.char_path_edit.setText(char_folder)
         self.char_path_edit.setCursorPosition(0)
-        self.config_path_edit.setText(config_folder)
+        self.config_path_edit.setText(get_config_dir())
         self.config_path_edit.setCursorPosition(0)
         self.log_path_edit.setText(log_folder)
         self.log_path_edit.setCursorPosition(0)

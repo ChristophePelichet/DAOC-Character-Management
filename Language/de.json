@@ -79,6 +79,7 @@
     "config_path_label": "Charakterverzeichnis",
     "browse_button": "Durchsuchen...",
     "move_folder_button": "Verschieben",
+    "open_folder_button": "Ordner öffnen",
     "move_folder_tooltip": "Verschieben oder erstellen Sie diesen Ordner an einem neuen Speicherort",
     "move_folder_no_source": "Der Quellordner existiert nicht.",
     "move_folder_select_destination": "Wählen Sie den übergeordneten Zielordner",

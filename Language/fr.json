@@ -79,6 +79,7 @@
     "config_path_label": "Répertoire des personnages",
     "browse_button": "Parcourir...",
     "move_folder_button": "Déplacer",
+    "open_folder_button": "Ouvrir le dossier",
     "move_folder_tooltip": "Déplacer ou créer ce dossier à un nouvel emplacement",
     "move_folder_no_source": "Le dossier source n'existe pas.",
     "move_folder_select_destination": "Sélectionnez le dossier parent de destination",

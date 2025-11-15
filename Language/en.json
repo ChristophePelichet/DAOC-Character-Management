@@ -78,6 +78,7 @@
     "config_path_label": "Character Directory",
     "browse_button": "Browse...",
     "move_folder_button": "Move",
+    "open_folder_button": "Open folder",
     "move_folder_tooltip": "Move or create this folder to a new location",
     "move_folder_no_source": "The source folder does not exist.",
     "move_folder_select_destination": "Select the parent destination folder",

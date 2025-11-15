@@ -750,6 +750,7 @@ class CharacterApp(QMainWindow):
                 pass  # Keep existing value if invalid
             config.set("cookies_backup_enabled", dialog.cookies_backup_enabled_check.isChecked())
             config.set("cookies_backup_path", dialog.cookies_backup_path_edit.text())
+            config.set("cookies_backup_compress", dialog.cookies_backup_compress_check.isChecked())
         
         # Theme
         old_theme = config.get("theme", "default")

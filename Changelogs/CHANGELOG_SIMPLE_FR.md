@@ -21,6 +21,11 @@
 
 ### 🐛 Correction
 
+**Largeurs de Colonnes Non Mémorisées**
+- 🛡️ Colonnes redimensionnées manuellement perdues au redémarrage
+- 🔧 Sauvegarde automatique des largeurs dans config.json
+- 🎯 Configuration des colonnes persistante entre sessions
+
 **URL Manquante à l'Import**
 - 🛡️ Correction bug URL Herald non sauvegardée lors de l'import de personnages
 - 🔧 Ajout du fallback URL oublié lors du refactoring SearchThread

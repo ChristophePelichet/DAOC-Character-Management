@@ -4,9 +4,21 @@ Historique complet des versions du gestionnaire de personnages pour Dark Age of 
 
 ---
 
-# ✨✨ v0.108 - 14/11/2025
+# ✨✨ v0.108
 
 ### 🐛 Correction
+
+**Largeurs de Colonnes Non Sauvegardées en Mode Manuel**
+- 🛡️ **Problème** : En mode de redimensionnement manuel (colonnes non bloquées), les largeurs personnalisées des colonnes n'étaient pas sauvegardées, obligeant l'utilisateur à redimensionner toutes les colonnes à chaque redémarrage de l'application
+- 🔧 **Cause Racine** : Le système sauvegardait uniquement `tree_view_header_state` (ordre et état général), mais pas les largeurs individuelles. En mode manuel, `apply_column_resize_mode()` réinitialisait tout en mode `Interactive` sans restaurer les largeurs précédentes
+- 🔧 **Solution Implémentée** :
+  - Nouveau paramètre `column_widths` dans `config.json` : dictionnaire `{"0": 60, "1": 80, ...}` stockant la largeur de chaque colonne
+  - Modification `save_header_state()` : sauvegarde automatique des largeurs des 12 colonnes visibles
+  - Modification `apply_column_resize_mode()` en mode manuel : restauration des largeurs sauvegardées via `setColumnWidth()`, sinon application de largeurs par défaut
+  - Sauvegarde automatique avant changement de mode dans les paramètres (préserve configuration actuelle)
+  - Sauvegarde automatique à la fermeture de l'application (`closeEvent`)
+- 📝 Fichiers modifiés : `Functions/tree_manager.py` (save_header_state, apply_column_resize_mode), `main.py` (sauvegarde avant changement de mode)
+- 🎯 Impact : Les largeurs de colonnes personnalisées sont maintenant mémorisées entre les sessions. L'utilisateur ne doit configurer ses colonnes qu'une seule fois
 
 **Freeze de la Fenêtre après Mise à Jour Herald**
 - 🛡️ **Problème** : La fenêtre du personnage (CharacterSheetWindow) se figeait après fermeture du dialogue "Aucune mise à jour", empêchant toute interaction pendant plusieurs secondes

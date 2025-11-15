@@ -83,15 +83,9 @@ class UIManager:
         file_menu.addSeparator()
         
         settings_action = QAction(lang.get("menu_file_settings"), self.main_window)
+        settings_action.setShortcut("Ctrl+S")
         settings_action.triggered.connect(self.main_window.open_configuration)
         file_menu.addAction(settings_action)
-        
-        # Menu Affichage
-        view_menu = menubar.addMenu(lang.get("menu_view"))
-        
-        columns_action = QAction(lang.get("menu_view_columns"), self.main_window)
-        columns_action.triggered.connect(self.main_window.open_columns_configuration)
-        view_menu.addAction(columns_action)
         
         # Menu Outils
         tools_menu = menubar.addMenu(lang.get("tools_menu"))
@@ -108,12 +102,6 @@ class UIManager:
         wiki_doc_action.setShortcut("F1")
         wiki_doc_action.triggered.connect(self._open_wiki_documentation)
         help_menu.addAction(wiki_doc_action)
-        
-        help_menu.addSeparator()
-        
-        eden_debug_action = QAction(lang.get("menu_help_eden_debug"), self.main_window)
-        eden_debug_action.triggered.connect(self.main_window.open_eden_debug)
-        help_menu.addAction(eden_debug_action)
         
         help_menu.addSeparator()
         

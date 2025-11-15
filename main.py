@@ -674,15 +674,20 @@ class CharacterApp(QMainWindow):
         servers = config.get("servers", ["Eden"])
         realms = self.data_manager.get_realms()
         
-        dialog = ConfigurationDialog(
+        # Use new modern settings dialog
+        from UI.settings_dialog import SettingsDialog
+        dialog = SettingsDialog(
             self, self.available_languages,
             available_seasons=seasons,
             available_servers=servers,
             available_realms=realms
         )
         
-        if dialog.exec() == QDialog.Accepted:
-            self.save_configuration(dialog)
+        # Show non-modal (don't block)
+        dialog.show()
+        
+        # Connect accepted signal to save
+        dialog.accepted.connect(lambda: self.save_configuration(dialog))
             
     def save_configuration(self, dialog):
         """Sauvegarde la configuration"""
@@ -720,6 +725,14 @@ class CharacterApp(QMainWindow):
             # Sauvegarder l'état actuel avant de changer de mode
             self.tree_manager.save_header_state()
             self.tree_manager.apply_column_resize_mode(new_manual_resize)
+        
+        # Column visibility
+        if hasattr(dialog, 'column_checkboxes'):
+            visibility_config = {}
+            for col_name, checkbox in dialog.column_checkboxes.items():
+                visibility_config[col_name] = checkbox.isChecked()
+            config.set("column_visibility", visibility_config)
+            self.tree_manager.apply_column_visibility()
         
         # Navigateur and téléchargement
         config.set("preferred_browser", dialog.browser_combo.currentText())

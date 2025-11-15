@@ -26,8 +26,8 @@ The configuration window displays:
 |--------|-----|-------------|---------|
 | **Selection** | `selection` | Checkbox for bulk actions | ✅ Visible |
 | **Realm** | `realm` | Realm icon (Albion/Hibernia/Midgard) | ✅ Visible |
-| **Season** | `season` | Character's season (S1, S2, S3, etc.) | ✅ Visible |
-| **Server** | `server` | Character's server (Eden, Blackthorn, etc.) | ❌ Hidden |
+| **Season** | `season` | Character's season (S3 - current) | ✅ Visible |
+| **Server** | `server` | Character's server (Eden) | ❌ Hidden |
 | **Name** | `name` | Character name | ✅ Visible |
 | **Level** | `level` | Character level | ✅ Visible |
 | **Rank** | `realm_rank` | Realm rank (e.g., 5L7) | ✅ Visible |

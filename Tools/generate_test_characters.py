@@ -52,7 +52,7 @@ def generate_test_characters():
                 "class": random.choice(classes_by_realm[realm]),
                 "race": random.choice(races_by_realm[realm]),
                 "level": random.randint(1, 50),
-                "season": "S1",
+                "season": "S3",
                 "server": "Eden",
                 "page": random.randint(1, 5),
                 "guild": random.choice(guilds),

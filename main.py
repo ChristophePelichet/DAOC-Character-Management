@@ -670,8 +670,8 @@ class CharacterApp(QMainWindow):
     def open_configuration(self):
         """Ouvre la fenêtre de configuration"""
         logging.debug("Opening configuration window")
-        seasons = config.get("seasons", ["S1", "S2", "S3"])
-        servers = config.get("servers", ["Eden", "Blackthorn"])
+        seasons = config.get("seasons", ["S3"])
+        servers = config.get("servers", ["Eden"])
         realms = self.data_manager.get_realms()
         
         dialog = ConfigurationDialog(

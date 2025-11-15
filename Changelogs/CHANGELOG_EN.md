@@ -6,6 +6,14 @@ Complete version history of the character manager for Dark Age of Camelot (Eden)
 
 # ✨✨ v0.108
 
+### 🧹 Cleanup
+- 🗑️ **Removed Obsolete References**: Complete cleanup of code and documentation
+  - Removed references to S1 and S2 seasons (ended seasons on Eden)
+  - Removed references to Blackthorn server (not compatible with the program)
+  - Updated all default values: S3 (current season) and Eden (single server)
+  - Simplified configuration: seasons = ["S3"], servers = ["Eden"]
+  - Code and documentation aligned with current game state
+
 ### 🎉 Added
 - 🎨 **New Purple Theme (Dracula)**: Dracula-inspired theme with purple/pink palette
   - Background colors: #282A36 (dark purple-gray background)

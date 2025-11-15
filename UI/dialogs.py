@@ -194,15 +194,15 @@ class CharacterSheetWindow(QDialog):
         # Editable season dropdown
         self.season_combo = QComboBox()
         from Functions.config_manager import config
-        seasons = config.get("seasons", ["S1", "S2", "S3"])
+        seasons = config.get("seasons", ["S3"])
         self.season_combo.addItems(seasons)
-        current_season = self.character_data.get('season', 'S1')
+        current_season = self.character_data.get('season', 'S3')
         self.season_combo.setCurrentText(current_season)
         info_layout.addRow("Saison :", self.season_combo)
         
         # Editable server dropdown
         self.server_combo = QComboBox()
-        servers = config.get("servers", ["Eden", "Blackthorn"])
+        servers = config.get("servers", ["Eden"])
         self.server_combo.addItems(servers)
         current_server = self.character_data.get('server', 'Eden')
         self.server_combo.setCurrentText(current_server)
@@ -5186,7 +5186,7 @@ class HeraldSearchDialog(QDialog):
                     # the personnage existe, on va the mettre à jour
                     # Construire le chemin du fichier existant
                     base_char_dir = get_character_dir()
-                    char_season = existing_char.get('season', 'S1')
+                    char_season = existing_char.get('season', 'S3')
                     char_realm = existing_char.get('realm', realm)
                     file_path = os.path.join(base_char_dir, char_season, char_realm, f"{name}.json")
                     

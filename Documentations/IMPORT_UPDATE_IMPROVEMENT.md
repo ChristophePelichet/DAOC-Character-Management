@@ -75,7 +75,7 @@ if existing_char:
     # Le personnage existe, on va le mettre à jour
     # Construire le chemin du fichier existant
     base_char_dir = get_character_dir()
-    char_season = existing_char.get('season', 'S1')
+    char_season = existing_char.get('season', 'S3')
     char_realm = existing_char.get('realm', realm)
     file_path = os.path.join(base_char_dir, char_season, char_realm, f"{name}.json")
     
@@ -131,7 +131,7 @@ if error_count > 0:
 Les données suivantes sont **CONSERVÉES** (non écrasées) :
 - ✅ `name` (le nom)
 - ✅ `realm` (le royaume)
-- ✅ `season` (la saison S1, S2, S3)
+- ✅ `season` (la saison S3 - actuelle)
 - ✅ `server` (Eden, Live, etc.)
 - ✅ Tous les autres champs personnalisés
 

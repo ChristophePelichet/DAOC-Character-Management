@@ -26,8 +26,8 @@ La fenêtre de configuration affiche :
 |---------|-----|-------------|--------|
 | **Sélection** | `selection` | Case à cocher pour les actions en masse | ✅ Visible |
 | **Royaume** | `realm` | Icône du royaume (Albion/Hibernia/Midgard) | ✅ Visible |
-| **Saison** | `season` | Saison du personnage (S1, S2, S3, etc.) | ✅ Visible |
-| **Serveur** | `server` | Serveur du personnage (Eden, Blackthorn, etc.) | ❌ Masquée |
+| **Saison** | `season` | Saison du personnage (S3 - actuelle) | ✅ Visible |
+| **Serveur** | `server` | Serveur du personnage (Eden) | ❌ Masquée |
 | **Nom** | `name` | Nom du personnage | ✅ Visible |
 | **Niveau** | `level` | Niveau du personnage | ✅ Visible |
 | **Rang** | `realm_rank` | Rang de royaume (ex: 5L7) | ✅ Visible |

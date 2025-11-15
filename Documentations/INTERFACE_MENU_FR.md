@@ -33,8 +33,8 @@ Le menu **Aide** fournit des informations sur l'application :
 2. Remplissez le formulaire :
    - **Nom** : Nom du personnage
    - **Royaume** : Albion, Hibernia ou Midgard
-   - **Saison** : S1, S2, S3, etc.
-   - **Serveur** : Eden, Blackthorn, etc.
+   - **Saison** : S3 (saison actuelle)
+   - **Serveur** : Eden
 3. Cliquez sur "OK" pour créer le personnage
 
 ### Configurer l'Application

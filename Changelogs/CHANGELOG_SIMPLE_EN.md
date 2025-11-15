@@ -4,6 +4,9 @@
 
 # ✨ v0.108
 
+### 🧹 Cleanup
+- 🗑️ **Obsolete References**: Removed S1/S2 seasons and Blackthorn server (not compatible)
+
 ### 🎉 New Features
 - 🎨 **Purple Theme (Dracula)**: New purple/pink theme with official Dracula palette
 - 📝 **FUTURE_IMPROVEMENTS.md File**: List of planned enhancements with checkboxes

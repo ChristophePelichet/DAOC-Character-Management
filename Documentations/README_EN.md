@@ -37,8 +37,8 @@ Character management application for Dark Age of Camelot (DAOC), developed in Py
 
 ### Organization
 - 📁 Organization by **Realm** (Albion, Hibernia, Midgard)
-- 🏷️ Filter by **Season** (S1, S2, S3, etc.)
-- 🖥️ Multi-**Server** management (Eden, Blackthorn, etc.)
+- 🏷️ Filter by **Season** (S3 - current season)
+- 🖥️ **Server**: Eden
 - 📊 Table with sortable columns
 
 ### Realm Ranks
@@ -145,19 +145,11 @@ DAOC---Gestion-des-personnages/
 │   └── .gitattributes                   # Git configuration
 │
 ├── 📁 Characters/                       # ⭐ Character data (Season/Realm structure v0.104)
-│   ├── S1/                              # Season 1
-│   │   ├── Albion/                      # Albion S1 characters
+│   ├── S3/                              # Current season
+│   │   ├── Albion/                      # Albion characters
 │   │   │   └── *.json                   # Character files
-│   │   ├── Hibernia/                    # Hibernia S1 characters
-│   │   └── Midgard/                     # Midgard S1 characters
-│   ├── S2/                              # Season 2
-│   │   ├── Albion/
-│   │   ├── Hibernia/
-│   │   └── Midgard/
-│   ├── S3/                              # Season 3
-│   │   ├── Albion/
-│   │   ├── Hibernia/
-│   │   └── Midgard/
+│   │   ├── Hibernia/                    # Hibernia characters
+│   │   └── Midgard/                     # Midgard characters
 │   └── .migration_done                  # Migration completed marker
 │
 ├── 📁 Backup/                           # Automatic backups
@@ -308,8 +300,8 @@ Configuration is accessible via **File > Settings** menu.
 - 📁 **Directories**: Characters, Configuration, Logs
 - 🌍 **Language**: Français, English, Deutsch
 - 🎨 **Theme**: Light / Dark
-- 🖥️ **Default Server**: Eden, Blackthorn, etc.
-- 📅 **Default Season**: S1, S2, S3, etc.
+- 🖥️ **Default Server**: Eden
+- 📅 **Default Season**: S3
 - 🐛 **Debug Mode**: Enable/disable detailed logs
 
 ## 🔄 Structure Migration
@@ -319,7 +311,7 @@ Configuration is accessible via **File > Settings** menu.
 ### Current structure (v0.104+)
 ```
 Characters/
-└── Season/              # S1, S2, S3, etc.
+└── S3/                  # Current season
     └── Realm/           # Albion, Hibernia, Midgard
         └── Character.json
 ```
@@ -436,8 +428,8 @@ See [REFACTORING_v0.104_COMPLETE.md](REFACTORING_v0.104_COMPLETE.md) for all ref
 - ✅ **Character Sheet**: Added dropdown to select server
 - ✅ **Visibility**: Server column hidden by default (can be shown via View > Columns)
 - ✅ **Column Reorganization**: New order: Selection, Realm, Name, Level, Rank, Title, Guild, Page, Server
-- ✅ **Multi-server Support**: Ability to manage characters on Eden and Blackthorn
-- ✅ **Columns Menu**: Fixed column list in menu (added server, removed season)
+- ✅ **Server Support**: Eden server configuration
+- ✅ **Columns Menu**: Fixed column list in menu
 - ✅ **Quick Rename**: Press Enter in "Name" field to rename directly
 - ✅ **Cleaner Interface**: Removed "Rename" button and unnecessary popups
 - ✅ **Bug Fix**: Resolved critical error in colored titles display

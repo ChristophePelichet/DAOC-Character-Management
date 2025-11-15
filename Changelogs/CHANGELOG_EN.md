@@ -45,6 +45,20 @@ Complete version history of the character manager for Dark Age of Camelot (Eden)
   - New `column_widths` parameter in config.json (dictionary)
   - Automatic restoration on startup in manual mode
   - Save on close and before mode change
+- ⚙️ **Complete Settings Reorganization**: Major refactoring of configuration system
+  - Migrated backups from Tools menu to Settings > Backup page
+  - New dedicated page with two sections: Characters Backup + Cookies Backup
+  - Real-time statistics (count, last date) with immediate update after backup
+  - Direct actions: Backup Now, Open Folder (explorer)
+  - Configuration folder now non-configurable (always `<exe_dir>/Configuration`)
+  - Removed `.config_path` system (simplified architecture)
+  - Normalized all Windows paths (backslashes `\\`)
+  - Automatic character list refresh after Characters folder change
+  - Complete Tools menu removal (features consolidated in Settings)
+  - Removed Browse UI for Configuration folder (security)
+  - Files modified: `UI/settings_dialog.py` (+273 lines), `main.py` (+13 lines), `Functions/ui_manager.py` (-7 lines), `Functions/config_manager.py` (-40 lines)
+  - 🌍 Complete FR/EN/DE translations (10 new backup_* keys)
+  - 📚 Complete technical documentation (3 files, 1800+ lines): Settings Architecture, Folder Move System, Backup Integration
 
 ### 🐛 Fix
 

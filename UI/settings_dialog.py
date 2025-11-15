@@ -169,27 +169,29 @@ class SettingsDialog(QDialog):
         self.char_path_edit = QLineEdit()
         browse_char_button = QPushButton(lang.get("browse_button"))
         browse_char_button.clicked.connect(self._browse_character_folder)
+        move_char_button = QPushButton("📦 " + lang.get("move_folder_button", default="Déplacer"))
+        move_char_button.clicked.connect(lambda: self._move_folder(self.char_path_edit, "character_folder", lang.get("config_path_label")))
+        move_char_button.setToolTip(lang.get("move_folder_tooltip", default="Déplacer le dossier et son contenu vers un nouvel emplacement"))
         char_path_layout = QHBoxLayout()
         char_path_layout.addWidget(self.char_path_edit)
         char_path_layout.addWidget(browse_char_button)
+        char_path_layout.addWidget(move_char_button)
         paths_layout.addRow(lang.get("config_path_label"), char_path_layout)
         
-        # Config Path
-        self.config_path_edit = QLineEdit()
-        browse_config_button = QPushButton(lang.get("browse_button"))
-        browse_config_button.clicked.connect(self._browse_config_folder)
-        config_path_layout = QHBoxLayout()
-        config_path_layout.addWidget(self.config_path_edit)
-        config_path_layout.addWidget(browse_config_button)
-        paths_layout.addRow(lang.get("config_file_path_label"), config_path_layout)
+        # Note: Config folder path is NOT configurable - it must always be next to the executable
+        # This avoids circular dependency issues with config.json location
         
         # Armor Path
         self.armor_path_edit = QLineEdit()
         browse_armor_button = QPushButton(lang.get("browse_button"))
         browse_armor_button.clicked.connect(self._browse_armor_folder)
+        move_armor_button = QPushButton("📦 " + lang.get("move_folder_button", default="Déplacer"))
+        move_armor_button.clicked.connect(lambda: self._move_folder(self.armor_path_edit, "armor_folder", lang.get("config_armor_path_label")))
+        move_armor_button.setToolTip(lang.get("move_folder_tooltip", default="Déplacer le dossier et son contenu vers un nouvel emplacement"))
         armor_path_layout = QHBoxLayout()
         armor_path_layout.addWidget(self.armor_path_edit)
         armor_path_layout.addWidget(browse_armor_button)
+        armor_path_layout.addWidget(move_armor_button)
         paths_layout.addRow(lang.get("config_armor_path_label"), armor_path_layout)
         
         paths_group.setLayout(paths_layout)
@@ -431,9 +433,13 @@ class SettingsDialog(QDialog):
         self.cookies_path_edit = QLineEdit()
         browse_cookies_button = QPushButton(lang.get("browse_button"))
         browse_cookies_button.clicked.connect(self._browse_cookies_folder)
+        move_cookies_button = QPushButton("📦 " + lang.get("move_folder_button", default="Déplacer"))
+        move_cookies_button.clicked.connect(lambda: self._move_folder(self.cookies_path_edit, "cookies_folder", lang.get("config_cookies_path_label")))
+        move_cookies_button.setToolTip(lang.get("move_folder_tooltip", default="Déplacer le dossier et son contenu vers un nouvel emplacement"))
         cookies_path_layout = QHBoxLayout()
         cookies_path_layout.addWidget(self.cookies_path_edit)
         cookies_path_layout.addWidget(browse_cookies_button)
+        cookies_path_layout.addWidget(move_cookies_button)
         cookies_layout.addRow(lang.get("config_cookies_path_label"), cookies_path_layout)
         
         cookies_group.setLayout(cookies_layout)
@@ -489,7 +495,9 @@ class SettingsDialog(QDialog):
         self.pages.addWidget(page)
         
     def _create_backup_page(self):
-        """Page 4: Backup Settings"""
+        """Page 6: Backup Settings"""
+        from Functions.backup_manager import get_backup_manager, BackupManager
+        
         page = QWidget()
         layout = QVBoxLayout(page)
         layout.setAlignment(Qt.AlignTop)
@@ -508,16 +516,183 @@ class SettingsDialog(QDialog):
         layout.addWidget(subtitle)
         layout.addSpacing(20)
         
-        # Info: This page will be populated with backup settings
-        # For now, show a placeholder
-        info_label = QLabel(
-            "🚧 " + lang.get("settings_backup_placeholder",
-                           default="Les paramètres de sauvegarde sont gérés dans le menu Outils > Sauvegardes.\n\n"
-                                  "Cette section sera développée dans une future version.")
-        )
-        info_label.setWordWrap(True)
-        info_label.setStyleSheet("background-color: palette(alternate-base); padding: 20px; border-radius: 5px;")
-        layout.addWidget(info_label)
+        # Initialize backup manager
+        self.backup_manager = get_backup_manager(config)
+        if self.backup_manager is None:
+            self.backup_manager = BackupManager(config)
+        
+        backup_info = self.backup_manager.get_backup_info()
+        
+        # === CHARACTERS BACKUP ===
+        chars_group = QGroupBox("📁 " + lang.get("backup_characters_title", default="Sauvegardes des personnages"))
+        chars_layout = QVBoxLayout()
+        
+        # Enabled checkbox
+        self.backup_enabled_check = QCheckBox(lang.get("backup_enabled_label", default="Activer les sauvegardes"))
+        self.backup_enabled_check.setChecked(config.get("backup_enabled", True))
+        chars_layout.addWidget(self.backup_enabled_check)
+        chars_layout.addSpacing(10)
+        
+        # Backup path
+        path_form = QFormLayout()
+        self.backup_path_edit = QLineEdit()
+        backup_path = config.get("backup_path")
+        if not backup_path:
+            from Functions.path_manager import get_base_path
+            backup_path = os.path.join(get_base_path(), "Backup", "Characters")
+        self.backup_path_edit.setText(backup_path)
+        self.backup_path_edit.setReadOnly(True)
+        self.backup_path_edit.setCursorPosition(0)
+        
+        browse_backup_button = QPushButton(lang.get("browse_button", default="Parcourir..."))
+        browse_backup_button.clicked.connect(self._browse_backup_path)
+        browse_backup_button.setMaximumWidth(100)
+        
+        backup_path_layout = QHBoxLayout()
+        backup_path_layout.addWidget(self.backup_path_edit)
+        backup_path_layout.addWidget(browse_backup_button)
+        path_form.addRow(lang.get("backup_path_label", default="Dossier de sauvegarde") + " :", backup_path_layout)
+        chars_layout.addLayout(path_form)
+        chars_layout.addSpacing(10)
+        
+        # Compress checkbox
+        self.backup_compress_check = QCheckBox(lang.get("backup_compress_label", default="Compresser les sauvegardes (ZIP)"))
+        self.backup_compress_check.setChecked(config.get("backup_compress", True))
+        self.backup_compress_check.setToolTip(lang.get("backup_compress_tooltip", default="Réduit la taille des sauvegardes"))
+        chars_layout.addWidget(self.backup_compress_check)
+        chars_layout.addSpacing(10)
+        
+        # Size limit
+        size_form = QFormLayout()
+        self.backup_size_limit_edit = QLineEdit()
+        self.backup_size_limit_edit.setText(str(config.get("backup_size_limit_mb", 20)))
+        self.backup_size_limit_edit.setMaximumWidth(80)
+        
+        size_limit_layout = QHBoxLayout()
+        size_limit_layout.addWidget(self.backup_size_limit_edit)
+        size_limit_layout.addWidget(QLabel("MB"))
+        size_limit_layout.addWidget(QLabel(lang.get("backup_size_limit_tooltip", default="Limite totale")))
+        size_limit_layout.addStretch()
+        size_form.addRow(lang.get("backup_size_limit_label", default="Limite de taille"), size_limit_layout)
+        chars_layout.addLayout(size_form)
+        chars_layout.addSpacing(10)
+        
+        # Info
+        info_form = QFormLayout()
+        total_backups = len(backup_info["backups"])
+        self.backup_total_label = QLabel(f"{total_backups}")
+        self.backup_total_label.setStyleSheet("font-weight: bold; color: #0078D4;")
+        info_form.addRow(lang.get("backup_total_label", default="Nombre de sauvegardes") + " :", self.backup_total_label)
+        
+        last_backup_date = config.get("backup_last_date")
+        if last_backup_date:
+            try:
+                from datetime import datetime
+                dt = datetime.fromisoformat(last_backup_date)
+                last_backup_str = dt.strftime("%Y-%m-%d %H:%M:%S")
+            except:
+                last_backup_str = "N/A"
+        else:
+            last_backup_str = lang.get("backup_no_backup", default="Aucune sauvegarde")
+        self.backup_last_label = QLabel(last_backup_str)
+        self.backup_last_label.setStyleSheet("font-weight: bold; color: #0078D4;")
+        info_form.addRow(lang.get("backup_last_label", default="Dernière sauvegarde") + " :", self.backup_last_label)
+        chars_layout.addLayout(info_form)
+        chars_layout.addSpacing(15)
+        
+        # Buttons
+        buttons_layout = QHBoxLayout()
+        
+        backup_now_button = QPushButton(lang.get("backup_now_button", default="Sauvegarder maintenant"))
+        backup_now_button.setStyleSheet("QPushButton { padding: 6px 12px; font-weight: bold; background-color: #0078D4; color: white; border-radius: 4px; }")
+        backup_now_button.clicked.connect(self._backup_now)
+        buttons_layout.addWidget(backup_now_button)
+        
+        open_folder_button = QPushButton("📂 " + lang.get("backup_open_folder", default="Ouvrir le dossier"))
+        open_folder_button.setStyleSheet("QPushButton { padding: 6px 12px; font-weight: bold; background-color: #107C10; color: white; border-radius: 4px; }")
+        open_folder_button.clicked.connect(self._open_backup_folder)
+        buttons_layout.addWidget(open_folder_button)
+        
+        buttons_layout.addStretch()
+        chars_layout.addLayout(buttons_layout)
+        
+        chars_group.setLayout(chars_layout)
+        layout.addWidget(chars_group)
+        
+        # === COOKIES BACKUP ===
+        cookies_info = self.backup_manager.get_cookies_backup_info()
+        cookies_group = QGroupBox("🍪 " + lang.get("backup_cookies_title", default="Sauvegardes des cookies Eden"))
+        cookies_layout = QVBoxLayout()
+        
+        # Enabled checkbox
+        self.cookies_backup_enabled_check = QCheckBox(lang.get("backup_enabled_label", default="Activer les sauvegardes"))
+        self.cookies_backup_enabled_check.setChecked(config.get("cookies_backup_enabled", True))
+        cookies_layout.addWidget(self.cookies_backup_enabled_check)
+        cookies_layout.addSpacing(10)
+        
+        # Cookies backup path
+        cookies_path_form = QFormLayout()
+        self.cookies_backup_path_edit = QLineEdit()
+        cookies_backup_path = config.get("cookies_backup_path")
+        if not cookies_backup_path:
+            from Functions.path_manager import get_base_path
+            cookies_backup_path = os.path.join(get_base_path(), "Backup", "Cookies")
+        self.cookies_backup_path_edit.setText(cookies_backup_path)
+        self.cookies_backup_path_edit.setReadOnly(True)
+        self.cookies_backup_path_edit.setCursorPosition(0)
+        
+        browse_cookies_button = QPushButton(lang.get("browse_button", default="Parcourir..."))
+        browse_cookies_button.clicked.connect(self._browse_cookies_backup_path)
+        browse_cookies_button.setMaximumWidth(100)
+        
+        cookies_path_layout = QHBoxLayout()
+        cookies_path_layout.addWidget(self.cookies_backup_path_edit)
+        cookies_path_layout.addWidget(browse_cookies_button)
+        cookies_path_form.addRow(lang.get("backup_path_label", default="Dossier de sauvegarde") + " :", cookies_path_layout)
+        cookies_layout.addLayout(cookies_path_form)
+        cookies_layout.addSpacing(10)
+        
+        # Cookies info
+        cookies_info_form = QFormLayout()
+        total_cookies_backups = len(cookies_info["backups"])
+        self.cookies_total_label = QLabel(f"{total_cookies_backups}")
+        self.cookies_total_label.setStyleSheet("font-weight: bold; color: #0078D4;")
+        cookies_info_form.addRow(lang.get("backup_total_label", default="Nombre de sauvegardes") + " :", self.cookies_total_label)
+        
+        last_cookies_backup_date = config.get("cookies_backup_last_date")
+        if last_cookies_backup_date:
+            try:
+                from datetime import datetime
+                dt = datetime.fromisoformat(last_cookies_backup_date)
+                last_cookies_str = dt.strftime("%Y-%m-%d %H:%M:%S")
+            except:
+                last_cookies_str = "N/A"
+        else:
+            last_cookies_str = lang.get("backup_no_backup", default="Aucune sauvegarde")
+        self.cookies_last_label = QLabel(last_cookies_str)
+        self.cookies_last_label.setStyleSheet("font-weight: bold; color: #0078D4;")
+        cookies_info_form.addRow(lang.get("backup_last_label", default="Dernière sauvegarde") + " :", self.cookies_last_label)
+        cookies_layout.addLayout(cookies_info_form)
+        cookies_layout.addSpacing(15)
+        
+        # Cookies buttons
+        cookies_buttons_layout = QHBoxLayout()
+        
+        cookies_backup_now_button = QPushButton(lang.get("backup_now_button", default="Sauvegarder maintenant"))
+        cookies_backup_now_button.setStyleSheet("QPushButton { padding: 6px 12px; font-weight: bold; background-color: #0078D4; color: white; border-radius: 4px; }")
+        cookies_backup_now_button.clicked.connect(self._backup_cookies_now)
+        cookies_buttons_layout.addWidget(cookies_backup_now_button)
+        
+        open_cookies_folder_button = QPushButton("📂 " + lang.get("backup_open_folder", default="Ouvrir le dossier"))
+        open_cookies_folder_button.setStyleSheet("QPushButton { padding: 6px 12px; font-weight: bold; background-color: #107C10; color: white; border-radius: 4px; }")
+        open_cookies_folder_button.clicked.connect(self._open_cookies_backup_folder)
+        cookies_buttons_layout.addWidget(open_cookies_folder_button)
+        
+        cookies_buttons_layout.addStretch()
+        cookies_layout.addLayout(cookies_buttons_layout)
+        
+        cookies_group.setLayout(cookies_layout)
+        layout.addWidget(cookies_group)
         
         layout.addStretch()
         self.pages.addWidget(page)
@@ -550,9 +725,13 @@ class SettingsDialog(QDialog):
         self.log_path_edit = QLineEdit()
         browse_log_button = QPushButton(lang.get("browse_button"))
         browse_log_button.clicked.connect(self._browse_log_folder)
+        move_log_button = QPushButton("📦 " + lang.get("move_folder_button", default="Déplacer"))
+        move_log_button.clicked.connect(lambda: self._move_folder(self.log_path_edit, "log_folder", lang.get("config_log_path_label")))
+        move_log_button.setToolTip(lang.get("move_folder_tooltip", default="Déplacer le dossier et son contenu vers un nouvel emplacement"))
         log_path_layout = QHBoxLayout()
         log_path_layout.addWidget(self.log_path_edit)
         log_path_layout.addWidget(browse_log_button)
+        log_path_layout.addWidget(move_log_button)
         log_layout.addRow(lang.get("config_log_path_label"), log_path_layout)
         
         log_group.setLayout(log_layout)
@@ -610,13 +789,12 @@ class SettingsDialog(QDialog):
         """Generic folder browser"""
         directory = QFileDialog.getExistingDirectory(self, lang.get(title_key))
         if directory:
-            line_edit.setText(directory)
+            # Normalize path to use backslashes on Windows
+            normalized_directory = directory.replace('/', '\\')
+            line_edit.setText(normalized_directory)
             
     def _browse_character_folder(self):
         self._browse_folder(self.char_path_edit, "select_folder_dialog_title")
-        
-    def _browse_config_folder(self):
-        self._browse_folder(self.config_path_edit, "select_config_folder_dialog_title")
         
     def _browse_log_folder(self):
         self._browse_folder(self.log_path_edit, "select_log_folder_dialog_title")
@@ -626,6 +804,239 @@ class SettingsDialog(QDialog):
         
     def _browse_cookies_folder(self):
         self._browse_folder(self.cookies_path_edit, "select_folder_dialog_title")
+    
+    def _browse_backup_path(self):
+        """Browse for backup folder"""
+        directory = QFileDialog.getExistingDirectory(self, lang.get("backup_select_folder", default="Sélectionner le dossier de sauvegarde"))
+        if directory:
+            normalized_directory = directory.replace('/', '\\')
+            self.backup_path_edit.setText(normalized_directory)
+    
+    def _browse_cookies_backup_path(self):
+        """Browse for cookies backup folder"""
+        directory = QFileDialog.getExistingDirectory(self, lang.get("backup_select_folder", default="Sélectionner le dossier de sauvegarde"))
+        if directory:
+            normalized_directory = directory.replace('/', '\\')
+            self.cookies_backup_path_edit.setText(normalized_directory)
+    
+    def _backup_now(self):
+        """Execute characters backup now"""
+        from PySide6.QtWidgets import QMessageBox
+        try:
+            result = self.backup_manager.create_backup()
+            if result:
+                # Update last backup date display
+                from datetime import datetime
+                last_backup_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                self.backup_last_label.setText(last_backup_str)
+                self.backup_last_label.setStyleSheet("font-weight: bold; color: #0078D4;")
+                
+                # Update total count
+                backup_info = self.backup_manager.get_backup_info()
+                self.backup_total_label.setText(str(len(backup_info["backups"])))
+                
+                QMessageBox.information(self, lang.get("success_title", default="Succès"), 
+                                       lang.get("backup_success", default="Sauvegarde créée avec succès"))
+            else:
+                QMessageBox.warning(self, lang.get("warning_title", default="Attention"),
+                                   lang.get("backup_failed", default="La sauvegarde a échoué"))
+        except Exception as e:
+            QMessageBox.critical(self, lang.get("error_title", default="Erreur"),
+                                f"{lang.get('backup_error', default='Erreur lors de la sauvegarde')} : {str(e)}")
+    
+    def _backup_cookies_now(self):
+        """Execute cookies backup now"""
+        from PySide6.QtWidgets import QMessageBox
+        try:
+            result = self.backup_manager.backup_cookies()
+            if result:
+                # Update last backup date display
+                from datetime import datetime
+                last_backup_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                self.cookies_last_label.setText(last_backup_str)
+                self.cookies_last_label.setStyleSheet("font-weight: bold; color: #0078D4;")
+                
+                # Update total count
+                cookies_info = self.backup_manager.get_cookies_backup_info()
+                self.cookies_total_label.setText(str(len(cookies_info["backups"])))
+                
+                QMessageBox.information(self, lang.get("success_title", default="Succès"),
+                                       lang.get("backup_success", default="Sauvegarde créée avec succès"))
+            else:
+                QMessageBox.warning(self, lang.get("warning_title", default="Attention"),
+                                   lang.get("backup_failed", default="La sauvegarde a échoué"))
+        except Exception as e:
+            QMessageBox.critical(self, lang.get("error_title", default="Erreur"),
+                                f"{lang.get('backup_error', default='Erreur lors de la sauvegarde')} : {str(e)}")
+    
+    def _open_backup_folder(self):
+        """Open characters backup folder"""
+        import subprocess
+        backup_path = self.backup_path_edit.text()
+        if os.path.exists(backup_path):
+            subprocess.Popen(f'explorer "{backup_path}"')
+    
+    def _open_cookies_backup_folder(self):
+        """Open cookies backup folder"""
+        import subprocess
+        cookies_backup_path = self.cookies_backup_path_edit.text()
+        if os.path.exists(cookies_backup_path):
+            subprocess.Popen(f'explorer "{cookies_backup_path}"')
+    
+    def _move_folder(self, line_edit, config_key, folder_label):
+        """Move or create a folder at a new location"""
+        import shutil
+        from PySide6.QtWidgets import QMessageBox, QProgressDialog, QInputDialog
+        from PySide6.QtCore import Qt
+        
+        current_path = line_edit.text()
+        source_exists = current_path and os.path.exists(current_path)
+        
+        # Ask for destination parent directory
+        parent_dir = QFileDialog.getExistingDirectory(
+            self,
+            lang.get("move_folder_select_destination", default="Sélectionnez le dossier parent de destination")
+        )
+        
+        if not parent_dir:
+            return  # User cancelled
+        
+        # Normalize path to use backslashes on Windows
+        parent_dir = parent_dir.replace('/', '\\')
+        
+        # Get folder name (use existing name or ask for new one)
+        if source_exists:
+            default_name = os.path.basename(current_path)
+        else:
+            # Suggest a default name based on config_key
+            default_name = {
+                "characters_directory": "Characters",
+                "configuration_directory": "Configuration",
+                "armor_path": "Armures",
+                "logs_directory": "Logs",
+                "cookies_folder": "Cookies"
+            }.get(config_key, "Nouveau_Dossier")
+        
+        folder_name, ok = QInputDialog.getText(
+            self,
+            lang.get("move_folder_name_title", default="Nom du dossier"),
+            lang.get("move_folder_name_message", default="Entrez le nom du dossier :"),
+            text=default_name
+        )
+        
+        if not ok or not folder_name:
+            return  # User cancelled
+        
+        destination = os.path.join(parent_dir, folder_name)
+        
+        # Check if destination already exists
+        if os.path.exists(destination):
+            QMessageBox.warning(
+                self,
+                lang.get("warning_title", default="Attention"),
+                lang.get("move_folder_destination_exists", 
+                        default=f"Le dossier '{folder_name}' existe déjà à la destination.")
+            )
+            return
+        
+        # If source exists, confirm move/copy
+        if source_exists:
+            reply = QMessageBox.question(
+                self,
+                lang.get("move_folder_confirm_title", default="Confirmer le déplacement"),
+                f"{lang.get('move_folder_confirm_message', default='Voulez-vous déplacer le dossier et son contenu ?')}\n\n"
+                f"De : {current_path}\n"
+                f"Vers : {destination}",
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No
+            )
+            
+            if reply != QMessageBox.Yes:
+                return
+        else:
+            # Just create new folder
+            reply = QMessageBox.question(
+                self,
+                lang.get("create_folder_confirm_title", default="Créer le dossier"),
+                f"{lang.get('create_folder_confirm_message', default='Créer le dossier à cet emplacement ?')}\n\n"
+                f"{destination}",
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No
+            )
+            
+            if reply != QMessageBox.Yes:
+                return
+        
+        # Progress dialog
+        progress = QProgressDialog(
+            lang.get("move_folder_in_progress", default="Opération en cours..."),
+            lang.get("cancel", default="Annuler"),
+            0, 0,
+            self
+        )
+        progress.setWindowModality(Qt.WindowModal)
+        progress.setWindowTitle(lang.get("move_folder_title", default="Déplacement"))
+        progress.show()
+        
+        try:
+            if source_exists:
+                # Copy the folder
+                shutil.copytree(current_path, destination)
+                
+                # Update the line edit
+                line_edit.setText(destination)
+                
+                # Ask if user wants to delete old folder
+                delete_reply = QMessageBox.question(
+                    self,
+                    lang.get("move_folder_delete_title", default="Supprimer l'ancien dossier ?"),
+                    f"{lang.get('move_folder_delete_message', default='Le dossier a été copié avec succès. Voulez-vous supprimer l ancien dossier ?')}\n\n"
+                    f"{current_path}",
+                    QMessageBox.Yes | QMessageBox.No,
+                    QMessageBox.No
+                )
+                
+                if delete_reply == QMessageBox.Yes:
+                    shutil.rmtree(current_path)
+                    QMessageBox.information(
+                        self,
+                        lang.get("success_title", default="Succès"),
+                        lang.get("move_folder_success", 
+                                default=f"Dossier déplacé avec succès vers :\n{destination}")
+                    )
+                else:
+                    QMessageBox.information(
+                        self,
+                        lang.get("success_title", default="Succès"),
+                        lang.get("move_folder_copy_success", 
+                                default=f"Dossier copié avec succès vers :\n{destination}\n\n"
+                                       f"L'ancien dossier a été conservé.")
+                    )
+            else:
+                # Just create the folder
+                os.makedirs(destination, exist_ok=True)
+                
+                # Update the line edit
+                line_edit.setText(destination)
+                
+                QMessageBox.information(
+                    self,
+                    lang.get("success_title", default="Succès"),
+                    lang.get("create_folder_success", 
+                            default=f"Dossier créé avec succès :\n{destination}")
+                )
+            
+            progress.close()
+            
+        except Exception as e:
+            progress.close()
+            QMessageBox.critical(
+                self,
+                lang.get("error_title", default="Erreur"),
+                lang.get("move_folder_error", 
+                        default=f"Erreur lors du déplacement :\n{str(e)}")
+            )
+            logging.error(f"Error moving folder: {e}")
         
     # === Settings Load/Save ===
     
@@ -635,8 +1046,7 @@ class SettingsDialog(QDialog):
         self.char_path_edit.setText(config.get("character_folder") or get_character_dir())
         self.char_path_edit.setCursorPosition(0)
         
-        self.config_path_edit.setText(config.get("config_folder") or get_config_dir())
-        self.config_path_edit.setCursorPosition(0)
+        # Config folder is not configurable - always next to executable
         
         self.log_path_edit.setText(config.get("log_folder") or get_log_dir())
         self.log_path_edit.setCursorPosition(0)

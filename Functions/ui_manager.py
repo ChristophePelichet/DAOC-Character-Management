@@ -87,12 +87,7 @@ class UIManager:
         settings_action.triggered.connect(self.main_window.open_configuration)
         file_menu.addAction(settings_action)
         
-        # Menu Outils
-        tools_menu = menubar.addMenu(lang.get("tools_menu"))
-        
-        backup_action = QAction(lang.get("backup_menu_item"), self.main_window)
-        backup_action.triggered.connect(self.main_window.open_backup_settings)
-        tools_menu.addAction(backup_action)
+        # Note: Backup settings moved to Settings > Backup section
         
         # Menu Aide
         help_menu = menubar.addMenu(lang.get("menu_help"))

@@ -13,6 +13,13 @@
 - 🎨 **Changement de Thème** : Application instantanée complète sans redémarrage
 - 📋 **Colonnes** : Sauvegarde automatique des largeurs en mode manuel
 
+### 🧰 Améliorations (Suite)
+- ⚙️ **Settings Réorganisés** : Nouvelle page Sauvegardes avec statistiques temps réel et actions directes
+- 💾 **Sauvegardes Intégrées** : Sauvegardes Personnages + Cookies accessibles depuis Settings (plus de menu Outils)
+- 📁 **Configuration Simplifiée** : Dossier config toujours à côté de l'exécutable (sécurité)
+- 🔄 **Rafraîchissement Auto** : Liste des personnages mise à jour automatiquement après changement de dossier
+- 📚 **Documentation Technique** : 3 nouveaux guides détaillés (1800+ lignes)
+
 ### 🐛 Corrections
 - ✅ Menus et affichage central s'adaptent correctement lors du changement Dark→Light
 - ✅ Barre de menus réinitialisée aux couleurs système en thème Light

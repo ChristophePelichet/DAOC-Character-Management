@@ -697,14 +697,14 @@ class CharacterApp(QMainWindow):
         if not new_debug_mode and old_debug_mode:
             logging.info("Debug mode DEACTIVATED")
             
-        # Check if the Folder des personnages a changé
-        old_char_folder = config.get("character_folder", "")
-        new_char_folder = dialog.char_path_edit.text()
+        # Check if the Folder des personnages a changé (normalize paths for comparison)
+        old_char_folder = (config.get("character_folder") or "").replace('/', '\\')
+        new_char_folder = (dialog.char_path_edit.text() or "").replace('/', '\\')
         char_folder_changed = (old_char_folder != new_char_folder)
         
         # Save all the paramètres
         config.set("character_folder", new_char_folder)
-        config.set("config_folder", dialog.config_path_edit.text())
+        # Config folder is NOT saved - always next to executable
         config.set("log_folder", dialog.log_path_edit.text())
         config.set("armor_folder", dialog.armor_path_edit.text())
         config.set("cookies_folder", dialog.cookies_path_edit.text())
@@ -737,6 +737,19 @@ class CharacterApp(QMainWindow):
         # Navigateur and téléchargement
         config.set("preferred_browser", dialog.browser_combo.currentText())
         config.set("allow_browser_download", dialog.allow_browser_download_check.isChecked())
+        
+        # Backup settings
+        if hasattr(dialog, 'backup_enabled_check'):
+            config.set("backup_enabled", dialog.backup_enabled_check.isChecked())
+            config.set("backup_path", dialog.backup_path_edit.text())
+            config.set("backup_compress", dialog.backup_compress_check.isChecked())
+            try:
+                size_limit = int(dialog.backup_size_limit_edit.text())
+                config.set("backup_size_limit_mb", size_limit)
+            except ValueError:
+                pass  # Keep existing value if invalid
+            config.set("cookies_backup_enabled", dialog.cookies_backup_enabled_check.isChecked())
+            config.set("cookies_backup_path", dialog.cookies_backup_path_edit.text())
         
         # Theme
         old_theme = config.get("theme", "default")
@@ -784,6 +797,8 @@ class CharacterApp(QMainWindow):
         # Check the migration if the Folder des personnages a changé
         if char_folder_changed:
             self._check_migration_on_path_change()
+            # Recharger les personnages depuis le nouveau dossier
+            self.refresh_character_list()
             
         if language_changed:
             self.change_language(new_lang_code)

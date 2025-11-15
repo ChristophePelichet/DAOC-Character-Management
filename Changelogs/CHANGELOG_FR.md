@@ -45,6 +45,20 @@ Historique complet des versions du gestionnaire de personnages pour Dark Age of 
   - Nouveau paramètre `column_widths` dans config.json (dictionnaire)
   - Restauration automatique au démarrage en mode manuel
   - Sauvegarde lors de la fermeture et avant changement de mode
+- ⚙️ **Réorganisation Complète des Settings** : Refactorisation majeure du système de configuration
+  - Migration des sauvegardes depuis le menu Outils vers Settings > Sauvegardes
+  - Nouvelle page dédiée avec deux sections : Sauvegardes Personnages + Cookies Eden
+  - Statistiques en temps réel (nombre, dernière date) avec mise à jour immédiate après sauvegarde
+  - Actions directes : Sauvegarder Maintenant, Ouvrir le Dossier (explorateur)
+  - Dossier Configuration désormais non-configurable (toujours `<exe_dir>/Configuration`)
+  - Suppression du système `.config_path` (simplification architecture)
+  - Normalisation de tous les chemins Windows (backslashes `\\`)
+  - Rafraîchissement automatique de la liste après changement de dossier Characters
+  - Suppression complète du menu Outils (fonctionnalités consolidées dans Settings)
+  - Suppression de l'UI Browse pour le dossier Configuration (sécurité)
+  - Fichiers modifiés : `UI/settings_dialog.py` (+273 lignes), `main.py` (+13 lignes), `Functions/ui_manager.py` (-7 lignes), `Functions/config_manager.py` (-40 lignes)
+  - 🌍 Traductions complètes FR/EN/DE (10 nouvelles clés backup_*)
+  - 📚 Documentation technique complète (3 fichiers, 1800+ lignes) : Architecture Settings, Système Move Folder, Intégration Backup
 
 ### 🐛 Correction
 

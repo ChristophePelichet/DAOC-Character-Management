@@ -9,6 +9,10 @@
 - 🎨 **Purple Theme (Dracula)**: New purple/pink theme with official Dracula palette
 - 📝 **FUTURE_IMPROVEMENTS.md File**: List of planned enhancements with checkboxes
 
+### 🐛 Bug Fixes
+- 🛡️ **Migration File**: No more automatic creation of .migration_done file
+- ⚡ **Herald Search**: Instant window closure (no more latency)
+
 ### 🧹 Cleanup
 
 ### 🧰 Improvements

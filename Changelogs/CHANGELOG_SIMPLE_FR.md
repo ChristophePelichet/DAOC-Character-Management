@@ -7,6 +7,10 @@
 - 🎨 **Thème Purple (Dracula)** : Nouveau thème violet/rose avec palette Dracula officielle
 - 📝 **Fichier FUTURE_IMPROVEMENTS.md** : Liste des améliorations planifiées avec cases à cocher
 
+### 🐛 Corrections
+- 🛡️ **Fichier Migration** : Plus de création automatique du fichier .migration_done
+- ⚡ **Recherche Herald** : Fermeture instantanée de la fenêtre (plus de latence)
+
 ### 🧹 Nettoyage
 
 ### 🧰 Améliorations

@@ -4,12 +4,12 @@
 
 # ✨ v0.108
 
-### 🧹 Cleanup
-- 🗑️ **Obsolete References**: Removed S1/S2 seasons and Blackthorn server (not compatible)
-
 ### 🎉 New Features
+- ⌨️ **Keyboard Shortcuts**: Ctrl+N to create character, Ctrl+F to search on Herald
 - 🎨 **Purple Theme (Dracula)**: New purple/pink theme with official Dracula palette
 - 📝 **FUTURE_IMPROVEMENTS.md File**: List of planned enhancements with checkboxes
+
+### 🧹 Cleanup
 
 ### 🧰 Improvements
 - 🎨 **Theme Switching**: Complete instant application without restart

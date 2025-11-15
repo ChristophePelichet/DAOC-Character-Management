@@ -897,6 +897,108 @@ class CharacterApp(QMainWindow):
         from UI.dialogs import HeraldSearchDialog
         dialog = HeraldSearchDialog(self)
         dialog.exec()
+    
+    def open_herald_search_with_validation(self):
+        """Ouvre la recherche Herald avec vérification de la validation Eden"""
+        # Vérifier si le thread de validation est en cours
+        if hasattr(self.ui_manager, 'eden_status_thread') and self.ui_manager.eden_status_thread and self.ui_manager.eden_status_thread.isRunning():
+            # Validation en cours - afficher message et attendre
+            self._show_waiting_for_validation_dialog(validation_already_running=True)
+        else:
+            # Vérifier l'état actuel de la connexion Eden
+            if hasattr(self.ui_manager, 'eden_status_label'):
+                status_text = self.ui_manager.eden_status_label.text()
+                
+                # Si Herald est accessible, ouvrir directement
+                if "✅" in status_text:
+                    self.open_herald_search()
+                # Si en attente initiale (⏳), attendre sans relancer
+                elif "⏳" in status_text:
+                    self._show_waiting_for_validation_dialog(validation_already_running=True)
+                # Si erreur ou pas de cookie, afficher message explicatif
+                elif "❌" in status_text:
+                    QMessageBox.warning(
+                        self,
+                        lang.get("herald_validation_failed_title", default="Connexion impossible"),
+                        lang.get("herald_validation_failed_message", default="Impossible de se connecter au Herald Eden.\n\nStatut: {status}\n\nVeuillez vérifier vos cookies dans le menu Outils.").replace("{status}", status_text)
+                    )
+                else:
+                    # État inconnu, ouvrir quand même
+                    self.open_herald_search()
+            else:
+                # Pas de barre de statut Eden, ouvrir directement
+                self.open_herald_search()
+    
+    def _show_waiting_for_validation_dialog(self, validation_already_running=False):
+        """Affiche une boîte de dialogue d'attente pendant la validation Eden"""
+        from PySide6.QtWidgets import QProgressDialog
+        
+        progress = QProgressDialog(
+            lang.get("herald_validation_wait_message", default="Vérification de la connexion au Herald Eden...\nVeuillez patienter..."),
+            lang.get("cancel", default="Annuler"),
+            0, 0,
+            self
+        )
+        progress.setWindowTitle(lang.get("herald_validation_wait_title", default="Validation en cours"))
+        progress.setWindowModality(Qt.WindowModal)
+        progress.setMinimumDuration(0)
+        progress.setValue(0)
+        
+        # Timer pour vérifier l'état toutes les 500ms
+        check_timer = QTimer(self)
+        check_count = [0]  # Utiliser une liste pour modifier dans la closure
+        max_checks = 30  # Maximum 15 secondes (30 x 500ms)
+        
+        def check_validation_status():
+            check_count[0] += 1
+            
+            # Si annulé par l'utilisateur
+            if progress.wasCanceled():
+                check_timer.stop()
+                return
+            
+            # Si timeout
+            if check_count[0] >= max_checks:
+                check_timer.stop()
+                progress.close()
+                QMessageBox.warning(
+                    self,
+                    lang.get("herald_validation_timeout_title", default="Délai dépassé"),
+                    lang.get("herald_validation_timeout_message", default="La validation de la connexion Eden prend trop de temps.\nVeuillez vérifier vos cookies et réessayer.")
+                )
+                return
+            
+            # Vérifier si la validation est terminée
+            if hasattr(self.ui_manager, 'eden_status_thread') and self.ui_manager.eden_status_thread:
+                if not self.ui_manager.eden_status_thread.isRunning():
+                    check_timer.stop()
+                    progress.close()
+                    
+                    # Vérifier le résultat
+                    if hasattr(self.ui_manager, 'eden_status_label'):
+                        status_text = self.ui_manager.eden_status_label.text()
+                        
+                        if "✅" in status_text:
+                            # Succès - ouvrir la recherche
+                            self.open_herald_search()
+                        else:
+                            # Échec - afficher message d'erreur
+                            error_msg = lang.get("herald_validation_failed_message", default="Impossible de se connecter au Herald Eden.\n\nStatut: {status}\n\nVeuillez vérifier vos cookies dans le menu Outils.")
+                            # Remplacer le placeholder status
+                            error_msg = error_msg.replace("{status}", status_text)
+                            QMessageBox.warning(
+                                self,
+                                lang.get("herald_validation_failed_title", default="Connexion impossible"),
+                                error_msg
+                            )
+        
+        check_timer.timeout.connect(check_validation_status)
+        check_timer.start(500)  # Vérifier toutes les 500ms
+        
+        # NE PAS lancer de validation si elle est déjà en cours
+        # La validation est lancée automatiquement au démarrage de l'application
+        
+        progress.exec()
         
     # ========================================================================
     # ÉVÉNEMENTS

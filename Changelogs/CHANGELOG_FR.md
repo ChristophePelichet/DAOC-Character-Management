@@ -6,6 +6,15 @@ Historique complet des versions du gestionnaire de personnages pour Dark Age of 
 
 # ✨✨ v0.108
 
+### 🎉 Ajout
+- ⌨️ **Raccourcis Clavier pour Actions Principales** : Accès rapide aux fonctionnalités courantes
+  - **Ctrl+N** : Créer un nouveau personnage manuellement (affichage du raccourci dans le menu Fichier)
+  - **Ctrl+F** : Rechercher un personnage sur le Herald Eden avec validation intelligente
+  - Gestion automatique de la validation de connexion Eden avant ouverture de la recherche
+  - Fenêtre d'attente avec vérification toutes les 500ms (timeout 15 secondes)
+  - Messages d'erreur contextuels si connexion Herald indisponible
+  - 🌍 Traductions complètes FR/EN/DE (7 nouvelles clés)
+
 ### 🧹 Nettoyage
 - 🗑️ **Suppression des Références Obsolètes** : Nettoyage complet du code et de la documentation
   - Suppression des références aux saisons S1 et S2 (saisons terminées sur Eden)

@@ -68,8 +68,17 @@ class UIManager:
         file_menu = menubar.addMenu(lang.get("menu_file"))
         
         new_char_action = QAction(lang.get("menu_file_new_character"), self.main_window)
+        new_char_action.setShortcut("Ctrl+N")
         new_char_action.triggered.connect(self.main_window.create_new_character)
         file_menu.addAction(new_char_action)
+        
+        file_menu.addSeparator()
+        
+        # Recherche Herald
+        search_herald_action = QAction(lang.get("menu_file_search_herald", default="🔍 Rechercher sur Herald"), self.main_window)
+        search_herald_action.setShortcut("Ctrl+F")
+        search_herald_action.triggered.connect(self.main_window.open_herald_search_with_validation)
+        file_menu.addAction(search_herald_action)
         
         file_menu.addSeparator()
         

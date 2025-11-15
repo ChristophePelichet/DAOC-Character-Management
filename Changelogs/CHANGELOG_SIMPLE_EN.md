@@ -15,6 +15,13 @@
 - 🎨 **Theme Switching**: Complete instant application without restart
 - 📋 **Columns**: Automatic width save in manual mode
 
+### 🧰 Improvements (Continued)
+- ⚙️ **Reorganized Settings**: New Backup page with real-time stats and direct actions
+- 💾 **Integrated Backups**: Characters + Cookies backups accessible from Settings (no more Tools menu)
+- 📁 **Simplified Configuration**: Config folder always next to executable (security)
+- 🔄 **Auto Refresh**: Character list automatically updated after folder change
+- 📚 **Technical Documentation**: 3 new detailed guides (1800+ lines)
+
 ### 🐛 Bug Fixes
 - ✅ Menus and central display adapt correctly on Dark→Light switch
 - ✅ Menu bar correctly reset to system colors in Light theme

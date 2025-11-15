@@ -67,20 +67,40 @@ class TreeManager:
         self.tree_view.setRootIsDecorated(False)
         self.tree_view.setSortingEnabled(True)
         
-        # Style pour les lignes de grille
-        grid_color = "#d6d6d6"
-        text_color = "#000000"
-        selected_text_color = "#ffffff"
-        selected_bg_color = "#0078d4"
+        # Appliquer le style initial
+        self.apply_tree_view_style()
+        
+    def apply_tree_view_style(self):
+        """Applique le style au tree view selon la palette actuelle"""
+        from PySide6.QtWidgets import QApplication
+        from PySide6.QtGui import QPalette
+        
+        # Récupérer les couleurs depuis la palette de l'application
+        palette = QApplication.instance().palette()
+        
+        # Couleurs pour les grilles (légèrement plus foncé/clair que le fond)
+        base_color = palette.color(QPalette.Base)
+        window_text = palette.color(QPalette.WindowText)
+        highlight = palette.color(QPalette.Highlight)
+        highlighted_text = palette.color(QPalette.HighlightedText)
+        
+        # Calculer une couleur de grille adaptée au thème
+        # Si le fond est clair (luminosité > 128), grille foncée, sinon grille claire
+        base_lightness = base_color.lightness()
+        if base_lightness > 128:
+            # Thème clair : grille légèrement plus foncée
+            grid_color = "#d6d6d6"
+        else:
+            # Thème sombre : grille légèrement plus claire
+            grid_color = "#404040"
         
         self.tree_view.setStyleSheet(f"""
             QTreeView::item {{
                 border-right: 1px solid {grid_color};
-                color: {text_color};
             }}
             QTreeView::item:selected {{
-                color: {selected_text_color};
-                background-color: {selected_bg_color};
+                color: {highlighted_text.name()};
+                background-color: {highlight.name()};
             }}
             QTreeView {{
                 border-bottom: 1px solid {grid_color};

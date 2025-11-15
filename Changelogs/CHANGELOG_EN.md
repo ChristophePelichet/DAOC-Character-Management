@@ -4,9 +4,47 @@ Complete version history of the character manager for Dark Age of Camelot (Eden)
 
 ---
 
-# ✨✨ v0.108 - 11/14/2025
+# ✨✨ v0.108
+
+### 🎉 Added
+- 🎨 **New Purple Theme (Dracula)**: Dracula-inspired theme with purple/pink palette
+  - Background colors: #282A36 (dark purple-gray background)
+  - Accents: #BD93F9 (signature purple), #FF79C6 (pink)
+  - Text: #F8F8F2 (off-white)
+  - Fusion style with complete 16-color palette
+  - FR/EN/DE translations ("Violet", "Purple", "Lila")
+- 📝 **FUTURE_IMPROVEMENTS.md File**: Structured list of future enhancements
+  - Overview section with checkboxes and anchor links
+  - Sections: Theme System, Features, Fixes, Optimizations, Ideas
+  - 3 planned theme improvements (Integrated Editor, Variant Generation, Import/Export)
+
+### 🧰 Modified
+- 🎨 **Dynamic Style System**: Complete tree_view refactoring
+  - New `apply_tree_view_style()` method based on QPalette
+  - Automatic theme detection (light/dark) via lightness (>128)
+  - Adaptive grid colors: #d6d6d6 (light) / #404040 (dark)
+  - Real-time application on theme change
+- 📋 **Column Width Persistence**: Automatic save in manual mode
+  - New `column_widths` parameter in config.json (dictionary)
+  - Automatic restoration on startup in manual mode
+  - Save on close and before mode change
 
 ### 🐛 Fix
+
+**Incomplete Theme Application on Switch**
+- 🛡️ **Problem**: When switching from Dark to Light theme, menu bar stayed black and central character display stayed black, requiring application restart to see complete changes
+- 🔧 **Root Cause**: 
+  - Tree_view had hardcoded colors in `_configure_tree_view()` (`grid_color = "#d6d6d6"`, `text_color = "#000000"`)
+  - `default.json` (Light theme) had empty stylesheet, allowing Dark theme styles to persist
+  - No call to reapply tree_view styles after theme change
+- 🔧 **Solution Implemented**:
+  - Created `apply_tree_view_style()`: dynamic method using QPalette to calculate colors based on active theme
+  - Automatic theme detection: `base_color.lightness() > 128` → light theme, otherwise dark
+  - Adaptive grid colors: `#d6d6d6` (light) / `#404040` (dark)
+  - Added `apply_tree_view_style()` call in main.py after theme change
+  - Added complete stylesheet in `default.json` with dynamic `palette(window)` references for menu bar
+- 📝 Files modified: `Functions/tree_manager.py` (new method), `main.py` (call after switch), `Themes/default.json` and `dark.json` (stylesheets)
+- 🎯 Impact: Theme switching now applies instantly and completely to all components (menus, tree view, dialogs) without requiring restart
 
 **Column Widths Not Saved in Manual Resize Mode**
 - 🛡️ **Problem**: In manual resize mode (unlocked columns), custom column widths were not saved, forcing users to resize all columns after each application restart

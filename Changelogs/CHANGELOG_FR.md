@@ -6,7 +6,45 @@ Historique complet des versions du gestionnaire de personnages pour Dark Age of 
 
 # ✨✨ v0.108
 
+### 🎉 Ajout
+- 🎨 **Nouveau Thème Purple (Dracula)** : Thème inspiré de Dracula avec palette violet/rose
+  - Couleurs de fond : #282A36 (fond sombre violet-gris)
+  - Accents : #BD93F9 (violet signature), #FF79C6 (rose)
+  - Texte : #F8F8F2 (blanc cassé)
+  - Style Fusion avec 16 couleurs de palette complètes
+  - Traductions FR/EN/DE ("Violet", "Purple", "Lila")
+- 📝 **Fichier FUTURE_IMPROVEMENTS.md** : Liste structurée des améliorations futures
+  - Vue d'ensemble avec cases à cocher et liens d'ancrage
+  - Sections : Système de Thèmes, Fonctionnalités, Corrections, Optimisations, Idées
+  - 3 améliorations de thèmes planifiées (Éditeur intégré, Génération variantes, Import/Export)
+
+### 🧰 Modification
+- 🎨 **Système de Style Dynamique** : Refactorisation complète du tree_view
+  - Nouvelle méthode `apply_tree_view_style()` basée sur QPalette
+  - Détection automatique du thème (clair/sombre) via lightness (>128)
+  - Couleurs de grille adaptatives : #d6d6d6 (clair) / #404040 (sombre)
+  - Application en temps réel lors du changement de thème
+- 📋 **Persistance des Largeurs de Colonnes** : Sauvegarde automatique en mode manuel
+  - Nouveau paramètre `column_widths` dans config.json (dictionnaire)
+  - Restauration automatique au démarrage en mode manuel
+  - Sauvegarde lors de la fermeture et avant changement de mode
+
 ### 🐛 Correction
+
+**Application Incomplète du Thème lors du Switch**
+- 🛡️ **Problème** : Lors du passage du thème Dark au thème Light, la barre de menus restait noire et l'affichage central des personnages restait noir, nécessitant un redémarrage de l'application pour voir les changements complets
+- 🔧 **Cause Racine** : 
+  - Le tree_view avait des couleurs hardcodées dans `_configure_tree_view()` (`grid_color = "#d6d6d6"`, `text_color = "#000000"`)
+  - Le fichier `default.json` (thème Light) avait un stylesheet vide, permettant aux styles du thème Dark de persister
+  - Aucun appel pour réappliquer les styles du tree_view après changement de thème
+- 🔧 **Solution Implémentée** :
+  - Création de `apply_tree_view_style()` : méthode dynamique utilisant QPalette pour calculer les couleurs selon le thème actif
+  - Détection automatique du thème : `base_color.lightness() > 128` → thème clair, sinon sombre
+  - Couleurs de grille adaptatives : `#d6d6d6` (clair) / `#404040` (sombre)
+  - Ajout d'appel `apply_tree_view_style()` dans main.py après changement de thème
+  - Ajout de stylesheet complet dans `default.json` avec références `palette(window)` dynamiques pour la barre de menus
+- 📝 Fichiers modifiés : `Functions/tree_manager.py` (nouvelle méthode), `main.py` (appel après switch), `Themes/default.json` et `dark.json` (stylesheets)
+- 🎯 Impact : Le changement de thème s'applique maintenant instantanément et complètement à tous les composants (menus, tree view, dialogs) sans nécessiter de redémarrage
 
 **Largeurs de Colonnes Non Sauvegardées en Mode Manuel**
 - 🛡️ **Problème** : En mode de redimensionnement manuel (colonnes non bloquées), les largeurs personnalisées des colonnes n'étaient pas sauvegardées, obligeant l'utilisateur à redimensionner toutes les colonnes à chaque redémarrage de l'application

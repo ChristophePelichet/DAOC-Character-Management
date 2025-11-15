@@ -16,5 +16,5 @@
     "Highlight": "#0078D7",
     "HighlightedText": "#FFFFFF"
   },
-  "stylesheet": ""
+  "stylesheet": "QMenuBar { background-color: palette(window); color: palette(window-text); } QMenuBar::item { background-color: transparent; } QMenuBar::item:selected { background-color: palette(highlight); color: palette(highlighted-text); } QMenu { background-color: palette(base); color: palette(text); } QMenu::item:selected { background-color: palette(highlight); color: palette(highlighted-text); }"
 }

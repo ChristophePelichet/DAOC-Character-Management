@@ -62,6 +62,7 @@
     "config_font_scale_label": "Textgröße",
     "theme_light": "Hell",
     "theme_dark": "Dunkel",
+    "theme_purple": "Lila (Dracula)",
     "debug_font_size_menu": "Schrift",
     "font_size_small": "Klein",
     "font_size_medium": "Mittel",

@@ -1,44 +1,6 @@
 # 📋 Changelog Simple - DAOC Character Management
 
-# ✨ v0.108 - 14/11/2025
-
-### 🐛 Correction
-
-**Freeze Fenêtre après Mise à Jour Herald**
-- 🛡️ Interface bloquée plusieurs secondes après dialogue "Aucune mise à jour"
-- 🔧 Nettoyage automatique du thread avant affichage dialogues
-- 🎯 Fermeture instantanée, interface réactive immédiatement
-
-**Comportement Incohérent Menu Contextuel**
-- 🛡️ Menu contextuel affichait fenêtre vide, feuille personnage affichait message
-- 🔧 Ajout vérification `has_changes()` dans gestionnaire menu contextuel
-- 🎯 Comportement uniforme entre feuille personnage et menu contextuel
-
-### 🗑️ Retrait
-
-**Option "Vérifier la Structure"**
-- 🛡️ Fonctionnalité de migration obsolète retirée
-- 🎯 Interface simplifiée, option manuelle supprimée
-
-**Rang de Royaume Incorrect dans Comparaison**
-- 🛡️ Affichage du titre ("Raven Ardent") au lieu du code (5L9) causant faux changements
-- 🔧 Détection automatique et recalcul depuis points de royaume
-- 🎯 Comparaison correcte, plus de faux positifs
-
-**Fenêtre Comparaison Vide**
-- 🛡️ Fenêtre s'ouvrait même sans changement détecté
-- 🔧 Vérification préalable + message "Personnage déjà à jour"
-- 🎯 Pas de fenêtre vide, message clair
-
-### ✨ Ajout
-
-**Traductions Messages Mise à Jour**
-- 🌍 2 nouvelles traductions FR/EN/DE
-- 🎯 Interface 100% multilingue
-
----
-
-# ✨ v0.108 - 14/11/2025
+# ✨ v0.108
 
 ### ✨ Ajout
 
@@ -46,53 +8,8 @@
 - 🌍 58 nouvelles traductions FR/EN/DE pour tous les dialogues de progression et messages d'import
 - 📚 Documentation technique complète avec diagrammes (PROGRESS_DIALOG_SYSTEM_EN.md, 1900+ lignes)
 - 🎯 Support complet de 3 langues pour l'interface utilisateur
-
-### 🧰 Modification
-
-**Migration vers Système de Traduction**
-- 🔄 Tous les textes des dialogues maintenant traduits automatiquement
-- 🌐 4 dialogues migrés : Mise à jour stats, Mise à jour personnage (×2), Génération cookies
-- ✅ Interface entièrement multilingue (FR/EN/DE)
-
-### 🐛 Correction
-
-**Erreur Formatage Messages**
-- 🛡️ Correction crash "Index out of range" lors affichage messages
-- 🔧 Migration vers paramètres nommés ({char_name}, {count}, {error})
-- 🎯 Messages traduits affichés correctement avec valeurs dynamiques
-
-**Freeze Fenêtre Recherche Herald**
-- 🛡️ Correction fermeture lente (2-3 clics nécessaires) + freeze après import
-- 🔧 Cleanup asynchrone des threads et ressources (QTimer.singleShot)
-- 🎯 Fermeture instantanée (<100ms), plus de freeze, refresh/backup en arrière-plan
-
-**Messages Import Non Traduits**
-- 🛡️ Messages "Import terminé" codés en dur en français
-- 🔧 6 nouvelles clés de traduction FR/EN/DE
-- 🎯 Interface Herald 100% multilingue
-
-### 🔚 Retrait
-
-**Nettoyage Documentation**
-- 🗑️ Suppression de 20+ fichiers obsolètes (~4000 lignes)
-- 🧹 Documentation finale propre et consolidée
-
----
-
-# ✨ v0.107 - 11/11/2025
-
-### 🧰 Modification
-
-**Configuration Copilot + Documentation Technique**
-- ⚙️ Configuration VS Code Copilot pour workflow automatique (traductions, changelogs, commit, merge)
-- 📝 2 fichiers instructions Copilot (`.github/copilot-instructions.md` et `.copilot-instructions.md`)
-- 📐 Document réflexion architecture fenêtres progression (ARCHI_WINDOWS.md, 1200+ lignes)
-- 📊 Documentation complète CharacterProfileScraper + WealthManager (CHARACTER_STATS_SCRAPER_EN.md, 2000+ lignes)
-- 🔧 Refactoring wealth_manager.py vers fonction centralisée `_connect_to_eden_herald()`
-
----
-
-# ✨ v0.108
+- 🌍 2 nouvelles traductions FR/EN/DE
+- 🎯 Interface 100% multilingue
 
 ### 📚 Documentation
 
@@ -114,6 +31,26 @@
 - 🔧 Protection complète : arrêt du thread, déconnexion signaux, gestion exceptions
 - 🎯 Fermeture sécurisée à tout moment sans crash
 
+**Erreur Formatage Messages**
+- 🛡️ Correction crash "Index out of range" lors affichage messages
+- 🔧 Migration vers paramètres nommés ({char_name}, {count}, {error})
+- 🎯 Messages traduits affichés correctement avec valeurs dynamiques
+
+**Freeze Fenêtre Recherche Herald**
+- 🛡️ Correction fermeture lente (2-3 clics nécessaires) + freeze après import
+- 🔧 Cleanup asynchrone des threads et ressources (QTimer.singleShot)
+- 🎯 Fermeture instantanée (<100ms), plus de freeze, refresh/backup en arrière-plan
+
+**Messages Import Non Traduits**
+- 🛡️ Messages "Import terminé" codés en dur en français
+- 🔧 6 nouvelles clés de traduction FR/EN/DE
+- 🎯 Interface Herald 100% multilingue
+
+**Comportement Incohérent Menu Contextuel**
+- 🛡️ Menu contextuel affichait fenêtre vide, feuille personnage affichait message
+- 🔧 Ajout vérification `has_changes()` dans gestionnaire menu contextuel
+- 🎯 Comportement uniforme entre feuille personnage et menu contextuel
+
 ### 🧰 Modification
 
 **Amélioration Recherche Herald**
@@ -122,6 +59,33 @@
 - 📋 Toutes les étapes restent visibles avec indication de leur statut
 - 🔄 Mise à jour automatique des étapes au fur et à mesure de la progression
 - 🎯 Feedback visuel complet pour l'utilisateur
+- 🔧 Refactoring wealth_manager.py vers fonction centralisée `_connect_to_eden_herald()`
+- 📊 Documentation complète CharacterProfileScraper + WealthManager (CHARACTER_STATS_SCRAPER_EN.md, 2000+ lignes)
+
+**Migration vers Système de Traduction**
+- 🔄 Tous les textes des dialogues maintenant traduits automatiquement
+- 🌐 4 dialogues migrés : Mise à jour stats, Mise à jour personnage (×2), Génération cookies
+- ✅ Interface entièrement multilingue (FR/EN/DE)
+
+### 🔚 Retrait
+
+**Nettoyage Documentation**
+- 🗑️ Suppression de 20+ fichiers obsolètes (~4000 lignes)
+- 🧹 Documentation finale propre et consolidée
+
+**Option "Vérifier la Structure"**
+- 🛡️ Fonctionnalité de migration obsolète retirée
+- 🎯 Interface simplifiée, option manuelle supprimée
+
+**Rang de Royaume Incorrect dans Comparaison**
+- 🛡️ Affichage du titre ("Raven Ardent") au lieu du code (5L9) causant faux changements
+- 🔧 Détection automatique et recalcul depuis points de royaume
+- 🎯 Comparaison correcte, plus de faux positifs
+
+**Fenêtre Comparaison Vide**
+- 🛡️ Fenêtre s'ouvrait même sans changement détecté
+- 🔧 Vérification préalable + message "Personnage déjà à jour"
+- 🎯 Pas de fenêtre vide, message clair
 
 ---
 

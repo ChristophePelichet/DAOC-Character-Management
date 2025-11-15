@@ -2,41 +2,41 @@
 
 ---
 
-# ✨ v0.108 - 11/14/2025
-
-### 🐛 Fixed
-
-**Window Freeze After Herald Update**
-- 🛡️ Interface blocked for several seconds after "No update" dialog
-- 🔧 Automatic thread cleanup before displaying dialogs
-- 🎯 Instant closure, immediately responsive interface
-
-**Inconsistent Context Menu Behavior**
-- 🛡️ Context menu showed empty window, character sheet showed message
-- 🔧 Added `has_changes()` check in context menu handler
-- 🎯 Uniform behavior between character sheet and context menu
-
-### 🗑️ Removal
-
-**"Check File Structure" Option**
-- 🛡️ Obsolete migration feature removed
-- 🎯 Simplified interface, manual option removed
-
-**Incorrect Realm Rank in Comparison**
-- 🛡️ Displayed title ("Raven Ardent") instead of code (5L9) causing false changes
-- 🔧 Automatic detection and recalculation from realm points
-- 🎯 Correct comparison, no more false positives
-
-**Empty Comparison Window**
-- 🛡️ Window opened even when no changes detected
-- 🔧 Pre-check + "Character already up to date" message
-- 🎯 No empty window, clear message
+# ✨ v0.108 - 11/15/2025
 
 ### ✨ Added
 
-**Update Message Translations**
-- 🌍 2 new FR/EN/DE translations
-- 🎯 100% multilingual interface
+**GitHub Wiki Help System**
+- 📚 Migrated from in-app help to GitHub Wiki for better accessibility
+- 🌐 F1 shortcut opens Wiki documentation in browser
+- 🌍 Multilingual support (FR/EN/DE pages)
+- 📝 Complete French documentation (Home, Create, Edit, Delete)
+- 🔗 Language-aware links (opens correct language based on app settings)
+- 📖 Technical documentation (WIKI_HELP_SYSTEM.md, 400+ lines)
+
+### 🧰 Modified
+
+**Help System Architecture**
+- 🔄 Replaced in-app HelpDialog with browser-based Wiki
+- 🌐 Single "Documentation" menu item (F1) instead of 3 separate entries
+- ✅ Git submodule for Wiki repository integration
+
+### 🗑️ Removed
+
+**In-App Help Components**
+- 🗑️ Help/ folder (help_database.json, Markdown files)
+- 🗑️ Functions/help_system.py (507 lines)
+- 🗑️ Functions/tooltip_manager.py (70 lines)
+- 🗑️ Scripts/create_complete_help_database.py
+- 🧹 Total: -982 lines removed, +433 lines added (net -549 lines)
+
+### 📚 Documentation
+
+**Technical Eden Scraping**
+- 📝 3 detailed English documentations (2000+ lines)
+- 📊 ASCII flow diagrams
+- 💡 Practical examples and troubleshooting guides
+- 🎯 Unified documented architecture
 
 ---
 

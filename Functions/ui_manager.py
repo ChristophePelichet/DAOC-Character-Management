@@ -94,21 +94,11 @@ class UIManager:
         # Menu Aide
         help_menu = menubar.addMenu(lang.get("menu_help"))
         
-        # Sous-menu Documentation
-        doc_menu = QMenu(lang.get("menu_help_documentation"), self.main_window)
-        help_menu.addMenu(doc_menu)
-        
-        help_create_char_action = QAction(lang.get("menu_help_create_character"), self.main_window)
-        help_create_char_action.triggered.connect(self.main_window.show_help_create_character)
-        doc_menu.addAction(help_create_char_action)
-        
-        help_edit_char_action = QAction(lang.get("menu_help_edit_character"), self.main_window)
-        help_edit_char_action.triggered.connect(self.main_window.show_help_edit_character)
-        doc_menu.addAction(help_edit_char_action)
-        
-        help_delete_char_action = QAction(lang.get("menu_help_delete_character"), self.main_window)
-        help_delete_char_action.triggered.connect(self.main_window.show_help_delete_character)
-        doc_menu.addAction(help_delete_char_action)
+        # Lien direct vers Wiki Documentation (F1)
+        wiki_doc_action = QAction(lang.get("menu_help_documentation"), self.main_window)
+        wiki_doc_action.setShortcut("F1")
+        wiki_doc_action.triggered.connect(self._open_wiki_documentation)
+        help_menu.addAction(wiki_doc_action)
         
         help_menu.addSeparator()
         
@@ -458,6 +448,16 @@ class UIManager:
         title = lang.get("about_dialog_title", app_name=app_name)
         message = lang.get("about_dialog_content", app_name=app_name, version=app_version)
         QMessageBox.about(self.main_window, title, message)
+    
+    def _open_wiki_documentation(self):
+        """Ouvre le Wiki GitHub dans le navigateur"""
+        import webbrowser
+        from Functions.config_manager import config
+        
+        # Déterminer la langue pour le lien Wiki
+        current_lang = config.get("language", "fr").upper()
+        wiki_url = f"https://github.com/ChristophePelichet/DAOC-Character-Management/wiki/{current_lang}-Home"
+        webbrowser.open(wiki_url)
         
     def retranslate_ui(self):
         """Met à jour toutes les traductions de l'interface"""

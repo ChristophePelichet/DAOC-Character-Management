@@ -2,12 +2,12 @@
 
 # ✨ v0.108
 
-### 🧹 Nettoyage
-- 🗑️ **Références Obsolètes** : Suppression des saisons S1/S2 et serveur Blackthorn (non compatibles)
-
 ### 🎉 Nouveautés
+- ⌨️ **Raccourcis Clavier** : Ctrl+N pour créer un personnage, Ctrl+F pour rechercher sur Herald
 - 🎨 **Thème Purple (Dracula)** : Nouveau thème violet/rose avec palette Dracula officielle
 - 📝 **Fichier FUTURE_IMPROVEMENTS.md** : Liste des améliorations planifiées avec cases à cocher
+
+### 🧹 Nettoyage
 
 ### 🧰 Améliorations
 - 🎨 **Changement de Thème** : Application instantanée complète sans redémarrage

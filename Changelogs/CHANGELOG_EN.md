@@ -6,6 +6,15 @@ Complete version history of the character manager for Dark Age of Camelot (Eden)
 
 # ✨✨ v0.108
 
+### 🎉 Added
+- ⌨️ **Keyboard Shortcuts for Main Actions**: Quick access to common features
+  - **Ctrl+N**: Create new character manually (shortcut displayed in File menu)
+  - **Ctrl+F**: Search character on Eden Herald with smart validation
+  - Automatic Eden connection validation management before opening search
+  - Waiting window with 500ms checks (15 seconds timeout)
+  - Contextual error messages if Herald connection unavailable
+  - 🌍 Complete FR/EN/DE translations (7 new keys)
+
 ### 🧹 Cleanup
 - 🗑️ **Removed Obsolete References**: Complete cleanup of code and documentation
   - Removed references to S1 and S2 seasons (ended seasons on Eden)

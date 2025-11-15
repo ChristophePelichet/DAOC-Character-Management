@@ -5,11 +5,12 @@ Separated from dialogs.py for better maintainability
 
 import os
 import logging
+import shutil
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QFormLayout, QGroupBox, QLabel,
     QPushButton, QLineEdit, QComboBox, QCheckBox, QDialogButtonBox,
     QFileDialog, QListWidget, QStackedWidget, QWidget, QListWidgetItem,
-    QFrame
+    QFrame, QMessageBox, QProgressDialog
 )
 from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QIcon, QFont
@@ -19,6 +20,7 @@ from Functions.config_manager import config, get_config_dir
 from Functions.character_manager import get_character_dir
 from Functions.logging_manager import get_log_dir
 from Functions.path_manager import get_armor_dir
+from Functions.backup_manager import BackupManager
 
 
 class SettingsDialog(QDialog):
@@ -94,11 +96,17 @@ class SettingsDialog(QDialog):
         main_layout.addLayout(content_layout, 1)
         
         # === BOTTOM: Action Buttons ===
-        button_box = QDialogButtonBox(
-            QDialogButtonBox.Save | QDialogButtonBox.Cancel
-        )
-        button_box.accepted.connect(self.accept)
-        button_box.rejected.connect(self.reject)
+        button_box = QDialogButtonBox()
+        
+        # Add custom buttons in order: Save, Cancel, Close
+        save_button = button_box.addButton(lang.get("save_button", default="Sauvegarder"), QDialogButtonBox.ActionRole)
+        cancel_button = button_box.addButton(lang.get("cancel_button", default="Annuler"), QDialogButtonBox.ActionRole)
+        close_button = button_box.addButton(lang.get("close_button", default="Fermer"), QDialogButtonBox.ActionRole)
+        
+        # Connect signals
+        save_button.clicked.connect(self._save_without_closing)
+        cancel_button.clicked.connect(self._cancel_changes)
+        close_button.clicked.connect(self.reject)
         
         button_layout = QHBoxLayout()
         button_layout.setContentsMargins(10, 10, 10, 10)
@@ -541,6 +549,7 @@ class SettingsDialog(QDialog):
         
         self.backup_enabled_check = QCheckBox(lang.get("backup_enabled_label", default="Activer les sauvegardes"))
         self.backup_enabled_check.setChecked(config.get("backup_enabled", True))
+        self.backup_enabled_check.stateChanged.connect(lambda state: self._save_backup_setting("backup_enabled", state == 2))
         enable_compress_layout.addWidget(self.backup_enabled_check)
         
         enable_compress_layout.addSpacing(30)
@@ -548,7 +557,17 @@ class SettingsDialog(QDialog):
         self.backup_compress_check = QCheckBox(lang.get("backup_compress_label", default="Compresser les sauvegardes (ZIP)"))
         self.backup_compress_check.setChecked(config.get("backup_compress", True))
         self.backup_compress_check.setToolTip(lang.get("backup_compress_tooltip", default="Réduit la taille des sauvegardes"))
+        self.backup_compress_check.stateChanged.connect(lambda state: self._save_backup_setting("backup_compress", state == 2))
         enable_compress_layout.addWidget(self.backup_compress_check)
+        
+        enable_compress_layout.addSpacing(30)
+        
+        # Auto-delete checkbox
+        self.backup_auto_delete_check = QCheckBox(lang.get("backup_auto_delete_label", default="Supprimer auto les anciens"))
+        self.backup_auto_delete_check.setChecked(config.get("backup_auto_delete_old", True))
+        self.backup_auto_delete_check.setToolTip(lang.get("backup_auto_delete_tooltip", default="Supprime automatiquement les plus anciens backups quand la limite est atteinte"))
+        self.backup_auto_delete_check.stateChanged.connect(self._on_backup_auto_delete_changed)
+        enable_compress_layout.addWidget(self.backup_auto_delete_check)
         
         enable_compress_layout.addStretch()
         chars_layout.addLayout(enable_compress_layout)
@@ -585,33 +604,43 @@ class SettingsDialog(QDialog):
         chars_layout.addLayout(path_form)
         chars_layout.addSpacing(10)
         
-        # Size limit
-        size_form = QFormLayout()
+        # Storage limit + Stats on same line with separator
+        stats_layout = QHBoxLayout()
+        
+        # Storage limit
+        stats_layout.addWidget(QLabel(lang.get("backup_size_limit_label", default="Limite de stockage") + " :"))
         self.backup_size_limit_edit = QLineEdit()
         self.backup_size_limit_edit.setText(str(config.get("backup_size_limit_mb", 20)))
-        self.backup_size_limit_edit.setMaximumWidth(80)
+        self.backup_size_limit_edit.setMaximumWidth(60)
+        self.backup_size_limit_edit.textChanged.connect(self._on_backup_limit_changed)
+        stats_layout.addWidget(self.backup_size_limit_edit)
+        stats_layout.addWidget(QLabel("MB"))
+        stats_layout.addWidget(QLabel(lang.get("backup_size_limit_tooltip", default="(-1 = illimité)")))
+        stats_layout.addSpacing(15)
         
-        size_limit_layout = QHBoxLayout()
-        size_limit_layout.addWidget(self.backup_size_limit_edit)
-        size_limit_layout.addWidget(QLabel("MB"))
-        size_limit_layout.addWidget(QLabel(lang.get("backup_size_limit_tooltip", default="Limite totale")))
-        size_limit_layout.addStretch()
-        size_form.addRow(lang.get("backup_size_limit_label", default="Limite de taille"), size_limit_layout)
-        chars_layout.addLayout(size_form)
-        chars_layout.addSpacing(10)
-        
-        # Info - Total and Last Backup side by side
-        info_layout = QHBoxLayout()
+        # Vertical separator
+        separator1 = QFrame()
+        separator1.setFrameShape(QFrame.VLine)
+        separator1.setFrameShadow(QFrame.Sunken)
+        separator1.setStyleSheet("color: #888888;")
+        stats_layout.addWidget(separator1)
+        stats_layout.addSpacing(10)
         
         # Total backups
         total_backups = len(backup_info["backups"])
-        total_label_text = QLabel(lang.get("backup_total_label", default="Nombre de sauvegardes") + " :")
+        stats_layout.addWidget(QLabel(lang.get("backup_total_label", default="Nombre de sauvegardes") + " :"))
         self.backup_total_label = QLabel(f"{total_backups}")
         self.backup_total_label.setStyleSheet("font-weight: bold; color: #0078D4;")
-        info_layout.addWidget(total_label_text)
-        info_layout.addWidget(self.backup_total_label)
+        stats_layout.addWidget(self.backup_total_label)
+        stats_layout.addSpacing(10)
         
-        info_layout.addSpacing(30)
+        # Vertical separator
+        separator2 = QFrame()
+        separator2.setFrameShape(QFrame.VLine)
+        separator2.setFrameShadow(QFrame.Sunken)
+        separator2.setStyleSheet("color: #888888;")
+        stats_layout.addWidget(separator2)
+        stats_layout.addSpacing(10)
         
         # Last backup date
         last_backup_date = config.get("backup_last_date")
@@ -624,14 +653,29 @@ class SettingsDialog(QDialog):
                 last_backup_str = "N/A"
         else:
             last_backup_str = lang.get("backup_no_backup", default="Aucune sauvegarde")
-        last_label_text = QLabel(lang.get("backup_last_label", default="Dernière sauvegarde") + " :")
+        stats_layout.addWidget(QLabel(lang.get("backup_last_label", default="Dernière sauvegarde") + " :"))
         self.backup_last_label = QLabel(last_backup_str)
         self.backup_last_label.setStyleSheet("font-weight: bold; color: #0078D4;")
-        info_layout.addWidget(last_label_text)
-        info_layout.addWidget(self.backup_last_label)
+        stats_layout.addWidget(self.backup_last_label)
+        stats_layout.addSpacing(15)
         
-        info_layout.addStretch()
-        chars_layout.addLayout(info_layout)
+        # Vertical separator
+        separator3 = QFrame()
+        separator3.setFrameShape(QFrame.VLine)
+        separator3.setFrameShadow(QFrame.Sunken)
+        separator3.setStyleSheet("color: #888888;")
+        stats_layout.addWidget(separator3)
+        stats_layout.addSpacing(10)
+        
+        # Manual backup button
+        backup_now_button = QPushButton("💾 " + lang.get("backup_now_button", default="Sauvegarder maintenant"))
+        backup_now_button.clicked.connect(self._backup_characters_now)
+        backup_now_button.setToolTip(lang.get("backup_now_tooltip", default="Créer une sauvegarde manuelle immédiate"))
+        backup_now_button.setMaximumWidth(200)
+        stats_layout.addWidget(backup_now_button)
+        
+        stats_layout.addStretch()
+        chars_layout.addLayout(stats_layout)
         chars_layout.addSpacing(15)
         
         chars_group.setLayout(chars_layout)
@@ -647,6 +691,7 @@ class SettingsDialog(QDialog):
         
         self.cookies_backup_enabled_check = QCheckBox(lang.get("backup_enabled_label", default="Activer les sauvegardes"))
         self.cookies_backup_enabled_check.setChecked(config.get("cookies_backup_enabled", True))
+        self.cookies_backup_enabled_check.stateChanged.connect(lambda state: self._save_backup_setting("cookies_backup_enabled", state == 2))
         cookies_enable_compress_layout.addWidget(self.cookies_backup_enabled_check)
         
         cookies_enable_compress_layout.addSpacing(30)
@@ -654,7 +699,17 @@ class SettingsDialog(QDialog):
         self.cookies_backup_compress_check = QCheckBox(lang.get("backup_compress_label", default="Compresser les sauvegardes (ZIP)"))
         self.cookies_backup_compress_check.setChecked(config.get("cookies_backup_compress", True))
         self.cookies_backup_compress_check.setToolTip(lang.get("backup_compress_tooltip", default="Réduit la taille des sauvegardes"))
+        self.cookies_backup_compress_check.stateChanged.connect(lambda state: self._save_backup_setting("cookies_backup_compress", state == 2))
         cookies_enable_compress_layout.addWidget(self.cookies_backup_compress_check)
+        
+        cookies_enable_compress_layout.addSpacing(30)
+        
+        # Auto-delete checkbox for cookies
+        self.cookies_backup_auto_delete_check = QCheckBox(lang.get("backup_auto_delete_label", default="Supprimer auto les anciens"))
+        self.cookies_backup_auto_delete_check.setChecked(config.get("cookies_backup_auto_delete_old", True))
+        self.cookies_backup_auto_delete_check.setToolTip(lang.get("backup_auto_delete_tooltip", default="Supprime automatiquement les plus anciens backups quand la limite est atteinte"))
+        self.cookies_backup_auto_delete_check.stateChanged.connect(self._on_cookies_auto_delete_changed)
+        cookies_enable_compress_layout.addWidget(self.cookies_backup_auto_delete_check)
         
         cookies_enable_compress_layout.addStretch()
         cookies_layout.addLayout(cookies_enable_compress_layout)
@@ -691,18 +746,43 @@ class SettingsDialog(QDialog):
         cookies_layout.addLayout(cookies_path_form)
         cookies_layout.addSpacing(10)
         
-        # Cookies info - Total and Last Backup side by side
-        cookies_info_layout = QHBoxLayout()
+        # Storage limit + Stats on same line with separator
+        cookies_stats_layout = QHBoxLayout()
+        
+        # Storage limit for cookies
+        cookies_stats_layout.addWidget(QLabel(lang.get("backup_size_limit_label", default="Limite de stockage") + " :"))
+        self.cookies_backup_size_limit_edit = QLineEdit()
+        self.cookies_backup_size_limit_edit.setText(str(config.get("cookies_backup_size_limit_mb", 20)))
+        self.cookies_backup_size_limit_edit.setMaximumWidth(60)
+        self.cookies_backup_size_limit_edit.textChanged.connect(self._on_cookies_limit_changed)
+        cookies_stats_layout.addWidget(self.cookies_backup_size_limit_edit)
+        cookies_stats_layout.addWidget(QLabel("MB"))
+        cookies_stats_layout.addWidget(QLabel(lang.get("backup_size_limit_tooltip", default="(-1 = illimité)")))
+        cookies_stats_layout.addSpacing(15)
+        
+        # Vertical separator
+        cookies_separator1 = QFrame()
+        cookies_separator1.setFrameShape(QFrame.VLine)
+        cookies_separator1.setFrameShadow(QFrame.Sunken)
+        cookies_separator1.setStyleSheet("color: #888888;")
+        cookies_stats_layout.addWidget(cookies_separator1)
+        cookies_stats_layout.addSpacing(10)
         
         # Total cookies backups
         total_cookies_backups = len(cookies_info["backups"])
-        cookies_total_label_text = QLabel(lang.get("backup_total_label", default="Nombre de sauvegardes") + " :")
+        cookies_stats_layout.addWidget(QLabel(lang.get("backup_total_label", default="Nombre de sauvegardes") + " :"))
         self.cookies_total_label = QLabel(f"{total_cookies_backups}")
         self.cookies_total_label.setStyleSheet("font-weight: bold; color: #0078D4;")
-        cookies_info_layout.addWidget(cookies_total_label_text)
-        cookies_info_layout.addWidget(self.cookies_total_label)
+        cookies_stats_layout.addWidget(self.cookies_total_label)
+        cookies_stats_layout.addSpacing(10)
         
-        cookies_info_layout.addSpacing(30)
+        # Vertical separator
+        cookies_separator2 = QFrame()
+        cookies_separator2.setFrameShape(QFrame.VLine)
+        cookies_separator2.setFrameShadow(QFrame.Sunken)
+        cookies_separator2.setStyleSheet("color: #888888;")
+        cookies_stats_layout.addWidget(cookies_separator2)
+        cookies_stats_layout.addSpacing(10)
         
         # Last cookies backup date
         last_cookies_backup_date = config.get("cookies_backup_last_date")
@@ -715,18 +795,175 @@ class SettingsDialog(QDialog):
                 last_cookies_str = "N/A"
         else:
             last_cookies_str = lang.get("backup_no_backup", default="Aucune sauvegarde")
-        cookies_last_label_text = QLabel(lang.get("backup_last_label", default="Dernière sauvegarde") + " :")
+        cookies_stats_layout.addWidget(QLabel(lang.get("backup_last_label", default="Dernière sauvegarde") + " :"))
         self.cookies_last_label = QLabel(last_cookies_str)
         self.cookies_last_label.setStyleSheet("font-weight: bold; color: #0078D4;")
-        cookies_info_layout.addWidget(cookies_last_label_text)
-        cookies_info_layout.addWidget(self.cookies_last_label)
+        cookies_stats_layout.addWidget(self.cookies_last_label)
+        cookies_stats_layout.addSpacing(15)
         
-        cookies_info_layout.addStretch()
-        cookies_layout.addLayout(cookies_info_layout)
+        # Vertical separator
+        cookies_separator3 = QFrame()
+        cookies_separator3.setFrameShape(QFrame.VLine)
+        cookies_separator3.setFrameShadow(QFrame.Sunken)
+        cookies_separator3.setStyleSheet("color: #888888;")
+        cookies_stats_layout.addWidget(cookies_separator3)
+        cookies_stats_layout.addSpacing(10)
+        
+        # Manual backup button
+        cookies_backup_now_button = QPushButton("💾 " + lang.get("backup_now_button", default="Sauvegarder maintenant"))
+        cookies_backup_now_button.clicked.connect(self._backup_cookies_now)
+        cookies_backup_now_button.setToolTip(lang.get("backup_now_tooltip", default="Créer une sauvegarde manuelle immédiate"))
+        cookies_backup_now_button.setMaximumWidth(200)
+        cookies_stats_layout.addWidget(cookies_backup_now_button)
+        
+        cookies_stats_layout.addStretch()
+        cookies_layout.addLayout(cookies_stats_layout)
         cookies_layout.addSpacing(15)
         
         cookies_group.setLayout(cookies_layout)
         layout.addWidget(cookies_group)
+        
+        # === ARMOR BACKUP ===
+        armor_info = self.backup_manager.get_armor_backup_info()
+        armor_group = QGroupBox("🛡️ " + lang.get("backup_armor_title", default="Sauvegardes des données d'armures"))
+        armor_layout = QVBoxLayout()
+        
+        # Enabled checkbox and compress checkbox side by side
+        armor_enable_compress_layout = QHBoxLayout()
+        
+        self.armor_backup_enabled_check = QCheckBox(lang.get("backup_enabled_label", default="Activer les sauvegardes"))
+        self.armor_backup_enabled_check.setChecked(config.get("armor_backup_enabled", True))
+        self.armor_backup_enabled_check.stateChanged.connect(lambda state: self._save_backup_setting("armor_backup_enabled", state == 2))
+        armor_enable_compress_layout.addWidget(self.armor_backup_enabled_check)
+        
+        armor_enable_compress_layout.addSpacing(30)
+        
+        self.armor_backup_compress_check = QCheckBox(lang.get("backup_compress_label", default="Compresser les sauvegardes (ZIP)"))
+        self.armor_backup_compress_check.setChecked(config.get("armor_backup_compress", True))
+        self.armor_backup_compress_check.setToolTip(lang.get("backup_compress_tooltip", default="Réduit la taille des sauvegardes"))
+        self.armor_backup_compress_check.stateChanged.connect(lambda state: self._save_backup_setting("armor_backup_compress", state == 2))
+        armor_enable_compress_layout.addWidget(self.armor_backup_compress_check)
+        
+        armor_enable_compress_layout.addSpacing(30)
+        
+        # Auto-delete checkbox for armor
+        self.armor_backup_auto_delete_check = QCheckBox(lang.get("backup_auto_delete_label", default="Supprimer auto les anciens"))
+        self.armor_backup_auto_delete_check.setChecked(config.get("armor_backup_auto_delete_old", True))
+        self.armor_backup_auto_delete_check.setToolTip(lang.get("backup_auto_delete_tooltip", default="Supprime automatiquement les plus anciens backups quand la limite est atteinte"))
+        self.armor_backup_auto_delete_check.stateChanged.connect(self._on_armor_auto_delete_changed)
+        armor_enable_compress_layout.addWidget(self.armor_backup_auto_delete_check)
+        
+        armor_enable_compress_layout.addStretch()
+        armor_layout.addLayout(armor_enable_compress_layout)
+        armor_layout.addSpacing(10)
+        
+        # Armor backup path
+        armor_path_form = QFormLayout()
+        self.armor_backup_path_edit = QLineEdit()
+        armor_backup_path = config.get("armor_backup_path")
+        if not armor_backup_path:
+            from Functions.path_manager import get_base_path
+            armor_backup_path = os.path.join(get_base_path(), "Backup", "Armor")
+        self.armor_backup_path_edit.setText(armor_backup_path)
+        self.armor_backup_path_edit.setReadOnly(True)
+        self.armor_backup_path_edit.setCursorPosition(0)
+        
+        browse_armor_button = QPushButton(lang.get("browse_button", default="Parcourir..."))
+        browse_armor_button.clicked.connect(self._browse_armor_backup_path)
+        browse_armor_button.setMaximumWidth(100)
+        
+        move_armor_backup_button = QPushButton("📦 " + lang.get("move_folder_button", default="Déplacer"))
+        move_armor_backup_button.clicked.connect(lambda: self._move_folder(self.armor_backup_path_edit, "armor_backup_path", lang.get("backup_path_label", default="Dossier de sauvegarde")))
+        move_armor_backup_button.setToolTip(lang.get("move_folder_tooltip", default="Déplacer le dossier et son contenu vers un nouvel emplacement"))
+        
+        open_armor_backup_folder_button = QPushButton("📂 " + lang.get("backup_open_folder", default="Ouvrir le dossier"))
+        open_armor_backup_folder_button.clicked.connect(self._open_armor_backup_folder)
+        
+        armor_path_layout = QHBoxLayout()
+        armor_path_layout.addWidget(self.armor_backup_path_edit)
+        armor_path_layout.addWidget(browse_armor_button)
+        armor_path_layout.addWidget(move_armor_backup_button)
+        armor_path_layout.addWidget(open_armor_backup_folder_button)
+        armor_path_form.addRow(lang.get("backup_path_label", default="Dossier de sauvegarde") + " :", armor_path_layout)
+        armor_layout.addLayout(armor_path_form)
+        armor_layout.addSpacing(10)
+        
+        # Storage limit + Stats on same line with separator
+        armor_stats_layout = QHBoxLayout()
+        
+        # Storage limit for armor
+        armor_stats_layout.addWidget(QLabel(lang.get("backup_size_limit_label", default="Limite de stockage") + " :"))
+        self.armor_backup_size_limit_edit = QLineEdit()
+        self.armor_backup_size_limit_edit.setText(str(config.get("armor_backup_size_limit_mb", 20)))
+        self.armor_backup_size_limit_edit.setMaximumWidth(60)
+        self.armor_backup_size_limit_edit.textChanged.connect(self._on_armor_limit_changed)
+        armor_stats_layout.addWidget(self.armor_backup_size_limit_edit)
+        armor_stats_layout.addWidget(QLabel("MB"))
+        armor_stats_layout.addWidget(QLabel(lang.get("backup_size_limit_tooltip", default="(-1 = illimité)")))
+        armor_stats_layout.addSpacing(15)
+        
+        # Vertical separator
+        armor_separator1 = QFrame()
+        armor_separator1.setFrameShape(QFrame.VLine)
+        armor_separator1.setFrameShadow(QFrame.Sunken)
+        armor_separator1.setStyleSheet("color: #888888;")
+        armor_stats_layout.addWidget(armor_separator1)
+        armor_stats_layout.addSpacing(10)
+        
+        # Total armor backups
+        total_armor_backups = len(armor_info["backups"])
+        armor_stats_layout.addWidget(QLabel(lang.get("backup_total_label", default="Nombre de sauvegardes") + " :"))
+        self.armor_total_label = QLabel(f"{total_armor_backups}")
+        self.armor_total_label.setStyleSheet("font-weight: bold; color: #0078D4;")
+        armor_stats_layout.addWidget(self.armor_total_label)
+        armor_stats_layout.addSpacing(10)
+        
+        # Vertical separator
+        armor_separator2 = QFrame()
+        armor_separator2.setFrameShape(QFrame.VLine)
+        armor_separator2.setFrameShadow(QFrame.Sunken)
+        armor_separator2.setStyleSheet("color: #888888;")
+        armor_stats_layout.addWidget(armor_separator2)
+        armor_stats_layout.addSpacing(10)
+        
+        # Last armor backup date
+        last_armor_backup_date = config.get("armor_backup_last_date")
+        if last_armor_backup_date:
+            try:
+                from datetime import datetime
+                dt = datetime.fromisoformat(last_armor_backup_date)
+                last_armor_str = dt.strftime("%Y-%m-%d %H:%M:%S")
+            except:
+                last_armor_str = "N/A"
+        else:
+            last_armor_str = lang.get("backup_no_backup", default="Aucune sauvegarde")
+        armor_stats_layout.addWidget(QLabel(lang.get("backup_last_label", default="Dernière sauvegarde") + " :"))
+        self.armor_last_label = QLabel(last_armor_str)
+        self.armor_last_label.setStyleSheet("font-weight: bold; color: #0078D4;")
+        armor_stats_layout.addWidget(self.armor_last_label)
+        armor_stats_layout.addSpacing(15)
+        
+        # Vertical separator
+        armor_separator3 = QFrame()
+        armor_separator3.setFrameShape(QFrame.VLine)
+        armor_separator3.setFrameShadow(QFrame.Sunken)
+        armor_separator3.setStyleSheet("color: #888888;")
+        armor_stats_layout.addWidget(armor_separator3)
+        armor_stats_layout.addSpacing(10)
+        
+        # Manual backup button
+        armor_backup_now_button = QPushButton("💾 " + lang.get("backup_now_button", default="Sauvegarder maintenant"))
+        armor_backup_now_button.clicked.connect(self._backup_armor_now)
+        armor_backup_now_button.setToolTip(lang.get("backup_now_tooltip", default="Créer une sauvegarde manuelle immédiate"))
+        armor_backup_now_button.setMaximumWidth(200)
+        armor_stats_layout.addWidget(armor_backup_now_button)
+        
+        armor_stats_layout.addStretch()
+        armor_layout.addLayout(armor_stats_layout)
+        armor_layout.addSpacing(15)
+        
+        armor_group.setLayout(armor_layout)
+        layout.addWidget(armor_group)
         
         layout.addStretch()
         self.pages.addWidget(page)
@@ -831,13 +1068,38 @@ class SettingsDialog(QDialog):
             line_edit.setText(normalized_directory)
             
     def _browse_character_folder(self):
+        old_path = self.char_path_edit.text()
         self._browse_folder(self.char_path_edit, "select_folder_dialog_title")
+        new_path = self.char_path_edit.text()
+        
+        # If path changed, save and reload character list
+        if old_path != new_path:
+            config.set("character_folder", new_path)
+            config.save_config()
+            if self.parent():
+                self.parent().refresh_character_list()
         
     def _browse_log_folder(self):
+        old_path = self.log_path_edit.text()
         self._browse_folder(self.log_path_edit, "select_log_folder_dialog_title")
+        new_path = self.log_path_edit.text()
+        
+        # If path changed, save and reinitialize logging
+        if old_path != new_path:
+            config.set("log_folder", new_path)
+            config.save_config()
+            from Functions.logging_manager import setup_logging
+            setup_logging()
         
     def _browse_armor_folder(self):
+        old_path = self.armor_path_edit.text()
         self._browse_folder(self.armor_path_edit, "select_folder_dialog_title")
+        new_path = self.armor_path_edit.text()
+        
+        # If path changed, save immediately
+        if old_path != new_path:
+            config.set("armor_folder", new_path)
+            config.save_config()
         
     def _browse_cookies_folder(self):
         self._browse_folder(self.cookies_path_edit, "select_folder_dialog_title")
@@ -856,11 +1118,16 @@ class SettingsDialog(QDialog):
             normalized_directory = directory.replace('/', '\\')
             self.cookies_backup_path_edit.setText(normalized_directory)
     
-    def _backup_now(self):
+    def _backup_characters_now(self):
         """Execute characters backup now"""
         from PySide6.QtWidgets import QMessageBox
         try:
-            result = self.backup_manager.create_backup()
+            # Save current path from text field to config and reinitialize backup_manager
+            config.set("backup_path", self.backup_path_edit.text())
+            config.save_config()
+            self.backup_manager = BackupManager(config)
+            
+            result = self.backup_manager.backup_characters_force()
             if result:
                 # Update last backup date display
                 from datetime import datetime
@@ -885,7 +1152,12 @@ class SettingsDialog(QDialog):
         """Execute cookies backup now"""
         from PySide6.QtWidgets import QMessageBox
         try:
-            result = self.backup_manager.backup_cookies()
+            # Save current path from text field to config and reinitialize backup_manager
+            config.set("cookies_backup_path", self.cookies_backup_path_edit.text())
+            config.save_config()
+            self.backup_manager = BackupManager(config)
+            
+            result = self.backup_manager.backup_cookies_force()
             if result:
                 # Update last backup date display
                 from datetime import datetime
@@ -896,6 +1168,36 @@ class SettingsDialog(QDialog):
                 # Update total count
                 cookies_info = self.backup_manager.get_cookies_backup_info()
                 self.cookies_total_label.setText(str(len(cookies_info["backups"])))
+                
+                QMessageBox.information(self, lang.get("success_title", default="Succès"),
+                                       lang.get("backup_success", default="Sauvegarde créée avec succès"))
+            else:
+                QMessageBox.warning(self, lang.get("warning_title", default="Attention"),
+                                   lang.get("backup_failed", default="La sauvegarde a échoué"))
+        except Exception as e:
+            QMessageBox.critical(self, lang.get("error_title", default="Erreur"),
+                                f"{lang.get('backup_error', default='Erreur lors de la sauvegarde')} : {str(e)}")
+    
+    def _backup_armor_now(self):
+        """Execute armor backup now"""
+        from PySide6.QtWidgets import QMessageBox
+        try:
+            # Save current path from text field to config and reinitialize backup_manager
+            config.set("armor_backup_path", self.armor_backup_path_edit.text())
+            config.save_config()
+            self.backup_manager = BackupManager(config)
+            
+            result = self.backup_manager.backup_armor_force()
+            if result:
+                # Update last backup date display
+                from datetime import datetime
+                last_backup_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                self.armor_last_label.setText(last_backup_str)
+                self.armor_last_label.setStyleSheet("font-weight: bold; color: #0078D4;")
+                
+                # Update total count
+                armor_info = self.backup_manager.get_armor_backup_info()
+                self.armor_total_label.setText(str(len(armor_info["backups"])))
                 
                 QMessageBox.information(self, lang.get("success_title", default="Succès"),
                                        lang.get("backup_success", default="Sauvegarde créée avec succès"))
@@ -976,41 +1278,69 @@ class SettingsDialog(QDialog):
             "log_folder": "Logs",
             "cookies_folder": "Cookies",
             "backup_path": "Backups",
-            "cookies_backup_path": "Backups"
+            "cookies_backup_path": "Backups",
+            "armor_backup_path": "Backups"
         }
         
         folder_name = folder_names.get(config_key, "Data")
         
         # Special handling for backup folders: always use /Backups/ intermediate folder
-        if config_key in ["backup_path", "cookies_backup_path"]:
+        if config_key in ["backup_path", "cookies_backup_path", "armor_backup_path"]:
             # For backups: parent_dir/Backups/subfolder_type
-            subfolder_type = "Characters" if config_key == "backup_path" else "Cookies"
+            if config_key == "backup_path":
+                subfolder_type = "Characters"
+            elif config_key == "cookies_backup_path":
+                subfolder_type = "Cookies"
+            else:  # armor_backup_path
+                subfolder_type = "Armor"
             backup_parent = os.path.join(parent_dir, "Backups")
             destination = os.path.join(backup_parent, subfolder_type)
         else:
             destination = os.path.join(parent_dir, folder_name)
         
-        # Check if destination already exists
-        if os.path.exists(destination):
+        # Check if destination already exists and source exists (need to merge)
+        destination_exists = os.path.exists(destination)
+        if destination_exists and source_exists:
             reply = QMessageBox.question(
                 self,
                 lang.get("warning_title", default="Attention"),
                 f"{lang.get('move_folder_destination_exists', default='Le dossier existe déjà à la destination.')}\n\n"
                 f"{destination}\n\n"
-                f"{lang.get('move_folder_use_existing', default='Voulez-vous utiliser ce dossier existant ?')}",
+                f"{lang.get('move_folder_merge_question', default='Voulez-vous fusionner les fichiers ?')}",
                 QMessageBox.Yes | QMessageBox.No,
                 QMessageBox.No
             )
             
-            if reply == QMessageBox.Yes:
-                # Use existing folder - just update the config
-                line_edit.setText(destination)
+            if reply != QMessageBox.Yes:
                 QMessageBox.information(
                     self,
-                    lang.get("success_title", default="Succès"),
-                    lang.get("move_folder_using_existing", 
-                            default=f"Configuration mise à jour pour utiliser :\n{destination}")
+                    lang.get("info_title", default="Information"),
+                    lang.get("move_folder_cancelled", default="Opération annulée.")
                 )
+                return
+            # Continue with merge (copytree with dirs_exist_ok=True)
+        elif destination_exists and not source_exists:
+            # Destination exists but no source to move - just update config
+            line_edit.setText(destination)
+            config.set(config_key, destination)
+            config.save_config()
+            self.backup_manager = BackupManager(config)
+            
+            # Reload character list if Characters folder changed
+            if config_key == "character_folder" and self.parent():
+                self.parent().refresh_character_list()
+            
+            # Reinitialize logging if log folder changed
+            if config_key == "log_folder":
+                from Functions.logging_manager import setup_logging
+                setup_logging()
+            
+            QMessageBox.information(
+                self,
+                lang.get("success_title", default="Succès"),
+                lang.get("move_folder_using_existing", 
+                        default=f"Configuration mise à jour pour utiliser :\n{destination}")
+            )
             return
         
         # If source exists, confirm move/copy
@@ -1054,24 +1384,47 @@ class SettingsDialog(QDialog):
         
         try:
             if source_exists:
-                # Copy the folder
-                shutil.copytree(current_path, destination)
+                # Copy the folder (dirs_exist_ok allows destination to exist for merge)
+                shutil.copytree(current_path, destination, dirs_exist_ok=True)
                 
                 # Update the line edit
                 line_edit.setText(destination)
                 
-                # Ask if user wants to delete old folder
-                delete_reply = QMessageBox.question(
-                    self,
-                    lang.get("move_folder_delete_title", default="Supprimer l'ancien dossier ?"),
-                    f"{lang.get('move_folder_delete_message', default='Le dossier a été copié avec succès. Voulez-vous supprimer l ancien dossier ?')}\n\n"
-                    f"{current_path}",
-                    QMessageBox.Yes | QMessageBox.No,
-                    QMessageBox.No
-                )
+                # Save the new path immediately to config
+                config.set(config_key, destination)
+                config.save_config()
                 
-                if delete_reply == QMessageBox.Yes:
+                # Reinitialize backup manager to use new path
+                self.backup_manager = BackupManager(config)
+                
+                # Check if source folder is now empty (all files were moved in merge)
+                source_is_empty = False
+                if os.path.exists(current_path):
+                    remaining_files = [item for item in os.listdir(current_path)]
+                    source_is_empty = len(remaining_files) == 0
+                
+                # Reload character list if Characters folder changed
+                if config_key == "character_folder" and self.parent():
+                    self.parent().refresh_character_list()
+                
+                # Reinitialize logging if log folder changed
+                if config_key == "log_folder":
+                    from Functions.logging_manager import setup_logging
+                    setup_logging()
+                
+                # Ask if user wants to delete old folder (or auto-delete if empty)
+                if source_is_empty:
+                    # Source is empty after merge, delete automatically
                     shutil.rmtree(current_path)
+                    
+                    # Check if parent Backup folder is now empty and delete it if so
+                    parent_backup = os.path.dirname(current_path)
+                    if os.path.exists(parent_backup) and os.path.basename(parent_backup).lower() == "backup":
+                        remaining_items = [item for item in os.listdir(parent_backup) 
+                                         if os.path.isdir(os.path.join(parent_backup, item))]
+                        if not remaining_items:
+                            shutil.rmtree(parent_backup)
+                    
                     QMessageBox.information(
                         self,
                         lang.get("success_title", default="Succès"),
@@ -1079,19 +1432,64 @@ class SettingsDialog(QDialog):
                                 default=f"Dossier déplacé avec succès vers :\n{destination}")
                     )
                 else:
-                    QMessageBox.information(
+                    # Source still has files, ask user
+                    delete_reply = QMessageBox.question(
                         self,
-                        lang.get("success_title", default="Succès"),
-                        lang.get("move_folder_copy_success", 
-                                default=f"Dossier copié avec succès vers :\n{destination}\n\n"
-                                       f"L'ancien dossier a été conservé.")
+                        lang.get("move_folder_delete_title", default="Supprimer l'ancien dossier ?"),
+                        f"{lang.get('move_folder_delete_message', default='Le dossier a été copié avec succès. Voulez-vous supprimer l ancien dossier ?')}\n\n"
+                        f"{current_path}",
+                        QMessageBox.Yes | QMessageBox.No,
+                        QMessageBox.No
                     )
+                    
+                    if delete_reply == QMessageBox.Yes:
+                        # Delete the old folder
+                        shutil.rmtree(current_path)
+                        
+                        # Check if parent Backup folder is now empty and delete it if so
+                        parent_backup = os.path.dirname(current_path)
+                        if os.path.exists(parent_backup) and os.path.basename(parent_backup).lower() == "backup":
+                            remaining_items = [item for item in os.listdir(parent_backup) 
+                                             if os.path.isdir(os.path.join(parent_backup, item))]
+                            if not remaining_items:
+                                shutil.rmtree(parent_backup)
+                        
+                        QMessageBox.information(
+                            self,
+                            lang.get("success_title", default="Succès"),
+                            lang.get("move_folder_success", 
+                                    default=f"Dossier déplacé avec succès vers :\n{destination}")
+                        )
+                    else:
+                        QMessageBox.information(
+                            self,
+                            lang.get("success_title", default="Succès"),
+                            lang.get("move_folder_copy_success", 
+                                    default=f"Dossier copié avec succès vers :\n{destination}\n\n"
+                                           f"L'ancien dossier a été conservé.")
+                        )
             else:
                 # Create the folder (including intermediate folders for backups)
                 os.makedirs(destination, exist_ok=True)
                 
                 # Update the line edit
                 line_edit.setText(destination)
+                
+                # Save the new path immediately to config
+                config.set(config_key, destination)
+                config.save_config()
+                
+                # Reinitialize backup manager to use new path
+                self.backup_manager = BackupManager(config)
+                
+                # Reload character list if Characters folder changed
+                if config_key == "character_folder" and self.parent():
+                    self.parent().refresh_character_list()
+                
+                # Reinitialize logging if log folder changed
+                if config_key == "log_folder":
+                    from Functions.logging_manager import setup_logging
+                    setup_logging()
                 
                 QMessageBox.information(
                     self,
@@ -1174,3 +1572,182 @@ class SettingsDialog(QDialog):
         # Browser
         self.browser_combo.setCurrentText(config.get("preferred_browser", "Chrome"))
         self.allow_browser_download_check.setChecked(config.get("allow_browser_download", False))
+    
+    def _on_backup_auto_delete_changed(self, state):
+        """Handle Characters backup auto-delete checkbox state change"""
+        from PySide6.QtWidgets import QMessageBox
+        from PySide6.QtCore import Qt
+        
+        # If unchecked (user is disabling auto-delete), show warning
+        # state is 0 for unchecked, 2 for checked
+        if state == 0:  # Qt.CheckState.Unchecked
+            reply = QMessageBox.warning(
+                self,
+                lang.get("backup_auto_delete_warning_title", default="⚠️ Avertissement"),
+                lang.get("backup_auto_delete_warning_message", default=(
+                    "ATTENTION : Désactiver la suppression automatique peut entraîner :\n\n"
+                    "• Saturation de l'espace disque\n"
+                    "• Blocage des futures sauvegardes\n"
+                    "• Nécessité de gérer manuellement les anciens backups\n\n"
+                    "Voulez-vous vraiment désactiver cette protection ?"
+                )),
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No
+            )
+            
+            if reply == QMessageBox.No:
+                # User cancelled - recheck the checkbox
+                self.backup_auto_delete_check.blockSignals(True)
+                self.backup_auto_delete_check.setChecked(True)
+                self.backup_auto_delete_check.blockSignals(False)
+                return
+        
+        # Save immediately
+        self._save_backup_setting("backup_auto_delete_old", state == 2)
+    
+    def _on_cookies_auto_delete_changed(self, state):
+        """Handle Cookies backup auto-delete checkbox state change"""
+        from PySide6.QtWidgets import QMessageBox
+        from PySide6.QtCore import Qt
+        
+        # If unchecked (user is disabling auto-delete), show warning
+        # state is 0 for unchecked, 2 for checked
+        if state == 0:  # Qt.CheckState.Unchecked
+            reply = QMessageBox.warning(
+                self,
+                lang.get("backup_auto_delete_warning_title", default="⚠️ Avertissement"),
+                lang.get("backup_auto_delete_warning_message", default=(
+                    "ATTENTION : Désactiver la suppression automatique peut entraîner :\n\n"
+                    "• Saturation de l'espace disque\n"
+                    "• Blocage des futures sauvegardes\n"
+                    "• Nécessité de gérer manuellement les anciens backups\n\n"
+                    "Voulez-vous vraiment désactiver cette protection ?"
+                )),
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No
+            )
+            
+            if reply == QMessageBox.No:
+                # User cancelled - recheck the checkbox
+                self.cookies_backup_auto_delete_check.blockSignals(True)
+                self.cookies_backup_auto_delete_check.setChecked(True)
+                self.cookies_backup_auto_delete_check.blockSignals(False)
+                return
+        
+        # Save immediately
+        self._save_backup_setting("cookies_backup_auto_delete_old", state == 2)
+    
+    def _on_backup_limit_changed(self, text):
+        """Handle Characters backup storage limit change"""
+        try:
+            limit = int(text)
+            if limit == -1:
+                # Unlimited - uncheck auto-delete without warning
+                self.backup_auto_delete_check.blockSignals(True)
+                self.backup_auto_delete_check.setChecked(False)
+                self.backup_auto_delete_check.blockSignals(False)
+                # Save immediately
+                self._save_backup_setting("backup_auto_delete_old", False)
+        except ValueError:
+            pass  # Invalid input, ignore
+    
+    def _on_cookies_limit_changed(self, text):
+        """Handle Cookies backup storage limit change"""
+        try:
+            limit = int(text)
+            if limit == -1:
+                # Unlimited - uncheck auto-delete without warning
+                self.cookies_backup_auto_delete_check.blockSignals(True)
+                self.cookies_backup_auto_delete_check.setChecked(False)
+                self.cookies_backup_auto_delete_check.blockSignals(False)
+                # Save immediately
+                self._save_backup_setting("cookies_backup_auto_delete_old", False)
+        except ValueError:
+            pass  # Invalid input, ignore
+    
+    def _on_armor_auto_delete_changed(self, state):
+        """Handle Armor backup auto-delete checkbox state change"""
+        from PySide6.QtWidgets import QMessageBox
+        from PySide6.QtCore import Qt
+        
+        # If unchecked (user is disabling auto-delete), show warning
+        # state is 0 for unchecked, 2 for checked
+        if state == 0:  # Qt.CheckState.Unchecked
+            reply = QMessageBox.warning(
+                self,
+                lang.get("backup_auto_delete_warning_title", default="⚠️ Avertissement"),
+                lang.get("backup_auto_delete_warning_message", default=(
+                    "ATTENTION : Désactiver la suppression automatique peut entraîner :\n\n"
+                    "• Saturation de l'espace disque\n"
+                    "• Blocage des futures sauvegardes\n"
+                    "• Nécessité de gérer manuellement les anciens backups\n\n"
+                    "Voulez-vous vraiment désactiver cette protection ?"
+                )),
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No
+            )
+            
+            if reply == QMessageBox.No:
+                # User cancelled - recheck the checkbox
+                self.armor_backup_auto_delete_check.blockSignals(True)
+                self.armor_backup_auto_delete_check.setChecked(True)
+                self.armor_backup_auto_delete_check.blockSignals(False)
+                return
+        
+        # Save immediately
+        self._save_backup_setting("armor_backup_auto_delete_old", state == 2)
+    
+    def _on_armor_limit_changed(self, text):
+        """Handle Armor backup storage limit change"""
+        try:
+            limit = int(text)
+            if limit == -1:
+                # Unlimited - uncheck auto-delete without warning
+                self.armor_backup_auto_delete_check.blockSignals(True)
+                self.armor_backup_auto_delete_check.setChecked(False)
+                self.armor_backup_auto_delete_check.blockSignals(False)
+                # Save immediately
+                self._save_backup_setting("armor_backup_auto_delete_old", False)
+        except ValueError:
+            pass  # Invalid input, ignore
+    
+    def _save_backup_setting(self, key, value):
+        """Save a backup setting immediately to config"""
+        config.set(key, value)
+        config.save_config()
+    
+    def _browse_armor_backup_path(self):
+        """Browse for armor backup folder"""
+        folder = QFileDialog.getExistingDirectory(
+            self,
+            lang.get("backup_path_label", default="Dossier de sauvegarde")
+        )
+        if folder:
+            self.armor_backup_path_edit.setText(folder)
+            self.armor_backup_path_edit.setCursorPosition(0)
+    
+    def _open_armor_backup_folder(self):
+        """Open armor backup folder"""
+        import subprocess
+        armor_backup_path = self.armor_backup_path_edit.text()
+        if os.path.exists(armor_backup_path):
+            subprocess.Popen(f'explorer "{armor_backup_path}"')
+    
+    def _save_without_closing(self):
+        """Save settings without closing the dialog"""
+        # Trigger the accepted signal which will call save_configuration in main.py
+        self.accepted.emit()
+    
+    def _cancel_changes(self):
+        """Cancel changes and reload settings"""
+        reply = QMessageBox.question(
+            self,
+            lang.get("warning_title", default="Attention"),
+            lang.get("cancel_changes_confirm", default="Annuler les modifications non sauvegardées ?"),
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+        
+        if reply == QMessageBox.Yes:
+            self._load_settings()
+

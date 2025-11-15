@@ -733,6 +733,8 @@ class CharacterApp(QMainWindow):
             config.set("theme", new_theme)
             from Functions.theme_manager import apply_theme
             apply_theme(QApplication.instance(), new_theme)
+            # Réappliquer le style du tree_view avec les nouvelles couleurs
+            self.tree_manager.apply_tree_view_style()
         
         # Font Scale
         old_font_scale = config.get("font_scale", 1.0)

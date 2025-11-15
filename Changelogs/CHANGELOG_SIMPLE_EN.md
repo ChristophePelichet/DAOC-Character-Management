@@ -2,9 +2,22 @@
 
 ---
 
-# ✨ v0.108 - 11/15/2025
+# ✨ v0.108
 
-### ✨ Added
+### 🎉 New Features
+- 🎨 **Purple Theme (Dracula)**: New purple/pink theme with official Dracula palette
+- 📝 **FUTURE_IMPROVEMENTS.md File**: List of planned enhancements with checkboxes
+
+### 🧰 Improvements
+- 🎨 **Theme Switching**: Complete instant application without restart
+- 📋 **Columns**: Automatic width save in manual mode
+
+### 🐛 Bug Fixes
+- ✅ Menus and central display adapt correctly on Dark→Light switch
+- ✅ Menu bar correctly reset to system colors in Light theme
+- ✅ Column widths remembered between sessions in manual mode
+
+### ✨ Added (Previous Features)
 
 **GitHub Wiki Help System**
 - 📚 Migrated from in-app help to GitHub Wiki for better accessibility

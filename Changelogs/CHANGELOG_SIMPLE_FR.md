@@ -2,7 +2,20 @@
 
 # ✨ v0.108
 
-### ✨ Ajout
+### 🎉 Nouveautés
+- 🎨 **Thème Purple (Dracula)** : Nouveau thème violet/rose avec palette Dracula officielle
+- 📝 **Fichier FUTURE_IMPROVEMENTS.md** : Liste des améliorations planifiées avec cases à cocher
+
+### 🧰 Améliorations
+- 🎨 **Changement de Thème** : Application instantanée complète sans redémarrage
+- 📋 **Colonnes** : Sauvegarde automatique des largeurs en mode manuel
+
+### 🐛 Corrections
+- ✅ Menus et affichage central s'adaptent correctement lors du changement Dark→Light
+- ✅ Barre de menus réinitialisée aux couleurs système en thème Light
+- ✅ Largeurs de colonnes mémorisées entre les sessions en mode manuel
+
+### ✨ Ajout (Fonctionnalités Précédentes)
 
 **Support Multilingue des Dialogues de Progression**
 - 🌍 58 nouvelles traductions FR/EN/DE pour tous les dialogues de progression et messages d'import

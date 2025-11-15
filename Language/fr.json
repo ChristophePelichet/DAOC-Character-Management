@@ -62,6 +62,7 @@
     "config_font_scale_label": "Taille du texte",
     "theme_light": "Clair",
     "theme_dark": "Sombre",
+    "theme_purple": "Violet (Dracula)",
     "debug_font_size_menu": "Police",
     "font_size_small": "Petite",
     "font_size_medium": "Moyenne",

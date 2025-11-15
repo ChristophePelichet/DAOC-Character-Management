@@ -1,0 +1,23 @@
+{
+  "name": "theme_purple",
+  "style": "Fusion",
+  "palette": {
+    "Window": "#282A36",
+    "WindowText": "#F8F8F2",
+    "Base": "#1E1E1E",
+    "AlternateBase": "#2F3142",
+    "ToolTipBase": "#44475A",
+    "ToolTipText": "#F8F8F2",
+    "Text": "#F8F8F2",
+    "Button": "#44475A",
+    "ButtonText": "#F8F8F2",
+    "BrightText": "#FF79C6",
+    "Link": "#8BE9FD",
+    "Highlight": "#BD93F9",
+    "HighlightedText": "#FFFFFF",
+    "Disabled_WindowText": "#6272A4",
+    "Disabled_Text": "#6272A4",
+    "Disabled_ButtonText": "#6272A4"
+  },
+  "stylesheet": "QToolTip { color: #F8F8F2; background-color: #44475A; border: 1px solid #6272A4; } QMenuBar { background-color: #282A36; color: #F8F8F2; } QMenuBar::item { background-color: transparent; padding: 4px 8px; } QMenuBar::item:selected { background-color: #44475A; } QMenuBar::item:pressed { background-color: #BD93F9; color: #282A36; } QMenu { background-color: #44475A; color: #F8F8F2; border: 1px solid #6272A4; } QMenu::item { padding: 4px 24px 4px 8px; } QMenu::item:selected { background-color: #BD93F9; color: #282A36; } QMenu::separator { height: 1px; background-color: #6272A4; margin: 4px 0px; } QComboBox QAbstractItemView { background-color: #44475A; color: #F8F8F2; selection-background-color: #BD93F9; selection-color: #282A36; border: 1px solid #6272A4; }"
+}

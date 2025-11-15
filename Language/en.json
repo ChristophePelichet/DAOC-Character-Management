@@ -61,6 +61,7 @@
     "config_font_scale_label": "Text size",
     "theme_light": "Light",
     "theme_dark": "Dark",
+    "theme_purple": "Purple (Dracula)",
     "debug_font_size_menu": "Font",
     "font_size_small": "Small",
     "font_size_medium": "Medium",

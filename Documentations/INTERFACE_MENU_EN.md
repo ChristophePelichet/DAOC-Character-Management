@@ -33,8 +33,8 @@ The **Help** menu provides application information:
 2. Fill out the form:
    - **Name**: Character name
    - **Realm**: Albion, Hibernia or Midgard
-   - **Season**: S1, S2, S3, etc.
-   - **Server**: Eden, Blackthorn, etc.
+   - **Season**: S3 (current season)
+   - **Server**: Eden
 3. Click "OK" to create the character
 
 ### Configuring the Application

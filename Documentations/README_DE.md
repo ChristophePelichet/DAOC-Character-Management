@@ -37,8 +37,8 @@ Charakterverwaltungsanwendung für Dark Age of Camelot (DAOC), entwickelt in Pyt
 
 ### Organisation
 - 📁 Organisation nach **Reich** (Albion, Hibernia, Midgard)
-- 🏷️ Filter nach **Saison** (S1, S2, S3, usw.)
-- 🖥️ Multi-**Server** Verwaltung (Eden, Blackthorn, usw.)
+- 🏷️ Filter nach **Saison** (S3 - aktuelle Saison)
+- 🖥️ **Server**: Eden
 - 📊 Tabelle mit sortierbaren Spalten
 
 ### Reichsränge
@@ -144,20 +144,12 @@ DAOC---Gestion-des-personnages/
 │   ├── .gitignore                       # Von Git ausgeschlossene Dateien
 │   └── .gitattributes                   # Git-Konfiguration
 │
-├── 📁 Characters/                       # ⭐ Charakterdaten (Season/Realm-Struktur v0.104)
-│   ├── S1/                              # Saison 1
-│   │   ├── Albion/                      # Albion S1-Charaktere
+├── 📁 Characters/                       # ⭐ Charakterdaten (Saison/Reich-Struktur v0.104)
+│   ├── S3/                              # Aktuelle Saison
+│   │   ├── Albion/                      # Albion-Charaktere
 │   │   │   └── *.json                   # Charakterdateien
-│   │   ├── Hibernia/                    # Hibernia S1-Charaktere
-│   │   └── Midgard/                     # Midgard S1-Charaktere
-│   ├── S2/                              # Saison 2
-│   │   ├── Albion/
-│   │   ├── Hibernia/
-│   │   └── Midgard/
-│   ├── S3/                              # Saison 3
-│   │   ├── Albion/
-│   │   ├── Hibernia/
-│   │   └── Midgard/
+│   │   ├── Hibernia/                    # Hibernia-Charaktere
+│   │   └── Midgard/                     # Midgard-Charaktere
 │   └── .migration_done                  # Migrations-Markierung
 │
 ├── 📁 Backup/                           # Automatische Sicherungen
@@ -308,8 +300,8 @@ Die Konfiguration ist über das Menü **Datei > Einstellungen** zugänglich.
 - 📁 **Verzeichnisse**: Charaktere, Konfiguration, Logs
 - 🌍 **Sprache**: Français, English, Deutsch
 - 🎨 **Thema**: Hell / Dunkel
-- 🖥️ **Standard-Server**: Eden, Blackthorn, usw.
-- 📅 **Standard-Saison**: S1, S2, S3, usw.
+- 🖥️ **Standard-Server**: Eden
+- 📅 **Standard-Saison**: S3
 - 🐛 **Debug-Modus**: Detaillierte Logs aktivieren/deaktivieren
 
 ## 🔄 Strukturmigration
@@ -319,8 +311,8 @@ Die Konfiguration ist über das Menü **Datei > Einstellungen** zugänglich.
 ### Aktuelle Struktur (v0.104+)
 ```
 Characters/
-└── Season/              # S1, S2, S3, usw.
-    └── Realm/           # Albion, Hibernia, Midgard
+└── S3/                  # Aktuelle Saison
+    └── Reich/           # Albion, Hibernia, Midgard
         └── Character.json
 ```
 

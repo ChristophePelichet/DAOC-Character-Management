@@ -162,8 +162,8 @@ def main():
     
     # Retrieve the royaumes, serveurs and saisons
     realms = data_manager.get_realms()
-    servers = config.get("servers", ["Eden", "Blackthorn"])
-    seasons = config.get("seasons", ["S1", "S2", "S3"])
+    servers = config.get("servers", ["Eden"])
+    seasons = config.get("seasons", ["S3"])
     
     print(f"   Royaumes: {', '.join(realms)}")
     print(f"   Serveurs: {', '.join(servers)}")

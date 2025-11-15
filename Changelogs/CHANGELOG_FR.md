@@ -6,6 +6,14 @@ Historique complet des versions du gestionnaire de personnages pour Dark Age of 
 
 # ✨✨ v0.108
 
+### 🧹 Nettoyage
+- 🗑️ **Suppression des Références Obsolètes** : Nettoyage complet du code et de la documentation
+  - Suppression des références aux saisons S1 et S2 (saisons terminées sur Eden)
+  - Suppression des références au serveur Blackthorn (non compatible avec le programme)
+  - Mise à jour de toutes les valeurs par défaut : S3 (saison actuelle) et Eden (serveur unique)
+  - Simplification de la configuration : seasons = ["S3"], servers = ["Eden"]
+  - Code et documentation alignés sur l'état actuel du jeu
+
 ### 🎉 Ajout
 - 🎨 **Nouveau Thème Purple (Dracula)** : Thème inspiré de Dracula avec palette violet/rose
   - Couleurs de fond : #282A36 (fond sombre violet-gris)

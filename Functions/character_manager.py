@@ -75,15 +75,15 @@ def save_character(character_data, allow_overwrite=False):
 
     character_name = character_data.get('name')
     character_realm = character_data.get('realm')
-    character_season = character_data.get('season', 'S1')  # Default to S1 if not specified
+    character_season = character_data.get('season', 'S3')  # Default to S3 if not specified
 
     if not character_name:
         return False, "Character data must contain a 'name'."
     if not character_realm or character_realm not in REALMS:
         return False, f"Invalid or missing realm for character '{character_name}'."
     if not character_season:
-        character_season = 'S1'
-        logging.warning(f"Character '{character_name}' has no season, defaulting to S1")
+        character_season = 'S3'
+        logging.warning(f"Character '{character_name}' has no season, defaulting to S3")
 
     # Create the season/realm-specific directory
     season_dir = os.path.join(base_char_dir, character_season)
@@ -273,7 +273,7 @@ def move_character_to_realm(character_data, old_realm, new_realm):
         return False, f"Invalid realm: {new_realm}"
     
     character_name = character_data.get('name')
-    character_season = character_data.get('season', 'S1')
+    character_season = character_data.get('season', 'S3')
     if not character_name:
         return False, "Character name not found in data."
     

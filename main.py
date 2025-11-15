@@ -640,34 +640,32 @@ class CharacterApp(QMainWindow):
         self.eden_debug_window.activateWindow()
     
     def show_help_create_character(self):
-        """Affiche l'aide pour créer un nouveau personnage"""
-        from Functions.help_manager import HelpManager
+        """Ouvre la documentation Wiki pour créer un personnage"""
+        import webbrowser
         from Functions.config_manager import config
         
-        # Create the Manager d'aide with the langue actuelle
-        current_lang = config.get("language", "fr")
-        help_manager = HelpManager(language=current_lang)
-        
-        # Afficher l'aide
-        help_manager.show_help('character_create', parent=self)
+        # Déterminer la langue pour le lien Wiki
+        current_lang = config.get("language", "fr").upper()
+        wiki_url = f"https://github.com/ChristophePelichet/DAOC-Character-Management/wiki/{current_lang}-Create-Character"
+        webbrowser.open(wiki_url)
     
     def show_help_edit_character(self):
-        """Affiche l'aide pour modifier un personnage"""
-        from Functions.help_manager import HelpManager
+        """Ouvre la documentation Wiki pour modifier un personnage"""
+        import webbrowser
         from Functions.config_manager import config
         
-        current_lang = config.get("language", "fr")
-        help_manager = HelpManager(language=current_lang)
-        help_manager.show_help('character_edit', parent=self)
+        current_lang = config.get("language", "fr").upper()
+        wiki_url = f"https://github.com/ChristophePelichet/DAOC-Character-Management/wiki/{current_lang}-Edit-Character"
+        webbrowser.open(wiki_url)
     
     def show_help_delete_character(self):
-        """Affiche l'aide pour supprimer un personnage"""
-        from Functions.help_manager import HelpManager
+        """Ouvre la documentation Wiki pour supprimer un personnage"""
+        import webbrowser
         from Functions.config_manager import config
         
-        current_lang = config.get("language", "fr")
-        help_manager = HelpManager(language=current_lang)
-        help_manager.show_help('character_delete', parent=self)
+        current_lang = config.get("language", "fr").upper()
+        wiki_url = f"https://github.com/ChristophePelichet/DAOC-Character-Management/wiki/{current_lang}-Delete-Character"
+        webbrowser.open(wiki_url)
             
     def open_configuration(self):
         """Ouvre la fenêtre de configuration"""

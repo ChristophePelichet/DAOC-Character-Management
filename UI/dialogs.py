@@ -2338,8 +2338,7 @@ class NewCharacterDialog(QDialog):
     
     def _on_season_changed(self, new_season):
         logging.debug(f"New character dialog: Season changed to '{new_season}'")
-
-
+    
 class ConfigurationDialog(QDialog):
     """Configuration window for the application."""
     

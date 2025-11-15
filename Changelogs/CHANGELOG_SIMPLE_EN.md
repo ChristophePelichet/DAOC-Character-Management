@@ -58,6 +58,11 @@
 
 ### 🐛 Fixed
 
+**Column Widths Not Remembered**
+- 🛡️ Manually resized columns lost on application restart
+- 🔧 Automatic width saving in config.json
+- 🎯 Persistent column configuration between sessions
+
 **Message Formatting Error**
 - 🛡️ Fixed "Index out of range" crash when displaying messages
 - 🔧 Migrated to named parameters ({char_name}, {count}, {error})

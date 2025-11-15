@@ -8,6 +8,18 @@ Complete version history of the character manager for Dark Age of Camelot (Eden)
 
 ### 🐛 Fix
 
+**Column Widths Not Saved in Manual Resize Mode**
+- 🛡️ **Problem**: In manual resize mode (unlocked columns), custom column widths were not saved, forcing users to resize all columns after each application restart
+- 🔧 **Root Cause**: The system only saved `tree_view_header_state` (order and general state), but not individual widths. In manual mode, `apply_column_resize_mode()` reset everything to `Interactive` mode without restoring previous widths
+- 🔧 **Solution Implemented**:
+  - New `column_widths` parameter in `config.json`: dictionary `{"0": 60, "1": 80, ...}` storing each column's width
+  - Modified `save_header_state()`: automatic saving of widths for all 12 visible columns
+  - Modified `apply_column_resize_mode()` in manual mode: restores saved widths via `setColumnWidth()`, applies default widths if none saved
+  - Automatic save before mode change in settings (preserves current configuration)
+  - Automatic save on application close (`closeEvent`)
+- 📝 Files modified: `Functions/tree_manager.py` (save_header_state, apply_column_resize_mode), `main.py` (save before mode change)
+- 🎯 Impact: Custom column widths are now remembered between sessions. Users only need to configure columns once
+
 **Window Freeze After Herald Update**
 - 🛡️ **Problem**: Character sheet window (CharacterSheetWindow) froze after closing "No update" dialog, preventing any interaction for several seconds
 - 🔧 **Root Cause**: Herald update thread (`char_update_thread`) continued running in background after displaying dialogs (error/success/no changes), blocking the interface

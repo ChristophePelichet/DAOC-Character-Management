@@ -322,6 +322,23 @@ class TreeManager:
         
         if manual_mode:
             header.setSectionResizeMode(QHeaderView.Interactive)
+            
+            # Restaurer les largeurs sauvegardées
+            saved_widths = config.get("column_widths", {})
+            if saved_widths:
+                for col_index, width in saved_widths.items():
+                    try:
+                        self.tree_view.setColumnWidth(int(col_index), width)
+                    except Exception as e:
+                        logging.warning(f"Could not restore width for column {col_index}: {e}")
+                logging.debug(f"Column widths restored: {len(saved_widths)} columns")
+            else:
+                # Appliquer des largeurs par défaut si aucune sauvegarde
+                default_widths = {0: 60, 1: 80, 2: 150, 3: 120, 4: 60, 5: 80, 6: 150, 7: 120, 8: 60, 9: 100, 10: 100, 11: 120}
+                for col_index, width in default_widths.items():
+                    self.tree_view.setColumnWidth(col_index, width)
+                logging.debug("Default column widths applied")
+            
             logging.debug("Column resize mode: Manual")
         else:
             for i in range(12):  # 12 colonnes : Selection(0), Realm(1), Name(2), Class(3), Level(4), Rank(5), Title(6), Guild(7), Page(8), Server(9), Race(10), URL(11)
@@ -339,7 +356,16 @@ class TreeManager:
         header_state = self.tree_view.header().saveState()
         header_state_b64 = header_state.toBase64().data().decode('ascii')
         config.set("tree_view_header_state", header_state_b64)
-        logging.debug("Header state saved")
+        
+        # Sauvegarder aussi les largeurs individuelles des colonnes
+        column_widths = {}
+        for i in range(12):  # 12 colonnes
+            width = self.tree_view.columnWidth(i)
+            if width > 0:  # Ne sauvegarder que les colonnes visibles
+                column_widths[str(i)] = width
+        config.set("column_widths", column_widths)
+        
+        logging.debug(f"Header state saved (widths: {len(column_widths)} columns)")
         
     def get_checked_character_ids(self):
         """Retourne la liste des IDs des personnages cochés"""

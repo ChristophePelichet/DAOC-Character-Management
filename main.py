@@ -717,6 +717,8 @@ class CharacterApp(QMainWindow):
         old_manual_resize = config.get("manual_column_resize", True)
         config.set("manual_column_resize", new_manual_resize)
         if new_manual_resize != old_manual_resize:
+            # Sauvegarder l'état actuel avant de changer de mode
+            self.tree_manager.save_header_state()
             self.tree_manager.apply_column_resize_mode(new_manual_resize)
         
         # Navigateur and téléchargement

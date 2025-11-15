@@ -4644,8 +4644,8 @@ class HeraldSearchDialog(QDialog):
     
     def accept(self):
         """Appelé quand on ferme avec le bouton Fermer"""
-        self._stop_search_thread_async()
-        self._cleanup_temp_files()
+        # Cleanup asynchrone pour éviter la latence à la fermeture
+        QTimer.singleShot(0, self._async_full_cleanup)
         super().accept()
     
     def _stop_search_thread(self):

@@ -410,7 +410,7 @@ def run_migration_if_needed():
     # Check if migration is needed
     if not check_migration_needed():
         log_with_action(logger, "info", "No migration needed - structure is already correct", action="MIGRATION_NOT_NEEDED")
-        mark_migration_done()
+        # Don't create flag file - only create it when migration is actually performed
         return False, True, "No migration needed"
     
     # Migration is needed - return this info so UI can show confirmation dialog

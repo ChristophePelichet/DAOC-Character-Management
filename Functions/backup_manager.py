@@ -24,7 +24,7 @@ class BackupManager:
         self.logger = get_logger(LOGGER_BACKUP)
         self.backup_dir = self._get_backup_dir()
         self.last_backup_date = None
-        self._ensure_backup_dir()
+        # Don't create backup directory on init - will be created on first actual backup
         
         init_msg = f"BackupManager initialized - Backup directory: {self.backup_dir}"
         log_with_action(self.logger, "info", init_msg, action="INIT")
@@ -179,9 +179,6 @@ class BackupManager:
             dict: Status with keys 'success' (bool), 'message' (str), 'file' (str or None)
         """
         try:
-            # Ensure backup directory exists
-            self._ensure_backup_dir()
-
             # Get configuration
             should_compress = self.config_manager.get("backup_compress", True)
             
@@ -198,6 +195,9 @@ class BackupManager:
                     "message": "No characters to backup (add characters first)",
                     "file": None
                 }
+            
+            # Only create backup directory if we have something to backup
+            self._ensure_backup_dir()
 
             # Create backup filename with timestamp, reason and character name
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -335,9 +335,6 @@ class BackupManager:
             dict: Status with keys 'success' (bool), 'message' (str), 'file' (str or None)
         """
         try:
-            # Ensure backup directory exists
-            self._ensure_cookies_backup_dir()
-
             # Get configuration
             should_compress = self.config_manager.get("cookies_backup_compress", True)
             
@@ -354,6 +351,20 @@ class BackupManager:
                     "message": "Cookies folder not found",
                     "file": None
                 }
+            
+            # Check if there's actually a cookies file to backup
+            cookies_file = os.path.join(cookies_folder, "eden_cookies.pkl")
+            if not os.path.exists(cookies_file):
+                info_msg = "No cookies file to backup yet"
+                log_with_action(self.logger, "info", info_msg, action="COOKIES_INFO")
+                return {
+                    "success": False,
+                    "message": "No cookies configured yet",
+                    "file": None
+                }
+            
+            # Only create backup directory if we have something to backup
+            self._ensure_cookies_backup_dir()
 
             # Create backup filename with timestamp and reason
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -402,8 +413,14 @@ class BackupManager:
         
         log_with_action(self.logger, "debug", f"Found {len(backups)} existing cookies backups", action="RETENTION_COOKIES")
         
+        # Check if auto-delete is enabled for cookies
+        auto_delete = self.config_manager.get("cookies_backup_auto_delete_old", True)
+        if not auto_delete:
+            log_with_action(self.logger, "debug", "Cookies auto-delete disabled - skipping retention policy", action="RETENTION_COOKIES")
+            return
+        
         # Apply size retention (size limit only, no count limit)
-        size_limit_mb = self.config_manager.get("cookies_backup_size_limit_mb", 10)
+        size_limit_mb = self.config_manager.get("cookies_backup_size_limit_mb", 20)
         if size_limit_mb > 0:
             total_size = sum(self._get_file_size(b) for b in backups)
             size_limit_bytes = size_limit_mb * 1024 * 1024
@@ -464,6 +481,12 @@ class BackupManager:
         backups = self._get_sorted_backups()
         
         log_with_action(self.logger, "debug", f"Found {len(backups)} existing backups", action="RETENTION")
+        
+        # Check if auto-delete is enabled
+        auto_delete = self.config_manager.get("backup_auto_delete_old", True)
+        if not auto_delete:
+            log_with_action(self.logger, "debug", "Auto-delete disabled - skipping retention policy", action="RETENTION")
+            return
         
         # Apply size retention (size limit only, no count limit)
         size_limit_mb = self.config_manager.get("backup_size_limit_mb", 20)
@@ -577,7 +600,7 @@ class BackupManager:
         cookies_backup_dir = self._get_cookies_backup_dir()
         backups = self._get_sorted_backups_in_dir(cookies_backup_dir)
         total_size = sum(self._get_file_size(b) for b in backups)
-        size_limit_mb = self.config_manager.get("cookies_backup_size_limit_mb", 10)
+        size_limit_mb = self.config_manager.get("cookies_backup_size_limit_mb", 20)
 
         backup_list = []
         for backup_path in backups[:10]:  # Show last 10
@@ -599,6 +622,156 @@ class BackupManager:
             "current_usage_mb": round(total_size / (1024 * 1024), 2),
             "backups": backup_list
         }
+
+    def get_armor_backup_info(self):
+        """
+        Get information about current armor backup configuration and usage.
+        
+        Returns:
+            dict: Contains path, compress, size_limit, current_usage, backups list
+        """
+        log_with_action(self.logger, "debug", "Gathering armor backup information", action="INFO_ARMOR")
+        armor_backup_dir = self._get_armor_backup_dir()
+        backups = self._get_sorted_backups_in_dir(armor_backup_dir)
+        total_size = sum(self._get_file_size(b) for b in backups)
+        size_limit_mb = self.config_manager.get("armor_backup_size_limit_mb", 20)
+
+        backup_list = []
+        for backup_path in backups[:10]:  # Show last 10
+            size = self._get_file_size(backup_path)
+            mtime = os.path.getmtime(backup_path)
+            mtime_str = datetime.fromtimestamp(mtime).strftime("%Y-%m-%d %H:%M:%S")
+            backup_list.append({
+                "name": os.path.basename(backup_path),
+                "size_mb": round(size / (1024 * 1024), 2),
+                "date": mtime_str
+            })
+
+        log_with_action(self.logger, "debug", f"Armor backup info: {len(backup_list)} backups, {total_size / (1024*1024):.2f} MB total", action="INFO_ARMOR")
+        
+        return {
+            "path": armor_backup_dir,
+            "compress": self.config_manager.get("armor_backup_compress", True),
+            "size_limit_mb": size_limit_mb,
+            "current_usage_mb": round(total_size / (1024 * 1024), 2),
+            "backups": backup_list
+        }
+
+    def _get_armor_backup_dir(self):
+        """Get the armor backup directory path."""
+        armor_backup_path = self.config_manager.get("armor_backup_path")
+        if not armor_backup_path:
+            from Functions.path_manager import get_base_path
+            armor_backup_path = os.path.join(get_base_path(), "Backup", "Armor")
+        return armor_backup_path
+
+    def backup_armor_force(self):
+        """Force armor data backup (manual trigger)."""
+        if not self.config_manager.get("armor_backup_enabled", True):
+            log_with_action(self.logger, "debug", "Armor backup is disabled", action="BACKUP_ARMOR")
+            return False
+        
+        result = self._create_armor_backup()
+        if result:
+            self._apply_armor_retention_policies()
+        return result
+
+    def _create_armor_backup(self):
+        """Create a backup of armor data."""
+        try:
+            log_with_action(self.logger, "info", "Creating armor data backup", action="BACKUP_ARMOR")
+            
+            from Functions.path_manager import get_base_path
+            armor_data_path = os.path.join(get_base_path(), "Data", "armor_resists.json")
+            
+            if not os.path.exists(armor_data_path):
+                log_with_action(self.logger, "warning", "Armor data file not found", action="BACKUP_ARMOR")
+                return False
+            
+            armor_backup_dir = self._get_armor_backup_dir()
+            os.makedirs(armor_backup_dir, exist_ok=True)
+            
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            compress = self.config_manager.get("armor_backup_compress", True)
+            
+            if compress:
+                backup_name = f"backup_armor_{timestamp}.zip"
+                backup_path = os.path.join(armor_backup_dir, backup_name)
+                
+                with zipfile.ZipFile(backup_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                    zipf.write(armor_data_path, "armor_resists.json")
+                
+                size = os.path.getsize(backup_path) / (1024 * 1024)
+                log_with_action(self.logger, "info", 
+                    f"Armor backup created (ZIP): {backup_name} ({size:.2f} MB)", 
+                    action="BACKUP_ARMOR")
+            else:
+                backup_name = f"backup_armor_{timestamp}"
+                backup_path = os.path.join(armor_backup_dir, backup_name)
+                os.makedirs(backup_path, exist_ok=True)
+                
+                shutil.copy2(armor_data_path, os.path.join(backup_path, "armor_resists.json"))
+                
+                size = os.path.getsize(os.path.join(backup_path, "armor_resists.json")) / (1024 * 1024)
+                log_with_action(self.logger, "info", 
+                    f"Armor backup created (folder): {backup_name} ({size:.2f} MB)", 
+                    action="BACKUP_ARMOR")
+            
+            self.config_manager.set("armor_backup_last_date", datetime.now().isoformat())
+            return True
+            
+        except Exception as e:
+            log_with_action(self.logger, "error", f"Failed to create armor backup: {e}", action="BACKUP_ARMOR")
+            return False
+
+    def _apply_armor_retention_policies(self):
+        """Apply retention policy for armor backups based on storage size limit only."""
+        armor_backup_dir = self._get_armor_backup_dir()
+        backups = self._get_sorted_backups_in_dir(armor_backup_dir)
+        
+        log_with_action(self.logger, "debug", 
+            f"Found {len(backups)} existing armor backups", 
+            action="RETENTION_ARMOR")
+        
+        # Check if auto-delete enabled
+        auto_delete = self.config_manager.get("armor_backup_auto_delete_old", True)
+        if not auto_delete:
+            log_with_action(self.logger, "debug", 
+                "Armor auto-delete disabled - skipping retention policy", 
+                action="RETENTION_ARMOR")
+            return
+        
+        # Apply size retention
+        size_limit_mb = self.config_manager.get("armor_backup_size_limit_mb", 20)
+        if size_limit_mb <= 0:
+            log_with_action(self.logger, "debug", 
+                "Unlimited armor storage mode - skipping retention", 
+                action="RETENTION_ARMOR")
+            return
+        
+        total_size_mb = sum(self._get_file_size(b) for b in backups) / (1024 * 1024)
+        log_with_action(self.logger, "debug", 
+            f"Total armor backup size: {total_size_mb:.2f} MB (limit: {size_limit_mb} MB)", 
+            action="RETENTION_ARMOR")
+        
+        while total_size_mb > size_limit_mb and backups:
+            oldest_backup = backups.pop(0)
+            backup_size_mb = self._get_file_size(oldest_backup) / (1024 * 1024)
+            
+            if os.path.isfile(oldest_backup):
+                os.remove(oldest_backup)
+            else:
+                shutil.rmtree(oldest_backup)
+            
+            log_with_action(self.logger, "info", 
+                f"Deleted old armor backup: {os.path.basename(oldest_backup)} ({backup_size_mb:.2f} MB)", 
+                action="RETENTION_ARMOR")
+            
+            total_size_mb = sum(self._get_file_size(b) for b in backups) / (1024 * 1024)
+        
+        log_with_action(self.logger, "debug", 
+            f"Armor retention complete. Total size: {total_size_mb:.2f} MB", 
+            action="RETENTION_ARMOR")
 
     def restore_backup(self, backup_path, restore_to=None):
         """

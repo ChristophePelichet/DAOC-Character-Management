@@ -28,6 +28,7 @@ from Functions.language_manager import lang, get_available_languages
 from Functions.logging_manager import setup_logging, get_log_dir
 from Functions.path_manager import get_base_path, get_resource_path
 from Functions.data_manager import DataManager
+from Functions.backup_manager import BackupManager
 
 # Import des managers UI
 from Functions.ui_manager import UIManager
@@ -93,7 +94,6 @@ class CharacterApp(QMainWindow):
         self.available_languages = get_available_languages()
         
         # Initialisation du BackupManager
-        from Functions.backup_manager import BackupManager
         self.backup_manager = BackupManager(config)
         
         # Perform startup backup for Characters (once per day)
@@ -686,10 +686,10 @@ class CharacterApp(QMainWindow):
         # Show non-modal (don't block)
         dialog.show()
         
-        # Connect accepted signal to save
-        dialog.accepted.connect(lambda: self.save_configuration(dialog))
+        # Connect accepted signal to save (but don't close dialog)
+        dialog.accepted.connect(lambda: self.save_configuration(dialog, close_dialog=False))
             
-    def save_configuration(self, dialog):
+    def save_configuration(self, dialog, close_dialog=True):
         """Sauvegarde la configuration"""
         old_debug_mode = config.get("debug_mode", False)
         new_debug_mode = dialog.debug_mode_check.isChecked()
@@ -748,8 +748,25 @@ class CharacterApp(QMainWindow):
                 config.set("backup_size_limit_mb", size_limit)
             except ValueError:
                 pass  # Keep existing value if invalid
+            config.set("backup_auto_delete_old", dialog.backup_auto_delete_check.isChecked())
             config.set("cookies_backup_enabled", dialog.cookies_backup_enabled_check.isChecked())
             config.set("cookies_backup_path", dialog.cookies_backup_path_edit.text())
+            config.set("cookies_backup_compress", dialog.cookies_backup_compress_check.isChecked())
+            try:
+                cookies_size_limit = int(dialog.cookies_backup_size_limit_edit.text())
+                config.set("cookies_backup_size_limit_mb", cookies_size_limit)
+            except ValueError:
+                pass  # Keep existing value if invalid
+            config.set("cookies_backup_auto_delete_old", dialog.cookies_backup_auto_delete_check.isChecked())
+            config.set("armor_backup_enabled", dialog.armor_backup_enabled_check.isChecked())
+            config.set("armor_backup_path", dialog.armor_backup_path_edit.text())
+            config.set("armor_backup_compress", dialog.armor_backup_compress_check.isChecked())
+            try:
+                armor_size_limit = int(dialog.armor_backup_size_limit_edit.text())
+                config.set("armor_backup_size_limit_mb", armor_size_limit)
+            except ValueError:
+                pass  # Keep existing value if invalid
+            config.set("armor_backup_auto_delete_old", dialog.armor_backup_auto_delete_check.isChecked())
         
         # Theme
         old_theme = config.get("theme", "default")
@@ -782,6 +799,12 @@ class CharacterApp(QMainWindow):
         language_changed = new_lang_code and new_lang_code != config.get("language")
         if language_changed:
             config.set("language", new_lang_code)
+        
+        # Save all configuration changes to disk
+        config.save_config()
+        
+        # Reinitialize backup manager to use new paths
+        self.backup_manager = BackupManager(config)
             
         setup_logging()
         

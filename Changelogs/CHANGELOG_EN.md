@@ -7,6 +7,13 @@ Complete version history of the character manager for Dark Age of Camelot (Eden)
 # ✨✨ v0.108
 
 ### 🎉 Added
+- 📚 **Wiki Help Pages**: Complete documentation for Settings and Backup
+  - FR-Settings.md page: Complete settings guide (5 detailed tabs)
+  - FR-Backup.md page: Comprehensive backup system documentation
+  - Navigation between pages with GitHub Wiki links
+  - Table of contents, practical examples, FAQ, troubleshooting
+  - Compatible with integrated help system (F1 key)
+  - FR versions ready, EN/DE translations coming soon
 - ⌨️ **Keyboard Shortcuts for Main Actions**: Quick access to common features
   - **Ctrl+N**: Create new character manually (shortcut displayed in File menu)
   - **Ctrl+F**: Search character on Eden Herald with smart validation
@@ -14,6 +21,19 @@ Complete version history of the character manager for Dark Age of Camelot (Eden)
   - Waiting window with 500ms checks (15 seconds timeout)
   - Contextual error messages if Herald connection unavailable
   - 🌍 Complete FR/EN/DE translations (7 new keys)
+
+### 🐛 Bug Fix
+- 🛡️ **.migration_done File Not Recreated**: Prevention of automatic flag file creation
+  - 🔧 Removed `mark_migration_done()` call during startup check
+  - 🎯 File only created when migration is actually performed successfully
+  - Prevents file recreation when changing Characters folder or manual deletion
+  - File: `Functions/migration_manager.py`
+- ⚡ **Herald Search Close Button Latency**: Instant window closure
+  - 🔧 Modified `accept()` to use asynchronous cleanup via QTimer
+  - 🎯 Removed 100ms+ UI blocking caused by `thread.wait(100)`
+  - Thread and temporary files cleanup after window closure
+  - Consistent with pattern already used in `closeEvent()`
+  - File: `UI/dialogs.py` (HeraldSearchDialog class)
 
 ### 🧹 Cleanup
 - 🗑️ **Removed Obsolete References**: Complete cleanup of code and documentation

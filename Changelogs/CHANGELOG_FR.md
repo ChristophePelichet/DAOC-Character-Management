@@ -7,6 +7,13 @@ Historique complet des versions du gestionnaire de personnages pour Dark Age of 
 # ✨✨ v0.108
 
 ### 🎉 Ajout
+- 📚 **Pages d'Aide Wiki** : Documentation complète pour Settings et Backup
+  - Page FR-Settings.md : Guide complet des paramètres (5 onglets détaillés)
+  - Page FR-Backup.md : Documentation exhaustive du système de sauvegarde
+  - Navigation entre pages avec liens Wiki GitHub
+  - Tables des matières, exemples pratiques, FAQ, résolution de problèmes
+  - Compatible avec le système d'aide intégré (touche F1)
+  - Versions FR prêtes, traductions EN/DE à venir
 - ⌨️ **Raccourcis Clavier pour Actions Principales** : Accès rapide aux fonctionnalités courantes
   - **Ctrl+N** : Créer un nouveau personnage manuellement (affichage du raccourci dans le menu Fichier)
   - **Ctrl+F** : Rechercher un personnage sur le Herald Eden avec validation intelligente
@@ -14,6 +21,19 @@ Historique complet des versions du gestionnaire de personnages pour Dark Age of 
   - Fenêtre d'attente avec vérification toutes les 500ms (timeout 15 secondes)
   - Messages d'erreur contextuels si connexion Herald indisponible
   - 🌍 Traductions complètes FR/EN/DE (7 nouvelles clés)
+
+### 🐛 Correction
+- 🛡️ **Fichier .migration_done Non Recréé** : Prévention de la création automatique du fichier flag
+  - 🔧 Suppression de l'appel `mark_migration_done()` lors de la vérification au démarrage
+  - 🎯 Le fichier n'est créé que lors d'une migration réellement effectuée avec succès
+  - Évite la recréation du fichier lors du changement de dossier Characters ou suppression manuelle
+  - Fichier : `Functions/migration_manager.py`
+- ⚡ **Latence Bouton Fermer Recherche Herald** : Fermeture instantanée de la fenêtre
+  - 🔧 Modification de `accept()` pour utiliser cleanup asynchrone via QTimer
+  - 🎯 Suppression du blocage UI de 100ms+ causé par `thread.wait(100)`
+  - Cleanup des threads et fichiers temporaires après fermeture de la fenêtre
+  - Cohérence avec le pattern déjà utilisé dans `closeEvent()`
+  - Fichier : `UI/dialogs.py` (classe HeraldSearchDialog)
 
 ### 🧹 Nettoyage
 - 🗑️ **Suppression des Références Obsolètes** : Nettoyage complet du code et de la documentation

@@ -1,6 +1,6 @@
 # Folder Move System - Technical Documentation
 
-**Version**: 2.0  
+**Version**: 2.1  
 **Last Updated**: 2025-11-15  
 **Status**: ✅ Production Ready
 
@@ -16,10 +16,14 @@ The **Folder Move System** allows users to physically relocate application data 
 
 ---
 
-## Key Features (v2.0)
+## Key Features (v2.1)
 
 ✅ **Fixed Folder Names** - No user input for folder names (predefined by application)  
 ✅ **Backup Special Handling** - Automatic `/Backups/` intermediate folder for backup paths  
+✅ **Merge Support** - Ability to merge files when destination folder already exists  
+✅ **Auto-Cleanup** - Automatic deletion of empty source folders after merge  
+✅ **Parent Folder Cleanup** - Removes empty Backup parent folder when last subfolder deleted  
+✅ **Immediate Reload** - Character list, logging system, and paths updated without restart  
 ✅ **Open Folder Buttons** - Quick access to all folders via 📂 button  
 ✅ **Consistent UI** - Same design pattern for all folder configurations  
 ✅ **Multi-language** - FR/EN/DE support with standardized translations
@@ -203,7 +207,7 @@ def _move_folder(self, line_edit, config_key, folder_label):
 
 ## Operation Modes
 
-### **Mode 1: MOVE (Source Exists)**
+### **Mode 1: MOVE with MERGE Support (Source Exists)**
 
 **Trigger**: Source folder exists on disk  
 **Flow**:
@@ -212,31 +216,84 @@ def _move_folder(self, line_edit, config_key, folder_label):
 1. Get current path from line_edit
 2. Verify source exists → YES: MOVE MODE
 3. Select destination parent folder
-4. Ask for folder name (pre-filled with current name)
-5. Build destination path = parent + name
-6. Check if destination exists
-   ├─ YES: Show error, abort
-   └─ NO: Continue
-7. Confirm move with source/dest display
+4. Build destination path with FIXED folder name
+5. Check if destination exists
+   ├─ YES + Source exists: MERGE MODE
+   │   ├─ Ask: "Do you want to merge files?"
+   │   ├─ User says NO: Show "Operation cancelled", abort
+   │   └─ User says YES: Continue to merge
+   ├─ YES + Source missing: USE EXISTING MODE
+   │   └─ Update config to use existing destination
+   └─ NO: Continue with normal move
+6. Confirm move with source/dest display
    ├─ User cancels: abort
    └─ User confirms: continue
-8. Show progress dialog
-9. Copy folder: shutil.copytree(source, dest)
-10. Update line_edit.setText(dest)
-11. Ask: Delete old folder?
-    ├─ YES: shutil.rmtree(source)
-    │       Show "Moved successfully"
-    └─ NO:  Show "Copied successfully, old folder kept"
+7. Show progress dialog (indeterminate)
+8. Copy folder: shutil.copytree(source, dest, dirs_exist_ok=True)
+   - dirs_exist_ok=True allows merging into existing destination
+   - Existing files are overwritten
+   - New files are added
+9. Update line_edit.setText(dest)
+10. Save config immediately: config.set(config_key, dest)
+11. Reinitialize BackupManager with new paths
+12. Reload affected systems:
+    ├─ character_folder changed: refresh_character_list()
+    └─ log_folder changed: setup_logging()
+13. Check if source folder is empty after copy
+    ├─ Empty: Auto-delete source + cleanup parent Backup folder
+    └─ Not empty: Ask user to delete
+14. If user deletes old folder:
+    ├─ shutil.rmtree(source)
+    ├─ Check parent folder (if named "Backup")
+    │   └─ If no remaining subfolders: shutil.rmtree(parent)
+    └─ Show "Moved successfully"
+15. If user keeps old folder:
+    └─ Show "Copied successfully, old folder kept"
 ```
 
-**Example**:
+**Merge Example**:
 ```
-Source: D:\DAOC\Characters
-Dest:   E:\Backups\DAOC\Characters
+Source:      D:\DAOC\Backup\Characters\ 
+             ├─ backup_20251114.zip
+             └─ backup_20251113.zip
 
-Result: Folder copied to E:\Backups\DAOC\Characters
-        User chooses to delete D:\DAOC\Characters
-        Config updated: character_folder = E:\Backups\DAOC\Characters
+Destination: E:\Backups\Characters\ (already exists)
+             ├─ backup_20251115.zip
+             └─ backup_20251112.zip
+
+After Merge: E:\Backups\Characters\
+             ├─ backup_20251115.zip (kept from destination)
+             ├─ backup_20251114.zip (added from source)
+             ├─ backup_20251113.zip (added from source)
+             └─ backup_20251112.zip (kept from destination)
+
+Source After: D:\DAOC\Backup\Characters\ (now empty)
+              → Auto-deleted
+
+Parent Check: D:\DAOC\Backup\ (check if empty)
+              ├─ No other subfolders found
+              → Auto-deleted for cleanliness
+```
+
+**Auto-Cleanup Logic**:
+```python
+# After copytree with merge
+if os.path.exists(current_path):
+    remaining_files = os.listdir(current_path)
+    source_is_empty = len(remaining_files) == 0
+    
+    if source_is_empty:
+        # Delete empty source
+        shutil.rmtree(current_path)
+        
+        # Check parent Backup folder
+        parent_backup = os.path.dirname(current_path)
+        if os.path.basename(parent_backup).lower() == "backup":
+            remaining_items = [item for item in os.listdir(parent_backup) 
+                             if os.path.isdir(os.path.join(parent_backup, item))]
+            if not remaining_items:
+                # Parent Backup folder is empty, delete it
+                shutil.rmtree(parent_backup)
 ```
 
 ---
@@ -276,7 +333,95 @@ Suggested: "Characters"
 Parent: E:\MyDAOC
 Result: E:\MyDAOC\Characters created
         Config updated: character_folder = E:\MyDAOC\Characters
+        Character list reloaded immediately (if Characters folder)
 ```
+
+---
+
+## Immediate System Reload
+
+**Critical Feature**: Path changes are applied **immediately** without requiring application restart.
+
+### **Reload Triggers by Folder Type**
+
+```python
+# After successful move/create/browse operation:
+
+if config_key == "character_folder":
+    # Save to config
+    config.set("character_folder", new_path)
+    config.save_config()
+    
+    # Reinitialize backup manager
+    self.backup_manager = BackupManager(config)
+    
+    # Reload character list from new location
+    if self.parent():
+        self.parent().refresh_character_list()
+
+elif config_key == "log_folder":
+    # Save to config
+    config.set("log_folder", new_path)
+    config.save_config()
+    
+    # Reinitialize logging system
+    from Functions.logging_manager import setup_logging
+    setup_logging()
+    # New logs will now be written to new location
+
+elif config_key == "armor_folder":
+    # Save to config
+    config.set("armor_folder", new_path)
+    config.save_config()
+    # Armor data loaded on-demand, no reload needed
+
+elif config_key in ["backup_path", "cookies_backup_path", "armor_backup_path"]:
+    # Save to config
+    config.set(config_key, new_path)
+    config.save_config()
+    
+    # Reinitialize backup manager to use new paths
+    self.backup_manager = BackupManager(config)
+```
+
+### **Browse Immediate Reload**
+
+Browse buttons also trigger immediate reload:
+
+```python
+def _browse_character_folder(self):
+    old_path = self.char_path_edit.text()
+    self._browse_folder(self.char_path_edit, "select_folder_dialog_title")
+    new_path = self.char_path_edit.text()
+    
+    if old_path != new_path:
+        config.set("character_folder", new_path)
+        config.save_config()
+        if self.parent():
+            self.parent().refresh_character_list()
+
+def _browse_log_folder(self):
+    old_path = self.log_path_edit.text()
+    self._browse_folder(self.log_path_edit, "select_log_folder_dialog_title")
+    new_path = self.log_path_edit.text()
+    
+    if old_path != new_path:
+        config.set("log_folder", new_path)
+        config.save_config()
+        from Functions.logging_manager import setup_logging
+        setup_logging()
+
+def _browse_armor_folder(self):
+    old_path = self.armor_path_edit.text()
+    self._browse_folder(self.armor_path_edit, "select_folder_dialog_title")
+    new_path = self.armor_path_edit.text()
+    
+    if old_path != new_path:
+        config.set("armor_folder", new_path)
+        config.save_config()
+```
+
+**Result**: User sees changes instantly in the UI without closing Settings dialog.
 
 ---
 
@@ -689,6 +834,9 @@ Moving to/from network drives:
 ## Future Enhancements
 
 **Potential Improvements**:
+- [x] **Merge support** - Implemented in v3.0
+- [x] **Auto-cleanup empty folders** - Implemented in v3.0
+- [x] **Immediate reload** - Implemented in v3.0
 - [ ] Show folder size before move
 - [ ] Disk space validation
 - [ ] Move with progress percentage (for large folders)
@@ -702,8 +850,14 @@ Moving to/from network drives:
 ## Version History
 
 | Version | Changes |
-|---------|---------|
-| **0.108** | Initial implementation |
+|---------|---------||
+| **0.108** | v2.1 Enhanced Update |
+| | - Merge support when destination exists |
+| | - Auto-delete empty source folders |
+| | - Auto-cleanup parent Backup folder |
+| | - Immediate system reload (Characters, Logs, Armor) |
+| | - Browse buttons trigger immediate save |
+| | - Fixed folder names |
 | | - Move + Create modes |
 | | - Path normalization |
 | | - Safety confirmations |

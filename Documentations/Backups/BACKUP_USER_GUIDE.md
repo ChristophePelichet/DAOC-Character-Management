@@ -1,8 +1,11 @@
 # Backup System - User Guide
 
+**Version**: 2.1  
+**Last Updated**: 2025-11-15
+
 ## Introduction
 
-This guide helps you understand and use the automatic backup system to protect your character data and Eden cookies.
+This guide helps you understand and use the automatic backup system to protect your character data and Eden cookies with **smart folder creation** that only creates backup folders when actually needed.
 
 ## What is Backed Up?
 
@@ -14,6 +17,11 @@ This guide helps you understand and use the automatic backup system to protect y
 ### Cookies Backup
 - **Eden session cookies** for automatic login
 - **Browser credentials** for Herald import
+- **Separate backup** from characters
+
+### Armor Backup (v2.1)
+- **Armor resistance data** (armor_resists.json)
+- **Custom armor configurations**
 - **Separate backup** from characters
 
 ## How It Works
@@ -35,12 +43,68 @@ Monday 20:00   → Skipped (already done today)
 Tuesday 09:15  → New backup created ✓
 ```
 
+### Smart Folder Creation (v2.1)
+
+**NEW BEHAVIOR**: Backup folders are **NOT created on startup** anymore.
+
+**Old Behavior** (v0.108 and earlier):
+```
+Application Launch
+    ↓
+Backup/Characters/ folder created (even if empty)
+Backup/Cookies/ folder created (even if empty)
+Backup/Armor/ folder created (even if empty)
+    ↓
+Result: Empty folders cluttering your directory
+```
+
+**New Behavior** (v2.1+):
+```
+Application Launch
+    ↓
+NO folders created
+    ↓
+First Backup Execution
+    ↓
+Check if source exists (Characters/, eden_cookies.pkl, armor_resists.json)
+    ├─ Source exists: Create backup folder + perform backup
+    └─ Source missing: Skip (no folder created)
+```
+
+**Benefits**:
+- ✅ No empty folders on first launch
+- ✅ Cleaner directory structure
+- ✅ Folders appear only when actually used
+- ✅ Automatic cleanup when moving backups
+
+**Example Timeline**:
+```
+Day 1, 08:00 - Fresh Install
+    → No backup folders exist yet
+
+Day 1, 10:00 - Add first character
+    → Characters/ folder created with character data
+    
+Day 2, 08:00 - Application startup
+    → Characters/ exists → Backup/Characters/ created
+    → Backup performed: backup_characters_20251102_080000.zip
+    
+Day 2, 09:00 - Configure cookies
+    → eden_cookies.pkl created
+    
+Day 3, 08:00 - Application startup
+    → Characters/ exists → Backup/Characters/ already exists
+    → eden_cookies.pkl exists → Backup/Cookies/ created
+    → Two backups performed
+```
+
 ### Backup Naming
 
 Backups use a standardized naming format:
 ```
 backup_characters_YYYYMMDD_HHMMSS.zip
 backup_cookies_YYYYMMDD_HHMMSS.zip
+backup_armor_YYYYMMDD_HHMMSS.zip
 ```
 
 **Example**:

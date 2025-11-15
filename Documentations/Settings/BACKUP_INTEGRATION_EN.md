@@ -1,12 +1,22 @@
 # Backup Integration in Settings - Technical Documentation
 
+**Version**: 2.1  
+**Last Updated**: 2025-11-15
+
 ## Overview
 
-The **Backup Integration** in Settings provides a unified interface for managing all backup operations directly from the Settings dialog. It replaced the previous Tools > Backups menu system, offering real-time backup execution, configuration, and monitoring.
+The **Backup Integration** in Settings provides a unified interface for managing all backup operations directly from the Settings dialog with **immediate path updates** and **automatic system reload**. It replaced the previous Tools > Backups menu system, offering real-time backup execution, configuration, and monitoring without requiring application restart.
 
 **Location**: `UI/settings_dialog.py` - Page 5  
-**Section**: `_create_backup_page()` (lines 497-700)  
+**Section**: `_create_backup_page()` (lines 497-900)  
 **Integration**: `main.py` - `save_configuration()` (backup settings save)
+
+**Key Features (v2.1)**:
+- ✅ Immediate backup path updates without restart
+- ✅ Manual backup buttons apply current path instantly
+- ✅ BackupManager reinitialized after each path change
+- ✅ No empty backup folders created on startup
+- ✅ Folders created only when actual backup occurs
 
 ---
 
@@ -189,17 +199,25 @@ open_folder_button.clicked.connect(self._open_backup_folder)
 
 ---
 
-## Backup Execution Workflow
+## Backup Execution Workflow (v2.1)
 
-### **Characters Backup**
+### **Characters Backup with Immediate Path Update**
 
 ```
 User clicks "Sauvegarder maintenant"
     ↓
-_backup_now() method
+_backup_characters_now() method
     ↓
+1. Save current path from text field to config
+   config.set("backup_path", self.backup_path_edit.text())
+   config.save_config()
+    ↓
+2. Reinitialize BackupManager with new path
+   self.backup_manager = BackupManager(config)
+    ↓
+3. Execute backup with updated path
 try:
-    ├─ backup_manager.create_backup()
+    ├─ backup_manager.backup_characters_force()
     ├─ if result:
     │   ├─ Update last_backup_label (now timestamp)
     │   ├─ Update total_label (re-query backup_info)
@@ -210,14 +228,19 @@ catch Exception:
     └─ Show error dialog with exception details
 ```
 
-### **Implementation**
+### **Implementation (v2.1)**
 
 ```python
-def _backup_now(self):
+def _backup_characters_now(self):
     """Execute characters backup now"""
     from PySide6.QtWidgets import QMessageBox
     try:
-        result = self.backup_manager.create_backup()
+        # Save current path from text field to config and reinitialize backup_manager
+        config.set("backup_path", self.backup_path_edit.text())
+        config.save_config()
+        self.backup_manager = BackupManager(config)  # NEW: Reinitialize with new path
+        
+        result = self.backup_manager.backup_characters_force()
         if result:
             # Update last backup date display
             from datetime import datetime
@@ -239,19 +262,33 @@ def _backup_now(self):
                             f"{lang.get('backup_error')} : {str(e)}")
 ```
 
+**Key Changes (v2.1)**:
+- ✅ Path saved to config BEFORE backup execution
+- ✅ BackupManager reinitialized to use new path immediately
+- ✅ No need to close Settings dialog or click Save button
+- ✅ Works even if path was just changed in text field
+
 ---
 
-## Cookies Backup Workflow
+## Cookies Backup Workflow (v2.1)
 
-### **Flow**
+### **Flow with Immediate Path Update**
 
 ```
 User clicks "Sauvegarder maintenant" (Cookies section)
     ↓
 _backup_cookies_now() method
     ↓
+1. Save current path from text field to config
+   config.set("cookies_backup_path", self.cookies_backup_path_edit.text())
+   config.save_config()
+    ↓
+2. Reinitialize BackupManager with new path
+   self.backup_manager = BackupManager(config)
+    ↓
+3. Execute backup with updated path
 try:
-    ├─ backup_manager.backup_cookies()
+    ├─ backup_manager.backup_cookies_force()
     ├─ if result:
     │   ├─ Update cookies_last_label (now timestamp)
     │   ├─ Update cookies_total_label (re-query cookies_info)
@@ -262,13 +299,18 @@ catch Exception:
     └─ Show error dialog
 ```
 
-### **Implementation**
+### **Implementation (v2.1)**
 
 ```python
 def _backup_cookies_now(self):
     """Execute cookies backup now"""
     try:
-        result = self.backup_manager.backup_cookies()
+        # Save current path from text field to config and reinitialize backup_manager
+        config.set("cookies_backup_path", self.cookies_backup_path_edit.text())
+        config.save_config()
+        self.backup_manager = BackupManager(config)  # NEW: Reinitialize with new path
+        
+        result = self.backup_manager.backup_cookies_force()
         if result:
             from datetime import datetime
             last_backup_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -285,6 +327,16 @@ def _backup_cookies_now(self):
     except Exception as e:
         QMessageBox.critical(self, lang.get("error_title"),
                             f"{lang.get('backup_error')} : {str(e)}")
+```
+
+**Armor Backup** (v2.1):
+Same pattern applies to `_backup_armor_now()`:
+```python
+config.set("armor_backup_path", self.armor_backup_path_edit.text())
+config.save_config()
+self.backup_manager = BackupManager(config)
+result = self.backup_manager.backup_armor_force()
+```
 ```
 
 ---

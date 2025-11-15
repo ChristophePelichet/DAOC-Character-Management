@@ -16,8 +16,11 @@ Complete technical documentation for the DAOC Character Management Settings syst
   - Integration points
 
 ### **Feature Systems**
-- **[Folder Move System](FOLDER_MOVE_SYSTEM_EN.md)** - Folder management functionality
+- **[Folder Move System](FOLDER_MOVE_SYSTEM_EN.md)** - Folder management functionality (v3.0)
   - Move/Create folder workflows
+  - Merge support for existing destinations (v2.1)
+  - Auto-cleanup of empty folders (v2.1)
+  - Immediate reload system (v2.1)
   - Path normalization
   - Safety features and confirmations
   - Usage examples
@@ -43,6 +46,59 @@ Complete technical documentation for the DAOC Character Management Settings syst
 | **4** | 🌐 | **Herald Eden** | Cookies path, Browser selection (Chrome/Edge/Firefox) |
 | **5** | 💾 | **Sauvegardes** | Characters backup, Cookies backup (enable, path, stats, actions) |
 | **6** | 🐛 | **Debug** | Logs path, Debug mode, Eden debug window |
+
+---
+
+## 🎨 Dialog Buttons (v0.108)
+
+### **Button Layout**
+```
+┌─────────────────────────────────────────────────┐
+│               Settings Content                   │
+│                                                  │
+│  [Save] [Cancel] [Close]                        │
+└─────────────────────────────────────────────────┘
+```
+
+### **Button Behavior**
+
+| Button | Action | Closes Dialog | Triggers Save | Reloads Settings |
+|--------|--------|---------------|---------------|------------------|
+| **Save** | Saves all changes to config | ❌ No | ✅ Yes | ❌ No |
+| **Cancel** | Reverts unsaved changes | ❌ No | ❌ No | ✅ Yes (after confirmation) |
+| **Close** | Exits settings dialog | ✅ Yes | ❌ No | ❌ No |
+
+### **User Workflow**
+```
+Open Settings
+    ↓
+Make Changes
+    ↓
+Click "Save" → Changes saved, dialog stays open
+    ↓
+Make More Changes
+    ↓
+Click "Save" again → More changes saved
+    ↓
+Click "Close" → Dialog closes
+```
+
+**vs. Old Behavior** (v0.108):
+- Save button closed dialog immediately
+- No way to save multiple times without reopening
+
+### **Cancel Confirmation**
+```python
+# When user clicks Cancel button
+if unsaved_changes_exist():
+    reply = QMessageBox.question(
+        "Cancel unsaved changes?",
+        Yes | No
+    )
+    if reply == Yes:
+        _load_settings()  # Reload from config
+        # Dialog stays open
+```
 
 ---
 
@@ -86,38 +142,86 @@ Complete technical documentation for the DAOC Character Management Settings syst
 
 ## 🔄 Folder Move/Create System
 
-### **Two Operation Modes**
+### **Three Operation Modes** (v2.1)
 
-**1. MOVE MODE** (source folder exists)
+**1. MOVE with MERGE** (source exists, destination exists)
 ```
-Source Exists
+Source Exists + Destination Exists
+    ↓
+Ask: "Merge files?"
+    ├─ NO: Operation cancelled
+    └─ YES: Continue
+            ↓
+        Copy with merge (dirs_exist_ok=True)
+            ↓
+        Check if source is empty
+            ├─ Empty: Auto-delete source + cleanup parent
+            └─ Not empty: Ask user to delete
+```
+
+**2. MOVE MODE** (source exists, destination missing)
+```
+Source Exists + Destination Missing
     ↓
 Copy to Destination
     ↓
 Ask: Delete Old Folder?
-    ├─ YES: Delete + Update config
+    ├─ YES: Delete + Cleanup parent if empty
     └─ NO: Keep + Update config
 ```
 
-**2. CREATE MODE** (source folder missing)
+**3. CREATE MODE** (source missing)
 ```
 Source Missing
     ↓
-Suggest Default Name
-    ↓
-User Confirms/Changes
+Use Fixed Folder Name
     ↓
 Create New Folder
     ↓
-Update Config
+Update Config + Immediate Reload
 ```
 
 ### **Safety Features**
 - ✅ Copy-before-delete pattern (never lose data)
+- ✅ Merge support for incremental moves
+- ✅ Auto-cleanup of empty folders
+- ✅ Parent Backup folder cleanup when last subfolder removed
 - ✅ Confirmations at every step
 - ✅ Default answer always "No" (safe choice)
-- ✅ Duplicate destination detection
 - ✅ Windows path normalization (backslashes)
+
+### **Immediate Reload System** (v2.1)
+
+**Character Folder Changed**:
+```python
+config.set("character_folder", new_path)
+config.save_config()
+self.backup_manager = BackupManager(config)
+self.parent().refresh_character_list()  # Immediate UI update
+```
+
+**Log Folder Changed**:
+```python
+config.set("log_folder", new_path)
+config.save_config()
+setup_logging()  # Logging reinitialize, new logs go to new path
+```
+
+**Armor Folder Changed**:
+```python
+config.set("armor_folder", new_path)
+config.save_config()
+# No reload needed (loaded on-demand)
+```
+
+**Backup Path Changed**:
+```python
+config.set("backup_path", new_path)
+config.save_config()
+self.backup_manager = BackupManager(config)  # Uses new path immediately
+```
+
+**Result**: Changes visible instantly without restarting application or closing Settings dialog.
 
 ---
 

@@ -6,6 +6,28 @@ Complete version history of the character manager for Dark Age of Camelot (Eden)
 
 # ✨✨ v0.108
 
+### 🎉 Added
+- 💾 **Automatic Character Migration System**: Intelligent folder structure reorganization
+  - 📝 3 new modules: character_schema.py (390 lines), character_migration.py (481 lines), config_schema.py (migrations section)
+  - 🔄 Automatic old structure detection: Characters/Realm/ → Characters/Season/Realm/
+  - 💾 Timestamped ZIP backup with testzip() validation before migration
+  - ✅ Complete schema validation (7 required fields, 12 optional) for each character
+  - 🔄 Data normalization with intelligent default values
+  - ⚙️ Silent execution on character_manager.py load (no user interaction)
+  - 🛡️ Automatic rollback on error (removes new files, preserves old ones)
+  - 📊 Tracking in config.json (migrations.character_structure_done + ISO timestamp)
+  - 📄 Complete technical documentation (CHARACTER_MIGRATION_TECHNICAL_DOC.md, 870 lines)
+  - Files: Functions/character_schema.py, character_migration.py, character_manager.py, config_schema.py
+
+### 🔚 Removed
+- 🗑️ **Old Popup Migration System**: Complete removal in favor of new automatic system
+  - 📝 Removed _run_automatic_migration() method in main.py (105 lines)
+  - 🌍 Removed "migration" section in Language/*.json (21 keys × 3 languages = 63 deletions)
+  - ⚙️ Removed 22 migration_* mappings in language_schema.py
+  - 📚 Updated LANGUAGE_V2_TECHNICAL_DOC.md (421→399 keys)
+  - 🎯 Impact: Fully automatic and silent migration, no user interaction
+  - Files: main.py, Language/*.json, Functions/language_schema.py, Documentations/Lang/LANGUAGE_V2_TECHNICAL_DOC.md
+
 ### 🐛 Bug Fix
 - 🌍 **Version Section Translations**: Dynamic language update without restart
   - 🔧 Converted version labels to instance attributes (status_group, info_group, version labels)

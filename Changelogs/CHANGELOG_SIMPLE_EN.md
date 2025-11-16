@@ -4,6 +4,16 @@
 
 # ✨ v0.108
 
+### 🎉 New Features
+- 💾 **Automatic Character Migration**: Intelligent folder restructuring without user intervention
+  - 🔄 Automatic detection and migration: Characters/Realm/ → Characters/Season/Realm/
+  - 💾 Automatic ZIP backup before migration with complete validation
+  - ✅ Verification and normalization of each character file
+  - ⚙️ Silent execution on startup (no popup, no confirmation)
+  - 🛡️ Automatic rollback on error (data preserved)
+  - 📊 Tracking in config.json to prevent multiple migrations
+  - 🗑️ Removed old popup system (63 obsolete translations deleted)
+
 ### 🐛 Bug Fixes
 - 🌍 **Dynamic Translations**: Version section updates without restart when changing language
 - 🌍 **Herald Import**: "Import Complete" title displays correctly (instead of key name)

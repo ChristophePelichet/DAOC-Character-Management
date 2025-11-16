@@ -6,6 +6,28 @@ Historique complet des versions du gestionnaire de personnages pour Dark Age of 
 
 # ✨✨ v0.108
 
+### 🎉 Ajout
+- 💾 **Système de Migration Automatique des Personnages** : Restructuration intelligente de l'arborescence de dossiers
+  - 📝 3 nouveaux modules : character_schema.py (390 lignes), character_migration.py (481 lignes), config_schema.py (section migrations)
+  - 🔄 Détection automatique de l'ancienne structure : Characters/Royaume/ → Characters/Saison/Royaume/
+  - 💾 Sauvegarde ZIP timestampée avec validation testzip() avant migration
+  - ✅ Validation complète du schéma (7 champs requis, 12 optionnels) pour chaque personnage
+  - 🔄 Normalisation des données avec valeurs par défaut intelligentes
+  - ⚙️ Exécution silencieuse au chargement de character_manager.py (aucune interaction)
+  - 🛡️ Rollback automatique en cas d'erreur (supprime nouveaux fichiers, préserve anciens)
+  - 📊 Tracking dans config.json (migrations.character_structure_done + timestamp ISO)
+  - 📄 Documentation technique complète (CHARACTER_MIGRATION_TECHNICAL_DOC.md, 870 lignes)
+  - Fichiers : Functions/character_schema.py, character_migration.py, character_manager.py, config_schema.py
+
+### 🔚 Retrait
+- 🗑️ **Ancien Système de Migration avec Popup** : Suppression complète au profit du nouveau système automatique
+  - 📝 Suppression méthode _run_automatic_migration() dans main.py (105 lignes)
+  - 🌍 Suppression section "migration" dans Language/*.json (21 clés × 3 langues = 63 suppressions)
+  - ⚙️ Suppression 22 mappings migration_* dans language_schema.py
+  - 📚 Mise à jour LANGUAGE_V2_TECHNICAL_DOC.md (421→399 clés)
+  - 🎯 Impact : Migration entièrement automatique et silencieuse, aucune interaction utilisateur
+  - Fichiers : main.py, Language/*.json, Functions/language_schema.py, Documentations/Lang/LANGUAGE_V2_TECHNICAL_DOC.md
+
 ### 🐛 Correction
 - 🌍 **Traductions Section Version** : Mise à jour dynamique de la langue sans redémarrage
   - 🔧 Conversion des labels de version en attributs d'instance (status_group, info_group, version labels)

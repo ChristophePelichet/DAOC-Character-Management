@@ -464,9 +464,9 @@
         },
         "stats": {
             "realm_rank": "Realm Rank:",
-            "tower_captures": "🗼 Tower Captures:",
-            "keep_captures": "🏰 Keep Captures:",
-            "relic_captures": "💎 Relic Captures:",
+            "tower_captures": "🗼 Towers Captured:",
+            "keep_captures": "🏰 Keeps Captured:",
+            "relic_captures": "💎 Relics Captured:",
             "solo_kills": "⚔️ Solo Kills:",
             "deathblows": "💀 Deathblows:",
             "kills": "🎯 Kills:",

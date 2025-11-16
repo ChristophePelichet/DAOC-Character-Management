@@ -464,9 +464,9 @@
         },
         "stats": {
             "realm_rank": "Reichsrang:",
-            "tower_captures": "🗼 Turm-Eroberungen:",
-            "keep_captures": "🏰 Burg-Eroberungen:",
-            "relic_captures": "💎 Reliquien-Eroberungen:",
+            "tower_captures": "🗼 Türme Erobert:",
+            "keep_captures": "🏰 Festungen Erobert:",
+            "relic_captures": "💎 Reliquien Erobert:",
             "solo_kills": "⚔️ Solo-Kills:",
             "deathblows": "💀 Todesstöße:",
             "kills": "🎯 Kills:",

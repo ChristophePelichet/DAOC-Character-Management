@@ -533,7 +533,8 @@ class CookieManager:
             
             eden_logger.info(f"{len(cookies)} cookies sauvegardés dans {self.cookie_file}", extra={"action": "COOKIES"})
             
-            return (True, f"{len(cookies)} cookies sauvegardés avec succès", len(cookies))
+            from Functions.language_manager import lang
+            return (True, lang.get("cookie_manager.cookies_saved_success", count=len(cookies)), len(cookies))
             
         except Exception as e:
             error_msg = f"Erreur lors de la sauvegarde des cookies: {e}"

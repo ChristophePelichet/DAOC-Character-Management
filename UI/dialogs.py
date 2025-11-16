@@ -2821,7 +2821,7 @@ class CookieManagerDialog(QDialog):
     
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Gestion des Cookies Eden")
+        self.setWindowTitle(lang.get("cookie_manager.window_title"))
         self.resize(600, 400)
         
         # Importer le gestionnaire de cookies
@@ -2835,14 +2835,14 @@ class CookieManagerDialog(QDialog):
         layout = QVBoxLayout(self)
         
         # Titre et description
-        title_label = QLabel("<h2>🍪 Gestion des Cookies Eden</h2>")
+        title_label = QLabel(f"<h2>{lang.get('cookie_manager.title')}</h2>")
         title_label.setTextFormat(Qt.RichText)
         layout.addWidget(title_label)
         
         layout.addSpacing(10)
         
         # Zone d'information sur les cookies
-        info_group = QGroupBox("📊 État des Cookies")
+        info_group = QGroupBox(lang.get("cookie_manager.info_group_title"))
         info_layout = QVBoxLayout()
         
         self.status_label = QLabel()
@@ -2870,18 +2870,18 @@ class CookieManagerDialog(QDialog):
         layout.addWidget(info_group)
         
         # Section import manuel
-        import_group = QGroupBox("📂 Import Manuel")
+        import_group = QGroupBox(lang.get("cookie_manager.import_group_title"))
         import_layout = QHBoxLayout()
         
-        import_label = QLabel("Chemin du fichier :")
+        import_label = QLabel(lang.get("cookie_manager.file_path_label"))
         import_layout.addWidget(import_label)
         
         self.cookie_path_edit = QLineEdit()
-        self.cookie_path_edit.setPlaceholderText("Sélectionnez un fichier .pkl ou saisissez le chemin")
+        self.cookie_path_edit.setPlaceholderText(lang.get("cookie_manager.file_path_placeholder"))
         self.cookie_path_edit.returnPressed.connect(self.import_from_path)
         import_layout.addWidget(self.cookie_path_edit)
         
-        browse_button = QPushButton("📁 Parcourir")
+        browse_button = QPushButton(lang.get("buttons.cookie_browse"))
         browse_button.clicked.connect(self.browse_cookie_file)
         import_layout.addWidget(browse_button)
         
@@ -2891,23 +2891,23 @@ class CookieManagerDialog(QDialog):
         # Boutons d'action
         buttons_layout = QHBoxLayout()
         
-        self.generate_button = QPushButton("🔐 Générer des Cookies")
-        self.generate_button.setToolTip("Ouvre un navigateur pour se connecter et récupérer les cookies")
+        self.generate_button = QPushButton(lang.get("buttons.cookie_generate"))
+        self.generate_button.setToolTip(lang.get("cookie_manager.generate_tooltip"))
         self.generate_button.clicked.connect(self.generate_cookies)
         buttons_layout.addWidget(self.generate_button)
         
-        self.refresh_button = QPushButton("🔄 Actualiser")
+        self.refresh_button = QPushButton(lang.get("buttons.eden_refresh"))
         self.refresh_button.clicked.connect(self.refresh_status)
         buttons_layout.addWidget(self.refresh_button)
         
-        self.delete_button = QPushButton("🗑️ Supprimer")
+        self.delete_button = QPushButton(lang.get("buttons.cookie_delete"))
         self.delete_button.clicked.connect(self.delete_cookies)
         buttons_layout.addWidget(self.delete_button)
         
         layout.addLayout(buttons_layout)
         
         # Bouton de fermeture
-        close_button = QPushButton("Fermer")
+        close_button = QPushButton(lang.get("buttons.close"))
         close_button.clicked.connect(self.accept)
         layout.addWidget(close_button)
         
@@ -2944,17 +2944,17 @@ class CookieManagerDialog(QDialog):
             
             # Construire le statut de connexion
             if result['accessible']:
-                connection_status = "🌐 <b>Accès Eden :</b> <span style='color: green;'>✅ Connecté</span>"
+                connection_status = f"{lang.get('cookie_manager.eden_access')} {lang.get('cookie_manager.eden_connected')}"
             else:
                 if result['status_code']:
-                    connection_status = f"🌐 <b>Accès Eden :</b> <span style='color: red;'>❌ {result['message']}</span>"
+                    connection_status = f"{lang.get('cookie_manager.eden_access')} <span style='color: red;'>❌ {result['message']}</span>"
                 else:
-                    connection_status = f"🌐 <b>Accès Eden :</b> <span style='color: orange;'>⚠️ {result['message']}</span>"
+                    connection_status = f"{lang.get('cookie_manager.eden_access')} <span style='color: orange;'>⚠️ {result['message']}</span>"
             
             # Mettre à jour l'affichage
             self.expiry_label.setText(
-                f"📅 <b>Date d'expiration:</b> {expiry_date.strftime('%d/%m/%Y à %H:%M')}<br/>"
-                f"⏰ <b>Validité restante:</b> {days} jours<br/>"
+                f"{lang.get('cookie_manager.expiry_date', date=expiry_date.strftime('%d/%m/%Y à %H:%M'))}<br/>"
+                f"{lang.get('cookie_manager.remaining_validity', days=days)}<br/>"
                 f"{connection_status}"
             )
             
@@ -2963,7 +2963,7 @@ class CookieManagerDialog(QDialog):
             if browser_used:
                 browser_icon = {'Chrome': '🔵', 'Edge': '🔷', 'Firefox': '🦊'}.get(browser_used, '🌐')
                 self.browser_label.setText(
-                    f"{browser_icon} <i>Test effectué avec: {browser_used}</i>"
+                    lang.get('cookie_manager.test_with_browser', icon=browser_icon, browser=browser_used)
                 )
             else:
                 self.browser_label.setText("")
@@ -2974,18 +2974,17 @@ class CookieManagerDialog(QDialog):
         
         if info is None:
             # Aucun cookie
-            self.status_label.setText("❌ <b>Aucun cookie trouvé</b>")
+            self.status_label.setText(lang.get("cookie_manager.status_no_cookies"))
             self.status_label.setStyleSheet("color: red;")
             self.expiry_label.setText("")
             self.details_label.setText(
-                "Pour utiliser le scraper Eden, vous devez importer un fichier de cookies.<br/>"
-                "Utilisez le bouton 'Importer des Cookies' ci-dessous."
+                lang.get("cookie_manager.details_need_import")
             )
             self.delete_button.setEnabled(False)
             
         elif info.get('error'):
             # Erreur de lecture
-            self.status_label.setText("⚠️ <b>Erreur de lecture</b>")
+            self.status_label.setText(lang.get("cookie_manager.status_read_error"))
             self.status_label.setStyleSheet("color: orange;")
             self.expiry_label.setText("")
             self.details_label.setText(f"Erreur: {info['error']}")
@@ -2993,21 +2992,21 @@ class CookieManagerDialog(QDialog):
             
         elif not info['is_valid']:
             # Cookies expirés
-            self.status_label.setText("⚠️ <b>Cookies expirés</b>")
+            self.status_label.setText(lang.get("cookie_manager.status_expired"))
             self.status_label.setStyleSheet("color: orange;")
             self.expiry_label.setText("")
             
-            details = f"Total: {info['total_cookies']} cookies<br/>"
-            details += f"Expirés: {info['expired_cookies']}<br/>"
-            details += f"Valides: {info['valid_cookies']}<br/>"
-            details += "<br/>Vous devez importer de nouveaux cookies."
+            details = lang.get("cookie_manager.total_cookies", count=info['total_cookies']) + "<br/>"
+            details += lang.get("cookie_manager.expired_cookies", count=info['expired_cookies']) + "<br/>"
+            details += lang.get("cookie_manager.valid_cookies", count=info['valid_cookies']) + "<br/>"
+            details += lang.get("cookie_manager.details_need_new")
             
             self.details_label.setText(details)
             self.delete_button.setEnabled(True)
             
         else:
             # Cookies valides
-            self.status_label.setText("✅ <b>Cookies valides</b>")
+            self.status_label.setText(lang.get("cookie_manager.status_valid"))
             self.status_label.setStyleSheet("color: green;")
             
             expiry_date = info['expiry_date']
@@ -3016,8 +3015,8 @@ class CookieManagerDialog(QDialog):
             days = duration.days
             
             self.expiry_label.setText(
-                f"📅 <b>Date d'expiration:</b> {expiry_date.strftime('%d/%m/%Y à %H:%M')}<br/>"
-                f"⏰ <b>Validité restante:</b> {days} jours"
+                f"{lang.get('cookie_manager.expiry_date', date=expiry_date.strftime('%d/%m/%Y à %H:%M'))}<br/>"
+                f"{lang.get('cookie_manager.remaining_validity', days=days)}"
             )
             
             if days < 7:
@@ -3027,21 +3026,21 @@ class CookieManagerDialog(QDialog):
             
             # Afficher the infos of base immédiatement
             self.expiry_label.setText(
-                f"📅 <b>Date d'expiration:</b> {expiry_date.strftime('%d/%m/%Y à %H:%M')}<br/>"
-                f"⏰ <b>Validité restante:</b> {days} jours<br/>"
-                f"🌐 <b>Accès Eden :</b> <span style='color: gray;'>⏳ Test en cours...</span>"
+                f"{lang.get('cookie_manager.expiry_date', date=expiry_date.strftime('%d/%m/%Y à %H:%M'))}<br/>"
+                f"{lang.get('cookie_manager.remaining_validity', days=days)}<br/>"
+                f"{lang.get('cookie_manager.eden_access')} {lang.get('cookie_manager.eden_testing')}"
             )
             
             # Lancer the test of connexion en arrière-plan
             self.start_connection_test()
             
-            details = f"📦 Total: {info['total_cookies']} cookies<br/>"
-            details += f"✓ Valides: {info['valid_cookies']}<br/>"
+            details = lang.get("cookie_manager.total_cookies_display", count=info['total_cookies']) + "<br/>"
+            details += lang.get("cookie_manager.valid_cookies_display", count=info['valid_cookies']) + "<br/>"
             
             if info['session_cookies'] > 0:
-                details += f"🔄 Session: {info['session_cookies']}<br/>"
+                details += lang.get("cookie_manager.session_cookies", count=info['session_cookies']) + "<br/>"
             
-            details += f"<br/>📁 Fichier: {info['file_path']}"
+            details += lang.get("cookie_manager.file_location", path=info['file_path'])
             
             self.details_label.setText(details)
             self.delete_button.setEnabled(True)
@@ -3054,9 +3053,9 @@ class CookieManagerDialog(QDialog):
         """Ouvre un dialog pour sélectionner un fichier de cookies"""
         file_path, _ = QFileDialog.getOpenFileName(
             self,
-            "Sélectionner un fichier de cookies",
+            lang.get("cookie_manager.browse_dialog_title"),
             "",
-            "Fichiers Pickle (*.pkl);;Tous les fichiers (*.*)"
+            lang.get("cookie_manager.browse_dialog_filter")
         )
         
         if file_path:
@@ -3071,8 +3070,8 @@ class CookieManagerDialog(QDialog):
         if not file_path:
             QMessageBox.warning(
                 self,
-                "Attention",
-                "Veuillez sélectionner ou saisir un chemin de fichier."
+                lang.get("cookie_manager.import_warning_title"),
+                lang.get("cookie_manager.import_warning_message")
             )
             return
         
@@ -3083,9 +3082,8 @@ class CookieManagerDialog(QDialog):
         if not os.path.exists(file_path):
             QMessageBox.critical(
                 self,
-                "Erreur",
-                f"Le fichier n'existe pas :\n\n{file_path}\n\n"
-                "Vérifiez le chemin et réessayez."
+                lang.get("cookie_manager.import_error_not_exists_title"),
+                lang.get("cookie_manager.import_error_not_exists_message", path=file_path)
             )
             return
         
@@ -3094,8 +3092,8 @@ class CookieManagerDialog(QDialog):
         if success:
             QMessageBox.information(
                 self,
-                "Succès",
-                "Les cookies ont été importés avec succès !"
+                lang.get("cookie_manager.import_success_title"),
+                lang.get("cookie_manager.import_success_message")
             )
             self.cookie_path_edit.clear()
             self.refresh_status()
@@ -3106,19 +3104,16 @@ class CookieManagerDialog(QDialog):
         else:
             QMessageBox.critical(
                 self,
-                "Erreur",
-                f"Impossible d'importer le fichier de cookies.\n\n"
-                f"Fichier : {file_path}\n\n"
-                "Le fichier doit être un fichier .pkl valide contenant des cookies."
+                lang.get("cookie_manager.import_error_title"),
+                lang.get("cookie_manager.import_error_message", path=file_path)
             )
     
     def delete_cookies(self):
         """Supprime les cookies après confirmation"""
         reply = QMessageBox.question(
             self,
-            "Confirmer la suppression",
-            "Êtes-vous sûr de vouloir supprimer les cookies ?\n\n"
-            "Une sauvegarde sera créée automatiquement.",
+            lang.get("cookie_manager.delete_confirm_title"),
+            lang.get("cookie_manager.delete_confirm_message"),
             QMessageBox.Yes | QMessageBox.No,
             QMessageBox.No
         )
@@ -3129,8 +3124,8 @@ class CookieManagerDialog(QDialog):
             if success:
                 QMessageBox.information(
                     self,
-                    "Succès",
-                    "Les cookies ont été supprimés."
+                    lang.get("cookie_manager.delete_success_title"),
+                    lang.get("cookie_manager.delete_success_message")
                 )
                 self.refresh_status()
                 
@@ -3140,8 +3135,8 @@ class CookieManagerDialog(QDialog):
             else:
                 QMessageBox.critical(
                     self,
-                    "Erreur",
-                    "Impossible de supprimer les cookies."
+                    lang.get("cookie_manager.delete_error_title"),
+                    lang.get("cookie_manager.delete_error_message")
                 )
     
     def generate_cookies(self):
@@ -3227,9 +3222,9 @@ class CookieManagerDialog(QDialog):
         # Créer dialogue de confirmation
         wait_msg = QMessageBox(self)
         wait_msg.setIcon(QMessageBox.Information)
-        wait_msg.setWindowTitle("En attente de connexion")
+        wait_msg.setWindowTitle(lang.get("cookie_manager.user_action_title"))
         wait_msg.setTextFormat(Qt.RichText)
-        wait_msg.setText("<b>Connectez-vous maintenant</b>")
+        wait_msg.setText(lang.get("cookie_manager.user_action_header"))
         wait_msg.setInformativeText(message)
         wait_msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
         
@@ -3331,16 +3326,16 @@ class CookieManagerDialog(QDialog):
             from PySide6.QtWidgets import QMessageBox
             QMessageBox.information(
                 self,
-                "Succès",
-                f"Les cookies ont été générés avec succès !\n\n{message}"
+                lang.get("cookie_manager.import_success_title"),
+                f"{lang.get('cookie_manager.import_success_message')}\n\n{message}"
             )
         elif message and "Annulé" not in message:
             # Afficher erreur seulement si pas annulé
             from PySide6.QtWidgets import QMessageBox
             QMessageBox.critical(
                 self,
-                "Erreur",
-                f"Erreur lors de la génération des cookies :\n\n{message}"
+                lang.get("cookie_manager.import_error_title"),
+                f"{lang.get('cookie_manager.import_error_title')} :\n\n{message}"
             )
         
         # Actualiser le statut
@@ -3478,7 +3473,7 @@ class CookieGenThread(QThread):
             # Émettre signal pour demander confirmation utilisateur
             self.user_action_required.emit(
                 browser_name,
-                f"Le navigateur {browser_name} est ouvert.\n\nConnectez-vous avec Discord, puis cliquez sur OK."
+                lang.get("cookie_manager.browser_opened_message", browser=browser_name)
             )
             
             # Attendre confirmation avec sleep interruptible (max 5 minutes)

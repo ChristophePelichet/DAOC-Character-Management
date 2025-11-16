@@ -27,7 +27,7 @@
 
 ### What Changed?
 
-The language system was restructured from a **flat 417-key format** to a **hierarchical 12-section v2 format**, mirroring the config.json v2 approach.
+The language system was restructured from a **flat 417-key format** to a **hierarchical 13-section v2 format**, mirroring the config.json v2 approach.
 
 **Before (v1 - Flat):**
 ```json
@@ -306,7 +306,41 @@ The v2 structure organizes translations into 12 logical sections:
     "download": "📥 Télécharger",
     "eden_refresh": "🔄 Actualiser",
     "eden_search": "🔍 Recherche",
-    "eden_manage": "⚙️ Gérer"
+    "eden_manage": "⚙️ Gérer",
+    "cookie_generate": "🔐 Générer des Cookies",
+    "cookie_delete": "🗑️ Supprimer",
+    "cookie_browse": "📁 Parcourir"
+}
+```
+
+#### 5.1. **cookie_manager** (Cookie Manager Dialog - 50+ keys)
+```json
+"cookie_manager": {
+    "window_title": "Gestion des Cookies Eden",
+    "title": "🍪 Gestion des Cookies Eden",
+    "info_group_title": "📊 État des Cookies",
+    "import_group_title": "📂 Import Manuel",
+    "file_path_label": "Chemin du fichier :",
+    "file_path_placeholder": "Sélectionnez un fichier .pkl ou saisissez le chemin",
+    "generate_tooltip": "Ouvre un navigateur pour se connecter et récupérer les cookies",
+    "status_no_cookies": "❌ <b>Aucun cookie trouvé</b>",
+    "status_read_error": "⚠️ <b>Erreur de lecture</b>",
+    "status_expired": "⚠️ <b>Cookies expirés</b>",
+    "status_valid": "✅ <b>Cookies valides</b>",
+    "details_need_import": "Pour utiliser le scraper Eden, vous devez importer un fichier de cookies...",
+    "expiry_date": "📅 <b>Date d'expiration:</b> {date}",
+    "remaining_validity": "⏰ <b>Validité restante:</b> {days} jours",
+    "eden_access": "🌐 <b>Accès Eden :</b>",
+    "eden_connected": "<span style='color: green;'>✅ Connecté</span>",
+    "eden_testing": "<span style='color: gray;'>⏳ Test en cours...</span>",
+    "browse_dialog_title": "Sélectionner un fichier de cookies",
+    "import_success_message": "Les cookies ont été importés avec succès !",
+    "delete_confirm_message": "Êtes-vous sûr de vouloir supprimer les cookies ?\\n\\nUne sauvegarde sera créée automatiquement.",
+    "user_action_title": "En attente de connexion",
+    "user_action_header": "<b>Connectez-vous maintenant</b>",
+    "browser_opened_message": "Le navigateur {browser} est ouvert.\\n\\nConnectez-vous avec Discord, puis cliquez sur OK.",
+    "cookies_saved_success": "{count} cookies sauvegardés avec succès"
+    // ... 30+ more keys for error/success messages, dialogs, etc.
 }
 ```
 
@@ -860,7 +894,7 @@ def migrate_v1_to_v2(v1_data: dict) -> dict:
         v1_data: Flat dictionary with 417+ keys
     
     Returns:
-        Hierarchical v2 dictionary with 12 sections
+        Hierarchical v2 dictionary with 13 sections
     
     Process:
         1. Initialize v2 structure (12 empty sections)
@@ -1214,9 +1248,9 @@ grep -r "_unknown_v1_keys" Language/*.json
 ```
 Project Root
 ├── Language/
-│   ├── fr.json (v2, ~550 lines, 12 sections)
-│   ├── en.json (v2, ~550 lines, 12 sections)
-│   └── de.json (v2, ~550 lines, 12 sections)
+│   ├── fr.json (v2, ~550 lines, 13 sections)
+│   ├── en.json (v2, ~550 lines, 13 sections)
+│   └── de.json (v2, ~550 lines, 13 sections)
 │
 ├── Functions/
 │   ├── language_schema.py (NEW, ~600 lines)

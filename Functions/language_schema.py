@@ -173,6 +173,9 @@ LANGUAGE_LEGACY_MAPPING = {
     "eden_refresh_button": "buttons.eden_refresh",
     "eden_search_button": "buttons.eden_search",
     "eden_manage_button": "buttons.eden_manage",
+    "cookie_generate_button": "buttons.cookie_generate",
+    "cookie_delete_button": "buttons.cookie_delete",
+    "cookie_browse_button": "buttons.cookie_browse",
     
     # Columns (14 keys)
     "column_name": "columns.name",

@@ -3585,10 +3585,11 @@ class SearchThread(QThread):
     step_completed = Signal(int)  # (step_index) - NOUVEAU pour ProgressStepsDialog
     step_error = Signal(int, str)  # (step_index, error_message) - NOUVEAU pour ProgressStepsDialog
     
-    def __init__(self, character_name, realm_filter=""):
+    def __init__(self, character_name, realm_filter="", lang=None):
         super().__init__()
         self.character_name = character_name
         self.realm_filter = realm_filter
+        self.lang = lang
         self._stop_requested = False  # Flag pour arrêt gracieux
         self._scraper = None  # Référence au scraper pour cleanup externe
     
@@ -3871,7 +3872,10 @@ class SearchThread(QThread):
             
             # Stocker le succès (signal émis APRÈS Step 8 dans finally)
             result_success = True
-            result_message = f"{len(characters)} personnage(s) trouvé(s)"
+            if self.lang:
+                result_message = self.lang.get("herald_search.search_complete", count=len(characters), default=f"{len(characters)} personnage(s) trouvé(s)")
+            else:
+                result_message = f"{len(characters)} personnage(s) trouvé(s)"
             result_json_path = str(json_path)
             
         except Exception as e:
@@ -4468,7 +4472,10 @@ class HeraldSearchDialog(QDialog):
     
     def __init__(self, parent):
         super().__init__(parent)
-        self.setWindowTitle("🔍 Recherche Herald Eden")
+        from Functions.language_manager import lang
+        self.lang = lang
+        
+        self.setWindowTitle(lang.get("herald_search.window_title"))
         self.resize(700, 600)
         self.search_thread = None
         self.temp_json_path = None  # Stocke le chemin du fichier temp
@@ -4503,29 +4510,26 @@ class HeraldSearchDialog(QDialog):
         layout = QVBoxLayout(self)
         
         # Titre
-        title_label = QLabel("<h2>🔍 Recherche de Personnage</h2>")
+        title_label = QLabel(f"<h2>{self.lang.get('herald_search.title_label')}</h2>")
         title_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(title_label)
         
         # Description
-        desc_label = QLabel(
-            "Entrez le nom du personnage à rechercher sur le Herald Eden-DAOC.\n"
-            "Les résultats seront affichés ci-dessous."
-        )
+        desc_label = QLabel(self.lang.get("herald_search.description"))
         desc_label.setWordWrap(True)
         desc_label.setAlignment(Qt.AlignCenter)
         desc_label.setStyleSheet("color: gray; padding: 10px;")
         layout.addWidget(desc_label)
         
         # Groupe de recherche
-        search_group = QGroupBox("Recherche")
+        search_group = QGroupBox(self.lang.get("herald_search.search_group_title"))
         search_layout = QVBoxLayout()
         
         # Ligne 1 : Champ de saisie du nom
         input_layout = QHBoxLayout()
-        input_label = QLabel("Nom du personnage :")
+        input_label = QLabel(self.lang.get("herald_search.name_label"))
         self.name_input = QLineEdit()
-        self.name_input.setPlaceholderText("Minimum 3 caractères (ex: Alb, Tho, Ely...)")
+        self.name_input.setPlaceholderText(self.lang.get("herald_search.name_placeholder"))
         self.name_input.returnPressed.connect(self.start_search)
         input_layout.addWidget(input_label)
         input_layout.addWidget(self.name_input)
@@ -4533,9 +4537,9 @@ class HeraldSearchDialog(QDialog):
         
         # Ligne 2 : Sélection of the royaume
         realm_layout = QHBoxLayout()
-        realm_label = QLabel("Royaume :")
+        realm_label = QLabel(self.lang.get("herald_search.realm_label"))
         self.realm_combo = QComboBox()
-        self.realm_combo.addItem("Tous les royaumes", "")  # Par défaut
+        self.realm_combo.addItem(self.lang.get("herald_search.realm_all"), "")  # Par défaut
         if "Albion" in self.realm_combo_icons:
             self.realm_combo.addItem(self.realm_combo_icons["Albion"], "Albion", "alb")
         else:
@@ -4548,14 +4552,14 @@ class HeraldSearchDialog(QDialog):
             self.realm_combo.addItem(self.realm_combo_icons["Hibernia"], "Hibernia", "hib")
         else:
             self.realm_combo.addItem("🟢 Hibernia", "hib")
-        self.realm_combo.setToolTip("Sélectionnez un royaume pour affiner la recherche")
+        self.realm_combo.setToolTip(self.lang.get("herald_search.realm_tooltip"))
         realm_layout.addWidget(realm_label)
         realm_layout.addWidget(self.realm_combo)
         realm_layout.addStretch()
         search_layout.addLayout(realm_layout)
         
         # Statut
-        self.status_label = QLabel("Prêt à rechercher")
+        self.status_label = QLabel(self.lang.get("herald_search.status_ready"))
         self.status_label.setAlignment(Qt.AlignCenter)
         self.status_label.setStyleSheet("padding: 10px; border: 1px solid #ccc; border-radius: 5px;")
         search_layout.addWidget(self.status_label)
@@ -4564,7 +4568,7 @@ class HeraldSearchDialog(QDialog):
         layout.addWidget(search_group)
         
         # Zone of Results
-        results_group = QGroupBox("Résultats")
+        results_group = QGroupBox(self.lang.get("herald_search.results_group_title"))
         results_layout = QVBoxLayout()
         
         self.results_table = QTableWidget()
@@ -4577,7 +4581,17 @@ class HeraldSearchDialog(QDialog):
         self.results_table.customContextMenuRequested.connect(self.show_context_menu)
         
         # Configurer les colonnes (sans URL)
-        columns = ["☑", "Royaume", "Nom", "Classe", "Race", "Guilde", "Niveau", "RP", "Realm Rank"]
+        columns = [
+            self.lang.get("herald_search.column_check"),
+            self.lang.get("herald_search.column_realm"),
+            self.lang.get("herald_search.column_name"),
+            self.lang.get("herald_search.column_class"),
+            self.lang.get("herald_search.column_race"),
+            self.lang.get("herald_search.column_guild"),
+            self.lang.get("herald_search.column_level"),
+            self.lang.get("herald_search.column_rp"),
+            self.lang.get("herald_search.column_realm_rank")
+        ]
         self.results_table.setColumnCount(len(columns))
         self.results_table.setHorizontalHeaderLabels(columns)
         
@@ -4595,7 +4609,7 @@ class HeraldSearchDialog(QDialog):
         # Boutons
         button_layout = QHBoxLayout()
         
-        self.search_button = QPushButton("🔍 Rechercher")
+        self.search_button = QPushButton(self.lang.get("herald_search.search_button"))
         self.search_button.clicked.connect(self.start_search)
         self.search_button.setDefault(True)
         button_layout.addWidget(self.search_button)
@@ -4603,19 +4617,19 @@ class HeraldSearchDialog(QDialog):
         button_layout.addStretch()
         
         # Boutons d'import
-        self.import_selected_button = QPushButton("📥 Importer sélection")
+        self.import_selected_button = QPushButton(self.lang.get("herald_search.import_selected_button"))
         self.import_selected_button.clicked.connect(self.import_selected_characters)
         self.import_selected_button.setEnabled(False)
-        self.import_selected_button.setToolTip("Importer les personnages cochés")
+        self.import_selected_button.setToolTip(self.lang.get("herald_search.import_selected_tooltip"))
         button_layout.addWidget(self.import_selected_button)
         
-        self.import_all_button = QPushButton("📥 Importer tout")
+        self.import_all_button = QPushButton(self.lang.get("herald_search.import_all_button"))
         self.import_all_button.clicked.connect(self.import_all_characters)
         self.import_all_button.setEnabled(False)
-        self.import_all_button.setToolTip("Importer tous les personnages trouvés")
+        self.import_all_button.setToolTip(self.lang.get("herald_search.import_all_tooltip"))
         button_layout.addWidget(self.import_all_button)
         
-        close_button = QPushButton("Fermer")
+        close_button = QPushButton(self.lang.get("herald_search.close_button"))
         close_button.clicked.connect(self.accept)
         button_layout.addWidget(close_button)
         
@@ -4771,8 +4785,8 @@ class HeraldSearchDialog(QDialog):
         if not character_name:
             QMessageBox.warning(
                 self,
-                "Nom requis",
-                "Veuillez entrer un nom de personnage à rechercher."
+                self.lang.get("herald_search.name_required_title"),
+                self.lang.get("herald_search.name_required_message")
             )
             return
         
@@ -4780,8 +4794,8 @@ class HeraldSearchDialog(QDialog):
         if len(character_name) < 3:
             QMessageBox.warning(
                 self,
-                "Nom trop court",
-                "Veuillez entrer au moins 3 caractères pour la recherche."
+                self.lang.get("herald_search.name_too_short_title"),
+                self.lang.get("herald_search.name_too_short_message")
             )
             return
         
@@ -4806,11 +4820,11 @@ class HeraldSearchDialog(QDialog):
         # Construire le titre et la description
         realm_text = self.realm_combo.currentText()
         if realm_filter:
-            title = f"🔍 Recherche de '{character_name}' dans {realm_text}..."
-            description = f"Connexion à Eden Herald et recherche de personnages dans le royaume {realm_text}"
+            title = self.lang.get("herald_search.search_title_realm", name=character_name, realm=realm_text, default=f"🔍 Recherche de '{character_name}' dans {realm_text}...")
+            description = self.lang.get("herald_search.search_description_realm", realm=realm_text, default=f"Connexion à Eden Herald et recherche de personnages dans le royaume {realm_text}")
         else:
-            title = f"🔍 Recherche de '{character_name}' sur Eden Herald..."
-            description = "Connexion à Eden Herald et recherche de personnages dans tous les royaumes"
+            title = self.lang.get("herald_search.search_title_all", name=character_name, default=f"🔍 Recherche de '{character_name}' sur Eden Herald...")
+            description = self.lang.get("herald_search.search_description_all", default="Connexion à Eden Herald et recherche de personnages dans tous les royaumes")
         
         # Créer le dialogue de progression
         self.progress_dialog = ProgressStepsDialog(
@@ -4823,8 +4837,8 @@ class HeraldSearchDialog(QDialog):
             allow_cancel=False  # Pas d'annulation pour l'instant
         )
         
-        # Lancer le thread avec le filtre de royaume
-        self.search_thread = SearchThread(character_name, realm_filter)
+        # Lancer le thread avec le filtre de royaume et l'objet lang
+        self.search_thread = SearchThread(character_name, realm_filter, self.lang)
         
         # Connecter les NOUVEAUX signaux step_started/step_completed
         self.search_thread.step_started.connect(self._on_step_started)
@@ -4917,10 +4931,16 @@ class HeraldSearchDialog(QDialog):
         self.name_input.setEnabled(True)
         self.realm_combo.setEnabled(True)
         
-        if success:
+        if success and json_path:
             # Load and afficher the Results
             try:
                 import json
+                from pathlib import Path
+                
+                # Vérifier que le fichier existe
+                if not Path(json_path).exists():
+                    raise FileNotFoundError(f"Le fichier de résultats n'existe pas: {json_path}")
+                
                 with open(json_path, 'r', encoding='utf-8') as f:
                     data = json.load(f)
                 
@@ -5005,7 +5025,7 @@ class HeraldSearchDialog(QDialog):
                     
                     # Mettre à jour the message of statut with the nombre filtré
                     count = len(characters)
-                    self.status_label.setText(f"✅ {count} personnage(s) trouvé(s) commençant par '{search_query}'")
+                    self.status_label.setText(self.lang.get("herald_search.status_found", count=count, query=search_query))
                     self.status_label.setStyleSheet("padding: 10px; border: 1px solid #ccc; border-radius: 5px; color: green; font-weight: bold;")
                     
                     # Activer les boutons d'import
@@ -5017,20 +5037,20 @@ class HeraldSearchDialog(QDialog):
                     self.import_all_button.setEnabled(False)
                     self.import_selected_button.setEnabled(False)
                     # Afficher un message dans le statut
-                    self.status_label.setText(f"⚠️ Aucun personnage trouvé pour '{data['search_query']}'")
+                    self.status_label.setText(self.lang.get("herald_search.status_no_results", query=data['search_query']))
                     self.status_label.setStyleSheet("padding: 10px; border: 1px solid #ccc; border-radius: 5px; color: orange;")
                     
             except Exception as e:
                 self.current_characters = []
                 self.import_all_button.setEnabled(False)
                 self.import_selected_button.setEnabled(False)
-                self.status_label.setText(f"❌ Erreur de lecture: {str(e)}")
+                self.status_label.setText(self.lang.get("herald_search.status_read_error", error=str(e)))
                 self.status_label.setStyleSheet("padding: 10px; border: 1px solid #ccc; border-radius: 5px; color: red;")
         else:
             self.current_characters = []
             self.import_all_button.setEnabled(False)
             self.import_selected_button.setEnabled(False)
-            self.status_label.setText(f"❌ Erreur : {message}")
+            self.status_label.setText(self.lang.get("herald_search.status_search_error", message=message))
             self.status_label.setStyleSheet("padding: 10px; border: 1px solid #ccc; border-radius: 5px; color: red;")
             # Vider le tableau en cas d'erreur
             self.results_table.setRowCount(0)
@@ -5049,7 +5069,7 @@ class HeraldSearchDialog(QDialog):
         context_menu = QMenu(self)
         
         # Action d'import
-        import_action = context_menu.addAction("📥 Importer ce personnage")
+        import_action = context_menu.addAction(self.lang.get("herald_search.context_menu_import"))
         import_action.triggered.connect(lambda: self._import_single_character(row))
         
         # Afficher the menu à the position of the curseur
@@ -5066,8 +5086,8 @@ class HeraldSearchDialog(QDialog):
         char_name = char_data.get('clean_name', char_data.get('name', ''))
         reply = QMessageBox.question(
             self,
-            "Confirmer l'import",
-            f"Voulez-vous importer le personnage '{char_name}' ?",
+            self.lang.get("herald_search.confirm_import_single_title"),
+            self.lang.get("herald_search.confirm_import_single_message", name=char_name),
             QMessageBox.Yes | QMessageBox.No,
             QMessageBox.No
         )
@@ -5091,8 +5111,8 @@ class HeraldSearchDialog(QDialog):
         if not selected_chars:
             QMessageBox.warning(
                 self,
-                "Aucune sélection",
-                "Veuillez cocher au moins un personnage à importer."
+                self.lang.get("herald_search.no_selection_title"),
+                self.lang.get("herald_search.no_selection_message")
             )
             return
         
@@ -5100,8 +5120,8 @@ class HeraldSearchDialog(QDialog):
         count = len(selected_chars)
         reply = QMessageBox.question(
             self,
-            "Confirmer l'import",
-            f"Voulez-vous importer {count} personnage(s) sélectionné(s) ?",
+            self.lang.get("herald_search.confirm_import_selected_title"),
+            self.lang.get("herald_search.confirm_import_selected_message", count=count),
             QMessageBox.Yes | QMessageBox.No,
             QMessageBox.No
         )
@@ -5118,8 +5138,8 @@ class HeraldSearchDialog(QDialog):
         count = len(self.current_characters)
         reply = QMessageBox.question(
             self,
-            "Confirmer l'import",
-            f"Voulez-vous importer tous les {count} personnage(s) trouvé(s) ?",
+            self.lang.get("herald_search.confirm_import_all_title"),
+            self.lang.get("herald_search.confirm_import_all_message", count=count),
             QMessageBox.Yes | QMessageBox.No,
             QMessageBox.No
         )

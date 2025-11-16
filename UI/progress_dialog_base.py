@@ -10,7 +10,7 @@ Classes:
     - StepConfiguration: Configurations prédéfinies d'étapes réutilisables
     - ProgressStepsDialog: Dialogue de base avec système d'étapes configurables
 
-Version: 0.110
+Version: 0.108
 Date: 14 novembre 2025
 """
 
@@ -171,76 +171,76 @@ class StepConfiguration:
     
     # Étapes de connexion Herald (communes à beaucoup d'opérations)
     HERALD_CONNECTION = [
-        ProgressStep("🔐", "step_herald_connection_cookies", category="connection"),
-        ProgressStep("🌐", "step_herald_connection_init", category="connection"),
-        ProgressStep("🍪", "step_herald_connection_load", category="connection"),
+        ProgressStep("🔐", "progress.steps.herald_connection_cookies", category="connection"),
+        ProgressStep("🌐", "progress.steps.herald_connection_init", category="connection"),
+        ProgressStep("🍪", "progress.steps.herald_connection_load", category="connection"),
     ]
     
     # Initialisation simple du scraper (sans cookies/browser complet)
     SCRAPER_INIT = [
-        ProgressStep("🔌", "step_scraper_init", category="connection"),
+        ProgressStep("🔌", "progress.steps.scraper_init", category="connection"),
     ]
     
     # Étapes de recherche Herald
     HERALD_SEARCH = [
-        ProgressStep("🔍", "step_herald_search_search", category="scraping"),
-        ProgressStep("⏳", "step_herald_search_load", category="scraping"),
-        ProgressStep("📊", "step_herald_search_extract", category="scraping"),
-        ProgressStep("💾", "step_herald_search_save", category="processing"),
-        ProgressStep("🎯", "step_herald_search_format", category="processing"),
+        ProgressStep("🔍", "progress.steps.herald_search_search", category="scraping"),
+        ProgressStep("⏳", "progress.steps.herald_search_load", category="scraping"),
+        ProgressStep("📊", "progress.steps.herald_search_extract", category="scraping"),
+        ProgressStep("💾", "progress.steps.herald_search_save", category="processing"),
+        ProgressStep("🎯", "progress.steps.herald_search_format", category="processing"),
     ]
     
     # Étapes de mise à jour stats
     STATS_SCRAPING = [
-        ProgressStep("🏰", "step_stats_scraping_rvr", category="scraping"),
-        ProgressStep("⚔️", "step_stats_scraping_pvp", category="scraping"),
-        ProgressStep("🐉", "step_stats_scraping_pve", category="scraping"),
-        ProgressStep("💰", "step_stats_scraping_wealth", category="scraping"),
-        ProgressStep("🏆", "step_stats_scraping_achievements", conditional=True, category="scraping"),
+        ProgressStep("🏰", "progress.steps.stats_scraping_rvr", category="scraping"),
+        ProgressStep("⚔️", "progress.steps.stats_scraping_pvp", category="scraping"),
+        ProgressStep("🐉", "progress.steps.stats_scraping_pve", category="scraping"),
+        ProgressStep("💰", "progress.steps.stats_scraping_wealth", category="scraping"),
+        ProgressStep("🏆", "progress.steps.stats_scraping_achievements", conditional=True, category="scraping"),
     ]
     
     # Étapes de mise à jour personnage (ANCIENNE VERSION - 3 étapes)
     # Cette config est pour un workflow différent
     CHARACTER_UPDATE_SIMPLE = [
-        ProgressStep("🔍", "Scraping de la page personnage", category="scraping"),
-        ProgressStep("📊", "Comparaison des données", category="processing"),
-        ProgressStep("💾", "Application des modifications", category="processing"),
+        ProgressStep("🔍", "progress.steps.character_update_simple_scraping", category="scraping"),
+        ProgressStep("📊", "progress.steps.character_update_simple_comparison", category="processing"),
+        ProgressStep("💾", "progress.steps.character_update_simple_apply", category="processing"),
     ]
     
     # Étapes de mise à jour personnage depuis Herald (NOUVELLE VERSION - 8 étapes complètes)
     CHARACTER_UPDATE = [
-        ProgressStep("📝", "step_character_update_extract_name", category="connection"),
-        ProgressStep("🌐", "step_character_update_init", category="connection"),
-        ProgressStep("🍪", "step_character_update_load_cookies", category="connection"),
-        ProgressStep("🔍", "step_character_update_navigate", category="scraping"),
-        ProgressStep("⏳", "step_character_update_wait", category="scraping"),
-        ProgressStep("📊", "step_character_update_extract_data", category="scraping"),
-        ProgressStep("🎯", "step_character_update_format", category="processing"),
-        ProgressStep("🔄", "step_character_update_close", category="cleanup"),
+        ProgressStep("📝", "progress.steps.character_update_extract_name", category="connection"),
+        ProgressStep("🌐", "progress.steps.character_update_init", category="connection"),
+        ProgressStep("🍪", "progress.steps.character_update_load_cookies", category="connection"),
+        ProgressStep("🔍", "progress.steps.character_update_navigate", category="scraping"),
+        ProgressStep("⏳", "progress.steps.character_update_wait", category="scraping"),
+        ProgressStep("📊", "progress.steps.character_update_extract_data", category="scraping"),
+        ProgressStep("🎯", "progress.steps.character_update_format", category="processing"),
+        ProgressStep("🔄", "progress.steps.character_update_close", category="cleanup"),
     ]
     
     # Étapes de génération de cookies (PAS de connexion Herald)
     COOKIE_GENERATION = [
-        ProgressStep("⚙️", "step_cookie_gen_config", category="setup"),
-        ProgressStep("🌐", "step_cookie_gen_open", category="setup"),
-        ProgressStep("👤", "step_cookie_gen_wait_user", category="interactive"),
-        ProgressStep("🍪", "step_cookie_gen_extract", category="processing"),
-        ProgressStep("💾", "step_cookie_gen_save", category="processing"),
-        ProgressStep("✅", "step_cookie_gen_validate", category="processing"),
+        ProgressStep("⚙️", "progress.steps.cookie_gen_config", category="setup"),
+        ProgressStep("🌐", "progress.steps.cookie_gen_open", category="setup"),
+        ProgressStep("👤", "progress.steps.cookie_gen_wait_user", category="interactive"),
+        ProgressStep("🍪", "progress.steps.cookie_gen_extract", category="processing"),
+        ProgressStep("💾", "progress.steps.cookie_gen_save", category="processing"),
+        ProgressStep("✅", "progress.steps.cookie_gen_validate", category="processing"),
     ]
     
     # Étapes de richesse multi-royaumes
     WEALTH_MULTI_REALM = [
-        ProgressStep("🔍", "Recherche des personnages par royaume", category="scraping"),
-        ProgressStep("🔴", "Scraping Albion", conditional=True, category="scraping"),
-        ProgressStep("🔵", "Scraping Midgard", conditional=True, category="scraping"),
-        ProgressStep("🟢", "Scraping Hibernia", conditional=True, category="scraping"),
-        ProgressStep("💰", "Calcul du total", category="processing"),
+        ProgressStep("🔍", "progress.steps.wealth_search_characters", category="scraping"),
+        ProgressStep("🔴", "progress.steps.wealth_scraping_albion", conditional=True, category="scraping"),
+        ProgressStep("🔵", "progress.steps.wealth_scraping_midgard", conditional=True, category="scraping"),
+        ProgressStep("🟢", "progress.steps.wealth_scraping_hibernia", conditional=True, category="scraping"),
+        ProgressStep("💰", "progress.steps.wealth_calculate_total", category="processing"),
     ]
     
     # Étape de fermeture (commune)
     CLEANUP = [
-        ProgressStep("🔄", "step_cleanup", category="cleanup"),
+        ProgressStep("🧹", "progress.steps.cleanup", category="cleanup"),
     ]
     
     @classmethod
@@ -418,7 +418,8 @@ class ProgressStepsDialog(QDialog):
             self.progress_bar = None
         
         # Message de statut
-        self.status_label = QLabel("⏳ Opération en cours...")
+        from Functions.language_manager import lang
+        self.status_label = QLabel(lang.get("progress.operation_in_progress", default="⏳ Opération en cours..."))
         self.status_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.status_label.setStyleSheet(
             "padding: 10px; "
@@ -433,7 +434,8 @@ class ProgressStepsDialog(QDialog):
             button_layout = QHBoxLayout()
             button_layout.addStretch()
             
-            self.cancel_button = QPushButton("Annuler")
+            from Functions.language_manager import lang
+            self.cancel_button = QPushButton(lang.get("buttons.cancel", default="Annuler"))
             self.cancel_button.clicked.connect(self._on_cancel_clicked)
             button_layout.addWidget(self.cancel_button)
             button_layout.addStretch()
@@ -446,9 +448,11 @@ class ProgressStepsDialog(QDialog):
         """Gestion du clic sur le bouton Annuler"""
         if self.cancel_button:
             self.cancel_button.setEnabled(False)
-            self.cancel_button.setText("Annulation...")
+            from Functions.language_manager import lang
+            self.cancel_button.setText(lang.get("progress.canceling", default="Annulation..."))
         
-        self.set_status_message("⚠️ Annulation en cours...", "#FF9800")
+        from Functions.language_manager import lang
+        self.set_status_message(lang.get("progress.cancellation_in_progress", default="⚠️ Annulation en cours..."), "#FF9800")
         self.canceled.emit()
     
     def update_step(
@@ -534,7 +538,8 @@ class ProgressStepsDialog(QDialog):
         
         if reason:
             # Ajouter la raison au tooltip
-            self.step_labels[step_index].setToolTip(f"Sauté: {reason}")
+            from Functions.language_manager import lang
+            self.step_labels[step_index].setToolTip(lang.get("progress.skipped_reason", reason=reason, default=f"Sauté: {reason}"))
     
     def error_step(self, step_index: int, error_message: Optional[str] = None):
         """
@@ -548,15 +553,18 @@ class ProgressStepsDialog(QDialog):
         
         if error_message:
             # Ajouter le message d'erreur au tooltip
-            self.step_labels[step_index].setToolTip(f"Erreur: {error_message}")
+            from Functions.language_manager import lang
+            self.step_labels[step_index].setToolTip(lang.get("progress.error_reason", error=error_message, default=f"Erreur: {error_message}"))
         
         # Mettre à jour le message de statut
+        from Functions.language_manager import lang
+        default_error = lang.get("progress.operation_failed", default="Opération échouée")
         self.set_status_message(
-            f"❌ Erreur: {error_message if error_message else 'Opération échouée'}", 
+            lang.get("progress.error_message", error=error_message if error_message else default_error, default=f"❌ Erreur: {error_message if error_message else default_error}"), 
             "#F44336"
         )
     
-    def complete_all(self, success_message: str = "✅ Opération terminée avec succès !"):
+    def complete_all(self, success_message: Optional[str] = None):
         """
         Marque toutes les étapes comme terminées.
         
@@ -567,6 +575,11 @@ class ProgressStepsDialog(QDialog):
         for i, step in enumerate(self.steps):
             if step.is_pending() or step.is_running():
                 self.complete_step(i)
+        
+        # Message par défaut si non fourni
+        if success_message is None:
+            from Functions.language_manager import lang
+            success_message = lang.get("progress.operation_completed", default="✅ Opération terminée avec succès !")
         
         # Mettre à jour le message de statut
         self.set_status_message(success_message, "#4CAF50")

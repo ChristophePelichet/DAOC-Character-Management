@@ -508,7 +508,78 @@ The v2 structure organizes translations into 12 logical sections:
 }
 ```
 
-#### 12. Other sections
+#### 12. **herald_search** (Herald search dialog)
+```json
+"herald_search": {
+    "window_title": "🔍 Recherche Herald Eden",
+    "title_label": "🔍 Recherche de Personnage",
+    "description": "Entrez le nom du personnage à rechercher sur le Herald Eden-DAOC.\nLes résultats seront affichés ci-dessous.",
+    "search_group_title": "Recherche",
+    "name_label": "Nom du personnage :",
+    "name_placeholder": "Minimum 3 caractères (ex: Alb, Tho, Ely...)",
+    "realm_label": "Royaume :",
+    "realm_all": "Tous les royaumes",
+    "realm_tooltip": "Sélectionnez un royaume pour affiner la recherche",
+    "status_ready": "Prêt à rechercher",
+    "results_group_title": "Résultats",
+    "column_check": "☑",
+    "column_realm": "Royaume",
+    "column_name": "Nom",
+    "column_class": "Classe",
+    "column_race": "Race",
+    "column_guild": "Guilde",
+    "column_level": "Niveau",
+    "column_rp": "RP",
+    "column_realm_rank": "Realm Rank",
+    "search_button": "🔍 Rechercher",
+    "import_selected_button": "📥 Importer sélection",
+    "import_selected_tooltip": "Importer les personnages cochés",
+    "import_all_button": "📥 Importer tout",
+    "import_all_tooltip": "Importer tous les personnages trouvés",
+    "close_button": "Fermer",
+    "status_found": "✅ {count} personnage(s) trouvé(s) commençant par '{query}'",
+    "status_no_results": "⚠️ Aucun personnage trouvé pour '{query}'",
+    "status_read_error": "❌ Erreur de lecture: {error}",
+    "status_search_error": "❌ Erreur : {message}",
+    "context_menu_import": "📥 Importer ce personnage",
+    "name_required_title": "Nom requis",
+    "name_required_message": "Veuillez entrer un nom de personnage à rechercher.",
+    "name_too_short_title": "Nom trop court",
+    "name_too_short_message": "Veuillez entrer au moins 3 caractères pour la recherche.",
+    "confirm_import_single_title": "Confirmer l'import",
+    "confirm_import_single_message": "Voulez-vous importer le personnage '{name}' ?",
+    "no_selection_title": "Aucune sélection",
+    "no_selection_message": "Veuillez cocher au moins un personnage à importer.",
+    "confirm_import_selected_title": "Confirmer l'import",
+    "confirm_import_selected_message": "Voulez-vous importer {count} personnage(s) sélectionné(s) ?",
+    "confirm_import_all_title": "Confirmer l'import",
+    "confirm_import_all_message": "Voulez-vous importer tous les {count} personnage(s) trouvé(s) ?",
+    "search_title_realm": "🔍 Recherche de '{name}' dans {realm}...",
+    "search_description_realm": "Connexion à Eden Herald et recherche de personnages dans le royaume {realm}",
+    "search_title_all": "🔍 Recherche de '{name}' sur Eden Herald...",
+    "search_description_all": "Connexion à Eden Herald et recherche de personnages dans tous les royaumes",
+    "search_complete": "{count} personnage(s) trouvé(s)"
+}
+```
+
+**Usage in SearchThread:**
+```python
+# In SearchThread, lang object is passed from HeraldSearchDialog
+class SearchThread(QThread):
+    def __init__(self, character_name, realm_filter="", lang=None):
+        super().__init__()
+        self.lang = lang  # LanguageManager instance from parent dialog
+    
+    def run(self):
+        # Use self.lang for translations in thread context
+        result_message = self.lang.get(
+            "herald_search.search_complete", 
+            count=len(characters),
+            default=f"{len(characters)} personnage(s) trouvé(s)"
+        )
+```
+
+#### 13. Other sections
 ```json
 "status_bar": {
     "loaded": "Prêt. Chargé en {duration:.2f} secondes.",

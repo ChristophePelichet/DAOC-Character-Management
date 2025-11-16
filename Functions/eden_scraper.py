@@ -648,7 +648,8 @@ def search_herald_character(character_name, realm_filter=""):
             }, f, indent=2, ensure_ascii=False)
         
         char_count = len(characters)
-        message = f"{char_count} personnage(s) trouvé(s)"
+        from Functions.language_manager import lang
+        message = lang.get("herald_search.search_complete", count=char_count, default=f"{char_count} personnage(s) trouvé(s)")
         
         module_logger.info(f"Recherche terminée: {char_count} personnages trouvés", extra={"action": "SEARCH"})
         module_logger.info(f"Résultats sauvegardés dans: {characters_path}", extra={"action": "SEARCH"})

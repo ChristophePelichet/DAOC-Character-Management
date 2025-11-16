@@ -20,8 +20,12 @@ a = Analysis(
         'Functions.character_actions_manager',
         'Functions.character_manager',
         'Functions.config_manager',
+        'Functions.config_schema',        # Config v2 schema (NEW)
+        'Functions.config_migration',     # Config v2 migration (NEW)
         'Functions.data_manager',
         'Functions.language_manager',
+        'Functions.language_schema',      # Language v2 schema (NEW)
+        'Functions.language_migration',   # Language v2 migration (NEW)
         'Functions.logging_manager',
         'Functions.migration_manager',
         'Functions.path_manager',

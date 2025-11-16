@@ -92,17 +92,18 @@ The language system was restructured from a **flat 417-key format** to a **hiera
 
 | File | Keys (v1) | Keys (v2) | Unknown Keys | Status |
 |------|-----------|-----------|--------------|--------|
-| `Language/fr.json` | 417 | Hierarchical | 0 | ✅ Complete |
-| `Language/en.json` | 418 | Hierarchical | 0 | ✅ Complete |
-| `Language/de.json` | 418 | Hierarchical | 0 | ✅ Complete |
+| `Language/fr.json` | 396 | Hierarchical | 0 | ✅ Complete |
+| `Language/en.json` | 397 | Hierarchical | 0 | ✅ Complete |
+| `Language/de.json` | 397 | Hierarchical | 0 | ✅ Complete |
 
 ### Migration Statistics
 
-- **Total v1→v2 mappings**: 421 keys
+- **Total v1→v2 mappings**: 399 keys (22 migration.* keys removed)
 - **Backups created**: 6 (2 iterations × 3 files)
 - **Unknown keys found**: 4 (first pass) → 0 (final pass)
 - **Migration success rate**: 100%
 - **Code compatibility**: 100% (530+ existing `lang.get()` calls work)
+- **Cleanup (Nov 16, 2025)**: Removed obsolete migration.* keys (old popup system replaced by automatic silent migration)
 
 ### Timeline
 
@@ -271,13 +272,6 @@ The v2 structure organizes translations into 12 logical sections:
         "confirm_title": "Confirmer la suppression",
         "confirm_message": "Êtes-vous sûr de vouloir supprimer définitivement le personnage '{name}' ? Cette action est irréversible.",
         "bulk_confirm_message": "..."
-    },
-    "migration": {
-        "startup_title": "Migration de structure requise / ...",
-        "confirm_title": "Confirmer la migration",
-        "in_progress": "Migration en cours...",
-        "success": "Migration réussie !",
-        // ... more migration messages
     },
     "about": { /* ... */ },
     "disclaimer": { /* ... */ },

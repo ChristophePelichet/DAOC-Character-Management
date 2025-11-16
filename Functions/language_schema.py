@@ -105,28 +105,6 @@ LANGUAGE_LEGACY_MAPPING = {
     "disclaimer_title": "dialogs.disclaimer.title",
     "disclaimer_message": "dialogs.disclaimer.message",
     
-    # Dialogs - Migration (12 keys)
-    "migration_startup_title": "dialogs.migration.startup_title",
-    "migration_confirm_title": "dialogs.migration.confirm_title",
-    "migration_confirm_message": "dialogs.migration.confirm_message",
-    "migration_in_progress": "dialogs.migration.in_progress",
-    "migration_success": "dialogs.migration.success",
-    "migration_error": "dialogs.migration.error",
-    "migration_cancelled_title": "dialogs.migration.cancelled_title",
-    "migration_cancelled_message": "dialogs.migration.cancelled_message",
-    "migration_dialog_title": "dialogs.migration.confirm_title",
-    "migration_startup_message_fr": "dialogs.migration.startup_message_fr",
-    "migration_startup_message_en": "dialogs.migration.startup_message_en",
-    "migration_startup_message_de": "dialogs.migration.startup_message_de",
-    "migration_backup_location": "dialogs.migration.backup_location",
-    "migration_warning": "dialogs.migration.warning",
-    "migration_question": "dialogs.migration.question",
-    "migration_backup_info": "dialogs.migration.backup_info",
-    "migration_path_change_title": "dialogs.migration.path_change_title",
-    "migration_path_change_message": "dialogs.migration.path_change_message",
-    "migration_path_change_question": "dialogs.migration.path_change_question",
-    "migration_path_change_later": "dialogs.migration.path_change_later",
-    
     # Dialogs - Move Folder (8 keys)
     "move_folder_select_destination": "dialogs.move_folder.select_destination",
     "move_folder_name_title": "dialogs.move_folder.name_title",
@@ -436,11 +414,9 @@ LANGUAGE_LEGACY_MAPPING = {
     # Progress - General (1 key)
     "progress_error": "progress.error",
     
-    # Additional missing keys (4 keys)
+    # Additional missing keys (2 keys)
     "config_eden_debug_group_title": "settings.groups.eden_debug",
     "update_char_progress": "progress.character_update.in_progress",
-    "migration_rollback_info": "dialogs.migration.rollback_info",
-    "migration_data_safe": "dialogs.migration.data_safe",
     
     # Messages - Errors (14 keys)
     "char_name_empty_error": "messages.errors.char_name_empty",

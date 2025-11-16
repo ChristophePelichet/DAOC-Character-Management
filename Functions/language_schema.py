@@ -522,9 +522,8 @@ LANGUAGE_LEGACY_MAPPING = {
     "realm_hibernia": "realms.hibernia",
     "realm_midgard": "realms.midgard",
     
-    # Misc (5 keys)
+    # Misc (1 key)
     "none_option": "misc.none",
-    "qdarkstyle_not_found_tooltip": "misc.qdarkstyle_not_found_tooltip",
     
     # Tooltips (7 keys)
     "create_char_tooltip": "tooltips.create_char",

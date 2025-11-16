@@ -187,7 +187,7 @@ The v2 structure organizes translations into 12 logical sections:
     "debug": { /* Debug window (10 keys) */ },
     "themes": { /* Theme names (3 keys) */ },
     "realms": { /* Realm names (3 keys) */ },
-    "misc": { /* Miscellaneous (5 keys) */ },
+    "misc": { /* Miscellaneous (1 key) */ },
     "tooltips": { /* Hover tooltips (5 keys) */ },
     "version_check": { /* Version checker (8 keys) */ }
 }

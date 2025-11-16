@@ -132,8 +132,7 @@
         }
     },
     "misc": {
-        "none": "Keine",
-        "qdarkstyle_not_found_tooltip": "Modul 'qdarkstyle' nicht gefunden. Führen Sie 'pip install qdarkstyle' aus, um das dunkle Thema zu aktivieren."
+        "none": "Keine"
     },
     "buttons": {
         "create": "Neuer Charakter",

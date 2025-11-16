@@ -132,8 +132,7 @@
         }
     },
     "misc": {
-        "none": "Aucun",
-        "qdarkstyle_not_found_tooltip": "Module 'qdarkstyle' non trouvé. Exécutez 'pip install qdarkstyle' pour activer le thème sombre."
+        "none": "Aucun"
     },
     "buttons": {
         "create": "Nouveau personnage",

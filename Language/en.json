@@ -132,8 +132,7 @@
         }
     },
     "misc": {
-        "none": "None",
-        "qdarkstyle_not_found_tooltip": "Module 'qdarkstyle' not found. Run 'pip install qdarkstyle' to enable the dark theme."
+        "none": "None"
     },
     "buttons": {
         "create": "New character",

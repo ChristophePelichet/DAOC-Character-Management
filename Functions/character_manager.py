@@ -9,6 +9,51 @@ from Functions.logging_manager import get_logger, log_with_action, LOGGER_CHARAC
 # Get CHARACTER logger
 logger = get_logger(LOGGER_CHARACTER)
 
+# ============================================================================
+# AUTOMATIC CHARACTER FILE MIGRATION
+# ============================================================================
+
+def _run_character_migration():
+    """
+    Runs automatic character file migration at startup.
+    Migrates from old structure (Characters/Realm/) to new structure (Characters/Season/Realm/).
+    
+    This function is called automatically when the character_manager module is loaded.
+    Migration is silent and transparent to the user:
+    - Creates backup before migration
+    - Validates all data
+    - Rolls back on any error
+    - Only runs once (flag file prevents re-runs)
+    """
+    try:
+        from Functions.character_migration import run_migration
+        
+        # Run migration silently
+        success, message, stats = run_migration(silent=True)
+        
+        if success:
+            status = stats.get("status", "migrated")
+            if status == "already_done":
+                logger.debug("Character migration: Already completed")
+            elif status == "nothing_to_migrate":
+                logger.debug("Character migration: No old structure detected")
+            else:
+                migrated = stats.get("migrated", 0)
+                logger.info(f"Character migration: Successfully migrated {migrated} character(s)")
+        else:
+            # Log error but don't block application startup
+            logger.error(f"Character migration failed: {message}")
+            
+    except ImportError:
+        # Migration module not available (should not happen in production)
+        logger.warning("Character migration module not found, skipping migration")
+    except Exception as e:
+        # Unexpected error during migration - log but don't block startup
+        logger.error(f"Unexpected error during character migration: {e}")
+
+# Run migration automatically when module is loaded
+_run_character_migration()
+
 # Lazy load to avoid circular imports
 _data_manager = None
 

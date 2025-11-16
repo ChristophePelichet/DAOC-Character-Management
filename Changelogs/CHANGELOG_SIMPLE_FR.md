@@ -2,6 +2,16 @@
 
 # ✨ v0.108
 
+### 🎉 Nouveautés
+- 💾 **Migration Automatique des Personnages** : Restructuration intelligente des dossiers sans intervention
+  - 🔄 Détection et migration automatique : Characters/Royaume/ → Characters/Saison/Royaume/
+  - 💾 Sauvegarde ZIP automatique avant migration avec validation complète
+  - ✅ Vérification et normalisation de chaque fichier personnage
+  - ⚙️ Exécution silencieuse au démarrage (aucune popup, aucune confirmation)
+  - 🛡️ Annulation automatique en cas de problème (données préservées)
+  - 📊 Suivi dans config.json pour éviter les migrations multiples
+  - 🗑️ Suppression de l'ancien système avec popup (63 traductions obsolètes retirées)
+
 ### 🐛 Corrections
 - 🌍 **Traductions Dynamiques** : Section version se met à jour sans redémarrage lors du changement de langue
 - 🌍 **Import Herald** : Titre "Import terminé" s'affiche correctement (au lieu du nom de clé)

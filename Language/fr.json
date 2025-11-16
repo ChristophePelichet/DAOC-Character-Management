@@ -64,29 +64,6 @@
             "title": "À propos des statistiques",
             "message": "ℹ️ Information importante\n\nLes statistiques affichées (RvR, PvP, PvE et Monnaie) sont cumulatives depuis la création du personnage.\n\n📊 Données globales :\n• Total depuis la création du personnage\n• Pas de réinitialisation par saison\n• Historique complet de toutes les actions\n\n🌐 Source des données :\nLe site Herald d'Eden ne fournit pas les statistiques par saison, uniquement le cumul total de toute l'existence du personnage.\n\nCela signifie que les valeurs affichées représentent l'ensemble de votre parcours sur ce personnage, toutes saisons confondues."
         },
-        "migration": {
-            "confirm_title": "Confirmer la migration",
-            "in_progress": "Migration en cours...",
-            "success": "Migration réussie !",
-            "error": "Erreur de migration",
-            "confirm_message": "Cette opération va réorganiser vos dossiers de personnages.\n\nAncienne structure : Characters/Royaume/Personnage\nNouvelle structure : Characters/Saison/Royaume/Personnage\n\nVoulez-vous continuer ?",
-            "startup_title": "Migration de structure requise / Structure Migration Required / Strukturmigration erforderlich",
-            "startup_message_fr": "🇫🇷 FRANÇAIS :\nSuite à une modification de structure dans le répertoire des personnages, l'application va restructurer le répertoire \"Characters\".\n\n📁 Ancienne structure : Characters/Royaume/Personnage.json\n📁 Nouvelle structure : Characters/Saison/Royaume/Personnage.json",
-            "startup_message_en": "🇬🇧 ENGLISH:\nDue to a structure modification in the character directory, the application will restructure the \"Characters\" folder.\n\n📁 Old structure: Characters/Realm/Character.json\n📁 New structure: Characters/Season/Realm/Character.json",
-            "startup_message_de": "🇩🇪 DEUTSCH:\nAufgrund einer Strukturänderung im Charakterverzeichnis wird die Anwendung das \"Characters\"-Verzeichnis umstrukturieren.\n\n📁 Alte Struktur: Characters/Realm/Character.json\n📁 Neue Struktur: Characters/Season/Realm/Character.json",
-            "backup_location": "Emplacement de la sauvegarde :",
-            "rollback_info": "Annulation des modifications en cours pour préserver vos données...",
-            "data_safe": "Vos données originales sont en sécurité",
-            "warning": "⚠️ Si vous cliquez sur 'Annuler', l'application se fermera sans effectuer de modifications.\n⚠️ If you click 'Cancel', the application will close without making any changes.\n⚠️ Wenn Sie auf 'Abbrechen' klicken, wird die Anwendung geschlossen, ohne Änderungen vorzunehmen.",
-            "question": "Voulez-vous continuer avec la migration ?\nDo you want to proceed with the migration?\nMöchten Sie mit der Migration fortfahren?",
-            "cancelled_title": "Migration annulée / Migration Cancelled / Migration abgebrochen",
-            "cancelled_message": "🇫🇷 Migration annulée, fermeture du programme.\n\n🇬🇧 Migration cancelled, closing program.\n\n🇩🇪 Migration abgebrochen, Programm wird geschlossen.",
-            "backup_info": "Sauvegarde en cours...",
-            "path_change_title": "⚠️ Migration requise",
-            "path_change_message": "Le nouveau dossier de personnages utilise l'ancienne structure.\n\n📁 Structure détectée : Characters/Royaume/\n✅ Structure requise : Characters/Saison/Royaume/\n\nVeuillez relancer l'application pour effectuer la migration automatique.\nUne sauvegarde ZIP sera créée avant la migration.",
-            "path_change_question": "Le nouveau dossier de personnages utilise l'ancienne structure.\n\n📁 Structure détectée : Characters/Royaume/\n✅ Structure requise : Characters/Saison/Royaume/\n\nVoulez-vous effectuer la migration maintenant ?\n💾 Une sauvegarde ZIP sera créée automatiquement avant la migration.",
-            "path_change_later": "Migration reportée. Vous pouvez effectuer la migration plus tard via le menu Aide > Migrer la structure des dossiers."
-        },
         "disclaimer": {
             "title": "Alpha Version / Version Alpha / Alpha-Version",
             "message": "🇫🇷 FRANÇAIS :\nCe logiciel est une version Alpha en cours de programmation.\nIl est donc soumis à des changements.\n\nCette application est un outil de gestion de personnages pour Dark Age of Camelot.\nLes données sont stockées localement sur votre machine.\n\n🇬🇧 ENGLISH:\nThis software is an Alpha version currently under development.\nIt is therefore subject to changes.\n\nThis application is a character management tool for Dark Age of Camelot.\nData is stored locally on your machine.\n\n🇩🇪 DEUTSCH:\nDiese Software ist eine Alpha-Version, die sich derzeit in der Entwicklung befindet.\nSie unterliegt daher Änderungen.\n\nDiese Anwendung ist ein Charakterverwaltungstool für Dark Age of Camelot.\nDaten werden lokal auf Ihrem Computer gespeichert.\n\n───────────────────────────────\nVous pouvez désactiver ce message dans Paramètres > Divers.\nYou can disable this message in Settings > Miscellaneous.\nSie können diese Meldung in Einstellungen > Verschiedenes deaktivieren."

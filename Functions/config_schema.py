@@ -63,6 +63,10 @@ DEFAULT_CONFIG = {
         "seasons": ["S3"],
         "default_season": "S3",
         "default_realm": None
+    },
+    "migrations": {
+        "character_structure_done": False,
+        "character_structure_date": None
     }
 }
 

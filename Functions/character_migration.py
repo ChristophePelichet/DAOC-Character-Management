@@ -33,6 +33,7 @@ try:
         get_character_info_summary,
         VALID_REALMS
     )
+    from Functions.config_manager import config
 except ImportError:
     from character_schema import (
         validate_character_data,
@@ -42,6 +43,7 @@ except ImportError:
         get_character_info_summary,
         VALID_REALMS
     )
+    config = None  # For standalone testing
 
 # Setup logging
 logger = logging.getLogger(__name__)
@@ -52,7 +54,6 @@ logger = logging.getLogger(__name__)
 
 CHARACTERS_DIR = "Characters"
 BACKUP_DIR = "Backup/Characters"
-MIGRATION_FLAG = os.path.join(CHARACTERS_DIR, ".migration_done")
 
 # ============================================================================
 # DETECTION FUNCTIONS
@@ -84,27 +85,50 @@ def detect_old_structure() -> bool:
 
 def is_migration_done() -> bool:
     """
-    Checks if migration has already been completed.
+    Checks if migration has already been completed by reading config.json.
     
     Returns:
-        bool: True if migration flag exists, False otherwise
+        bool: True if migration flag is set in config, False otherwise
     """
-    exists = os.path.exists(MIGRATION_FLAG)
-    if exists:
-        logger.debug(f"Migration flag found: {MIGRATION_FLAG}")
-    return exists
+    if config is None:
+        logger.warning("Config manager not available, assuming migration not done")
+        return False
+    
+    # Check migrations.character_structure_done flag in config
+    try:
+        migrations = config.get("migrations", {})
+        done = migrations.get("character_structure_done", False)
+        if done:
+            date = migrations.get("character_structure_date", "unknown")
+            logger.debug(f"Migration flag found in config.json (completed: {date})")
+        return done
+    except Exception as e:
+        logger.error(f"Error checking migration status: {e}")
+        return False
 
 def mark_migration_done():
     """
-    Creates migration completion flag file.
+    Marks migration as complete in config.json.
     """
-    os.makedirs(CHARACTERS_DIR, exist_ok=True)
+    if config is None:
+        logger.error("Config manager not available, cannot mark migration as done")
+        return
     
-    with open(MIGRATION_FLAG, 'w', encoding='utf-8') as f:
-        f.write(f"Migration completed: {datetime.now().isoformat()}\n")
-        f.write(f"Old structure (Characters/Realm/) migrated to new structure (Characters/Season/Realm/)\n")
-    
-    logger.info(f"Migration flag created: {MIGRATION_FLAG}")
+    try:
+        # Ensure migrations section exists
+        if "migrations" not in config.config:
+            config.config["migrations"] = {}
+        
+        # Set migration flags
+        config.config["migrations"]["character_structure_done"] = True
+        config.config["migrations"]["character_structure_date"] = datetime.now().isoformat()
+        
+        # Save config
+        config.save_config()
+        
+        logger.info("Migration marked as complete in config.json")
+    except Exception as e:
+        logger.error(f"Failed to mark migration as done: {e}")
 
 # ============================================================================
 # BACKUP FUNCTIONS

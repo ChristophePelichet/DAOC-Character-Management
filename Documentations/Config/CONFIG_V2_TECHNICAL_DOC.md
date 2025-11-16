@@ -35,12 +35,13 @@ Configuration v2 introduces a **hierarchical structure** to improve:
 
 | Aspect | v1 (Old) | v2 (New) |
 |--------|----------|----------|
-| **Structure** | Flat (37 keys at root) | Hierarchical (5 sections) |
+| **Structure** | Flat (37 keys at root) | Hierarchical (6 sections) |
 | **Access** | `config.get("language")` | `config.get("ui.language")` |
 | **Organization** | None | Logical by domain |
 | **Validation** | Manual | Automatic with schema |
 | **Migration** | Manual | Automatic with backup |
 | **Backup settings** | 1 single section | 3 subsections (characters/cookies/armor) |
+| **Migration tracking** | None | Stored in migrations section |
 | **Compatibility** | N/A | 100% backward compatible with v1 |
 
 ---
@@ -186,6 +187,10 @@ DEFAULT_CONFIG = {
         "seasons": ["S3"],                   # Available seasons
         "default_season": "S3",              # Default season
         "default_realm": None                # Default realm
+    },
+    "migrations": {
+        "character_structure_done": False,  # Character migration completed
+        "character_structure_date": None    # Character migration date (ISO)
     }
 }
 ```
@@ -581,6 +586,9 @@ ui_settings = config.get_section("ui")
 
 # Read with deep navigation
 backup_path = config.get("backup.characters.path")
+
+# Check migration status
+migration_done = config.get("migrations.character_structure_done", False)
 ```
 
 #### Writing Configuration
@@ -674,6 +682,10 @@ After (v2):
     },
     "system": {
         "debug_mode": false
+    },
+    "migrations": {
+        "character_structure_done": false,
+        "character_structure_date": null
     }
 }
 ```
@@ -819,6 +831,11 @@ print("Forced migration completed")
 **New files:**
 - `Functions/config_schema.py` (318 lines)
 - `Functions/config_migration.py` (186 lines)
+
+**New section in config.json:**
+- `migrations`: Tracks automatic migrations (character structure, etc.)
+  - Replaces separate `.migration_done` files
+  - Centralized migration tracking
 
 **Modified files:**
 - `Functions/config_manager.py` (migration integration)

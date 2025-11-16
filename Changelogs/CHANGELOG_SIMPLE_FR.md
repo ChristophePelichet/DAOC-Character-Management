@@ -2,6 +2,13 @@
 
 # ✨ v0.108
 
+### 🐛 Corrections
+- 🌍 **Traductions Dynamiques** : Section version se met à jour sans redémarrage lors du changement de langue
+- 🌍 **Import Herald** : Titre "Import terminé" s'affiche correctement (au lieu du nom de clé)
+- 🌍 **Statistiques RvR** : Labels traduits (Tours/Forteresses/Reliques Capturées en FR, Towers/Keeps/Relics Captured en EN, etc.)
+- 🌍 **Statistiques PvP/PvE** : Tous les labels traduits (Kills en Solo, Coups Fatals, Dragons Tués, etc.)
+- 🗑️ **Nettoyage** : Suppression de la clé obsolète qdarkstyle (thème custom JSON utilisé maintenant)
+
 ### 🎉 Nouveautés
 - ⌨️ **Raccourcis Clavier** : Ctrl+N pour créer un personnage, Ctrl+F pour rechercher sur Herald
 - 🎨 **Thème Purple (Dracula)** : Nouveau thème violet/rose avec palette Dracula officielle

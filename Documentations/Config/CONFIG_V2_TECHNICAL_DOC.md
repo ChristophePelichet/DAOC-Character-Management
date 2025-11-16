@@ -1,69 +1,69 @@
-# Configuration v2 - Documentation Technique
+# Configuration v2 - Technical Documentation
 **Version:** v0.108  
-**Date:** 16 novembre 2025  
-**Auteur:** Christophe Pelichet
+**Date:** November 16, 2025  
+**Author:** Christophe Pelichet
 
 ---
 
-## 📋 Table des matières
+## 📋 Table of Contents
 
-1. [Vue d'ensemble](#vue-densemble)
+1. [Overview](#overview)
 2. [Architecture](#architecture)
-3. [Structure de la configuration](#structure-de-la-configuration)
-4. [Système de migration](#système-de-migration)
-5. [API du ConfigManager](#api-du-configmanager)
-6. [Rétrocompatibilité](#rétrocompatibilité)
+3. [Configuration Structure](#configuration-structure)
+4. [Migration System](#migration-system)
+5. [ConfigManager API](#configmanager-api)
+6. [Backward Compatibility](#backward-compatibility)
 7. [Validation](#validation)
-8. [Guide d'utilisation](#guide-dutilisation)
+8. [Usage Guide](#usage-guide)
 9. [Maintenance](#maintenance)
 
 ---
 
-## Vue d'ensemble
+## Overview
 
-### Objectifs
+### Objectives
 
-La configuration v2 introduit une **structure hiérarchique** pour améliorer :
+Configuration v2 introduces a **hierarchical structure** to improve:
 
-- ✅ **Organisation** : Regroupement logique par catégories (ui, folders, backup, system, game)
-- ✅ **Lisibilité** : Structure JSON claire et auto-documentée
-- ✅ **Maintenabilité** : Facilite l'ajout de nouvelles options
-- ✅ **Extensibilité** : Support natif des sous-sections (ex: backup.characters, backup.cookies)
-- ✅ **Sécurité** : Migration automatique avec backup et validation
+- ✅ **Organization**: Logical grouping by categories (ui, folders, backup, system, game)
+- ✅ **Readability**: Clear and self-documented JSON structure
+- ✅ **Maintainability**: Easier to add new options
+- ✅ **Extensibility**: Native support for subsections (e.g., backup.characters, backup.cookies)
+- ✅ **Security**: Automatic migration with backup and validation
 
-### Changements majeurs
+### Major Changes
 
-| Aspect | v1 (Ancienne) | v2 (Nouvelle) |
-|--------|---------------|---------------|
-| **Structure** | Plate (37 clés au root) | Hiérarchique (5 sections) |
-| **Accès** | `config.get("language")` | `config.get("ui.language")` |
-| **Organisation** | Aucune | Logique par domaine |
-| **Validation** | Manuelle | Automatique avec schéma |
-| **Migration** | Manuelle | Automatique avec backup |
-| **Backup settings** | 1 section unique | 3 sous-sections (characters/cookies/armor) |
-| **Compatibilité** | N/A | 100% rétrocompatible avec v1 |
+| Aspect | v1 (Old) | v2 (New) |
+|--------|----------|----------|
+| **Structure** | Flat (37 keys at root) | Hierarchical (5 sections) |
+| **Access** | `config.get("language")` | `config.get("ui.language")` |
+| **Organization** | None | Logical by domain |
+| **Validation** | Manual | Automatic with schema |
+| **Migration** | Manual | Automatic with backup |
+| **Backup settings** | 1 single section | 3 subsections (characters/cookies/armor) |
+| **Compatibility** | N/A | 100% backward compatible with v1 |
 
 ---
 
 ## Architecture
 
-### Composants
+### Components
 
 ```
 Functions/
-├── config_schema.py       # Définition de la structure v2
-├── config_migration.py    # Logique de migration v1→v2
-└── config_manager.py      # Gestionnaire principal (modifié)
+├── config_schema.py       # v2 structure definition
+├── config_migration.py    # v1→v2 migration logic
+└── config_manager.py      # Main manager (modified)
 
 Configuration/
-└── config.json            # Fichier de configuration
+└── config.json            # Configuration file
 ```
 
-### Flux de données
+### Data Flow
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    Application démarre                       │
+│                    Application starts                        │
 └────────────────────────────┬────────────────────────────────┘
                              │
                              ▼
@@ -74,8 +74,8 @@ Configuration/
                              ▼
 ┌─────────────────────────────────────────────────────────────┐
 │         detect_config_version(config_data)                   │
-│         • v1 détecté si pas de sections "ui", "folders"      │
-│         • v2 détecté si sections présentes                   │
+│         • v1 detected if no "ui", "folders" sections         │
+│         • v2 detected if sections present                    │
 └────────────────────────────┬────────────────────────────────┘
                              │
                   ┌──────────┴──────────┐
@@ -115,46 +115,46 @@ Configuration/
                         │
                         ▼
          ┌──────────────────────────────┐
-         │   Config v2 chargée en RAM   │
-         │   Application peut démarrer  │
+         │   Config v2 loaded in RAM    │
+         │   Application can start      │
          └──────────────────────────────┘
 ```
 
 ---
 
-## Structure de la configuration
+## Configuration Structure
 
 ### config_schema.py
 
 #### DEFAULT_CONFIG
 
-Structure complète de la configuration v2 :
+Complete v2 configuration structure:
 
 ```python
 DEFAULT_CONFIG = {
     "ui": {
-        "language": "en",                    # Langue de l'interface
-        "theme": "purple",                   # Thème visuel
-        "font_scale": 1.0,                   # Échelle de police
-        "column_widths": {},                 # Largeurs des colonnes
-        "column_visibility": {},             # Visibilité des colonnes
-        "tree_view_header_state": None,      # État de l'en-tête TreeView
-        "manual_column_resize": True         # Redimensionnement manuel
+        "language": "en",                    # Interface language
+        "theme": "purple",                   # Visual theme
+        "font_scale": 1.0,                   # Font scale
+        "column_widths": {},                 # Column widths
+        "column_visibility": {},             # Column visibility
+        "tree_view_header_state": None,      # TreeView header state
+        "manual_column_resize": True         # Manual resize
     },
     "folders": {
-        "characters": None,                  # Dossier des personnages
-        "logs": None,                        # Dossier des logs
-        "armor": None,                       # Dossier des armures
-        "cookies": None                      # Dossier des cookies
+        "characters": None,                  # Characters folder
+        "logs": None,                        # Logs folder
+        "armor": None,                       # Armor folder
+        "cookies": None                      # Cookies folder
     },
     "backup": {
         "characters": {
-            "auto_daily_backup": True,       # Backup auto quotidien
-            "path": None,                    # Chemin de sauvegarde
-            "compress": True,                # Compression ZIP
-            "size_limit_mb": 10,             # Limite de taille (MB)
-            "auto_delete_old": True,         # Suppr. anciennes backups
-            "last_date": None                # Date dernière backup
+            "auto_daily_backup": True,       # Daily auto backup
+            "path": None,                    # Backup path
+            "compress": True,                # ZIP compression
+            "size_limit_mb": 10,             # Size limit (MB)
+            "auto_delete_old": True,         # Delete old backups
+            "last_date": None                # Last backup date
         },
         "cookies": {
             "auto_daily_backup": True,
@@ -174,25 +174,25 @@ DEFAULT_CONFIG = {
         }
     },
     "system": {
-        "debug_mode": False,                 # Mode debug
-        "show_debug_window": False,          # Fenêtre debug
-        "disable_disclaimer": False,         # Désactiver avertissement
-        "preferred_browser": "Chrome",       # Navigateur préféré
-        "allow_browser_download": False      # Autoriser téléchargement
+        "debug_mode": False,                 # Debug mode
+        "show_debug_window": False,          # Debug window
+        "disable_disclaimer": False,         # Disable disclaimer
+        "preferred_browser": "Chrome",       # Preferred browser
+        "allow_browser_download": False      # Allow download
     },
     "game": {
-        "servers": ["Eden"],                 # Serveurs de jeu
-        "default_server": "Eden",            # Serveur par défaut
-        "seasons": ["S3"],                   # Saisons disponibles
-        "default_season": "S3",              # Saison par défaut
-        "default_realm": None                # Royaume par défaut
+        "servers": ["Eden"],                 # Game servers
+        "default_server": "Eden",            # Default server
+        "seasons": ["S3"],                   # Available seasons
+        "default_season": "S3",              # Default season
+        "default_realm": None                # Default realm
     }
 }
 ```
 
 #### VALIDATION_SCHEMA
 
-Règles de validation pour chaque clé :
+Validation rules for each key:
 
 ```python
 VALIDATION_SCHEMA = {
@@ -213,22 +213,22 @@ VALIDATION_SCHEMA = {
             "max": 2.0,
             "default": 1.0
         },
-        # ... autres règles UI
+        # ... other UI rules
     },
-    # ... autres sections
+    # ... other sections
 }
 ```
 
-**Types de validation supportés :**
+**Supported validation types:**
 
-- `type` : Type(s) attendu(s) - ex: `str`, `bool`, `int`, `(str, type(None))`
-- `allowed` : Liste de valeurs autorisées
-- `min` / `max` : Valeurs min/max pour les nombres
-- `default` : Valeur par défaut
+- `type`: Expected type(s) - e.g., `str`, `bool`, `int`, `(str, type(None))`
+- `allowed`: List of allowed values
+- `min` / `max`: Min/max values for numbers
+- `default`: Default value
 
 #### LEGACY_KEY_MAPPING
 
-Mapping complet v1 → v2 (39 clés) :
+Complete v1 → v2 mapping (39 keys):
 
 ```python
 LEGACY_KEY_MAPPING = {
@@ -289,169 +289,169 @@ LEGACY_KEY_MAPPING = {
 
 ---
 
-## Système de migration
+## Migration System
 
 ### config_migration.py
 
-#### Détection de version
+#### Version Detection
 
 ```python
 def detect_config_version(config: Dict[str, Any]) -> str:
     """
-    Détecte la version de configuration (v1 ou v2).
+    Detects configuration version (v1 or v2).
     
-    Logique:
-    - v2 détectée si sections "ui", "folders", "backup" présentes
-    - v1 détectée sinon (structure plate)
+    Logic:
+    - v2 detected if "ui", "folders", "backup" sections present
+    - v1 detected otherwise (flat structure)
     
     Returns:
-        "v1" ou "v2"
+        "v1" or "v2"
     """
 ```
 
-#### Migration v1 → v2
+#### v1 → v2 Migration
 
 ```python
 def migrate_v1_to_v2(old_config: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Migre une configuration v1 vers v2.
+    Migrates v1 configuration to v2.
     
-    Processus:
-    1. Créer structure v2 vide (copie de DEFAULT_CONFIG)
-    2. Pour chaque clé v1 dans old_config:
-       a. Chercher mapping dans LEGACY_KEY_MAPPING
-       b. Si trouvé: copier la valeur dans la structure v2
-       c. Si non trouvé: logger warning + conserver dans section "unknown"
-    3. Retourner nouvelle structure
+    Process:
+    1. Create empty v2 structure (copy of DEFAULT_CONFIG)
+    2. For each v1 key in old_config:
+       a. Look for mapping in LEGACY_KEY_MAPPING
+       b. If found: copy value to v2 structure
+       c. If not found: log warning + preserve in "unknown" section
+    3. Return new structure
     
-    Sécurité:
-    - Aucune donnée perdue (clés inconnues conservées)
-    - Valeurs par défaut appliquées si manquantes
-    - Logging détaillé de chaque migration
+    Safety:
+    - No data lost (unknown keys preserved)
+    - Default values applied if missing
+    - Detailed logging of each migration
     """
 ```
 
-#### Création de backup
+#### Backup Creation
 
 ```python
 def create_backup(config_file: str) -> bool:
     """
-    Crée un backup avant migration.
+    Creates backup before migration.
     
     Format: config.json.backup_YYYYMMDD_HHMMSS
-    Exemple: config.json.backup_20251116_143052
+    Example: config.json.backup_20251116_143052
     
     Returns:
-        True si succès, False sinon
+        True if success, False otherwise
     """
 ```
 
-#### Validation post-migration
+#### Post-Migration Validation
 
 ```python
 def validate_migrated_config(config: Dict[str, Any]) -> Tuple[bool, List[str]]:
     """
-    Valide la structure migrée.
+    Validates migrated structure.
     
-    Vérifications:
-    - Toutes les sections requises présentes (ui, folders, backup, system, game)
-    - Sous-sections backup présentes (characters, cookies, armor)
-    - Clés critiques présentes dans chaque section
+    Checks:
+    - All required sections present (ui, folders, backup, system, game)
+    - Backup subsections present (characters, cookies, armor)
+    - Critical keys present in each section
     
     Returns:
         (is_valid: bool, errors: List[str])
     """
 ```
 
-#### Résumé de migration
+#### Migration Summary
 
 ```python
 def get_migration_summary(old_config, new_config) -> str:
     """
-    Génère un rapport détaillé de migration.
+    Generates detailed migration report.
     
-    Contient:
-    - Nombre de clés migrées
-    - Liste des transformations
-    - Clés inconnues (si présentes)
-    - Structure finale
+    Contains:
+    - Number of migrated keys
+    - List of transformations
+    - Unknown keys (if any)
+    - Final structure
     
-    Utilisé pour logging et debugging
+    Used for logging and debugging
     """
 ```
 
 ---
 
-## API du ConfigManager
+## ConfigManager API
 
-### Méthodes principales
+### Main Methods
 
 #### load_config()
 
 ```python
 def load_config(self):
     """
-    Charge la configuration avec migration automatique.
+    Loads configuration with automatic migration.
     
     Workflow:
-    1. Charger config.json
-    2. Détecter version (v1/v2)
-    3. Si v1:
-       a. Créer backup
-       b. Migrer vers v2
-       c. Valider
-       d. Sauvegarder
-       e. Logger résumé
-    4. Si v2:
-       a. Charger directement
-    5. Retourner config
+    1. Load config.json
+    2. Detect version (v1/v2)
+    3. If v1:
+       a. Create backup
+       b. Migrate to v2
+       c. Validate
+       d. Save
+       e. Log summary
+    4. If v2:
+       a. Load directly
+    5. Return config
     """
 ```
 
-#### get() - Notation pointée
+#### get() - Dotted Notation
 
 ```python
 def get(self, key: str, default=None) -> Any:
     """
-    Récupère une valeur avec support notation pointée.
+    Retrieves value with dotted notation support.
     
-    Exemples:
-        config.get("ui.language")              # v2 (recommandé)
-        config.get("language")                 # v1 (legacy, redirigé)
+    Examples:
+        config.get("ui.language")              # v2 (recommended)
+        config.get("language")                 # v1 (legacy, redirected)
         config.get("backup.characters.enabled")
         config.get("nonexistent", "fallback")
     
-    Logique:
-    1. Si "." dans key → navigation hiérarchique
-    2. Sinon, si key dans LEGACY_KEY_MAPPING → rediriger vers clé v2
-    3. Sinon → chercher au root (backward compat)
-    4. Si non trouvé → retourner default
+    Logic:
+    1. If "." in key → hierarchical navigation
+    2. Else, if key in LEGACY_KEY_MAPPING → redirect to v2 key
+    3. Else → search at root (backward compat)
+    4. If not found → return default
     """
 ```
 
-#### set() - Notation pointée avec validation
+#### set() - Dotted Notation with Validation
 
 ```python
 def set(self, key: str, value: Any, save=True, validate=False):
     """
-    Définit une valeur avec support notation pointée.
+    Sets value with dotted notation support.
     
-    Paramètres:
-        key: Clé v2 ou v1 (ex: "ui.theme" ou "theme")
-        value: Nouvelle valeur
-        save: Sauvegarder immédiatement sur disque
-        validate: Valider la valeur avant de la définir
+    Parameters:
+        key: v2 or v1 key (e.g., "ui.theme" or "theme")
+        value: New value
+        save: Save immediately to disk
+        validate: Validate value before setting
     
-    Exemples:
+    Examples:
         config.set("ui.theme", "purple")
-        config.set("theme", "dark")  # Legacy, redirigé vers ui.theme
+        config.set("theme", "dark")  # Legacy, redirected to ui.theme
         config.set("ui.font_scale", 1.5, validate=True)
     
-    Validation (si validate=True):
-    - Type vérifié contre VALIDATION_SCHEMA
-    - Valeurs allowed vérifiées
-    - Min/max vérifiés pour les nombres
-    - Rejeté si invalide
+    Validation (if validate=True):
+    - Type checked against VALIDATION_SCHEMA
+    - Allowed values verified
+    - Min/max verified for numbers
+    - Rejected if invalid
     """
 ```
 
@@ -460,57 +460,57 @@ def set(self, key: str, value: Any, save=True, validate=False):
 ```python
 def get_section(self, section: str) -> Dict[str, Any]:
     """
-    Récupère une section complète.
+    Retrieves complete section.
     
-    Exemples:
-        config.get_section("ui")       # Tout ui.*
-        config.get_section("backup")   # Tout backup.*
+    Examples:
+        config.get_section("ui")       # All ui.*
+        config.get_section("backup")   # All backup.*
     
-    Retourne un dictionnaire avec toutes les clés de la section.
+    Returns dictionary with all keys in section.
     """
 ```
 
 ---
 
-## Rétrocompatibilité
+## Backward Compatibility
 
-### Garantie 100%
+### 100% Guarantee
 
-**Toutes les anciennes clés v1 continuent de fonctionner** grâce au LEGACY_KEY_MAPPING.
+**All old v1 keys continue to work** thanks to LEGACY_KEY_MAPPING.
 
-### Exemples de compatibilité
+### Compatibility Examples
 
 ```python
-# ✅ AVANT (v1) - Fonctionne toujours
+# ✅ BEFORE (v1) - Still works
 language = config.get("language")
 config.set("backup_enabled", True)
 theme = config.get("theme", "default")
 
-# ✅ APRÈS (v2) - Nouvelles méthodes recommandées
+# ✅ AFTER (v2) - New recommended methods
 language = config.get("ui.language")
 config.set("backup.characters.auto_daily_backup", True)
 theme = config.get("ui.theme", "purple")
 
-# ✅ Les deux fonctionnent simultanément !
+# ✅ Both work simultaneously!
 ```
 
-### Redirection automatique
+### Automatic Redirection
 
-Quand du code utilise une clé v1 :
+When code uses a v1 key:
 
-1. ConfigManager détecte la clé legacy
-2. Cherche dans LEGACY_KEY_MAPPING
-3. Redirige automatiquement vers la clé v2
-4. Retourne la valeur
+1. ConfigManager detects legacy key
+2. Looks up in LEGACY_KEY_MAPPING
+3. Automatically redirects to v2 key
+4. Returns value
 
-**Transparence totale** : le code legacy n'a pas besoin d'être modifié immédiatement.
+**Total transparency**: legacy code doesn't need immediate modification.
 
-### Code refactorisé
+### Refactored Code
 
-Bien que la rétrocompatibilité soit garantie, **tout le code a été refactorisé** pour utiliser la notation v2 :
+Although backward compatibility is guaranteed, **all code has been refactored** to use v2 notation:
 
-| Fichier | Occurrences refactorées |
-|---------|------------------------|
+| File | Refactored Occurrences |
+|------|------------------------|
 | main.py | 53 |
 | UI/settings_dialog.py | 46 |
 | UI/dialogs.py | 18 |
@@ -527,91 +527,91 @@ Bien que la rétrocompatibilité soit garantie, **tout le code a été refactori
 
 ## Validation
 
-### Fonction validate_value()
+### validate_value() Function
 
 ```python
 def validate_value(key_path: str, value: Any) -> bool:
     """
-    Valide une valeur contre le schéma.
+    Validates value against schema.
     
-    Vérifications:
-    1. Type (str, int, bool, tuple de types, etc.)
-    2. Valeurs autorisées (si liste "allowed" définie)
-    3. Min/Max (pour nombres)
+    Checks:
+    1. Type (str, int, bool, tuple of types, etc.)
+    2. Allowed values (if "allowed" list defined)
+    3. Min/Max (for numbers)
     
-    Exemples:
+    Examples:
         validate_value("ui.language", "fr")    # True
-        validate_value("ui.language", "es")    # False (non dans allowed)
+        validate_value("ui.language", "es")    # False (not in allowed)
         validate_value("ui.font_scale", 1.5)   # True
         validate_value("ui.font_scale", 3.0)   # False (max=2.0)
     """
 ```
 
-### Utilisation dans le code
+### Usage in Code
 
 ```python
-# Validation explicite
+# Explicit validation
 if config.validate_value("ui.theme", new_theme):
     config.set("ui.theme", new_theme)
 else:
-    print("Thème invalide!")
+    print("Invalid theme!")
 
-# Validation automatique avec set()
-config.set("ui.theme", new_theme, validate=True)  # Rejeté si invalide
+# Automatic validation with set()
+config.set("ui.theme", new_theme, validate=True)  # Rejected if invalid
 ```
 
 ---
 
-## Guide d'utilisation
+## Usage Guide
 
-### Pour les développeurs
+### For Developers
 
-#### Lecture de configuration
+#### Reading Configuration
 
 ```python
 from Functions.config_manager import ConfigManager
 
 config = ConfigManager()
 
-# Lire une valeur simple
+# Read simple value
 language = config.get("ui.language", "en")
 
-# Lire une section complète
+# Read complete section
 ui_settings = config.get_section("ui")
 
-# Lire avec navigation profonde
+# Read with deep navigation
 backup_path = config.get("backup.characters.path")
 ```
 
-#### Écriture de configuration
+#### Writing Configuration
 
 ```python
-# Écrire une valeur (sauvegarde auto)
+# Write value (auto save)
 config.set("ui.theme", "purple")
 
-# Écrire sans sauvegarder immédiatement
+# Write without immediate save
 config.set("ui.font_scale", 1.2, save=False)
-# ... autres modifications ...
-config.save_config()  # Sauvegarde groupée
+# ... other modifications ...
+config.save_config()  # Batch save
 
-# Écrire avec validation
-config.set("ui.theme", "invalid", validate=True)  # Rejeté
+# Write with validation
+config.set("ui.theme", "invalid", validate=True)  # Rejected
 ```
 
-#### Ajout de nouvelles options
+#### Adding New Options
 
-1. **Ajouter dans DEFAULT_CONFIG** (config_schema.py) :
+1. **Add to DEFAULT_CONFIG** (config_schema.py):
 ```python
 "system": {
-    # ... existant ...
+    # ... existing ...
     "new_option": "default_value",
 }
 ```
 
-2. **Ajouter validation dans VALIDATION_SCHEMA** :
+2. **Add validation to VALIDATION_SCHEMA**:
 ```python
 "system": {
-    # ... existant ...
+    # ... existing ...
     "new_option": {
         "type": str,
         "allowed": ["value1", "value2"],
@@ -620,33 +620,33 @@ config.set("ui.theme", "invalid", validate=True)  # Rejeté
 }
 ```
 
-3. **Si besoin de rétrocompatibilité, ajouter dans LEGACY_KEY_MAPPING** :
+3. **If backward compatibility needed, add to LEGACY_KEY_MAPPING**:
 ```python
 "old_option_name": "system.new_option"
 ```
 
-4. **Utiliser dans le code** :
+4. **Use in code**:
 ```python
 value = config.get("system.new_option")
 ```
 
-### Pour les utilisateurs
+### For Users
 
-#### Migration automatique
+#### Automatic Migration
 
-Lors de la première utilisation de v0.108 :
+On first use of v0.108:
 
-1. **Backup automatique** : `config.json.backup_20251116_143052`
-2. **Migration** : Structure v1 → v2
-3. **Validation** : Vérification d'intégrité
-4. **Sauvegarde** : Nouvelle structure écrite
-5. **Log détaillé** : Rapport de migration dans la console
+1. **Automatic backup**: `config.json.backup_20251116_143052`
+2. **Migration**: v1 structure → v2
+3. **Validation**: Integrity check
+4. **Save**: New structure written
+5. **Detailed log**: Migration report in console
 
-**Aucune action requise** - tout est automatique !
+**No action required** - everything is automatic!
 
-#### Structure du fichier config.json
+#### config.json File Structure
 
-Avant (v1) :
+Before (v1):
 ```json
 {
     "language": "fr",
@@ -657,7 +657,7 @@ Avant (v1) :
 }
 ```
 
-Après (v2) :
+After (v2):
 ```json
 {
     "ui": {
@@ -682,9 +682,9 @@ Après (v2) :
 
 ## Maintenance
 
-### Logs de migration
+### Migration Logs
 
-Lors d'une migration, les informations suivantes sont loggées :
+During migration, following information is logged:
 
 ```
 [CONFIG MIGRATION] Starting migration from v1 to v2...
@@ -696,24 +696,24 @@ Lors d'une migration, les informations suivantes sont loggées :
 [CONFIG MIGRATION] Migration complete: 37 keys migrated
 ```
 
-### Fichiers de backup
+### Backup Files
 
-Format : `config.json.backup_YYYYMMDD_HHMMSS`
+Format: `config.json.backup_YYYYMMDD_HHMMSS`
 
-**Conservation recommandée** : Garder au moins 1 backup en cas de problème.
+**Recommended retention**: Keep at least 1 backup in case of issues.
 
-**Restauration manuelle** :
+**Manual restoration**:
 ```powershell
-# Sauvegarder la version actuelle
+# Backup current version
 Copy-Item config.json config.json.current
 
-# Restaurer depuis backup
+# Restore from backup
 Copy-Item config.json.backup_20251116_143052 config.json
 ```
 
-### Débogage
+### Debugging
 
-#### Vérifier la version
+#### Check Version
 
 ```python
 from Functions.config_migration import detect_config_version
@@ -725,7 +725,7 @@ with open("Configuration/config.json") as f:
     print(f"Version: {version}")
 ```
 
-#### Valider la configuration
+#### Validate Configuration
 
 ```python
 from Functions.config_migration import validate_migrated_config
@@ -736,108 +736,108 @@ with open("Configuration/config.json") as f:
     is_valid, errors = validate_migrated_config(data)
     
     if is_valid:
-        print("✅ Configuration valide")
+        print("✅ Valid configuration")
     else:
-        print("❌ Erreurs détectées:")
+        print("❌ Errors detected:")
         for error in errors:
             print(f"  - {error}")
 ```
 
-#### Forcer une migration
+#### Force Migration
 
 ```python
 from Functions.config_manager import ConfigManager
 from Functions.config_migration import migrate_v1_to_v2, create_backup
 import json
 
-# Charger config actuelle
+# Load current config
 with open("Configuration/config.json") as f:
     old_config = json.load(f)
 
-# Créer backup
+# Create backup
 create_backup("Configuration/config.json")
 
-# Migrer
+# Migrate
 new_config = migrate_v1_to_v2(old_config)
 
-# Sauvegarder
+# Save
 config = ConfigManager()
 config.config = new_config
 config.save_config()
 
-print("Migration forcée terminée")
+print("Forced migration completed")
 ```
 
-### Problèmes courants
+### Common Issues
 
-#### 1. Config reste en v1
+#### 1. Config Stays in v1
 
-**Symptôme** : La migration ne se déclenche pas.
+**Symptom**: Migration doesn't trigger.
 
-**Solution** :
-- Vérifier que `detect_config_version()` retourne bien "v1"
-- Vérifier les permissions d'écriture sur config.json
-- Consulter les logs pour erreurs
+**Solution**:
+- Verify `detect_config_version()` returns "v1"
+- Check write permissions on config.json
+- Check logs for errors
 
-#### 2. Valeurs perdues après migration
+#### 2. Values Lost After Migration
 
-**Symptôme** : Certaines valeurs sont None après migration.
+**Symptom**: Some values are None after migration.
 
-**Solution** :
-- Vérifier le fichier backup (`config.json.backup_*`)
-- Comparer avec LEGACY_KEY_MAPPING (clé peut être manquante)
-- Ajouter le mapping si nécessaire et re-migrer
+**Solution**:
+- Check backup file (`config.json.backup_*`)
+- Compare with LEGACY_KEY_MAPPING (key might be missing)
+- Add mapping if needed and re-migrate
 
-#### 3. Thème ne s'applique pas
+#### 3. Theme Doesn't Apply
 
-**Symptôme** : Le thème par défaut ne fonctionne pas.
+**Symptom**: Default theme doesn't work.
 
-**Cause** : Fichier de thème inexistant (ex: "dracula.json" n'existe pas).
+**Cause**: Theme file doesn't exist (e.g., "dracula.json" doesn't exist).
 
-**Solution** :
-- Vérifier les thèmes disponibles dans `Themes/`
-- Utiliser un thème existant : "default", "dark", "light", "purple"
-- Mettre à jour DEFAULT_CONFIG avec un thème valide
+**Solution**:
+- Check available themes in `Themes/`
+- Use existing theme: "default", "dark", "light", "purple"
+- Update DEFAULT_CONFIG with valid theme
 
 ---
 
-## Résumé des changements v0.108
+## Summary of v0.108 Changes
 
 ### Nomenclature
 
-| Changement | Avant | Après | Raison |
-|------------|-------|-------|--------|
-| **backup enabled** | `enabled` | `auto_daily_backup` | Plus explicite |
-| **backup last_date** | Uniquement characters | characters, cookies, armor | Cohérence |
-| **Thème par défaut** | "default" | "purple" | Choix utilisateur |
-| **Langue par défaut** | "fr" | "en" | Internationalisation |
-| **auto_delete_old** | `False` | `True` | Gestion automatique |
-| **size_limit_mb** | 5 MB (cookies/armor) | 10 MB | Plus d'espace |
+| Change | Before | After | Reason |
+|--------|--------|-------|--------|
+| **backup enabled** | `enabled` | `auto_daily_backup` | More explicit |
+| **backup last_date** | Characters only | characters, cookies, armor | Consistency |
+| **Default theme** | "default" | "purple" | User choice |
+| **Default language** | "fr" | "en" | Internationalization |
+| **auto_delete_old** | `False` | `True` | Automatic management |
+| **size_limit_mb** | 5 MB (cookies/armor) | 10 MB | More space |
 
-### Fichiers modifiés
+### Modified Files
 
-**Nouveaux fichiers :**
-- `Functions/config_schema.py` (318 lignes)
-- `Functions/config_migration.py` (186 lignes)
+**New files:**
+- `Functions/config_schema.py` (318 lines)
+- `Functions/config_migration.py` (186 lines)
 
-**Fichiers modifiés :**
+**Modified files:**
 - `Functions/config_manager.py` (migration integration)
-- `main.py` (53 occurrences refactorées)
+- `main.py` (53 refactored occurrences)
 - `UI/settings_dialog.py` (46 occurrences)
 - `UI/dialogs.py` (18 occurrences)
 - `Functions/backup_manager.py` (6 occurrences)
-- 8 autres fichiers Functions/ (multiple occurrences chacun)
+- 8 other Functions/ files (multiple occurrences each)
 
-**Total :** ~2800 lignes ajoutées, 11 fichiers modifiés, 100% rétrocompatible
+**Total:** ~2800 lines added, 11 files modified, 100% backward compatible
 
 ---
 
-## Annexes
+## Appendices
 
-### Mapping complet v1 → v2
+### Complete v1 → v2 Mapping
 
-| # | Clé v1 | Clé v2 | Catégorie |
-|---|--------|--------|-----------|
+| # | v1 Key | v2 Key | Category |
+|---|--------|--------|----------|
 | 1 | `language` | `ui.language` | UI |
 | 2 | `theme` | `ui.theme` | UI |
 | 3 | `font_scale` | `ui.font_scale` | UI |
@@ -878,15 +878,15 @@ print("Migration forcée terminée")
 | 38 | `default_season` | `game.default_season` | Game |
 | 39 | `default_realm` | `game.default_realm` | Game |
 
-### Thèmes disponibles
+### Available Themes
 
-| ID | Nom | Fichier | Description |
-|----|-----|---------|-------------|
-| `default` | Light | `default.json` | Thème clair système |
-| `dark` | Dark | `dark.json` | Thème sombre |
-| `light` | Light | `default.json` | Alias de default |
-| `purple` | Purple | `purple.json` | **Thème violet (défaut v0.108)** |
+| ID | Name | File | Description |
+|----|------|------|-------------|
+| `default` | Light | `default.json` | Light system theme |
+| `dark` | Dark | `dark.json` | Dark theme |
+| `light` | Light | `default.json` | Alias of default |
+| `purple` | Purple | `purple.json` | **Purple theme (default v0.108)** |
 
 ---
 
-**Fin de la documentation technique**
+**End of Technical Documentation**

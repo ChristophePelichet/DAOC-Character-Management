@@ -14,8 +14,15 @@
 - ⚡ **Herald Search**: Instant window closure (no more latency)
 
 ### 🧹 Cleanup
+- 🗑️ Removed test files and temporary documentation
+- 📚 Final documentation: CONFIG_V2_TECHNICAL_DOC.md
 
 ### 🧰 Improvements
+- 🔄 **Configuration v2**: Hierarchical structure with automatic migration and backup
+  - 5 organized sections (ui, folders, backup, system, game)
+  - 100% backward compatibility guaranteed (39 legacy keys)
+  - Default theme: Purple | Default language: English
+  - Complete technical documentation included
 - 🎨 **Theme Switching**: Complete instant application without restart
 - 📋 **Columns**: Automatic width save in manual mode
 

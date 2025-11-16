@@ -110,7 +110,7 @@ class CharacterApp(QMainWindow):
         # Perform startup backup for Cookies Eden (once per day)
         try:
             print("[APP_STARTUP] Checking for daily backup of Cookies...")
-            cookies_backup_enabled = config.get("cookies_backup_enabled", True)
+            cookies_backup_enabled = config.get("backup.cookies.auto_daily_backup", True)
             if cookies_backup_enabled:
                 startup_cookies_backup_result = self.backup_manager.backup_cookies()
                 if startup_cookies_backup_result["success"]:
@@ -298,7 +298,7 @@ class CharacterApp(QMainWindow):
             
     def _show_startup_disclaimer(self):
         """Affiche le disclaimer au démarrage si non désactivé"""
-        if not config.get("disable_disclaimer", False):
+        if not config.get("system.disable_disclaimer", False):
             msg_box = QMessageBox(self)
             msg_box.setWindowTitle(lang.get("disclaimer_title", default="Alpha Version"))
             msg_box.setIcon(QMessageBox.Information)
@@ -670,8 +670,8 @@ class CharacterApp(QMainWindow):
     def open_configuration(self):
         """Ouvre la fenêtre de configuration"""
         logging.debug("Opening configuration window")
-        seasons = config.get("seasons", ["S3"])
-        servers = config.get("servers", ["Eden"])
+        seasons = config.get("game.seasons", ["S3"])
+        servers = config.get("game.servers", ["Eden"])
         realms = self.data_manager.get_realms()
         
         # Use new modern settings dialog
@@ -691,14 +691,14 @@ class CharacterApp(QMainWindow):
             
     def save_configuration(self, dialog, close_dialog=True):
         """Sauvegarde la configuration"""
-        old_debug_mode = config.get("debug_mode", False)
+        old_debug_mode = config.get("system.debug_mode", False)
         new_debug_mode = dialog.debug_mode_check.isChecked()
         
         if not new_debug_mode and old_debug_mode:
             logging.info("Debug mode DEACTIVATED")
             
         # Check if the Folder des personnages a changé (normalize paths for comparison)
-        old_char_folder = (config.get("character_folder") or "").replace('/', '\\')
+        old_char_folder = (config.get("folders.characters") or "").replace('/', '\\')
         new_char_folder = (dialog.char_path_edit.text() or "").replace('/', '\\')
         char_folder_changed = (old_char_folder != new_char_folder)
         
@@ -719,8 +719,8 @@ class CharacterApp(QMainWindow):
         
         # Mode de redimensionnement des colonnes
         new_manual_resize = dialog.manual_column_resize_check.isChecked()
-        old_manual_resize = config.get("manual_column_resize", True)
-        config.set("manual_column_resize", new_manual_resize)
+        old_manual_resize = config.get("ui.manual_column_resize", True)
+        config.set("ui.manual_column_resize", new_manual_resize)
         if new_manual_resize != old_manual_resize:
             # Sauvegarder l'état actuel avant de changer de mode
             self.tree_manager.save_header_state()
@@ -740,51 +740,51 @@ class CharacterApp(QMainWindow):
         
         # Backup settings
         if hasattr(dialog, 'backup_enabled_check'):
-            config.set("backup_enabled", dialog.backup_enabled_check.isChecked())
-            config.set("backup_path", dialog.backup_path_edit.text())
-            config.set("backup_compress", dialog.backup_compress_check.isChecked())
+            config.set("backup.characters.auto_daily_backup", dialog.backup_enabled_check.isChecked())
+            config.set("backup.characters.path", dialog.backup_path_edit.text())
+            config.set("backup.characters.compress", dialog.backup_compress_check.isChecked())
             try:
                 size_limit = int(dialog.backup_size_limit_edit.text())
-                config.set("backup_size_limit_mb", size_limit)
+                config.set("backup.characters.size_limit_mb", size_limit)
             except ValueError:
                 pass  # Keep existing value if invalid
-            config.set("backup_auto_delete_old", dialog.backup_auto_delete_check.isChecked())
-            config.set("cookies_backup_enabled", dialog.cookies_backup_enabled_check.isChecked())
-            config.set("cookies_backup_path", dialog.cookies_backup_path_edit.text())
-            config.set("cookies_backup_compress", dialog.cookies_backup_compress_check.isChecked())
+            config.set("backup.characters.auto_delete_old", dialog.backup_auto_delete_check.isChecked())
+            config.set("backup.cookies.auto_daily_backup", dialog.cookies_backup_enabled_check.isChecked())
+            config.set("backup.cookies.path", dialog.cookies_backup_path_edit.text())
+            config.set("backup.cookies.compress", dialog.cookies_backup_compress_check.isChecked())
             try:
                 cookies_size_limit = int(dialog.cookies_backup_size_limit_edit.text())
-                config.set("cookies_backup_size_limit_mb", cookies_size_limit)
+                config.set("backup.cookies.size_limit_mb", cookies_size_limit)
             except ValueError:
                 pass  # Keep existing value if invalid
-            config.set("cookies_backup_auto_delete_old", dialog.cookies_backup_auto_delete_check.isChecked())
-            config.set("armor_backup_enabled", dialog.armor_backup_enabled_check.isChecked())
-            config.set("armor_backup_path", dialog.armor_backup_path_edit.text())
-            config.set("armor_backup_compress", dialog.armor_backup_compress_check.isChecked())
+            config.set("backup.cookies.auto_delete_old", dialog.cookies_backup_auto_delete_check.isChecked())
+            config.set("backup.armor.auto_daily_backup", dialog.armor_backup_enabled_check.isChecked())
+            config.set("backup.armor.path", dialog.armor_backup_path_edit.text())
+            config.set("backup.armor.compress", dialog.armor_backup_compress_check.isChecked())
             try:
                 armor_size_limit = int(dialog.armor_backup_size_limit_edit.text())
-                config.set("armor_backup_size_limit_mb", armor_size_limit)
+                config.set("backup.armor.size_limit_mb", armor_size_limit)
             except ValueError:
                 pass  # Keep existing value if invalid
-            config.set("armor_backup_auto_delete_old", dialog.armor_backup_auto_delete_check.isChecked())
+            config.set("backup.armor.auto_delete_old", dialog.armor_backup_auto_delete_check.isChecked())
         
         # Theme
-        old_theme = config.get("theme", "default")
+        old_theme = config.get("ui.theme", "purple")
         new_theme = dialog.theme_combo.currentData()
         theme_changed = (old_theme != new_theme)
         if theme_changed:
-            config.set("theme", new_theme)
+            config.set("ui.theme", new_theme)
             from Functions.theme_manager import apply_theme
             apply_theme(QApplication.instance(), new_theme)
             # Réappliquer le style du tree_view avec les nouvelles couleurs
             self.tree_manager.apply_tree_view_style()
         
         # Font Scale
-        old_font_scale = config.get("font_scale", 1.0)
+        old_font_scale = config.get("ui.font_scale", 1.0)
         new_font_scale = dialog.font_scale_combo.currentData()  # Récupérer la valeur du ComboBox
         font_scale_changed = (old_font_scale != new_font_scale)
         if font_scale_changed:
-            config.set("font_scale", new_font_scale)
+            config.set("ui.font_scale", new_font_scale)
             from Functions.theme_manager import apply_font_scale
             apply_font_scale(QApplication.instance(), new_font_scale)
             
@@ -796,9 +796,9 @@ class CharacterApp(QMainWindow):
                 new_lang_code = code
                 break
                 
-        language_changed = new_lang_code and new_lang_code != config.get("language")
+        language_changed = new_lang_code and new_lang_code != config.get("ui.language")
         if language_changed:
-            config.set("language", new_lang_code)
+            config.set("ui.language", new_lang_code)
         
         # Save all configuration changes to disk
         config.save_config()
@@ -833,7 +833,7 @@ class CharacterApp(QMainWindow):
         )
         
         if check_migration_needed() and not is_migration_done():
-            new_char_folder = config.get("character_folder", "")
+            new_char_folder = config.get("folders.characters", "")
             logging.warning(f"Path changed to location requiring migration: {new_char_folder}")
             
             reply = QMessageBox.question(
@@ -905,7 +905,7 @@ class CharacterApp(QMainWindow):
     def change_language(self, lang_code):
         """Change la langue de l'application"""
         logging.info(f"Changing language to {lang_code}")
-        config.set("language", lang_code)
+        config.set("ui.language", lang_code)
         lang.set_language(lang_code)
         self.retranslate_ui()
         
@@ -1096,14 +1096,14 @@ class CharacterApp(QMainWindow):
 def apply_theme(app):
     """Applique le thème configuré"""
     from Functions.theme_manager import apply_theme as apply_theme_manager
-    theme_id = config.get("theme", "default")
+    theme_id = config.get("ui.theme", "purple")
     apply_theme_manager(app, theme_id)
 
 
 def apply_font_scale(app):
     """Applique l'échelle de police configurée"""
     from Functions.theme_manager import apply_font_scale as apply_font_scale_manager
-    font_scale = config.get("font_scale", 1.0)
+    font_scale = config.get("ui.font_scale", 1.0)
     apply_font_scale_manager(app, font_scale)
 
 
@@ -1149,7 +1149,7 @@ def main():
         main_window.show()
         
         # Afficher the fenêtre of debug if configuré
-        if config.get("show_debug_window", False):
+        if config.get("system.show_debug_window", False):
             main_window.show_debug_window()
         
         logging.info("Entering main event loop")

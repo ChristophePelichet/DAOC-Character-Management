@@ -194,7 +194,7 @@ class CharacterSheetWindow(QDialog):
         # Editable season dropdown
         self.season_combo = QComboBox()
         from Functions.config_manager import config
-        seasons = config.get("seasons", ["S3"])
+        seasons = config.get("game.seasons", ["S3"])
         self.season_combo.addItems(seasons)
         current_season = self.character_data.get('season', 'S3')
         self.season_combo.setCurrentText(current_season)
@@ -202,7 +202,7 @@ class CharacterSheetWindow(QDialog):
         
         # Editable server dropdown
         self.server_combo = QComboBox()
-        servers = config.get("servers", ["Eden"])
+        servers = config.get("game.servers", ["Eden"])
         self.server_combo.addItems(servers)
         current_server = self.character_data.get('server', 'Eden')
         self.server_combo.setCurrentText(current_server)
@@ -693,7 +693,7 @@ class CharacterSheetWindow(QDialog):
         
         # Get all classes for the realm
         classes = self.data_manager.get_classes(realm)
-        current_language = config.get("language", "en")
+        current_language = config.get("ui.language", "en")
         
         for cls in classes:
             # Get translated name
@@ -725,7 +725,7 @@ class CharacterSheetWindow(QDialog):
                 # Filter races that can be this class
                 races = self.data_manager.get_available_races_for_class(realm, class_name)
         
-        current_language = config.get("language", "en")
+        current_language = config.get("ui.language", "en")
         
         for race in races:
             # Get translated name
@@ -2147,7 +2147,7 @@ class ColumnsConfigDialog(QDialog):
         
         # Checkboxes for each column
         self.checkboxes = {}
-        current_visibility = config.get("column_visibility", {})
+        current_visibility = config.get("ui.column_visibility", {})
         
         for col in self.COLUMNS_CONFIG:
             checkbox = QCheckBox(lang.get(col["name_key"], default=col["key"]))
@@ -2264,7 +2264,7 @@ class NewCharacterDialog(QDialog):
             return
         
         # Get current language
-        current_lang = config.get("language", "fr")
+        current_lang = config.get("ui.language", "en")
         
         # Update classes
         self.class_combo.clear()
@@ -2290,7 +2290,7 @@ class NewCharacterDialog(QDialog):
             return
         
         # Get current language
-        current_lang = config.get("language", "fr")
+        current_lang = config.get("ui.language", "en")
         
         # Update races available for this class
         self.race_combo.clear()
@@ -2561,11 +2561,11 @@ class ConfigurationDialog(QDialog):
         # Use 'or' to handle None or empty string values and fallback to default paths
         from Functions.path_manager import get_armor_dir
         
-        char_folder = config.get("character_folder") or get_character_dir()
+        char_folder = config.get("folders.characters") or get_character_dir()
         # Config folder is NOT configurable - always next to executable
-        log_folder = config.get("log_folder") or get_log_dir()
-        armor_folder = config.get("armor_folder") or get_armor_dir()
-        cookies_folder = config.get("cookies_folder") or get_config_dir()
+        log_folder = config.get("folders.logs") or get_log_dir()
+        armor_folder = config.get("folders.armor") or get_armor_dir()
+        cookies_folder = config.get("folders.cookies") or get_config_dir()
         
         self.char_path_edit.setText(char_folder)
         self.char_path_edit.setCursorPosition(0)
@@ -2577,22 +2577,22 @@ class ConfigurationDialog(QDialog):
         self.armor_path_edit.setCursorPosition(0)
         self.cookies_path_edit.setText(cookies_folder)
         self.cookies_path_edit.setCursorPosition(0)
-        self.debug_mode_check.setChecked(config.get("debug_mode", False))
-        self.show_debug_window_check.setChecked(config.get("show_debug_window", False))
-        self.disable_disclaimer_check.setChecked(config.get("disable_disclaimer", False))
+        self.debug_mode_check.setChecked(config.get("system.debug_mode", False))
+        self.show_debug_window_check.setChecked(config.get("system.show_debug_window", False))
+        self.disable_disclaimer_check.setChecked(config.get("system.disable_disclaimer", False))
         
-        current_lang_code = config.get("language", "fr")
+        current_lang_code = config.get("ui.language", "en")
         current_lang_name = self.available_languages.get(current_lang_code, "Français")
         self.language_combo.setCurrentText(current_lang_name)
 
         # Theme
-        current_theme = config.get("theme", "default")
+        current_theme = config.get("ui.theme", "dracula")
         theme_index = self.theme_combo.findData(current_theme)
         if theme_index >= 0:
             self.theme_combo.setCurrentIndex(theme_index)
         
         # Font Scale
-        current_font_scale = config.get("font_scale", 1.0)
+        current_font_scale = config.get("ui.font_scale", 1.0)
         # Trouver l'index correspondant à la valeur dans le ComboBox
         scale_index = self.font_scale_combo.findData(current_font_scale)
         if scale_index == -1:  # Si la valeur exacte n'existe pas, trouver la plus proche
@@ -2607,22 +2607,22 @@ class ConfigurationDialog(QDialog):
         else:
             self.font_scale_combo.setCurrentIndex(scale_index)
 
-        current_default_server = config.get("default_server", "")
+        current_default_server = config.get("game.default_server", "")
         self.default_server_combo.setCurrentText(current_default_server)
 
-        current_default_season = config.get("default_season", "")
+        current_default_season = config.get("game.default_season", "")
         self.default_season_combo.setCurrentText(current_default_season)
 
-        current_default_realm = config.get("default_realm", "")
+        current_default_realm = config.get("game.default_realm", "")
         self.default_realm_combo.setCurrentText(current_default_realm)
 
         
-        manual_resize = config.get("manual_column_resize", True)
+        manual_resize = config.get("ui.manual_column_resize", True)
         self.manual_column_resize_check.setChecked(manual_resize)        # Browser settings
-        preferred_browser = config.get("preferred_browser", "Chrome")
+        preferred_browser = config.get("system.preferred_browser", "Chrome")
         self.browser_combo.setCurrentText(preferred_browser)
         
-        allow_download = config.get("allow_browser_download", False)
+        allow_download = config.get("system.allow_browser_download", False)
         self.allow_browser_download_check.setChecked(allow_download)
 
     def browse_folder(self, line_edit, title_key):
@@ -3149,8 +3149,8 @@ class CookieManagerDialog(QDialog):
         
         # Lire la configuration
         from Functions.config_manager import config
-        preferred_browser = config.get('preferred_browser', 'Chrome')
-        allow_download = config.get('allow_browser_download', False)
+        preferred_browser = config.get('system.preferred_browser', 'Chrome')
+        allow_download = config.get('system.allow_browser_download', False)
         
         # Import des composants
         from UI.progress_dialog_base import ProgressStepsDialog, StepConfiguration
@@ -5152,7 +5152,7 @@ class HeraldSearchDialog(QDialog):
                 realm = self.CLASS_TO_REALM.get(char_class, "Unknown")
                 
                 # Retrieve the saison par défaut depuis the Configuration
-                default_season = config.get('default_season', 'S3')
+                default_season = config.get('game.default_season', 'S3')
                 
                 # Create the dictionnaire of Data of the personnage
                 character_data = {

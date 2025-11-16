@@ -10,8 +10,8 @@ from typing import Any, Dict, List, Optional, Union
 # Default configuration v2 (hierarchical structure)
 DEFAULT_CONFIG = {
     "ui": {
-        "language": "fr",
-        "theme": "default",
+        "language": "en",
+        "theme": "purple",
         "font_scale": 1.0,
         "column_widths": {},
         "column_visibility": {},
@@ -26,26 +26,28 @@ DEFAULT_CONFIG = {
     },
     "backup": {
         "characters": {
-            "enabled": True,
+            "auto_daily_backup": True,
             "path": None,
             "compress": True,
-            "size_limit_mb": 20,
-            "auto_delete_old": False,
+            "size_limit_mb": 10,
+            "auto_delete_old": True,
             "last_date": None
         },
         "cookies": {
-            "enabled": True,
+            "auto_daily_backup": True,
             "path": None,
             "compress": True,
-            "size_limit_mb": 5,
-            "auto_delete_old": False
+            "size_limit_mb": 10,
+            "auto_delete_old": True,
+            "last_date": None
         },
         "armor": {
-            "enabled": True,
+            "auto_daily_backup": True,
             "path": None,
             "compress": True,
-            "size_limit_mb": 5,
-            "auto_delete_old": False
+            "size_limit_mb": 10,
+            "auto_delete_old": True,
+            "last_date": None
         }
     },
     "system": {
@@ -70,12 +72,12 @@ VALIDATION_SCHEMA = {
         "language": {
             "type": str,
             "allowed": ["fr", "en", "de"],
-            "default": "fr"
+            "default": "en"
         },
         "theme": {
             "type": str,
-            "allowed": ["default", "dark", "light"],
-            "default": "default"
+            "allowed": ["default", "dark", "light", "purple"],
+            "default": "dark"
         },
         "font_scale": {
             "type": (int, float),
@@ -120,26 +122,28 @@ VALIDATION_SCHEMA = {
     },
     "backup": {
         "characters": {
-            "enabled": {"type": bool, "default": True},
+            "auto_daily_backup": {"type": bool, "default": True},
             "path": {"type": (str, type(None)), "default": None},
             "compress": {"type": bool, "default": True},
             "size_limit_mb": {"type": int, "min": 1, "max": 1000, "default": 20},
-            "auto_delete_old": {"type": bool, "default": False},
+            "auto_delete_old": {"type": bool, "default": True},
             "last_date": {"type": (str, type(None)), "default": None}
         },
         "cookies": {
-            "enabled": {"type": bool, "default": True},
+            "auto_daily_backup": {"type": bool, "default": True},
             "path": {"type": (str, type(None)), "default": None},
             "compress": {"type": bool, "default": True},
-            "size_limit_mb": {"type": int, "min": 1, "max": 1000, "default": 5},
-            "auto_delete_old": {"type": bool, "default": False}
+            "size_limit_mb": {"type": int, "min": 1, "max": 1000, "default": 10},
+            "auto_delete_old": {"type": bool, "default": True},
+            "last_date": {"type": (str, type(None)), "default": None}
         },
         "armor": {
-            "enabled": {"type": bool, "default": True},
+            "auto_daily_backup": {"type": bool, "default": True},
             "path": {"type": (str, type(None)), "default": None},
             "compress": {"type": bool, "default": True},
-            "size_limit_mb": {"type": int, "min": 1, "max": 1000, "default": 5},
-            "auto_delete_old": {"type": bool, "default": False}
+            "size_limit_mb": {"type": int, "min": 1, "max": 1000, "default": 10},
+            "auto_delete_old": {"type": bool, "default": True},
+            "last_date": {"type": (str, type(None)), "default": None}
         }
     },
     "system": {
@@ -208,7 +212,7 @@ LEGACY_KEY_MAPPING = {
     "cookies_folder": "folders.cookies",
     
     # Backup - Characters
-    "backup_enabled": "backup.characters.enabled",
+    "backup_enabled": "backup.characters.auto_daily_backup",
     "backup_path": "backup.characters.path",
     "backup_compress": "backup.characters.compress",
     "backup_size_limit_mb": "backup.characters.size_limit_mb",
@@ -216,18 +220,20 @@ LEGACY_KEY_MAPPING = {
     "backup_last_date": "backup.characters.last_date",
     
     # Backup - Cookies
-    "cookies_backup_enabled": "backup.cookies.enabled",
+    "cookies_backup_enabled": "backup.cookies.auto_daily_backup",
     "cookies_backup_path": "backup.cookies.path",
     "cookies_backup_compress": "backup.cookies.compress",
     "cookies_backup_size_limit_mb": "backup.cookies.size_limit_mb",
     "cookies_backup_auto_delete_old": "backup.cookies.auto_delete_old",
+    "cookies_backup_last_date": "backup.cookies.last_date",
     
     # Backup - Armor
-    "armor_backup_enabled": "backup.armor.enabled",
+    "armor_backup_enabled": "backup.armor.auto_daily_backup",
     "armor_backup_path": "backup.armor.path",
     "armor_backup_compress": "backup.armor.compress",
     "armor_backup_size_limit_mb": "backup.armor.size_limit_mb",
     "armor_backup_auto_delete_old": "backup.armor.auto_delete_old",
+    "armor_backup_last_date": "backup.armor.last_date",
     
     # System keys
     "debug_mode": "system.debug_mode",

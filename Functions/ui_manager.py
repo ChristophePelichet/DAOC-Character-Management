@@ -447,7 +447,7 @@ class UIManager:
         from Functions.config_manager import config
         
         # Déterminer la langue pour le lien Wiki
-        current_lang = config.get("language", "fr").upper()
+        current_lang = config.get("ui.language", "fr").upper()
         wiki_url = f"https://github.com/ChristophePelichet/DAOC-Character-Management/wiki/{current_lang}-Home"
         webbrowser.open(wiki_url)
         

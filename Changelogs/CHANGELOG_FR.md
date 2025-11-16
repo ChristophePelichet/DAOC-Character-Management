@@ -22,12 +22,46 @@ Historique complet des versions du gestionnaire de personnages pour Dark Age of 
   - Messages d'erreur contextuels si connexion Herald indisponible
   - 🌍 Traductions complètes FR/EN/DE (7 nouvelles clés)
 
+### 🧰 Modification
+- 🔄 **Restructuration Configuration v2** : Architecture hiérarchique avec migration automatique
+  - 📊 Structure organisée en 5 sections (ui, folders, backup, system, game)
+  - 🔀 Migration automatique v1→v2 avec backup timestampé
+  - ✅ Validation automatique avec schéma de types et valeurs autorisées
+  - 🔙 Rétrocompatibilité 100% garantie (39 clés legacy supportées)
+  - 📝 Notation pointée (ex: `config.get("ui.language")` au lieu de `config.get("language")`)
+  - 🎯 Refactoring complet : 11 fichiers, 100+ occurrences mises à jour
+  - 📚 Documentation technique complète : `CONFIG_V2_TECHNICAL_DOC.md`
+  - Fichiers : `Functions/config_schema.py`, `Functions/config_migration.py`, `Functions/config_manager.py`
+- 🏷️ **Renommage Clés Backup** : Nomenclature plus explicite
+  - `enabled` → `auto_daily_backup` (clarification du comportement automatique)
+  - Ajout de `last_date` pour cookies et armor (cohérence avec characters)
+  - Mapping legacy complet maintenu pour compatibilité
+- 🎨 **Thème par Défaut** : Changement de "default" vers "purple"
+  - Thème purple appliqué automatiquement aux nouvelles installations
+  - Liste des thèmes validés : default, dark, light, purple
+  - Fichier : `Functions/config_schema.py`
+- 🌍 **Langue par Défaut** : Changement de "fr" vers "en"
+  - Interface en anglais par défaut pour meilleure internationalisation
+  - Fichier : `Functions/config_schema.py`
+- ⚙️ **Valeurs par Défaut Backup** : Optimisation des paramètres
+  - `auto_delete_old`: `false` → `true` (gestion automatique des anciennes sauvegardes)
+  - `size_limit_mb`: 5 → 10 MB pour cookies et armor (plus d'espace)
+  - Fichier : `Functions/config_schema.py`
+
 ### 🐛 Correction
 - 🛡️ **Fichier .migration_done Non Recréé** : Prévention de la création automatique du fichier flag
   - 🔧 Suppression de l'appel `mark_migration_done()` lors de la vérification au démarrage
   - 🎯 Le fichier n'est créé que lors d'une migration réellement effectuée avec succès
   - Évite la recréation du fichier lors du changement de dossier Characters ou suppression manuelle
   - Fichier : `Functions/migration_manager.py`
+
+### 🔚 Retrait
+- 🗑️ **Fichiers de Test** : Suppression des scripts de développement
+  - Tests unitaires de migration (test_config_migration.py, test_migration_real.py)
+  - Script de refactoring automatique (refactor_config_keys.py)
+- 🗑️ **Documentations de Travail** : Nettoyage des documents temporaires
+  - CONFIG_ANALYSIS_v1.md, JSON_STRUCTURE_IMPROVEMENT.md, PHASE2_COMPLETE.md
+  - Conservé uniquement CONFIG_V2_TECHNICAL_DOC.md (documentation finale)
 - ⚡ **Latence Bouton Fermer Recherche Herald** : Fermeture instantanée de la fenêtre
   - 🔧 Modification de `accept()` pour utiliser cleanup asynchrone via QTimer
   - 🎯 Suppression du blocage UI de 100ms+ causé par `thread.wait(100)`

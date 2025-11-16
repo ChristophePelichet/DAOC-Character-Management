@@ -404,7 +404,7 @@ class SettingsDialog(QDialog):
         
         # Create checkboxes for each column
         self.column_checkboxes = {}
-        visibility_config = config.get("column_visibility", {})
+        visibility_config = config.get("ui.column_visibility", {})
         
         for col in ColumnsConfigDialog.COLUMNS_CONFIG:
             checkbox = QCheckBox(lang.get(col["name_key"], default=col["key"]))
@@ -548,14 +548,14 @@ class SettingsDialog(QDialog):
         enable_compress_layout = QHBoxLayout()
         
         self.backup_enabled_check = QCheckBox(lang.get("backup_enabled_label", default="Activer les sauvegardes"))
-        self.backup_enabled_check.setChecked(config.get("backup_enabled", True))
+        self.backup_enabled_check.setChecked(config.get("backup.characters.auto_daily_backup", True))
         self.backup_enabled_check.stateChanged.connect(lambda state: self._save_backup_setting("backup_enabled", state == 2))
         enable_compress_layout.addWidget(self.backup_enabled_check)
         
         enable_compress_layout.addSpacing(30)
         
         self.backup_compress_check = QCheckBox(lang.get("backup_compress_label", default="Compresser les sauvegardes (ZIP)"))
-        self.backup_compress_check.setChecked(config.get("backup_compress", True))
+        self.backup_compress_check.setChecked(config.get("backup.characters.compress", True))
         self.backup_compress_check.setToolTip(lang.get("backup_compress_tooltip", default="Réduit la taille des sauvegardes"))
         self.backup_compress_check.stateChanged.connect(lambda state: self._save_backup_setting("backup_compress", state == 2))
         enable_compress_layout.addWidget(self.backup_compress_check)
@@ -564,7 +564,7 @@ class SettingsDialog(QDialog):
         
         # Auto-delete checkbox
         self.backup_auto_delete_check = QCheckBox(lang.get("backup_auto_delete_label", default="Supprimer auto les anciens"))
-        self.backup_auto_delete_check.setChecked(config.get("backup_auto_delete_old", True))
+        self.backup_auto_delete_check.setChecked(config.get("backup.characters.auto_delete_old", True))
         self.backup_auto_delete_check.setToolTip(lang.get("backup_auto_delete_tooltip", default="Supprime automatiquement les plus anciens backups quand la limite est atteinte"))
         self.backup_auto_delete_check.stateChanged.connect(self._on_backup_auto_delete_changed)
         enable_compress_layout.addWidget(self.backup_auto_delete_check)
@@ -576,7 +576,7 @@ class SettingsDialog(QDialog):
         # Backup path
         path_form = QFormLayout()
         self.backup_path_edit = QLineEdit()
-        backup_path = config.get("backup_path")
+        backup_path = config.get("backup.characters.path")
         if not backup_path:
             from Functions.path_manager import get_base_path
             backup_path = os.path.join(get_base_path(), "Backup", "Characters")
@@ -610,7 +610,7 @@ class SettingsDialog(QDialog):
         # Storage limit
         stats_layout.addWidget(QLabel(lang.get("backup_size_limit_label", default="Limite de stockage") + " :"))
         self.backup_size_limit_edit = QLineEdit()
-        self.backup_size_limit_edit.setText(str(config.get("backup_size_limit_mb", 20)))
+        self.backup_size_limit_edit.setText(str(config.get("backup.characters.size_limit_mb", 20)))
         self.backup_size_limit_edit.setMaximumWidth(60)
         self.backup_size_limit_edit.textChanged.connect(self._on_backup_limit_changed)
         stats_layout.addWidget(self.backup_size_limit_edit)
@@ -643,7 +643,7 @@ class SettingsDialog(QDialog):
         stats_layout.addSpacing(10)
         
         # Last backup date
-        last_backup_date = config.get("backup_last_date")
+        last_backup_date = config.get("backup.characters.last_date")
         if last_backup_date:
             try:
                 from datetime import datetime
@@ -690,14 +690,14 @@ class SettingsDialog(QDialog):
         cookies_enable_compress_layout = QHBoxLayout()
         
         self.cookies_backup_enabled_check = QCheckBox(lang.get("backup_enabled_label", default="Activer les sauvegardes"))
-        self.cookies_backup_enabled_check.setChecked(config.get("cookies_backup_enabled", True))
+        self.cookies_backup_enabled_check.setChecked(config.get("backup.cookies.auto_daily_backup", True))
         self.cookies_backup_enabled_check.stateChanged.connect(lambda state: self._save_backup_setting("cookies_backup_enabled", state == 2))
         cookies_enable_compress_layout.addWidget(self.cookies_backup_enabled_check)
         
         cookies_enable_compress_layout.addSpacing(30)
         
         self.cookies_backup_compress_check = QCheckBox(lang.get("backup_compress_label", default="Compresser les sauvegardes (ZIP)"))
-        self.cookies_backup_compress_check.setChecked(config.get("cookies_backup_compress", True))
+        self.cookies_backup_compress_check.setChecked(config.get("backup.cookies.compress", True))
         self.cookies_backup_compress_check.setToolTip(lang.get("backup_compress_tooltip", default="Réduit la taille des sauvegardes"))
         self.cookies_backup_compress_check.stateChanged.connect(lambda state: self._save_backup_setting("cookies_backup_compress", state == 2))
         cookies_enable_compress_layout.addWidget(self.cookies_backup_compress_check)
@@ -706,7 +706,7 @@ class SettingsDialog(QDialog):
         
         # Auto-delete checkbox for cookies
         self.cookies_backup_auto_delete_check = QCheckBox(lang.get("backup_auto_delete_label", default="Supprimer auto les anciens"))
-        self.cookies_backup_auto_delete_check.setChecked(config.get("cookies_backup_auto_delete_old", True))
+        self.cookies_backup_auto_delete_check.setChecked(config.get("backup.cookies.auto_delete_old", True))
         self.cookies_backup_auto_delete_check.setToolTip(lang.get("backup_auto_delete_tooltip", default="Supprime automatiquement les plus anciens backups quand la limite est atteinte"))
         self.cookies_backup_auto_delete_check.stateChanged.connect(self._on_cookies_auto_delete_changed)
         cookies_enable_compress_layout.addWidget(self.cookies_backup_auto_delete_check)
@@ -718,7 +718,7 @@ class SettingsDialog(QDialog):
         # Cookies backup path
         cookies_path_form = QFormLayout()
         self.cookies_backup_path_edit = QLineEdit()
-        cookies_backup_path = config.get("cookies_backup_path")
+        cookies_backup_path = config.get("backup.cookies.path")
         if not cookies_backup_path:
             from Functions.path_manager import get_base_path
             cookies_backup_path = os.path.join(get_base_path(), "Backup", "Cookies")
@@ -752,7 +752,7 @@ class SettingsDialog(QDialog):
         # Storage limit for cookies
         cookies_stats_layout.addWidget(QLabel(lang.get("backup_size_limit_label", default="Limite de stockage") + " :"))
         self.cookies_backup_size_limit_edit = QLineEdit()
-        self.cookies_backup_size_limit_edit.setText(str(config.get("cookies_backup_size_limit_mb", 20)))
+        self.cookies_backup_size_limit_edit.setText(str(config.get("backup.cookies.size_limit_mb", 20)))
         self.cookies_backup_size_limit_edit.setMaximumWidth(60)
         self.cookies_backup_size_limit_edit.textChanged.connect(self._on_cookies_limit_changed)
         cookies_stats_layout.addWidget(self.cookies_backup_size_limit_edit)
@@ -785,7 +785,7 @@ class SettingsDialog(QDialog):
         cookies_stats_layout.addSpacing(10)
         
         # Last cookies backup date
-        last_cookies_backup_date = config.get("cookies_backup_last_date")
+        last_cookies_backup_date = config.get("backup.cookies.last_date")
         if last_cookies_backup_date:
             try:
                 from datetime import datetime
@@ -832,14 +832,14 @@ class SettingsDialog(QDialog):
         armor_enable_compress_layout = QHBoxLayout()
         
         self.armor_backup_enabled_check = QCheckBox(lang.get("backup_enabled_label", default="Activer les sauvegardes"))
-        self.armor_backup_enabled_check.setChecked(config.get("armor_backup_enabled", True))
+        self.armor_backup_enabled_check.setChecked(config.get("backup.armor.auto_daily_backup", True))
         self.armor_backup_enabled_check.stateChanged.connect(lambda state: self._save_backup_setting("armor_backup_enabled", state == 2))
         armor_enable_compress_layout.addWidget(self.armor_backup_enabled_check)
         
         armor_enable_compress_layout.addSpacing(30)
         
         self.armor_backup_compress_check = QCheckBox(lang.get("backup_compress_label", default="Compresser les sauvegardes (ZIP)"))
-        self.armor_backup_compress_check.setChecked(config.get("armor_backup_compress", True))
+        self.armor_backup_compress_check.setChecked(config.get("backup.armor.compress", True))
         self.armor_backup_compress_check.setToolTip(lang.get("backup_compress_tooltip", default="Réduit la taille des sauvegardes"))
         self.armor_backup_compress_check.stateChanged.connect(lambda state: self._save_backup_setting("armor_backup_compress", state == 2))
         armor_enable_compress_layout.addWidget(self.armor_backup_compress_check)
@@ -848,7 +848,7 @@ class SettingsDialog(QDialog):
         
         # Auto-delete checkbox for armor
         self.armor_backup_auto_delete_check = QCheckBox(lang.get("backup_auto_delete_label", default="Supprimer auto les anciens"))
-        self.armor_backup_auto_delete_check.setChecked(config.get("armor_backup_auto_delete_old", True))
+        self.armor_backup_auto_delete_check.setChecked(config.get("backup.armor.auto_delete_old", True))
         self.armor_backup_auto_delete_check.setToolTip(lang.get("backup_auto_delete_tooltip", default="Supprime automatiquement les plus anciens backups quand la limite est atteinte"))
         self.armor_backup_auto_delete_check.stateChanged.connect(self._on_armor_auto_delete_changed)
         armor_enable_compress_layout.addWidget(self.armor_backup_auto_delete_check)
@@ -860,7 +860,7 @@ class SettingsDialog(QDialog):
         # Armor backup path
         armor_path_form = QFormLayout()
         self.armor_backup_path_edit = QLineEdit()
-        armor_backup_path = config.get("armor_backup_path")
+        armor_backup_path = config.get("backup.armor.path")
         if not armor_backup_path:
             from Functions.path_manager import get_base_path
             armor_backup_path = os.path.join(get_base_path(), "Backup", "Armor")
@@ -894,7 +894,7 @@ class SettingsDialog(QDialog):
         # Storage limit for armor
         armor_stats_layout.addWidget(QLabel(lang.get("backup_size_limit_label", default="Limite de stockage") + " :"))
         self.armor_backup_size_limit_edit = QLineEdit()
-        self.armor_backup_size_limit_edit.setText(str(config.get("armor_backup_size_limit_mb", 20)))
+        self.armor_backup_size_limit_edit.setText(str(config.get("backup.armor.size_limit_mb", 20)))
         self.armor_backup_size_limit_edit.setMaximumWidth(60)
         self.armor_backup_size_limit_edit.textChanged.connect(self._on_armor_limit_changed)
         armor_stats_layout.addWidget(self.armor_backup_size_limit_edit)
@@ -927,7 +927,7 @@ class SettingsDialog(QDialog):
         armor_stats_layout.addSpacing(10)
         
         # Last armor backup date
-        last_armor_backup_date = config.get("armor_backup_last_date")
+        last_armor_backup_date = config.get("backup.armor.last_date")
         if last_armor_backup_date:
             try:
                 from datetime import datetime
@@ -1074,7 +1074,7 @@ class SettingsDialog(QDialog):
         
         # If path changed, save and reload character list
         if old_path != new_path:
-            config.set("character_folder", new_path)
+            config.set("folders.characters", new_path)
             config.save_config()
             if self.parent():
                 self.parent().refresh_character_list()
@@ -1086,7 +1086,7 @@ class SettingsDialog(QDialog):
         
         # If path changed, save and reinitialize logging
         if old_path != new_path:
-            config.set("log_folder", new_path)
+            config.set("folders.logs", new_path)
             config.save_config()
             from Functions.logging_manager import setup_logging
             setup_logging()
@@ -1098,7 +1098,7 @@ class SettingsDialog(QDialog):
         
         # If path changed, save immediately
         if old_path != new_path:
-            config.set("armor_folder", new_path)
+            config.set("folders.armor", new_path)
             config.save_config()
         
     def _browse_cookies_folder(self):
@@ -1123,7 +1123,7 @@ class SettingsDialog(QDialog):
         from PySide6.QtWidgets import QMessageBox
         try:
             # Save current path from text field to config and reinitialize backup_manager
-            config.set("backup_path", self.backup_path_edit.text())
+            config.set("backup.characters.path", self.backup_path_edit.text())
             config.save_config()
             self.backup_manager = BackupManager(config)
             
@@ -1153,7 +1153,7 @@ class SettingsDialog(QDialog):
         from PySide6.QtWidgets import QMessageBox
         try:
             # Save current path from text field to config and reinitialize backup_manager
-            config.set("cookies_backup_path", self.cookies_backup_path_edit.text())
+            config.set("backup.cookies.path", self.cookies_backup_path_edit.text())
             config.save_config()
             self.backup_manager = BackupManager(config)
             
@@ -1183,7 +1183,7 @@ class SettingsDialog(QDialog):
         from PySide6.QtWidgets import QMessageBox
         try:
             # Save current path from text field to config and reinitialize backup_manager
-            config.set("armor_backup_path", self.armor_backup_path_edit.text())
+            config.set("backup.armor.path", self.armor_backup_path_edit.text())
             config.save_config()
             self.backup_manager = BackupManager(config)
             
@@ -1515,43 +1515,43 @@ class SettingsDialog(QDialog):
     def _load_settings(self):
         """Load current settings into the UI"""
         # Paths
-        self.char_path_edit.setText(config.get("character_folder") or get_character_dir())
+        self.char_path_edit.setText(config.get("folders.characters") or get_character_dir())
         self.char_path_edit.setCursorPosition(0)
         
         # Config folder is not configurable - always next to executable
         
-        self.log_path_edit.setText(config.get("log_folder") or get_log_dir())
+        self.log_path_edit.setText(config.get("folders.logs") or get_log_dir())
         self.log_path_edit.setCursorPosition(0)
         
-        self.armor_path_edit.setText(config.get("armor_folder") or get_armor_dir())
+        self.armor_path_edit.setText(config.get("folders.armor") or get_armor_dir())
         self.armor_path_edit.setCursorPosition(0)
         
-        self.cookies_path_edit.setText(config.get("cookies_folder") or get_config_dir())
+        self.cookies_path_edit.setText(config.get("folders.cookies") or get_config_dir())
         self.cookies_path_edit.setCursorPosition(0)
         
         # General settings
-        self.debug_mode_check.setChecked(config.get("debug_mode", False))
-        self.show_debug_window_check.setChecked(config.get("show_debug_window", False))
-        self.disable_disclaimer_check.setChecked(config.get("disable_disclaimer", False))
+        self.debug_mode_check.setChecked(config.get("system.debug_mode", False))
+        self.show_debug_window_check.setChecked(config.get("system.show_debug_window", False))
+        self.disable_disclaimer_check.setChecked(config.get("system.disable_disclaimer", False))
         
         # Defaults
-        self.default_server_combo.setCurrentText(config.get("default_server", ""))
-        self.default_season_combo.setCurrentText(config.get("default_season", ""))
-        self.default_realm_combo.setCurrentText(config.get("default_realm", ""))
+        self.default_server_combo.setCurrentText(config.get("game.default_server", ""))
+        self.default_season_combo.setCurrentText(config.get("game.default_season", ""))
+        self.default_realm_combo.setCurrentText(config.get("game.default_realm", ""))
         
         # Language
-        current_lang_code = config.get("language", "fr")
+        current_lang_code = config.get("ui.language", "en")
         current_lang_name = self.available_languages.get(current_lang_code, "Français")
         self.language_combo.setCurrentText(current_lang_name)
         
         # Theme
-        current_theme = config.get("theme", "default")
+        current_theme = config.get("ui.theme", "dracula")
         theme_index = self.theme_combo.findData(current_theme)
         if theme_index >= 0:
             self.theme_combo.setCurrentIndex(theme_index)
             
         # Font scale
-        current_font_scale = config.get("font_scale", 1.0)
+        current_font_scale = config.get("ui.font_scale", 1.0)
         scale_index = self.font_scale_combo.findData(current_font_scale)
         if scale_index == -1:
             # Find closest value
@@ -1567,11 +1567,11 @@ class SettingsDialog(QDialog):
             self.font_scale_combo.setCurrentIndex(scale_index)
             
         # Columns
-        self.manual_column_resize_check.setChecked(config.get("manual_column_resize", True))
+        self.manual_column_resize_check.setChecked(config.get("ui.manual_column_resize", True))
         
         # Browser
-        self.browser_combo.setCurrentText(config.get("preferred_browser", "Chrome"))
-        self.allow_browser_download_check.setChecked(config.get("allow_browser_download", False))
+        self.browser_combo.setCurrentText(config.get("system.preferred_browser", "Chrome"))
+        self.allow_browser_download_check.setChecked(config.get("system.allow_browser_download", False))
     
     def _on_backup_auto_delete_changed(self, state):
         """Handle Characters backup auto-delete checkbox state change"""

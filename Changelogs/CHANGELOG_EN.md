@@ -35,6 +35,40 @@ Complete version history of the character manager for Dark Age of Camelot (Eden)
   - Consistent with pattern already used in `closeEvent()`
   - File: `UI/dialogs.py` (HeraldSearchDialog class)
 
+### 🧰 Modifications
+- 🔄 **Configuration v2 Restructuring**: Hierarchical architecture with automatic migration
+  - 📊 Organized structure in 5 sections (ui, folders, backup, system, game)
+  - 🔀 Automatic v1→v2 migration with timestamped backup
+  - ✅ Automatic validation with type schema and allowed values
+  - 🔙 100% backward compatibility guaranteed (39 legacy keys supported)
+  - 📝 Dotted notation (e.g., `config.get("ui.language")` instead of `config.get("language")`)
+  - 🎯 Complete refactoring: 11 files, 100+ occurrences updated
+  - 📚 Complete technical documentation: `CONFIG_V2_TECHNICAL_DOC.md`
+  - Files: `Functions/config_schema.py`, `Functions/config_migration.py`, `Functions/config_manager.py`
+- 🏷️ **Backup Keys Renaming**: More explicit nomenclature
+  - `enabled` → `auto_daily_backup` (clarification of automatic behavior)
+  - Added `last_date` for cookies and armor (consistency with characters)
+  - Complete legacy mapping maintained for compatibility
+- 🎨 **Default Theme**: Changed from "default" to "purple"
+  - Purple theme automatically applied to new installations
+  - Validated themes list: default, dark, light, purple
+  - File: `Functions/config_schema.py`
+- 🌍 **Default Language**: Changed from "fr" to "en"
+  - English interface by default for better internationalization
+  - File: `Functions/config_schema.py`
+- ⚙️ **Backup Default Values**: Parameter optimization
+  - `auto_delete_old`: `false` → `true` (automatic management of old backups)
+  - `size_limit_mb`: 5 → 10 MB for cookies and armor (more space)
+  - File: `Functions/config_schema.py`
+
+### 🔚 Removed
+- 🗑️ **Test Files**: Removed development scripts
+  - Migration unit tests (test_config_migration.py, test_migration_real.py)
+  - Automatic refactoring script (refactor_config_keys.py)
+- 🗑️ **Working Documentation**: Cleaned up temporary documents
+  - CONFIG_ANALYSIS_v1.md, JSON_STRUCTURE_IMPROVEMENT.md, PHASE2_COMPLETE.md
+  - Kept only CONFIG_V2_TECHNICAL_DOC.md (final documentation)
+
 ### 🧹 Cleanup
 - 🗑️ **Removed Obsolete References**: Complete cleanup of code and documentation
   - Removed references to S1 and S2 seasons (ended seasons on Eden)

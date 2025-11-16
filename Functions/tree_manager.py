@@ -171,7 +171,7 @@ class TreeManager:
         self.apply_column_visibility()
         
         # Appliquer le mode de redimensionnement
-        manual_resize = config.get("manual_column_resize", True)
+        manual_resize = config.get("ui.manual_column_resize", True)
         self.apply_column_resize_mode(manual_resize)
         
         # Connecter the signal of changement for the compteur of sélection
@@ -307,7 +307,7 @@ class TreeManager:
                 
     def apply_column_visibility(self):
         """Applique les paramètres de visibilité des colonnes"""
-        visibility_config = config.get("column_visibility", {})
+        visibility_config = config.get("ui.column_visibility", {})
         
         # Visibilité par défaut
         default_visibility = {

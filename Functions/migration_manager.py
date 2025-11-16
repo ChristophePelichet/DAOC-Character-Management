@@ -17,7 +17,7 @@ logger = get_logger(LOGGER_BACKUP)
 def get_character_dir():
     """Returns the configured character directory."""
     default_path = os.path.join(get_base_path(), "Characters")
-    return config.get("character_folder") or default_path
+    return config.get("folders.characters") or default_path
 
 def get_backup_path():
     """

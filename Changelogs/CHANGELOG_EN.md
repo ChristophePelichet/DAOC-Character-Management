@@ -6,6 +6,38 @@ Complete version history of the character manager for Dark Age of Camelot (Eden)
 
 # ✨✨ v0.108
 
+### 🐛 Bug Fix
+- 🌍 **Version Section Translations**: Dynamic language update without restart
+  - 🔧 Converted version labels to instance attributes (status_group, info_group, version labels)
+  - 🎯 Enhanced retranslate_ui() method with 7 dynamic label updates
+  - Added status_bar.status_group_title key (FR/EN/DE)
+  - Language change applied immediately to version titles and labels
+  - Files: Functions/ui_manager.py, Language/*.json
+- 🌍 **herald_import_complete_title Key**: Fixed translation hierarchical path
+  - 🔧 Using full path messages.info.herald_import_complete_title
+  - 🎯 Import dialog title now displays "Import Complete" instead of key name
+  - Fixed in both dialogs (information and warning)
+  - File: UI/dialogs.py
+- 🌍 **RvR Statistics Labels**: Translated captures in character sheet
+  - 🔧 Tours Capturées, Forteresses Capturées, Reliques Capturées (FR)
+  - Towers Captured, Keeps Captured, Relics Captured (EN)
+  - Türme Erobert, Festungen Erobert, Reliquien Erobert (DE)
+  - Note: Scraper continues to search for English terms in Eden Herald HTML
+  - Files: Language/*.json
+- 🌍 **PvP/PvE Statistics Labels**: Complete translation of combat statistics
+  - 🔧 PvP: Kills en Solo, Coups Fatals, Kills (FR) | Solo Kills, Deathblows, Kills (EN) | Solo-Kills, Todesstöße, Kills (DE)
+  - PvE: Dragons Tués, Légions Tuées, Mini Dragons Tués, Rencontres Épiques, Donjons Épiques (FR)
+  - PvE: Dragons Killed, Legions Killed, Mini Dragons Killed, Epic Encounters, Epic Dungeons (EN)
+  - PvE: Drachen Getötet, Legionen Getötet, Mini-Drachen Getötet, Epische Begegnungen, Epische Dungeons (DE)
+  - Files: Language/*.json, LANGUAGE_V2_TECHNICAL_DOC.md
+
+### 🔚 Removed
+- 🗑️ **Obsolete qdarkstyle_not_found_tooltip Key**: Removed reference to unused library
+  - 🔧 Application now uses custom JSON-based theme system (Themes/*.json)
+  - No longer depends on external qdarkstyle library
+  - Misc section reduced to 1 key (none) instead of 5
+  - Files: Language/*.json, Functions/language_schema.py, LANGUAGE_V2_TECHNICAL_DOC.md
+
 ### 🎉 Added
 - 📚 **Wiki Help Pages**: Complete documentation for Settings and Backup
   - FR-Settings.md page: Complete settings guide (5 detailed tabs)

@@ -6,6 +6,38 @@ Historique complet des versions du gestionnaire de personnages pour Dark Age of 
 
 # ✨✨ v0.108
 
+### 🐛 Correction
+- 🌍 **Traductions Section Version** : Mise à jour dynamique de la langue sans redémarrage
+  - 🔧 Conversion des labels de version en attributs d'instance (status_group, info_group, version labels)
+  - 🎯 Méthode retranslate_ui() améliorée avec 7 mises à jour dynamiques de labels
+  - Ajout de la clé status_bar.status_group_title (FR/EN/DE)
+  - Changement de langue appliqué immédiatement sur les titres et labels de version
+  - Fichiers : Functions/ui_manager.py, Language/*.json
+- 🌍 **Clé herald_import_complete_title** : Correction du chemin hiérarchique de traduction
+  - 🔧 Utilisation du chemin complet messages.info.herald_import_complete_title
+  - 🎯 Le titre de dialogue d'import affiche maintenant "Import terminé" au lieu du nom de clé
+  - Correction dans les 2 boîtes de dialogue (information et warning)
+  - Fichier : UI/dialogs.py
+- 🌍 **Labels Statistiques RvR** : Traduction des captures dans la feuille de personnage
+  - 🔧 Tours Capturées, Forteresses Capturées, Reliques Capturées (FR)
+  - Towers Captured, Keeps Captured, Relics Captured (EN)
+  - Türme Erobert, Festungen Erobert, Reliquien Erobert (DE)
+  - Note : Le scraper continue de chercher les termes anglais dans Eden Herald HTML
+  - Fichiers : Language/*.json
+- 🌍 **Labels Statistiques PvP/PvE** : Traduction complète des statistiques de combat
+  - 🔧 PvP : Kills en Solo, Coups Fatals, Kills (FR) | Solo Kills, Deathblows, Kills (EN) | Solo-Kills, Todesstöße, Kills (DE)
+  - PvE : Dragons Tués, Légions Tuées, Mini Dragons Tués, Rencontres Épiques, Donjons Épiques (FR)
+  - PvE : Dragons Killed, Legions Killed, Mini Dragons Killed, Epic Encounters, Epic Dungeons (EN)
+  - PvE : Drachen Getötet, Legionen Getötet, Mini-Drachen Getötet, Epische Begegnungen, Epische Dungeons (DE)
+  - Fichiers : Language/*.json, LANGUAGE_V2_TECHNICAL_DOC.md
+
+### 🔚 Retrait
+- 🗑️ **Clé Obsolète qdarkstyle_not_found_tooltip** : Suppression de référence à bibliothèque non utilisée
+  - 🔧 L'application utilise maintenant un système de thèmes custom basé sur JSON (Themes/*.json)
+  - Plus de dépendance à la bibliothèque externe qdarkstyle
+  - Section misc réduite à 1 clé (none) au lieu de 5
+  - Fichiers : Language/*.json, Functions/language_schema.py, LANGUAGE_V2_TECHNICAL_DOC.md
+
 ### 🎉 Ajout
 - 📚 **Pages d'Aide Wiki** : Documentation complète pour Settings et Backup
   - Page FR-Settings.md : Guide complet des paramètres (5 onglets détaillés)

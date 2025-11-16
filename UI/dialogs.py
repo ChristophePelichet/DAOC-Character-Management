@@ -5259,7 +5259,7 @@ class HeraldSearchDialog(QDialog):
                 if len(errors) > 5:
                     message += f"\n{lang.get('herald_import_more_errors', count=len(errors) - 5)}"
             
-            QMessageBox.information(self, lang.get("herald_import_complete_title"), message)
+            QMessageBox.information(self, lang.get("messages.info.herald_import_complete_title"), message)
             
             # Rafraîchir l'interface principale de manière asynchrone pour éviter le freeze
             if hasattr(self.parent(), 'tree_manager') and hasattr(self.parent().tree_manager, 'refresh_character_list'):
@@ -5289,7 +5289,7 @@ class HeraldSearchDialog(QDialog):
             error_msg += "\n".join(errors[:10])
             if len(errors) > 10:
                 error_msg += f"\n{lang.get('herald_import_more_errors', count=len(errors) - 10)}"
-            QMessageBox.warning(self, lang.get("herald_import_complete_title"), error_msg)
+            QMessageBox.warning(self, lang.get("messages.info.herald_import_complete_title"), error_msg)
 
 
 class CharacterUpdateDialog(QDialog):

@@ -45,13 +45,23 @@ Liste des idées d'améliorations et fonctionnalités à développer ultérieure
 
 ## 🐛 Corrections à Planifier
 
-*(Cette section sera complétée au fur et à mesure de la découverte de bugs non critiques)*
+### 1. Fenêtre de Progression - Thème Purple
+- [ ] Corriger l'affichage du texte en bas de la fenêtre de progression avec le thème Purple
+- [ ] Problème : Carré blanc masquant le texte pendant la progression
+- [ ] Le texte vert final reste visible dans un carré blanc (manque de contraste/transparence)
+- [ ] Impact : Fichier `UI/dialogs.py` ou configuration thème `Themes/purple.json`
+- [ ] Solution probable : Ajuster les couleurs de fond du QLabel de statut ou stylesheet du thème
 
 ---
 
 ## 🔧 Optimisations Techniques
 
-*(Cette section sera complétée pour les optimisations de performance ou refactoring non urgents)*
+### 1. Profil Chrome Dédié pour Selenium
+- [ ] Créer un profil Chrome dédié pour Selenium dans `eden_scraper.py`
+- [ ] Configurer ChromeDriver avec un `user-data-dir` séparé et isolé
+- [ ] Garantir une isolation totale entre navigation personnelle et requêtes du scraper
+- [ ] Éviter tout conflit de cookies à l'avenir
+- [ ] Impact : Fichier `Functions/eden_scraper.py` (configuration ChromeDriver)
 
 ---
 

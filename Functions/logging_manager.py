@@ -49,7 +49,7 @@ def get_log_dir():
     Gets the log directory from the config.
     If not set, defaults to a 'Logs' folder next to the executable.
     """
-    path = config.get("log_folder")
+    path = config.get("folders.logs")
     if path and os.path.isdir(path):
         return path
     return os.path.join(get_base_path(), "Logs")
@@ -85,7 +85,7 @@ def setup_logging(extra_handlers=None):
             logger.addHandler(handler)
 
     # Determine logging level from config
-    is_debug_mode = config.get("debug_mode", False)
+    is_debug_mode = config.get("system.debug_mode", False)
 
     # Set the root logger's level to the lowest possible level.
     # This allows individual handlers to control what they display.

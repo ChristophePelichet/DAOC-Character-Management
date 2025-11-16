@@ -85,12 +85,12 @@ class BackupManager:
         Check if a backup should be performed today.
         Returns True if last backup was on a different day or no backup exists yet.
         """
-        backup_enabled = self.config_manager.get("backup_enabled", True)
+        backup_enabled = self.config_manager.get("backup.characters.auto_daily_backup", True)
         if not backup_enabled:
             log_with_action(self.logger, "debug", "Backup is disabled in configuration", action="CHECK")
             return False
         
-        last_backup_str = self.config_manager.get("backup_last_date")
+        last_backup_str = self.config_manager.get("backup.characters.last_date")
         if not last_backup_str:
             log_with_action(self.logger, "debug", "No previous backup found - backup needed", action="CHECK")
             return True
@@ -221,7 +221,7 @@ class BackupManager:
                 shutil.copytree(char_folder, backup_file, dirs_exist_ok=True)
 
             # Update last backup date
-            self.config_manager.set("backup_last_date", datetime.now().isoformat())
+            self.config_manager.set("backup.characters.last_date", datetime.now().isoformat())
             
             # Apply retention policies
             log_with_action(self.logger, "info", "Applying retention policies...", action="RETENTION")
@@ -303,12 +303,12 @@ class BackupManager:
         Check if a cookies backup should be performed today.
         Returns True if last backup was on a different day or no backup exists yet.
         """
-        cookies_backup_enabled = self.config_manager.get("cookies_backup_enabled", True)
+        cookies_backup_enabled = self.config_manager.get("backup.cookies.auto_daily_backup", True)
         if not cookies_backup_enabled:
             log_with_action(self.logger, "debug", "Cookies backup is disabled in configuration", action="CHECK_COOKIES")
             return False
         
-        last_backup_str = self.config_manager.get("cookies_backup_last_date")
+        last_backup_str = self.config_manager.get("backup.cookies.last_date")
         if not last_backup_str:
             log_with_action(self.logger, "debug", "No previous cookies backup found - backup needed", action="CHECK_COOKIES")
             return True
@@ -382,7 +382,7 @@ class BackupManager:
                 shutil.copytree(cookies_folder, backup_file, dirs_exist_ok=True)
 
             # Update last cookies backup date
-            self.config_manager.set("cookies_backup_last_date", datetime.now().isoformat())
+            self.config_manager.set("backup.cookies.last_date", datetime.now().isoformat())
             
             # Apply retention policies for cookies
             log_with_action(self.logger, "info", "Applying retention policies for cookies backup...", action="RETENTION_COOKIES")
@@ -667,7 +667,7 @@ class BackupManager:
 
     def backup_armor_force(self):
         """Force armor data backup (manual trigger)."""
-        if not self.config_manager.get("armor_backup_enabled", True):
+        if not self.config_manager.get("backup.armor.auto_daily_backup", True):
             log_with_action(self.logger, "debug", "Armor backup is disabled", action="BACKUP_ARMOR")
             return False
         
@@ -717,7 +717,7 @@ class BackupManager:
                     f"Armor backup created (folder): {backup_name} ({size:.2f} MB)", 
                     action="BACKUP_ARMOR")
             
-            self.config_manager.set("armor_backup_last_date", datetime.now().isoformat())
+            self.config_manager.set("backup.armor.last_date", datetime.now().isoformat())
             return True
             
         except Exception as e:

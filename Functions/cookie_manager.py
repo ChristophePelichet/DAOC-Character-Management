@@ -36,7 +36,7 @@ class CookieManager:
             # Utiliser le dossier des cookies depuis la configuration
             from Functions.config_manager import config, get_config_dir
             # Check if a cookies folder has been configured
-            config_dir = config.get("cookies_folder")
+            config_dir = config.get("folders.cookies")
             if not config_dir:
                 # Fallback to default configuration folder
                 config_dir = get_config_dir()
@@ -612,8 +612,8 @@ class CookieManager:
             
             # Read configuration for preferred browser
             from Functions.config_manager import config
-            preferred_browser = config.get('preferred_browser', 'Chrome')
-            allow_download = config.get('allow_browser_download', False)
+            preferred_browser = config.get('system.preferred_browser', 'Chrome')
+            allow_download = config.get('system.allow_browser_download', False)
             
             eden_logger.info("🔧 test_eden_connection - Configuration lue: preferred_browser=", extra={"action": "TEST"})
             
@@ -762,8 +762,8 @@ class CookieManager:
             
             # Read configuration for preferred browser
             from Functions.config_manager import config
-            preferred_browser = config.get('preferred_browser', 'Chrome')
-            allow_download = config.get('allow_browser_download', False)
+            preferred_browser = config.get('system.preferred_browser', 'Chrome')
+            allow_download = config.get('system.allow_browser_download', False)
             
             # Create driver in NON-HEADLESS mode (to see result)
             driver, browser_name = self._initialize_browser_driver(
@@ -882,8 +882,8 @@ class CookieManager:
             
             # Read configuration for preferred browser
             from Functions.config_manager import config
-            preferred_browser = config.get('preferred_browser', 'Chrome')
-            allow_download = config.get('allow_browser_download', False)
+            preferred_browser = config.get('system.preferred_browser', 'Chrome')
+            allow_download = config.get('system.allow_browser_download', False)
             
             # Create driver in NON-HEADLESS mode (to see result)
             driver, browser_name = self._initialize_browser_driver(
@@ -1108,8 +1108,8 @@ class CookieManager:
             
             # Read configuration for preferred browser
             from Functions.config_manager import config
-            preferred_browser = config.get('preferred_browser', 'Chrome')
-            allow_download = config.get('allow_browser_download', False)
+            preferred_browser = config.get('system.preferred_browser', 'Chrome')
+            allow_download = config.get('system.allow_browser_download', False)
             
             # Create the driver
             driver, browser_name = self._initialize_browser_driver(
@@ -1219,7 +1219,7 @@ class CookieManager:
             
             # Read configuration for preferred browser
             from Functions.config_manager import config
-            preferred_browser = config.get('preferred_browser', 'Chrome')
+            preferred_browser = config.get('system.preferred_browser', 'Chrome')
             
             # Trouver le chemin du navigateur
             browser_path = None

@@ -74,4 +74,4 @@ def get_available_languages():
     return {code: languages[code] for code in final_sorted_codes}
 
 # Global instance to be easily accessible throughout the application
-lang = LanguageManager(config.get("language", "fr"))
+lang = LanguageManager(config.get("ui.language", "fr"))

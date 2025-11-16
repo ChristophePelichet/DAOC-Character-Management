@@ -12,8 +12,15 @@
 - ⚡ **Recherche Herald** : Fermeture instantanée de la fenêtre (plus de latence)
 
 ### 🧹 Nettoyage
+- 🗑️ Suppression des fichiers de test et documentations temporaires
+- 📚 Documentation finale : CONFIG_V2_TECHNICAL_DOC.md
 
 ### 🧰 Améliorations
+- 🔄 **Configuration v2** : Structure hiérarchique avec migration automatique et backup
+  - 5 sections organisées (ui, folders, backup, system, game)
+  - Rétrocompatibilité 100% garantie (39 clés legacy)
+  - Thème par défaut : Purple | Langue par défaut : English
+  - Documentation technique complète incluse
 - 🎨 **Changement de Thème** : Application instantanée complète sans redémarrage
 - 📋 **Colonnes** : Sauvegarde automatique des largeurs en mode manuel
 

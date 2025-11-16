@@ -53,8 +53,8 @@ class EdenScraper:
         try:
             # Read configuration for preferred browser
             from Functions.config_manager import config
-            preferred_browser = config.get('preferred_browser', 'Chrome')
-            allow_download = config.get('allow_browser_download', False)
+            preferred_browser = config.get('system.preferred_browser', 'Chrome')
+            allow_download = config.get('system.allow_browser_download', False)
             
             # Utiliser la fonction helper du cookie_manager
             # (which handles Chrome → Edge → Firefox fallback)

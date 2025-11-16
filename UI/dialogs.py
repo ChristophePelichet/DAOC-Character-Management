@@ -97,7 +97,7 @@ class CharacterSheetWindow(QDialog):
         layout = QVBoxLayout()
         
         # Eden Herald Section - EN HAUT for FACILITER the MISE À JOUR
-        eden_group = QGroupBox("🌐 Eden Herald")
+        eden_group = QGroupBox(lang.get("character_sheet.labels.eden_herald"))
         eden_layout = QVBoxLayout()
         
         # URL du Herald
@@ -105,22 +105,22 @@ class CharacterSheetWindow(QDialog):
         self.herald_url_edit = QLineEdit()
         current_url = self.character_data.get('url', '')
         self.herald_url_edit.setText(current_url)
-        self.herald_url_edit.setPlaceholderText("https://eden-daoc.net/herald?n=player&k=NomPersonnage")
+        self.herald_url_edit.setPlaceholderText(lang.get("character_sheet.labels.herald_url_placeholder"))
         self.herald_url_edit.textChanged.connect(self.on_herald_url_changed)
-        url_form_layout.addRow("URL Herald :", self.herald_url_edit)
+        url_form_layout.addRow(lang.get("character_sheet.labels.herald_url"), self.herald_url_edit)
         eden_layout.addLayout(url_form_layout)
         
         # Boutons d'action Herald
         herald_buttons_layout = QHBoxLayout()
         
-        self.open_herald_button = QPushButton("🌐 Ouvrir dans le navigateur")
-        self.open_herald_button.setToolTip("Ouvrir la page Herald dans le navigateur")
+        self.open_herald_button = QPushButton(lang.get("character_sheet.labels.open_browser"))
+        self.open_herald_button.setToolTip(lang.get("character_sheet.labels.open_browser_tooltip"))
         self.open_herald_button.clicked.connect(self.open_herald_url)
         self.open_herald_button.setMinimumHeight(28)
         herald_buttons_layout.addWidget(self.open_herald_button)
         
-        self.update_herald_button = QPushButton("🔄 Mettre à jour depuis Herald")
-        self.update_herald_button.setToolTip("Récupérer et mettre à jour les données depuis Herald")
+        self.update_herald_button = QPushButton(lang.get("character_sheet.labels.update_from_herald"))
+        self.update_herald_button.setToolTip(lang.get("character_sheet.labels.update_from_herald_tooltip"))
         self.update_herald_button.clicked.connect(self.update_from_herald)
         self.update_herald_button.setMinimumHeight(30)
         # Mettre en évidence the bouton of mise à jour
@@ -139,15 +139,15 @@ class CharacterSheetWindow(QDialog):
         layout.addSpacing(10)
         
         # Basic Information Section
-        info_group = QGroupBox("Informations générales")
+        info_group = QGroupBox(lang.get("character_sheet.labels.general_info"))
         info_layout = QFormLayout()
         
         # Editable name field with Enter key support
         self.name_edit = QLineEdit()
         self.name_edit.setText(char_name)
-        self.name_edit.setPlaceholderText("Nom du personnage (Appuyez sur Entrée pour renommer)")
+        self.name_edit.setPlaceholderText(lang.get("character_sheet.labels.name_placeholder"))
         self.name_edit.returnPressed.connect(self.rename_character)  # Rename on Enter key
-        info_layout.addRow("Nom :", self.name_edit)
+        info_layout.addRow(lang.get("character_sheet.labels.name"), self.name_edit)
         
         # Editable realm dropdown
         self.realm_combo = QComboBox()
@@ -155,7 +155,7 @@ class CharacterSheetWindow(QDialog):
         self.realm_combo.addItems(REALMS)
         self.realm_combo.setCurrentText(self.realm)
         self.realm_combo.currentTextChanged.connect(self._on_realm_changed_sheet)
-        info_layout.addRow("Royaume :", self.realm_combo)
+        info_layout.addRow(lang.get("character_sheet.labels.realm"), self.realm_combo)
         
         # Initialize DataManager for race/class data
         self.data_manager = DataManager()
@@ -170,7 +170,7 @@ class CharacterSheetWindow(QDialog):
             if class_index >= 0:
                 self.class_combo.setCurrentIndex(class_index)
         self.class_combo.currentTextChanged.connect(self._on_class_changed_sheet)
-        info_layout.addRow(lang.get("new_char_class_prompt", default="Classe :"), self.class_combo)
+        info_layout.addRow(lang.get("character_sheet.labels.class"), self.class_combo)
         
         # Editable race dropdown (AFTER class)
         self.race_combo = QComboBox()
@@ -182,14 +182,14 @@ class CharacterSheetWindow(QDialog):
             if race_index >= 0:
                 self.race_combo.setCurrentIndex(race_index)
         self.race_combo.currentTextChanged.connect(self._on_race_changed_sheet)
-        info_layout.addRow(lang.get("new_char_race_prompt", default="Race :"), self.race_combo)
+        info_layout.addRow(lang.get("character_sheet.labels.race"), self.race_combo)
         
         # Editable level dropdown (1-50)
         self.level_combo = QComboBox()
         self.level_combo.addItems([str(i) for i in range(1, 51)])
         current_level = self.character_data.get('level', 1)
         self.level_combo.setCurrentText(str(current_level))
-        info_layout.addRow("Niveau :", self.level_combo)
+        info_layout.addRow(lang.get("character_sheet.labels.level"), self.level_combo)
         
         # Editable season dropdown
         self.season_combo = QComboBox()
@@ -198,7 +198,7 @@ class CharacterSheetWindow(QDialog):
         self.season_combo.addItems(seasons)
         current_season = self.character_data.get('season', 'S3')
         self.season_combo.setCurrentText(current_season)
-        info_layout.addRow("Saison :", self.season_combo)
+        info_layout.addRow(lang.get("character_sheet.labels.season"), self.season_combo)
         
         # Editable server dropdown
         self.server_combo = QComboBox()
@@ -206,20 +206,20 @@ class CharacterSheetWindow(QDialog):
         self.server_combo.addItems(servers)
         current_server = self.character_data.get('server', 'Eden')
         self.server_combo.setCurrentText(current_server)
-        info_layout.addRow("Serveur :", self.server_combo)
+        info_layout.addRow(lang.get("character_sheet.labels.server"), self.server_combo)
         
         # Editable page dropdown (1-5)
         self.page_combo = QComboBox()
         self.page_combo.addItems([str(i) for i in range(1, 6)])
         current_page = self.character_data.get('page', 1)
         self.page_combo.setCurrentText(str(current_page))
-        info_layout.addRow("Page :", self.page_combo)
+        info_layout.addRow(lang.get("character_sheet.labels.page"), self.page_combo)
         
         # Editable guild text field
         self.guild_edit = QLineEdit()
         self.guild_edit.setText(self.character_data.get('guild', ''))
-        self.guild_edit.setPlaceholderText("Nom de la guilde")
-        info_layout.addRow("Guilde :", self.guild_edit)
+        self.guild_edit.setPlaceholderText(lang.get("character_sheet.labels.guild_placeholder"))
+        info_layout.addRow(lang.get("character_sheet.labels.guild"), self.guild_edit)
         
         info_group.setLayout(info_layout)
         
@@ -528,10 +528,10 @@ class CharacterSheetWindow(QDialog):
         
         if not herald_url:
             self.update_rvr_button.setEnabled(False)
-            self.update_rvr_button.setToolTip("Veuillez d'abord configurer l'URL Herald")
+            self.update_rvr_button.setToolTip(lang.get("character_sheet.labels.no_herald_url"))
         elif not herald_validation_done:
             self.update_rvr_button.setEnabled(False)
-            self.update_rvr_button.setToolTip("⏳ Validation Herald en cours au démarrage...")
+            self.update_rvr_button.setToolTip(lang.get("character_sheet.labels.herald_validation_pending"))
             # S'abonner au signal de fin de validation pour réactiver le bouton
             if hasattr(self.parent_app, 'ui_manager') and hasattr(self.parent_app.ui_manager, 'eden_status_thread'):
                 thread = self.parent_app.ui_manager.eden_status_thread
@@ -553,7 +553,7 @@ class CharacterSheetWindow(QDialog):
         layout.addLayout(top_layout)
         
         # Realm Rank Section
-        realm_rank_group = QGroupBox("Rang de Royaume")
+        realm_rank_group = QGroupBox(lang.get("character_sheet.labels.realm_rank_group"))
         realm_rank_layout = QVBoxLayout()
         
         realm_points = self.character_data.get('realm_points', 0)
@@ -591,7 +591,7 @@ class CharacterSheetWindow(QDialog):
         
         # Rank and Level dropdowns on a single line below the title
         rank_dropdown_layout = QHBoxLayout()
-        rank_dropdown_layout.addWidget(QLabel("Rang :"))
+        rank_dropdown_layout.addWidget(QLabel(lang.get("character_sheet.labels.rank")))
         
         self.rank_combo = QComboBox()
         for i in range(1, 15):  # Ranks 1-14
@@ -601,7 +601,7 @@ class CharacterSheetWindow(QDialog):
         rank_dropdown_layout.addWidget(self.rank_combo)
         
         # Level dropdown (0-10 for rank 1, 0-9 for others)
-        rank_dropdown_layout.addWidget(QLabel("Niveau :"))
+        rank_dropdown_layout.addWidget(QLabel(lang.get("character_sheet.labels.rank_level")))
         
         self.level_combo_rank = QComboBox()
         self.update_level_dropdown(current_rank, current_level)
@@ -616,9 +616,9 @@ class CharacterSheetWindow(QDialog):
         layout.addWidget(realm_rank_group)
         
         # Armor Manager button (moved here after Realm Rank section)
-        armor_manager_button = QPushButton("📁 Gérer les armures")
+        armor_manager_button = QPushButton(lang.get("character_sheet.labels.armor_manager"))
         armor_manager_button.clicked.connect(self.open_armor_manager)
-        armor_manager_button.setToolTip("Upload et gestion des fichiers d'armure créés avec des logiciels tiers")
+        armor_manager_button.setToolTip(lang.get("character_sheet.labels.armor_manager_tooltip"))
         layout.addWidget(armor_manager_button)
         
         layout.addStretch()
@@ -642,7 +642,7 @@ class CharacterSheetWindow(QDialog):
         if not class_name:
             # No class selected, show placeholder or hide
             self.banner_label.clear()
-            self.banner_label.setText("No\nClass\nSelected")
+            self.banner_label.setText(lang.get("character_sheet.labels.no_class_selected"))
             self.banner_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
             self.banner_label.setStyleSheet("color: gray; font-style: italic;")
             return

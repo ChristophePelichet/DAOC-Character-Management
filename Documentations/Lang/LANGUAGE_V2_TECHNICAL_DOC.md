@@ -180,7 +180,7 @@ The v2 structure organizes translations into 12 logical sections:
     "context_menu": { /* Right-click menu (5 keys) */ },
     "settings": { /* Settings dialog (120 keys) */ },
     "backup": { /* Backup system (30 keys) */ },
-    "character_sheet": { /* Character stats (35 keys) */ },
+    "character_sheet": { /* Character sheet window (73 keys: 27 labels + 7 sections + 19 stats + 16 messages + 4 sub-sections) */ },
     "progress": { /* Progress dialogs (45 keys) */ },
     "messages": { /* Error/success/info messages (40 keys) */ },
     "status_bar": { /* Status bar texts (2 keys) */ },
@@ -461,28 +461,108 @@ The v2 structure organizes translations into 12 logical sections:
 }
 ```
 
-#### 10. **character_sheet** (Character stats)
+#### 10. **character_sheet** (Character sheet window - 73 keys total)
 ```json
 "character_sheet": {
+    "labels": {
+        "eden_herald": "🌐 Eden Herald",
+        "herald_url": "URL Herald :",
+        "herald_url_placeholder": "https://eden-daoc.net/herald?n=player&k=NomPersonnage",
+        "open_browser": "🌐 Ouvrir dans le navigateur",
+        "open_browser_tooltip": "Ouvrir la page Herald dans le navigateur",
+        "update_from_herald": "🔄 Mettre à jour depuis Herald",
+        "update_from_herald_tooltip": "Récupérer et mettre à jour les données depuis Herald",
+        "general_info": "Informations générales",
+        "name": "Nom :",
+        "name_placeholder": "Nom du personnage (Appuyez sur Entrée pour renommer)",
+        "realm": "Royaume :",
+        "class": "Classe :",
+        "race": "Race :",
+        "level": "Niveau :",
+        "season": "Saison :",
+        "server": "Serveur :",
+        "page": "Page :",
+        "guild": "Guilde :",
+        "guild_placeholder": "Nom de la guilde",
+        "realm_rank_group": "Rang de Royaume",
+        "rank": "Rang :",
+        "rank_level": "Niveau :",
+        "armor_manager": "📁 Gérer les armures",
+        "armor_manager_tooltip": "Upload et gestion des fichiers d'armure créés avec des logiciels tiers",
+        "no_herald_url": "Veuillez d'abord configurer l'URL Herald",
+        "herald_validation_pending": "⏳ Validation Herald en cours au démarrage...",
+        "no_class_selected": "No\nClass\nSelected"
+        // 27 labels total
+    },
     "sections": {
+        "stats": "Statistiques",
         "rvr": "⚔️ RvR",
         "pvp": "🗡️ PvP",
         "pve": "🐉 PvE",
         "achievements": "🏆 Réalisations",
         "wealth": "💰 Monnaie",
-        "stats": "Statistiques"
+        "info": "ℹ️ Informations"
+        // 7 sections total
     },
     "stats": {
         "realm_rank": "Rang de Royaume :",
         "tower_captures": "🗼 Tower Captures:",
         "keep_captures": "🏰 Keep Captures:",
+        "relic_captures": "💎 Relic Captures:",
         "solo_kills": "⚔️ Solo Kills:",
         "deathblows": "💀 Deathblows:",
+        "kills": "🎯 Kills:",
+        "dragon_kills": "Dragon Kills:",
+        "legion_kills": "Legion Kills:",
+        "mini_dragon_kills": "Mini Dragon Kills:",
+        "epic_encounters": "Epic Encounters:",
+        "epic_dungeons": "Epic Dungeons:",
+        "sobekite": "Sobekite:",
         "gold": "Or:",
         "silver": "Argent:",
-        // ... more stats
+        "copper": "Cuivre:",
+        "mithril": "Mithril:",
+        "platinum": "Platine:",
+        "total_wealth": "Total:"
+        // 19 stats total
+    },
+    "messages": {
+        "pve_coming_soon": "🔜 Statistiques PvE à venir",
+        "statistics_coming_soon": "🔜 Fonctionnalité bientôt disponible",
+        "stats_update_success": "Statistiques mises à jour :",
+        "stats_update_warning_partial": "Certaines statistiques n'ont pas pu être récupérées",
+        "stats_save_error": "Statistiques récupérées mais erreur de sauvegarde : {msg}",
+        "partial_update_title": "Mise à jour partielle",
+        "rvr_success_pvp_failed": "✅ RvR Captures récupérées avec succès\n❌ Statistiques PvP non disponibles\n\nErreur PvP: {error}\n\nCela peut arriver si le personnage n'a pas encore de statistiques PvP.\nLes Tower/Keep/Relic Captures ont été sauvegardées.",
+        "pvp_success_rvr_failed": "❌ RvR Captures non disponibles\n✅ Statistiques PvP récupérées avec succès\n\nErreur RvR: {error}\n\nLes statistiques PvP ont été sauvegardées.",
+        "stats_fetch_failed": "Impossible de récupérer les statistiques :",
+        "stats_fetch_error_title": "Erreur",
+        "unknown_error": "Erreur inconnue",
+        "rank_update_success": "Rang mis à jour : {level}\nRealm Points : {rp:,}",
+        "info_update_success": "Informations du personnage mises à jour avec succès !",
+        "save_error": "Erreur lors de la sauvegarde : {error}",
+        "armor_manager_error": "Erreur lors de l'ouverture de la gestion des armures:\n{error}\n\n{traceback}",
+        "character_id_error": "Impossible de déterminer l'ID du personnage."
+        // 16 messages total
     }
 }
+```
+
+**Usage examples:**
+```python
+# UI labels
+eden_group = QGroupBox(lang.get("character_sheet.labels.eden_herald"))
+info_layout.addRow(lang.get("character_sheet.labels.name"), self.name_edit)
+
+# Sections
+rvr_subgroup = QGroupBox(lang.get("character_sheet.sections.rvr"))
+
+# Stats labels
+self.tower_captures_label = QLabel(lang.get("character_sheet.stats.tower_captures"))
+
+# Messages with parameters
+QMessageBox.information(self, "Success", 
+    lang.get("character_sheet.messages.rank_update_success", level="10L5", rp=12500))
 ```
 
 #### 11. **backup** (Backup system)

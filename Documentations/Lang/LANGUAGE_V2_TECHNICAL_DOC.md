@@ -303,7 +303,10 @@ The v2 structure organizes translations into 12 logical sections:
     "stats_info": "ℹ️ Informations",
     "backup_now": "Sauvegarder maintenant",
     "version_check": "🔄 Vérifier",
-    "download": "📥 Télécharger"
+    "download": "📥 Télécharger",
+    "eden_refresh": "🔄 Actualiser",
+    "eden_search": "🔍 Recherche",
+    "eden_manage": "⚙️ Gérer"
 }
 ```
 

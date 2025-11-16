@@ -169,7 +169,7 @@ class UIManager:
         status_layout.addWidget(self.eden_status_label, 1)
         
         # Boutons réduits alignés horizontalement - all the même taille
-        self.refresh_button = QPushButton("🔄 Actualiser")
+        self.refresh_button = QPushButton(lang.get("buttons.eden_refresh"))
         self.refresh_button.clicked.connect(self.check_eden_status)
         self.refresh_button.setEnabled(False)
         self.refresh_button.setMaximumWidth(750)
@@ -177,7 +177,7 @@ class UIManager:
         self.refresh_button.setStyleSheet("font-size: 12px; padding: 3px;")
         status_layout.addWidget(self.refresh_button)
         
-        self.search_button = QPushButton("🔍 Recherche")
+        self.search_button = QPushButton(lang.get("buttons.eden_search"))
         self.search_button.clicked.connect(self.main_window.open_herald_search)
         self.search_button.setEnabled(False)
         self.search_button.setMaximumWidth(750)
@@ -185,7 +185,7 @@ class UIManager:
         self.search_button.setStyleSheet("font-size: 12px; padding: 3px;")
         status_layout.addWidget(self.search_button)
         
-        manage_button = QPushButton("⚙️ Gérer")
+        manage_button = QPushButton(lang.get("buttons.eden_manage"))
         manage_button.clicked.connect(self.main_window.open_cookie_manager)
         manage_button.setMaximumWidth(750)
         manage_button.setMinimumHeight(35)

@@ -154,7 +154,10 @@
         "open_backup_folder": "Ordner öffnen",
         "version_check": "🔄 Prüfen",
         "version_check_checking": "⏳ Wird geprüft...",
-        "download": "📥 Herunterladen"
+        "download": "📥 Herunterladen",
+        "eden_refresh": "🔄 Aktualisieren",
+        "eden_search": "🔍 Suchen",
+        "eden_manage": "⚙️ Verwalten"
     },
     "messages": {
         "errors": {

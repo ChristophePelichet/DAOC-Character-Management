@@ -170,6 +170,9 @@ LANGUAGE_LEGACY_MAPPING = {
     "exit_button_text": "buttons.exit",
     "action_button_label": "buttons.action",
     "cancel": "buttons.cancel",
+    "eden_refresh_button": "buttons.eden_refresh",
+    "eden_search_button": "buttons.eden_search",
+    "eden_manage_button": "buttons.eden_manage",
     
     # Columns (14 keys)
     "column_name": "columns.name",

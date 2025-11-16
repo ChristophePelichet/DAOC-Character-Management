@@ -154,7 +154,10 @@
         "open_backup_folder": "Open folder",
         "version_check": "🔄 Check",
         "version_check_checking": "⏳ Checking...",
-        "download": "📥 Download"
+        "download": "📥 Download",
+        "eden_refresh": "🔄 Refresh",
+        "eden_search": "🔍 Search",
+        "eden_manage": "⚙️ Manage"
     },
     "messages": {
         "errors": {

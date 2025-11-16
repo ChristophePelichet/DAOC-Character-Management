@@ -408,7 +408,8 @@
     },
     "status_bar": {
         "loaded": "Ready. Loaded in {duration:.2f} seconds.",
-        "selection_count": "{count} of {total} character(s) selected"
+        "selection_count": "{count} of {total} character(s) selected",
+        "status_group_title": "Eden Herald Status"
     },
     "themes": {
         "light": "Light",
@@ -493,7 +494,21 @@
         },
         "messages": {
             "pve_coming_soon": "🔜 PvE Statistics coming soon",
-            "statistics_coming_soon": "🔜 Feature coming soon"
+            "statistics_coming_soon": "🔜 Feature coming soon",
+            "stats_update_success": "Statistics updated:",
+            "stats_update_warning_partial": "Some statistics could not be retrieved",
+            "stats_save_error": "Statistics retrieved but save error: {msg}",
+            "partial_update_title": "Partial Update",
+            "rvr_success_pvp_failed": "✅ RvR Captures retrieved successfully\n❌ PvP Statistics not available\n\nPvP Error: {error}\n\nThis can happen if the character doesn't have PvP statistics yet.\nTower/Keep/Relic Captures have been saved.",
+            "pvp_success_rvr_failed": "❌ RvR Captures not available\n✅ PvP Statistics retrieved successfully\n\nRvR Error: {error}\n\nPvP statistics have been saved.",
+            "stats_fetch_failed": "Unable to retrieve statistics:",
+            "stats_fetch_error_title": "Error",
+            "unknown_error": "Unknown error",
+            "rank_update_success": "Rank updated: {level}\nRealm Points: {rp:,}",
+            "info_update_success": "Character information updated successfully!",
+            "save_error": "Error while saving: {error}",
+            "armor_manager_error": "Error opening armor management:\n{error}\n\n{traceback}",
+            "character_id_error": "Unable to determine character ID."
         }
     },
     "context_menu": {

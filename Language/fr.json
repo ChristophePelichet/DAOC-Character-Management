@@ -408,7 +408,8 @@
     },
     "status_bar": {
         "loaded": "Prêt. Chargé en {duration:.2f} secondes.",
-        "selection_count": "{count} sur {total} personnage(s) sélectionné(s)"
+        "selection_count": "{count} sur {total} personnage(s) sélectionné(s)",
+        "status_group_title": "Statut Eden Herald"
     },
     "themes": {
         "light": "Clair",
@@ -493,7 +494,21 @@
         },
         "messages": {
             "pve_coming_soon": "🔜 Statistiques PvE à venir",
-            "statistics_coming_soon": "🔜 Fonctionnalité bientôt disponible"
+            "statistics_coming_soon": "🔜 Fonctionnalité bientôt disponible",
+            "stats_update_success": "Statistiques mises à jour :",
+            "stats_update_warning_partial": "Certaines statistiques n'ont pas pu être récupérées",
+            "stats_save_error": "Statistiques récupérées mais erreur de sauvegarde : {msg}",
+            "partial_update_title": "Mise à jour partielle",
+            "rvr_success_pvp_failed": "✅ RvR Captures récupérées avec succès\n❌ Statistiques PvP non disponibles\n\nErreur PvP: {error}\n\nCela peut arriver si le personnage n'a pas encore de statistiques PvP.\nLes Tower/Keep/Relic Captures ont été sauvegardées.",
+            "pvp_success_rvr_failed": "❌ RvR Captures non disponibles\n✅ Statistiques PvP récupérées avec succès\n\nErreur RvR: {error}\n\nLes statistiques PvP ont été sauvegardées.",
+            "stats_fetch_failed": "Impossible de récupérer les statistiques :",
+            "stats_fetch_error_title": "Erreur",
+            "unknown_error": "Erreur inconnue",
+            "rank_update_success": "Rang mis à jour : {level}\nRealm Points : {rp:,}",
+            "info_update_success": "Informations du personnage mises à jour avec succès !",
+            "save_error": "Erreur lors de la sauvegarde : {error}",
+            "armor_manager_error": "Erreur lors de l'ouverture de la gestion des armures:\n{error}\n\n{traceback}",
+            "character_id_error": "Impossible de déterminer l'ID du personnage."
         }
     },
     "context_menu": {

@@ -157,7 +157,7 @@ class UIManager:
         container_layout = QHBoxLayout()
         
         # ===== SECTION GAUCHE : Status Herald Eden (réduite of moitié) =====
-        status_group = QGroupBox("Statut Eden Herald")
+        self.status_group = QGroupBox("Statut Eden Herald")
         status_layout = QHBoxLayout()
         status_layout.setSpacing(5)
         status_layout.setContentsMargins(5, 5, 5, 5)
@@ -192,20 +192,20 @@ class UIManager:
         manage_button.setStyleSheet("font-size: 12px; padding: 3px 15px;")
         status_layout.addWidget(manage_button)
         
-        status_group.setLayout(status_layout)
-        container_layout.addWidget(status_group, 1)  # Stretch = 1
+        self.status_group.setLayout(status_layout)
+        container_layout.addWidget(self.status_group, 1)  # Stretch = 1
         
         # ===== SECTION DROITE : Informations (Version) =====
-        info_group = QGroupBox(lang.get("info_section_title"))
+        self.info_group = QGroupBox(lang.get("info_section_title"))
         info_layout = QVBoxLayout()
         info_layout.setContentsMargins(10, 10, 10, 10)
         info_layout.setSpacing(5)
         
         # Version actuelle
         current_layout = QHBoxLayout()
-        current_label = QLabel(lang.get("version_check_current"))
-        current_label.setStyleSheet("font-size: 11px;")
-        current_layout.addWidget(current_label)
+        self.version_current_title_label = QLabel(lang.get("version_check_current"))
+        self.version_current_title_label.setStyleSheet("font-size: 11px;")
+        current_layout.addWidget(self.version_current_title_label)
         
         self.version_current_label = QLabel("—")
         self.version_current_label.setStyleSheet("font-size: 11px; font-weight: bold;")
@@ -216,9 +216,9 @@ class UIManager:
         
         # Dernière version
         latest_layout = QHBoxLayout()
-        latest_label = QLabel(lang.get("version_check_latest"))
-        latest_label.setStyleSheet("font-size: 11px;")
-        latest_layout.addWidget(latest_label)
+        self.version_latest_title_label = QLabel(lang.get("version_check_latest"))
+        self.version_latest_title_label.setStyleSheet("font-size: 11px;")
+        latest_layout.addWidget(self.version_latest_title_label)
         
         self.version_latest_label = QLabel("—")
         self.version_latest_label.setStyleSheet("font-size: 11px; font-weight: bold;")
@@ -265,8 +265,8 @@ class UIManager:
         
         info_layout.addLayout(status_button_layout)
         
-        info_group.setLayout(info_layout)
-        container_layout.addWidget(info_group, 1)  # Stretch = 1
+        self.info_group.setLayout(info_layout)
+        container_layout.addWidget(self.info_group, 1)  # Stretch = 1
         
         # Ajouter the conteneur à the layout principale
         parent_layout.addLayout(container_layout)
@@ -456,3 +456,27 @@ class UIManager:
         self.main_window.setWindowTitle(lang.get("window_title"))
         self.create_menu_bar()
         self.create_context_menu()
+        
+        # Mettre à jour les titres des groupes de la barre de statut Eden
+        if hasattr(self, 'status_group'):
+            self.status_group.setTitle(lang.get("status_bar.status_group_title"))
+        
+        if hasattr(self, 'info_group'):
+            self.info_group.setTitle(lang.get("info_section_title"))
+        
+        # Mettre à jour les labels de version
+        if hasattr(self, 'version_current_title_label'):
+            self.version_current_title_label.setText(lang.get("version_check_current"))
+        
+        if hasattr(self, 'version_latest_title_label'):
+            self.version_latest_title_label.setText(lang.get("version_check_latest"))
+        
+        if hasattr(self, 'version_check_button'):
+            self.version_check_button.setText(lang.get("version_check_button"))
+        
+        # Mettre à jour les boutons Eden
+        if hasattr(self, 'refresh_button'):
+            self.refresh_button.setText(lang.get("buttons.eden_refresh"))
+        
+        if hasattr(self, 'search_button'):
+            self.search_button.setText(lang.get("buttons.eden_search"))

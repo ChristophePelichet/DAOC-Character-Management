@@ -919,7 +919,7 @@ class CharacterSheetWindow(QDialog):
             
             if success:
                 log_with_action(logger_char, "info", f"Character rank applied to {level_str} with {new_rp:,} RP after confirmation", action="RANK_UPDATE")
-                QMessageBox.information(self, "Succès", f"Rang mis à jour : {level_str}\nRealm Points : {new_rp:,}")
+                QMessageBox.information(self, lang.get("dialogs.titles.success"), lang.get("character_sheet.messages.rank_update_success", level=level_str, rp=new_rp))
                 # Update display
                 self.update_rank_display(new_rp)
                 # Refresh list
@@ -1038,30 +1038,30 @@ class CharacterSheetWindow(QDialog):
                         sys.stderr.flush()
                         logging.warning(f"[BACKUP_TRIGGER] Backup after basic info modification failed: {e}")
             
-            QMessageBox.information(self, "Succès", "Informations du personnage mises à jour avec succès !")
+            QMessageBox.information(self, lang.get("dialogs.titles.success"), lang.get("character_sheet.messages.info_update_success"))
             # Refresh list in parent
             if hasattr(self.parent_app, 'refresh_character_list'):
                 self.parent_app.refresh_character_list()
                 
         except Exception as e:
             log_with_action(logger_char, "error", f"Error saving basic info: {str(e)}", action="ERROR")
-            QMessageBox.critical(self, "Erreur", f"Erreur lors de la sauvegarde : {str(e)}")
+            QMessageBox.critical(self, lang.get("dialogs.titles.error"), lang.get("character_sheet.messages.save_error", error=str(e)))
 
     def open_armor_manager(self):
         """Opens the armor management dialog."""
         try:
             character_id = self.character_data.get('id', '')
             if not character_id:
-                QMessageBox.warning(self, "Erreur", "Impossible de déterminer l'ID du personnage.")
+                QMessageBox.warning(self, lang.get("dialogs.titles.error"), lang.get("character_sheet.messages.character_id_error"))
                 return
             
             dialog = ArmorManagementDialog(self, character_id)
             dialog.exec()
         except Exception as e:
             import traceback
-            error_msg = f"Erreur lors de l'ouverture de la gestion des armures:\n{str(e)}\n\n{traceback.format_exc()}"
+            error_msg = lang.get("character_sheet.messages.armor_manager_error", error=str(e), traceback=traceback.format_exc())
             logging.error(error_msg)
-            QMessageBox.critical(self, "Erreur", error_msg)
+            QMessageBox.critical(self, lang.get("dialogs.titles.error"), error_msg)
     
     def on_herald_url_changed(self, text):
         """Active/désactive le bouton de mise à jour des stats selon l'URL Herald"""
@@ -1460,21 +1460,21 @@ class CharacterSheetWindow(QDialog):
                 
                 QMessageBox.information(
                     self,
-                    "Succès",
-                    f"Statistiques mises à jour :\n\n"
-                    f"⚔️ RvR\n"
+                    lang.get("dialogs.titles.success"),
+                    f"{lang.get('character_sheet.messages.stats_update_success')}\n\n"
+                    f"{lang.get('character_sheet.sections.rvr')}\n"
                     f"🗼 Tower Captures: {tower:,}\n"
                     f"🏰 Keep Captures: {keep:,}\n"
                     f"💎 Relic Captures: {relic:,}\n\n"
-                    f"🗡️ PvP\n"
+                    f"{lang.get('character_sheet.sections.pvp')}\n"
                     f"⚔️ Solo Kills: {solo_kills:,} (Alb: {solo_kills_alb:,}, Hib: {solo_kills_hib:,}, Mid: {solo_kills_mid:,})\n"
                     f"💀 Deathblows: {deathblows:,} (Alb: {deathblows_alb:,}, Hib: {deathblows_hib:,}, Mid: {deathblows_mid:,})\n"
                     f"🎯 Kills: {kills:,} (Alb: {kills_alb:,}, Hib: {kills_hib:,}, Mid: {kills_mid:,})\n\n"
-                    f"🐉 PvE\n"
+                    f"{lang.get('character_sheet.sections.pve')}\n"
                     f"🐉 Dragons: {dragon_kills:,}  |  👹 Légions: {legion_kills:,}\n"
                     f"🐲 Mini Dragons: {mini_dragon_kills:,}  |  ⚔️ Epic Encounters: {epic_encounters:,}\n"
                     f"🏛️ Epic Dungeons: {epic_dungeons:,}  |  🐊 Sobekite: {sobekite:,}\n\n"
-                    f"💰 Monnaie\n"
+                    f"{lang.get('character_sheet.sections.wealth')}\n"
                     f"Total: {money}"
                 )
                 
@@ -1487,8 +1487,8 @@ class CharacterSheetWindow(QDialog):
             else:
                 QMessageBox.warning(
                     self,
-                    "Avertissement",
-                    f"Statistiques récupérées mais erreur de sauvegarde : {msg}"
+                    lang.get("dialogs.titles.warning"),
+                    lang.get("character_sheet.messages.stats_save_error", msg=msg)
                 )
         
         elif result_rvr.get('success') and not result_pvp.get('success'):
@@ -1497,12 +1497,8 @@ class CharacterSheetWindow(QDialog):
             
             QMessageBox.warning(
                 self,
-                "Mise à jour partielle",
-                f"✅ RvR Captures récupérées avec succès\n"
-                f"❌ Statistiques PvP non disponibles\n\n"
-                f"Erreur PvP: {result_pvp.get('error', 'Erreur inconnue')}\n\n"
-                f"Cela peut arriver si le personnage n'a pas encore de statistiques PvP.\n"
-                f"Les Tower/Keep/Relic Captures ont été sauvegardées."
+                lang.get("character_sheet.messages.partial_update_title"),
+                lang.get("character_sheet.messages.rvr_success_pvp_failed", error=result_pvp.get('error', lang.get("character_sheet.messages.unknown_error")))
             )
         
         elif not result_rvr.get('success') and result_pvp.get('success'):
@@ -1511,26 +1507,23 @@ class CharacterSheetWindow(QDialog):
             
             QMessageBox.warning(
                 self,
-                "Mise à jour partielle",
-                f"❌ RvR Captures non disponibles\n"
-                f"✅ Statistiques PvP récupérées avec succès\n\n"
-                f"Erreur RvR: {result_rvr.get('error', 'Erreur inconnue')}\n\n"
-                f"Les statistiques PvP ont été sauvegardées."
+                lang.get("character_sheet.messages.partial_update_title"),
+                lang.get("character_sheet.messages.pvp_success_rvr_failed", error=result_rvr.get('error', lang.get("character_sheet.messages.unknown_error")))
             )
         
         else:
             # Échec complet ou multiple
-            error_msg = "Impossible de récupérer les statistiques :\n\n"
+            error_msg = f"{lang.get('character_sheet.messages.stats_fetch_failed')}\n\n"
             if not result_rvr.get('success'):
-                error_msg += f"❌ RvR Captures: {result_rvr.get('error', 'Erreur inconnue')}\n"
+                error_msg += f"❌ RvR Captures: {result_rvr.get('error', lang.get('character_sheet.messages.unknown_error'))}\n"
             if not result_pvp.get('success'):
-                error_msg += f"❌ PvP Stats: {result_pvp.get('error', 'Erreur inconnue')}\n"
+                error_msg += f"❌ PvP Stats: {result_pvp.get('error', lang.get('character_sheet.messages.unknown_error'))}\n"
             if not result_pve.get('success'):
-                error_msg += f"❌ PvE Stats: {result_pve.get('error', 'Erreur inconnue')}\n"
+                error_msg += f"❌ PvE Stats: {result_pve.get('error', lang.get('character_sheet.messages.unknown_error'))}\n"
             if not result_wealth.get('success'):
-                error_msg += f"❌ Wealth: {result_wealth.get('error', 'Erreur inconnue')}\n"
+                error_msg += f"❌ Wealth: {result_wealth.get('error', lang.get('character_sheet.messages.unknown_error'))}\n"
             
-            QMessageBox.critical(self, "Erreur", error_msg)
+            QMessageBox.critical(self, lang.get("character_sheet.messages.stats_fetch_error_title"), error_msg)
         
         # Réactiver le bouton
         if not self.herald_scraping_in_progress:
@@ -1549,8 +1542,8 @@ class CharacterSheetWindow(QDialog):
         # Afficher l'erreur
         QMessageBox.critical(
             self,
-            "Erreur",
-            f"Erreur lors de la mise à jour des stats:\n{error_message}"
+            lang.get("character_sheet.messages.stats_fetch_error_title"),
+            f"{lang.get('character_sheet.messages.stats_fetch_failed')}\n{error_message}"
         )
         
         # Réactiver le bouton

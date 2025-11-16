@@ -183,7 +183,7 @@ The v2 structure organizes translations into 12 logical sections:
     "character_sheet": { /* Character sheet window (73 keys: 27 labels + 7 sections + 19 stats + 16 messages + 4 sub-sections) */ },
     "progress": { /* Progress dialogs (45 keys) */ },
     "messages": { /* Error/success/info messages (40 keys) */ },
-    "status_bar": { /* Status bar texts (2 keys) */ },
+    "status_bar": { /* Status bar texts (3 keys) */ },
     "debug": { /* Debug window (10 keys) */ },
     "themes": { /* Theme names (3 keys) */ },
     "realms": { /* Realm names (3 keys) */ },
@@ -663,7 +663,8 @@ class SearchThread(QThread):
 ```json
 "status_bar": {
     "loaded": "Prêt. Chargé en {duration:.2f} secondes.",
-    "selection_count": "{count} sur {total} personnage(s) sélectionné(s)"
+    "selection_count": "{count} sur {total} personnage(s) sélectionné(s)",
+    "status_group_title": "Statut Eden Herald"
 },
 "debug": { /* Debug window settings */ },
 "themes": { "light": "Clair", "dark": "Sombre", "purple": "Violet (Dracula)" },

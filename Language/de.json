@@ -408,7 +408,8 @@
     },
     "status_bar": {
         "loaded": "Bereit. Geladen in {duration:.2f} Sekunden.",
-        "selection_count": "{count} von {total} Charakter(e) ausgewählt"
+        "selection_count": "{count} von {total} Charakter(e) ausgewählt",
+        "status_group_title": "Eden Herald Status"
     },
     "themes": {
         "light": "Hell",
@@ -493,7 +494,21 @@
         },
         "messages": {
             "pve_coming_soon": "🔜 PvE-Statistiken demnächst verfügbar",
-            "statistics_coming_soon": "🔜 Funktion kommt bald"
+            "statistics_coming_soon": "🔜 Funktion kommt bald",
+            "stats_update_success": "Statistiken aktualisiert:",
+            "stats_update_warning_partial": "Einige Statistiken konnten nicht abgerufen werden",
+            "stats_save_error": "Statistiken abgerufen, aber Speicherfehler: {msg}",
+            "partial_update_title": "Teilweise Aktualisierung",
+            "rvr_success_pvp_failed": "✅ RvR-Eroberungen erfolgreich abgerufen\n❌ PvP-Statistiken nicht verfügbar\n\nPvP-Fehler: {error}\n\nDies kann passieren, wenn der Charakter noch keine PvP-Statistiken hat.\nTower/Keep/Relic-Eroberungen wurden gespeichert.",
+            "pvp_success_rvr_failed": "❌ RvR-Eroberungen nicht verfügbar\n✅ PvP-Statistiken erfolgreich abgerufen\n\nRvR-Fehler: {error}\n\nPvP-Statistiken wurden gespeichert.",
+            "stats_fetch_failed": "Statistiken konnten nicht abgerufen werden:",
+            "stats_fetch_error_title": "Fehler",
+            "unknown_error": "Unbekannter Fehler",
+            "rank_update_success": "Rang aktualisiert: {level}\nReich-Punkte: {rp:,}",
+            "info_update_success": "Charakterinformationen erfolgreich aktualisiert!",
+            "save_error": "Fehler beim Speichern: {error}",
+            "armor_manager_error": "Fehler beim Öffnen der Rüstungsverwaltung:\n{error}\n\n{traceback}",
+            "character_id_error": "Charakter-ID kann nicht ermittelt werden."
         }
     },
     "context_menu": {

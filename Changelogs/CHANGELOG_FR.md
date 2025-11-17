@@ -58,6 +58,12 @@ Historique complet des versions du gestionnaire de personnages pour Dark Age of 
   - ✅ Solution : Ajout de 10 mappings dans LANGUAGE_LEGACY_MAPPING (buttons + warnings)
   - 🎯 Impact : Bouton et dialogues traduits correctement en FR/EN/DE
   - Fichier : Functions/language_schema.py
+- 🌍 **Fenêtre Mise à Jour Personnage Non Traduite** : Ajout traductions complètes FR/EN/DE
+  - 🔧 Problème : Fenêtre `CharacterUpdateDialog` affichait tous les textes en français hardcodé
+  - 🔍 Cause : Textes en dur dans UI/dialogs.py sans utilisation du système de langue
+  - ✅ Solution : Ajout de 16 clés dans `dialogs.character_update` (titre, en-têtes colonnes, boutons, noms de champs)
+  - 🎯 Impact : Fenêtre de mise à jour complètement traduite selon la langue sélectionnée
+  - Fichiers : UI/dialogs.py, Language/fr.json, Language/en.json, Language/de.json
 - 🌍 **Traductions Section Version** : Mise à jour dynamique de la langue sans redémarrage
   - 🔧 Conversion des labels de version en attributs d'instance (status_group, info_group, version labels)
   - 🎯 Méthode retranslate_ui() améliorée avec 7 mises à jour dynamiques de labels

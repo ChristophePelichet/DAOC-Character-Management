@@ -88,6 +88,13 @@ Complete version history of the character manager for Dark Age of Camelot (Eden)
   - 🌍 Complete FR/EN/DE translations (7 new keys)
 
 ### 🐛 Bug Fix
+- 🌍 **Character Update Window Not Translated**: Added complete FR/EN/DE translations
+  - 🛡️ Problem: `CharacterUpdateDialog` window displayed all texts in hardcoded French
+  - 🔍 Cause: Hardcoded texts in UI/dialogs.py without using language system
+  - ✅ Solution: Added 16 keys in `dialogs.character_update` (title, column headers, buttons, field names)
+  - 🎯 Impact: Update window fully translated according to selected language
+  - Files: UI/dialogs.py, Language/fr.json, Language/en.json, Language/de.json
+  - 📚 Documentation: Updated LANGUAGE_V2_TECHNICAL_DOC.md with character_update section
 - 🛡️ **.migration_done File Not Recreated**: Prevention of automatic flag file creation
   - 🔧 Removed `mark_migration_done()` call during startup check
   - 🎯 File only created when migration is actually performed successfully

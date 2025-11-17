@@ -50,6 +50,28 @@
             "title": "Renommer le personnage",
             "prompt": "Nouveau nom :"
         },
+        "character_update": {
+            "title": "Mise à jour - {name}",
+            "header": "Mise à jour du personnage: {name}",
+            "comparison_info": "<b>Comparaison des données :</b><br>• <span style='color: green;'>✓</span> = Valeurs identiques (pas de changement)<br>• <span style='color: red;'>Valeur actuelle</span> → <span style='color: green;'><b>Nouvelle valeur</b></span> = Changement détecté<br>Cochez les modifications que vous souhaitez appliquer.",
+            "apply_column": "Appliquer",
+            "field_column": "Champ",
+            "current_column": "Valeur actuelle",
+            "new_column": "Nouvelle valeur",
+            "select_all": "Tout sélectionner",
+            "deselect_all": "Tout désélectionner",
+            "apply_changes": "Appliquer les modifications",
+            "field_level": "Niveau",
+            "field_class": "Classe",
+            "field_race": "Race",
+            "field_realm": "Royaume",
+            "field_guild": "Guilde",
+            "field_realm_points": "Points de Royaume",
+            "field_realm_rank": "Rang de Royaume",
+            "field_server": "Serveur",
+            "empty_value": "(vide)"
+        }
+        },
         "columns_config": {
             "title": "Configuration des colonnes",
             "description": "Sélectionnez les colonnes à afficher :",

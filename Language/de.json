@@ -46,6 +46,27 @@
             "title": "Charakter duplizieren",
             "prompt": "Name des neuen Charakters:"
         },
+        "character_update": {
+            "title": "Aktualisierung - {name}",
+            "header": "Charakteraktualisierung: {name}",
+            "comparison_info": "<b>Datenvergleich:</b><br>• <span style='color: green;'>✓</span> = Identische Werte (keine Änderung)<br>• <span style='color: red;'>Aktueller Wert</span> → <span style='color: green;'><b>Neuer Wert</b></span> = Änderung erkannt<br>Markieren Sie die Änderungen, die Sie anwenden möchten.",
+            "apply_column": "Anwenden",
+            "field_column": "Feld",
+            "current_column": "Aktueller Wert",
+            "new_column": "Neuer Wert",
+            "select_all": "Alle auswählen",
+            "deselect_all": "Alle abwählen",
+            "apply_changes": "Änderungen anwenden",
+            "field_level": "Stufe",
+            "field_class": "Klasse",
+            "field_race": "Rasse",
+            "field_realm": "Reich",
+            "field_guild": "Gilde",
+            "field_realm_points": "Reichspunkte",
+            "field_realm_rank": "Reichsrang",
+            "field_server": "Server",
+            "empty_value": "(leer)"
+        },
         "columns_config": {
             "title": "Spaltenkonfiguration",
             "description": "Wählen Sie die anzuzeigenden Spalten:",

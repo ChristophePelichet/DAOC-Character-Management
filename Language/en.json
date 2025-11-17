@@ -46,6 +46,27 @@
             "title": "Duplicate Character",
             "prompt": "New character name:"
         },
+        "character_update": {
+            "title": "Update - {name}",
+            "header": "Character update: {name}",
+            "comparison_info": "<b>Data comparison:</b><br>• <span style='color: green;'>✓</span> = Identical values (no change)<br>• <span style='color: red;'>Current value</span> → <span style='color: green;'><b>New value</b></span> = Change detected<br>Check the modifications you want to apply.",
+            "apply_column": "Apply",
+            "field_column": "Field",
+            "current_column": "Current value",
+            "new_column": "New value",
+            "select_all": "Select all",
+            "deselect_all": "Deselect all",
+            "apply_changes": "Apply changes",
+            "field_level": "Level",
+            "field_class": "Class",
+            "field_race": "Race",
+            "field_realm": "Realm",
+            "field_guild": "Guild",
+            "field_realm_points": "Realm Points",
+            "field_realm_rank": "Realm Rank",
+            "field_server": "Server",
+            "empty_value": "(empty)"
+        },
         "columns_config": {
             "title": "Column Configuration",
             "description": "Select the columns to display:",

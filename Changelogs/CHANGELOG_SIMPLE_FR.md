@@ -17,6 +17,7 @@
 - 🐛 Correction crash Settings avec cookies_path_edit manquant
 - 🐛 Correction backup cookies qui disparaissait immédiatement après création
 - 🌍 Correction traductions bouton "Nettoyer Eden" (FR/EN/DE)
+- 🌍 Correction fenêtre "Mise à jour" personnage maintenant traduite (FR/EN/DE)
 
 ## v0.108
 

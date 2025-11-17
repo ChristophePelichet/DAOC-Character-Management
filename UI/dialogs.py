@@ -5334,20 +5334,23 @@ class CharacterUpdateDialog(QDialog):
         self.character_name = character_name
         self.changes = {}
         
-        self.setWindowTitle(f"Mise à jour - {character_name}")
+        self.setWindowTitle(lang.get("dialogs.character_update.title", default="Mise à jour - {name}").format(name=character_name))
         self.resize(600, 500)
         
         layout = QVBoxLayout(self)
         
         # En-tête
-        header_label = QLabel(f"<h2>Mise à jour du personnage: {character_name}</h2>")
+        header_label = QLabel(f"<h2>{lang.get('dialogs.character_update.header', default='Mise à jour du personnage: {name}').format(name=character_name)}</h2>")
         layout.addWidget(header_label)
         
         info_label = QLabel(
-            "<b>Comparaison des données :</b><br>"
-            "• <span style='color: green;'>✓</span> = Valeurs identiques (pas de changement)<br>"
-            "• <span style='color: red;'>Valeur actuelle</span> → <span style='color: green;'><b>Nouvelle valeur</b></span> = Changement détecté<br>"
-            "Cochez les modifications que vous souhaitez appliquer."
+            lang.get(
+                "dialogs.character_update.comparison_info",
+                default="<b>Comparaison des données :</b><br>"
+                        "• <span style='color: green;'>✓</span> = Valeurs identiques (pas de changement)<br>"
+                        "• <span style='color: red;'>Valeur actuelle</span> → <span style='color: green;'><b>Nouvelle valeur</b></span> = Changement détecté<br>"
+                        "Cochez les modifications que vous souhaitez appliquer."
+            )
         )
         info_label.setWordWrap(True)
         layout.addWidget(info_label)
@@ -5355,7 +5358,12 @@ class CharacterUpdateDialog(QDialog):
         # Tableau des modifications
         self.changes_table = QTableWidget()
         self.changes_table.setColumnCount(4)
-        self.changes_table.setHorizontalHeaderLabels(["Appliquer", "Champ", "Valeur actuelle", "Nouvelle valeur"])
+        self.changes_table.setHorizontalHeaderLabels([
+            lang.get("dialogs.character_update.apply_column", default="Appliquer"),
+            lang.get("dialogs.character_update.field_column", default="Champ"),
+            lang.get("dialogs.character_update.current_column", default="Valeur actuelle"),
+            lang.get("dialogs.character_update.new_column", default="Nouvelle valeur")
+        ])
         self.changes_table.horizontalHeader().setStretchLastSection(True)
         self.changes_table.setSelectionMode(QTableWidget.NoSelection)
         
@@ -5367,11 +5375,11 @@ class CharacterUpdateDialog(QDialog):
         # Boutons of sélection
         button_layout = QHBoxLayout()
         
-        select_all_btn = QPushButton("Tout sélectionner")
+        select_all_btn = QPushButton(lang.get("dialogs.character_update.select_all", default="Tout sélectionner"))
         select_all_btn.clicked.connect(self._select_all)
         button_layout.addWidget(select_all_btn)
         
-        deselect_all_btn = QPushButton("Tout désélectionner")
+        deselect_all_btn = QPushButton(lang.get("dialogs.character_update.deselect_all", default="Tout désélectionner"))
         deselect_all_btn.clicked.connect(self._deselect_all)
         button_layout.addWidget(deselect_all_btn)
         
@@ -5385,7 +5393,7 @@ class CharacterUpdateDialog(QDialog):
         
         # Changer le texte du bouton OK
         ok_button = button_box.button(QDialogButtonBox.Ok)
-        ok_button.setText("Appliquer les modifications")
+        ok_button.setText(lang.get("dialogs.character_update.apply_changes", default="Appliquer les modifications"))
         
         layout.addWidget(button_box)
     
@@ -5393,14 +5401,14 @@ class CharacterUpdateDialog(QDialog):
         """Détecte les changements entre les données actuelles et nouvelles."""
         # Champs à comparer (all the champs importants)
         fields_to_check = {
-            'level': 'Niveau',
-            'class': 'Classe',
-            'race': 'Race',
-            'realm': 'Royaume',
-            'guild': 'Guilde',
-            'realm_points': 'Points de Royaume',
-            'realm_rank': 'Rang de Royaume',
-            'server': 'Serveur'
+            'level': lang.get('dialogs.character_update.field_level', default='Niveau'),
+            'class': lang.get('dialogs.character_update.field_class', default='Classe'),
+            'race': lang.get('dialogs.character_update.field_race', default='Race'),
+            'realm': lang.get('dialogs.character_update.field_realm', default='Royaume'),
+            'guild': lang.get('dialogs.character_update.field_guild', default='Guilde'),
+            'realm_points': lang.get('dialogs.character_update.field_realm_points', default='Points de Royaume'),
+            'realm_rank': lang.get('dialogs.character_update.field_realm_rank', default='Rang de Royaume'),
+            'server': lang.get('dialogs.character_update.field_server', default='Serveur')
         }
         
         all_rows = []
@@ -5465,11 +5473,12 @@ class CharacterUpdateDialog(QDialog):
             # Déterminer if c'est un changement
             has_change = (current_value_str != new_value_str and new_value_str)
             
+            empty_text = lang.get('dialogs.character_update.empty_value', default='(vide)')
             all_rows.append({
                 'field': field,
                 'label': label,
-                'current': current_value_str or '(vide)',
-                'new': new_value_str or '(vide)',
+                'current': current_value_str or empty_text,
+                'new': new_value_str or empty_text,
                 'new_value_raw': new_value,
                 'has_change': has_change
             })

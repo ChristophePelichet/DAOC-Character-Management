@@ -21,10 +21,11 @@
 - 💾 **Cookies Backup Optimization**: Backup only cookies file (~10 KB instead of 50+ MB), 99% reduction
 - ⚙️ **Simplified Settings Interface**: Removed obsolete cookies fields (path managed automatically)
 
-### 🐛 Bug Fixes
+### Bug Fixes
 - 🐛 Fixed Settings crash with missing cookies_path_edit
 - 🐛 Fixed cookies backup disappearing immediately after creation
 - 🌍 Fixed "Clean Eden" button translations (FR/EN/DE)
+- 🌍 Fixed character "Update" window now translated (FR/EN/DE)
 - 🌍 **Dynamic Translations**: Version section updates without restart when changing language
 - 🌍 **Herald Import**: "Import Complete" title displays correctly (instead of key name)
 - 🌍 **RvR Statistics**: Translated labels (Tours/Forteresses/Reliques Capturées in FR, Towers/Keeps/Relics Captured in EN, etc.)

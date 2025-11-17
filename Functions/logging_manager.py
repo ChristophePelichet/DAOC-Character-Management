@@ -8,11 +8,12 @@ from .path_manager import get_base_path, get_resource_path
 LOGGER_ROOT = "ROOT"
 LOGGER_BACKUP = "BACKUP"
 LOGGER_EDEN = "EDEN"
+LOGGER_EDEN_PERF = "EDEN_PERF"  # Performance logs for Eden connection test
 LOGGER_UI = "UI"
 LOGGER_CHARACTER = "CHARACTER"
 
 # All available loggers (for future UI filtering)
-ALL_LOGGERS = [LOGGER_BACKUP, LOGGER_EDEN, LOGGER_UI, LOGGER_CHARACTER]
+ALL_LOGGERS = [LOGGER_BACKUP, LOGGER_EDEN, LOGGER_EDEN_PERF, LOGGER_UI, LOGGER_CHARACTER]
 
 class ContextualFormatter(logging.Formatter):
     """
@@ -66,6 +67,47 @@ def get_img_dir():
         return path
     # Use resource path which handles both dev and frozen modes
     return get_resource_path("Img")
+
+def setup_eden_performance_logger():
+    """
+    Configure le logger dédié pour les logs de performance Eden.
+    Crée un fichier séparé: Logs/eden_performance_YYYY-MM-DD.log
+    Activé uniquement si system.eden.enable_performance_logs = true dans config.json
+    """
+    from datetime import datetime
+    
+    # Vérifier si les logs de performance sont activés
+    perf_logs_enabled = config.get("system.eden.enable_performance_logs", False)
+    
+    if not perf_logs_enabled:
+        return None
+    
+    # Créer le répertoire de logs si nécessaire
+    log_dir = get_log_dir()
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
+    
+    # Nom de fichier avec date du jour
+    today = datetime.now().strftime('%Y-%m-%d')
+    log_file_path = os.path.join(log_dir, f"eden_performance_{today}.log")
+    
+    # Créer le logger dédié
+    perf_logger = logging.getLogger(LOGGER_EDEN_PERF)
+    perf_logger.setLevel(logging.DEBUG)
+    
+    # Supprimer les handlers existants pour éviter les duplications
+    perf_logger.handlers.clear()
+    
+    # Handler fichier avec rotation quotidienne
+    fh = RotatingFileHandler(log_file_path, maxBytes=5*1024*1024, backupCount=10, encoding='utf-8')
+    fh.setLevel(logging.DEBUG)
+    fh.setFormatter(ContextualFormatter())
+    perf_logger.addHandler(fh)
+    
+    # Ne pas propager au logger root (pour éviter duplication dans debug.log)
+    perf_logger.propagate = False
+    
+    return perf_logger
 
 def setup_logging(extra_handlers=None):
     """

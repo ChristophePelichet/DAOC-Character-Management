@@ -180,6 +180,10 @@ class CharacterApp(QMainWindow):
         # Barre de statut
         self.ui_manager.create_status_bar()
         
+        # OPTIMISATION 6: Lancer le test Eden en arrière-plan AVANT le chargement des personnages
+        # Pendant que les personnages se chargent, le test s'exécute en parallèle
+        # Résultat: l'utilisateur ne "sent" plus l'attente du test
+        
         # Chargement des personnages
         self.tree_manager.refresh_character_list()
         

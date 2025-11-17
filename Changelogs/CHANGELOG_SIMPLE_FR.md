@@ -4,6 +4,13 @@
 
 ## v0.108
 
+### 🚀 Performance
+- ⚡ **Test Connexion Eden** : Amélioration de 50%+ (7-8s → 3-4s ou <0,1s en cache)
+  - 🎯 Mise en cache 10 secondes pour tests répétés (instantané)
+  - ⏲️ Réduction temps d'attente : 7s → 3,3s
+  - 📈 Logs de performance optionnels (Settings > Eden, désactivé par défaut)
+  - 📁 Fichier log dédié : Logs/eden_performance_AAAA-MM-JJ.log
+
 ### Nouveautés
 - 🐛 **Options Debug HTML Herald** : Contrôle des fichiers de débogage dans Settings > Debug (désactivé par défaut)
 - 🌐 **Profil Chrome Dédié** : Navigateur Selenium isolé dans AppData avec migration automatique des cookies

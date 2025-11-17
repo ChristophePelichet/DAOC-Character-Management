@@ -13,10 +13,33 @@ from datetime import datetime
 from pathlib import Path
 
 # Import new logging system
-from .logging_manager import get_logger, LOGGER_EDEN
+from .logging_manager import get_logger, LOGGER_EDEN, LOGGER_EDEN_PERF, setup_eden_performance_logger
 
 # Dedicated logger for Eden
 eden_logger = get_logger(LOGGER_EDEN)
+
+# Performance logger (initialisé à None, sera créé si activé dans config)
+eden_perf_logger = None
+
+def _log_perf(message, action="PERF"):
+    """
+    Helper pour logger les messages de performance.
+    Écrit dans eden_perf_logger si activé, sinon dans eden_logger standard.
+    """
+    global eden_perf_logger
+    
+    # Initialiser le logger de performance si pas encore fait
+    if eden_perf_logger is None:
+        eden_perf_logger = setup_eden_performance_logger()
+    
+    # Si le logger de performance est activé, l'utiliser
+    if eden_perf_logger:
+        eden_perf_logger.info(message, extra={"action": action})
+    # Sinon, utiliser le logger standard (pour ne pas perdre les logs en mode debug)
+    else:
+        from .config_manager import config
+        if config.get("system.debug_mode", False):
+            eden_logger.info(message, extra={"action": action})
 
 # Variable GLOBALE pour garder les drivers Selenium vivants
 # This list prevents browser garbage collection
@@ -24,6 +47,13 @@ _PERSISTENT_DRIVERS = []
 
 class CookieManager:
     """Gestionnaire de cookies pour l'authentification Eden"""
+    
+    # Cache du résultat de test de connexion (class variable)
+    _test_cache = {
+        'result': None,
+        'timestamp': None
+    }
+    _CACHE_DURATION_SECONDS = 10  # Cache valide pendant 10 secondes
     
     def __init__(self, config_dir=None):
         """
@@ -614,17 +644,42 @@ class CookieManager:
                 'accessible': bool
             }
         """
+        # TIMER: Début du test
+        import time as time_module
+        start_total = time_module.time()
+        _log_perf("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        _log_perf("🚀 DÉBUT TEST CONNEXION EDEN")
+        
+        # OPTIMISATION 1: Vérifier le cache (10 secondes)
+        start_step = time_module.time()
+        now = time_module.time()
+        if (CookieManager._test_cache['timestamp'] and 
+            now - CookieManager._test_cache['timestamp'] < CookieManager._CACHE_DURATION_SECONDS):
+            elapsed = (time_module.time() - start_total) * 1000
+            _log_perf(f"✅ Résultat en cache utilisé (âge: {now - CookieManager._test_cache['timestamp']:.1f}s) - TOTAL: {elapsed:.0f}ms")
+            _log_perf("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            return CookieManager._test_cache['result']
+        elapsed = (time_module.time() - start_step) * 1000
+        _log_perf(f"⏱️  STEP 1: Vérification cache - {elapsed:.0f}ms")
+        
         driver = None  # Initialize to None for safe cleanup
         
         try:
+            start_step = time_module.time()
             if not self.cookie_exists():
+                elapsed_total = (time_module.time() - start_total) * 1000
+                _log_perf(f"❌ Aucun cookie trouvé - TOTAL: {elapsed_total:.0f}ms")
+                _log_perf("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
                 return {
                     'success': False,
                     'status_code': None,
                     'message': 'Aucun cookie trouvé',
                     'accessible': False
                 }
+            elapsed = (time_module.time() - start_step) * 1000
+            _log_perf(f"⏱️  STEP 2: Vérification existence cookie - {elapsed:.0f}ms")
             
+            start_step = time_module.time()
             try:
                 from selenium import webdriver
                 from selenium.webdriver.chrome.options import Options
@@ -638,33 +693,45 @@ class CookieManager:
                     'message': f'Module {missing_module} non installé',
                     'accessible': False
                 }
+            elapsed = (time_module.time() - start_step) * 1000
+            _log_perf(f"⏱️  STEP 3: Import modules Selenium - {elapsed:.0f}ms")
             
             # Charger les cookies
+            start_step = time_module.time()
             cookies_list = self.get_cookies_for_scraper()
             if not cookies_list:
+                elapsed_total = (time_module.time() - start_total) * 1000
+                _log_perf(f"❌ Cookies invalides - TOTAL: {elapsed_total:.0f}ms")
+                _log_perf("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
                 return {
                     'success': False,
                     'status_code': None,
                     'message': 'Cookies invalides ou expirés',
                     'accessible': False
                 }
+            elapsed = (time_module.time() - start_step) * 1000
+            _log_perf(f"⏱️  STEP 4: Chargement cookies ({len(cookies_list)} cookies) - {elapsed:.0f}ms")
             
             # Read configuration for preferred browser
+            start_step = time_module.time()
             from Functions.config_manager import config
             preferred_browser = config.get('system.preferred_browser', 'Chrome')
             allow_download = config.get('system.allow_browser_download', False)
-            
-            eden_logger.info("🔧 test_eden_connection - Configuration lue: preferred_browser=", extra={"action": "TEST"})
+            elapsed = (time_module.time() - start_step) * 1000
+            _log_perf(f"⏱️  STEP 5: Lecture configuration ({preferred_browser}) - {elapsed:.0f}ms")
             
             # Create driver with multi-browser fallback (headless mode)
+            start_step = time_module.time()
             driver, browser_name = self._initialize_browser_driver(
                 headless=True,
                 preferred_browser=preferred_browser,
                 allow_download=allow_download
             )
+            elapsed = (time_module.time() - start_step) * 1000
             
             if not driver:
-                eden_logger.error("Impossible d'initialiser un navigateur", extra={"action": "TEST"})
+                _log_perf(f"❌ Impossible d'initialiser navigateur - {elapsed:.0f}ms - TOTAL: {(time_module.time() - start_total)*1000:.0f}ms")
+                _log_perf("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
                 return {
                     'success': False,
                     'status_code': None,
@@ -674,50 +741,50 @@ class CookieManager:
             
             # Store browser used for display
             self.last_browser_used = browser_name
-            eden_logger.debug("✅ Test avec {browser_name} (headless)", extra={"action": "TEST"})
+            _log_perf(f"⏱️  STEP 6: Initialisation {browser_name} (headless) - {elapsed:.0f}ms")
             
             # TEST ALIGNED EXACTLY WITH load_cookies()
             import time
             
             # Step 1: Homepage
+            start_step = time_module.time()
             driver.get("https://eden-daoc.net/")
-            
-            # Wait for page to be completely loaded (fixes first-load freeze)
-            from selenium.webdriver.support.ui import WebDriverWait
-            try:
-                # Wait for document.readyState to be 'complete'
-                WebDriverWait(driver, 15).until(
-                    lambda d: d.execute_script("return document.readyState") == "complete"
-                )
-                eden_logger.debug("✅ Page complètement chargée (readyState=complete)", extra={"action": "TEST"})
-            except Exception as e:
-                eden_logger.warning(f"⚠️ Timeout attente page load: {e}", extra={"action": "TEST"})
-            
-            # Additional safety wait for first load (Chrome profile initialization)
-            time.sleep(1)
+            time.sleep(0.5)  # Attente réduite homepage
+            elapsed = (time_module.time() - start_step) * 1000
+            _log_perf(f"⏱️  STEP 7: Navigation homepage + wait 0.5s - {elapsed:.0f}ms")
             
             # Step 2: Add cookies
-            eden_logger.info(f"Ajout de {len(cookies_list)} cookies", extra={"action": "TEST"})
+            start_step = time_module.time()
             for cookie in cookies_list:
                 try:
                     driver.add_cookie(cookie)
                 except:
                     pass
             
-            time.sleep(1)
+            # OPTIMISATION 2: Attente réduite après ajout cookies (0.3s au lieu de 1s)
+            time.sleep(0.3)
+            elapsed = (time_module.time() - start_step) * 1000
+            _log_perf(f"⏱️  STEP 8: Ajout {len(cookies_list)} cookies + wait 0.3s - {elapsed:.0f}ms")
             
             # Step 3: Refresh
-            eden_logger.info("Refresh pour activer les cookies", extra={"action": "TEST"})
+            start_step = time_module.time()
             driver.refresh()
-            time.sleep(2)  # PHASE 1: Optimisé 3s → 2s
+            time.sleep(1)  # Attente réduite refresh
+            elapsed = (time_module.time() - start_step) * 1000
+            _log_perf(f"⏱️  STEP 9: Refresh page + wait 1s - {elapsed:.0f}ms")
             
             # Step 4: Go to Herald
-            eden_logger.info("Navigation vers https://eden-daoc.net/herald", extra={"action": "TEST"})
+            start_step = time_module.time()
             driver.get("https://eden-daoc.net/herald")
-            time.sleep(3)  # PHASE 1: Optimisé 5s → 3s
+            time.sleep(1.5)  # Attente réduite Herald (au lieu de 3s)
+            elapsed = (time_module.time() - start_step) * 1000
+            _log_perf(f"⏱️  STEP 10: Navigation Herald + wait 1.5s - {elapsed:.0f}ms")
             
             # Retrieve and parse HTML
+            start_step = time_module.time()
             page_source = driver.page_source
+            elapsed = (time_module.time() - start_step) * 1000
+            _log_perf(f"⏱️  STEP 11: Récupération HTML ({len(page_source)} bytes) - {elapsed:.0f}ms")
             
             # DEBUG: Sauvegarder pour inspection (si activé dans config)
             from Functions.config_manager import config
@@ -735,30 +802,40 @@ class CookieManager:
             
             # MÉTHODE DE SIMPLE AND RELIABLE DETECTION:
             # If we don't have the "not available" error message → We are connected
+            start_step = time_module.time()
             error_message = 'The requested page "herald" is not available.'
             has_error = error_message in page_source
-            
-            eden_logger.debug(f"HTML size: {len(page_source)}, error present: {has_error}", extra={"action": "TEST"})
+            elapsed = (time_module.time() - start_step) * 1000
+            _log_perf(f"⏱️  STEP 12: Analyse contenu HTML - {elapsed:.0f}ms")
             
             # SIMPLE LOGIC: No error = Connected
+            elapsed_total = (time_module.time() - start_total) * 1000
             if not has_error:
-                eden_logger.info("CONNECTÉ - Pas de message d'erreur détecté", extra={"action": "TEST"})
-                return {
+                _log_perf(f"✅ CONNECTÉ - TEMPS TOTAL: {elapsed_total:.0f}ms")
+                _log_perf("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+                result = {
                     'success': True,
                     'status_code': 200,
                     'message': 'Connecté à Herald',
                     'accessible': True,
                     'browser_used': browser_name  # Inclure le navigateur utilisé
                 }
+                # OPTIMISATION 5: Mettre en cache le résultat
+                CookieManager._test_cache = {'result': result, 'timestamp': time_module.time()}
+                return result
             else:
-                eden_logger.warning('NON CONNECTÉ - Message d\'erreur détecté', extra={"action": "TEST"})
-                return {
+                _log_perf(f"❌ NON CONNECTÉ - TEMPS TOTAL: {elapsed_total:.0f}ms")
+                _log_perf("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+                result = {
                     'success': True,
                     'status_code': 200,
                     'message': 'Non connecté à Herald',
                     'accessible': False,
                     'browser_used': browser_name  # Inclure le navigateur utilisé
                 }
+                # OPTIMISATION 5: Mettre en cache le résultat (même si échec)
+                CookieManager._test_cache = {'result': result, 'timestamp': time_module.time()}
+                return result
                     
         except Exception as e:
             # Detailed exception log for debugging

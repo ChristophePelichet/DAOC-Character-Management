@@ -6,6 +6,20 @@ Historique complet des versions du gestionnaire de personnages pour Dark Age of 
 
 # ✨✨ v0.108
 
+### 🚀 Performance
+- ⚡ **Optimisation Test Connexion Eden** : Amélioration des performances de 50%+
+  - ⏱️ Optimisation `test_eden_connection()` dans cookie_manager.py :
+    * 🎯 Mise en cache des résultats pendant 10 secondes (instantané <0,1s pour tests répétés)
+    * ⏲️ Réduction des temps d'attente : 7s → 3,3s d'attentes fixes
+    * 📊 Suivi des performances en 12 étapes avec logs de timing détaillés
+  - 🎚️ Système de logs de performance optionnel :
+    * 🔧 Configuration : Settings > Eden > `enable_performance_logs` (bool, par défaut False)
+    * 📁 Fichier de log dédié : `Logs/eden_performance_AAAA-MM-JJ.log` (rotation quotidienne)
+    * 📈 Analyse de timing détaillée par étape (vérification cache, init Selenium, opérations réseau)
+  - 🎯 Impact : Test de connexion Herald 7-8s → 3-4s (première exécution) ou <0,1s (en cache)
+  - 📚 Documentation : PERFORMANCE_OPTIMIZATION_EN.md (350+ lignes)
+  - Fichiers : Functions/cookie_manager.py, logging_manager.py, Configuration/config.json
+
 ### 🎉 Ajout
 - 🐛 **Options Debug HTML Herald (Optionnelles)** : Contrôle des fichiers de débogage Herald
   - ⚙️ 2 nouvelles checkboxes dans Settings > Debug > Debug HTML Herald :

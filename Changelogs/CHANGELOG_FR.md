@@ -63,6 +63,20 @@ Historique complet des versions du gestionnaire de personnages pour Dark Age of 
   - 🌍 Traductions : Ajout clé `herald_buttons.validation_in_progress` (FR/EN/DE)
   - 📚 Documentation : HERALD_BUTTONS_STATE_MANAGEMENT_EN.md (700+ lignes)
   - Fichiers : Functions/ui_manager.py, main.py, UI/dialogs.py, Language/*.json
+- 🎨 **Thème Purple - Affichage Texte** : Correction de la visibilité du texte avec le thème Purple
+  - 🔧 Problème 1 : Carré blanc masquant le texte de statut dans la fenêtre de progression
+  - 🔍 Cause 1 : `background-color: #f5f5f5` (gris clair) fixe sur fond sombre du thème
+  - ✅ Solution 1 : Remplacement par `background-color: transparent` pour compatibilité tous thèmes
+  - 🔧 Problème 2 : Placeholder "Minimum 3 caractères..." invisible (noir) dans fenêtre recherche Herald
+  - 🔍 Cause 2 : Absence de règle CSS `QLineEdit::placeholder` dans le thème Purple
+  - ✅ Solution 2 : Ajout stylesheets QLineEdit avec `placeholder { color: #6272A4; }` (gris visible)
+  - 🎯 Impact : Texte parfaitement lisible dans toutes les fenêtres avec thème Purple
+  - 📚 Documentation : THEME_SYSTEM_TECHNICAL_EN.md (700+ lignes, nouveau fichier)
+  - Fichiers : UI/progress_dialog_base.py, Themes/purple.json, Documentations/Themes/
+  - 🎯 Impact : Boutons désactivés pendant validation (tooltips explicatifs), réactivation instantanée (<100ms)
+  - 🌍 Traductions : Ajout clé `herald_buttons.validation_in_progress` (FR/EN/DE)
+  - 📚 Documentation : HERALD_BUTTONS_STATE_MANAGEMENT_EN.md (700+ lignes)
+  - Fichiers : Functions/ui_manager.py, main.py, UI/dialogs.py, Language/*.json
   - ✅ Solution : Backup uniquement de `eden_cookies.pkl` (~10 KB) avec ZIP ou copie directe
   - 🎯 Impact : Backups cookies persistent et respectent la limite de stockage
   - Fichier : Functions/backup_manager.py

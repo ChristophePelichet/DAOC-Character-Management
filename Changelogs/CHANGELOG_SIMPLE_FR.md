@@ -20,6 +20,8 @@
 - 🌍 Correction fenêtre "Mise à jour" personnage maintenant traduite (FR/EN/DE)
 - 🌐 Correction blocage navigateur Chrome au premier lancement (cookies non chargés)
 - 🔒 Protection contre conflits profil Chrome pendant validation Herald au démarrage
+- 🎨 Correction affichage texte avec thème Purple (carré blanc + placeholder invisible)
+- 📚 Documentation complète système de thèmes (700+ lignes)
 
 ## v0.108
 

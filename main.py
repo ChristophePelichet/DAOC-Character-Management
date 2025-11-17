@@ -597,7 +597,7 @@ class CharacterApp(QMainWindow):
         # Config folder is NOT saved - always next to executable
         config.set("log_folder", dialog.log_path_edit.text())
         config.set("armor_folder", dialog.armor_path_edit.text())
-        config.set("cookies_folder", dialog.cookies_path_edit.text())
+        # Note: cookies_folder removed - Eden uses automatic AppData location
         config.set("debug_mode", new_debug_mode)
         config.set("show_debug_window", dialog.show_debug_window_check.isChecked())
         config.set("disable_disclaimer", dialog.disable_disclaimer_check.isChecked())

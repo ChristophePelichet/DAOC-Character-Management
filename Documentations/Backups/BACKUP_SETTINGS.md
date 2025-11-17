@@ -237,7 +237,7 @@ All settings mirror Characters backup settings with separate configuration:
 | **Default** | `20` MB |
 | **Config Key** | `cookies_backup_size_limit_mb` |
 
-**Note**: Cookies backups are typically much smaller (~100-500 KB each).
+**Note**: Cookies backups contain only `eden_cookies.pkl` file (~10-50 KB each), not the entire Eden folder.
 
 ### Cookies Backup Path
 
@@ -245,6 +245,15 @@ All settings mirror Characters backup settings with separate configuration:
 |----------|-------|
 | **Default** | `<app_folder>/Backups/Cookies/` |
 | **Config Key** | `cookies_backup_path` |
+
+**Backup Content**:
+- ✅ **Included**: `eden_cookies.pkl` (cookies file only)
+- ❌ **Excluded**: ChromeProfile folder (not backed up)
+- **Reason**: Chrome profile can be regenerated, cookies cannot
+
+**File Formats**:
+- **Compressed**: `backup_cookies_YYYYMMDD_HHMMSS_Reason.zip` (contains eden_cookies.pkl)
+- **Uncompressed**: `backup_cookies_YYYYMMDD_HHMMSS_Reason.pkl` (direct copy)
 
 ---
 

@@ -33,10 +33,13 @@ def backup_cookies_force() -> bool
 def _perform_cookies_backup() -> dict
     """Internal cookies backup logic
     
-    Note: As of v0.108, cookies are stored in AppData:
+    Note: As of v0.108+, cookies backup strategy changed:
+    - Backups ONLY: eden_cookies.pkl file (~10-50 KB)
+    - Excludes: ChromeProfile/ folder (can be regenerated)
     - Path: %LOCALAPPDATA%/DAOC_Character_Manager/Eden/eden_cookies.pkl
-    - Uses path_manager.get_eden_cookies_path() and get_eden_data_dir()
+    - Uses path_manager.get_eden_cookies_path()
     - Migrated from Configuration/eden_cookies.pkl
+    - Reason: Reduce backup size from 50+ MB to ~10 KB
     """
 
 def _apply_cookies_retention_policies() -> None
@@ -681,16 +684,20 @@ if not backup_path.resolve().is_relative_to(app_folder):
 - Auto-uncheck when -1 unlimited entered
 - **Chrome Profile Management**: Dedicated Chrome profile for Selenium in AppData
 - **Cookie Migration**: Automatic migration from `Configuration/` to `Eden/` in AppData
-- **Cookie Path Update**: Backup system now uses `path_manager.get_eden_cookies_path()`
+- **Cookie Backup Strategy**: Changed to backup ONLY `eden_cookies.pkl` file, excluding ChromeProfile/
+- **Clean Eden Button**: Added in Settings > Herald to clean entire Eden folder (cookies + Chrome profile)
 
 **Changed**:
 - Statistics reorganized with vertical separators
 - Cookies default limit: 10 MB → 20 MB
 - Checkbox layout: moved auto-delete to top section
 - **Cookies Location**: Moved from `Configuration/eden_cookies.pkl` to `%LOCALAPPDATA%/DAOC_Character_Manager/Eden/eden_cookies.pkl`
+- **Cookies Backup Content**: Eden folder → cookies file only (99% size reduction)
+- **UI**: Removed "Clear Chrome Profile" button from Cookie Manager dialog
 
 **Fixed**:
 - Warning dialog state comparison (Qt enum → integer)
+- Cookies backup disappearing after creation (size limit issue)
 
 ---
 

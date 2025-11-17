@@ -2908,15 +2908,8 @@ class CookieManagerDialog(QDialog):
         self.chrome_profile_size_label.setWordWrap(True)
         chrome_layout.addWidget(self.chrome_profile_size_label)
         
-        # Bouton de purge
-        chrome_buttons_layout = QHBoxLayout()
-        self.clear_profile_button = QPushButton("🗑️ " + lang.get("cookie_manager.clear_chrome_profile"))
-        self.clear_profile_button.setToolTip(lang.get("cookie_manager.clear_chrome_profile_tooltip"))
-        self.clear_profile_button.clicked.connect(self.clear_chrome_profile)
-        chrome_buttons_layout.addWidget(self.clear_profile_button)
-        chrome_buttons_layout.addStretch()
+        # Note: Bouton de purge supprimé - utilisez "Nettoyer Eden" dans les paramètres Herald
         
-        chrome_layout.addLayout(chrome_buttons_layout)
         chrome_group.setLayout(chrome_layout)
         layout.addWidget(chrome_group)
         
@@ -3170,33 +3163,6 @@ class CookieManagerDialog(QDialog):
             size_text = lang.get("cookie_manager.chrome_profile_size", size=f"{size_mb:.1f} MB")
         
         self.chrome_profile_size_label.setText(size_text)
-    
-    def clear_chrome_profile(self):
-        """Purge le profil Chrome dédié après confirmation"""
-        reply = QMessageBox.question(
-            self,
-            lang.get("cookie_manager.clear_chrome_confirm_title"),
-            lang.get("cookie_manager.clear_chrome_confirm_message"),
-            QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.No
-        )
-        
-        if reply == QMessageBox.Yes:
-            success = self.cookie_manager.clear_chrome_profile()
-            
-            if success:
-                QMessageBox.information(
-                    self,
-                    lang.get("cookie_manager.clear_chrome_success_title"),
-                    lang.get("cookie_manager.clear_chrome_success_message")
-                )
-                self.update_chrome_profile_size()
-            else:
-                QMessageBox.critical(
-                    self,
-                    lang.get("cookie_manager.clear_chrome_error_title"),
-                    lang.get("cookie_manager.clear_chrome_error_message")
-                )
     
     def generate_cookies(self):
         """Génère de nouveaux cookies via authentification navigateur (VERSION MIGRÉE)"""

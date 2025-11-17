@@ -1,6 +1,24 @@
 # 📋 Changelog Simple - DAOC Character Management
 
-# ✨ v0.108
+# 📝 CHANGELOG SIMPLIFIÉ
+
+## v0.108
+
+### Nouveautés
+- 🌐 **Profil Chrome Dédié** : Navigateur Selenium isolé dans AppData avec migration automatique des cookies
+- 🗑️ **Bouton "Nettoyer Eden"** : Nouveau bouton dans Settings > Herald pour supprimer cookies et profil Chrome
+- 📂 **Création Auto Dossiers Backup** : Les boutons "Ouvrir le dossier" créent maintenant automatiquement les dossiers manquants
+
+### Améliorations
+- 💾 **Optimisation Backup Cookies** : Backup uniquement du fichier cookies (~10 KB au lieu de 50+ MB), réduction de 99%
+- ⚙️ **Interface Settings Simplifiée** : Suppression des champs obsolètes pour les cookies (chemin géré automatiquement)
+
+### Corrections
+- 🐛 Correction crash Settings avec cookies_path_edit manquant
+- 🐛 Correction backup cookies qui disparaissait immédiatement après création
+- 🌍 Correction traductions bouton "Nettoyer Eden" (FR/EN/DE)
+
+## v0.108
 
 ### 🎉 Nouveautés
 - 💾 **Migration Automatique des Personnages** : Restructuration intelligente des dossiers sans intervention

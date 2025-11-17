@@ -64,6 +64,34 @@ def get_eden_cookies_path():
 
 ---
 
+## Eden Folder Cleanup
+
+### Settings Integration
+
+**Location**: Settings > Herald Eden > Cookies Path (Eden AppData)
+
+**UI Elements**:
+- 📂 **Open Folder**: Opens `%LOCALAPPDATA%/DAOC_Character_Manager/Eden/` in Explorer
+- 🗑️ **Clean Eden** (red button): Deletes all Eden data (cookies + Chrome profile)
+
+**Clean Eden Button**:
+- **Action**: Removes entire Eden folder contents
+- **Confirmation**: Shows warning dialog before deletion
+- **Content Deleted**:
+  - `eden_cookies.pkl` - All Eden Herald cookies
+  - `ChromeProfile/` - Complete Chrome profile (cache, history, session, preferences)
+- **After Cleanup**: Folder recreated empty, user must regenerate cookies
+
+**Why Clean?**:
+- Chrome profile corruption
+- Clear browsing data
+- Reset to fresh state
+- Troubleshooting connection issues
+
+**Replacement**: The "Clear Chrome Profile" button in Cookie Manager dialog has been **removed** in favor of this unified cleanup in Settings.
+
+---
+
 ## Cookie Manager Integration
 
 ### Automatic Migration
@@ -388,18 +416,106 @@ pyinstaller DAOC-Character-Manager.spec
 - ✅ Dedicated Chrome profile in AppData
 - ✅ Automatic cookie migration from Configuration/
 - ✅ Multi-OS path support (Windows/Linux/macOS)
-- ✅ Chrome profile management UI (size display + purge)
-- ✅ Backup integration (includes ChromeProfile/)
+- ✅ Chrome profile size display in Cookie Manager
+- ✅ Unified "Clean Eden" button in Settings (Herald tab)
 
 **Changed**:
 - 🔄 Cookies path: `Configuration/eden_cookies.pkl` → `%LOCALAPPDATA%/DAOC_Character_Manager/Eden/eden_cookies.pkl`
 - 🔄 Chrome profile: No profile → Dedicated profile in AppData
-- 🔄 Backup: Cookies folder → Eden folder (includes profile)
+- 🔄 Backup: Eden folder → Cookies file only (`eden_cookies.pkl`)
+- 🔄 UI: Removed "Clear Chrome Profile" from Cookie Manager
+- 🔄 UI: Added "Clean Eden" button in Settings > Herald > Cookies section
 
 **Migration**:
 - 🔁 Automatic one-time migration on first startup
 - 🔁 Backup created as `eden_cookies.pkl.migrated`
 - 🔁 No user action required
+
+**Backup Strategy**:
+- 💾 Cookies backup: `eden_cookies.pkl` file only (~10 KB)
+- ❌ ChromeProfile excluded from backup (can be regenerated)
+- ✅ Reduced backup size from 50+ MB to ~10 KB
+
+---
+
+## Backup System
+
+### Cookies Backup Strategy
+
+**What is Backed Up**: `eden_cookies.pkl` file **ONLY**
+
+**Rationale**:
+| Component | Backed Up | Reason |
+|-----------|-----------|--------|
+| `eden_cookies.pkl` | ✅ YES | Critical authentication data, cannot be regenerated |
+| `ChromeProfile/` | ❌ NO | Cache/session data, can be regenerated |
+
+**Size Impact**:
+- Cookies file: ~10-50 KB
+- Chrome profile: ~50-150 MB
+- **Savings**: 99%+ reduction in backup size
+
+### Backup Formats
+
+**Compressed** (default):
+```
+backup_cookies_20251117_143022_Manual.zip
+  └─ eden_cookies.pkl
+```
+
+**Uncompressed**:
+```
+backup_cookies_20251117_143022_Manual.pkl (direct copy)
+```
+
+### Implementation
+
+**Backup Manager** (`Functions/backup_manager.py`):
+
+```python
+def _perform_cookies_backup(self, mode="MANUAL", reason=None):
+    from Functions.path_manager import get_eden_cookies_path
+    
+    cookies_file = get_eden_cookies_path()
+    
+    if should_compress:
+        # ZIP: Contains only eden_cookies.pkl
+        import zipfile
+        with zipfile.ZipFile(backup_file, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            zipf.write(str(cookies_file), cookies_file.name)
+    else:
+        # Direct copy: .pkl file
+        shutil.copy2(str(cookies_file), backup_file)
+```
+
+### Settings UI
+
+**Location**: Settings > Backups > Eden Cookies Backup
+
+**Controls**:
+- ✅ **Enable cookies backup** - Master switch
+- 🗄️ **Compress backups (ZIP)** - Format selection
+- 🗑️ **Auto-delete old backups** - Retention policy
+- 💾 **Storage limit** - 20 MB default (configurable)
+- 📂 **Open folder** - Opens backup directory
+- 🔄 **Backup now** - Manual backup trigger
+
+**Retention Policy**:
+- Daily automatic backup (if enabled)
+- Size-based retention (oldest deleted when limit exceeded)
+- Manual backups bypass daily limit
+
+### Recovery
+
+**From ZIP Backup**:
+1. Extract `eden_cookies.pkl` from backup ZIP
+2. Copy to `%LOCALAPPDATA%/DAOC_Character_Manager/Eden/`
+3. Restart application - cookies restored
+
+**From .pkl Backup**:
+1. Rename backup file to `eden_cookies.pkl`
+2. Copy to `%LOCALAPPDATA%/DAOC_Character_Manager/Eden/`
+3. Restart application
 
 ---
 

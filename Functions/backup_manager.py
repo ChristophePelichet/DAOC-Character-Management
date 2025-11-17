@@ -339,10 +339,9 @@ class BackupManager:
             should_compress = self.config_manager.get("cookies_backup_compress", True)
             
             # Utiliser le nouveau chemin Eden dans AppData
-            from Functions.path_manager import get_eden_cookies_path, get_eden_data_dir
+            from Functions.path_manager import get_eden_cookies_path
             
             cookies_file = get_eden_cookies_path()
-            cookies_folder = get_eden_data_dir()
             
             # Check if there's actually a cookies file to backup
             if not cookies_file.exists():
@@ -366,11 +365,15 @@ class BackupManager:
             if should_compress:
                 backup_file = os.path.join(cookies_backup_dir, f"{backup_name}.zip")
                 log_with_action(self.logger, "info", f"Creating compressed cookies backup: {os.path.basename(backup_file)}", action="ZIP_COOKIES")
-                self._create_zip_backup(str(cookies_folder), backup_file)
+                # Compress only the cookies file, not the entire Eden folder
+                import zipfile
+                with zipfile.ZipFile(backup_file, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                    zipf.write(str(cookies_file), cookies_file.name)
             else:
-                backup_file = os.path.join(cookies_backup_dir, backup_name)
-                log_with_action(self.logger, "info", f"Creating uncompressed cookies backup: {os.path.basename(backup_file)}", action="ZIP_COOKIES")
-                shutil.copytree(str(cookies_folder), backup_file, dirs_exist_ok=True)
+                backup_file = os.path.join(cookies_backup_dir, f"{backup_name}.pkl")
+                log_with_action(self.logger, "info", f"Creating uncompressed cookies backup: {os.path.basename(backup_file)}", action="COPY_COOKIES")
+                # Copy only the cookies file
+                shutil.copy2(str(cookies_file), backup_file)
 
             # Update last cookies backup date
             self.config_manager.set("backup.cookies.last_date", datetime.now().isoformat())

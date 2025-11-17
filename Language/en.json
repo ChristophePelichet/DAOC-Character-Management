@@ -136,7 +136,9 @@
         "eden_manage": "⚙️ Manage",
         "cookie_generate": "🔐 Generate Cookies",
         "cookie_delete": "🗑️ Delete",
-        "cookie_browse": "📁 Browse"
+        "cookie_browse": "📁 Browse",
+        "clean_eden_button": "Clean Eden",
+        "clean_eden_tooltip": "Delete all cookies and Chrome profile temporary files"
     },
     "cookie_manager": {
         "window_title": "Eden Cookies Management",
@@ -168,6 +170,7 @@
         "test_with_browser": "{icon} <i>Test performed with: {browser}</i>",
         "chrome_profile_size": "📊 Profile size: {size}",
         "chrome_profile_size_empty": "📊 Empty profile (not used)",
+        "eden_storage_info": "Automatic storage in",
         "clear_chrome_profile": "Clear Chrome Profile",
         "clear_chrome_profile_tooltip": "Deletes all data from the dedicated Chrome profile (cache, history, etc.)",
         "clear_chrome_confirm_title": "Confirm Purge",
@@ -250,7 +253,15 @@
             "move_folder_merge_question": "Do you want to merge the files?",
             "move_folder_delete_title": "Delete old folder?",
             "move_folder_delete_question": "The folder has been copied successfully. Do you want to delete the old folder?",
-            "theme_change_restart": "The theme has been changed. Please restart the application for the changes to take effect."
+            "theme_change_restart": "The theme has been changed. Please restart the application for the changes to take effect.",
+            "clean_eden_confirm_title": "Confirm Cleanup",
+            "clean_eden_confirm_message": "⚠️ This action will delete:\n\n• All Eden cookies\n• Complete Chrome profile (cache, history, session)\n\n📁 Folder: {path}\n\nYou will need to regenerate your cookies after this operation.\n\nContinue?",
+            "clean_eden_success_title": "Cleanup Successful",
+            "clean_eden_success_message": "✅ The Eden folder has been successfully cleaned.\n\nAll cookies and temporary files have been deleted.",
+            "clean_eden_empty_title": "Empty Folder",
+            "clean_eden_empty_message": "ℹ️ The Eden folder is already empty or does not exist.",
+            "clean_eden_error_title": "Error",
+            "clean_eden_error_message": "❌ Error during cleanup:\n\n{error}"
         }
     },
     "app": {

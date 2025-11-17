@@ -54,17 +54,6 @@ Liste des idées d'améliorations et fonctionnalités à développer ultérieure
 
 ---
 
-## 🔧 Optimisations Techniques
-
-### 1. Profil Chrome Dédié pour Selenium
-- [ ] Créer un profil Chrome dédié pour Selenium dans `eden_scraper.py`
-- [ ] Configurer ChromeDriver avec un `user-data-dir` séparé et isolé
-- [ ] Garantir une isolation totale entre navigation personnelle et requêtes du scraper
-- [ ] Éviter tout conflit de cookies à l'avenir
-- [ ] Impact : Fichier `Functions/eden_scraper.py` (configuration ChromeDriver)
-
----
-
 ## 💡 Idées en Vrac
 
 *(Brainstorming d'idées à affiner plus tard)*

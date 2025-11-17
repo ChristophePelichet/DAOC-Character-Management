@@ -135,6 +135,8 @@ LANGUAGE_LEGACY_MAPPING = {
     "browse_button": "buttons.browse",
     "move_folder_button": "buttons.move_folder",
     "open_folder_button": "buttons.open_folder",
+    "clean_eden_button": "buttons.clean_eden_button",
+    "clean_eden_tooltip": "buttons.clean_eden_tooltip",
     "bulk_action_execute_button": "buttons.execute",
     "clear_button_text": "buttons.clear",
     "backup_now_button": "buttons.backup_now",
@@ -471,6 +473,14 @@ LANGUAGE_LEGACY_MAPPING = {
     "move_folder_merge_question": "messages.warnings.move_folder_merge_question",
     "move_folder_delete_title": "messages.warnings.move_folder_delete_title",
     "move_folder_delete_message": "messages.warnings.move_folder_delete_question",
+    "clean_eden_confirm_title": "messages.warnings.clean_eden_confirm_title",
+    "clean_eden_confirm_message": "messages.warnings.clean_eden_confirm_message",
+    "clean_eden_success_title": "messages.warnings.clean_eden_success_title",
+    "clean_eden_success_message": "messages.warnings.clean_eden_success_message",
+    "clean_eden_empty_title": "messages.warnings.clean_eden_empty_title",
+    "clean_eden_empty_message": "messages.warnings.clean_eden_empty_message",
+    "clean_eden_error_title": "messages.warnings.clean_eden_error_title",
+    "clean_eden_error_message": "messages.warnings.clean_eden_error_message",
     
     # Status Bar (2 keys)
     "status_bar_loaded": "status_bar.loaded",

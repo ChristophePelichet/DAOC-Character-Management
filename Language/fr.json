@@ -162,6 +162,9 @@
         "clean_eden_button": "Nettoyer Eden",
         "clean_eden_tooltip": "Supprime tous les cookies et fichiers temporaires du profil Chrome"
     },
+    "herald_buttons": {
+        "validation_in_progress": "⏳ Validation Eden en cours... Veuillez patienter"
+    },
     "cookie_manager": {
         "window_title": "Gestion des Cookies Eden",
         "title": "🍪 Gestion des Cookies Eden",

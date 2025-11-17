@@ -248,6 +248,12 @@ class CharacterApp(QMainWindow):
             )
             return
         
+        # CRITICAL: Check if Eden validation is running - action should be disabled
+        # If user somehow triggered this while validation running, return silently
+        if hasattr(self.ui_manager, 'eden_status_thread') and self.ui_manager.eden_status_thread:
+            if self.ui_manager.eden_status_thread.isRunning():
+                return  # Silent return - action is disabled with tooltip
+        
         # Stocker the Data of the personnage for the callback
         self._current_character_data = character_data
         
@@ -835,6 +841,13 @@ class CharacterApp(QMainWindow):
         
     def open_herald_search(self):
         """Ouvre la fenêtre de recherche Herald"""
+        # CRITICAL: Check if Eden validation is still running (avoid Chrome profile conflict)
+        # CRITICAL: Check if Eden validation is running - button should be disabled
+        # If user somehow triggered this while validation running, return silently
+        if hasattr(self.ui_manager, 'eden_status_thread') and self.ui_manager.eden_status_thread:
+            if self.ui_manager.eden_status_thread.isRunning():
+                return  # Silent return - button is disabled with tooltip
+        
         from UI.dialogs import HeraldSearchDialog
         dialog = HeraldSearchDialog(self)
         dialog.exec()

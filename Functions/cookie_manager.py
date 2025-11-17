@@ -681,7 +681,20 @@ class CookieManager:
             
             # Step 1: Homepage
             driver.get("https://eden-daoc.net/")
-            time.sleep(1)  # PHASE 1: Optimisé 2s → 1s
+            
+            # Wait for page to be completely loaded (fixes first-load freeze)
+            from selenium.webdriver.support.ui import WebDriverWait
+            try:
+                # Wait for document.readyState to be 'complete'
+                WebDriverWait(driver, 15).until(
+                    lambda d: d.execute_script("return document.readyState") == "complete"
+                )
+                eden_logger.debug("✅ Page complètement chargée (readyState=complete)", extra={"action": "TEST"})
+            except Exception as e:
+                eden_logger.warning(f"⚠️ Timeout attente page load: {e}", extra={"action": "TEST"})
+            
+            # Additional safety wait for first load (Chrome profile initialization)
+            time.sleep(1)
             
             # Step 2: Add cookies
             eden_logger.info(f"Ajout de {len(cookies_list)} cookies", extra={"action": "TEST"})

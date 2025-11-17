@@ -106,9 +106,20 @@ class EdenScraper:
             self.logger.info("🌐 Étape 1: Navigation vers https://eden-daoc.net/", extra={"action": "COOKIES"})
             self.driver.get("https://eden-daoc.net/")
             
-            # Wait for page to load
+            # Wait for page to be completely loaded (fixes first-load freeze)
             import time
-            time.sleep(1)  # PHASE 1: Optimisé 2s → 1s
+            from selenium.webdriver.support.ui import WebDriverWait
+            try:
+                # Wait for document.readyState to be 'complete'
+                WebDriverWait(self.driver, 15).until(
+                    lambda d: d.execute_script("return document.readyState") == "complete"
+                )
+                self.logger.debug("✅ Page complètement chargée (readyState=complete)", extra={"action": "COOKIES"})
+            except Exception as e:
+                self.logger.warning(f"⚠️ Timeout attente page load: {e}", extra={"action": "COOKIES"})
+            
+            # Additional safety wait for first load (Chrome profile initialization)
+            time.sleep(1)
             
             # Step 2: Add cookies
             self.logger.info(f"🍪 Étape 2: Ajout de {len(cookies_list)} cookies...", extra={"action": "COOKIES"})

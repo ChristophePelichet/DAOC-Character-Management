@@ -18,6 +18,8 @@
 - 🐛 Correction backup cookies qui disparaissait immédiatement après création
 - 🌍 Correction traductions bouton "Nettoyer Eden" (FR/EN/DE)
 - 🌍 Correction fenêtre "Mise à jour" personnage maintenant traduite (FR/EN/DE)
+- 🌐 Correction blocage navigateur Chrome au premier lancement (cookies non chargés)
+- 🔒 Protection contre conflits profil Chrome pendant validation Herald au démarrage
 
 ## v0.108
 

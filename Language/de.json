@@ -376,6 +376,7 @@
             "log_folder": "Logs-Ordner",
             "debug_app": "Anwendungs-Debug",
             "debug_eden": "Eden-Debug",
+            "debug_herald_html": "Herald-HTML-Debugging",
             "font": "Textgröße",
             "bulk_actions": "Massenaktionen",
             "misc": "Verschiedenes"
@@ -398,7 +399,13 @@
             "show_debug_window": "Debug-Fenster beim Start anzeigen",
             "theme": "Thema",
             "font_scale": "Textgröße",
-            "disable_disclaimer": "Startwarnmeldung deaktivieren"
+            "disable_disclaimer": "Startwarnmeldung deaktivieren",
+            "debug_save_herald_html": "💾 Herald-HTML speichern (debug_herald_page.html)",
+            "debug_save_test_connection_html": "💾 Verbindungstest-HTML speichern (debug_test_connection.html)"
+        },
+        "tooltips": {
+            "debug_save_herald_html": "Speichert den HTML-Code der Herald-Seite im Logs/-Ordner zur Diagnose von Scraping-Problemen",
+            "debug_save_test_connection_html": "Speichert den HTML-Code des Herald-Verbindungstests im Logs/-Ordner zur Diagnose von Authentifizierungsproblemen"
         },
         "dialog_titles": {
             "select_character_folder": "Charakterordner auswählen",

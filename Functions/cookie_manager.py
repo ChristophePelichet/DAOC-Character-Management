@@ -719,14 +719,19 @@ class CookieManager:
             # Retrieve and parse HTML
             page_source = driver.page_source
             
-            # DEBUG: Sauvegarder pour inspection
-            import os
-            debug_file = os.path.join(os.path.dirname(__file__), '..', 'Scripts', 'debug_test_connection.html')
-            try:
-                with open(debug_file, 'w', encoding='utf-8') as f:
-                    f.write(page_source)
-            except:
-                pass
+            # DEBUG: Sauvegarder pour inspection (si activé dans config)
+            from Functions.config_manager import config
+            if config.get("system.debug.save_test_connection_html", False):
+                from Functions.path_manager import get_logs_dir
+                import os
+                debug_file = os.path.join(get_logs_dir(), 'debug_test_connection.html')
+                try:
+                    os.makedirs(os.path.dirname(debug_file), exist_ok=True)
+                    with open(debug_file, 'w', encoding='utf-8') as f:
+                        f.write(page_source)
+                    eden_logger.debug(f"HTML test connection sauvegardé dans {debug_file}", extra={"action": "TEST"})
+                except Exception as e:
+                    eden_logger.warning(f"Impossible de sauvegarder debug HTML: {e}", extra={"action": "TEST"})
             
             # MÉTHODE DE SIMPLE AND RELIABLE DETECTION:
             # If we don't have the "not available" error message → We are connected

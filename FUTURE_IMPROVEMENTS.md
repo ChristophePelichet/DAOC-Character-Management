@@ -41,19 +41,9 @@ Liste des idées d'améliorations et fonctionnalités à développer ultérieure
 
 *(Cette section sera complétée au fur et à mesure du développement)*
 
----
 
-## 🐛 Corrections à Planifier
-
-### 1. Fenêtre de Progression - Thème Purple
-- [ ] Corriger l'affichage du texte en bas de la fenêtre de progression avec le thème Purple
-- [ ] Problème : Carré blanc masquant le texte pendant la progression
-- [ ] Le texte vert final reste visible dans un carré blanc (manque de contraste/transparence)
-- [ ] Impact : Fichier `UI/dialogs.py` ou configuration thème `Themes/purple.json`
-- [ ] Solution probable : Ajuster les couleurs de fond du QLabel de statut ou stylesheet du thème
 
 ---
-
 ## 💡 Idées en Vrac
 
 *(Brainstorming d'idées à affiner plus tard)*

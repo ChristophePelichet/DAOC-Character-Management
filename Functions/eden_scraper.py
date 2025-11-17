@@ -156,16 +156,19 @@ class EdenScraper:
             
             self.logger.debug(f"URL actuelle: {current_url}", extra={"action": "COOKIES"})
             
-            # DEBUG: Sauvegarder le HTML pour inspection
-            import os
-            debug_file = os.path.join(os.path.dirname(__file__), '..', 'Scripts', 'debug_herald_page.html')
-            try:
-                os.makedirs(os.path.dirname(debug_file), exist_ok=True)
-                with open(debug_file, 'w', encoding='utf-8') as f:
-                    f.write(html_content)
-                self.logger.debug(f"HTML sauvegardé dans {debug_file}", extra={"action": "COOKIES"})
-            except:
-                pass
+            # DEBUG: Sauvegarder le HTML pour inspection (si activé dans config)
+            from Functions.config_manager import config
+            if config.get("system.debug.save_herald_html", False):
+                from Functions.path_manager import get_logs_dir
+                import os
+                debug_file = os.path.join(get_logs_dir(), 'debug_herald_page.html')
+                try:
+                    os.makedirs(os.path.dirname(debug_file), exist_ok=True)
+                    with open(debug_file, 'w', encoding='utf-8') as f:
+                        f.write(html_content)
+                    self.logger.debug(f"HTML sauvegardé dans {debug_file}", extra={"action": "COOKIES"})
+                except Exception as e:
+                    self.logger.warning(f"Impossible de sauvegarder debug HTML: {e}", extra={"action": "COOKIES"})
             
             # SIMPLE AND RELIABLE DETECTION:
             # If we have "not available" message → Not connected

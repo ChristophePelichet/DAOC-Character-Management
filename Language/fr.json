@@ -70,7 +70,6 @@
             "field_realm_rank": "Rang de Royaume",
             "field_server": "Serveur",
             "empty_value": "(vide)"
-        }
         },
         "columns_config": {
             "title": "Configuration des colonnes",
@@ -377,6 +376,7 @@
             "log_folder": "Dossier des logs",
             "debug_app": "Debug Application",
             "debug_eden": "Debug Eden",
+            "debug_herald_html": "Débogage HTML Herald",
             "font": "Taille du texte",
             "bulk_actions": "Actions sur la sélection",
             "misc": "Divers"
@@ -399,7 +399,13 @@
             "show_debug_window": "Afficher la fenêtre de débogage au démarrage",
             "theme": "Thème",
             "font_scale": "Taille du texte",
-            "disable_disclaimer": "Désactiver le message d'avertissement au démarrage"
+            "disable_disclaimer": "Désactiver le message d'avertissement au démarrage",
+            "debug_save_herald_html": "💾 Sauvegarder HTML Herald (debug_herald_page.html)",
+            "debug_save_test_connection_html": "💾 Sauvegarder HTML Test Connexion (debug_test_connection.html)"
+        },
+        "tooltips": {
+            "debug_save_herald_html": "Sauvegarde le code HTML de la page Herald dans le dossier Logs/ pour diagnostic des problèmes de scraping",
+            "debug_save_test_connection_html": "Sauvegarde le code HTML du test de connexion Herald dans le dossier Logs/ pour diagnostic des problèmes d'authentification"
         },
         "dialog_titles": {
             "select_character_folder": "Sélectionner le dossier des personnages",

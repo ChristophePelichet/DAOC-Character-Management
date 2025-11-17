@@ -4,6 +4,13 @@
 
 # ✨ v0.108
 
+### 🚀 Performance
+- ⚡ **Eden Connection Test**: 50%+ improvement (7-8s → 3-4s or <0.1s cached)
+  - 🎯 10-second caching for repeated tests (instant)
+  - ⏲️ Reduced wait times: 7s → 3.3s
+  - 📈 Optional performance logs (Settings > Eden, disabled by default)
+  - 📁 Dedicated log file: Logs/eden_performance_YYYY-MM-DD.log
+
 ### 🎉 New Features
 - 🐛 **Herald Debug HTML Options**: Control debug file generation in Settings > Debug (disabled by default)
 - 🌐 **Dedicated Chrome Profile**: Isolated Selenium browser in AppData with automatic cookie migration

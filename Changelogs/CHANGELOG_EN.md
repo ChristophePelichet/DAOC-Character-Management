@@ -6,6 +6,20 @@ Complete version history of the character manager for Dark Age of Camelot (Eden)
 
 # ✨✨ v0.108
 
+### 🚀 Performance
+- ⚡ **Eden Connection Test Optimization**: 50%+ performance improvement
+  - ⏱️ Optimized `test_eden_connection()` in cookie_manager.py:
+    * 🎯 10-second result caching (instant <0.1s for repeated tests)
+    * ⏲️ Reduced wait times: 7s → 3.3s fixed waits
+    * 📊 12-step performance tracking with detailed timing logs
+  - 🎚️ Optional performance logging system:
+    * 🔧 Configuration: Settings > Eden > `enable_performance_logs` (bool, default False)
+    * 📁 Dedicated log file: `Logs/eden_performance_YYYY-MM-DD.log` (daily rotation)
+    * 📈 Detailed per-step timing analysis (cache check, Selenium init, network operations)
+  - 🎯 Impact: Herald connection test 7-8s → 3-4s (first run) or <0.1s (cached)
+  - 📚 Documentation: PERFORMANCE_OPTIMIZATION_EN.md (350+ lines)
+  - Files: Functions/cookie_manager.py, logging_manager.py, Configuration/config.json
+
 ### 🎉 Added
 - 🐛 **Herald Debug HTML Options (Optional)**: Control over Herald debug file generation
   - ⚙️ 2 new checkboxes in Settings > Debug > Debug HTML Herald:

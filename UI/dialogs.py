@@ -2899,13 +2899,35 @@ class CookieManagerDialog(QDialog):
         
         layout.addLayout(buttons_layout)
         
+        # Section Chrome Profile Management
+        chrome_group = QGroupBox(lang.get("cookie_manager.chrome_profile_section"))
+        chrome_layout = QVBoxLayout()
+        
+        # Affichage taille du profil
+        self.chrome_profile_size_label = QLabel()
+        self.chrome_profile_size_label.setWordWrap(True)
+        chrome_layout.addWidget(self.chrome_profile_size_label)
+        
+        # Bouton de purge
+        chrome_buttons_layout = QHBoxLayout()
+        self.clear_profile_button = QPushButton("🗑️ " + lang.get("cookie_manager.clear_chrome_profile"))
+        self.clear_profile_button.setToolTip(lang.get("cookie_manager.clear_chrome_profile_tooltip"))
+        self.clear_profile_button.clicked.connect(self.clear_chrome_profile)
+        chrome_buttons_layout.addWidget(self.clear_profile_button)
+        chrome_buttons_layout.addStretch()
+        
+        chrome_layout.addLayout(chrome_buttons_layout)
+        chrome_group.setLayout(chrome_layout)
+        layout.addWidget(chrome_group)
+        
         # Bouton de fermeture
         close_button = QPushButton(lang.get("buttons.close"))
         close_button.clicked.connect(self.accept)
         layout.addWidget(close_button)
         
-        # Afficher l'état initial
+        # Afficher l'état initial et la taille du profil
         self.refresh_status()
+        self.update_chrome_profile_size()
     
     def start_connection_test(self):
         """Lance le test de connexion en arrière-plan"""
@@ -3130,6 +3152,50 @@ class CookieManagerDialog(QDialog):
                     self,
                     lang.get("cookie_manager.delete_error_title"),
                     lang.get("cookie_manager.delete_error_message")
+                )
+    
+    def update_chrome_profile_size(self):
+        """Met à jour l'affichage de la taille du profil Chrome"""
+        size_bytes = self.cookie_manager.get_chrome_profile_size()
+        
+        if size_bytes == 0:
+            size_text = lang.get("cookie_manager.chrome_profile_size_empty")
+        elif size_bytes < 1024:
+            size_text = lang.get("cookie_manager.chrome_profile_size", size=f"{size_bytes} B")
+        elif size_bytes < 1024 * 1024:
+            size_kb = size_bytes / 1024
+            size_text = lang.get("cookie_manager.chrome_profile_size", size=f"{size_kb:.1f} KB")
+        else:
+            size_mb = size_bytes / (1024 * 1024)
+            size_text = lang.get("cookie_manager.chrome_profile_size", size=f"{size_mb:.1f} MB")
+        
+        self.chrome_profile_size_label.setText(size_text)
+    
+    def clear_chrome_profile(self):
+        """Purge le profil Chrome dédié après confirmation"""
+        reply = QMessageBox.question(
+            self,
+            lang.get("cookie_manager.clear_chrome_confirm_title"),
+            lang.get("cookie_manager.clear_chrome_confirm_message"),
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+        
+        if reply == QMessageBox.Yes:
+            success = self.cookie_manager.clear_chrome_profile()
+            
+            if success:
+                QMessageBox.information(
+                    self,
+                    lang.get("cookie_manager.clear_chrome_success_title"),
+                    lang.get("cookie_manager.clear_chrome_success_message")
+                )
+                self.update_chrome_profile_size()
+            else:
+                QMessageBox.critical(
+                    self,
+                    lang.get("cookie_manager.clear_chrome_error_title"),
+                    lang.get("cookie_manager.clear_chrome_error_message")
                 )
     
     def generate_cookies(self):

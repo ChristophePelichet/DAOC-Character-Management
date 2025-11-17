@@ -30,8 +30,14 @@ def _apply_retention_policies() -> None
 def backup_cookies_force() -> bool
     """Force cookies backup creation"""
 
-def _create_cookies_backup() -> bool
-    """Internal cookies backup logic"""
+def _perform_cookies_backup() -> dict
+    """Internal cookies backup logic
+    
+    Note: As of v0.108, cookies are stored in AppData:
+    - Path: %LOCALAPPDATA%/DAOC_Character_Manager/Eden/eden_cookies.pkl
+    - Uses path_manager.get_eden_cookies_path() and get_eden_data_dir()
+    - Migrated from Configuration/eden_cookies.pkl
+    """
 
 def _apply_cookies_retention_policies() -> None
     """Apply cookies retention"""
@@ -39,6 +45,7 @@ def _apply_cookies_retention_policies() -> None
 
 **Dependencies**:
 - `ConfigManager` - Configuration access
+- `path_manager` - Eden data paths (v0.108+)
 - `logging` - Operation logging
 - `shutil` - File operations (copy, move, zip)
 - `datetime` - Timestamp generation
@@ -632,6 +639,12 @@ def _apply_retention_policies(self):
 - Character JSON files (plain text)
 - Cookies files (browser cookies)
 
+**Cookie Storage Location (v0.108+)**:
+- **New Path**: `%LOCALAPPDATA%/DAOC_Character_Manager/Eden/eden_cookies.pkl`
+- **Old Path**: `Configuration/eden_cookies.pkl` (migrated automatically)
+- **Reason**: PyInstaller --onefile compatibility
+- **Migration**: Automatic on first startup, backup created as `.pkl.migrated`
+
 **Not Encrypted**:
 - Backups stored as plain ZIP or folder copies
 - No password protection on ZIP files
@@ -666,11 +679,15 @@ if not backup_path.resolve().is_relative_to(app_folder):
 - Cookies backup storage limit
 - Warning dialog on auto-delete disable
 - Auto-uncheck when -1 unlimited entered
+- **Chrome Profile Management**: Dedicated Chrome profile for Selenium in AppData
+- **Cookie Migration**: Automatic migration from `Configuration/` to `Eden/` in AppData
+- **Cookie Path Update**: Backup system now uses `path_manager.get_eden_cookies_path()`
 
 **Changed**:
 - Statistics reorganized with vertical separators
 - Cookies default limit: 10 MB → 20 MB
 - Checkbox layout: moved auto-delete to top section
+- **Cookies Location**: Moved from `Configuration/eden_cookies.pkl` to `%LOCALAPPDATA%/DAOC_Character_Manager/Eden/eden_cookies.pkl`
 
 **Fixed**:
 - Warning dialog state comparison (Qt enum → integer)

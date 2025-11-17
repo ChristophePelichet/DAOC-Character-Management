@@ -122,7 +122,7 @@
         "action": {
             "label": "Action",
             "resistances": "Resistances",
-            "armor_management": "📁 Armor Management"
+            "armor_management": "📁 Armoury"
         },
         "tools": {
             "label": "Tools",
@@ -335,7 +335,7 @@
             },
             "data": {
                 "title": "Data Management",
-                "subtitle": "Data files and armor paths",
+                "subtitle": "Data files and armoury paths",
                 "info": "Data files (classes, races, realm ranks, etc.) are located in the program's Data/ folder.\n\nTo modify this data, use the Tools > Data Manager menu."
             },
             "language": {
@@ -359,8 +359,8 @@
             "columns": "Column Management",
             "cookies": "Cookies Path",
             "browser": "Browser",
-            "eden_debug": "Eden Debugging",
-            "armor": "Armor",
+            "eden_debug": "Eden Debug",
+            "armor": "Armoury",
             "language": "Application Language",
             "season": "Server Configuration",
             "general": "General Settings",
@@ -377,11 +377,11 @@
             "preferred_browser": "Preferred browser:",
             "allow_browser_download": "Allow automatic driver download",
             "window_content": "Configuration options will be here.",
-            "character_folder": "Character Directory",
-            "config_folder": "Configuration directory",
+            "character_folder": "Characters Directory",
+            "config_folder": "Configuration Directory",
             "debug_mode": "Enable debug mode (creates debug.log)",
-            "log_folder": "Log Directory",
-            "armor_folder": "Armor Directory",
+            "log_folder": "Logs Directory",
+            "armor_folder": "Armoury Directory",
             "cookies_folder": "Herald Cookies Directory",
             "language": "Application Language",
             "default_server": "Default Server",
@@ -400,10 +400,10 @@
             "debug_save_test_connection_html": "Save Herald connection test HTML code to Logs/ folder for authentication issue diagnosis"
         },
         "dialog_titles": {
-            "select_character_folder": "Select Character Folder",
+            "select_character_folder": "Select Characters Folder",
             "select_config_folder": "Select Configuration Folder",
-            "select_log_folder": "Select Log Folder",
-            "select_armor_folder": "Select Armor Folder",
+            "select_log_folder": "Select Logs Folder",
+            "select_armor_folder": "Select Armoury Folder",
             "select_cookies_folder": "Select Cookies Folder"
         }
     },
@@ -485,8 +485,8 @@
             "realm_rank_group": "Realm Rank",
             "rank": "Rank:",
             "rank_level": "Level:",
-            "armor_manager": "📁 Manage Armor",
-            "armor_manager_tooltip": "Upload and manage armor files created with third-party software",
+            "armor_manager": "📁 Armoury",
+            "armor_manager_tooltip": "Upload and manage armor templates created with third-party software",
             "no_herald_url": "Please configure Herald URL first",
             "herald_validation_pending": "⏳ Herald validation in progress at startup...",
             "no_class_selected": "No\nClass\nSelected"
@@ -535,8 +535,8 @@
             "unknown_error": "Unknown error",
             "rank_update_success": "Rank updated: {level}\nRealm Points: {rp:,}",
             "info_update_success": "Character information updated successfully!",
-            "save_error": "Error while saving: {error}",
-            "armor_manager_error": "Error opening armor management:\n{error}\n\n{traceback}",
+            "save_error": "Error saving: {error}",
+            "armor_manager_error": "Error opening armoury:\n{error}\n\n{traceback}",
             "character_id_error": "Unable to determine character ID."
         }
     },
@@ -544,8 +544,91 @@
         "delete": "Delete",
         "rename": "Rename",
         "duplicate": "Duplicate",
-        "armor_management": "Armor Management",
+        "armor_management": "Armoury",
         "update_from_herald": "🔄 Update from Herald"
+    },
+    "armoury_dialog": {
+        "title": "Armoury Management - {name} ({realm} - {season})",
+        "info": "Manage armoury templates created with third-party software (Zenkcraft, etc.)",
+        "table_headers": {
+            "filename": "Filename",
+            "season": "Season",
+            "modified": "Modified Date"
+        },
+        "preview": {
+            "title": "👁️ Preview",
+            "no_selection": "Select a file to display its content...",
+            "file_not_found": "File '{filename}' not found.",
+            "error": "Error reading file:\n{error}",
+            "equipment_categories": {
+                "armor_pieces": "Armor Pieces",
+                "jewelry": "Jewelry",
+                "weapons": "Weapons"
+            }
+        },
+        "buttons": {
+            "upload": "📤 Upload File",
+            "refresh": "🔄 Refresh",
+            "close": "Close",
+            "open": "🔍 Open",
+            "delete": "🗑️ Delete"
+        },
+        "context_menu": {
+            "view": "👁️ View",
+            "download": "💾 Download",
+            "open": "🔍 Open with default application",
+            "delete": "🗑️ Delete"
+        },
+        "tooltips": {
+            "open": "Open file with default application",
+            "delete": "Delete this armor file"
+        },
+        "messages": {
+            "upload_success": "File uploaded successfully:\n{filename}{season_info}",
+            "upload_error": "Unable to upload file:\n{error}",
+            "delete_confirm": "Are you sure you want to delete the file '{filename}'?",
+            "delete_success": "File '{filename}' deleted successfully.",
+            "delete_error": "Unable to delete file:\n{error}",
+            "open_error": "Unable to open file:\n{error}",
+            "refresh_error": "Unable to load armor list:\n{error}",
+            "season_info": " (Season: {season})",
+            "view_title": "Armoury Viewer",
+            "view_placeholder": "Viewing '{filename}' will be implemented soon.",
+            "download_success": "File '{filename}' downloaded successfully.",
+            "download_error": "Unable to download file:\n{error}",
+            "file_not_found": "File '{filename}' not found."
+        },
+        "dialogs": {
+            "select_file": "Select armor file",
+            "all_files": "All files (*.*)",
+            "confirm_delete": "Confirm deletion",
+            "download_file": "Download file"
+        }
+    },
+    "armoury_upload": {
+        "title": "Import Preview",
+        "header": "📤 Armoury Import Preview",
+        "file_info": {
+            "title": "File Information",
+            "source": "Source file:",
+            "size": "Size:",
+            "type": "Type:",
+            "no_extension": "No extension"
+        },
+        "config": {
+            "title": "Import Configuration",
+            "filename": "Filename:",
+            "filename_placeholder": "Filename in armoury",
+            "season": "Season:",
+            "season_help": "💡 The season determines where the file will be stored"
+        },
+        "destination": {
+            "title": "Destination"
+        },
+        "buttons": {
+            "cancel": "❌ Cancel",
+            "import": "✅ Import"
+        }
     },
     "progress": {
         "character_update": {
@@ -728,7 +811,7 @@
         "sections": {
             "characters": "Character Backups",
             "cookies": "Eden Cookies Backups",
-            "armor": "Armor Data Backups"
+            "armor": "Armoury Data Backups"
         }
     },
     "version_check": {

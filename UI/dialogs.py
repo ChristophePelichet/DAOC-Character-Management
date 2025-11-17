@@ -16,7 +16,7 @@ from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QFormLayout, QGroupBox, QLabel, 
     QPushButton, QLineEdit, QComboBox, QCheckBox, QSlider, QMessageBox,
     QDialogButtonBox, QFileDialog, QTableWidget, QTableWidgetItem, QHeaderView,
-    QWidget, QTextEdit, QApplication, QProgressBar, QMenu, QGridLayout, QFrame, QScrollArea
+    QWidget, QTextEdit, QApplication, QProgressBar, QMenu, QGridLayout, QFrame, QScrollArea, QSplitter
 )
 from PySide6.QtCore import Qt, QThread, Signal, QTimer
 from PySide6.QtGui import QBrush, QColor, QIcon, QPixmap
@@ -1055,12 +1055,15 @@ class CharacterSheetWindow(QDialog):
     def open_armor_manager(self):
         """Opens the armor management dialog."""
         try:
-            character_id = self.character_data.get('id', '')
-            if not character_id:
+            season = self.character_data.get('season', 'S3')
+            realm = self.character_data.get('realm', '')
+            character_name = self.character_data.get('name', '')
+            
+            if not realm or not character_name:
                 QMessageBox.warning(self, lang.get("dialogs.titles.error"), lang.get("character_sheet.messages.character_id_error"))
                 return
             
-            dialog = ArmorManagementDialog(self, character_id)
+            dialog = ArmorManagementDialog(self, season, realm, character_name)
             dialog.exec()
         except Exception as e:
             import traceback
@@ -2703,51 +2706,107 @@ class ConfigurationDialog(QDialog):
 
 
 class ArmorManagementDialog(QDialog):
-    """Dialog for managing armor files for a specific character."""
+    """Dialog for managing armor templates for a specific character."""
     
-    def __init__(self, parent, character_id):
+    def __init__(self, parent, season, realm, character_name):
         super().__init__(parent)
-        self.character_id = character_id
+        self.season = season
+        self.realm = realm
+        self.character_name = character_name
         
         from Functions.armor_manager import ArmorManager
-        self.armor_manager = ArmorManager(character_id)
+        self.armor_manager = ArmorManager(season, realm, character_name)
         
-        self.setWindowTitle(f"Gestion des armures - Personnage {character_id}")
-        self.resize(700, 450)
+        self.setWindowTitle(lang.get("armoury_dialog.title", name=character_name, realm=realm, season=season))
+        self.resize(1400, 700)  # Larger window for better split visibility
+        
+        # Enable window buttons (minimize, maximize, close)
+        self.setWindowFlags(Qt.Window | Qt.WindowMinimizeButtonHint | Qt.WindowMaximizeButtonHint | Qt.WindowCloseButtonHint)
         
         layout = QVBoxLayout(self)
         
-        # Info label
-        info_label = QLabel("Gérez les fichiers d'armure créés avec des logiciels tiers (formats : .png, .jpg, .pdf, .txt, etc.)")
-        info_label.setWordWrap(True)
-        layout.addWidget(info_label)
+        # Create horizontal splitter for table and preview (no info label)
+        splitter = QSplitter(Qt.Horizontal)
+        splitter.setChildrenCollapsible(False)  # Prevent panels from collapsing
+        
+        # Left panel: Table
+        left_widget = QWidget()
+        left_layout = QVBoxLayout(left_widget)
+        left_layout.setContentsMargins(0, 0, 0, 0)
         
         # Armor files table
         self.table = QTableWidget()
-        self.table.setColumnCount(4)
-        self.table.setHorizontalHeaderLabels(["Nom du fichier", "Taille", "Date de modification", "Actions"])
+        self.table.setColumnCount(1)
+        self.table.setHorizontalHeaderLabels([
+            lang.get("armoury_dialog.table_headers.filename")
+        ])
         self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
-        self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
-        self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
-        self.table.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeToContents)
         self.table.setSelectionBehavior(QTableWidget.SelectRows)
         self.table.setEditTriggers(QTableWidget.NoEditTriggers)
-        layout.addWidget(self.table)
+        self.table.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.table.customContextMenuRequested.connect(self.show_context_menu)
+        self.table.itemSelectionChanged.connect(self.on_selection_changed)
+        left_layout.addWidget(self.table)
+        
+        splitter.addWidget(left_widget)
+        
+        # Right panel: Preview
+        right_widget = QWidget()
+        right_layout = QVBoxLayout(right_widget)
+        right_layout.setContentsMargins(0, 0, 0, 0)
+        
+        # Preview header
+        preview_header = QLabel(lang.get("armoury_dialog.preview.title"))
+        preview_header_font = preview_header.font()
+        preview_header_font.setBold(True)
+        preview_header_font.setPointSize(preview_header_font.pointSize() + 1)
+        preview_header.setFont(preview_header_font)
+        right_layout.addWidget(preview_header)
+        
+        # Preview content area
+        self.preview_area = QTextEdit()
+        self.preview_area.setReadOnly(True)
+        self.preview_area.setPlaceholderText(lang.get("armoury_dialog.preview.no_selection"))
+        self.preview_area.setMinimumWidth(350)  # Ensure preview panel has minimum width
+        
+        # Force Courier New font for the entire widget
+        from PySide6.QtGui import QFont
+        preview_font = QFont("Courier New", 10)
+        preview_font.setStyleHint(QFont.Monospace)
+        self.preview_area.setFont(preview_font)
+        
+        right_layout.addWidget(self.preview_area)
+        
+        # Download button in preview panel
+        self.preview_download_button = QPushButton(lang.get("armoury_dialog.context_menu.download", default="Download"))
+        self.preview_download_button.setEnabled(False)  # Disabled until file selected
+        self.preview_download_button.clicked.connect(self.download_selected_armor)
+        right_layout.addWidget(self.preview_download_button)
+        
+        splitter.addWidget(right_widget)
+        
+        # Set splitter proportions (30% table, 70% preview)
+        # Force initial sizes based on window width (1400 * 0.3 = 420, 1400 * 0.7 = 980)
+        splitter.setSizes([420, 980])
+        splitter.setStretchFactor(0, 3)  # Left panel gets less stretch
+        splitter.setStretchFactor(1, 7)  # Right panel gets more stretch
+        
+        layout.addWidget(splitter, 1)  # Stretch factor 1 = take all available space
         
         # Buttons
         button_layout = QHBoxLayout()
         
-        upload_button = QPushButton("📤 Uploader un fichier")
+        upload_button = QPushButton(lang.get("armoury_dialog.buttons.upload"))
         upload_button.clicked.connect(self.upload_armor)
         button_layout.addWidget(upload_button)
         
-        refresh_button = QPushButton("🔄 Actualiser")
+        refresh_button = QPushButton(lang.get("armoury_dialog.buttons.refresh"))
         refresh_button.clicked.connect(self.refresh_list)
         button_layout.addWidget(refresh_button)
         
         button_layout.addStretch()
         
-        close_button = QPushButton("Fermer")
+        close_button = QPushButton(lang.get("armoury_dialog.buttons.close"))
         close_button.clicked.connect(self.close)
         button_layout.addWidget(close_button)
         
@@ -2763,62 +2822,456 @@ class ArmorManagementDialog(QDialog):
             self.table.setRowCount(len(armors))
             
             for row, armor in enumerate(armors):
-                # Filename
+                # Filename only (Season and Modified Date now shown in preview)
                 filename_item = QTableWidgetItem(armor['filename'])
                 self.table.setItem(row, 0, filename_item)
-                
-                # Size
-                size_mb = armor['size'] / (1024 * 1024)
-                size_text = f"{size_mb:.2f} MB" if size_mb >= 1 else f"{armor['size'] / 1024:.2f} KB"
-                size_item = QTableWidgetItem(size_text)
-                self.table.setItem(row, 1, size_item)
-                
-                # Modified date
-                modified_date = datetime.fromtimestamp(armor['modified']).strftime("%d/%m/%Y %H:%M")
-                date_item = QTableWidgetItem(modified_date)
-                self.table.setItem(row, 2, date_item)
-                
-                # Actions buttons
-                actions_widget = QWidget()
-                actions_layout = QHBoxLayout(actions_widget)
-                actions_layout.setContentsMargins(4, 2, 4, 2)
-                
-                open_button = QPushButton("🔍 Ouvrir")
-                open_button.setToolTip("Ouvrir le fichier avec l'application par défaut")
-                open_button.clicked.connect(lambda checked, f=armor['filename']: self.open_armor(f))
-                actions_layout.addWidget(open_button)
-                
-                delete_button = QPushButton("🗑️ Supprimer")
-                delete_button.setToolTip("Supprimer ce fichier d'armure")
-                delete_button.clicked.connect(lambda checked, f=armor['filename']: self.delete_armor(f))
-                actions_layout.addWidget(delete_button)
-                
-                self.table.setCellWidget(row, 3, actions_widget)
             
             logging.info(f"Liste des armures actualisée : {len(armors)} fichier(s)")
             
         except Exception as e:
             logging.error(f"Erreur lors du rafraîchissement de la liste des armures : {e}")
-            QMessageBox.critical(self, "Erreur", f"Impossible de charger la liste des armures :\n{str(e)}")
+            QMessageBox.critical(self, lang.get("dialogs.titles.error"), lang.get("armoury_dialog.messages.refresh_error", error=str(e)))
     
     def upload_armor(self):
         """Opens file dialog to upload an armor file."""
         file_path, _ = QFileDialog.getOpenFileName(
             self,
-            "Sélectionner un fichier d'armure",
+            lang.get("armoury_dialog.dialogs.select_file"),
             "",
-            "Tous les fichiers (*.*)"
+            lang.get("armoury_dialog.dialogs.all_files")
         )
         
         if file_path:
-            try:
-                result_path = self.armor_manager.upload_armor(file_path)
-                QMessageBox.information(self, "Succès", f"Fichier uploadé avec succès :\n{os.path.basename(result_path)}")
-                self.refresh_list()
-                logging.info(f"Fichier d'armure uploadé : {result_path}")
-            except Exception as e:
-                logging.error(f"Erreur lors de l'upload du fichier d'armure : {e}")
-                QMessageBox.critical(self, "Erreur", f"Impossible d'uploader le fichier :\n{str(e)}")
+            # Open preview dialog before import
+            from Functions.config_manager import config
+            available_seasons = config.get("game.seasons", ["S3"])
+            
+            preview_dialog = ArmorUploadPreviewDialog(
+                self,
+                file_path,
+                self.season,
+                available_seasons,
+                self.realm,
+                self.character_name
+            )
+            
+            if preview_dialog.exec() == QDialog.Accepted:
+                try:
+                    # Get the chosen season and filename
+                    target_season = preview_dialog.season_combo.currentText()
+                    new_filename = preview_dialog.filename_edit.text().strip()
+                    
+                    # If season changed, create a new ArmorManager for that season
+                    if target_season != self.season:
+                        from Functions.armor_manager import ArmorManager
+                        target_armor_manager = ArmorManager(target_season, self.realm, self.character_name)
+                    else:
+                        target_armor_manager = self.armor_manager
+                    
+                    # Upload with optional rename
+                    result_path = target_armor_manager.upload_armor(file_path, new_filename)
+                    
+                    season_info = lang.get("armoury_dialog.messages.season_info", season=target_season) if target_season != self.season else ""
+                    QMessageBox.information(
+                        self, 
+                        lang.get("dialogs.titles.success"),
+                        lang.get("armoury_dialog.messages.upload_success", filename=os.path.basename(result_path), season_info=season_info)
+                    )
+                    
+                    # Refresh only if same season
+                    if target_season == self.season:
+                        self.refresh_list()
+                    
+                    logging.info(f"Fichier d'armure uploadé : {result_path} (Saison: {target_season})")
+                except Exception as e:
+                    logging.error(f"Erreur lors de l'upload du fichier d'armure : {e}")
+                    QMessageBox.critical(self, lang.get("dialogs.titles.error"), lang.get("armoury_dialog.messages.upload_error", error=str(e)))
+    
+    def parse_zenkcraft_template(self, content, season=""):
+        """Parse Zenkcraft template and return formatted display."""
+        lines = content.split('\n')
+        
+        # Extract character info
+        char_name = ""
+        char_level = ""
+        char_class = ""
+        last_saved = ""
+        version = ""
+        
+        for line in lines:
+            if line.startswith("Character Summary for"):
+                # Extract: "Eden - Hibernia - Bard(Level 50) - Bard"
+                match = re.search(r'for (.+?)\(Level (\d+)\) - (.+)', line)
+                if match:
+                    char_name = match.group(1).strip()
+                    char_level = match.group(2)
+                    char_class = match.group(3).strip()
+            elif line.startswith("Last Saved:"):
+                last_saved = line.replace("Last Saved:", "").strip()
+            elif line.startswith("Version:"):
+                version = line.replace("Version:", "").strip()
+        
+        # Parse Stats section
+        stats = {}
+        bonuses = {}
+        resists = {}
+        skills = {}
+        equipment_count = 0
+        
+        current_section = None
+        for line in lines:
+            line = line.strip()
+            
+            if line == "Stats":
+                current_section = "stats"
+                continue
+            elif line == "Bonuses":
+                current_section = "bonuses"
+                continue
+            elif line.startswith("Resists"):
+                current_section = "resists"
+                continue
+            elif line == "Skills":
+                current_section = "skills"
+                continue
+            elif line == "Items":
+                current_section = "items"
+                continue
+            elif line in ["Item Procs and Charges", ""]:
+                current_section = None
+                continue
+            
+            # Parse based on section
+            if current_section == "stats" and "/" in line:
+                # Format: "94 / 94  Constitution"
+                match = re.match(r'(\d+)\s*/\s*(\d+)\s+(.+)', line)
+                if match:
+                    current = int(match.group(1))
+                    cap = int(match.group(2))
+                    stat_name = match.group(3).strip()
+                    if current > 0:  # Only non-zero stats
+                        stats[stat_name] = (current, cap)
+            
+            elif current_section == "bonuses" and ":" in line:
+                # Format: "Healing: 23%"
+                parts = line.split(":")
+                if len(parts) == 2:
+                    bonus_name = parts[0].strip()
+                    bonus_value = parts[1].strip()
+                    # Skip unwanted entries
+                    if bonus_name not in ["Level", "Utility", "Source Type"]:
+                        bonuses[bonus_name] = bonus_value
+            
+            elif current_section == "resists" and "%" in line:
+                # Format: "25% Crush"
+                match = re.match(r'(\d+)%\s+(.+)', line)
+                if match:
+                    resist_value = match.group(1)
+                    resist_name = match.group(2).strip()
+                    resists[resist_name] = resist_value
+            
+            elif current_section == "skills":
+                # Format: "0 Blades" or "3 Regrowth"
+                match = re.match(r'(\d+)\s+(.+)', line)
+                if match:
+                    skill_level = int(match.group(1))
+                    skill_name = match.group(2).strip()
+                    if skill_level > 0:  # Only non-zero skills
+                        skills[skill_name] = skill_level
+        
+        # Parse equipment items (extract Slot, Name, Source Type)
+        equipment = []  # List of {slot, name, source_type}
+        current_slot = None
+        current_item = {}
+        
+        for line in lines:
+            stripped = line.strip()
+            
+            # Detect item slot
+            if stripped in ["Helmet", "Hands", "Torso", "Arms", "Feet", "Legs", 
+                           "Right Hand", "Left Hand", "Two Handed", "Ranged",
+                           "Neck", "Cloak", "Jewelry", "Waist", "L Ring", "R Ring",
+                           "L Wrist", "R Wrist", "Mythical"]:
+                # Save previous item if exists
+                if current_slot and current_item.get('name'):
+                    equipment.append({
+                        'slot': current_slot,
+                        'name': current_item['name'],
+                        'source_type': current_item.get('source_type', 'Unknown')
+                    })
+                
+                # Start new item
+                current_slot = stripped
+                current_item = {}
+                continue
+            
+            # Parse item properties
+            if current_slot:
+                if stripped.startswith("Name:"):
+                    name_value = stripped.split("Name:", 1)[1].strip()
+                    if name_value:
+                        current_item['name'] = name_value
+                elif stripped.startswith("Source Type:"):
+                    source_value = stripped.split("Source Type:", 1)[1].strip()
+                    current_item['source_type'] = source_value
+                elif stripped == "" or stripped == "Bonuses":
+                    # End of item section
+                    if current_slot and current_item.get('name'):
+                        equipment.append({
+                            'slot': current_slot,
+                            'name': current_item['name'],
+                            'source_type': current_item.get('source_type', 'Unknown')
+                        })
+                        current_slot = None
+                        current_item = {}
+        
+        # Save last item if exists
+        if current_slot and current_item.get('name'):
+            equipment.append({
+                'slot': current_slot,
+                'name': current_item['name'],
+                'source_type': current_item.get('source_type', 'Unknown')
+            })
+        
+        equipment_count = len(equipment)
+        
+        # Build formatted output
+        output = []
+        output.append("━" * 50)
+        output.append(f"🛡️  {char_name.upper()} (Level {char_level})")
+        output.append("━" * 50)
+        if version:
+            output.append(f"⚙️  Zenkcraft {version}")
+        if season:
+            output.append(f"📦 Season: {season}")
+        if last_saved:
+            output.append(f"📅 Last Saved: {last_saved}")
+        output.append("")
+        
+        # Stats (colored numbers: green=equal, orange=over cap, red=under cap)
+        if stats:
+            output.append("📊 STATS")
+            for stat_name, (current, cap) in stats.items():
+                # Determine color for numbers
+                if current == cap:
+                    color = "#4CAF50"  # Green
+                elif current > cap:
+                    color = "#FF9800"  # Orange
+                else:
+                    color = "#F44336"  # Red
+                
+                # Build HTML directly with proper formatting
+                stat_label = stat_name.ljust(14)
+                current_str = str(current).rjust(3)
+                cap_str = str(cap).ljust(3)
+                # Use %%COLOR%% markers that will be replaced with HTML later
+                output.append(f"  {stat_label} %%COLOR_START:{color}%%{current_str} / {cap_str}%%COLOR_END%%")
+            output.append("")
+        
+        # Bonuses (2 columns with vertical separator)
+        if bonuses:
+            output.append("✨ BONUSES")
+            bonus_items = list(bonuses.items())
+            for i in range(0, len(bonus_items), 2):
+                left_name, left_value = bonus_items[i]
+                left = f"{left_name:18} {left_value:>5}"
+                
+                if i+1 < len(bonus_items):
+                    right_name, right_value = bonus_items[i+1]
+                    right = f"{right_name:18} {right_value:>5}"
+                else:
+                    right = " " * 24
+                
+                output.append(f"  {left}  │  {right}")
+            output.append("")
+        
+        # Resists (3 columns with vertical separator)
+        if resists:
+            output.append("🛡️  RESISTANCES")
+            resist_items = list(resists.items())
+            for i in range(0, len(resist_items), 3):
+                parts = []
+                for j in range(3):
+                    if i+j < len(resist_items):
+                        name, value = resist_items[i+j]
+                        parts.append(f"{name:8} {value:>2}%")
+                    else:
+                        parts.append(" " * 11)
+                output.append(f"  {parts[0]}  │  {parts[1]}  │  {parts[2]}")
+            output.append("")
+        
+        # Skills (vertical list)
+        if skills:
+            output.append("📚 SKILLS")
+            for skill_name, skill_level in skills.items():
+                output.append(f"  {skill_name:20} {skill_level}")
+            output.append("")
+        
+        # Equipment summary with Spellcraft and Loot details
+        output.append(f"⚔️  ÉQUIPEMENT ({equipment_count}/18 slots)")
+        output.append("")
+        
+        # Separate Spellcraft and Loot items
+        spellcraft_items = [item for item in equipment if item['source_type'].lower() == 'spellcraft']
+        loot_items = [item for item in equipment if item['source_type'].lower() == 'loot']
+        
+        # Display Spellcraft items (count + slots)
+        if spellcraft_items:
+            slots = [item['slot'] for item in spellcraft_items]
+            slots_str = ", ".join(slots)
+            output.append(f"  🔨 Spellcraft : {len(spellcraft_items)} ({slots_str})")
+            output.append("")
+        
+        # Display Loot items with categories: Armor, Jewelry, Weapons
+        if loot_items:
+            output.append("  💎 Loot :")
+            
+            # Categorize items
+            armor_slots = ['Helmet', 'Hands', 'Torso', 'Arms', 'Feet', 'Legs']
+            jewelry_slots = ['L Ring', 'R Ring', 'L Wrist', 'R Wrist', 'Jewelry', 'Waist', 'Neck', 'Cloak', 'Mythical']
+            weapon_slots = ['Left Hand', 'Right Hand', 'Two Handed', 'Ranged']
+            
+            armor_items = [item for item in loot_items if item['slot'] in armor_slots]
+            jewelry_items = [item for item in loot_items if item['slot'] in jewelry_slots]
+            weapon_items = [item for item in loot_items if item['slot'] in weapon_slots]
+            
+            # Display Armor pieces
+            if armor_items:
+                output.append("")
+                output.append(f"    🛡️  {lang.get('armoury_dialog.preview.equipment_categories.armor_pieces')} :")
+                for item in armor_items:
+                    output.append(f"      • {item['name']} ({item['slot']})")
+            
+            # Display Jewelry items grouped side by side
+            if jewelry_items:
+                output.append("")
+                output.append(f"    💍 {lang.get('armoury_dialog.preview.equipment_categories.jewelry')} :")
+                
+                # Create a dictionary to quickly find items by slot
+                jewelry_dict = {item['slot']: item for item in jewelry_items}
+                
+                # Group 1: L Ring │ R Ring
+                left_ring = jewelry_dict.get('L Ring')
+                right_ring = jewelry_dict.get('R Ring')
+                if left_ring or right_ring:
+                    left_str = f"{left_ring['name']} (L Ring)" if left_ring else " " * 35
+                    right_str = f"{right_ring['name']} (R Ring)" if right_ring else ""
+                    if right_ring:
+                        output.append(f"      • {left_str:<35} │ {right_str}")
+                    else:
+                        output.append(f"      • {left_str}")
+                
+                # Group 2: L Wrist │ R Wrist
+                left_wrist = jewelry_dict.get('L Wrist')
+                right_wrist = jewelry_dict.get('R Wrist')
+                if left_wrist or right_wrist:
+                    left_str = f"{left_wrist['name']} (L Wrist)" if left_wrist else " " * 35
+                    right_str = f"{right_wrist['name']} (R Wrist)" if right_wrist else ""
+                    if right_wrist:
+                        output.append(f"      • {left_str:<35} │ {right_str}")
+                    else:
+                        output.append(f"      • {left_str}")
+                
+                # Group 3: Jewelry │ Waist
+                jewelry = jewelry_dict.get('Jewelry')
+                waist = jewelry_dict.get('Waist')
+                if jewelry or waist:
+                    left_str = f"{jewelry['name']} (Jewelry)" if jewelry else " " * 35
+                    right_str = f"{waist['name']} (Waist)" if waist else ""
+                    if waist:
+                        output.append(f"      • {left_str:<35} │ {right_str}")
+                    else:
+                        output.append(f"      • {left_str}")
+                
+                # Group 4: Neck │ Cloak
+                neck = jewelry_dict.get('Neck')
+                cloak = jewelry_dict.get('Cloak')
+                if neck or cloak:
+                    left_str = f"{neck['name']} (Neck)" if neck else " " * 35
+                    right_str = f"{cloak['name']} (Cloak)" if cloak else ""
+                    if cloak:
+                        output.append(f"      • {left_str:<35} │ {right_str}")
+                    else:
+                        output.append(f"      • {left_str}")
+                
+                # Mythical (standalone)
+                mythical = jewelry_dict.get('Mythical')
+                if mythical:
+                    output.append(f"      • {mythical['name']} (Mythical)")
+            
+            # Display Weapons
+            if weapon_items:
+                output.append("")
+                output.append(f"    ⚔️  {lang.get('armoury_dialog.preview.equipment_categories.weapons')} :")
+                for item in weapon_items:
+                    output.append(f"      • {item['name']} ({item['slot']})")
+            
+            output.append("")
+        
+        return "\n".join(output)
+    
+    def on_selection_changed(self):
+        """Updates the preview when a file is selected."""
+        selected_items = self.table.selectedItems()
+        if not selected_items:
+            self.preview_area.clear()
+            self.preview_area.setPlaceholderText(lang.get("armoury_dialog.preview.no_selection"))
+            self.preview_download_button.setEnabled(False)
+            return
+        
+        # Get filename from the first column of selected row
+        row = selected_items[0].row()
+        filename = self.table.item(row, 0).text()
+        
+        # Enable download button
+        self.preview_download_button.setEnabled(True)
+        
+        try:
+            # Get file path and file info
+            armors = self.armor_manager.list_armors()
+            armor_info = next((a for a in armors if a['filename'] == filename), None)
+            
+            if not armor_info:
+                self.preview_area.setPlainText(lang.get("armoury_dialog.preview.file_not_found", filename=filename))
+                return
+            
+            file_path = armor_info['path']
+            
+            if file_path and os.path.exists(file_path):
+                # Read file content
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                
+                # Parse and format Zenkcraft template (metadata will be added inside)
+                formatted_content = self.parse_zenkcraft_template(content, self.season)
+                
+                # Convert to HTML with color support
+                import re
+                
+                # Step 1: Replace color markers with HTML spans
+                color_pattern = r'%%COLOR_START:(.+?)%%(.*?)%%COLOR_END%%'
+                
+                def replace_color(match):
+                    color = match.group(1)
+                    text = match.group(2)
+                    return f"<span style='color:{color}'>{text}</span>"
+                
+                formatted_content = re.sub(color_pattern, replace_color, formatted_content)
+                
+                # Step 2: Replace spaces OUTSIDE HTML tags (negative lookahead to avoid spaces inside <...>)
+                formatted_content = re.sub(r' (?![^<]*>)', '&nbsp;', formatted_content)
+                
+                # Step 3: Convert newlines to <br>
+                html_content = formatted_content.replace('\n', '<br>')
+                html_content = f"<div style='line-height: 1.1;'>{html_content}</div>"
+                
+                # Display formatted content
+                self.preview_area.setHtml(html_content)
+            else:
+                self.preview_area.setPlainText(lang.get("armoury_dialog.preview.file_not_found", filename=filename))
+        except Exception as e:
+            logging.error(f"Erreur lors de la prévisualisation : {e}")
+            self.preview_area.setPlainText(lang.get("armoury_dialog.preview.error", error=str(e)))
     
     def open_armor(self, filename):
         """Opens an armor file with the default application."""
@@ -2827,14 +3280,14 @@ class ArmorManagementDialog(QDialog):
             logging.info(f"Ouverture du fichier d'armure : {filename}")
         except Exception as e:
             logging.error(f"Erreur lors de l'ouverture du fichier d'armure : {e}")
-            QMessageBox.critical(self, "Erreur", f"Impossible d'ouvrir le fichier :\n{str(e)}")
+            QMessageBox.critical(self, lang.get("dialogs.titles.error"), lang.get("armoury_dialog.messages.open_error", error=str(e)))
     
     def delete_armor(self, filename):
         """Deletes an armor file after confirmation."""
         reply = QMessageBox.question(
             self,
-            "Confirmer la suppression",
-            f"Êtes-vous sûr de vouloir supprimer le fichier '{filename}' ?",
+            lang.get("armoury_dialog.dialogs.confirm_delete"),
+            lang.get("armoury_dialog.messages.delete_confirm", filename=filename),
             QMessageBox.Yes | QMessageBox.No,
             QMessageBox.No
         )
@@ -2842,12 +3295,248 @@ class ArmorManagementDialog(QDialog):
         if reply == QMessageBox.Yes:
             try:
                 self.armor_manager.delete_armor(filename)
-                QMessageBox.information(self, "Succès", f"Fichier '{filename}' supprimé avec succès.")
+                QMessageBox.information(
+                    self, 
+                    lang.get("dialogs.titles.success"),
+                    lang.get("armoury_dialog.messages.delete_success", filename=filename)
+                )
                 self.refresh_list()
                 logging.info(f"Fichier d'armure supprimé : {filename}")
             except Exception as e:
                 logging.error(f"Erreur lors de la suppression du fichier d'armure : {e}")
-                QMessageBox.critical(self, "Erreur", f"Impossible de supprimer le fichier :\n{str(e)}")
+                QMessageBox.critical(self, lang.get("dialogs.titles.error"), lang.get("armoury_dialog.messages.delete_error", error=str(e)))
+    
+    def download_selected_armor(self):
+        """Downloads the currently selected armor file (called from preview panel button)."""
+        selected_items = self.table.selectedItems()
+        if not selected_items:
+            return
+        
+        # Get filename from selected row
+        row = selected_items[0].row()
+        filename = self.table.item(row, 0).text()
+        
+        # Call existing download method
+        self.download_armor(filename)
+    
+    def show_context_menu(self, position):
+        """Shows context menu for armor files."""
+        # Get the selected row
+        item = self.table.itemAt(position)
+        if not item:
+            return
+        
+        row = item.row()
+        filename = self.table.item(row, 0).text()
+        
+        # Create context menu
+        menu = QMenu(self)
+        
+        # View action
+        view_action = menu.addAction(lang.get("armoury_dialog.context_menu.view"))
+        view_action.triggered.connect(lambda: self.view_armor(filename))
+        
+        # Download action
+        download_action = menu.addAction(lang.get("armoury_dialog.context_menu.download"))
+        download_action.triggered.connect(lambda: self.download_armor(filename))
+        
+        menu.addSeparator()
+        
+        # Open action
+        open_action = menu.addAction(lang.get("armoury_dialog.context_menu.open"))
+        open_action.triggered.connect(lambda: self.open_armor(filename))
+        
+        menu.addSeparator()
+        
+        # Delete action
+        delete_action = menu.addAction(lang.get("armoury_dialog.context_menu.delete"))
+        delete_action.triggered.connect(lambda: self.delete_armor(filename))
+        
+        # Show menu at cursor position
+        menu.exec_(self.table.viewport().mapToGlobal(position))
+    
+    def view_armor(self, filename):
+        """Opens armor viewer dialog."""
+        # Placeholder for future armor viewer implementation
+        QMessageBox.information(
+            self,
+            lang.get("armoury_dialog.messages.view_title"),
+            lang.get("armoury_dialog.messages.view_placeholder", filename=filename)
+        )
+    
+    def download_armor(self, filename):
+        """Downloads/exports the armor file to a user-selected location."""
+        try:
+            # Get source file path
+            armors = self.armor_manager.list_armors()
+            source_file = next((a['path'] for a in armors if a['filename'] == filename), None)
+            
+            if not source_file:
+                QMessageBox.warning(
+                    self,
+                    lang.get("dialogs.titles.error"),
+                    lang.get("armoury_dialog.messages.file_not_found", filename=filename)
+                )
+                return
+            
+            # Ask user where to save the file
+            save_path, _ = QFileDialog.getSaveFileName(
+                self,
+                lang.get("armoury_dialog.dialogs.download_file"),
+                filename,
+                lang.get("armoury_dialog.dialogs.all_files")
+            )
+            
+            if save_path:
+                import shutil
+                shutil.copy2(source_file, save_path)
+                QMessageBox.information(
+                    self,
+                    lang.get("dialogs.titles.success"),
+                    lang.get("armoury_dialog.messages.download_success", filename=os.path.basename(save_path))
+                )
+                logging.info(f"Fichier d'armure téléchargé : {save_path}")
+        except Exception as e:
+            logging.error(f"Erreur lors du téléchargement du fichier d'armure : {e}")
+            QMessageBox.critical(self, lang.get("dialogs.titles.error"), lang.get("armoury_dialog.messages.download_error", error=str(e)))
+
+
+class ArmorUploadPreviewDialog(QDialog):
+    """Dialog to preview and configure armor file upload before final import."""
+    
+    def __init__(self, parent, file_path, current_season, available_seasons, realm, character_name):
+        super().__init__(parent)
+        self.file_path = file_path
+        self.current_season = current_season
+        self.available_seasons = available_seasons
+        self.realm = realm
+        self.character_name = character_name
+        
+        self.setWindowTitle(lang.get("armoury_upload.title"))
+        self.setWindowFlags(Qt.Window | Qt.WindowCloseButtonHint)
+        self.resize(600, 400)
+        
+        layout = QVBoxLayout(self)
+        
+        # Title
+        title_label = QLabel(lang.get("armoury_upload.header"))
+        title_font = title_label.font()
+        title_font.setPointSize(title_font.pointSize() + 2)
+        title_font.setBold(True)
+        title_label.setFont(title_font)
+        layout.addWidget(title_label)
+        
+        layout.addSpacing(10)
+        
+        # File information group
+        file_group = QGroupBox(lang.get("armoury_upload.file_info.title"))
+        file_layout = QFormLayout()
+        
+        # Original filename
+        original_filename = os.path.basename(file_path)
+        file_layout.addRow(lang.get("armoury_upload.file_info.source"), QLabel(original_filename))
+        
+        # File size
+        file_size = os.path.getsize(file_path)
+        size_mb = file_size / (1024 * 1024)
+        size_text = f"{size_mb:.2f} MB" if size_mb >= 1 else f"{file_size / 1024:.2f} KB"
+        file_layout.addRow(lang.get("armoury_upload.file_info.size"), QLabel(size_text))
+        
+        # File type
+        file_ext = os.path.splitext(original_filename)[1]
+        file_layout.addRow(lang.get("armoury_upload.file_info.type"), QLabel(file_ext if file_ext else lang.get("armoury_upload.file_info.no_extension")))
+        
+        file_group.setLayout(file_layout)
+        layout.addWidget(file_group)
+        
+        layout.addSpacing(10)
+        
+        # Import configuration group
+        config_group = QGroupBox(lang.get("armoury_upload.config.title"))
+        config_layout = QFormLayout()
+        
+        # Filename editor
+        self.filename_edit = QLineEdit()
+        self.filename_edit.setText(original_filename)
+        self.filename_edit.setPlaceholderText(lang.get("armoury_upload.config.filename_placeholder"))
+        config_layout.addRow(lang.get("armoury_upload.config.filename"), self.filename_edit)
+        
+        # Season selector
+        self.season_combo = QComboBox()
+        self.season_combo.addItems(available_seasons)
+        
+        # Set current season as default
+        current_index = self.season_combo.findText(current_season)
+        if current_index >= 0:
+            self.season_combo.setCurrentIndex(current_index)
+        
+        season_help = QLabel(lang.get("armoury_upload.config.season_help"))
+        season_help.setStyleSheet("color: gray; font-style: italic;")
+        
+        config_layout.addRow(lang.get("armoury_upload.config.season"), self.season_combo)
+        config_layout.addRow("", season_help)
+        
+        config_group.setLayout(config_layout)
+        layout.addWidget(config_group)
+        
+        layout.addSpacing(10)
+        
+        # Destination preview
+        dest_group = QGroupBox(lang.get("armoury_upload.destination.title"))
+        dest_layout = QVBoxLayout()
+        
+        self.dest_label = QLabel()
+        self.dest_label.setWordWrap(True)
+        # Use semi-transparent background that adapts to theme, with border for visibility
+        self.dest_label.setStyleSheet("""
+            QLabel {
+                padding: 10px;
+                background-color: rgba(128, 128, 128, 0.15);
+                border: 1px solid rgba(128, 128, 128, 0.3);
+                border-radius: 5px;
+            }
+        """)
+        self._update_destination_preview()
+        dest_layout.addWidget(self.dest_label)
+        
+        dest_group.setLayout(dest_layout)
+        layout.addWidget(dest_group)
+        
+        # Connect signals to update preview
+        self.filename_edit.textChanged.connect(self._update_destination_preview)
+        self.season_combo.currentTextChanged.connect(self._update_destination_preview)
+        
+        layout.addStretch()
+        
+        # Buttons
+        button_layout = QHBoxLayout()
+        button_layout.addStretch()
+        
+        cancel_button = QPushButton(lang.get("armoury_upload.buttons.cancel"))
+        cancel_button.clicked.connect(self.reject)
+        button_layout.addWidget(cancel_button)
+        
+        import_button = QPushButton(lang.get("armoury_upload.buttons.import"))
+        import_button.setDefault(True)
+        import_button.clicked.connect(self.accept)
+        button_layout.addWidget(import_button)
+        
+        layout.addLayout(button_layout)
+    
+    def _update_destination_preview(self):
+        """Updates the destination path preview."""
+        from Functions.path_manager import get_armory_dir
+        
+        filename = self.filename_edit.text().strip() or os.path.basename(self.file_path)
+        season = self.season_combo.currentText()
+        
+        dest_dir = get_armory_dir(season, self.realm, self.character_name)
+        dest_path = os.path.join(dest_dir, filename)
+        
+        # Normalize path for display
+        dest_path = os.path.normpath(dest_path)
+        
+        self.dest_label.setText(f"📁 {dest_path}")
 
 
 class ConnectionTestThread(QThread):

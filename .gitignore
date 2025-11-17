@@ -145,3 +145,6 @@ main.spec
 Scripts/debug_herald_page.html
 debug_wealth_page.html
 debug_herald_after_cookies.html
+
+# Templates 
+Templates/

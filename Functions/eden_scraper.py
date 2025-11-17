@@ -38,7 +38,7 @@ class EdenScraper:
         self.driver = None
         self.logger = get_logger(LOGGER_EDEN)
         
-    def initialize_driver(self, headless=True):
+    def initialize_driver(self, headless=True, minimize=True):
         """
         Initialise le driver Selenium avec fallback multi-navigateurs
         Supporte Chrome, Edge et Firefox
@@ -46,6 +46,7 @@ class EdenScraper:
         
         Args:
             headless: Si True, lance le navigateur en mode sans interface
+            minimize: Si True, minimise la fenêtre (seulement si headless=False)
             
         Returns:
             bool: True si l'initialisation a réussi
@@ -67,8 +68,8 @@ class EdenScraper:
             if driver:
                 self.driver = driver
                 
-                # Minimize browser window if not in headless mode
-                if not headless:
+                # Minimize browser window if not in headless mode and minimize=True
+                if not headless and minimize:
                     try:
                         self.driver.minimize_window()
                         self.logger.info("🔽 Fenêtre du navigateur minimisée", extra={"action": "INIT"})

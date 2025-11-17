@@ -122,7 +122,7 @@
         "action": {
             "label": "Action",
             "resistances": "Résistances",
-            "armor_management": "📁 Gestion des armures"
+            "armor_management": "📁 Armurerie"
         },
         "tools": {
             "label": "Outils",
@@ -368,7 +368,7 @@
             "cookies": "Chemin des cookies",
             "browser": "Navigateur",
             "eden_debug": "Débogage Eden",
-            "armor": "Armures",
+            "armor": "Armurerie",
             "language": "Langue de l'application",
             "season": "Configuration Serveur",
             "general": "Paramètres généraux",
@@ -389,7 +389,7 @@
             "config_folder": "Répertoire de configuration",
             "debug_mode": "Activer le mode débogage (crée debug.log)",
             "log_folder": "Répertoire des logs",
-            "armor_folder": "Répertoire des armures",
+            "armor_folder": "Répertoire de l'armurerie",
             "cookies_folder": "Répertoire des cookies Herald",
             "language": "Langue de l'application",
             "default_server": "Serveur par défaut",
@@ -411,7 +411,7 @@
             "select_character_folder": "Sélectionner le dossier des personnages",
             "select_config_folder": "Sélectionner le dossier de configuration",
             "select_log_folder": "Sélectionner le dossier des logs",
-            "select_armor_folder": "Sélectionner le dossier des armures",
+            "select_armor_folder": "Sélectionner le dossier de l'armurerie",
             "select_cookies_folder": "Sélectionner le dossier des cookies"
         }
     },
@@ -485,8 +485,8 @@
             "realm_rank_group": "Rang de Royaume",
             "rank": "Rang :",
             "rank_level": "Niveau :",
-            "armor_manager": "📁 Gérer les armures",
-            "armor_manager_tooltip": "Upload et gestion des fichiers d'armure créés avec des logiciels tiers",
+            "armor_manager": "📁 Armurerie",
+            "armor_manager_tooltip": "Upload et gestion des templates d'armurerie créés avec des logiciels tiers",
             "no_herald_url": "Veuillez d'abord configurer l'URL Herald",
             "herald_validation_pending": "⏳ Validation Herald en cours au démarrage...",
             "no_class_selected": "No\nClass\nSelected"
@@ -536,7 +536,7 @@
             "rank_update_success": "Rang mis à jour : {level}\nRealm Points : {rp:,}",
             "info_update_success": "Informations du personnage mises à jour avec succès !",
             "save_error": "Erreur lors de la sauvegarde : {error}",
-            "armor_manager_error": "Erreur lors de l'ouverture de la gestion des armures:\n{error}\n\n{traceback}",
+            "armor_manager_error": "Erreur lors de l'ouverture de l'armurerie:\n{error}\n\n{traceback}",
             "character_id_error": "Impossible de déterminer l'ID du personnage."
         }
     },
@@ -544,8 +544,91 @@
         "delete": "Supprimer",
         "rename": "Renommer",
         "duplicate": "Dupliquer",
-        "armor_management": "Gestion des armures",
+        "armor_management": "Armurerie",
         "update_from_herald": "🔄 Mettre à jour depuis Herald"
+    },
+    "armoury_dialog": {
+        "title": "Gestion de l'Armurerie - {name} ({realm} - {season})",
+        "info": "Gérez les templates d'armurerie créés avec des logiciels tiers (Zenkcraft, etc.)",
+        "table_headers": {
+            "filename": "Nom du fichier",
+            "season": "Saison",
+            "modified": "Date de modification"
+        },
+        "preview": {
+            "title": "👁️ Prévisualisation",
+            "no_selection": "Sélectionnez un fichier pour afficher son contenu...",
+            "file_not_found": "Fichier '{filename}' introuvable.",
+            "error": "Erreur lors de la lecture du fichier :\n{error}",
+            "equipment_categories": {
+                "armor_pieces": "Pièces d'armure",
+                "jewelry": "Bijoux",
+                "weapons": "Armes"
+            }
+        },
+        "buttons": {
+            "upload": "📤 Uploader un fichier",
+            "refresh": "🔄 Actualiser",
+            "close": "Fermer",
+            "open": "🔍 Ouvrir",
+            "delete": "🗑️ Supprimer"
+        },
+        "context_menu": {
+            "view": "👁️ Visualiser",
+            "download": "💾 Télécharger",
+            "open": "🔍 Ouvrir avec l'application par défaut",
+            "delete": "🗑️ Supprimer"
+        },
+        "tooltips": {
+            "open": "Ouvrir le fichier avec l'application par défaut",
+            "delete": "Supprimer ce fichier d'armure"
+        },
+        "messages": {
+            "upload_success": "Fichier uploadé avec succès :\n{filename}{season_info}",
+            "upload_error": "Impossible d'uploader le fichier :\n{error}",
+            "delete_confirm": "Êtes-vous sûr de vouloir supprimer le fichier '{filename}' ?",
+            "delete_success": "Fichier '{filename}' supprimé avec succès.",
+            "delete_error": "Impossible de supprimer le fichier :\n{error}",
+            "open_error": "Impossible d'ouvrir le fichier :\n{error}",
+            "refresh_error": "Impossible de charger la liste des armures :\n{error}",
+            "season_info": " (Saison: {season})",
+            "view_title": "Visualisation de l'armurerie",
+            "view_placeholder": "La visualisation de '{filename}' sera implémentée prochainement.",
+            "download_success": "Fichier '{filename}' téléchargé avec succès.",
+            "download_error": "Impossible de télécharger le fichier :\n{error}",
+            "file_not_found": "Fichier '{filename}' introuvable."
+        },
+        "dialogs": {
+            "select_file": "Sélectionner un fichier d'armure",
+            "all_files": "Tous les fichiers (*.*)",
+            "confirm_delete": "Confirmer la suppression",
+            "download_file": "Télécharger le fichier"
+        }
+    },
+    "armoury_upload": {
+        "title": "Prévisualisation de l'import",
+        "header": "📤 Prévisualisation de l'import d'armurerie",
+        "file_info": {
+            "title": "Informations du fichier",
+            "source": "Fichier source:",
+            "size": "Taille:",
+            "type": "Type:",
+            "no_extension": "Aucune extension"
+        },
+        "config": {
+            "title": "Configuration de l'import",
+            "filename": "Nom du fichier:",
+            "filename_placeholder": "Nom du fichier dans l'armurerie",
+            "season": "Saison:",
+            "season_help": "💡 La saison détermine où le fichier sera stocké"
+        },
+        "destination": {
+            "title": "Destination"
+        },
+        "buttons": {
+            "cancel": "❌ Annuler",
+            "import": "✅ Importer"
+        }
     },
     "progress": {
         "character_update": {
@@ -728,7 +811,7 @@
         "sections": {
             "characters": "Sauvegardes des personnages",
             "cookies": "Sauvegardes des cookies Eden",
-            "armor": "Sauvegardes des données d'armures"
+            "armor": "Sauvegardes de l'armurerie"
         }
     },
     "version_check": {

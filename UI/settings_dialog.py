@@ -1363,7 +1363,7 @@ class SettingsDialog(QDialog):
         # Fixed folder names based on config_key (no user input)
         folder_names = {
             "character_folder": "Characters",
-            "armor_folder": "Armor",
+            "armor_folder": "Armory",
             "log_folder": "Logs",
             "cookies_folder": "Cookies",
             "backup_path": "Backups",

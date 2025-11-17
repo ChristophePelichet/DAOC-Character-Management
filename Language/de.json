@@ -122,7 +122,7 @@
         "action": {
             "label": "Aktion",
             "resistances": "Widerstände",
-            "armor_management": "📁 Rüstungsverwaltung"
+            "armor_management": "📁 Waffenkammer"
         },
         "tools": {
             "label": "Werkzeuge",
@@ -365,10 +365,10 @@
             "defaults": "Standardwerte",
             "theme": "Themenauswahl",
             "columns": "Spaltenverwaltung",
-            "cookies": "Cookies-Pfad",
+            "cookies": "Cookie-Pfad",
             "browser": "Browser",
-            "eden_debug": "Eden-Debugging",
-            "armor": "Rüstung",
+            "eden_debug": "Eden-Debug",
+            "armor": "Waffenkammer",
             "language": "Anwendungssprache",
             "season": "Server-Konfiguration",
             "general": "Allgemeine Einstellungen",
@@ -388,8 +388,8 @@
             "character_folder": "Charakterverzeichnis",
             "config_folder": "Konfigurationsverzeichnis",
             "debug_mode": "Debug-Modus aktivieren (erstellt debug.log)",
-            "log_folder": "Log-Verzeichnis",
-            "armor_folder": "Rüstungsverzeichnis",
+            "log_folder": "Logs-Verzeichnis",
+            "armor_folder": "Waffenkammer-Verzeichnis",
             "cookies_folder": "Herald-Cookie-Verzeichnis",
             "language": "Anwendungssprache",
             "default_server": "Standardserver",
@@ -410,8 +410,8 @@
         "dialog_titles": {
             "select_character_folder": "Charakterordner auswählen",
             "select_config_folder": "Konfigurationsordner auswählen",
-            "select_log_folder": "Log-Ordner auswählen",
-            "select_armor_folder": "Rüstungsordner auswählen",
+            "select_log_folder": "Logs-Ordner auswählen",
+            "select_armor_folder": "Waffenkammer-Ordner auswählen",
             "select_cookies_folder": "Cookie-Ordner auswählen"
         }
     },
@@ -485,8 +485,8 @@
             "realm_rank_group": "Reich-Rang",
             "rank": "Rang:",
             "rank_level": "Stufe:",
-            "armor_manager": "📁 Rüstung verwalten",
-            "armor_manager_tooltip": "Rüstungsdateien hochladen und verwalten, die mit Software von Drittanbietern erstellt wurden",
+            "armor_manager": "📁 Waffenkammer",
+            "armor_manager_tooltip": "Rüstungsvorlagen hochladen und verwalten, die mit Software von Drittanbietern erstellt wurden",
             "no_herald_url": "Bitte konfigurieren Sie zuerst die Herald-URL",
             "herald_validation_pending": "⏳ Herald-Validierung beim Start läuft...",
             "no_class_selected": "No\nClass\nSelected"
@@ -536,7 +536,7 @@
             "rank_update_success": "Rang aktualisiert: {level}\nReich-Punkte: {rp:,}",
             "info_update_success": "Charakterinformationen erfolgreich aktualisiert!",
             "save_error": "Fehler beim Speichern: {error}",
-            "armor_manager_error": "Fehler beim Öffnen der Rüstungsverwaltung:\n{error}\n\n{traceback}",
+            "armor_manager_error": "Fehler beim Öffnen der Waffenkammer:\n{error}\n\n{traceback}",
             "character_id_error": "Charakter-ID kann nicht ermittelt werden."
         }
     },
@@ -544,8 +544,91 @@
         "delete": "Löschen",
         "rename": "Umbenennen",
         "duplicate": "Duplizieren",
-        "armor_management": "Rüstungsverwaltung",
+        "armor_management": "Waffenkammer",
         "update_from_herald": "🔄 Vom Herald aktualisieren"
+    },
+    "armoury_dialog": {
+        "title": "Waffenkammer-Verwaltung - {name} ({realm} - {season})",
+        "info": "Verwalten Sie Waffenkammer-Vorlagen, die mit Drittanbieter-Software (Zenkcraft, etc.) erstellt wurden",
+        "table_headers": {
+            "filename": "Dateiname",
+            "season": "Saison",
+            "modified": "Änderungsdatum"
+        },
+        "preview": {
+            "title": "👁️ Vorschau",
+            "no_selection": "Wählen Sie eine Datei aus, um deren Inhalt anzuzeigen...",
+            "file_not_found": "Datei '{filename}' nicht gefunden.",
+            "error": "Fehler beim Lesen der Datei:\n{error}",
+            "equipment_categories": {
+                "armor_pieces": "Rüstungsteile",
+                "jewelry": "Schmuck",
+                "weapons": "Waffen"
+            }
+        },
+        "buttons": {
+            "upload": "📤 Datei hochladen",
+            "refresh": "🔄 Aktualisieren",
+            "close": "Schließen",
+            "open": "🔍 Öffnen",
+            "delete": "🗑️ Löschen"
+        },
+        "context_menu": {
+            "view": "👁️ Anzeigen",
+            "download": "💾 Herunterladen",
+            "open": "🔍 Mit Standardanwendung öffnen",
+            "delete": "🗑️ Löschen"
+        },
+        "tooltips": {
+            "open": "Datei mit Standardanwendung öffnen",
+            "delete": "Diese Rüstungsdatei löschen"
+        },
+        "messages": {
+            "upload_success": "Datei erfolgreich hochgeladen:\n{filename}{season_info}",
+            "upload_error": "Datei konnte nicht hochgeladen werden:\n{error}",
+            "delete_confirm": "Sind Sie sicher, dass Sie die Datei '{filename}' löschen möchten?",
+            "delete_success": "Datei '{filename}' erfolgreich gelöscht.",
+            "delete_error": "Datei konnte nicht gelöscht werden:\n{error}",
+            "open_error": "Datei konnte nicht geöffnet werden:\n{error}",
+            "refresh_error": "Rüstungsliste konnte nicht geladen werden:\n{error}",
+            "season_info": " (Saison: {season})",
+            "view_title": "Waffenkammer-Anzeige",
+            "view_placeholder": "Die Anzeige von '{filename}' wird bald implementiert.",
+            "download_success": "Datei '{filename}' erfolgreich heruntergeladen.",
+            "download_error": "Datei konnte nicht heruntergeladen werden:\n{error}",
+            "file_not_found": "Datei '{filename}' nicht gefunden."
+        },
+        "dialogs": {
+            "select_file": "Rüstungsdatei auswählen",
+            "all_files": "Alle Dateien (*.*)",
+            "confirm_delete": "Löschen bestätigen",
+            "download_file": "Datei herunterladen"
+        }
+    },
+    "armoury_upload": {
+        "title": "Import-Vorschau",
+        "header": "📤 Waffenkammer-Import-Vorschau",
+        "file_info": {
+            "title": "Dateiinformationen",
+            "source": "Quelldatei:",
+            "size": "Größe:",
+            "type": "Typ:",
+            "no_extension": "Keine Erweiterung"
+        },
+        "config": {
+            "title": "Import-Konfiguration",
+            "filename": "Dateiname:",
+            "filename_placeholder": "Dateiname in der Waffenkammer",
+            "season": "Saison:",
+            "season_help": "💡 Die Saison bestimmt, wo die Datei gespeichert wird"
+        },
+        "destination": {
+            "title": "Ziel"
+        },
+        "buttons": {
+            "cancel": "❌ Abbrechen",
+            "import": "✅ Importieren"
+        }
     },
     "progress": {
         "character_update": {
@@ -727,8 +810,8 @@
         },
         "sections": {
             "characters": "Charakter-Sicherungen",
-            "cookies": "Eden-Cookies-Sicherungen",
-            "armor": "Rüstungsdaten-Sicherungen"
+            "cookies": "Eden-Cookie-Sicherungen",
+            "armor": "Waffenkammer-Datensicherungen"
         }
     },
     "version_check": {

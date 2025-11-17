@@ -330,17 +330,21 @@ class CharacterActionsManager:
                 )
                 return
                 
-            character_id = char.get('id', '')
-            if not character_id:
+            # Get character info for armor management
+            season = char.get('season', config.get('game.default_season', 'S3'))
+            realm = char.get('realm', '')
+            character_name = char.get('name', '')
+            
+            if not character_name or not realm:
                 QMessageBox.warning(
                     self.main_window,
                     "Erreur",
-                    "Impossible de déterminer l'ID du personnage."
+                    "Impossible de déterminer le nom ou le royaume du personnage."
                 )
                 return
                 
             from UI.dialogs import ArmorManagementDialog
-            dialog = ArmorManagementDialog(self.main_window, character_id)
+            dialog = ArmorManagementDialog(self.main_window, season, realm, character_name)
             dialog.exec()
         except Exception as e:
             import traceback

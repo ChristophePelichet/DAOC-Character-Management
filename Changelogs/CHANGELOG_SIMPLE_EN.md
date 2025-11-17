@@ -5,6 +5,7 @@
 # ✨ v0.108
 
 ### 🎉 New Features
+- 🐛 **Herald Debug HTML Options**: Control debug file generation in Settings > Debug (disabled by default)
 - 🌐 **Dedicated Chrome Profile**: Isolated Selenium browser in AppData with automatic cookie migration
 - 🗑️ **"Clean Eden" Button**: New button in Settings > Herald to delete cookies and Chrome profile
 - 📂 **Auto-Create Backup Folders**: "Open folder" buttons now automatically create missing folders
@@ -22,6 +23,7 @@
 - ⚙️ **Simplified Settings Interface**: Removed obsolete cookies fields (path managed automatically)
 
 ### Bug Fixes
+- 🎨 **Purple Theme**: Text now visible (transparent background, readable placeholder)
 - 🐛 Fixed Settings crash with missing cookies_path_edit
 - 🐛 Fixed cookies backup disappearing immediately after creation
 - 🌍 Fixed "Clean Eden" button translations (FR/EN/DE)

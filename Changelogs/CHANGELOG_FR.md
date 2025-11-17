@@ -7,6 +7,22 @@ Historique complet des versions du gestionnaire de personnages pour Dark Age of 
 # ✨✨ v0.108
 
 ### 🎉 Ajout
+- 🐛 **Options Debug HTML Herald (Optionnelles)** : Contrôle des fichiers de débogage Herald
+  - ⚙️ 2 nouvelles checkboxes dans Settings > Debug > Debug HTML Herald :
+    * 💾 "Enregistrer Herald HTML (debug_herald_page.html)" - Sauvegarde la page Herald lors du scraping
+    * 💾 "Enregistrer Test Connexion HTML (debug_test_connection.html)" - Sauvegarde la page de test de connexion
+  - ❌ Désactivé par défaut pour éviter de créer des fichiers inutiles
+  - 📁 Fichiers sauvegardés dans Logs/ (au lieu de Scripts/) pour portabilité .exe one-file
+  - 🔧 Configuration : `system.debug.save_herald_html` et `system.debug.save_test_connection_html` (bool, default False)
+  - 🌍 Traductions FR/EN/DE pour les labels et tooltips
+  - 🎯 Impact : Fichiers de debug uniquement créés quand activé manuellement pour diagnostic
+  - Fichiers : Functions/config_schema.py, eden_scraper.py, cookie_manager.py, UI/settings_dialog.py, main.py, Language/*.json
+- 🎨 **Correction Thème Purple** : Amélioration de la visibilité du texte
+  - 🔧 Problème : Carré blanc masquant le texte dans QLineEdit, placeholder invisible
+  - ✅ Solution : Background transparent, styling QLineEdit pour placeholder visible
+  - 📚 Documentation thème Purple ajoutée (Documentations/Themes/PURPLE_THEME_DOC.md)
+  - 🎯 Impact : Texte lisible dans tous les champs du thème Purple
+  - Fichiers : Themes/purple.json, Documentations/Themes/PURPLE_THEME_DOC.md
 - 🌐 **Profil Chrome Dédié pour Selenium** : Isolation complète du navigateur de scraping
   - 📁 Profil Chrome stocké dans AppData : `%LOCALAPPDATA%/DAOC_Character_Manager/Eden/ChromeProfile/`
   - 🔄 Migration automatique des cookies : `Configuration/eden_cookies.pkl` → `Eden/eden_cookies.pkl`

@@ -240,6 +240,11 @@ def _create_<section>_page(self):
   * Show debug window checkbox
 - **Debug Eden**:
   * Button to open Eden Debug Window
+- **Debug HTML Herald**:
+  * Save Herald HTML (debug_herald_page.html) checkbox
+  * Save Connection Test HTML (debug_test_connection.html) checkbox
+  * Both disabled by default
+  * Files saved to Logs/ folder when enabled
 
 **Info Box**:
 - Explains debug log location

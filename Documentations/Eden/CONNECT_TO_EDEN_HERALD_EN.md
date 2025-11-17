@@ -437,6 +437,28 @@ scraper, error = _connect_to_eden_herald(headless=False)
 3. Test cookie validity in Cookie Manager UI
 4. Try manual browser navigation to Herald (test authentication)
 5. Check internet connection stability
+6. **Enable debug HTML files** (Settings > Debug):
+   - `Save Connection Test HTML` - Saves raw HTML response to `Logs/debug_test_connection.html`
+   - Helps diagnose authentication/scraping issues
+   - Disabled by default for performance
+
+### Debug HTML Files (Optional)
+
+**Configuration**: Settings > Debug > Debug HTML Herald
+
+Two optional debug files can be enabled:
+- **`debug_test_connection.html`**: Saved during `test_connection()` in cookie_manager.py
+- **`debug_herald_page.html`**: Saved during Herald scraping in eden_scraper.py
+
+**Location**: `Logs/` folder (portable for .exe one-file builds)
+
+**When to Enable**:
+- Investigating Herald connection failures
+- Diagnosing scraping/parsing issues
+- Verifying HTML structure changes on Eden website
+- Troubleshooting authentication problems
+
+**Performance Impact**: Minimal - only writes HTML when enabled
 
 ---
 

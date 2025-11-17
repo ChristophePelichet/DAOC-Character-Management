@@ -7,6 +7,22 @@ Complete version history of the character manager for Dark Age of Camelot (Eden)
 # ✨✨ v0.108
 
 ### 🎉 Added
+- 🐛 **Herald Debug HTML Options (Optional)**: Control over Herald debug file generation
+  - ⚙️ 2 new checkboxes in Settings > Debug > Debug HTML Herald:
+    * 💾 "Save Herald HTML (debug_herald_page.html)" - Saves Herald page during scraping
+    * 💾 "Save Connection Test HTML (debug_test_connection.html)" - Saves connection test page
+  - ❌ Disabled by default to avoid creating unnecessary files
+  - 📁 Files saved to Logs/ (instead of Scripts/) for .exe one-file portability
+  - 🔧 Configuration: `system.debug.save_herald_html` and `system.debug.save_test_connection_html` (bool, default False)
+  - 🌍 FR/EN/DE translations for labels and tooltips
+  - 🎯 Impact: Debug files only created when manually enabled for diagnostics
+  - Files: Functions/config_schema.py, eden_scraper.py, cookie_manager.py, UI/settings_dialog.py, main.py, Language/*.json
+- 🎨 **Purple Theme Fix**: Improved text visibility
+  - 🔧 Issue: White square masking text in QLineEdit, invisible placeholder
+  - ✅ Solution: Transparent background, QLineEdit styling for visible placeholder
+  - 📚 Purple theme documentation added (Documentations/Themes/PURPLE_THEME_DOC.md)
+  - 🎯 Impact: Readable text in all Purple theme fields
+  - Files: Themes/purple.json, Documentations/Themes/PURPLE_THEME_DOC.md
 - 🌐 **Dedicated Chrome Profile for Selenium**: Complete browser scraping isolation
   - 📁 Chrome profile stored in AppData: `%LOCALAPPDATA%/DAOC_Character_Manager/Eden/ChromeProfile/`
   - 🔄 Automatic cookie migration: `Configuration/eden_cookies.pkl` → `Eden/eden_cookies.pkl`

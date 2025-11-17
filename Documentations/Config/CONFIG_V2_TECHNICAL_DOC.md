@@ -179,7 +179,11 @@ DEFAULT_CONFIG = {
         "show_debug_window": False,          # Debug window
         "disable_disclaimer": False,         # Disable disclaimer
         "preferred_browser": "Chrome",       # Preferred browser
-        "allow_browser_download": False      # Allow download
+        "allow_browser_download": False,     # Allow download
+        "debug": {
+            "save_herald_html": False,       # Save Herald HTML debug file
+            "save_test_connection_html": False  # Save connection test HTML debug file
+        }
     },
     "game": {
         "servers": ["Eden"],                 # Game servers
@@ -282,6 +286,10 @@ LEGACY_KEY_MAPPING = {
     "disable_disclaimer": "system.disable_disclaimer",
     "preferred_browser": "system.preferred_browser",
     "allow_browser_download": "system.allow_browser_download",
+    
+    # System Debug keys
+    "save_herald_html": "system.debug.save_herald_html",
+    "save_test_connection_html": "system.debug.save_test_connection_html",
     
     # Game keys
     "servers": "game.servers",
@@ -889,11 +897,13 @@ print("Forced migration completed")
 | 32 | `disable_disclaimer` | `system.disable_disclaimer` | System |
 | 33 | `preferred_browser` | `system.preferred_browser` | System |
 | 34 | `allow_browser_download` | `system.allow_browser_download` | System |
-| 35 | `servers` | `game.servers` | Game |
-| 36 | `default_server` | `game.default_server` | Game |
-| 37 | `seasons` | `game.seasons` | Game |
-| 38 | `default_season` | `game.default_season` | Game |
-| 39 | `default_realm` | `game.default_realm` | Game |
+| 35 | `save_herald_html` | `system.debug.save_herald_html` | System |
+| 36 | `save_test_connection_html` | `system.debug.save_test_connection_html` | System |
+| 37 | `servers` | `game.servers` | Game |
+| 38 | `default_server` | `game.default_server` | Game |
+| 39 | `seasons` | `game.seasons` | Game |
+| 40 | `default_season` | `game.default_season` | Game |
+| 41 | `default_realm` | `game.default_realm` | Game |
 
 ### Available Themes
 

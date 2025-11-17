@@ -5,6 +5,7 @@
 ## v0.108
 
 ### Nouveautés
+- 🐛 **Options Debug HTML Herald** : Contrôle des fichiers de débogage dans Settings > Debug (désactivé par défaut)
 - 🌐 **Profil Chrome Dédié** : Navigateur Selenium isolé dans AppData avec migration automatique des cookies
 - 🗑️ **Bouton "Nettoyer Eden"** : Nouveau bouton dans Settings > Herald pour supprimer cookies et profil Chrome
 - 📂 **Création Auto Dossiers Backup** : Les boutons "Ouvrir le dossier" créent maintenant automatiquement les dossiers manquants
@@ -14,6 +15,7 @@
 - ⚙️ **Interface Settings Simplifiée** : Suppression des champs obsolètes pour les cookies (chemin géré automatiquement)
 
 ### Corrections
+- 🎨 **Thème Purple** : Texte maintenant visible (background transparent, placeholder lisible)
 - 🐛 Correction crash Settings avec cookies_path_edit manquant
 - 🐛 Correction backup cookies qui disparaissait immédiatement après création
 - 🌍 Correction traductions bouton "Nettoyer Eden" (FR/EN/DE)

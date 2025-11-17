@@ -33,6 +33,8 @@
 - 🗑️ **Cleanup**: Removed obsolete qdarkstyle key (custom JSON theme system used now)
 - 🌐 Fixed Chrome browser freeze on first launch (cookies not loaded)
 - 🔒 Protection against Chrome profile conflicts during Herald validation at startup
+- 🎨 Fixed text display with Purple theme (white square + invisible placeholder)
+- 📚 Complete theme system documentation (700+ lines)
 
 ### 🎉 New Features
 - ⌨️ **Keyboard Shortcuts**: Ctrl+N to create character, Ctrl+F to search on Herald

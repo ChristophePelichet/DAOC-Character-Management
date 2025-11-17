@@ -64,6 +64,16 @@ Complete version history of the character manager for Dark Age of Camelot (Eden)
   - 🌍 Translations: Added `herald_buttons.validation_in_progress` key (FR/EN/DE)
   - 📚 Documentation: HERALD_BUTTONS_STATE_MANAGEMENT_EN.md (700+ lines)
   - Files: Functions/ui_manager.py, main.py, UI/dialogs.py, Language/*.json
+- 🎨 **Purple Theme - Text Display**: Fixed text visibility issues with Purple theme
+  - 🔧 Problem 1: White square masking status text in progress dialog
+  - 🔍 Cause 1: Fixed `background-color: #f5f5f5` (light gray) on dark theme background
+  - ✅ Solution 1: Replaced with `background-color: transparent` for theme compatibility
+  - 🔧 Problem 2: Placeholder "Minimum 3 characters..." invisible (black) in Herald search window
+  - 🔍 Cause 2: Missing `QLineEdit::placeholder` CSS rule in Purple theme
+  - ✅ Solution 2: Added QLineEdit stylesheets with `placeholder { color: #6272A4; }` (visible gray)
+  - 🎯 Impact: Text perfectly readable in all windows with Purple theme
+  - 📚 Documentation: THEME_SYSTEM_TECHNICAL_EN.md (700+ lines, new file)
+  - Files: UI/progress_dialog_base.py, Themes/purple.json, Documentations/Themes/
   - File: UI/dialogs.py
 - 🌍 **RvR Statistics Labels**: Translated captures in character sheet
   - 🔧 Tours Capturées, Forteresses Capturées, Reliques Capturées (FR)

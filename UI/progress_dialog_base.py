@@ -425,7 +425,7 @@ class ProgressStepsDialog(QDialog):
             "padding: 10px; "
             "border: 1px solid #ccc; "
             "border-radius: 5px; "
-            "background-color: #f5f5f5;"
+            "background-color: transparent;"
         )
         layout.addWidget(self.status_label)
         
@@ -607,7 +607,7 @@ class ProgressStepsDialog(QDialog):
             f"padding: 10px; "
             f"border: 1px solid #ccc; "
             f"border-radius: 5px; "
-            f"background-color: #f5f5f5; "
+            f"background-color: transparent; "
             f"color: {color};"
         )
     

@@ -2,24 +2,7 @@
     "version": "1.0",
     "description": "DAOC items database - IDs and basic information",
     "last_updated": "2025-11-17",
-    "items": {
-        "cape of legerdemain": {
-            "id": "139635",
-            "name": "Cape of Legerdemain",
-            "slot": "Cloak",
-            "realm": "Hibernia",
-            "merchant_zone": "SH",
-            "merchant_price": "700"
-        },
-        "filigree antalya ring": {
-            "id": "136668",
-            "name": "Filigree Antalya Ring",
-            "slot": "Ring",
-            "realm": "Hibernia",
-            "merchant_zone": "ToA",
-            "merchant_price": "700"
-        }
-    },
+    "items": {},
     "notes": [
         "This file is the application's embedded database",
         "It contains the most common items",

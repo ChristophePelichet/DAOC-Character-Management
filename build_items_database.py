@@ -30,13 +30,15 @@ def parse_zenkcraft_file(file_path):
         with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
         
-        # Regex pour extraire les items entre [Item: nom]
-        item_pattern = r'\[Item:\s*([^\]]+)\]'
-        matches = re.findall(item_pattern, content)
+        # Regex pour extraire les items depuis "Name: item_name" (format Zenkcraft)
+        # Ignore les lignes "Name: " vides et les items spellcraft sans nom
+        item_pattern = r'^Name:\s*(.+?)$'
+        matches = re.findall(item_pattern, content, re.MULTILINE)
         
         for item_name in matches:
             item_name = item_name.strip()
-            if item_name and item_name not in items:
+            # Ignore les noms vides ou très courts (probablement des erreurs)
+            if item_name and len(item_name) > 2 and item_name not in items:
                 items.append(item_name)
         
         print(f"  ✅ {file_path.name}: {len(items)} items trouvés")

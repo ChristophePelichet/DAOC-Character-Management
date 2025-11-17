@@ -338,23 +338,13 @@ class BackupManager:
             # Get configuration
             should_compress = self.config_manager.get("cookies_backup_compress", True)
             
-            # Get cookies folder - use get_config_dir() which has proper fallback
-            from Functions.config_manager import get_config_dir
-            cookies_folder = self.config_manager.get("cookies_folder") or get_config_dir()
+            # Utiliser le nouveau chemin Eden dans AppData
+            from Functions.path_manager import get_eden_cookies_path
             
-            if not os.path.exists(cookies_folder):
-                # This is normal on first startup - folder will be created when first cookies are saved
-                info_msg = "Cookies folder does not exist yet (normal on first startup)"
-                log_with_action(self.logger, "info", info_msg, action="COOKIES_INFO")
-                return {
-                    "success": False,
-                    "message": "Cookies folder not found",
-                    "file": None
-                }
+            cookies_file = get_eden_cookies_path()
             
             # Check if there's actually a cookies file to backup
-            cookies_file = os.path.join(cookies_folder, "eden_cookies.pkl")
-            if not os.path.exists(cookies_file):
+            if not cookies_file.exists():
                 info_msg = "No cookies file to backup yet"
                 log_with_action(self.logger, "info", info_msg, action="COOKIES_INFO")
                 return {
@@ -375,11 +365,15 @@ class BackupManager:
             if should_compress:
                 backup_file = os.path.join(cookies_backup_dir, f"{backup_name}.zip")
                 log_with_action(self.logger, "info", f"Creating compressed cookies backup: {os.path.basename(backup_file)}", action="ZIP_COOKIES")
-                self._create_zip_backup(cookies_folder, backup_file)
+                # Compress only the cookies file, not the entire Eden folder
+                import zipfile
+                with zipfile.ZipFile(backup_file, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                    zipf.write(str(cookies_file), cookies_file.name)
             else:
-                backup_file = os.path.join(cookies_backup_dir, backup_name)
-                log_with_action(self.logger, "info", f"Creating uncompressed cookies backup: {os.path.basename(backup_file)}", action="ZIP_COOKIES")
-                shutil.copytree(cookies_folder, backup_file, dirs_exist_ok=True)
+                backup_file = os.path.join(cookies_backup_dir, f"{backup_name}.pkl")
+                log_with_action(self.logger, "info", f"Creating uncompressed cookies backup: {os.path.basename(backup_file)}", action="COPY_COOKIES")
+                # Copy only the cookies file
+                shutil.copy2(str(cookies_file), backup_file)
 
             # Update last cookies backup date
             self.config_manager.set("backup.cookies.last_date", datetime.now().isoformat())

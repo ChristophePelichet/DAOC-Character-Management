@@ -6,6 +6,7 @@ Les thèmes sont définis dans des fichiers JSON dans le dossier Themes/
 import json
 import logging
 import os
+import re
 from pathlib import Path
 from PySide6.QtWidgets import QStyleFactory
 from PySide6.QtGui import QPalette, QColor
@@ -195,8 +196,6 @@ def scale_stylesheet_fonts(stylesheet, scale):
     Returns:
         Le stylesheet avec les tailles ajustées
     """
-    import re
-    
     def scale_pt(match):
         size = float(match.group(1))
         new_size = size * scale

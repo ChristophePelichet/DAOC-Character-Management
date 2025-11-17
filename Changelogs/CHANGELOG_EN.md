@@ -7,6 +7,17 @@ Complete version history of the character manager for Dark Age of Camelot (Eden)
 # ✨✨ v0.108
 
 ### 🎉 Added
+- 🌐 **Dedicated Chrome Profile for Selenium**: Complete browser scraping isolation
+  - 📁 Chrome profile stored in AppData: `%LOCALAPPDATA%/DAOC_Character_Manager/Eden/ChromeProfile/`
+  - 🔄 Automatic cookie migration: `Configuration/eden_cookies.pkl` → `Eden/eden_cookies.pkl`
+  - 💾 Multi-OS support (Windows/Linux/macOS) with appropriate paths
+  - 📊 Chrome profile size display in cookie manager
+  - 🗑️ "Clean Eden" button in Settings > Herald (deletes cookies + Chrome profile)
+  - 🔧 path_manager functions: `get_eden_data_dir()`, `get_chrome_profile_path()`, `get_eden_cookies_path()`
+  - 📚 Complete technical documentation (CHROME_PROFILE_TECHNICAL_EN.md, 500+ lines)
+  - Files: Functions/cookie_manager.py, path_manager.py, UI/settings_dialog.py, dialogs.py
+
+### 🎉 Added
 - 💾 **Automatic Character Migration System**: Intelligent folder structure reorganization
   - 📝 3 new modules: character_schema.py (390 lines), character_migration.py (481 lines), config_schema.py (migrations section)
   - 🔄 Automatic old structure detection: Characters/Realm/ → Characters/Season/Realm/

@@ -5,6 +5,9 @@
 # ✨ v0.108
 
 ### 🎉 New Features
+- 🌐 **Dedicated Chrome Profile**: Isolated Selenium browser in AppData with automatic cookie migration
+- 🗑️ **"Clean Eden" Button**: New button in Settings > Herald to delete cookies and Chrome profile
+- 📂 **Auto-Create Backup Folders**: "Open folder" buttons now automatically create missing folders
 - 💾 **Automatic Character Migration**: Intelligent folder restructuring without user intervention
   - 🔄 Automatic detection and migration: Characters/Realm/ → Characters/Season/Realm/
   - 💾 Automatic ZIP backup before migration with complete validation
@@ -14,7 +17,14 @@
   - 📊 Tracking in config.json to prevent multiple migrations
   - 🗑️ Removed old popup system (63 obsolete translations deleted)
 
+### 🔧 Improvements
+- 💾 **Cookies Backup Optimization**: Backup only cookies file (~10 KB instead of 50+ MB), 99% reduction
+- ⚙️ **Simplified Settings Interface**: Removed obsolete cookies fields (path managed automatically)
+
 ### 🐛 Bug Fixes
+- 🐛 Fixed Settings crash with missing cookies_path_edit
+- 🐛 Fixed cookies backup disappearing immediately after creation
+- 🌍 Fixed "Clean Eden" button translations (FR/EN/DE)
 - 🌍 **Dynamic Translations**: Version section updates without restart when changing language
 - 🌍 **Herald Import**: "Import Complete" title displays correctly (instead of key name)
 - 🌍 **RvR Statistics**: Translated labels (Tours/Forteresses/Reliques Capturées in FR, Towers/Keeps/Relics Captured in EN, etc.)

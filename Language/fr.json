@@ -136,13 +136,16 @@
         "eden_manage": "⚙️ Gérer",
         "cookie_generate": "🔐 Générer des Cookies",
         "cookie_delete": "🗑️ Supprimer",
-        "cookie_browse": "📁 Parcourir"
+        "cookie_browse": "📁 Parcourir",
+        "clean_eden_button": "Nettoyer Eden",
+        "clean_eden_tooltip": "Supprime tous les cookies et fichiers temporaires du profil Chrome"
     },
     "cookie_manager": {
         "window_title": "Gestion des Cookies Eden",
         "title": "🍪 Gestion des Cookies Eden",
         "info_group_title": "📊 État des Cookies",
         "import_group_title": "📂 Import Manuel",
+        "chrome_profile_section": "🔧 Profil Chrome Dédié",
         "file_path_label": "Chemin du fichier :",
         "file_path_placeholder": "Sélectionnez un fichier .pkl ou saisissez le chemin",
         "generate_tooltip": "Ouvre un navigateur pour se connecter et récupérer les cookies",
@@ -165,6 +168,17 @@
         "session_cookies": "🔄 Session: {count}",
         "file_location": "<br/>📁 Fichier: {path}",
         "test_with_browser": "{icon} <i>Test effectué avec: {browser}</i>",
+        "chrome_profile_size": "📊 Taille du profil: {size}",
+        "chrome_profile_size_empty": "📊 Profil vide (non utilisé)",
+        "eden_storage_info": "Stockage automatique dans",
+        "clear_chrome_profile": "Purger le profil Chrome",
+        "clear_chrome_profile_tooltip": "Supprime toutes les données du profil Chrome dédié (cache, historique, etc.)",
+        "clear_chrome_confirm_title": "Confirmer la purge",
+        "clear_chrome_confirm_message": "Êtes-vous sûr de vouloir purger le profil Chrome dédié ?\n\nCela supprimera le cache, l'historique et toutes les données stockées.\nLes cookies Eden ne seront PAS supprimés.",
+        "clear_chrome_success_title": "Succès",
+        "clear_chrome_success_message": "Le profil Chrome a été purgé avec succès.",
+        "clear_chrome_error_title": "Erreur",
+        "clear_chrome_error_message": "Impossible de purger le profil Chrome.",
         "browse_dialog_title": "Sélectionner un fichier de cookies",
         "browse_dialog_filter": "Fichiers Pickle (*.pkl);;Tous les fichiers (*.*)",
         "import_warning_title": "Attention",
@@ -239,7 +253,15 @@
             "move_folder_merge_question": "Voulez-vous fusionner les fichiers ?",
             "move_folder_delete_title": "Supprimer l'ancien dossier ?",
             "move_folder_delete_question": "Le dossier a été copié avec succès. Voulez-vous supprimer l'ancien dossier ?",
-            "theme_change_restart": "Le thème a été changé. Veuillez redémarrer l'application pour que les changements prennent effet."
+            "theme_change_restart": "Le thème a été changé. Veuillez redémarrer l'application pour que les changements prennent effet.",
+            "clean_eden_confirm_title": "Confirmer le nettoyage",
+            "clean_eden_confirm_message": "⚠️ Cette action va supprimer :\n\n• Tous les cookies Eden\n• Le profil Chrome complet (cache, historique, session)\n\n📁 Dossier : {path}\n\nVous devrez régénérer vos cookies après cette opération.\n\nContinuer ?",
+            "clean_eden_success_title": "Nettoyage réussi",
+            "clean_eden_success_message": "✅ Le dossier Eden a été nettoyé avec succès.\n\nTous les cookies et fichiers temporaires ont été supprimés.",
+            "clean_eden_empty_title": "Dossier vide",
+            "clean_eden_empty_message": "ℹ️ Le dossier Eden est déjà vide ou n'existe pas.",
+            "clean_eden_error_title": "Erreur",
+            "clean_eden_error_message": "❌ Erreur lors du nettoyage :\n\n{error}"
         }
     },
     "tooltips": {

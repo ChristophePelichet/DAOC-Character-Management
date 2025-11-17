@@ -439,25 +439,45 @@ class SettingsDialog(QDialog):
         layout.addWidget(subtitle)
         layout.addSpacing(20)
         
-        # === Cookies Path ===
+        # === Cookies Path (Eden AppData) ===
         cookies_group = QGroupBox("🍪 " + lang.get("config_cookies_group_title", 
                                                     default="Chemin des cookies"))
-        cookies_layout = QFormLayout()
+        cookies_layout = QVBoxLayout()
         
-        self.cookies_path_edit = QLineEdit()
-        browse_cookies_button = QPushButton(lang.get("browse_button"))
-        browse_cookies_button.clicked.connect(self._browse_cookies_folder)
-        move_cookies_button = QPushButton("📦 " + lang.get("move_folder_button", default="Déplacer"))
-        move_cookies_button.clicked.connect(lambda: self._move_folder(self.cookies_path_edit, "cookies_folder", lang.get("config_cookies_path_label")))
-        move_cookies_button.setToolTip(lang.get("move_folder_tooltip", default="Déplacer le dossier et son contenu vers un nouvel emplacement"))
+        # Info label
+        from Functions.path_manager import get_eden_data_dir
+        eden_path = get_eden_data_dir()
+        cookies_info = QLabel(lang.get("eden_storage_info", default="Stockage automatique dans") + f": {eden_path}")
+        cookies_info.setWordWrap(True)
+        cookies_info.setStyleSheet("color: gray; font-size: 9pt; padding: 5px;")
+        cookies_layout.addWidget(cookies_info)
+        
+        # Buttons layout (horizontal)
+        buttons_layout = QHBoxLayout()
+        
+        # Open folder button
         open_cookies_folder_button = QPushButton("📂 " + lang.get("open_folder_button", default="Ouvrir le dossier"))
         open_cookies_folder_button.clicked.connect(self._open_cookies_folder)
-        cookies_path_layout = QHBoxLayout()
-        cookies_path_layout.addWidget(self.cookies_path_edit)
-        cookies_path_layout.addWidget(browse_cookies_button)
-        cookies_path_layout.addWidget(move_cookies_button)
-        cookies_path_layout.addWidget(open_cookies_folder_button)
-        cookies_layout.addRow(lang.get("config_cookies_path_label"), cookies_path_layout)
+        buttons_layout.addWidget(open_cookies_folder_button)
+        
+        # Clean Eden button
+        clean_eden_button = QPushButton("🗑️ " + lang.get("clean_eden_button", default="Nettoyer Eden"))
+        clean_eden_button.clicked.connect(self._clean_eden_folder)
+        clean_eden_button.setToolTip(lang.get("clean_eden_tooltip", default="Supprime tous les cookies et fichiers temporaires du profil Chrome"))
+        clean_eden_button.setStyleSheet("""
+            QPushButton {
+                background-color: #D83B01;
+                color: white;
+                font-weight: bold;
+                padding: 6px 12px;
+            }
+            QPushButton:hover {
+                background-color: #A52A00;
+            }
+        """)
+        buttons_layout.addWidget(clean_eden_button)
+        
+        cookies_layout.addLayout(buttons_layout)
         
         cookies_group.setLayout(cookies_layout)
         layout.addWidget(cookies_group)
@@ -1101,9 +1121,6 @@ class SettingsDialog(QDialog):
             config.set("folders.armor", new_path)
             config.save_config()
         
-    def _browse_cookies_folder(self):
-        self._browse_folder(self.cookies_path_edit, "select_folder_dialog_title")
-    
     def _browse_backup_path(self):
         """Browse for backup folder"""
         directory = QFileDialog.getExistingDirectory(self, lang.get("backup_select_folder", default="Sélectionner le dossier de sauvegarde"))
@@ -1223,11 +1240,65 @@ class SettingsDialog(QDialog):
             subprocess.Popen(f'explorer "{armor_path}"')
     
     def _open_cookies_folder(self):
-        """Open cookies folder"""
+        """Open Eden data folder (AppData)"""
         import subprocess
-        cookies_path = self.cookies_path_edit.text()
-        if os.path.exists(cookies_path):
-            subprocess.Popen(f'explorer "{cookies_path}"')
+        from Functions.path_manager import get_eden_data_dir
+        eden_path = get_eden_data_dir()
+        if os.path.exists(eden_path):
+            subprocess.Popen(f'explorer "{eden_path}"')
+    
+    def _clean_eden_folder(self):
+        """Clean all Eden folder content (cookies + Chrome profile)"""
+        from PySide6.QtWidgets import QMessageBox
+        from Functions.path_manager import get_eden_data_dir
+        import shutil
+        
+        eden_path = get_eden_data_dir()
+        
+        # Confirmation dialog
+        reply = QMessageBox.question(
+            self,
+            lang.get("clean_eden_confirm_title", default="Confirmer le nettoyage"),
+            lang.get("clean_eden_confirm_message", 
+                    default=f"⚠️ Cette action va supprimer :\n\n"
+                           f"• Tous les cookies Eden\n"
+                           f"• Le profil Chrome complet (cache, historique, session)\n\n"
+                           f"📁 Dossier : {eden_path}\n\n"
+                           f"Vous devrez régénérer vos cookies après cette opération.\n\n"
+                           f"Continuer ?"),
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+        
+        if reply == QMessageBox.Yes:
+            try:
+                if os.path.exists(eden_path):
+                    # Delete all content
+                    shutil.rmtree(eden_path)
+                    # Recreate empty folder
+                    os.makedirs(eden_path, exist_ok=True)
+                    
+                    QMessageBox.information(
+                        self,
+                        lang.get("clean_eden_success_title", default="Nettoyage réussi"),
+                        lang.get("clean_eden_success_message", 
+                                default="✅ Le dossier Eden a été nettoyé avec succès.\n\n"
+                                       "Tous les cookies et fichiers temporaires ont été supprimés.")
+                    )
+                else:
+                    QMessageBox.information(
+                        self,
+                        lang.get("clean_eden_empty_title", default="Dossier vide"),
+                        lang.get("clean_eden_empty_message", 
+                                default="ℹ️ Le dossier Eden est déjà vide ou n'existe pas.")
+                    )
+            except Exception as e:
+                QMessageBox.critical(
+                    self,
+                    lang.get("clean_eden_error_title", default="Erreur"),
+                    lang.get("clean_eden_error_message", 
+                            default=f"❌ Erreur lors du nettoyage :\n\n{str(e)}")
+                )
     
     def _open_log_folder(self):
         """Open logs folder"""
@@ -1240,15 +1311,19 @@ class SettingsDialog(QDialog):
         """Open characters backup folder"""
         import subprocess
         backup_path = self.backup_path_edit.text()
-        if os.path.exists(backup_path):
-            subprocess.Popen(f'explorer "{backup_path}"')
+        # Créer le dossier s'il n'existe pas
+        if not os.path.exists(backup_path):
+            os.makedirs(backup_path, exist_ok=True)
+        subprocess.Popen(f'explorer "{backup_path}"')
     
     def _open_cookies_backup_folder(self):
         """Open cookies backup folder"""
         import subprocess
         cookies_backup_path = self.cookies_backup_path_edit.text()
-        if os.path.exists(cookies_backup_path):
-            subprocess.Popen(f'explorer "{cookies_backup_path}"')
+        # Créer le dossier s'il n'existe pas
+        if not os.path.exists(cookies_backup_path):
+            os.makedirs(cookies_backup_path, exist_ok=True)
+        subprocess.Popen(f'explorer "{cookies_backup_path}"')
     
     def _move_folder(self, line_edit, config_key, folder_label):
         """Move or create a folder at a new location"""
@@ -1526,8 +1601,7 @@ class SettingsDialog(QDialog):
         self.armor_path_edit.setText(config.get("folders.armor") or get_armor_dir())
         self.armor_path_edit.setCursorPosition(0)
         
-        self.cookies_path_edit.setText(config.get("folders.cookies") or get_config_dir())
-        self.cookies_path_edit.setCursorPosition(0)
+        # Note: cookies_path_edit removed - Eden uses automatic AppData location
         
         # General settings
         self.debug_mode_check.setChecked(config.get("system.debug_mode", False))
@@ -1730,8 +1804,10 @@ class SettingsDialog(QDialog):
         """Open armor backup folder"""
         import subprocess
         armor_backup_path = self.armor_backup_path_edit.text()
-        if os.path.exists(armor_backup_path):
-            subprocess.Popen(f'explorer "{armor_backup_path}"')
+        # Créer le dossier s'il n'existe pas
+        if not os.path.exists(armor_backup_path):
+            os.makedirs(armor_backup_path, exist_ok=True)
+        subprocess.Popen(f'explorer "{armor_backup_path}"')
     
     def _save_without_closing(self):
         """Save settings without closing the dialog"""

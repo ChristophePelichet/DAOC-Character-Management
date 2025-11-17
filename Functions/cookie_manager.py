@@ -30,31 +30,58 @@ class CookieManager:
         Initialise le gestionnaire de cookies
         
         Args:
-            config_dir: Dossier de configuration (par défaut: Configuration/)
+            config_dir: Dossier de configuration (obsolète, conservé pour compatibilité)
         """
-        if config_dir is None:
-            # Utiliser le dossier des cookies depuis la configuration
-            from Functions.config_manager import config, get_config_dir
-            # Check if a cookies folder has been configured
-            config_dir = config.get("folders.cookies")
-            if not config_dir:
-                # Fallback to default configuration folder
-                config_dir = get_config_dir()
+        # Utiliser le nouveau chemin Eden dans AppData
+        from Functions.path_manager import get_eden_cookies_path, get_eden_data_dir
         
-        config_dir = Path(config_dir)
-        self.config_dir = config_dir
-        self.cookie_file = self.config_dir / "eden_cookies.pkl"
+        self.cookie_file = get_eden_cookies_path()
+        self.config_dir = get_eden_data_dir()
         
-        # Create folder if needed - Log if creating for the first time
-        cookies_dir_existed = self.config_dir.exists()
-        self.config_dir.mkdir(parents=True, exist_ok=True)
-        if not cookies_dir_existed:
-            eden_logger.info(f"Created cookies directory: {self.config_dir}", extra={"action": "DIRECTORY"})
+        # Migration automatique depuis l'ancien emplacement Configuration/
+        self._migrate_cookies_from_old_location()
         
         # Keep reference to persistent drivers to avoid garbage collection
         self.persistent_drivers = []
         
         eden_logger.info(f"CookieManager initialisé - Fichier: {self.cookie_file}", extra={"action": "COOKIES"})
+    
+    def _migrate_cookies_from_old_location(self):
+        """
+        Migre automatiquement les cookies depuis l'ancien emplacement Configuration/
+        vers le nouveau chemin Eden/ dans AppData.
+        
+        Cette migration s'effectue une seule fois au premier lancement.
+        """
+        # Si les cookies existent déjà dans le nouveau chemin, pas de migration
+        if self.cookie_file.exists():
+            return
+        
+        # Chercher l'ancien fichier dans Configuration/
+        from Functions.config_manager import get_config_dir
+        old_cookie_file = Path(get_config_dir()) / "eden_cookies.pkl"
+        
+        if old_cookie_file.exists():
+            try:
+                # Copier l'ancien fichier vers le nouveau chemin
+                shutil.copy2(old_cookie_file, self.cookie_file)
+                eden_logger.info(
+                    f"Migration cookies: {old_cookie_file} → {self.cookie_file}",
+                    extra={"action": "MIGRATION"}
+                )
+                
+                # Créer une sauvegarde de l'ancien fichier
+                backup_file = old_cookie_file.with_suffix(".pkl.migrated")
+                shutil.copy2(old_cookie_file, backup_file)
+                eden_logger.info(
+                    f"Backup ancien fichier créé: {backup_file}",
+                    extra={"action": "BACKUP"}
+                )
+            except Exception as e:
+                eden_logger.error(
+                    f"Erreur migration cookies: {e}",
+                    extra={"action": "MIGRATION_ERROR"}
+                )
     
     def cookie_exists(self):
         """Vérifie si un fichier de cookies existe"""
@@ -341,26 +368,37 @@ class CookieManager:
         return None, None
     
     def _try_chrome(self, headless, allow_download, errors):
-        """Tente d'initialiser Chrome"""
+        """Tente d'initialiser Chrome avec profil dédié dans AppData"""
         try:
             from selenium import webdriver
             from selenium.webdriver.chrome.options import Options as ChromeOptions
+            from selenium.webdriver.chrome.service import Service as ChromeService
+            from Functions.path_manager import get_chrome_profile_path
             import os
             
             chrome_options = ChromeOptions()
+            
+            # Utiliser le profil Chrome dédié dans AppData
+            profile_path = get_chrome_profile_path()
+            chrome_options.add_argument(f"--user-data-dir={profile_path}")
+            chrome_options.add_argument("--profile-directory=Default")
+            
+            eden_logger.info(f"🔧 Chrome profil dédié: {profile_path}", extra={"action": "INIT"})
+            
             if headless:
                 chrome_options.add_argument('--headless=new')
                 chrome_options.add_argument('--disable-gpu')
             chrome_options.add_argument('--no-sandbox')
             chrome_options.add_argument('--disable-dev-shm-usage')
             chrome_options.add_argument('--log-level=3')
+            chrome_options.add_argument('--disable-blink-features=AutomationControlled')
             
             # Chrome local
             try:
                 local_chromedriver = os.path.join(os.getcwd(), "chromedriver.exe")
                 if os.path.exists(local_chromedriver):
                     driver = webdriver.Chrome(service=ChromeService(local_chromedriver), options=chrome_options)
-                    eden_logger.info("✅ Chrome (driver local)")
+                    eden_logger.info("✅ Chrome (driver local) avec profil dédié")
                     return driver
             except Exception as e:
                 eden_logger.debug(f"ChromeDriver local: {e}")
@@ -368,7 +406,7 @@ class CookieManager:
             # System Chrome (Selenium Manager)
             try:
                 driver = webdriver.Chrome(options=chrome_options)
-                eden_logger.info("✅ Chrome (Selenium Manager)")
+                eden_logger.info("✅ Chrome (Selenium Manager) avec profil dédié")
                 return driver
             except Exception as e:
                 eden_logger.debug(f"Chrome système: {e}")
@@ -379,7 +417,7 @@ class CookieManager:
                     from webdriver_manager.chrome import ChromeDriverManager
                     eden_logger.info("🌐 Téléchargement ChromeDriver...")
                     driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=chrome_options)
-                    eden_logger.info("✅ Chrome (téléchargé)")
+                    eden_logger.info("✅ Chrome (téléchargé) avec profil dédié")
                     return driver
                 except Exception as e:
                     errors.append(f"Chrome téléchargement: {e}")
@@ -1333,3 +1371,76 @@ class CookieManager:
                 'success': False,
                 'message': f'Erreur: {str(e)[:50]}'
             }
+    
+    def clear_chrome_profile(self):
+        """
+        Supprime le profil Chrome dédié Selenium et son contenu.
+        Utile pour résoudre des problèmes de cookies ou réinitialiser le profil.
+        
+        Returns:
+            bool: True si supprimé avec succès, False sinon
+        """
+        from Functions.path_manager import get_chrome_profile_path
+        
+        try:
+            profile_path = get_chrome_profile_path()
+            
+            if not profile_path.exists():
+                eden_logger.info(
+                    "Profil Chrome n'existe pas, rien à supprimer",
+                    extra={"action": "CHROME_PROFILE"}
+                )
+                return True
+            
+            # Supprimer tout le contenu du profil
+            shutil.rmtree(profile_path)
+            
+            # Recréer le dossier vide
+            profile_path.mkdir(parents=True, exist_ok=True)
+            
+            eden_logger.info(
+                f"Profil Chrome purgé: {profile_path}",
+                extra={"action": "CHROME_PROFILE"}
+            )
+            return True
+            
+        except Exception as e:
+            eden_logger.error(
+                f"Erreur lors de la purge du profil Chrome: {e}",
+                extra={"action": "CHROME_PROFILE_ERROR"}
+            )
+            return False
+    
+    def get_chrome_profile_size(self):
+        """
+        Calcule la taille totale du profil Chrome dédié.
+        
+        Returns:
+            int: Taille en octets (0 si profil n'existe pas)
+        """
+        from Functions.path_manager import get_chrome_profile_path
+        
+        try:
+            profile_path = get_chrome_profile_path()
+            
+            if not profile_path.exists():
+                return 0
+            
+            total_size = 0
+            for dirpath, dirnames, filenames in os.walk(profile_path):
+                for filename in filenames:
+                    filepath = os.path.join(dirpath, filename)
+                    try:
+                        total_size += os.path.getsize(filepath)
+                    except (OSError, FileNotFoundError):
+                        # Ignore files that can't be accessed
+                        pass
+            
+            return total_size
+            
+        except Exception as e:
+            eden_logger.error(
+                f"Erreur calcul taille profil Chrome: {e}",
+                extra={"action": "CHROME_PROFILE_ERROR"}
+            )
+            return 0

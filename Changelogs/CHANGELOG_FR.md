@@ -7,6 +7,17 @@ Historique complet des versions du gestionnaire de personnages pour Dark Age of 
 # ✨✨ v0.108
 
 ### 🎉 Ajout
+- 🌐 **Profil Chrome Dédié pour Selenium** : Isolation complète du navigateur de scraping
+  - 📁 Profil Chrome stocké dans AppData : `%LOCALAPPDATA%/DAOC_Character_Manager/Eden/ChromeProfile/`
+  - 🔄 Migration automatique des cookies : `Configuration/eden_cookies.pkl` → `Eden/eden_cookies.pkl`
+  - 💾 Support multi-OS (Windows/Linux/macOS) avec chemins appropriés
+  - 📊 Affichage de la taille du profil Chrome dans le gestionnaire de cookies
+  - 🗑️ Bouton "Nettoyer Eden" dans Settings > Herald (supprime cookies + profil Chrome)
+  - 🔧 Fonctions path_manager : `get_eden_data_dir()`, `get_chrome_profile_path()`, `get_eden_cookies_path()`
+  - 📚 Documentation technique complète (CHROME_PROFILE_TECHNICAL_EN.md, 500+ lignes)
+  - Fichiers : Functions/cookie_manager.py, path_manager.py, UI/settings_dialog.py, dialogs.py
+
+### 🎉 Ajout
 - 💾 **Système de Migration Automatique des Personnages** : Restructuration intelligente de l'arborescence de dossiers
   - 📝 3 nouveaux modules : character_schema.py (390 lignes), character_migration.py (481 lignes), config_schema.py (section migrations)
   - 🔄 Détection automatique de l'ancienne structure : Characters/Royaume/ → Characters/Saison/Royaume/
@@ -29,6 +40,24 @@ Historique complet des versions du gestionnaire de personnages pour Dark Age of 
   - Fichiers : main.py, Language/*.json, Functions/language_schema.py, Documentations/Lang/LANGUAGE_V2_TECHNICAL_DOC.md
 
 ### 🐛 Correction
+- 🛡️ **Erreur AttributeError cookies_path_edit** : Suppression des références obsolètes
+  - 🔧 Problème : `AttributeError: 'SettingsDialog' object has no attribute 'cookies_path_edit'`
+  - 🔍 Cause : Widget `cookies_path_edit` supprimé de l'UI mais référencé dans `_load_settings()` et `save_configuration()`
+  - ✅ Solution : Suppression des lignes `cookies_path_edit.setText()` et `config.set("cookies_folder", ...)`
+  - 🎯 Impact : Settings dialog s'ouvre sans crash, chemin cookies géré automatiquement dans AppData
+  - Fichiers : UI/settings_dialog.py, main.py
+- 🐛 **Backup Cookies Disparaît Immédiatement** : Correction de la politique de rétention
+  - 🔧 Problème : Backup créé puis supprimé instantanément par `_apply_cookies_retention_policies()`
+  - 🔍 Cause : Backup sauvegardait tout le dossier Eden (50+ MB) dépassant la limite de 20 MB
+  - ✅ Solution : Backup uniquement de `eden_cookies.pkl` (~10 KB) avec ZIP ou copie directe
+  - 🎯 Impact : Backups cookies persistent et respectent la limite de stockage
+  - Fichier : Functions/backup_manager.py
+- 🌍 **Traductions Bouton "Nettoyer Eden"** : Ajout des mappings manquants
+  - 🔧 Problème : Bouton affiche la clé brute au lieu de la traduction
+  - 🔍 Cause : Clés `clean_eden_button`, `clean_eden_tooltip`, etc. absentes de `language_schema.py`
+  - ✅ Solution : Ajout de 10 mappings dans LANGUAGE_LEGACY_MAPPING (buttons + warnings)
+  - 🎯 Impact : Bouton et dialogues traduits correctement en FR/EN/DE
+  - Fichier : Functions/language_schema.py
 - 🌍 **Traductions Section Version** : Mise à jour dynamique de la langue sans redémarrage
   - 🔧 Conversion des labels de version en attributs d'instance (status_group, info_group, version labels)
   - 🎯 Méthode retranslate_ui() améliorée avec 7 mises à jour dynamiques de labels

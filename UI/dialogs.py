@@ -2899,13 +2899,28 @@ class CookieManagerDialog(QDialog):
         
         layout.addLayout(buttons_layout)
         
+        # Section Chrome Profile Management
+        chrome_group = QGroupBox(lang.get("cookie_manager.chrome_profile_section"))
+        chrome_layout = QVBoxLayout()
+        
+        # Affichage taille du profil
+        self.chrome_profile_size_label = QLabel()
+        self.chrome_profile_size_label.setWordWrap(True)
+        chrome_layout.addWidget(self.chrome_profile_size_label)
+        
+        # Note: Bouton de purge supprimé - utilisez "Nettoyer Eden" dans les paramètres Herald
+        
+        chrome_group.setLayout(chrome_layout)
+        layout.addWidget(chrome_group)
+        
         # Bouton de fermeture
         close_button = QPushButton(lang.get("buttons.close"))
         close_button.clicked.connect(self.accept)
         layout.addWidget(close_button)
         
-        # Afficher l'état initial
+        # Afficher l'état initial et la taille du profil
         self.refresh_status()
+        self.update_chrome_profile_size()
     
     def start_connection_test(self):
         """Lance le test de connexion en arrière-plan"""
@@ -3131,6 +3146,23 @@ class CookieManagerDialog(QDialog):
                     lang.get("cookie_manager.delete_error_title"),
                     lang.get("cookie_manager.delete_error_message")
                 )
+    
+    def update_chrome_profile_size(self):
+        """Met à jour l'affichage de la taille du profil Chrome"""
+        size_bytes = self.cookie_manager.get_chrome_profile_size()
+        
+        if size_bytes == 0:
+            size_text = lang.get("cookie_manager.chrome_profile_size_empty")
+        elif size_bytes < 1024:
+            size_text = lang.get("cookie_manager.chrome_profile_size", size=f"{size_bytes} B")
+        elif size_bytes < 1024 * 1024:
+            size_kb = size_bytes / 1024
+            size_text = lang.get("cookie_manager.chrome_profile_size", size=f"{size_kb:.1f} KB")
+        else:
+            size_mb = size_bytes / (1024 * 1024)
+            size_text = lang.get("cookie_manager.chrome_profile_size", size=f"{size_mb:.1f} MB")
+        
+        self.chrome_profile_size_label.setText(size_text)
     
     def generate_cookies(self):
         """Génère de nouveaux cookies via authentification navigateur (VERSION MIGRÉE)"""

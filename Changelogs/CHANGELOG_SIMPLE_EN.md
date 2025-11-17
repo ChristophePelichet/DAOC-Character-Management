@@ -31,6 +31,8 @@
 - 🌍 **RvR Statistics**: Translated labels (Tours/Forteresses/Reliques Capturées in FR, Towers/Keeps/Relics Captured in EN, etc.)
 - 🌍 **PvP/PvE Statistics**: All labels translated (Kills en Solo, Coups Fatals, Dragons Tués, etc.)
 - 🗑️ **Cleanup**: Removed obsolete qdarkstyle key (custom JSON theme system used now)
+- 🌐 Fixed Chrome browser freeze on first launch (cookies not loaded)
+- 🔒 Protection against Chrome profile conflicts during Herald validation at startup
 
 ### 🎉 New Features
 - ⌨️ **Keyboard Shortcuts**: Ctrl+N to create character, Ctrl+F to search on Herald

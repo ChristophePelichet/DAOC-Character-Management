@@ -50,6 +50,20 @@ Complete version history of the character manager for Dark Age of Camelot (Eden)
   - 🔧 Using full path messages.info.herald_import_complete_title
   - 🎯 Import dialog title now displays "Import Complete" instead of key name
   - Fixed in both dialogs (information and warning)
+- 🛡️ **Selenium Browser Freeze on First Load**: Fixed browser freezing on initial launch
+  - 🔧 Problem: Chrome browser froze on first load, unable to load cookies
+  - 🔍 Cause: `time.sleep(1)` insufficient, DOM not ready before adding cookies
+  - ✅ Solution: Replaced with `WebDriverWait` checking `document.readyState == "complete"` (15s timeout)
+  - 🎯 Impact: Stable first launch, cookies loaded correctly, Chrome profile initialized properly
+  - Files: Functions/eden_scraper.py, cookie_manager.py
+- 🔒 **Chrome Profile Conflict During Validation**: Protection against simultaneous Chrome profile access
+  - 🔧 Problem: Chrome error if user clicks Herald during startup validation
+  - 🔍 Cause: Two Selenium instances trying to open same Chrome profile simultaneously
+  - ✅ Solution: Proactive Herald buttons/actions state management with `eden_validation_in_progress` flag
+  - 🎯 Impact: Buttons disabled during validation (explanatory tooltips), instant re-enable (<100ms)
+  - 🌍 Translations: Added `herald_buttons.validation_in_progress` key (FR/EN/DE)
+  - 📚 Documentation: HERALD_BUTTONS_STATE_MANAGEMENT_EN.md (700+ lines)
+  - Files: Functions/ui_manager.py, main.py, UI/dialogs.py, Language/*.json
   - File: UI/dialogs.py
 - 🌍 **RvR Statistics Labels**: Translated captures in character sheet
   - 🔧 Tours Capturées, Forteresses Capturées, Reliques Capturées (FR)

@@ -49,6 +49,20 @@ Historique complet des versions du gestionnaire de personnages pour Dark Age of 
 - 🐛 **Backup Cookies Disparaît Immédiatement** : Correction de la politique de rétention
   - 🔧 Problème : Backup créé puis supprimé instantanément par `_apply_cookies_retention_policies()`
   - 🔍 Cause : Backup sauvegardait tout le dossier Eden (50+ MB) dépassant la limite de 20 MB
+- 🛡️ **Selenium Browser Freeze on First Load** : Correction du blocage du navigateur au premier lancement
+  - 🔧 Problème : Le navigateur Chrome se figeait lors du premier chargement, impossible de charger les cookies
+  - 🔍 Cause : `time.sleep(1)` insuffisant, le DOM n'était pas prêt avant l'ajout des cookies
+  - ✅ Solution : Remplacement par `WebDriverWait` avec vérification `document.readyState == "complete"` (timeout 15s)
+  - 🎯 Impact : Premier lancement stable, cookies chargés correctement, profil Chrome initialisé proprement
+  - Fichiers : Functions/eden_scraper.py, cookie_manager.py
+- 🔒 **Chrome Profile Conflict During Validation** : Protection contre les conflits d'accès simultané au profil Chrome
+  - 🔧 Problème : Erreur Chrome si l'utilisateur clique sur Herald pendant la validation au démarrage
+  - 🔍 Cause : Deux instances Selenium essayant d'ouvrir le même profil Chrome simultanément
+  - ✅ Solution : Gestion proactive de l'état des boutons/actions Herald avec flag `eden_validation_in_progress`
+  - 🎯 Impact : Boutons désactivés pendant validation (tooltips explicatifs), réactivation instantanée (<100ms)
+  - 🌍 Traductions : Ajout clé `herald_buttons.validation_in_progress` (FR/EN/DE)
+  - 📚 Documentation : HERALD_BUTTONS_STATE_MANAGEMENT_EN.md (700+ lignes)
+  - Fichiers : Functions/ui_manager.py, main.py, UI/dialogs.py, Language/*.json
   - ✅ Solution : Backup uniquement de `eden_cookies.pkl` (~10 KB) avec ZIP ou copie directe
   - 🎯 Impact : Backups cookies persistent et respectent la limite de stockage
   - Fichier : Functions/backup_manager.py

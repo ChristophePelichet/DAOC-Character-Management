@@ -161,6 +161,9 @@
         "clean_eden_button": "Clean Eden",
         "clean_eden_tooltip": "Delete all cookies and Chrome profile temporary files"
     },
+    "herald_buttons": {
+        "validation_in_progress": "⏳ Eden validation in progress... Please wait"
+    },
     "cookie_manager": {
         "window_title": "Eden Cookies Management",
         "title": "🍪 Eden Cookies Management",

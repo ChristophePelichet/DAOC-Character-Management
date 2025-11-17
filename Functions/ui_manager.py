@@ -119,9 +119,9 @@ class UIManager:
 
         self.context_menu.addSeparator()
         
-        # Mettre à jour depuis Herald
-        update_action = self.context_menu.addAction(lang.get("context_menu_update_from_herald", default="🔄 Mettre à jour depuis Herald"))
-        update_action.triggered.connect(self.main_window.update_character_from_herald)
+        # Mettre à jour depuis Herald - stocker comme attribut pour pouvoir désactiver
+        self.update_from_herald_action = self.context_menu.addAction(lang.get("context_menu_update_from_herald", default="🔄 Mettre à jour depuis Herald"))
+        self.update_from_herald_action.triggered.connect(self.main_window.update_character_from_herald)
 
         self.context_menu.addSeparator()
 
@@ -372,6 +372,9 @@ class UIManager:
             self.eden_status_thread.quit()
             self.eden_status_thread.wait()
         
+        # Marquer la validation comme en cours
+        self.eden_validation_in_progress = True
+        
         # Afficher the statut of chargement and désactiver the boutons
         self.eden_status_label.setText("⏳ Vérification en cours...")
         self.eden_status_label.setStyleSheet("padding: 5px; color: gray;")
@@ -385,16 +388,23 @@ class UIManager:
         # Lancer the thread of Checking
         self.eden_status_thread = EdenStatusThread(cookie_manager)
         self.eden_status_thread.status_updated.connect(self.update_eden_status)
+        self.eden_status_thread.finished.connect(self._on_validation_finished)
         self.eden_status_thread.start()
+        
+        # Désactiver immédiatement les boutons/actions Herald APRÈS avoir démarré le thread
+        self._update_herald_buttons_state()
     
     def update_eden_status(self, accessible, message):
         """Met à jour l'affichage du statut Eden"""
+        # Marquer la validation comme terminée dès réception du résultat
+        self.eden_validation_in_progress = False
+        
         if accessible:
             self.eden_status_label.setText(f"✅ Herald accessible")
             self.eden_status_label.setStyleSheet("padding: 5px; color: green; font-weight: bold;")
-            # Réactiver the boutons - Herald est accessible
+            # Réactiver le bouton refresh
             self.refresh_button.setEnabled(True)
-            self.search_button.setEnabled(True)
+            # Le search_button sera réactivé par _update_herald_buttons_state() si validation terminée
         else:
             self.eden_status_label.setText(f"❌ {message}")
             self.eden_status_label.setStyleSheet("padding: 5px; color: red;")
@@ -404,9 +414,57 @@ class UIManager:
                 self.refresh_button.setEnabled(False)
                 self.search_button.setEnabled(False)
             else:
-                # if c'est juste une erreur of connexion, garder the boutons activés
+                # if c'est juste une erreur of connexion, garder refresh activé
                 self.refresh_button.setEnabled(True)
+                # Le search_button sera géré par _update_herald_buttons_state()
+        
+        # Mettre à jour l'état des boutons/actions Herald IMMÉDIATEMENT (plus d'attente)
+        self._update_herald_buttons_state()
+    
+    def _on_validation_finished(self):
+        """Appelé quand le thread de validation se termine (sécurité)"""
+        self.eden_validation_in_progress = False
+        self._update_herald_buttons_state()
+    
+    def _update_herald_buttons_state(self):
+        """Désactive/active les boutons et actions Herald selon l'état de validation Eden"""
+        from Functions.language_manager import lang
+        from Functions.logging_manager import log_with_action, get_logger, LOGGER_UI
+        
+        logger_ui = get_logger(LOGGER_UI)
+        
+        # Vérifier si validation en cours (basé sur le flag, pas sur isRunning())
+        is_validation_running = getattr(self, 'eden_validation_in_progress', False)
+        is_validation_running = getattr(self, 'eden_validation_in_progress', False)
+        
+        log_with_action(logger_ui, "debug", f"_update_herald_buttons_state: validation_running={is_validation_running}", action="UI_STATE")
+        
+        # Action du menu contextuel
+        if hasattr(self, 'update_from_herald_action'):
+            self.update_from_herald_action.setEnabled(not is_validation_running)
+            log_with_action(logger_ui, "debug", f"Menu contextuel action enabled={not is_validation_running}", action="UI_STATE")
+            if is_validation_running:
+                # QAction n'affiche pas les tooltips comme les boutons, on utilise statusTip
+                tooltip_text = lang.get("herald_buttons.validation_in_progress", default="⏳ Validation Eden en cours... Veuillez patienter")
+                self.update_from_herald_action.setToolTip(tooltip_text)
+                self.update_from_herald_action.setStatusTip(tooltip_text)
+            else:
+                self.update_from_herald_action.setToolTip("")
+                self.update_from_herald_action.setStatusTip("")
+        else:
+            log_with_action(logger_ui, "warning", "update_from_herald_action n'existe pas encore!", action="UI_STATE")
+        
+        # Bouton de recherche Herald (dans ui_manager)
+        if hasattr(self, 'search_button'):
+            if is_validation_running:
+                self.search_button.setEnabled(False)
+                self.search_button.setToolTip(lang.get("herald_buttons.validation_in_progress", default="⏳ Validation Eden en cours... Veuillez patienter"))
+                log_with_action(logger_ui, "debug", "search_button désactivé", action="UI_STATE")
+            else:
+                # Réactiver le bouton si la validation est terminée
                 self.search_button.setEnabled(True)
+                self.search_button.setToolTip(lang.get("buttons.eden_search", default="Rechercher un personnage sur Herald"))
+                log_with_action(logger_ui, "debug", "search_button réactivé", action="UI_STATE")
         
         
     def create_status_bar(self):
@@ -426,6 +484,9 @@ class UIManager:
         """Affiche le menu contextuel à la position spécifiée"""
         index = self.main_window.character_tree.indexAt(position)
         if index.isValid():
+            # Mettre à jour l'état du menu contextuel juste avant de l'afficher
+            self._update_herald_buttons_state()
+            
             # Sélectionner the ligne cliquée before d'afficher the menu
             self.main_window.character_tree.setCurrentIndex(index)
             self.context_menu.exec(self.main_window.character_tree.viewport().mapToGlobal(position))

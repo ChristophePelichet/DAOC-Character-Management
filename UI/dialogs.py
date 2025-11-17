@@ -75,9 +75,14 @@ class CharacterSheetWindow(QDialog):
         self.setSizeGripEnabled(True)  # Add resize grip in bottom-right corner
         
         # Connecter au signal de fin de validation Herald si disponible
-        if hasattr(parent, 'ui_manager') and hasattr(parent.ui_manager, 'eden_status_thread'):
-            # Créer une connexion pour réactiver le bouton quand la validation se termine
-            pass  # On gérera ça après la création du bouton
+        if hasattr(parent, 'ui_manager'):
+            ui_manager = parent.ui_manager
+            # Connecter au signal finished du thread Eden pour réactiver les boutons
+            if hasattr(ui_manager, 'eden_status_thread') and ui_manager.eden_status_thread:
+                ui_manager.eden_status_thread.finished.connect(self._update_herald_buttons_state)
+            # Initialiser l'état des boutons après leur création (via QTimer pour s'assurer qu'ils existent)
+            from PySide6.QtCore import QTimer
+            QTimer.singleShot(0, self._update_herald_buttons_state)
 
         # Main horizontal layout: Banner (left) + Content (right)
         main_horizontal = QHBoxLayout(self)
@@ -1276,6 +1281,14 @@ class CharacterSheetWindow(QDialog):
             )
             return
         
+        # CRITICAL: Check if Eden validation is running - button should be disabled
+        # If user somehow triggered this while validation running, return silently
+        main_window = self.parent()
+        if main_window and hasattr(main_window, 'ui_manager'):
+            if hasattr(main_window.ui_manager, 'eden_status_thread') and main_window.ui_manager.eden_status_thread:
+                if main_window.ui_manager.eden_status_thread.isRunning():
+                    return  # Silent return - button is disabled with tooltip
+        
         # Check URL format
         if not url.startswith(('http://', 'https://')):
             url = 'https://' + url
@@ -1552,6 +1565,45 @@ class CharacterSheetWindow(QDialog):
         
         log_with_action(logger_char, "error", f"Stats update error: {error_message}", action="ERROR")
     
+    def _update_herald_buttons_state(self):
+        """Met à jour l'état des boutons Herald selon l'état de validation Eden"""
+        from Functions.language_manager import lang
+        
+        # Vérifier si validation en cours
+        main_window = self.parent()
+        is_validation_running = False
+        
+        if main_window and hasattr(main_window, 'ui_manager'):
+            ui_manager = main_window.ui_manager
+            is_validation_running = (
+                hasattr(ui_manager, 'eden_status_thread') and 
+                ui_manager.eden_status_thread and 
+                ui_manager.eden_status_thread.isRunning()
+            )
+        
+        # Mettre à jour le bouton "Update from Herald"
+        if hasattr(self, 'update_herald_button'):
+            if is_validation_running:
+                self.update_herald_button.setEnabled(False)
+                self.update_herald_button.setToolTip(lang.get("herald_buttons.validation_in_progress", default="⏳ Validation Eden en cours... Veuillez patienter"))
+            else:
+                self.update_herald_button.setEnabled(True)
+                self.update_herald_button.setToolTip(lang.get("character_sheet.labels.update_from_herald_tooltip"))
+        
+        # Mettre à jour le bouton "Update RvR Stats"
+        if hasattr(self, 'update_rvr_button'):
+            herald_url = self.herald_url_edit.text().strip() if hasattr(self, 'herald_url_edit') else ''
+            
+            if is_validation_running:
+                self.update_rvr_button.setEnabled(False)
+                self.update_rvr_button.setToolTip(lang.get("herald_buttons.validation_in_progress", default="⏳ Validation Eden en cours... Veuillez patienter"))
+            elif not herald_url or self.herald_scraping_in_progress:
+                # Garder l'état désactivé si pas d'URL ou scraping en cours
+                pass
+            else:
+                self.update_rvr_button.setEnabled(True)
+                self.update_rvr_button.setToolTip(lang.get("update_rvr_pvp_tooltip"))
+    
     def _update_all_stats_ui(self, result_rvr, result_pvp, result_pve, result_wealth, result_achievements):
         """Met à jour tous les labels UI avec les stats complètes"""
         # RvR Captures
@@ -1732,6 +1784,14 @@ class CharacterSheetWindow(QDialog):
                 lang.get("update_char_no_url")
             )
             return
+        
+        # CRITICAL: Check if Eden validation is running - button should be disabled
+        # If user somehow triggered this while validation running, return silently
+        main_window = self.parent()
+        if main_window and hasattr(main_window, 'ui_manager'):
+            if hasattr(main_window.ui_manager, 'eden_status_thread') and main_window.ui_manager.eden_status_thread:
+                if main_window.ui_manager.eden_status_thread.isRunning():
+                    return  # Silent return - button is disabled with tooltip
         
         # Marquer qu'un scraping Herald est en cours AVANT toute modification d'URL
         self.herald_scraping_in_progress = True

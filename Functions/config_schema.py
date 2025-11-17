@@ -55,7 +55,11 @@ DEFAULT_CONFIG = {
         "show_debug_window": False,
         "disable_disclaimer": False,
         "preferred_browser": "Chrome",
-        "allow_browser_download": False
+        "allow_browser_download": False,
+        "debug": {
+            "save_herald_html": False,
+            "save_test_connection_html": False
+        }
     },
     "game": {
         "servers": ["Eden"],

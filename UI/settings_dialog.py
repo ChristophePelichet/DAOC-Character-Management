@@ -1061,6 +1061,20 @@ class SettingsDialog(QDialog):
         eden_debug_button.setMaximumWidth(300)
         debug_eden_layout.addWidget(eden_debug_button)
         
+        # Checkbox: Save Herald HTML
+        self.debug_save_herald_html = QCheckBox(lang.get("settings.labels.debug_save_herald_html", 
+                                                         default="💾 Sauvegarder HTML Herald (debug_herald_page.html)"))
+        self.debug_save_herald_html.setToolTip(lang.get("settings.tooltips.debug_save_herald_html",
+                                                        default="Sauvegarde le HTML de la page Herald dans Logs/ pour diagnostic"))
+        debug_eden_layout.addWidget(self.debug_save_herald_html)
+        
+        # Checkbox: Save Test Connection HTML
+        self.debug_save_test_connection_html = QCheckBox(lang.get("settings.labels.debug_save_test_connection_html", 
+                                                                   default="💾 Sauvegarder HTML Test Connexion (debug_test_connection.html)"))
+        self.debug_save_test_connection_html.setToolTip(lang.get("settings.tooltips.debug_save_test_connection_html",
+                                                                 default="Sauvegarde le HTML du test de connexion dans Logs/ pour diagnostic"))
+        debug_eden_layout.addWidget(self.debug_save_test_connection_html)
+        
         debug_eden_group.setLayout(debug_eden_layout)
         layout.addWidget(debug_eden_group)
         
@@ -1607,6 +1621,10 @@ class SettingsDialog(QDialog):
         self.debug_mode_check.setChecked(config.get("system.debug_mode", False))
         self.show_debug_window_check.setChecked(config.get("system.show_debug_window", False))
         self.disable_disclaimer_check.setChecked(config.get("system.disable_disclaimer", False))
+        
+        # Debug HTML options
+        self.debug_save_herald_html.setChecked(config.get("system.debug.save_herald_html", False))
+        self.debug_save_test_connection_html.setChecked(config.get("system.debug.save_test_connection_html", False))
         
         # Defaults
         self.default_server_combo.setCurrentText(config.get("game.default_server", ""))

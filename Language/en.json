@@ -368,6 +368,7 @@
             "log_folder": "Logs Folder",
             "debug_app": "Application Debug",
             "debug_eden": "Eden Debug",
+            "debug_herald_html": "Herald HTML Debugging",
             "font": "Text Size",
             "bulk_actions": "Bulk Actions",
             "misc": "Miscellaneous"
@@ -390,7 +391,13 @@
             "show_debug_window": "Show debug window on startup",
             "theme": "Theme",
             "font_scale": "Text Size",
-            "disable_disclaimer": "Disable startup warning message"
+            "disable_disclaimer": "Disable startup warning message",
+            "debug_save_herald_html": "💾 Save Herald HTML (debug_herald_page.html)",
+            "debug_save_test_connection_html": "💾 Save Connection Test HTML (debug_test_connection.html)"
+        },
+        "tooltips": {
+            "debug_save_herald_html": "Save Herald page HTML code to Logs/ folder for scraping issue diagnosis",
+            "debug_save_test_connection_html": "Save Herald connection test HTML code to Logs/ folder for authentication issue diagnosis"
         },
         "dialog_titles": {
             "select_character_folder": "Select Character Folder",

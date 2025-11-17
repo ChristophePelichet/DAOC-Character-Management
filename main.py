@@ -606,6 +606,8 @@ class CharacterApp(QMainWindow):
         # Note: cookies_folder removed - Eden uses automatic AppData location
         config.set("debug_mode", new_debug_mode)
         config.set("show_debug_window", dialog.show_debug_window_check.isChecked())
+        config.set("system.debug.save_herald_html", dialog.debug_save_herald_html.isChecked())
+        config.set("system.debug.save_test_connection_html", dialog.debug_save_test_connection_html.isChecked())
         config.set("disable_disclaimer", dialog.disable_disclaimer_check.isChecked())
         config.set("seasons", dialog.available_seasons)
         config.set("servers", dialog.available_servers)

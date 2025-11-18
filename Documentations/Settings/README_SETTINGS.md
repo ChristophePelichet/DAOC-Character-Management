@@ -43,7 +43,7 @@ Complete technical documentation for the DAOC Character Management Settings syst
 | **1** | 🎨 | **Thèmes** | Theme selection, Font scale adjustment |
 | **2** | 🚀 | **Démarrage** | Disclaimer checkbox |
 | **3** | 🏛️ | **Colonnes** | Table resize mode, Column visibility (12 columns) |
-| **4** | 🌐 | **Herald Eden** | Cookies path, Browser selection (Chrome/Edge/Firefox) |
+| **4** | 🌐 | **Eden** | Cookies path, Item cache path, Browser selection (Chrome/Edge/Firefox) |
 | **5** | 💾 | **Sauvegardes** | Characters backup, Cookies backup (enable, path, stats, actions) |
 | **6** | 🐛 | **Debug** | Logs path, Debug mode, Eden debug window, Herald HTML debug files (optional) |
 

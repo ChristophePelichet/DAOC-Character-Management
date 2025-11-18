@@ -117,17 +117,28 @@ class ItemsScraper:
         self.logger = get_logger(LOGGER_EDEN)
         self.base_url = "https://eden-daoc.net/items"
         
-        # Database and cache paths
+        # Database path (embedded)
         self.database_file = Path(__file__).parent.parent / 'Data' / 'items_database_src.json'
-        self.cache_file = Path(__file__).parent.parent / 'Armory' / 'items_cache.json'
         
-        # Initialize cache (will copy from database if needed)
+        # Cache path (user profile)
+        import os
+        user_profile = os.getenv('LOCALAPPDATA') or os.getenv('APPDATA')
+        if user_profile:
+            cache_dir = Path(user_profile) / 'DAOC_Character_Manager' / 'ItemCache'
+        else:
+            # Fallback to Armory if env vars not available
+            cache_dir = Path(__file__).parent.parent / 'Armory'
+        
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        self.cache_file = cache_dir / 'items_cache.json'
+        
+        # Initialize cache (web items only)
         self.cache = self._load_cache()
     
     def _load_cache(self):
         """
         Charge le cache des IDs d'items
-        Si le cache n'existe pas, le crée depuis la base de données embarquée
+        Le cache ne contient QUE les items trouvés via recherche web (pas ceux des databases)
         
         Returns:
             dict: Cache des items
@@ -137,67 +148,90 @@ class ItemsScraper:
             if self.cache_file.exists():
                 with open(self.cache_file, 'r', encoding='utf-8') as f:
                     cache = json.load(f)
-                    self.logger.debug(f"Cache utilisateur chargé: {len(cache.get('items', {}))} items", 
+                    self.logger.debug(f"Cache web chargé: {len(cache.get('items', {}))} items", 
                                     extra={"action": "CACHE"})
                     return cache
             else:
-                # First run: copy from database to cache
-                self.logger.info("Premier démarrage: création du cache depuis la base de données", 
+                # First run: create empty cache (no longer copies from database)
+                self.logger.info("Premier démarrage: création d'un cache vide", 
                                extra={"action": "CACHE"})
-                return self._initialize_cache_from_database()
+                return self._create_empty_cache()
                 
         except Exception as e:
             self.logger.warning(f"Erreur chargement cache: {e}", extra={"action": "CACHE"})
-            # Fallback: try to load from database
-            return self._initialize_cache_from_database()
+            return self._create_empty_cache()
     
-    def _initialize_cache_from_database(self):
+    def _create_empty_cache(self):
         """
-        Initialise le cache utilisateur depuis la base de données embarquée
+        Crée un cache vide pour les items trouvés via web uniquement
         
         Returns:
-            dict: Cache initialisé
+            dict: Cache vide initialisé
         """
+        cache = {
+            "version": "1.0",
+            "description": "Web search cache - items NOT in databases",
+            "last_updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "items": {}
+        }
+        
+        # Create Armory folder if needed
+        self.cache_file.parent.mkdir(parents=True, exist_ok=True)
+        
+        # Save empty cache
         try:
-            # Load embedded database
+            with open(self.cache_file, 'w', encoding='utf-8') as f:
+                json.dump(cache, f, indent=4, ensure_ascii=False)
+            self.logger.info(f"✅ Cache web vide créé: {self.cache_file}", 
+                           extra={"action": "CACHE"})
+        except Exception as e:
+            self.logger.warning(f"Erreur création cache: {e}", extra={"action": "CACHE"})
+        
+        return cache
+    
+    def _get_item_from_databases(self, item_name, realm=None):
+        """
+        Recherche un item dans les bases de données (source + user)
+        
+        Args:
+            item_name: Nom de l'item
+            realm: Royaume (optionnel)
+            
+        Returns:
+            str: ID de l'item ou None si non trouvé
+        """
+        cache_key = self._get_cache_key(item_name)
+        
+        # Check source database first (embedded)
+        try:
             if self.database_file.exists():
                 with open(self.database_file, 'r', encoding='utf-8') as f:
                     database = json.load(f)
-                
-                self.logger.info(f"Base de données chargée: {len(database.get('items', {}))} items", 
-                               extra={"action": "CACHE"})
-                
-                # Create Armory folder if needed
-                self.cache_file.parent.mkdir(parents=True, exist_ok=True)
-                
-                # Create user cache from database
-                cache = {
-                    "version": database.get("version", "1.0"),
-                    "description": "User items cache - customizable",
-                    "source": "Copied from Data/items_database_src.json",
-                    "last_updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                    "items": database.get("items", {})
-                }
-                
-                # Save initial cache
-                with open(self.cache_file, 'w', encoding='utf-8') as f:
-                    json.dump(cache, f, indent=4, ensure_ascii=False)
-                
-                self.logger.info(f"✅ Cache utilisateur créé: {self.cache_file}", 
-                               extra={"action": "CACHE"})
-                
-                return cache
-                
+                    item_data = database.get("items", {}).get(cache_key)
+                    if item_data and item_data.get('id'):
+                        item_id = item_data.get('id')
+                        self.logger.info(f"✅ Item trouvé dans DB source: {item_name} (ID: {item_id})", 
+                                       extra={"action": "DATABASE"})
+                        return item_id
         except Exception as e:
-            self.logger.error(f"Erreur initialisation cache depuis base: {e}", 
-                            extra={"action": "CACHE"})
+            self.logger.debug(f"Erreur lecture DB source: {e}", extra={"action": "DATABASE"})
         
-        # Return empty cache if all fails
-        return {
-            "version": "1.0",
-            "last_updated": datetime.now().strftime("%Y-%m-%d"),
-            "items": {}
-        }
+        # Check user database (Armory/items_database.json) if exists
+        user_db_file = self.cache_file.parent / 'items_database.json'
+        try:
+            if user_db_file.exists():
+                with open(user_db_file, 'r', encoding='utf-8') as f:
+                    database = json.load(f)
+                    item_data = database.get("items", {}).get(cache_key)
+                    if item_data and item_data.get('id'):
+                        item_id = item_data.get('id')
+                        self.logger.info(f"✅ Item trouvé dans DB user: {item_name} (ID: {item_id})", 
+                                       extra={"action": "DATABASE"})
+                        return item_id
+        except Exception as e:
+            self.logger.debug(f"Erreur lecture DB user: {e}", extra={"action": "DATABASE"})
+        
+        return None
     
     def _save_cache(self):
         """
@@ -726,7 +760,10 @@ class ItemsScraper:
     
     def find_item_id(self, item_name, realm="All"):
         """
-        Recherche l'ID d'un item sur Eden (avec cache)
+        Recherche l'ID d'un item dans cet ordre:
+        1. Bases de données (source + user)
+        2. Cache web
+        3. Recherche en ligne sur Eden
         
         Args:
             item_name: Nom de l'item
@@ -735,13 +772,19 @@ class ItemsScraper:
         Returns:
             str: ID de l'item ou None
         """
-        # Check cache first
+        # 1. Check databases first (embedded + user)
+        db_id = self._get_item_from_databases(item_name, realm)
+        if db_id:
+            return db_id
+        
+        # 2. Check web cache (items found via previous web searches)
         cached_id = self.get_item_id_from_cache(item_name, realm)
         if cached_id:
-            self.logger.info(f"🎯 ID trouvé dans le cache: {cached_id}", extra={"action": "CACHE"})
+            self.logger.info(f"🎯 ID trouvé dans le cache web: {cached_id}", extra={"action": "CACHE"})
             return cached_id
         
-        self.logger.info(f"⚠️ Item non trouvé dans le cache, recherche en ligne...", extra={"action": "CACHE"})
+        # 3. Search online
+        self.logger.info(f"⚠️ Item non trouvé (DB/cache), recherche en ligne...", extra={"action": "SEARCH"})
         
         try:
             # Build search URL

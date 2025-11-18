@@ -1,13 +1,274 @@
 {
-    "version": "1.0",
-    "description": "DAOC items database - IDs and basic information",
-    "last_updated": "2025-11-17",
-    "items": {},
-    "notes": [
-        "This file is the application's embedded database",
-        "It contains the most common items",
-        "Keys are lowercase names for searching",
-        "On first startup, this file is copied to Armory/items_cache.json",
-        "Users can customize their cache without modifying the database"
-    ]
+  "version": "1.0",
+  "description": "DAOC Items Source Database - Internal Read-Only",
+  "last_updated": "2025-11-18 15:46:19",
+  "item_count": 30,
+  "items": {
+    "cloth cap": {
+      "id": "163421",
+      "name": "Cloth Cap",
+      "slot": "Helm",
+      "realm": "Hibernia",
+      "merchant_zone": "Drake",
+      "merchant_price": "500",
+      "source": "internal"
+    },
+    "writhing blackthorn robe": {
+      "id": "153973",
+      "name": "Writhing Blackthorn Robe",
+      "slot": "Chest",
+      "realm": "Hibernia",
+      "merchant_zone": "Epik",
+      "merchant_price": "600",
+      "source": "internal"
+    },
+    "sleeves of strife": {
+      "id": "139628",
+      "name": "Sleeves of Strife",
+      "slot": "Arms",
+      "realm": "Albion",
+      "merchant_zone": "SH",
+      "merchant_price": "500",
+      "source": "internal"
+    },
+    "astral pants of stellar warding": {
+      "id": "137473",
+      "name": "Astral Pants of Stellar Warding",
+      "slot": "Legs",
+      "realm": "Hibernia",
+      "merchant_zone": "ToA",
+      "merchant_price": "800",
+      "source": "internal"
+    },
+    "cudgel of the undead": {
+      "id": "139625",
+      "name": "Cudgel of the Undead",
+      "slot": "Right Hand",
+      "realm": "Albion",
+      "merchant_zone": "SH",
+      "merchant_price": "600",
+      "source": "internal"
+    },
+    "basalt buckler of oblivion": {
+      "id": "110920",
+      "name": "Basalt Buckler of Oblivion",
+      "slot": "Left Hand",
+      "realm": "All",
+      "merchant_zone": "DF",
+      "merchant_price": "600",
+      "source": "internal"
+    },
+    "tenacious spell bender": {
+      "id": "164052",
+      "name": "Tenacious Spell Bender",
+      "slot": "Two Handed",
+      "realm": "Hibernia",
+      "source": "internal"
+    },
+    "azure's folly": {
+      "id": "163408",
+      "name": "Azure's Folly",
+      "slot": "Two Handed",
+      "realm": "Hibernia",
+      "merchant_zone": "Drake",
+      "merchant_price": "350",
+      "source": "internal"
+    },
+    "dragonseye strand": {
+      "id": "149092",
+      "name": "Dragonseye Strand",
+      "slot": "Necklace",
+      "realm": "All",
+      "merchant_zone": "Caer Sidi",
+      "merchant_price": "625",
+      "source": "internal"
+    },
+    "cape of legerdemain": {
+      "id": "139623",
+      "name": "Cape of Legerdemain",
+      "slot": "Cloak",
+      "realm": "Albion",
+      "merchant_zone": "SH",
+      "merchant_price": "700",
+      "source": "internal"
+    },
+    "ensorcelled mystic gem": {
+      "id": "117574",
+      "name": "Ensorcelled Mystic Gem",
+      "slot": "Jewel",
+      "realm": "Hibernia",
+      "merchant_zone": "SH",
+      "merchant_price": "600",
+      "source": "internal"
+    },
+    "soulbinder's belt": {
+      "id": "112490",
+      "name": "Soulbinder's Belt",
+      "slot": "Belt",
+      "realm": "All",
+      "merchant_zone": "Drake",
+      "merchant_price": "475",
+      "source": "internal"
+    },
+    "ring of the azure": {
+      "id": "163422",
+      "name": "Ring of the Azure",
+      "slot": "Ring",
+      "realm": "Hibernia",
+      "merchant_zone": "Drake",
+      "merchant_price": "500",
+      "source": "internal"
+    },
+    "director's ring of anarchy": {
+      "id": "110895",
+      "name": "Director's Ring of Anarchy",
+      "slot": "Ring",
+      "realm": "All",
+      "merchant_zone": "DF",
+      "merchant_price": "500",
+      "source": "internal"
+    },
+    "bracer of snow": {
+      "id": "132192",
+      "name": "Bracer of Snow",
+      "slot": "Bracer",
+      "realm": "Albion",
+      "merchant_zone": "ToA",
+      "merchant_price": "650",
+      "source": "internal"
+    },
+    "gatekeeper bracer of chaos": {
+      "id": "110900",
+      "name": "Gatekeeper Bracer of Chaos",
+      "slot": "Bracer",
+      "realm": "All",
+      "merchant_zone": "DF",
+      "merchant_price": "500",
+      "source": "internal"
+    },
+    "deserter arcane mythirian": {
+      "id": "66164",
+      "name": "Deserter Arcane Mythirian",
+      "slot": "Mythirian",
+      "realm": "All",
+      "source": "internal"
+    },
+    "twinkling tiara": {
+      "id": "139661",
+      "name": "Twinkling Tiara",
+      "slot": "Helm",
+      "realm": "Albion",
+      "merchant_zone": "SH",
+      "merchant_price": "600",
+      "source": "internal"
+    },
+    "timeless indigo mail": {
+      "id": "163475",
+      "name": "Timeless Indigo Mail",
+      "slot": "Chest",
+      "realm": "Albion",
+      "merchant_zone": "Drake",
+      "merchant_price": "450",
+      "source": "internal"
+    },
+    "fire-scored sleeves": {
+      "id": "117569",
+      "name": "Fire-Scored Sleeves",
+      "slot": "Arms",
+      "realm": "Hibernia",
+      "merchant_zone": "SH",
+      "merchant_price": "600",
+      "source": "internal"
+    },
+    "bloodstained war hammer": {
+      "id": "163471",
+      "name": "Bloodstained War Hammer",
+      "slot": "Right Hand",
+      "realm": "Albion",
+      "merchant_zone": "Drake",
+      "merchant_price": "350",
+      "source": "internal"
+    },
+    "defender of scorched dreams": {
+      "id": "163467",
+      "name": "Defender of Scorched Dreams",
+      "slot": "Left Hand",
+      "realm": "Albion",
+      "merchant_zone": "Drake",
+      "merchant_price": "450",
+      "source": "internal"
+    },
+    "sulphurous fiend necklace": {
+      "id": "115178",
+      "name": "Sulphurous Fiend Necklace",
+      "slot": "Necklace",
+      "realm": "All",
+      "merchant_zone": "DF",
+      "merchant_price": "600",
+      "source": "internal"
+    },
+    "polished granite pin": {
+      "id": "112181",
+      "name": "Polished Granite Pin",
+      "slot": "Jewel",
+      "realm": "Albion",
+      "merchant_zone": "Drake",
+      "merchant_price": "350",
+      "source": "internal"
+    },
+    "sulphurous fiend belt": {
+      "id": "115188",
+      "name": "Sulphurous Fiend Belt",
+      "slot": "Belt",
+      "realm": "All",
+      "merchant_zone": "DF",
+      "merchant_price": "600",
+      "source": "internal"
+    },
+    "construct forged ring": {
+      "id": "160232",
+      "name": "Construct Forged Ring",
+      "slot": "Ring",
+      "realm": "All",
+      "merchant_zone": "DF",
+      "merchant_price": "500",
+      "source": "internal"
+    },
+    "director's ring of bedlam": {
+      "id": "110896",
+      "name": "Director's Ring of Bedlam",
+      "slot": "Ring",
+      "realm": "All",
+      "merchant_zone": "DF",
+      "merchant_price": "500",
+      "source": "internal"
+    },
+    "stonewatch bracer": {
+      "id": "112180",
+      "name": "Stonewatch Bracer",
+      "slot": "Bracer",
+      "realm": "Albion",
+      "merchant_zone": "Drake",
+      "merchant_price": "475",
+      "source": "internal"
+    },
+    "gatekeeper bracer of anarchy": {
+      "id": "110901",
+      "name": "Gatekeeper Bracer of Anarchy",
+      "slot": "Bracer",
+      "realm": "All",
+      "merchant_zone": "DF",
+      "merchant_price": "500",
+      "source": "internal"
+    },
+    "dragon power mythirian": {
+      "id": "63575",
+      "name": "Dragon Power Mythirian",
+      "slot": "Mythirian",
+      "realm": "All",
+      "merchant_zone": "Caer Sidi",
+      "merchant_price": "500",
+      "source": "internal"
+    }
+  }
 }

@@ -50,7 +50,7 @@ SettingsDialog (QDialog)
 │   │   ├── Item 1: 🎨 Thèmes
 │   │   ├── Item 2: 🚀 Démarrage
 │   │   ├── Item 3: 🏛️ Colonnes
-│   │   ├── Item 4: 🌐 Herald Eden
+│   │   ├── Item 4: 🌐 Eden
 │   │   ├── Item 5: 💾 Sauvegardes
 │   │   └── Item 6: 🐛 Debug
 │   │
@@ -89,7 +89,7 @@ navigation.setSpacing(2)
 | 1 | 🎨 | Thèmes | `settings_nav_themes` |
 | 2 | 🚀 | Démarrage | `settings_nav_startup` |
 | 3 | 🏛️ | Colonnes | `settings_nav_columns` |
-| 4 | 🌐 | Herald Eden | `settings_nav_herald` |
+| 4 | 🌐 | Eden | `settings_nav_herald` |
 | 5 | 💾 | Sauvegardes | `settings_nav_backup` |
 | 6 | 🐛 | Debug | `settings_nav_debug` |
 | 7 | 🔧⚡ | SuperAdmin | `settings.navigation.superadmin` (conditional) |
@@ -208,15 +208,12 @@ def _create_<section>_page(self):
 - Selection, Realm, Name, Class, Level, Realm Rank
 - Realm Title, Guild, Page, Server, Race, URL
 
-### **Page 4: Herald Eden 🌐**
+### **Page 4: Eden 🌐**
 
 **Content**:
-- **Cookies Group**: Cookies folder path (Browse only)
+- **Cookies Path**: Eden AppData folder path with Open/Clean buttons
+- **Item Cache Path**: User profile cache folder with Open/Clean buttons
 - **Browser Group**: Preferred browser, Auto-download drivers
-
-**Info Box**:
-- Links to Cookie Manager
-- Explains cookie file location
 
 ### **Page 5: Sauvegardes 💾**
 

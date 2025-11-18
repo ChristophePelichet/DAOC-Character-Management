@@ -159,7 +159,9 @@
         "cookie_delete": "🗑️ Delete",
         "cookie_browse": "📁 Browse",
         "clean_eden_button": "Clean Eden",
-        "clean_eden_tooltip": "Delete all cookies and Chrome profile temporary files"
+        "clean_eden_tooltip": "Delete all cookies and Chrome profile temporary files",
+        "clean_cache_button": "Clean cache",
+        "clean_cache_tooltip": "Delete items cache from web searches"
     },
     "herald_buttons": {
         "validation_in_progress": "⏳ Eden validation in progress... Please wait"
@@ -195,6 +197,7 @@
         "chrome_profile_size": "📊 Profile size: {size}",
         "chrome_profile_size_empty": "📊 Empty profile (not used)",
         "eden_storage_info": "Automatic storage in",
+        "item_cache_storage_info": "Automatic storage in",
         "clear_chrome_profile": "Clear Chrome Profile",
         "clear_chrome_profile_tooltip": "Deletes all data from the dedicated Chrome profile (cache, history, etc.)",
         "clear_chrome_confirm_title": "Confirm Purge",
@@ -282,10 +285,19 @@
             "clean_eden_confirm_message": "⚠️ This action will delete:\n\n• All Eden cookies\n• Complete Chrome profile (cache, history, session)\n\n📁 Folder: {path}\n\nYou will need to regenerate your cookies after this operation.\n\nContinue?",
             "clean_eden_success_title": "Cleanup Successful",
             "clean_eden_success_message": "✅ The Eden folder has been successfully cleaned.\n\nAll cookies and temporary files have been deleted.",
-            "clean_eden_empty_title": "Empty Folder",
-            "clean_eden_empty_message": "ℹ️ The Eden folder is already empty or does not exist.",
+            "clean_eden_empty_title": "Empty folder",
+            "clean_eden_empty_message": "ℹ️ The Eden folder is already empty or doesn't exist.",
             "clean_eden_error_title": "Error",
-            "clean_eden_error_message": "❌ Error during cleanup:\n\n{error}"
+            "clean_eden_error_message": "❌ Cleaning error:\n\n{error}",
+            "clean_cache_confirm_title": "Confirm cleaning",
+            "clean_cache_confirm_message": "⚠️ This action will delete:\n\n• Items cache from web searches\n\n📁 Folder: {path}\n\nDatabase items won't be affected.\n\nContinue?",
+            "clean_cache_success_title": "Cleaning successful",
+            "clean_cache_success_message": "✅ Items cache has been cleaned.\n\nCache deleted.",
+            "clean_cache_empty_title": "Empty folder",
+            "clean_cache_empty_message": "ℹ️ The cache is already empty or doesn't exist.",
+            "clean_cache_error_title": "Error",
+            "clean_cache_error_message": "❌ Cleaning error:\n\n{error}",
+            "config_item_cache_group_title": "Items cache path"
         }
     },
     "app": {
@@ -299,7 +311,7 @@
             "themes": "Themes",
             "startup": "Startup",
             "columns": "Columns",
-            "herald": "Herald Eden",
+            "herald": "Eden",
             "backup": "Backups",
             "armory": "Armory",
             "superadmin": "SuperAdmin",
@@ -326,9 +338,8 @@
                 "subtitle": "Column display configuration"
             },
             "herald": {
-                "title": "Herald Eden",
-                "subtitle": "Herald connection configuration",
-                "info": "To manage your Herald cookies, use the button in the Eden status bar."
+                "title": "Eden",
+                "subtitle": "Herald connection configuration"
             },
             "backup": {
                 "title": "Backups",

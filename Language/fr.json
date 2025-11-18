@@ -159,7 +159,9 @@
         "cookie_delete": "🗑️ Supprimer",
         "cookie_browse": "📁 Parcourir",
         "clean_eden_button": "Nettoyer Eden",
-        "clean_eden_tooltip": "Supprime tous les cookies et fichiers temporaires du profil Chrome"
+        "clean_eden_tooltip": "Supprime tous les cookies et fichiers temporaires du profil Chrome",
+        "clean_cache_button": "Nettoyer le cache",
+        "clean_cache_tooltip": "Supprime le cache des items trouvés via recherche web"
     },
     "herald_buttons": {
         "validation_in_progress": "⏳ Validation Eden en cours... Veuillez patienter"
@@ -195,6 +197,7 @@
         "chrome_profile_size": "📊 Taille du profil: {size}",
         "chrome_profile_size_empty": "📊 Profil vide (non utilisé)",
         "eden_storage_info": "Stockage automatique dans",
+        "item_cache_storage_info": "Stockage automatique dans",
         "clear_chrome_profile": "Purger le profil Chrome",
         "clear_chrome_profile_tooltip": "Supprime toutes les données du profil Chrome dédié (cache, historique, etc.)",
         "clear_chrome_confirm_title": "Confirmer la purge",
@@ -285,7 +288,16 @@
             "clean_eden_empty_title": "Dossier vide",
             "clean_eden_empty_message": "ℹ️ Le dossier Eden est déjà vide ou n'existe pas.",
             "clean_eden_error_title": "Erreur",
-            "clean_eden_error_message": "❌ Erreur lors du nettoyage :\n\n{error}"
+            "clean_eden_error_message": "❌ Erreur lors du nettoyage :\n\n{error}",
+            "clean_cache_confirm_title": "Confirmer le nettoyage",
+            "clean_cache_confirm_message": "⚠️ Cette action va supprimer :\n\n• Le cache des items trouvés via recherche web\n\n📁 Dossier : {path}\n\nLes items de la base de données ne seront pas affectés.\n\nContinuer ?",
+            "clean_cache_success_title": "Nettoyage réussi",
+            "clean_cache_success_message": "✅ Le cache des items a été nettoyé.\n\nCache supprimé.",
+            "clean_cache_empty_title": "Dossier vide",
+            "clean_cache_empty_message": "ℹ️ Le cache est déjà vide ou n'existe pas.",
+            "clean_cache_error_title": "Erreur",
+            "clean_cache_error_message": "❌ Erreur lors du nettoyage :\n\n{error}",
+            "config_item_cache_group_title": "Chemin du cache des items"
         }
     },
     "tooltips": {
@@ -307,7 +319,7 @@
             "themes": "Thèmes",
             "startup": "Démarrage",
             "columns": "Colonnes",
-            "herald": "Herald Eden",
+            "herald": "Eden",
             "backup": "Sauvegardes",
             "armory": "Armurerie",
             "superadmin": "SuperAdmin",
@@ -334,9 +346,8 @@
                 "subtitle": "Configuration de l'affichage des colonnes"
             },
             "herald": {
-                "title": "Herald Eden",
-                "subtitle": "Configuration de la connexion au Herald",
-                "info": "Pour gérer vos cookies Herald, utilisez le bouton dans la barre d'état Eden."
+                "title": "Eden",
+                "subtitle": "Configuration de la connexion au Herald"
             },
             "backup": {
                 "title": "Sauvegardes",

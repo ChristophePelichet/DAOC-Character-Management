@@ -159,7 +159,9 @@
         "cookie_delete": "🗑️ Löschen",
         "cookie_browse": "📁 Durchsuchen",
         "clean_eden_button": "Eden bereinigen",
-        "clean_eden_tooltip": "Alle Cookies und temporären Chrome-Profildateien löschen"
+        "clean_eden_tooltip": "Alle Cookies und temporären Chrome-Profildateien löschen",
+        "clean_cache_button": "Cache leeren",
+        "clean_cache_tooltip": "Items-Cache von Websuchen löschen"
     },
     "herald_buttons": {
         "validation_in_progress": "⏳ Eden-Validierung läuft... Bitte warten"
@@ -195,6 +197,7 @@
         "chrome_profile_size": "📊 Profilgröße: {size}",
         "chrome_profile_size_empty": "📊 Leeres Profil (nicht verwendet)",
         "eden_storage_info": "Automatische Speicherung in",
+        "item_cache_storage_info": "Automatische Speicherung in",
         "clear_chrome_profile": "Chrome-Profil löschen",
         "clear_chrome_profile_tooltip": "Löscht alle Daten aus dem dedizierten Chrome-Profil (Cache, Verlauf usw.)",
         "clear_chrome_confirm_title": "Löschen bestätigen",
@@ -285,7 +288,16 @@
             "clean_eden_empty_title": "Leerer Ordner",
             "clean_eden_empty_message": "ℹ️ Der Eden-Ordner ist bereits leer oder existiert nicht.",
             "clean_eden_error_title": "Fehler",
-            "clean_eden_error_message": "❌ Fehler bei der Bereinigung:\n\n{error}"
+            "clean_eden_error_message": "❌ Bereinigungs fehler:\n\n{error}",
+            "clean_cache_confirm_title": "Bereinigung bestätigen",
+            "clean_cache_confirm_message": "⚠️ Diese Aktion löscht:\n\n• Items-Cache von Websuchen\n\n📁 Ordner: {path}\n\nDatenbank-Items sind nicht betroffen.\n\nFortfahren?",
+            "clean_cache_success_title": "Bereinigung erfolgreich",
+            "clean_cache_success_message": "✅ Items-Cache wurde geleert.\n\nCache gelöscht.",
+            "clean_cache_empty_title": "Leerer Ordner",
+            "clean_cache_empty_message": "ℹ️ Der Cache ist bereits leer oder existiert nicht.",
+            "clean_cache_error_title": "Fehler",
+            "clean_cache_error_message": "❌ Bereinigungs fehler:\n\n{error}",
+            "config_item_cache_group_title": "Items-Cache-Pfad"
         }
     },
     "tooltips": {
@@ -307,7 +319,7 @@
             "themes": "Themen",
             "startup": "Start",
             "columns": "Spalten",
-            "herald": "Herald Eden",
+            "herald": "Eden",
             "backup": "Sicherungen",
             "armory": "Waffenkammer",
             "superadmin": "SuperAdmin",
@@ -334,9 +346,8 @@
                 "subtitle": "Konfiguration der Spaltenanzeige"
             },
             "herald": {
-                "title": "Herald Eden",
-                "subtitle": "Herald-Verbindungskonfiguration",
-                "info": "Um Ihre Herald-Cookies zu verwalten, verwenden Sie die Schaltfläche in der Eden-Statusleiste."
+                "title": "Eden",
+                "subtitle": "Herald-Verbindungskonfiguration"
             },
             "backup": {
                 "title": "Sicherungen",

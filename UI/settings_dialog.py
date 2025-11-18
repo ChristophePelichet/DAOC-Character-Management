@@ -140,7 +140,7 @@ class SettingsDialog(QDialog):
             ("🎨", lang.get("settings.navigation.themes", default="Thèmes")),
             ("🚀", lang.get("settings.navigation.startup", default="Démarrage")),
             ("🏛️", lang.get("settings.navigation.columns", default="Colonnes")),
-            ("🌐", lang.get("settings.navigation.herald", default="Herald Eden")),
+            ("🌐", lang.get("settings.navigation.herald", default="Eden")),
             ("💾", lang.get("settings.navigation.backup", default="Sauvegardes")),
             ("🛡️", lang.get("settings.navigation.armory", default="Armurerie")),
         ]
@@ -425,13 +425,13 @@ class SettingsDialog(QDialog):
         self.pages.addWidget(page)
         
     def _create_herald_page(self):
-        """Page 3: Herald Eden Settings"""
+        """Page 3: Eden Settings"""
         page = QWidget()
         layout = QVBoxLayout(page)
         layout.setAlignment(Qt.AlignTop)
         
         # Title
-        title = QLabel(lang.get("settings_herald_title", default="Herald Eden"))
+        title = QLabel(lang.get("settings_herald_title", default="Eden"))
         title_font = title.font()
         title_font.setPointSize(title_font.pointSize() + 4)
         title_font.setBold(True)
@@ -487,6 +487,55 @@ class SettingsDialog(QDialog):
         cookies_group.setLayout(cookies_layout)
         layout.addWidget(cookies_group)
         
+        # === Item Cache Path ===
+        cache_group = QGroupBox("💾 " + lang.get("config_item_cache_group_title", 
+                                                    default="Chemin du cache des items"))
+        cache_layout = QVBoxLayout()
+        
+        # Info label
+        import os
+        user_profile = os.getenv('LOCALAPPDATA') or os.getenv('APPDATA')
+        if user_profile:
+            cache_path = os.path.join(user_profile, 'DAOC_Character_Manager', 'ItemCache')
+        else:
+            from pathlib import Path
+            cache_path = str(Path(__file__).parent.parent / 'Armory')
+        
+        cache_info = QLabel(lang.get("item_cache_storage_info", default="Stockage automatique dans") + f": {cache_path}")
+        cache_info.setWordWrap(True)
+        cache_info.setStyleSheet("color: gray; font-size: 9pt; padding: 5px;")
+        cache_layout.addWidget(cache_info)
+        
+        # Buttons layout (horizontal)
+        cache_buttons_layout = QHBoxLayout()
+        
+        # Open folder button
+        open_cache_folder_button = QPushButton("📂 " + lang.get("open_folder_button", default="Ouvrir le dossier"))
+        open_cache_folder_button.clicked.connect(self._open_item_cache_folder)
+        cache_buttons_layout.addWidget(open_cache_folder_button)
+        
+        # Clean cache button
+        clean_cache_button = QPushButton("🗑️ " + lang.get("clean_cache_button", default="Nettoyer le cache"))
+        clean_cache_button.clicked.connect(self._clean_item_cache)
+        clean_cache_button.setToolTip(lang.get("clean_cache_tooltip", default="Supprime le cache des items trouvés via recherche web"))
+        clean_cache_button.setStyleSheet("""
+            QPushButton {
+                background-color: #D83B01;
+                color: white;
+                font-weight: bold;
+                padding: 6px 12px;
+            }
+            QPushButton:hover {
+                background-color: #A52A00;
+            }
+        """)
+        cache_buttons_layout.addWidget(clean_cache_button)
+        
+        cache_layout.addLayout(cache_buttons_layout)
+        
+        cache_group.setLayout(cache_layout)
+        layout.addWidget(cache_group)
+        
         # === Browser Settings ===
         browser_group = QGroupBox("🌐 " + lang.get("config_browser_group_title", 
                                                     default="Navigateur"))
@@ -522,16 +571,6 @@ class SettingsDialog(QDialog):
         
         browser_group.setLayout(browser_layout)
         layout.addWidget(browser_group)
-        
-        # Info box
-        info_label = QLabel(
-            "💡 " + lang.get("settings_herald_info",
-                           default="Pour gérer vos cookies Herald, utilisez le bouton 'Gérer...' "
-                                  "dans la section Herald Eden de la fenêtre principale.")
-        )
-        info_label.setWordWrap(True)
-        info_label.setStyleSheet("background-color: palette(alternate-base); padding: 10px; border-radius: 5px;")
-        layout.addWidget(info_label)
         
         layout.addStretch()
         self.pages.addWidget(page)
@@ -1690,21 +1729,88 @@ class SettingsDialog(QDialog):
                         self,
                         lang.get("clean_eden_success_title", default="Nettoyage réussi"),
                         lang.get("clean_eden_success_message", 
-                                default="✅ Le dossier Eden a été nettoyé avec succès.\n\n"
-                                       "Tous les cookies et fichiers temporaires ont été supprimés.")
-                    )
-                else:
-                    QMessageBox.information(
-                        self,
-                        lang.get("clean_eden_empty_title", default="Dossier vide"),
-                        lang.get("clean_eden_empty_message", 
-                                default="ℹ️ Le dossier Eden est déjà vide ou n'existe pas.")
-                    )
+                                default="✅ Le dossier Eden a été nettoyé.\n\n"
+                                       "Dossier supprimé.")
             except Exception as e:
                 QMessageBox.critical(
                     self,
                     lang.get("clean_eden_error_title", default="Erreur"),
                     lang.get("clean_eden_error_message", 
+                            default=f"❌ Erreur lors du nettoyage :\n\n{str(e)}")
+                )
+    
+    def _open_item_cache_folder(self):
+        """Open Item Cache folder (AppData)"""
+        import subprocess
+        import os
+        
+        user_profile = os.getenv('LOCALAPPDATA') or os.getenv('APPDATA')
+        if user_profile:
+            cache_path = os.path.join(user_profile, 'DAOC_Character_Manager', 'ItemCache')
+        else:
+            from pathlib import Path
+            cache_path = str(Path(__file__).parent.parent / 'Armory')
+        
+        # Create folder if doesn't exist
+        os.makedirs(cache_path, exist_ok=True)
+        
+        if os.path.exists(cache_path):
+            subprocess.Popen(f'explorer "{cache_path}"')
+    
+    def _clean_item_cache(self):
+        """Clean Item Cache folder"""
+        from PySide6.QtWidgets import QMessageBox
+        import shutil
+        import os
+        
+        user_profile = os.getenv('LOCALAPPDATA') or os.getenv('APPDATA')
+        if user_profile:
+            cache_path = os.path.join(user_profile, 'DAOC_Character_Manager', 'ItemCache')
+        else:
+            from pathlib import Path
+            cache_path = str(Path(__file__).parent.parent / 'Armory')
+        
+        # Confirmation dialog
+        reply = QMessageBox.question(
+            self,
+            lang.get("clean_cache_confirm_title", default="Confirmer le nettoyage"),
+            lang.get("clean_cache_confirm_message", 
+                    default=f"⚠️ Cette action va supprimer :\n\n"
+                           f"• Le cache des items trouvés via recherche web\n\n"
+                           f"📁 Dossier : {cache_path}\n\n"
+                           f"Les items de la base de données ne seront pas affectés.\n\n"
+                           f"Continuer ?"),
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+        
+        if reply == QMessageBox.Yes:
+            try:
+                if os.path.exists(cache_path):
+                    # Delete items_cache.json if exists
+                    cache_file = os.path.join(cache_path, 'items_cache.json')
+                    if os.path.exists(cache_file):
+                        os.remove(cache_file)
+                    
+                    QMessageBox.information(
+                        self,
+                        lang.get("clean_cache_success_title", default="Nettoyage réussi"),
+                        lang.get("clean_cache_success_message", 
+                                default="✅ Le cache des items a été nettoyé.\n\n"
+                                       "Cache supprimé.")
+                    )
+                else:
+                    QMessageBox.information(
+                        self,
+                        lang.get("clean_cache_empty_title", default="Dossier vide"),
+                        lang.get("clean_cache_empty_message", 
+                                default="ℹ️ Le cache est déjà vide ou n'existe pas.")
+                    )
+            except Exception as e:
+                QMessageBox.critical(
+                    self,
+                    lang.get("clean_cache_error_title", default="Erreur"),
+                    lang.get("clean_cache_error_message", 
                             default=f"❌ Erreur lors du nettoyage :\n\n{str(e)}")
                 )
     

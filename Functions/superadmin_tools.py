@@ -22,7 +22,10 @@ from datetime import datetime
 import logging
 
 from Functions.path_manager import PathManager
-from Functions.items_parser import parse_item_from_template
+from Functions.items_parser import parse_template_file, search_item_for_database
+from Functions.eden_scraper import EdenScraper
+from Functions.cookie_manager import CookieManager
+from Functions.items_scraper import ItemsScraper
 
 
 class SuperAdminTools:
@@ -144,11 +147,11 @@ class SuperAdminTools:
         
         for file_path in file_paths:
             try:
-                file_path = Path(file_path)
+                file_path_obj = Path(file_path)
                 
                 # Auto-detect realm from filename
                 detected_realm = realm
-                filename_lower = file_path.stem.lower()
+                filename_lower = file_path_obj.stem.lower()
                 if "albion" in filename_lower:
                     detected_realm = "Albion"
                 elif "hibernia" in filename_lower or "hib" in filename_lower:
@@ -156,24 +159,51 @@ class SuperAdminTools:
                 elif "midgard" in filename_lower or "mid" in filename_lower:
                     detected_realm = "Midgard"
                 
-                # Read file content
-                with open(file_path, 'r', encoding='utf-8') as f:
-                    content = f.read()
+                # Use existing parser to get item names
+                item_names = parse_template_file(file_path)
                 
-                # Parse item using existing parser
-                item_data = parse_item_from_template(content, detected_realm)
+                # If no items found with Loot filter, try parsing all Name: entries
+                if not item_names:
+                    # Fallback: parse all lines with "Name:" regardless of Source Type
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                    
+                    import re
+                    item_names = []
+                    item_blocks = re.split(r'\n\n+', content)
+                    
+                    for block in item_blocks:
+                        if 'Name:' in block:
+                            name_match = re.search(r'^Name:\s*(.+?)$', block, re.MULTILINE)
+                            if name_match:
+                                item_name = name_match.group(1).strip()
+                                if item_name and item_name not in item_names:
+                                    item_names.append(item_name)
                 
-                if item_data:
-                    # Use name as key
-                    item_name = item_data.get("name", file_path.stem)
-                    parsed_items[item_name] = item_data
-                    logging.info(f"Parsed item '{item_name}' from {file_path.name}", 
+                if item_names:
+                    # Create item data for each name
+                    for item_name in item_names:
+                        item_data = {
+                            "name": item_name,
+                            "realm": detected_realm,
+                            "source": "internal"
+                        }
+                        
+                        # Use lowercase name as key for consistency
+                        key = item_name.lower()
+                        
+                        # Avoid duplicates
+                        if key not in parsed_items:
+                            parsed_items[key] = item_data
+                    
+                    logging.info(f"Parsed {len(item_names)} items from {file_path_obj.name}", 
                                 extra={"action": "SUPERADMIN_PARSE"})
                 else:
-                    errors.append(f"Failed to parse {file_path.name}")
+                    errors.append(f"No items found in {file_path_obj.name}")
                     
             except Exception as e:
-                errors.append(f"Error parsing {file_path.name}: {str(e)}")
+                file_name = Path(file_path).name if file_path else "unknown"
+                errors.append(f"Error parsing {file_name}: {str(e)}")
                 logging.error(f"Error parsing {file_path}: {e}", extra={"action": "SUPERADMIN_PARSE_ERROR"})
         
         return parsed_items, errors
@@ -195,11 +225,28 @@ class SuperAdminTools:
             Tuple[bool, str, Dict]: (Success, Message, Statistics dict)
         """
         try:
-            # Parse all template files
-            new_items, parse_errors = self.parse_template_files(file_paths, realm)
+            # Parse all template files to get item names
+            new_items_names, parse_errors = self.parse_template_files(file_paths, realm)
             
-            if not new_items:
+            if not new_items_names:
                 return False, "No items parsed from template files", {}
+            
+            # Initialize Eden scraper for fetching item details
+            logging.info("Initializing Eden scraper for item details...")
+            cookie_manager = CookieManager()
+            eden_scraper = EdenScraper(cookie_manager)
+            
+            # Initialize driver (NOT headless for database building)
+            if not eden_scraper.initialize_driver(headless=False, minimize=True):
+                return False, "Failed to initialize Eden scraper", {}
+            
+            # Load cookies
+            if not eden_scraper.load_cookies():
+                eden_scraper.close()
+                return False, "Failed to load cookies. Please generate cookies first.", {}
+            
+            items_scraper = ItemsScraper(eden_scraper)
+            logging.info("Eden scraper initialized successfully")
             
             # Load existing database if merging
             existing_items = {}
@@ -214,25 +261,50 @@ class SuperAdminTools:
                 if not success:
                     logging.warning(f"Backup failed: {backup_path}")
             
-            # Merge items
+            # Fetch details for each item from Eden
             merged_items = existing_items.copy() if merge else {}
             duplicates_count = 0
             added_count = 0
+            failed_count = 0
             
-            for item_name, item_data in new_items.items():
-                # Check for duplicates (same name + realm)
-                item_realm = item_data.get("realm", "")
-                is_duplicate = False
-                
-                if remove_duplicates and item_name in merged_items:
-                    existing_realm = merged_items[item_name].get("realm", "")
-                    if existing_realm.lower() == item_realm.lower():
-                        is_duplicate = True
-                        duplicates_count += 1
-                
-                if not is_duplicate:
-                    merged_items[item_name] = item_data
-                    added_count += 1
+            try:
+                total_items = len(new_items_names)
+                for idx, (key, item_basic) in enumerate(new_items_names.items(), 1):
+                    item_name = item_basic["name"]
+                    item_realm = item_basic["realm"]
+                    
+                    logging.info(f"[{idx}/{total_items}] Searching: {item_name}")
+                    
+                    # Check for duplicates before scraping
+                    if remove_duplicates and key in merged_items:
+                        existing_realm = merged_items[key].get("realm", "")
+                        if existing_realm.lower() == item_realm.lower():
+                            duplicates_count += 1
+                            logging.info(f"  Skipped (duplicate): {item_name}")
+                            continue
+                    
+                    # Search item details on Eden
+                    item_data = search_item_for_database(item_name, items_scraper, item_realm)
+                    
+                    if item_data:
+                        # Check if item has merchant information (mandatory for price calculations)
+                        if "merchant_zone" in item_data and "merchant_price" in item_data:
+                            # Add source field
+                            item_data["source"] = "internal"
+                            merged_items[key] = item_data
+                            added_count += 1
+                            logging.info(f"  ✅ Added: {item_name}")
+                        else:
+                            failed_count += 1
+                            logging.warning(f"  ❌ Skipped (no merchant info): {item_name}")
+                    else:
+                        failed_count += 1
+                        logging.warning(f"  ❌ Failed to fetch: {item_name}")
+                        
+            finally:
+                # Always close scraper
+                eden_scraper.close()
+                logging.info("Eden scraper closed")
             
             # Build final database structure
             database = {
@@ -251,8 +323,9 @@ class SuperAdminTools:
             # Build statistics
             stats = {
                 "files_processed": len(file_paths),
-                "items_parsed": len(new_items),
+                "items_parsed": len(new_items_names),
                 "items_added": added_count,
+                "items_failed": failed_count,
                 "duplicates_skipped": duplicates_count,
                 "parse_errors": len(parse_errors),
                 "total_items": len(merged_items),
@@ -263,6 +336,7 @@ class SuperAdminTools:
             message += f"Files processed: {stats['files_processed']}\n"
             message += f"Items parsed: {stats['items_parsed']}\n"
             message += f"Items added: {stats['items_added']}\n"
+            message += f"Items failed: {stats['items_failed']}\n"
             message += f"Duplicates skipped: {stats['duplicates_skipped']}\n"
             message += f"Total items in DB: {stats['total_items']}"
             

@@ -309,6 +309,7 @@
             "columns": "Colonnes",
             "herald": "Herald Eden",
             "backup": "Sauvegardes",
+            "armory": "Armurerie",
             "data": "Données",
             "language": "Langue",
             "debug": "Debug"
@@ -355,6 +356,21 @@
                 "title": "Debug",
                 "subtitle": "Options de débogage pour le diagnostic",
                 "info": "Le mode debug est utile pour diagnostiquer des problèmes.\n\nLes logs de debug sont sauvegardés dans le dossier Logs/"
+            },
+            "armory": {
+                "title": "Armurerie",
+                "subtitle": "Import et gestion de la base de données d'items",
+                "desc_group_title": "ℹ️ À propos",
+                "desc_text": "L'armurerie permet d'importer des items depuis des fichiers Zenkcraft (.txt) et de créer une base de données locale d'items avec leurs statistiques, résistances, bonus et informations sur les marchands.",
+                "import_group_title": "📥 Import d'items",
+                "import_button": "📥 Importer des items depuis Zenkcraft",
+                "import_help": "💡 Cliquez sur le bouton ci-dessus pour ouvrir l'interface d'import. Vous pourrez sélectionner un fichier template Zenkcraft (.txt), choisir le royaume et lancer l'import automatique.",
+                "status_group_title": "📊 État de la base de données",
+                "status_location": "📂 Emplacement:",
+                "status_items": "🔢 Items disponibles:",
+                "status_last_update": "🕐 Dernière mise à jour:",
+                "status_loading": "Chargement...",
+                "status_no_date": "-"
             }
         },
         "groups": {
@@ -546,6 +562,42 @@
         "duplicate": "Dupliquer",
         "armor_management": "Armurerie",
         "update_from_herald": "🔄 Mettre à jour depuis Herald"
+    },
+    "armory_import": {
+        "window_title": "Armurerie - Import d'items",
+        "file_group_title": "📂 Fichier Template",
+        "no_file_selected": "Aucun fichier sélectionné",
+        "browse_button": "📁 Parcourir...",
+        "realm_label": "🏰 Royaume:",
+        "start_import_button": "▶️ Démarrer l'import",
+        "progress_group_title": "⏳ Progression",
+        "waiting_status": "En attente...",
+        "items_found_group_title": "📦 Items trouvés",
+        "details_group_title": "ℹ️ Détails de l'item sélectionné",
+        "save_database_button": "💾 Sauvegarder la base de données",
+        "close_button": "✖️ Fermer",
+        "import_in_progress_title": "Import en cours",
+        "import_in_progress_message": "Un import est en cours. Voulez-vous vraiment fermer ?",
+        "import_finished_title": "Import terminé",
+        "import_finished_message": "Import terminé",
+        "import_error_title": "Erreur d'import",
+        "save_success_title": "Sauvegarde réussie",
+        "save_success_message": "Base de données sauvegardée",
+        "save_error_title": "Erreur de sauvegarde",
+        "path_not_configured_title": "Chemin non configuré",
+        "path_not_configured_message": "Veuillez configurer le chemin de l'armurerie dans les paramètres.",
+        "select_file": "Sélectionner un fichier template",
+        "file_filter": "Fichiers template (*.txt);;Tous les fichiers (*.*)",
+        "reading_file": "Lecture du fichier...",
+        "table_columns": {
+            "id": "ID",
+            "name": "Nom",
+            "type": "Type",
+            "slot": "Slot",
+            "zone": "Zone",
+            "price": "Prix",
+            "currency": "Devises"
+        }
     },
     "armoury_dialog": {
         "title": "Gestion de l'Armurerie - {name} ({realm} - {season})",

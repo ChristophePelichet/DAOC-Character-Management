@@ -59,9 +59,20 @@ def global_exception_handler(exc_type, exc_value, exc_traceback):
 def signal_handler(signum, frame):
     """Gestionnaire des signaux système (SIGTERM, SIGINT, etc.)"""
     signal_name = signal.Signals(signum).name if hasattr(signal, 'Signals') else str(signum)
-    logging.critical(f"Application interrupted by signal: {signal_name}")
-    print(f"CRITICAL: Received signal {signal_name}", file=sys.stderr)
-    sys.exit(1)
+    logging.info(f"Application received signal: {signal_name}")
+    
+    # Try to close gracefully via QApplication if it exists
+    try:
+        app = QApplication.instance()
+        if app:
+            logging.info("Requesting application quit via QApplication")
+            app.quit()
+        else:
+            logging.warning("No QApplication instance found, exiting directly")
+            sys.exit(0)
+    except Exception as e:
+        logging.error(f"Error during signal handling: {e}")
+        sys.exit(0)
 
 
 def on_app_exit():

@@ -8,6 +8,7 @@ Permet de rechercher et extraire les informations des items
 
 import time
 import json
+import html
 import re
 import urllib.parse
 from pathlib import Path
@@ -438,7 +439,7 @@ class ItemsScraper:
             bool: True si la navigation a réussi
         """
         try:
-            self.logger.info(f"Navigation vers {self.base_url}", extra={"action": "MARKET"})
+            self.logger.info(f"Navigation vers {self.base_url}", extra={"action": "ITEMDB"})
             self.driver.get(self.base_url)
             
             # Wait longer for page load (items database may be slower)
@@ -453,20 +454,20 @@ class ItemsScraper:
             debug_file.parent.mkdir(exist_ok=True)
             with open(debug_file, 'w', encoding='utf-8') as f:
                 f.write(html_content)
-            self.logger.info(f"💾 HTML sauvegardé: {debug_file}", extra={"action": "MARKET"})
+            self.logger.info(f"💾 HTML sauvegardé: {debug_file}", extra={"action": "ITEMDB"})
             
             # Check if page loaded correctly (use the SAME html_content)
             # Look for the specific error message, not just "not available" which can appear in help text
             if 'The requested page "items" is not available' in html_content:
-                self.logger.error("❌ Page items database non disponible", extra={"action": "MARKET"})
-                self.logger.error(f"   HTML taille: {len(html_content)} caractères", extra={"action": "MARKET"})
+                self.logger.error("❌ Page items database non disponible", extra={"action": "ITEMDB"})
+                self.logger.error(f"   HTML taille: {len(html_content)} caractères", extra={"action": "ITEMDB"})
                 return False
             
-            self.logger.info("✅ Page items database chargée", extra={"action": "MARKET"})
+            self.logger.info("✅ Page items database chargée", extra={"action": "ITEMDB"})
             return True
             
         except Exception as e:
-            self.logger.error(f"❌ Erreur navigation market: {e}", extra={"action": "MARKET"})
+            self.logger.error(f"❌ Erreur navigation market: {e}", extra={"action": "ITEMDB"})
             return False
     
     def search_items(self, item_name=None, realm=None, class_filter=None, slot=None):
@@ -498,7 +499,7 @@ class ItemsScraper:
                     return []
             
             self.logger.info(f"🔍 Recherche items: name={item_name}, realm={realm}, class={class_filter}, slot={slot}", 
-                           extra={"action": "MARKET"})
+                           extra={"action": "ITEMDB"})
             
             # Apply filters if provided
             if realm:
@@ -521,13 +522,13 @@ class ItemsScraper:
             # Parse results
             items = self._parse_search_results()
             
-            self.logger.info(f"✅ {len(items)} items trouvés", extra={"action": "MARKET"})
+            self.logger.info(f"✅ {len(items)} items trouvés", extra={"action": "ITEMDB"})
             return items
             
         except Exception as e:
-            self.logger.error(f"❌ Erreur recherche items: {e}", extra={"action": "MARKET"})
+            self.logger.error(f"❌ Erreur recherche items: {e}", extra={"action": "ITEMDB"})
             import traceback
-            self.logger.debug(traceback.format_exc(), extra={"action": "MARKET"})
+            self.logger.debug(traceback.format_exc(), extra={"action": "ITEMDB"})
             return []
     
     def _select_filter(self, select_id, value):
@@ -541,11 +542,11 @@ class ItemsScraper:
         try:
             select_element = Select(self.driver.find_element(By.ID, select_id))
             select_element.select_by_visible_text(value)
-            self.logger.debug(f"Filtre {select_id} = {value}", extra={"action": "MARKET"})
+            self.logger.debug(f"Filtre {select_id} = {value}", extra={"action": "ITEMDB"})
             time.sleep(0.5)  # Wait for potential AJAX reload
         except Exception as e:
             self.logger.warning(f"⚠️ Impossible de sélectionner {select_id}={value}: {e}", 
-                              extra={"action": "MARKET"})
+                              extra={"action": "ITEMDB"})
     
     def _enter_search_text(self, text):
         """
@@ -569,15 +570,15 @@ class ItemsScraper:
                     search_box.clear()
                     search_box.send_keys(text)
                     self.logger.debug(f"Texte recherche '{text}' entré dans {input_id}", 
-                                    extra={"action": "MARKET"})
+                                    extra={"action": "ITEMDB"})
                     return
                 except:
                     continue
             
-            self.logger.warning(f"⚠️ Champ de recherche non trouvé", extra={"action": "MARKET"})
+            self.logger.warning(f"⚠️ Champ de recherche non trouvé", extra={"action": "ITEMDB"})
             
         except Exception as e:
-            self.logger.warning(f"⚠️ Erreur saisie recherche: {e}", extra={"action": "MARKET"})
+            self.logger.warning(f"⚠️ Erreur saisie recherche: {e}", extra={"action": "ITEMDB"})
     
     def _parse_search_results(self):
         """
@@ -620,7 +621,7 @@ class ItemsScraper:
             return items
             
         except Exception as e:
-            self.logger.error(f"❌ Erreur parsing résultats: {e}", extra={"action": "MARKET"})
+            self.logger.error(f"❌ Erreur parsing résultats: {e}", extra={"action": "ITEMDB"})
             return []
     
     def _extract_item_from_row(self, cells):
@@ -669,7 +670,7 @@ class ItemsScraper:
             return None
             
         except Exception as e:
-            self.logger.debug(f"Erreur extraction row: {e}", extra={"action": "MARKET"})
+            self.logger.debug(f"Erreur extraction row: {e}", extra={"action": "ITEMDB"})
             return None
     
     def _extract_item_from_container(self, container):
@@ -707,7 +708,7 @@ class ItemsScraper:
             return None
             
         except Exception as e:
-            self.logger.debug(f"Erreur extraction container: {e}", extra={"action": "MARKET"})
+            self.logger.debug(f"Erreur extraction container: {e}", extra={"action": "ITEMDB"})
             return None
     
     def get_all_items_by_slot(self, slot, realm=None):
@@ -749,14 +750,14 @@ class ItemsScraper:
             search_encoded = urllib.parse.quote(item_name)
             search_url = f"{self.base_url}?s={search_encoded}&r={realm_id}"
             
-            self.logger.info(f"🔍 Recherche: {item_name} ({realm})", extra={"action": "MARKET"})
-            self.logger.debug(f"📍 URL: {search_url}", extra={"action": "MARKET"})
+            self.logger.info(f"🔍 Recherche: {item_name} ({realm})", extra={"action": "ITEMDB"})
+            self.logger.debug(f"📍 URL: {search_url}", extra={"action": "ITEMDB"})
             
             # Navigate to search URL
             self.driver.get(search_url)
             
             # Wait for results table to load
-            self.logger.debug("⏳ Attente chargement des résultats...", extra={"action": "MARKET"})
+            self.logger.debug("⏳ Attente chargement des résultats...", extra={"action": "ITEMDB"})
             time.sleep(8)
             
             # Wait for table results
@@ -764,18 +765,29 @@ class ItemsScraper:
                 WebDriverWait(self.driver, 10).until(
                     EC.presence_of_element_located((By.ID, "table_result"))
                 )
-                self.logger.debug("✅ Table de résultats chargée", extra={"action": "MARKET"})
+                self.logger.debug("✅ Table de résultats chargée", extra={"action": "ITEMDB"})
             except:
-                self.logger.warning("⚠️ Timeout attente table résultats", extra={"action": "MARKET"})
+                self.logger.warning("⚠️ Timeout attente table résultats", extra={"action": "ITEMDB"})
             
             # Small additional wait for JavaScript population
             time.sleep(3)
             
+            # DEBUG: Save HTML for inspection
+            from pathlib import Path
+            debug_folder = Path(__file__).parent.parent / 'Logs' / 'items_search_debug'
+            debug_folder.mkdir(parents=True, exist_ok=True)
+            safe_name = re.sub(r'[^\w\s-]', '_', item_name)
+            debug_file = debug_folder / f"search_{safe_name}_{realm}.html"
+            with open(debug_file, 'w', encoding='utf-8') as f:
+                f.write(self.driver.page_source)
+            self.logger.debug(f"💾 HTML recherche sauvegardé: {debug_file}", extra={"action": "ITEMDB"})
+            
             # Parse results
             soup = BeautifulSoup(self.driver.page_source, 'html.parser')
             
-            # Find all onclick links that contain "item_go"
             item_id = None
+            
+            # Method 1: Search in onclick attributes (multiple results or single result)
             for link in soup.find_all('a', onclick=True):
                 onclick = link.get('onclick', '')
                 if 'item_go' in onclick:
@@ -783,38 +795,87 @@ class ItemsScraper:
                     match = re.search(r'item_go\((\d+)\)', onclick)
                     if match:
                         item_id = match.group(1)
-                        self.logger.info(f"✅ ID trouvé: {item_id}", extra={"action": "MARKET"})
-                        
-                        # Save to cache
+                        self.logger.info(f"✅ ID trouvé (onclick): {item_id}", extra={"action": "ITEMDB"})
                         self.save_item_to_cache(item_name, realm, item_id)
                         return item_id
             
-            self.logger.warning(f"❌ ID non trouvé pour: {item_name}", extra={"action": "MARKET"})
+            # Method 2: Search in table rows with id="result_row_XXX"
+            if not item_id:
+                result_rows = soup.find_all('tr', id=re.compile(r'^result_row_\d+$'))
+                if result_rows:
+                    first_row = result_rows[0]
+                    row_id = first_row.get('id', '')
+                    match = re.search(r'result_row_(\d+)', row_id)
+                    if match:
+                        item_id = match.group(1)
+                        self.logger.info(f"✅ ID trouvé (result_row): {item_id}", extra={"action": "ITEMDB"})
+                        self.save_item_to_cache(item_name, realm, item_id)
+                        return item_id
+            
+            self.logger.warning(f"❌ ID non trouvé pour: {item_name}", extra={"action": "ITEMDB"})
+            self.logger.debug(f"📝 Nombre de liens onclick trouvés: {len(soup.find_all('a', onclick=True))}", extra={"action": "ITEMDB"})
+            self.logger.debug(f"📝 Nombre de result_row trouvés: {len(soup.find_all('tr', id=re.compile(r'^result_row_')))}", extra={"action": "ITEMDB"})
             return None
             
         except Exception as e:
-            self.logger.error(f"Erreur recherche item ID: {e}", extra={"action": "MARKET"})
+            self.logger.error(f"Erreur recherche item ID: {e}", extra={"action": "ITEMDB"})
             return None
     
-    def get_item_details(self, item_id, realm="All"):
+    def get_item_details(self, item_id, realm="All", item_name=None):
         """
         Récupère les détails complets d'un item via son ID
         
         Args:
             item_id: ID de l'item
             realm: Royaume (pour contexte)
+            item_name: Nom de l'item (pour recherche si besoin)
         
         Returns:
             dict: Détails complets de l'item avec merchants, stats, etc.
         """
         try:
-            # Navigate to item details page
-            item_url = f"{self.base_url}?id={item_id}"
-            self.logger.info(f"📄 Récupération détails item ID: {item_id}", extra={"action": "MARKET"})
-            self.driver.get(item_url)
+            self.logger.info(f"📄 Récupération détails item ID: {item_id}", extra={"action": "ITEMDB"})
             
-            # Wait for page load
-            time.sleep(5)
+            # Try to find and click on the item row in search results
+            try:
+                row = self.driver.find_element(By.ID, f"result_row_{item_id}")
+                row.click()
+                self.logger.debug("✅ Clic sur l'item effectué", extra={"action": "ITEMDB"})
+                time.sleep(2)
+                
+            except Exception as e:
+                # If row not found, navigate directly to item URL
+                self.logger.debug(f"Row non trouvé, navigation directe vers l'item", extra={"action": "ITEMDB"})
+                
+                item_url = f"{self.base_url}?id={item_id}"
+                self.driver.get(item_url)
+                time.sleep(3)
+                self.logger.debug(f"✅ Navigation directe vers {item_url}", extra={"action": "ITEMDB"})
+            
+            # Wait for item details to load via JavaScript
+            self.logger.debug("⏳ Attente chargement détails item...", extra={"action": "ITEMDB"})
+            
+            # Wait for item details table with actual data (not empty search table)
+            # We need to wait for table rows with class "item_line_left" which contain the actual item data
+            try:
+                WebDriverWait(self.driver, 15).until(
+                    EC.presence_of_element_located((By.CLASS_NAME, "item_line_left"))
+                )
+                self.logger.debug("✅ Détails item chargés (lignes item_line_left trouvées)", extra={"action": "ITEMDB"})
+            except Exception as e:
+                self.logger.warning(f"⚠️ Timeout attente détails item: {e}", extra={"action": "ITEMDB"})
+            
+            # Additional wait for complete rendering
+            time.sleep(2)
+            
+            # DEBUG: Save HTML for inspection
+            from pathlib import Path
+            debug_folder = Path(__file__).parent.parent / 'Logs' / 'items_details_debug'
+            debug_folder.mkdir(parents=True, exist_ok=True)
+            debug_file = debug_folder / f"item_{item_id}_clicked.html"
+            with open(debug_file, 'w', encoding='utf-8') as f:
+                f.write(self.driver.page_source)
+            self.logger.debug(f"💾 HTML détails sauvegardé: {debug_file}", extra={"action": "ITEMDB"})
             
             # Parse page
             soup = BeautifulSoup(self.driver.page_source, 'html.parser')
@@ -833,123 +894,160 @@ class ItemsScraper:
                 'merchants': []
             }
             
-            # Extract item name - try different methods
-            name_elem = soup.find('h1', class_=lambda x: x and 'item' in x.lower() if x else False)
-            if not name_elem:
-                name_elem = soup.find('h1')
-            if not name_elem:
-                # Try to find in title
-                title_elem = soup.find('title')
-                if title_elem:
-                    title_text = title_elem.get_text()
-                    # Remove "Eden - " prefix if present
-                    item_data['name'] = title_text.replace('Eden - ', '').strip()
-            else:
-                item_data['name'] = name_elem.get_text(strip=True)
+            # Extract data from HTML table (only reliable source)
             
-            # Find the item info container (usually a div/table with class containing 'item')
-            item_container = soup.find(['div', 'table'], class_=lambda x: x and any(c in x.lower() for c in ['item', 'detail']) if x else False)
+            # Find the main result table
+            result_table = soup.find('table', id='table_result')
+            if not result_table:
+                self.logger.error("❌ Table résultat introuvable", extra={"action": "ITEMDB"})
+                return item_data
             
-            if item_container:
-                container_text = item_container.get_text()
-            else:
-                container_text = soup.get_text()
+            # Extract item name from the first <tr> with class="header" containing the item name
+            # The name is in a <td class="nowrap"> element (second column of header row)
+            all_rows = result_table.find_all('tr')
+            for row in all_rows:
+                # Check if this row has the header class
+                if row.find('td', class_='header'):
+                    # Find the nowrap cell that contains the item name (not icon or stats)
+                    nowrap_cells = row.find_all('td', class_='nowrap')
+                    for cell in nowrap_cells:
+                        # Skip cells with icons (those have width style)
+                        if not cell.get('style') or 'width' not in cell.get('style', ''):
+                            text = cell.get_text(strip=True)
+                            # Check if it's not utility text (contains numbers like "103.0")
+                            if text and not any(char.isdigit() for char in text):
+                                item_data['name'] = text
+                                self.logger.debug(f"📝 Nom extrait: {item_data['name']}", extra={"action": "ITEMDB"})
+                                break
+                if item_data['name']:
+                    break
             
-            # Extract Type (Armor type, weapon type, etc.)
-            type_match = re.search(r'Type:\s*([^\n\r]+)', container_text, re.IGNORECASE)
-            if type_match:
-                item_data['type'] = type_match.group(1).strip()
-            
-            # Extract Slot
-            slot_match = re.search(r'Slot:\s*([^\n\r]+)', container_text, re.IGNORECASE)
-            if slot_match:
-                item_data['slot'] = slot_match.group(1).strip()
-            
-            # Extract Level
-            level_match = re.search(r'Level:\s*(\d+)', container_text, re.IGNORECASE)
-            if level_match:
-                item_data['level'] = level_match.group(1).strip()
-            
-            # Extract Quality
-            quality_match = re.search(r'Quality:\s*(\d+)%', container_text, re.IGNORECASE)
-            if quality_match:
-                item_data['quality'] = quality_match.group(1).strip()
+            # Find all item detail lines (class="item_line_left" and "item_line_right")
+            detail_rows = result_table.find_all('tr')
+            for row in detail_rows:
+                cells = row.find_all('td')
+                if len(cells) == 2:
+                    left_cell = cells[0]
+                    right_cell = cells[1]
+                    
+                    # Check if this is a detail row
+                    if 'item_line_left' in left_cell.get('class', []):
+                        label = left_cell.get_text(strip=True)
+                        value = right_cell.get_text(strip=True)
+                        
+                        # Map the label to our data structure
+                        if label == 'Type':
+                            item_data['type'] = value
+                            self.logger.debug(f"  Type: {value}", extra={"action": "ITEMDB"})
+                        elif label == 'Slot':
+                            item_data['slot'] = value
+                            self.logger.debug(f"  Slot: {value}", extra={"action": "ITEMDB"})
+                        elif label == 'Quality':
+                            item_data['quality'] = value.replace('%', '').strip()
+                            self.logger.debug(f"  Quality: {value}", extra={"action": "ITEMDB"})
+                        elif label == 'Required Level':
+                            item_data['level'] = value
+                            self.logger.debug(f"  Level: {value}", extra={"action": "ITEMDB"})
+                        elif label == 'Realm':
+                            item_data['realm'] = value
+                        # Stats
+                        elif label in ['Strength', 'Constitution', 'Dexterity', 'Quickness', 'Acuity', 'Health', 'Power Pool']:
+                            item_data['stats'][label] = value
+                        # Resists
+                        elif label.startswith('Resist:'):
+                            resist_type = label.replace('Resist:', '').strip()
+                            item_data['resistances'][resist_type] = value
+                        # ToA bonuses
+                        elif label in ['Spell Range', 'Casting Speed', 'Arcane Syphon', 'Melee Speed', 'Armor Factor']:
+                            item_data['bonuses'][label] = value
+                        # All Skills
+                        elif label == 'All Skills':
+                            item_data['bonuses'][label] = value
             
             # Parse merchants section
-            merchants_section = soup.find('h2', string=re.compile('From Merchants', re.IGNORECASE))
-            if merchants_section:
-                # Find content after the header
-                merchant_content = merchants_section.find_next_sibling()
-                if merchant_content:
-                    merchant_text = merchant_content.get_text()
-                    merchant_lines = [line.strip() for line in merchant_text.split('\n') if line.strip()]
+            merchants_table = soup.find('table', id='table_merchants')
+            if merchants_table:
+                # Find all merchant divs
+                merchant_divs = merchants_table.find_all('div', class_='item_mob')
+                for merchant_div in merchant_divs:
+                    merchant_data = {
+                        'name': None,
+                        'level': None,
+                        'location': None,
+                        'zone': None,
+                        'zone_full': None,
+                        'price': None,
+                        'price_parsed': None
+                    }
                     
-                    current_merchant = None
-                    i = 0
-                    while i < len(merchant_lines):
-                        line = merchant_lines[i]
-                        i += 1
-                        
-                        if not line:
+                    # Find all rows in the merchant div
+                    merchant_rows = merchant_div.find_all('tr')
+                    for row in merchant_rows:
+                        cells = row.find_all('td')
+                        if not cells:
                             continue
                         
-                        # Check if line contains "Level:" pattern
-                        if 'Level:' in line:
-                            if current_merchant is None:
-                                # Previous line should be merchant name
-                                if i > 1:
-                                    merchant_name = merchant_lines[i - 2].strip()
-                                else:
-                                    merchant_name = line.split('Level:')[0].strip()
-                                
-                                current_merchant = {
-                                    'name': merchant_name,
-                                    'level': line.split('Level:')[1].strip() if 'Level:' in line else '',
-                                    'location': None,
-                                    'zone': None,
-                                    'zone_full': None,
-                                    'price': None
-                                }
+                        row_text = row.get_text(strip=True)
                         
-                        # Location line (starts with "in ")
-                        elif line.startswith('in ') and current_merchant:
-                            zone_full = line.replace('in ', '').strip()
+                        # Name and level row (has "Level:" in it)
+                        if 'Level:' in row_text:
+                            # Name is in the clickable element
+                            name_elem = row.find('td', class_='mob_name')
+                            if name_elem:
+                                merchant_data['name'] = name_elem.get_text(strip=True)
+                            # Level is in the right cell
+                            if len(cells) >= 2:
+                                level_text = cells[-1].get_text(strip=True)
+                                level_match = re.search(r'Level:\s*(\d+)', level_text)
+                                if level_match:
+                                    merchant_data['level'] = level_match.group(1)
+                        
+                        # Zone row (starts with "in ")
+                        elif row_text.startswith('in '):
+                            zone_full = row_text.replace('in ', '').split('Loc:')[0].strip()
                             zone_short = self.ZONE_MAPPING.get(zone_full, zone_full)
-                            current_merchant['zone'] = zone_short
-                            current_merchant['zone_full'] = zone_full
-                        
-                        # Location coordinates (starts with "Loc:")
-                        elif line.startswith('Loc:') and current_merchant:
-                            current_merchant['location'] = line.replace('Loc:', '').strip()
-                        
-                        # Price line (starts with "Price:")
-                        elif line.startswith('Price:') and current_merchant:
-                            price_text = line.replace('Price:', '').strip()
-                            if not price_text and i < len(merchant_lines):
-                                # Price on next line
-                                price_text = merchant_lines[i].strip()
-                                i += 1
+                            merchant_data['zone'] = zone_short
+                            merchant_data['zone_full'] = zone_full
                             
-                            current_merchant['price'] = price_text
-                            current_merchant['price_parsed'] = self.parse_price(price_text)
+                            # Location (Loc: xxx)
+                            if 'Loc:' in row_text:
+                                loc_match = re.search(r'Loc:\s*(.+?)$', row_text)
+                                if loc_match:
+                                    merchant_data['location'] = loc_match.group(1).strip()
+                        
+                        # Price row
+                        elif row_text.startswith('Price:'):
+                            price_text = row_text.replace('Price:', '').strip()
+                            merchant_data['price'] = price_text
+                            merchant_data['price_parsed'] = self.parse_price(price_text)
                             
                             # Override zone based on currency
-                            if current_merchant['price_parsed']:
-                                currency = current_merchant['price_parsed']['currency']
+                            if merchant_data['price_parsed']:
+                                currency = merchant_data['price_parsed']['currency']
                                 if currency == 'Atlantean Glass':
-                                    current_merchant['zone'] = 'ToA'
+                                    merchant_data['zone'] = 'ToA'
                                 elif currency == 'Seals':
-                                    current_merchant['zone'] = 'DF'
+                                    merchant_data['zone'] = 'DF'
                                 elif currency == 'Roots':
-                                    current_merchant['zone'] = 'Galladoria'
-                            
-                            # Merchant entry complete
-                            if current_merchant['name']:
-                                item_data['merchants'].append(current_merchant)
-                            current_merchant = None
+                                    merchant_data['zone'] = 'Epik'
+                                elif currency == 'Dragon Scales':
+                                    # Afficher "Scales" comme devise
+                                    merchant_data['price_parsed']['currency'] = 'Scales'
+                                    merchant_data['zone'] = 'Drake'
+                                elif currency == 'Scales':
+                                    merchant_data['zone'] = 'Drake'
+                    
+                    # Add merchant if we found a name
+                    if merchant_data['name']:
+                        item_data['merchants'].append(merchant_data)
             
             return item_data
             
         except Exception as e:
-            self.logger.error(f"Erreur récupération détails item: {e}", extra={"action": "MARKET"})
-            return None
+            self.logger.error(f"Erreur récupération détails item: {e}", extra={"action": "ITEMDB"})
+            # Return minimal data with ID instead of None
+            return {
+                'id': item_id,
+                'name': item_name if item_name else 'Unknown',
+                'error': str(e)
+            }

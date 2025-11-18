@@ -2569,7 +2569,43 @@ class ConfigurationDialog(QDialog):
         server_group.setLayout(server_layout)
         content_layout.addWidget(server_group)
 
-        # Debug Settings (Position 4 - Last)
+        # Armory Settings (Position 4)
+        logging.debug("Creating Armory settings group")
+        armory_group = QGroupBox("🛡️ Armurerie")
+        armory_layout = QVBoxLayout()
+        
+        # Description
+        armory_desc = QLabel(
+            "L'armurerie permet d'importer des items depuis des fichiers Zenkcraft\n"
+            "et de créer une base de données locale d'items."
+        )
+        armory_desc.setWordWrap(True)
+        armory_desc.setStyleSheet("color: #888; font-style: italic; padding: 5px;")
+        armory_layout.addWidget(armory_desc)
+        
+        # Import button
+        self.armory_import_button = QPushButton("📥 Importer des items depuis Zenkcraft")
+        self.armory_import_button.setMinimumHeight(40)
+        self.armory_import_button.setToolTip(
+            "Ouvre l'interface d'import pour ajouter des items\n"
+            "depuis des fichiers templates Zenkcraft (.txt)"
+        )
+        self.armory_import_button.clicked.connect(self.open_armory_import)
+        armory_layout.addWidget(self.armory_import_button)
+        
+        # Database info
+        armory_info_layout = QHBoxLayout()
+        armory_info_layout.addWidget(QLabel("📊 Base de données:"))
+        self.armory_db_info_label = QLabel("Aucune base chargée")
+        self.armory_db_info_label.setStyleSheet("color: #888;")
+        armory_info_layout.addWidget(self.armory_db_info_label, 1)
+        armory_layout.addLayout(armory_info_layout)
+        
+        armory_group.setLayout(armory_layout)
+        content_layout.addWidget(armory_group)
+        logging.debug("Armory settings group added to content_layout")
+
+        # Debug Settings (Position 5 - Last)
         debug_group = QGroupBox(lang.get("config_debug_group_title", 
                                          default="Debug"))
         debug_layout = QFormLayout()
@@ -2680,6 +2716,9 @@ class ConfigurationDialog(QDialog):
         
         allow_download = config.get("system.allow_browser_download", False)
         self.allow_browser_download_check.setChecked(allow_download)
+        
+        # Update armory database info
+        self.update_armory_db_info()
 
     def browse_folder(self, line_edit, title_key):
         """Generic folder browser."""
@@ -2703,6 +2742,58 @@ class ConfigurationDialog(QDialog):
     def browse_cookies_folder(self):
         """Browse for cookies folder."""
         self.browse_folder(self.cookies_path_edit, "select_folder_dialog_title")
+    
+    def open_armory_import(self):
+        """Ouvre le dialogue d'import d'items pour l'armurerie"""
+        from UI.armory_import_dialog import ArmoryImportDialog
+        
+        dialog = ArmoryImportDialog(self)
+        dialog.exec()
+        
+        # Update database info after import
+        self.update_armory_db_info()
+    
+    def update_armory_db_info(self):
+        """Met à jour les informations sur la base de données d'armurerie"""
+        # Check if the label exists (in case method is called before UI is fully created)
+        if not hasattr(self, 'armory_db_info_label'):
+            return
+            
+        try:
+            import json
+            from pathlib import Path
+            
+            armor_path = config.get('folders.armor')
+            if not armor_path:
+                self.armory_db_info_label.setText("Chemin non configuré")
+                self.armory_db_info_label.setStyleSheet("color: #f44336;")
+                return
+            
+            armor_path = Path(armor_path)
+            
+            # Count items in all databases
+            total_items = 0
+            realms = ['albion', 'hibernia', 'midgard']
+            
+            for realm in realms:
+                db_file = armor_path / f"items_database_{realm}.json"
+                if db_file.exists():
+                    with open(db_file, 'r', encoding='utf-8') as f:
+                        database = json.load(f)
+                        total_items += len(database.get('items', {}))
+            
+            if total_items > 0:
+                self.armory_db_info_label.setText(f"{total_items} items disponibles")
+                self.armory_db_info_label.setStyleSheet("color: #4CAF50;")
+            else:
+                self.armory_db_info_label.setText("Aucun item")
+                self.armory_db_info_label.setStyleSheet("color: #888;")
+                
+        except Exception as e:
+            logging.error(f"Erreur lecture database armory: {e}", exc_info=True)
+            if hasattr(self, 'armory_db_info_label'):
+                self.armory_db_info_label.setText("Erreur")
+                self.armory_db_info_label.setStyleSheet("color: #f44336;")
 
 
 class ArmorManagementDialog(QDialog):

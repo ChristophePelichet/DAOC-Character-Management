@@ -2,49 +2,57 @@
 # -*- coding: utf-8 -*-
 
 """
-Script de construction de la base de données items depuis des fichiers .txt d'armures Zenkcraft
-Parse tous les fichiers .txt d'un dossier et extrait les noms d'items pour les chercher sur Eden
+Script de parsing des fichiers template d'items
+Parse les fichiers .txt template et extrait les noms d'items pour les chercher sur Eden
 """
 
 import os
 import json
 import re
 from pathlib import Path
-from Functions.items_scraper import ItemsScraper
-from Functions.eden_scraper import EdenScraper
-from Functions.cookie_manager import CookieManager
+from .items_scraper import ItemsScraper
+from .eden_scraper import EdenScraper
+from .cookie_manager import CookieManager
 
-def parse_zenkcraft_file(file_path):
+def parse_template_file(file_path):
     """
-    Parse un fichier .txt Zenkcraft et extrait tous les noms d'items
+    Parse un fichier .txt template et extrait tous les noms d'items de type Loot
     
     Args:
-        file_path: Chemin vers le fichier .txt
+        file_path: Chemin vers le fichier .txt (str ou Path)
         
     Returns:
-        list: Liste des noms d'items trouvés
+        list: Liste des noms d'items trouvés (uniquement Source Type: Loot)
     """
     items = []
     
     try:
+        # Convert to Path if string
+        if isinstance(file_path, str):
+            file_path = Path(file_path)
+            
         with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
         
-        # Regex pour extraire les items depuis "Name: item_name" (format Zenkcraft)
-        # Ignore les lignes "Name: " vides et les items spellcraft sans nom
-        item_pattern = r'^Name:\s*(.+?)$'
-        matches = re.findall(item_pattern, content, re.MULTILINE)
+        # Split content into item blocks (separated by double newlines)
+        # Each block contains: Name, Level, Utility, Source Type, etc.
+        item_blocks = re.split(r'\n\n+', content)
         
-        for item_name in matches:
-            item_name = item_name.strip()
-            # Ignore les noms vides ou très courts (probablement des erreurs)
-            if item_name and len(item_name) > 2 and item_name not in items:
-                items.append(item_name)
+        for block in item_blocks:
+            # Check if this block has both "Name:" and "Source Type: Loot"
+            if 'Name:' in block and 'Source Type: Loot' in block:
+                # Extract item name
+                name_match = re.search(r'^Name:\s*(.+?)$', block, re.MULTILINE)
+                if name_match:
+                    item_name = name_match.group(1).strip()
+                    # Skip empty names or duplicates
+                    if item_name and item_name not in items:
+                        items.append(item_name)
         
-        print(f"  ✅ {file_path.name}: {len(items)} items trouvés")
+        print(f"  ✅ {file_path.name}: {len(items)} items Loot trouvés")
         
     except Exception as e:
-        print(f"  ❌ Erreur lecture {file_path.name}: {e}")
+        print(f"  ❌ Erreur lecture {file_path.name if hasattr(file_path, 'name') else file_path}: {e}")
     
     return items
 
@@ -131,7 +139,7 @@ def build_database_from_folder(folder_path, output_file=None, realm="All"):
     # Parse all files and collect unique items
     all_items = []
     for txt_file in txt_files:
-        items = parse_zenkcraft_file(txt_file)
+        items = parse_template_file(txt_file)
         all_items.extend(items)
     
     # Remove duplicates (case insensitive)

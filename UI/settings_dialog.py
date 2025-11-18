@@ -78,6 +78,7 @@ class SettingsDialog(QDialog):
         self._create_columns_page()
         self._create_herald_page()
         self._create_backup_page()
+        self._create_armory_page()
         self._create_debug_page()
         
         # === LEFT SIDE: Navigation (create after pages) ===
@@ -122,13 +123,14 @@ class SettingsDialog(QDialog):
         
         # Navigation items with icons
         nav_items = [
-            ("📁", lang.get("settings_nav_general", default="Général")),
-            ("🎨", lang.get("settings_nav_themes", default="Thèmes")),
-            ("🚀", lang.get("settings_nav_startup", default="Démarrage")),
-            ("🏛️", lang.get("settings_nav_columns", default="Colonnes")),
-            ("🌐", lang.get("settings_nav_herald", default="Herald Eden")),
-            ("💾", lang.get("settings_nav_backup", default="Sauvegardes")),
-            ("🐛", lang.get("settings_nav_debug", default="Debug")),
+            ("📁", lang.get("settings.navigation.general", default="Général")),
+            ("🎨", lang.get("settings.navigation.themes", default="Thèmes")),
+            ("🚀", lang.get("settings.navigation.startup", default="Démarrage")),
+            ("🏛️", lang.get("settings.navigation.columns", default="Colonnes")),
+            ("🌐", lang.get("settings.navigation.herald", default="Herald Eden")),
+            ("💾", lang.get("settings.navigation.backup", default="Sauvegardes")),
+            ("🛡️", lang.get("settings.navigation.armory", default="Armurerie")),
+            ("🐛", lang.get("settings.navigation.debug", default="Debug")),
         ]
         
         for icon, text in nav_items:
@@ -984,6 +986,103 @@ class SettingsDialog(QDialog):
         
         armor_group.setLayout(armor_layout)
         layout.addWidget(armor_group)
+        
+        layout.addStretch()
+        self.pages.addWidget(page)
+        
+    def _create_armory_page(self):
+        """Page 7: Armory Settings"""
+        page = QWidget()
+        layout = QVBoxLayout(page)
+        layout.setAlignment(Qt.AlignTop)
+        
+        # Title
+        title = QLabel(f"🛡️ {lang.get('settings.pages.armory.title', default='Armurerie')}")
+        title_font = title.font()
+        title_font.setPointSize(title_font.pointSize() + 4)
+        title_font.setBold(True)
+        title.setFont(title_font)
+        layout.addWidget(title)
+        
+        subtitle = QLabel(lang.get('settings.pages.armory.subtitle', default="Import et gestion de la base de données d'items"))
+        subtitle.setStyleSheet("color: gray;")
+        layout.addWidget(subtitle)
+        layout.addSpacing(20)
+        
+        # === DESCRIPTION ===
+        desc_group = QGroupBox(lang.get('settings.pages.armory.desc_group_title', default="ℹ️ À propos"))
+        desc_layout = QVBoxLayout()
+        
+        desc_text = QLabel(lang.get('settings.pages.armory.desc_text', 
+            default="L'armurerie permet d'importer des items depuis des fichiers Zenkcraft (.txt) "
+            "et de créer une base de données locale d'items avec leurs statistiques, "
+            "résistances, bonus et informations sur les marchands."
+        ))
+        desc_text.setWordWrap(True)
+        desc_text.setStyleSheet("color: #888; padding: 10px;")
+        desc_layout.addWidget(desc_text)
+        
+        desc_group.setLayout(desc_layout)
+        layout.addWidget(desc_group)
+        layout.addSpacing(10)
+        
+        # === IMPORT SECTION ===
+        import_group = QGroupBox(lang.get('settings.pages.armory.import_group_title', default="📥 Import d'items"))
+        import_layout = QVBoxLayout()
+        
+        # Import button
+        self.armory_import_button = QPushButton(lang.get('settings.pages.armory.import_button', default="📥 Importer des items depuis Zenkcraft"))
+        self.armory_import_button.setMinimumHeight(50)
+        self.armory_import_button.setStyleSheet("""
+            QPushButton {
+                font-size: 14px;
+                font-weight: bold;
+                padding: 10px;
+            }
+            QPushButton:hover {
+                background-color: palette(highlight);
+            }
+        """)
+        self.armory_import_button.clicked.connect(self._open_armory_import)
+        import_layout.addWidget(self.armory_import_button)
+        
+        import_help = QLabel(lang.get('settings.pages.armory.import_help',
+            default="💡 Cliquez sur le bouton ci-dessus pour ouvrir l'interface d'import. "
+            "Vous pourrez sélectionner un fichier template Zenkcraft (.txt), "
+            "choisir le royaume et lancer l'import automatique."
+        ))
+        import_help.setWordWrap(True)
+        import_help.setStyleSheet("color: #666; font-style: italic; padding: 10px;")
+        import_layout.addWidget(import_help)
+        
+        import_group.setLayout(import_layout)
+        layout.addWidget(import_group)
+        layout.addSpacing(10)
+        
+        # === DATABASE STATUS ===
+        status_group = QGroupBox(lang.get('settings.pages.armory.status_group_title', default="📊 État de la base de données"))
+        status_layout = QFormLayout()
+        
+        # Database path
+        armor_path = config.get('folders.armor') or get_armor_dir()
+        self.armory_path_label = QLabel(armor_path)
+        self.armory_path_label.setStyleSheet("color: #888;")
+        status_layout.addRow(lang.get('settings.pages.armory.status_location', default="📂 Emplacement:"), self.armory_path_label)
+        
+        # Items count
+        self.armory_items_label = QLabel(lang.get('settings.pages.armory.status_loading', default="Chargement..."))
+        status_layout.addRow(lang.get('settings.pages.armory.status_items', default="🔢 Items disponibles:"), self.armory_items_label)
+        
+        # Last update
+        self.armory_last_update_label = QLabel(lang.get('settings.pages.armory.status_no_date', default="-"))
+        self.armory_last_update_label.setStyleSheet("color: #888;")
+        status_layout.addRow(lang.get('settings.pages.armory.status_last_update', default="🕐 Dernière mise à jour:"), self.armory_last_update_label)
+        
+        status_group.setLayout(status_layout)
+        layout.addWidget(status_group)
+        
+        # Update database info
+        self._update_armory_status()
         
         layout.addStretch()
         self.pages.addWidget(page)
@@ -1844,4 +1943,68 @@ class SettingsDialog(QDialog):
         
         if reply == QMessageBox.Yes:
             self._load_settings()
+    
+    def _open_armory_import(self):
+        """Ouvre le dialogue d'import d'items pour l'armurerie"""
+        from UI.armory_import_dialog import ArmoryImportDialog
+        
+        dialog = ArmoryImportDialog(self)
+        dialog.exec()
+        
+        # Update database status after import
+        self._update_armory_status()
+    
+    def _update_armory_status(self):
+        """Met à jour les informations sur la base de données d'armurerie"""
+        try:
+            import json
+            from pathlib import Path
+            from datetime import datetime
+            
+            armor_path = config.get('folders.armor') or get_armor_dir()
+            armor_path = Path(armor_path)
+            
+            # Count items in all databases
+            total_items = 0
+            latest_update = None
+            realms = ['albion', 'hibernia', 'midgard']
+            
+            for realm in realms:
+                db_file = armor_path / f"items_database_{realm}.json"
+                if db_file.exists():
+                    with open(db_file, 'r', encoding='utf-8') as f:
+                        database = json.load(f)
+                        total_items += len(database.get('items', {}))
+                        
+                        # Check last update date
+                        updated = database.get('updated')
+                        if updated:
+                            try:
+                                update_date = datetime.fromisoformat(updated)
+                                if latest_update is None or update_date > latest_update:
+                                    latest_update = update_date
+                            except:
+                                pass
+            
+            # Update labels
+            if total_items > 0:
+                self.armory_items_label.setText(f"{total_items} items")
+                self.armory_items_label.setStyleSheet("color: #4CAF50; font-weight: bold;")
+            else:
+                self.armory_items_label.setText("Aucun item")
+                self.armory_items_label.setStyleSheet("color: #888;")
+            
+            if latest_update:
+                self.armory_last_update_label.setText(latest_update.strftime("%d/%m/%Y %H:%M"))
+                self.armory_last_update_label.setStyleSheet("color: #4CAF50;")
+            else:
+                self.armory_last_update_label.setText("Jamais")
+                self.armory_last_update_label.setStyleSheet("color: #888;")
+                
+        except Exception as e:
+            logging.error(f"Erreur mise à jour statut armory: {e}", exc_info=True)
+            if hasattr(self, 'armory_items_label'):
+                self.armory_items_label.setText("Erreur")
+                self.armory_items_label.setStyleSheet("color: #f44336;")
+
 

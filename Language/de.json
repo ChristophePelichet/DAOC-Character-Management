@@ -309,6 +309,7 @@
             "columns": "Spalten",
             "herald": "Herald Eden",
             "backup": "Sicherungen",
+            "armory": "Waffenkammer",
             "data": "Daten",
             "language": "Sprache",
             "debug": "Debug"
@@ -355,6 +356,21 @@
                 "title": "Debug",
                 "subtitle": "Debug-Optionen für die Diagnose",
                 "info": "Der Debug-Modus ist nützlich zur Diagnose von Problemen.\n\nDebug-Protokolle werden im Logs/-Ordner gespeichert"
+            },
+            "armory": {
+                "title": "Waffenkammer",
+                "subtitle": "Import und Verwaltung der Gegenstände-Datenbank",
+                "desc_group_title": "ℹ️ Über",
+                "desc_text": "Die Waffenkammer ermöglicht den Import von Gegenständen aus Zenkcraft-Dateien (.txt) und die Erstellung einer lokalen Gegenstände-Datenbank mit ihren Statistiken, Widerständen, Boni und Händlerinformationen.",
+                "import_group_title": "📥 Gegenstände-Import",
+                "import_button": "📥 Gegenstände aus Zenkcraft importieren",
+                "import_help": "💡 Klicken Sie auf die Schaltfläche oben, um die Import-Oberfläche zu öffnen. Sie können eine Zenkcraft-Vorlagendatei (.txt) auswählen, das Reich wählen und den automatischen Import starten.",
+                "status_group_title": "📊 Datenbank-Status",
+                "status_location": "📂 Speicherort:",
+                "status_items": "🔢 Verfügbare Gegenstände:",
+                "status_last_update": "🕐 Letzte Aktualisierung:",
+                "status_loading": "Lädt...",
+                "status_no_date": "-"
             }
         },
         "groups": {
@@ -546,6 +562,42 @@
         "duplicate": "Duplizieren",
         "armor_management": "Waffenkammer",
         "update_from_herald": "🔄 Vom Herald aktualisieren"
+    },
+    "armory_import": {
+        "window_title": "Rüstkammer - Gegenstände Importieren",
+        "file_group_title": "📂 Vorlagen-Datei",
+        "no_file_selected": "Keine Datei ausgewählt",
+        "browse_button": "📁 Durchsuchen...",
+        "realm_label": "🏰 Reich:",
+        "start_import_button": "▶️ Import Starten",
+        "progress_group_title": "⏳ Fortschritt",
+        "waiting_status": "Warten...",
+        "items_found_group_title": "📦 Gefundene Gegenstände",
+        "details_group_title": "ℹ️ Details des ausgewählten Gegenstands",
+        "save_database_button": "💾 Datenbank Speichern",
+        "close_button": "✖️ Schließen",
+        "import_in_progress_title": "Import Läuft",
+        "import_in_progress_message": "Ein Import läuft gerade. Möchten Sie wirklich schließen?",
+        "import_finished_title": "Import Abgeschlossen",
+        "import_finished_message": "Import abgeschlossen",
+        "import_error_title": "Import Fehler",
+        "save_success_title": "Erfolgreich Gespeichert",
+        "save_success_message": "Datenbank erfolgreich gespeichert",
+        "save_error_title": "Speicherfehler",
+        "path_not_configured_title": "Pfad Nicht Konfiguriert",
+        "path_not_configured_message": "Bitte konfigurieren Sie den Rüstkammer-Pfad in den Einstellungen.",
+        "select_file": "Wählen Sie eine Vorlagen-Datei",
+        "file_filter": "Vorlagen-Dateien (*.txt);;Alle Dateien (*.*)",
+        "reading_file": "Datei wird gelesen...",
+        "table_columns": {
+            "id": "ID",
+            "name": "Name",
+            "type": "Typ",
+            "slot": "Slot",
+            "zone": "Zone",
+            "price": "Preis",
+            "currency": "Währung"
+        }
     },
     "armoury_dialog": {
         "title": "Waffenkammer-Verwaltung - {name} ({realm} - {season})",

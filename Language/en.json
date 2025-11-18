@@ -301,6 +301,7 @@
             "columns": "Columns",
             "herald": "Herald Eden",
             "backup": "Backups",
+            "armory": "Armory",
             "data": "Data",
             "language": "Language",
             "debug": "Debug"
@@ -345,8 +346,23 @@
             },
             "debug": {
                 "title": "Debug",
-                "subtitle": "Debugging options for diagnostics",
+                "subtitle": "Debugging and diagnostics options",
                 "info": "Debug mode is useful for diagnosing issues.\n\nDebug logs are saved in the Logs/ folder"
+            },
+            "armory": {
+                "title": "Armory",
+                "subtitle": "Import and management of items database",
+                "desc_group_title": "ℹ️ About",
+                "desc_text": "The armory allows you to import items from Zenkcraft files (.txt) and create a local items database with their stats, resists, bonuses and merchant information.",
+                "import_group_title": "📥 Items Import",
+                "import_button": "📥 Import items from Zenkcraft",
+                "import_help": "💡 Click the button above to open the import interface. You will be able to select a Zenkcraft template file (.txt), choose the realm and start the automatic import.",
+                "status_group_title": "📊 Database Status",
+                "status_location": "📂 Location:",
+                "status_items": "🔢 Available items:",
+                "status_last_update": "🕐 Last update:",
+                "status_loading": "Loading...",
+                "status_no_date": "-"
             }
         },
         "groups": {
@@ -546,6 +562,42 @@
         "duplicate": "Duplicate",
         "armor_management": "Armoury",
         "update_from_herald": "🔄 Update from Herald"
+    },
+    "armory_import": {
+        "window_title": "Armory - Items Import",
+        "file_group_title": "📂 Template File",
+        "no_file_selected": "No file selected",
+        "browse_button": "📁 Browse...",
+        "realm_label": "🏰 Realm:",
+        "start_import_button": "▶️ Start Import",
+        "progress_group_title": "⏳ Progress",
+        "waiting_status": "Waiting...",
+        "items_found_group_title": "📦 Items Found",
+        "details_group_title": "ℹ️ Selected Item Details",
+        "save_database_button": "💾 Save Database",
+        "close_button": "✖️ Close",
+        "import_in_progress_title": "Import In Progress",
+        "import_in_progress_message": "An import is currently running. Do you really want to close?",
+        "import_finished_title": "Import Finished",
+        "import_finished_message": "Import finished",
+        "import_error_title": "Import Error",
+        "save_success_title": "Save Successful",
+        "save_success_message": "Database saved successfully",
+        "save_error_title": "Save Error",
+        "path_not_configured_title": "Path Not Configured",
+        "path_not_configured_message": "Please configure the armory path in settings.",
+        "select_file": "Select a template file",
+        "file_filter": "Template files (*.txt);;All files (*.*)",
+        "reading_file": "Reading file...",
+        "table_columns": {
+            "id": "ID",
+            "name": "Name",
+            "type": "Type",
+            "slot": "Slot",
+            "zone": "Zone",
+            "price": "Price",
+            "currency": "Currency"
+        }
     },
     "armoury_dialog": {
         "title": "Armoury Management - {name} ({realm} - {season})",

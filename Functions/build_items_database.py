@@ -16,7 +16,7 @@ if __name__ == "__main__":
         print("\nExemples:")
         print("  python build_items_database.py Templates/Armures")
         print("  python build_items_database.py Templates/Armures Hibernia")
-        print("  python build_items_database.py Templates/Armures All Data/items_database.json")
+        print("  python build_items_database.py Templates/Armures All Data/items_database_src.json")
         sys.exit(1)
     
     folder_path = sys.argv[1]

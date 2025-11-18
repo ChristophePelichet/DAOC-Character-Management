@@ -115,7 +115,7 @@ def build_database_from_folder(folder_path, output_file=None, realm="All"):
     
     Args:
         folder_path: Chemin vers le dossier contenant les .txt
-        output_file: Chemin du fichier de sortie (défaut: Data/items_database.json)
+        output_file: Chemin du fichier de sortie (défaut: Data/items_database_src.json)
         realm: Royaume pour la recherche (défaut: All)
     """
     folder = Path(folder_path)
@@ -211,7 +211,7 @@ def build_database_from_folder(folder_path, output_file=None, realm="All"):
     
     # Save database
     if output_file is None:
-        output_file = Path("Data/items_database.json")
+        output_file = Path("Data/items_database_src.json")
     else:
         output_file = Path(output_file)
     
@@ -237,7 +237,7 @@ if __name__ == "__main__":
         print("\nExemples:")
         print("  python build_items_database.py Templates/Armures")
         print("  python build_items_database.py Templates/Armures Hibernia")
-        print("  python build_items_database.py Templates/Armures All Data/items_database.json")
+        print("  python build_items_database.py Templates/Armures All Data/items_database_src.json")
         sys.exit(1)
     
     folder_path = sys.argv[1]

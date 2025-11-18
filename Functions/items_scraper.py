@@ -118,7 +118,7 @@ class ItemsScraper:
         self.base_url = "https://eden-daoc.net/items"
         
         # Database and cache paths
-        self.database_file = Path(__file__).parent.parent / 'Data' / 'items_database.json'
+        self.database_file = Path(__file__).parent.parent / 'Data' / 'items_database_src.json'
         self.cache_file = Path(__file__).parent.parent / 'Armory' / 'items_cache.json'
         
         # Initialize cache (will copy from database if needed)
@@ -174,7 +174,7 @@ class ItemsScraper:
                 cache = {
                     "version": database.get("version", "1.0"),
                     "description": "User items cache - customizable",
-                    "source": "Copied from Data/items_database.json",
+                    "source": "Copied from Data/items_database_src.json",
                     "last_updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                     "items": database.get("items", {})
                 }

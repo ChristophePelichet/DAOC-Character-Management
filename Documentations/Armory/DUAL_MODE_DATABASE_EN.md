@@ -4,7 +4,7 @@
 
 The Armory system implements a **dual-mode database architecture** that allows users to choose between two operation modes:
 
-- **Mode 1 (Internal Database)**: Read-only mode using the embedded `Data/items_database.json`
+- **Mode 1 (Internal Database)**: Read-only mode using the embedded `Data/items_database_src.json`
 - **Mode 2 (Personal Database)**: User-managed mode with a copy in `Armory/items_database.json`
 
 This architecture provides flexibility for different use cases while maintaining data integrity.
@@ -16,7 +16,7 @@ This architecture provides flexibility for different use cases while maintaining
 ### Database Files
 
 #### Internal Database (Mode 1)
-- **Location**: `Data/items_database.json`
+- **Location**: `Data/items_database_src.json`
 - **Type**: Read-only, embedded in application
 - **Purpose**: Default database shipped with the application
 - **Updates**: Only through application updates
@@ -97,7 +97,7 @@ The active mode is controlled by the configuration key:
 Returns the path to the currently active database based on mode.
 
 **Returns**:
-- Mode 1: `Data/items_database.json`
+- Mode 1: `Data/items_database_src.json`
 - Mode 2: `Armory/items_database.json`
 
 **Usage**:
@@ -126,7 +126,7 @@ Creates a personal database by copying the internal database.
 
 **Process**:
 1. Checks if `Armory` folder exists, creates if needed
-2. Copies `Data/items_database.json` → `Armory/items_database.json`
+2. Copies `Data/items_database_src.json` → `Armory/items_database.json`
 3. Updates config: `use_personal_database = True`, `personal_db_created = True`
 4. Saves database path and version to config
 

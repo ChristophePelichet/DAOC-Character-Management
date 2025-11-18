@@ -54,14 +54,15 @@ SettingsDialog (QDialog)
 │   │   ├── Item 5: 💾 Sauvegardes
 │   │   └── Item 6: 🐛 Debug
 │   │
-│   └── Pages Stack (QStackedWidget)
-│       ├── Page 0: General Settings
-│       ├── Page 1: Themes Settings
-│       ├── Page 2: Startup Settings
-│       ├── Page 3: Columns Settings
-│       ├── Page 4: Herald Settings
-│       ├── Page 5: Backup Settings
-│       └── Page 6: Debug Settings
+   └── Pages Stack (QStackedWidget)
+       ├── Page 0: General Settings
+       ├── Page 1: Themes Settings
+       ├── Page 2: Startup Settings
+       ├── Page 3: Columns Settings
+       ├── Page 4: Herald Settings
+       ├── Page 5: Backup Settings
+       ├── Page 6: Debug Settings
+       └── Page 7: SuperAdmin (conditional - requires --admin flag)
 │
 └── Button Box (QDialogButtonBox)
     ├── OK Button
@@ -91,6 +92,7 @@ navigation.setSpacing(2)
 | 4 | 🌐 | Herald Eden | `settings_nav_herald` |
 | 5 | 💾 | Sauvegardes | `settings_nav_backup` |
 | 6 | 🐛 | Debug | `settings_nav_debug` |
+| 7 | 🔧⚡ | SuperAdmin | `settings.navigation.superadmin` (conditional) |
 
 ### **Page Switching Mechanism**
 
@@ -162,7 +164,9 @@ def _create_<section>_page(self):
 
 ---
 
-## 7 Configuration Pages
+## 8 Configuration Pages
+
+⚠️ **Note**: Page 7 (SuperAdmin) is **conditional** - only created when running `python main.py --admin` in development mode. It is completely hidden in production (.exe builds).
 
 ### **Page 0: Général 📁**
 
@@ -248,6 +252,53 @@ def _create_<section>_page(self):
 
 **Info Box**:
 - Explains debug log location
+
+### **Page 7: SuperAdmin 🔧⚡** (Conditional)
+
+**Access Control**:
+- **Required**: `python main.py --admin` flag
+- **Blocked**: In compiled .exe (frozen check)
+- **Condition**: `ADMIN_MODE = '--admin' in sys.argv and not sys.frozen`
+
+**Content**:
+- **Armory Section**: 
+  * Warning banner about internal database modification
+  * Build Database Group:
+    - Multi-file .txt template selection
+    - Realm dropdown (Albion/Hibernia/Midgard/All Realms)
+    - Merge with existing checkbox
+    - Remove duplicates checkbox
+    - Auto-backup checkbox
+    - Execute button (triggers build process)
+  * Statistics Group (left 50%):
+    - Database name label
+    - Total items, Albion, Hibernia, Midgard, All Realms counts
+    - File size, Last updated timestamp
+    - Refresh button
+  * Advanced Operations Group (right 50%):
+    - Clean duplicates button
+
+**Special Features**:
+- **Triple-layer security**: Flag + frozen check + conditional UI
+- **Auto-backup**: Creates timestamped backup before modifications
+- **Multi-file import**: Parse multiple .txt files in one operation
+- **Duplicate detection**: Removes items with same name+realm
+- **Statistics tracking**: Real-time database stats display
+- **Side-by-side layout**: Statistics and Advanced at 50/50 width
+
+**Backend Integration**:
+- Class: `Functions/superadmin_tools.py::SuperAdminTools`
+- Methods: `build_database_from_files()`, `get_database_stats()`, `clean_duplicates()`
+- Target: `Data/items_database_src.json` (internal read-only database)
+- Backups: `Data/Backups/items_database_src_YYYYMMDD_HHMMSS.json`
+
+**Translations**:
+- Namespace: `superadmin.*` (40+ keys)
+- Languages: FR/EN/DE
+- No emojis in JSON (emojis added in code)
+
+**Documentation**:
+- See: `Settings/SUPERADMIN_TOOLS_EN.md` for complete technical documentation
 
 ---
 
@@ -639,19 +690,26 @@ settings_action.triggered.connect(main_window.open_configuration)
 ## Version History
 
 | Version | Changes |
-|---------|---------|
+|---------|---------|------|
 | **0.108** | Complete reorganization with sidebar navigation |
 | | - Removed monolithic dialog |
 | | - Added 7 distinct pages |
 | | - Integrated Backup settings |
 | | - Added folder move functionality |
 | | - Removed Tools menu |
+| | - NEW: Page 7 SuperAdmin (conditional, development-only) |
+| | - SuperAdmin: Build database from template files |
+| | - SuperAdmin: Statistics tracking and duplicate cleaning |
+| | - SuperAdmin: Triple-layer security (flag + frozen + UI) |
+| | - SuperAdmin: Side-by-side layout (Stats 50% + Advanced 50%) |
 
 ---
 
 ## Related Documentation
 
+- [SuperAdmin Tools](SUPERADMIN_TOOLS_EN.md) ⭐ NEW
 - [Folder Move System](FOLDER_MOVE_SYSTEM_EN.md)
 - [Backup Integration](BACKUP_INTEGRATION_EN.md)
+- [Dual-Mode Database](../Armory/DUAL_MODE_DATABASE_EN.md)
 - [Configuration Manager](../Core/CONFIG_MANAGER_EN.md)
 - [Translation System](../Localization/TRANSLATION_SYSTEM_EN.md)

@@ -46,6 +46,9 @@ setup_logging()
 APP_NAME = "DAOC Character Manager"
 APP_VERSION = "0.108"
 
+# SuperAdmin mode detection (only in Python mode, not in .exe)
+ADMIN_MODE = '--admin' in sys.argv and not getattr(sys, 'frozen', False)
+
 
 def global_exception_handler(exc_type, exc_value, exc_traceback):
     """Gestionnaire global des exceptions non gérées"""
@@ -1034,6 +1037,10 @@ def main():
     logging.info(f"Application started at {datetime.now().isoformat()}")
     logging.info(f"Python version: {sys.version}")
     logging.info(f"Process ID: {sys.argv}")
+    
+    # Log SuperAdmin mode if enabled
+    if ADMIN_MODE:
+        logging.info("🔧 SuperAdmin mode enabled (--admin flag detected)")
     
     # Configuration des gestionnaires
     sys.excepthook = global_exception_handler

@@ -89,6 +89,11 @@ class SettingsDialog(QDialog):
         self._create_armory_page()
         self._create_debug_page()
         
+        # SuperAdmin page (only in --admin mode) - AFTER Debug to keep indexes consistent
+        from main import ADMIN_MODE
+        if ADMIN_MODE:
+            self._create_superadmin_page()
+        
         # === LEFT SIDE: Navigation (create after pages) ===
         self.navigation = self._create_navigation()
         content_layout.addWidget(self.navigation)
@@ -138,8 +143,14 @@ class SettingsDialog(QDialog):
             ("🌐", lang.get("settings.navigation.herald", default="Herald Eden")),
             ("💾", lang.get("settings.navigation.backup", default="Sauvegardes")),
             ("🛡️", lang.get("settings.navigation.armory", default="Armurerie")),
-            ("🐛", lang.get("settings.navigation.debug", default="Debug")),
         ]
+        
+        nav_items.append(("🐛", lang.get("settings.navigation.debug", default="Debug")))
+        
+        # Add SuperAdmin page conditionally (at the bottom)
+        from main import ADMIN_MODE
+        if ADMIN_MODE:
+            nav_items.append(("🔧", lang.get("settings.navigation.superadmin", default="SuperAdmin")))
         
         for icon, text in nav_items:
             item = QListWidgetItem(f"{icon}  {text}")
@@ -1124,6 +1135,188 @@ class SettingsDialog(QDialog):
         
         layout.addStretch()
         self.pages.addWidget(page)
+    
+    def _create_superadmin_page(self):
+        """Page 8: SuperAdmin Tools (only visible with --admin flag)"""
+        page = QWidget()
+        layout = QVBoxLayout(page)
+        layout.setAlignment(Qt.AlignTop)
+        
+        # Title
+        title = QLabel("🔧⚡ " + lang.get('superadmin.title', default='SuperAdmin'))
+        title_font = title.font()
+        title_font.setPointSize(title_font.pointSize() + 4)
+        title_font.setBold(True)
+        title.setFont(title_font)
+        layout.addWidget(title)
+        layout.addSpacing(20)
+        
+        # === ARMORY SECTION ===
+        armory_section = QGroupBox("🛡️ " + lang.get('superadmin.armory_section_title', default="Armurerie"))
+        armory_layout = QVBoxLayout()
+        
+        # === WARNING (inside Armory section) ===
+        warning_label = QLabel("⚠️ " + lang.get('superadmin.warning', default='Ces outils modifient la base de données source embarquée. Usage réservé aux développeurs.'))
+        warning_label.setStyleSheet("background-color: #fff3cd; color: #856404; padding: 10px; border-radius: 5px; font-weight: bold;")
+        warning_label.setWordWrap(True)
+        armory_layout.addWidget(warning_label)
+        armory_layout.addSpacing(10)
+        
+        # === BUILD SOURCE DATABASE GROUP ===
+        build_group = QGroupBox(lang.get('superadmin.build_group_title', 
+            default="📦 Construire la base source"))
+        build_layout = QVBoxLayout()
+        
+        # File selection
+        select_files_layout = QHBoxLayout()
+        select_files_label = QLabel(lang.get('superadmin.files_label', default="Fichiers templates (.txt):"))
+        self.superadmin_files_label = QLabel(lang.get('superadmin.no_files_selected', default="Aucun fichier sélectionné"))
+        self.superadmin_files_label.setStyleSheet("color: #888; font-style: italic;")
+        
+        select_files_button = QPushButton(lang.get('superadmin.select_button', default="Sélectionner"))
+        select_files_button.setToolTip(lang.get('superadmin.build_button_tooltip', 
+            default="Sélectionner plusieurs fichiers .txt contenant des templates d'items"))
+        select_files_button.clicked.connect(self._select_template_files)
+        
+        select_files_layout.addWidget(select_files_label)
+        select_files_layout.addWidget(self.superadmin_files_label, 1)
+        select_files_layout.addWidget(select_files_button)
+        build_layout.addLayout(select_files_layout)
+        
+        # Realm selection
+        realm_layout = QHBoxLayout()
+        realm_label = QLabel(lang.get('superadmin.realm_label', default="Royaume:"))
+        self.superadmin_realm_combo = QComboBox()
+        
+        # Add realm options with translations
+        self.superadmin_realm_combo.addItem(lang.get('superadmin.realm_auto', default="Auto-détection"))
+        self.superadmin_realm_combo.addItem("Albion")
+        self.superadmin_realm_combo.addItem("Hibernia")
+        self.superadmin_realm_combo.addItem("Midgard")
+        
+        self.superadmin_realm_combo.setToolTip(lang.get('superadmin.realm_tooltip', 
+            default="Royaume des items (auto-détection depuis les noms de fichiers si activé)"))
+        realm_layout.addWidget(realm_label)
+        realm_layout.addWidget(self.superadmin_realm_combo)
+        realm_layout.addStretch()
+        build_layout.addLayout(realm_layout)
+        
+        build_layout.addSpacing(10)
+        
+        # Options
+        self.superadmin_merge_check = QCheckBox(lang.get('superadmin.options_merge', 
+            default="Fusionner avec la base existante"))
+        self.superadmin_merge_check.setToolTip(lang.get('superadmin.options_merge_tooltip', 
+            default="Si décoché, la base sera écrasée. Si coché, les nouveaux items seront ajoutés à la base existante."))
+        self.superadmin_merge_check.setChecked(True)
+        build_layout.addWidget(self.superadmin_merge_check)
+        
+        self.superadmin_dedup_check = QCheckBox(lang.get('superadmin.options_remove_duplicates', 
+            default="Supprimer les doublons"))
+        self.superadmin_dedup_check.setToolTip(lang.get('superadmin.options_remove_duplicates_tooltip', 
+            default="Supprime les items avec le même nom + royaume"))
+        self.superadmin_dedup_check.setChecked(True)
+        build_layout.addWidget(self.superadmin_dedup_check)
+        
+        self.superadmin_backup_check = QCheckBox(lang.get('superadmin.options_auto_backup', 
+            default="Sauvegarde automatique"))
+        self.superadmin_backup_check.setToolTip(lang.get('superadmin.options_auto_backup_tooltip', 
+            default="Crée une sauvegarde horodatée avant modification"))
+        self.superadmin_backup_check.setChecked(True)
+        build_layout.addWidget(self.superadmin_backup_check)
+        
+        build_layout.addSpacing(10)
+        
+        # Execute button
+        build_execute_button = QPushButton(lang.get('superadmin.build_execute_button', 
+            default="Construire la base source"))
+        build_execute_button.clicked.connect(self._execute_build_database)
+        build_layout.addWidget(build_execute_button)
+        
+        build_group.setLayout(build_layout)
+        armory_layout.addWidget(build_group)
+        armory_layout.addSpacing(15)
+        
+        # === STATISTICS AND ADVANCED OPERATIONS (side by side) ===
+        stats_advanced_layout = QHBoxLayout()
+        
+        # === STATISTICS GROUP (left side - 50%) ===
+        stats_group = QGroupBox(lang.get('superadmin.stats_group_title', 
+            default="📊 Statistiques de la base source"))
+        stats_layout = QFormLayout()
+        
+        self.superadmin_stats_dbname = QLabel("items_database_src.json")
+        self.superadmin_stats_dbname.setStyleSheet("font-weight: bold; color: #2196f3;")
+        stats_layout.addRow(lang.get('superadmin.stats_database_name', default="Base de données:"), 
+                           self.superadmin_stats_dbname)
+        
+        self.superadmin_stats_total = QLabel("0")
+        stats_layout.addRow(lang.get('superadmin.stats_total', default="Total items:"), 
+                           self.superadmin_stats_total)
+        
+        self.superadmin_stats_albion = QLabel("0")
+        stats_layout.addRow(lang.get('superadmin.stats_albion', default="Albion:"), 
+                           self.superadmin_stats_albion)
+        
+        self.superadmin_stats_hibernia = QLabel("0")
+        stats_layout.addRow(lang.get('superadmin.stats_hibernia', default="Hibernia:"), 
+                           self.superadmin_stats_hibernia)
+        
+        self.superadmin_stats_midgard = QLabel("0")
+        stats_layout.addRow(lang.get('superadmin.stats_midgard', default="Midgard:"), 
+                           self.superadmin_stats_midgard)
+        
+        self.superadmin_stats_all_realms = QLabel("0")
+        stats_layout.addRow(lang.get('superadmin.stats_all_realms', default="Tous royaumes:"), 
+                           self.superadmin_stats_all_realms)
+        
+        self.superadmin_stats_file_size = QLabel("0 KB")
+        stats_layout.addRow(lang.get('superadmin.stats_file_size', default="Taille fichier:"), 
+                           self.superadmin_stats_file_size)
+        
+        self.superadmin_stats_last_updated = QLabel(lang.get('superadmin.stats_not_available', default="Non disponible"))
+        stats_layout.addRow(lang.get('superadmin.stats_last_updated', default="Dernière mise à jour:"), 
+                           self.superadmin_stats_last_updated)
+        
+        stats_refresh_button = QPushButton(lang.get('superadmin.stats_refresh_button', 
+            default="Actualiser"))
+        stats_refresh_button.setMinimumHeight(35)
+        stats_refresh_button.clicked.connect(self._refresh_superadmin_stats)
+        stats_layout.addRow("", stats_refresh_button)
+        
+        stats_group.setLayout(stats_layout)
+        stats_advanced_layout.addWidget(stats_group, 1)  # 50% width
+        
+        # === ADVANCED OPERATIONS GROUP (right side - 50%) ===
+        advanced_group = QGroupBox(lang.get('superadmin.advanced_group_title', 
+            default="⚙️ Opérations avancées"))
+        advanced_layout = QVBoxLayout()
+        
+        clean_duplicates_button = QPushButton(lang.get('superadmin.clean_duplicates_button', 
+            default="Nettoyer les doublons"))
+        clean_duplicates_button.setMinimumHeight(35)
+        clean_duplicates_button.setToolTip(lang.get('superadmin.clean_duplicates_tooltip', 
+            default="Supprime les items en double (même nom + royaume) dans la base source"))
+        clean_duplicates_button.clicked.connect(self._clean_duplicates)
+        advanced_layout.addWidget(clean_duplicates_button)
+        
+        advanced_layout.addStretch()  # Push button to top
+        
+        advanced_group.setLayout(advanced_layout)
+        stats_advanced_layout.addWidget(advanced_group, 1)  # 50% width
+        
+        # Add the horizontal layout to armory layout
+        armory_layout.addLayout(stats_advanced_layout)
+        
+        # Close Armory section
+        armory_section.setLayout(armory_layout)
+        layout.addWidget(armory_section)
+        
+        # Initialize statistics on page creation
+        self._refresh_superadmin_stats()
+        
+        layout.addStretch()
+        self.pages.addWidget(page)
         
     def _create_debug_page(self):
         """Page 7: Debug Settings"""
@@ -2074,8 +2267,10 @@ class SettingsDialog(QDialog):
                 
                 # Show stats, actions and import groups
                 self.stats_group.setVisible(True)
-                self.actions_group.setVisible(True)
-                self.import_group.setVisible(True)
+                if hasattr(self, 'actions_group'):
+                    self.actions_group.setVisible(True)
+                if hasattr(self, 'import_group'):
+                    self.import_group.setVisible(True)
                 
                 # Update statistics
                 self._update_statistics()
@@ -2086,8 +2281,10 @@ class SettingsDialog(QDialog):
                 
                 # Hide stats, actions and import groups
                 self.stats_group.setVisible(False)
-                self.actions_group.setVisible(False)
-                self.import_group.setVisible(False)
+                if hasattr(self, 'actions_group'):
+                    self.actions_group.setVisible(False)
+                if hasattr(self, 'import_group'):
+                    self.import_group.setVisible(False)
                 
         except Exception as e:
             logging.error(f"Error updating database mode: {e}", exc_info=True)
@@ -2238,5 +2435,225 @@ class SettingsDialog(QDialog):
             if hasattr(self, 'armory_items_label'):
                 self.armory_items_label.setText("Erreur")
                 self.armory_items_label.setStyleSheet("color: #f44336;")
+    
+    # === SUPERADMIN METHODS ===
+    
+    def _select_template_files(self):
+        """Select multiple .txt template files"""
+        try:
+            title = lang.get('superadmin.select_files_title', 
+                default="Sélectionner les fichiers templates")
+            file_filter = "Template files (*.txt);;All files (*.*)"
+            
+            files, _ = QFileDialog.getOpenFileNames(self, title, "", file_filter)
+            
+            if files:
+                self.superadmin_selected_files = files
+                count = len(files)
+                files_text = lang.get('superadmin.files_selected', 
+                    default="{count} fichier(s) sélectionné(s)")
+                self.superadmin_files_label.setText(files_text.replace("{count}", str(count)))
+                self.superadmin_files_label.setStyleSheet("color: #4caf50; font-weight: bold;")
+            else:
+                self.superadmin_selected_files = []
+                self.superadmin_files_label.setText(
+                    lang.get('superadmin.no_files_selected', 
+                        default="Aucun fichier sélectionné")
+                )
+                self.superadmin_files_label.setStyleSheet("color: #888; font-style: italic;")
+                
+        except Exception as e:
+            logging.error(f"Error selecting template files: {e}", exc_info=True)
+            QMessageBox.critical(self, "Erreur", f"Impossible de sélectionner les fichiers:\n{e}")
+    
+    def _execute_build_database(self):
+        """Execute database build from selected template files"""
+        try:
+            # Check if files are selected
+            if not hasattr(self, 'superadmin_selected_files') or not self.superadmin_selected_files:
+                QMessageBox.warning(self, 
+                    lang.get('superadmin.no_files_selected_title', default="Aucun fichier"),
+                    lang.get('superadmin.no_files_selected_message', 
+                        default="Veuillez sélectionner au moins un fichier template.")
+                )
+                return
+            
+            # Get options
+            realm_index = self.superadmin_realm_combo.currentIndex()
+            realm_map = {0: None, 1: "Albion", 2: "Hibernia", 3: "Midgard"}
+            realm = realm_map[realm_index]
+            
+            merge = self.superadmin_merge_check.isChecked()
+            remove_duplicates = self.superadmin_dedup_check.isChecked()
+            auto_backup = self.superadmin_backup_check.isChecked()
+            
+            # Confirmation dialog
+            count = len(self.superadmin_selected_files)
+            title = lang.get('superadmin.build_confirm_title', default="Confirmer la construction")
+            
+            yes_text = lang.get('common.yes', default="Oui")
+            no_text = lang.get('common.no', default="Non")
+            auto_text = lang.get('superadmin.realm_auto', default="Auto-détection")
+            
+            message = lang.get('superadmin.build_confirm_message',
+                default="Construire la base source avec {count} fichier(s) ?\n\nRoyaume: {realm}\nFusionner: {merge}\nSupprimer doublons: {dedup}\nSauvegarde auto: {backup}")
+            message = message.replace("{count}", str(count))
+            message = message.replace("{realm}", realm or auto_text)
+            message = message.replace("{merge}", yes_text if merge else no_text)
+            message = message.replace("{dedup}", yes_text if remove_duplicates else no_text)
+            message = message.replace("{backup}", yes_text if auto_backup else no_text)
+            
+            reply = QMessageBox.question(self, title, message,
+                                        QMessageBox.Yes | QMessageBox.No)
+            
+            if reply != QMessageBox.Yes:
+                return
+            
+            # Show progress dialog
+            from PySide6.QtWidgets import QApplication
+            progress = QProgressDialog(
+                lang.get('superadmin.progress_description', 
+                    default="Construction de la base source en cours..."),
+                None, 0, 0, self
+            )
+            progress.setWindowTitle(lang.get('superadmin.progress_title', 
+                default="Construction en cours"))
+            progress.setWindowModality(Qt.WindowModal)
+            progress.show()
+            QApplication.processEvents()
+            
+            # Import SuperAdminTools
+            from Functions.superadmin_tools import SuperAdminTools
+            superadmin = SuperAdminTools(self.path_manager)
+            
+            # Execute build
+            success, message, stats = superadmin.build_database_from_files(
+                file_paths=self.superadmin_selected_files,
+                realm=realm,
+                merge=merge,
+                remove_duplicates=remove_duplicates,
+                auto_backup=auto_backup
+            )
+            
+            progress.close()
+            
+            # Show result
+            if success:
+                stats_label = lang.get('superadmin.stats_title', default="Statistiques")
+                total_label = lang.get('superadmin.stats_total', default="Total items")
+                albion_label = lang.get('superadmin.stats_albion', default="Albion")
+                hibernia_label = lang.get('superadmin.stats_hibernia', default="Hibernia")
+                midgard_label = lang.get('superadmin.stats_midgard', default="Midgard")
+                all_realms_label = lang.get('superadmin.stats_all_realms', default="Tous royaumes")
+                
+                stats_text = f"\n\n{stats_label}:\n"
+                stats_text += f"• {total_label}: {stats.get('total_items', 0)}\n"
+                stats_text += f"• {albion_label}: {stats.get('albion', 0)}\n"
+                stats_text += f"• {hibernia_label}: {stats.get('hibernia', 0)}\n"
+                stats_text += f"• {midgard_label}: {stats.get('midgard', 0)}\n"
+                stats_text += f"• {all_realms_label}: {stats.get('all_realms', 0)}"
+                
+                QMessageBox.information(self,
+                    lang.get('superadmin.build_success_title', 
+                        default="Construction réussie"),
+                    message + stats_text
+                )
+                
+                # Refresh statistics
+                self._refresh_superadmin_stats()
+                
+                # Clear selection
+                self.superadmin_selected_files = []
+                self.superadmin_files_label.setText(
+                    lang.get('superadmin.no_files_selected', 
+                        default="Aucun fichier sélectionné")
+                )
+                self.superadmin_files_label.setStyleSheet("color: #888; font-style: italic;")
+            else:
+                QMessageBox.critical(self,
+                    lang.get('superadmin.build_error_title', 
+                        default="Erreur de construction"),
+                    message
+                )
+                
+        except Exception as e:
+            logging.error(f"Error executing database build: {e}", exc_info=True)
+            QMessageBox.critical(self, "Erreur", f"Erreur lors de la construction:\n{e}")
+    
+    def _refresh_superadmin_stats(self):
+        """Refresh SuperAdmin statistics display"""
+        try:
+            from Functions.superadmin_tools import SuperAdminTools
+            superadmin = SuperAdminTools(self.path_manager)
+            
+            stats = superadmin.get_database_stats()
+            
+            self.superadmin_stats_total.setText(str(stats.get("total_items", 0)))
+            self.superadmin_stats_albion.setText(str(stats.get("albion", 0)))
+            self.superadmin_stats_hibernia.setText(str(stats.get("hibernia", 0)))
+            self.superadmin_stats_midgard.setText(str(stats.get("midgard", 0)))
+            self.superadmin_stats_all_realms.setText(str(stats.get("all_realms", 0)))
+            
+            file_size_kb = stats.get("file_size", 0) / 1024
+            self.superadmin_stats_file_size.setText(f"{file_size_kb:.1f} KB")
+            
+            last_updated = stats.get("last_updated", 
+                lang.get('superadmin.stats_not_available', default="Non disponible"))
+            self.superadmin_stats_last_updated.setText(last_updated)
+            
+        except Exception as e:
+            logging.error(f"Error refreshing SuperAdmin stats: {e}", exc_info=True)
+            self.superadmin_stats_total.setText("0")
+            self.superadmin_stats_albion.setText("0")
+            self.superadmin_stats_hibernia.setText("0")
+            self.superadmin_stats_midgard.setText("0")
+            self.superadmin_stats_all_realms.setText("0")
+    
+    def _clean_duplicates(self):
+        """Clean duplicate items from source database"""
+        try:
+            # Confirmation dialog
+            title = lang.get('superadmin.clean_confirm_title', 
+                default="Confirmer le nettoyage")
+            message = lang.get('superadmin.clean_confirm_message',
+                default="Voulez-vous nettoyer les doublons de la base source ?\n\n"
+                       "Ceci supprimera tous les items avec le même nom + royaume.\n"
+                       "Une sauvegarde sera créée automatiquement.")
+            
+            reply = QMessageBox.question(self, title, message,
+                                        QMessageBox.Yes | QMessageBox.No)
+            
+            if reply != QMessageBox.Yes:
+                return
+            
+            # Import SuperAdminTools
+            from Functions.superadmin_tools import SuperAdminTools
+            superadmin = SuperAdminTools(self.path_manager)
+            
+            # Execute cleaning
+            success, message, removed_count = superadmin.clean_duplicates()
+            
+            # Show result
+            if success:
+                removed_label = lang.get('superadmin.clean_removed_count', default="Items supprimés")
+                result_message = message + f"\n\n{removed_label}: {removed_count}"
+                QMessageBox.information(self,
+                    lang.get('superadmin.clean_success_title', 
+                        default="Nettoyage réussi"),
+                    result_message
+                )
+                
+                # Refresh statistics
+                self._refresh_superadmin_stats()
+            else:
+                QMessageBox.critical(self,
+                    lang.get('superadmin.clean_error_title', 
+                        default="Erreur de nettoyage"),
+                    message
+                )
+                
+        except Exception as e:
+            logging.error(f"Error cleaning duplicates: {e}", exc_info=True)
+            QMessageBox.critical(self, "Erreur", f"Erreur lors du nettoyage:\n{e}")
 
 

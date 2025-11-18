@@ -73,6 +73,12 @@ Complete index of technical and user documentation for the character manager.
 - **SETTINGS_ARCHITECTURE_EN.md** - Settings system architecture
 - **BACKUP_INTEGRATION_EN.md** - Backup integration in Settings
 - **FOLDER_MOVE_SYSTEM_EN.md** - Folder move system
+- **SUPERADMIN_TOOLS_EN.md** ⭐ NEW - SuperAdmin tools for database management
+  - Development-only administrative tools (`--admin` flag)
+  - Rapid source database population from template files
+  - Statistics tracking and duplicate cleaning
+  - Triple-layer security (flag + frozen check + conditional UI)
+  - Auto-backup system for safe operations
 - **UI_COMPONENT_TEMPLATE.md** - UI component template
 
 ### 🎨 [Themes/](Themes/) - Theme System
@@ -116,12 +122,13 @@ Complete index of technical and user documentation for the character manager.
 
 ## 📊 Documentation Statistics
 
-- **Total files**: 26+ technical documents
-- **Total lines**: 13,500+ lines of documentation
+- **Total files**: 27+ technical documents
+- **Total lines**: 14,600+ lines of documentation
 - **Languages**: FR/EN (DE partial)
 - **Sections**: 10 functional categories
 - **Major technical documentation**:
-  - DUAL_MODE_DATABASE_EN.md: 650+ lines (NEW)
+  - SUPERADMIN_TOOLS_EN.md: 1100+ lines (NEW)
+  - DUAL_MODE_DATABASE_EN.md: 650+ lines
   - LANGUAGE_V2_TECHNICAL_DOC.md: 1793 lines
   - PROGRESS_DIALOG_SYSTEM_EN.md: 1900+ lines
   - CHARACTER_MIGRATION_TECHNICAL_DOC.md: 870 lines
@@ -132,7 +139,7 @@ Complete index of technical and user documentation for the character manager.
 ## 🆕 Recent Updates
 
 ### November 18, 2025 - v0.108
-**Armory Dual-Mode Database System**
+**Armory Dual-Mode Database System + SuperAdmin Tools**
 - Complete implementation of dual-mode database architecture
 - NEW: `Armory/DUAL_MODE_DATABASE_EN.md` - Complete technical documentation
 - Features: Mode 1 (read-only) and Mode 2 (user-managed) switching
@@ -140,6 +147,18 @@ Complete index of technical and user documentation for the character manager.
 - Statistics tracking (internal/personal/user-added counts)
 - Complete API reference for ItemsDatabaseManager class
 - UI integration in Settings > Armory page with folder path management
+
+**SuperAdmin Tools (Development Only)**
+- NEW: `Settings/SUPERADMIN_TOOLS_EN.md` - Complete administrative tools documentation
+- Access: `python main.py --admin` (development only, blocked in .exe)
+- Features: Rapid source database population from multiple .txt template files
+- Backend: `Functions/superadmin_tools.py` (359 lines) with 5 core methods
+- UI: Conditional Settings page 7 with Build, Statistics, and Advanced sections
+- Security: Triple-layer protection (flag + frozen check + conditional UI)
+- Auto-backup system before all destructive operations
+- Duplicate detection and cleaning functionality
+- Side-by-side layout (Statistics 50% + Advanced Operations 50%)
+- Translations: 40+ keys in FR/EN/DE
 
 ---
 

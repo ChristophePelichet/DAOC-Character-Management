@@ -71,6 +71,13 @@ DEFAULT_CONFIG = {
     "migrations": {
         "character_structure_done": False,
         "character_structure_date": None
+    },
+    "armory": {
+        "use_personal_database": False,
+        "personal_db_created": False,
+        "personal_db_path": None,
+        "auto_add_scraped_items": True,
+        "last_internal_db_version": "1.0"
     }
 }
 

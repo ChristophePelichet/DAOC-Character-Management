@@ -165,3 +165,19 @@ def get_eden_cookies_path():
         Path: Absolute path to cookies file (may not exist yet)
     """
     return get_eden_data_dir() / "eden_cookies.pkl"
+
+
+class PathManager:
+    """Centralized path management for the application"""
+    
+    def get_app_root(self):
+        """Get application root directory (where Data/ folder is located)"""
+        return Path(get_base_path())
+    
+    def get_resource_path(self, relative_path):
+        """Get absolute path to a resource file"""
+        return Path(get_resource_path(relative_path))
+
+
+# Global instance for easy access
+path_manager = PathManager()

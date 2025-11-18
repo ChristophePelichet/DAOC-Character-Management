@@ -38,6 +38,22 @@ Complete index of technical and user documentation for the character manager.
   - Cleanup before terminate()
   - Qt thread safety best practices
 
+### 🛡️ [Armory/](Armory/) - Armory System
+- **ARMORY_IMPORT_SYSTEM_EN.md** - Complete armory import system documentation
+- **ITEMS_SCRAPER_TECHNICAL_EN.md** - Items scraper technical documentation
+- **DUAL_MODE_DATABASE_EN.md** ⭐ NEW - Dual-mode database system (English)
+  - Mode 1: Internal read-only database (`Data/items_database.json`)
+  - Mode 2: Personal user-managed database (`Armory/items_database.json`)
+  - Database manager API reference
+  - Configuration and UI integration
+  - Auto-add scraped items feature
+- **DUAL_MODE_DATABASE_FR.md** ⭐ NEW - Système de base de données double mode (Français)
+  - Mode 1 : Base interne lecture seule
+  - Mode 2 : Base personnelle gérée par l'utilisateur
+  - Référence API du gestionnaire de base
+  - Configuration et intégration UI
+  - Fonctionnalité d'ajout automatique
+
 ### 🌐 [Eden/](Eden/) - Eden Herald Scraping
 - **CONNECT_TO_EDEN_HERALD_EN.md** - Eden Herald connection guide
 - **CHARACTER_PROFILE_SCRAPER_EN.md** - Character profile scraper
@@ -81,6 +97,12 @@ Complete index of technical and user documentation for the character manager.
 - [Backups/BACKUP_USER_GUIDE.md](Backups/BACKUP_USER_GUIDE.md) - User guide
 - [Settings/BACKUP_INTEGRATION_EN.md](Settings/BACKUP_INTEGRATION_EN.md) - UI integration
 
+### Armory Database System ⭐ NEW
+- [Armory/DUAL_MODE_DATABASE_EN.md](Armory/DUAL_MODE_DATABASE_EN.md) - Technical guide (English)
+- [Armory/DUAL_MODE_DATABASE_FR.md](Armory/DUAL_MODE_DATABASE_FR.md) - Guide technique (Français)
+- [Armory/ARMORY_IMPORT_SYSTEM_EN.md](Armory/ARMORY_IMPORT_SYSTEM_EN.md) - Import system
+- [Armory/ITEMS_SCRAPER_TECHNICAL_EN.md](Armory/ITEMS_SCRAPER_TECHNICAL_EN.md) - Scraper technical docs
+
 ### Eden Herald Scraping
 - [Eden/CONNECT_TO_EDEN_HERALD_EN.md](Eden/CONNECT_TO_EDEN_HERALD_EN.md) - Connection
 - [Eden/CHARACTER_SEARCH_SCRAPER_EN.md](Eden/CHARACTER_SEARCH_SCRAPER_EN.md) - Search
@@ -100,15 +122,29 @@ Complete index of technical and user documentation for the character manager.
 
 ## 📊 Documentation Statistics
 
-- **Total files**: 25+ technical documents
-- **Total lines**: 10,000+ lines of documentation
+- **Total files**: 27+ technical documents
+- **Total lines**: 14,000+ lines of documentation
 - **Languages**: FR/EN (DE partial)
-- **Sections**: 9 functional categories
+- **Sections**: 10 functional categories
 - **Major technical documentation**:
+  - DUAL_MODE_DATABASE_EN.md: 650+ lines (NEW)
+  - DUAL_MODE_DATABASE_FR.md: 650+ lines (NEW)
   - LANGUAGE_V2_TECHNICAL_DOC.md: 1793 lines
   - PROGRESS_DIALOG_SYSTEM_EN.md: 1900+ lines
   - CHARACTER_MIGRATION_TECHNICAL_DOC.md: 870 lines
   - CONFIG_V2_TECHNICAL_DOC.md: Complete with examples
+
+---
+
+## 🆕 Recent Updates
+
+### November 18, 2025 - v0.108
+**Armory Dual-Mode Database System**
+- Added complete documentation for dual-mode database architecture
+- NEW: `Armory/DUAL_MODE_DATABASE_EN.md` (English)
+- NEW: `Armory/DUAL_MODE_DATABASE_FR.md` (Français)
+- Features: Mode switching, auto-add integration, statistics tracking
+- Complete API reference for ItemsDatabaseManager
 
 ---
 

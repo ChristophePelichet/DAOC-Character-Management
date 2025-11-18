@@ -6,6 +6,7 @@ Separated from dialogs.py for better maintainability
 import os
 import logging
 import shutil
+from pathlib import Path
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QFormLayout, QGroupBox, QLabel,
     QPushButton, QLineEdit, QComboBox, QCheckBox, QDialogButtonBox,
@@ -16,10 +17,11 @@ from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QIcon, QFont
 
 from Functions.language_manager import lang
-from Functions.config_manager import config, get_config_dir
+from Functions.config_manager import config, get_config_dir, ConfigManager
 from Functions.character_manager import get_character_dir
+from Functions.path_manager import PathManager
 from Functions.logging_manager import get_log_dir
-from Functions.path_manager import get_armor_dir
+from Functions.path_manager import get_armor_dir, path_manager
 from Functions.backup_manager import BackupManager
 
 
@@ -52,6 +54,12 @@ class SettingsDialog(QDialog):
         
         # Make window non-modal (don't block main application)
         self.setModal(False)
+        
+        # Initialize managers for armory operations
+        self.config_manager = ConfigManager()
+        self.path_manager = PathManager()
+        from Functions.items_database_manager import ItemsDatabaseManager
+        self.db_manager = ItemsDatabaseManager(self.config_manager, self.path_manager)
         
         self._init_ui()
         self._load_settings()
@@ -193,22 +201,6 @@ class SettingsDialog(QDialog):
         
         # Note: Config folder path is NOT configurable - it must always be next to the executable
         # This avoids circular dependency issues with config.json location
-        
-        # Armor Path
-        self.armor_path_edit = QLineEdit()
-        browse_armor_button = QPushButton(lang.get("browse_button"))
-        browse_armor_button.clicked.connect(self._browse_armor_folder)
-        move_armor_button = QPushButton("📦 " + lang.get("move_folder_button", default="Déplacer"))
-        move_armor_button.clicked.connect(lambda: self._move_folder(self.armor_path_edit, "armor_folder", lang.get("config_armor_path_label")))
-        move_armor_button.setToolTip(lang.get("move_folder_tooltip", default="Déplacer le dossier et son contenu vers un nouvel emplacement"))
-        open_armor_folder_button = QPushButton("📂 " + lang.get("open_folder_button", default="Ouvrir le dossier"))
-        open_armor_folder_button.clicked.connect(self._open_armor_folder)
-        armor_path_layout = QHBoxLayout()
-        armor_path_layout.addWidget(self.armor_path_edit)
-        armor_path_layout.addWidget(browse_armor_button)
-        armor_path_layout.addWidget(move_armor_button)
-        armor_path_layout.addWidget(open_armor_folder_button)
-        paths_layout.addRow(lang.get("config_armor_path_label"), armor_path_layout)
         
         paths_group.setLayout(paths_layout)
         layout.addWidget(paths_group)
@@ -1009,35 +1001,89 @@ class SettingsDialog(QDialog):
         layout.addWidget(subtitle)
         layout.addSpacing(20)
         
-        # === DESCRIPTION ===
-        desc_group = QGroupBox(lang.get('settings.pages.armory.desc_group_title', default="ℹ️ À propos"))
-        desc_layout = QVBoxLayout()
+        # === FOLDER PATH (always visible) ===
+        folder_group = QGroupBox("📁 " + lang.get("config_folder_group_title", default="Dossiers"))
+        folder_layout = QFormLayout()
         
-        desc_text = QLabel(lang.get('settings.pages.armory.desc_text', 
-            default="L'armurerie permet d'importer des items depuis des fichiers Zenkcraft (.txt) "
-            "et de créer une base de données locale d'items avec leurs statistiques, "
-            "résistances, bonus et informations sur les marchands."
-        ))
-        desc_text.setWordWrap(True)
-        desc_text.setStyleSheet("color: #888; padding: 10px;")
-        desc_layout.addWidget(desc_text)
+        # Armor Path
+        self.armor_path_edit = QLineEdit()
+        browse_armor_button = QPushButton(lang.get("browse_button"))
+        browse_armor_button.setMaximumWidth(80)
+        browse_armor_button.clicked.connect(self._browse_armor_folder)
         
-        desc_group.setLayout(desc_layout)
-        layout.addWidget(desc_group)
+        move_armor_button = QPushButton(lang.get("move_folder_button"))
+        move_armor_button.setMaximumWidth(120)
+        move_armor_button.clicked.connect(self._move_armor_folder)
+        
+        open_armor_folder_button = QPushButton(lang.get("open_folder_button"))
+        open_armor_folder_button.setMaximumWidth(100)
+        open_armor_folder_button.clicked.connect(self._open_armor_folder)
+        
+        armor_path_layout = QHBoxLayout()
+        armor_path_layout.addWidget(self.armor_path_edit)
+        armor_path_layout.addWidget(browse_armor_button)
+        armor_path_layout.addWidget(move_armor_button)
+        armor_path_layout.addWidget(open_armor_folder_button)
+        folder_layout.addRow(lang.get("config_armor_path_label"), armor_path_layout)
+        
+        folder_group.setLayout(folder_layout)
+        layout.addWidget(folder_group)
+        layout.addSpacing(10)
+        
+        # === DATABASE MODE (en haut de la page) ===
+        db_group = QGroupBox(lang.get('armory_settings.group_title', default="🗄️ Base de données d'items"))
+        db_layout = QVBoxLayout()
+        
+        # Enable personal database checkbox
+        self.personal_db_check = QCheckBox(lang.get('armory_settings.enable_personal_db', default="Activer la base de données personnelle"))
+        self.personal_db_check.setToolTip(lang.get('armory_settings.enable_personal_db_tooltip', 
+            default="Copie la base interne dans votre dossier Armory pour permettre les imports et modifications"))
+        self.personal_db_check.clicked.connect(self._on_personal_db_toggled)
+        db_layout.addWidget(self.personal_db_check)
+        
+        # Mode info label
+        self.mode_info_label = QLabel()
+        self.mode_info_label.setStyleSheet("color: #888; font-style: italic; padding: 5px;")
+        db_layout.addWidget(self.mode_info_label)
+        
+        db_layout.addSpacing(10)
+        
+        # Statistics group (hidden by default)
+        self.stats_group = QGroupBox(lang.get('armory_settings.stats_group_title', default="📊 Statistiques"))
+        stats_layout = QFormLayout()
+        
+        self.internal_count_label = QLabel(lang.get('armory_settings.stats_not_available', default="Non disponible"))
+        stats_layout.addRow(lang.get('armory_settings.stats_internal_count', default="Items dans la base interne:"), 
+                           self.internal_count_label)
+        
+        self.personal_count_label = QLabel(lang.get('armory_settings.stats_not_available', default="Non disponible"))
+        stats_layout.addRow(lang.get('armory_settings.stats_personal_count', default="Items dans votre base:"), 
+                           self.personal_count_label)
+        
+        self.user_added_label = QLabel(lang.get('armory_settings.stats_not_available', default="Non disponible"))
+        stats_layout.addRow(lang.get('armory_settings.stats_user_added_count', default="Items ajoutés par vous:"), 
+                           self.user_added_label)
+        
+        self.stats_group.setLayout(stats_layout)
+        self.stats_group.setVisible(False)
+        db_layout.addWidget(self.stats_group)
+        
+        db_group.setLayout(db_layout)
+        layout.addWidget(db_group)
         layout.addSpacing(10)
         
         # === IMPORT SECTION ===
-        import_group = QGroupBox(lang.get('settings.pages.armory.import_group_title', default="📥 Import d'items"))
+        self.import_group = QGroupBox(lang.get('settings.pages.armory.import_group_title', default="📥 Import d'items"))
         import_layout = QVBoxLayout()
         
         # Import button
-        self.armory_import_button = QPushButton(lang.get('settings.pages.armory.import_button', default="📥 Importer des items depuis Zenkcraft"))
-        self.armory_import_button.setMinimumHeight(50)
+        self.armory_import_button = QPushButton(lang.get('settings.pages.armory.import_button', default="📥 Importer des items"))
+        self.armory_import_button.setMinimumHeight(40)
         self.armory_import_button.setStyleSheet("""
             QPushButton {
-                font-size: 14px;
+                font-size: 13px;
                 font-weight: bold;
-                padding: 10px;
+                padding: 8px;
             }
             QPushButton:hover {
                 background-color: palette(highlight);
@@ -1048,41 +1094,33 @@ class SettingsDialog(QDialog):
         
         import_help = QLabel(lang.get('settings.pages.armory.import_help',
             default="💡 Cliquez sur le bouton ci-dessus pour ouvrir l'interface d'import. "
-            "Vous pourrez sélectionner un fichier template Zenkcraft (.txt), "
+            "Vous pourrez sélectionner un fichier template (.txt), "
             "choisir le royaume et lancer l'import automatique."
         ))
         import_help.setWordWrap(True)
         import_help.setStyleSheet("color: #666; font-style: italic; padding: 10px;")
         import_layout.addWidget(import_help)
         
-        import_group.setLayout(import_layout)
-        layout.addWidget(import_group)
-        layout.addSpacing(10)
+        self.import_group.setLayout(import_layout)
+        self.import_group.setVisible(False)  # Hidden by default
+        layout.addWidget(self.import_group)
         
-        # === DATABASE STATUS ===
-        status_group = QGroupBox(lang.get('settings.pages.armory.status_group_title', default="📊 État de la base de données"))
-        status_layout = QFormLayout()
+        # === RESET SECTION (at the end) ===
+        self.actions_group = QGroupBox(lang.get('armory_settings.actions_group_title', default="⚙️ Actions"))
+        actions_layout = QVBoxLayout()
         
-        # Database path
-        armor_path = config.get('folders.armor') or get_armor_dir()
-        self.armory_path_label = QLabel(armor_path)
-        self.armory_path_label.setStyleSheet("color: #888;")
-        status_layout.addRow(lang.get('settings.pages.armory.status_location', default="📂 Emplacement:"), self.armory_path_label)
+        self.reset_db_button = QPushButton(lang.get('armory_settings.reset_db_button', default="🔄 Réinitialiser ma base"))
+        self.reset_db_button.setToolTip(lang.get('armory_settings.reset_db_tooltip',
+            default="Remplace votre base personnelle par une copie fraîche de la base interne (perte de vos ajouts personnels)"))
+        self.reset_db_button.clicked.connect(self._reset_personal_database)
+        actions_layout.addWidget(self.reset_db_button)
         
-        # Items count
-        self.armory_items_label = QLabel(lang.get('settings.pages.armory.status_loading', default="Chargement..."))
-        status_layout.addRow(lang.get('settings.pages.armory.status_items', default="🔢 Items disponibles:"), self.armory_items_label)
+        self.actions_group.setLayout(actions_layout)
+        self.actions_group.setVisible(False)
+        layout.addWidget(self.actions_group)
         
-        # Last update
-        self.armory_last_update_label = QLabel(lang.get('settings.pages.armory.status_no_date', default="-"))
-        self.armory_last_update_label.setStyleSheet("color: #888;")
-        status_layout.addRow(lang.get('settings.pages.armory.status_last_update', default="🕐 Dernière mise à jour:"), self.armory_last_update_label)
-        
-        status_group.setLayout(status_layout)
-        layout.addWidget(status_group)
-        
-        # Update database info
-        self._update_armory_status()
+        # Update database mode UI (after all groups are created)
+        self._update_armory_database_mode()
         
         layout.addStretch()
         self.pages.addWidget(page)
@@ -1344,6 +1382,70 @@ class SettingsDialog(QDialog):
         char_path = self.char_path_edit.text()
         if os.path.exists(char_path):
             subprocess.Popen(f'explorer "{char_path}"')
+    
+    def _move_armor_folder(self):
+        """Move armor folder to new location"""
+        from PySide6.QtWidgets import QMessageBox
+        import shutil
+        
+        # Browse for new location
+        new_location = QFileDialog.getExistingDirectory(
+            self, 
+            lang.get("select_new_armor_location", default="Sélectionner le nouvel emplacement pour Armory")
+        )
+        
+        if not new_location:
+            return
+        
+        old_path = self.armor_path_edit.text()
+        new_path = os.path.join(new_location, "Armory")
+        
+        if old_path == new_path:
+            return
+        
+        # Confirm move
+        reply = QMessageBox.question(
+            self,
+            lang.get("move_armor_confirm_title", default="Confirmer le déplacement"),
+            lang.get("move_armor_confirm_message", 
+                    default=f"Déplacer le dossier Armory ?\n\nDe : {old_path}\nVers : {new_path}"),
+            QMessageBox.Yes | QMessageBox.No
+        )
+        
+        if reply == QMessageBox.Yes:
+            try:
+                # Create new directory if it doesn't exist
+                os.makedirs(new_path, exist_ok=True)
+                
+                # Copy all files
+                if os.path.exists(old_path):
+                    for item in os.listdir(old_path):
+                        s = os.path.join(old_path, item)
+                        d = os.path.join(new_path, item)
+                        if os.path.isdir(s):
+                            shutil.copytree(s, d, dirs_exist_ok=True)
+                        else:
+                            shutil.copy2(s, d)
+                    
+                    # Remove old directory
+                    shutil.rmtree(old_path)
+                
+                # Update UI and config
+                self.armor_path_edit.setText(new_path)
+                config.set("folders.armor", new_path)
+                config.save_config()
+                
+                QMessageBox.information(
+                    self,
+                    lang.get("move_success_title", default="Succès"),
+                    lang.get("move_armor_success", default="Dossier Armory déplacé avec succès")
+                )
+            except Exception as e:
+                QMessageBox.critical(
+                    self,
+                    lang.get("error_title", default="Erreur"),
+                    lang.get("move_armor_error", default=f"Erreur lors du déplacement : {str(e)}")
+                )
     
     def _open_armor_folder(self):
         """Open armor folder"""
@@ -1952,57 +2054,187 @@ class SettingsDialog(QDialog):
         dialog.exec()
         
         # Update database status after import
-        self._update_armory_status()
+        # Initialize database manager
+        from Functions.items_database_manager import ItemsDatabaseManager
+        self.db_manager = ItemsDatabaseManager(self.config_manager, path_manager)
     
-    def _update_armory_status(self):
-        """Met à jour les informations sur la base de données d'armurerie"""
+    def _update_armory_database_mode(self):
+        """Update UI based on current database mode"""
         try:
-            import json
-            from pathlib import Path
-            from datetime import datetime
+            use_personal = self.config_manager.config.get('armory', {}).get('use_personal_database', False)
             
-            armor_path = config.get('folders.armor') or get_armor_dir()
-            armor_path = Path(armor_path)
+            # Update checkbox
+            self.personal_db_check.setChecked(use_personal)
             
-            # Count items in all databases
-            total_items = 0
-            latest_update = None
-            realms = ['albion', 'hibernia', 'midgard']
-            
-            for realm in realms:
-                db_file = armor_path / f"items_database_{realm}.json"
-                if db_file.exists():
-                    with open(db_file, 'r', encoding='utf-8') as f:
-                        database = json.load(f)
-                        total_items += len(database.get('items', {}))
-                        
-                        # Check last update date
-                        updated = database.get('updated')
-                        if updated:
-                            try:
-                                update_date = datetime.fromisoformat(updated)
-                                if latest_update is None or update_date > latest_update:
-                                    latest_update = update_date
-                            except:
-                                pass
-            
-            # Update labels
-            if total_items > 0:
-                self.armory_items_label.setText(f"{total_items} items")
-                self.armory_items_label.setStyleSheet("color: #4CAF50; font-weight: bold;")
+            # Update mode info label
+            if use_personal:
+                mode_text = lang.get('armory_settings.mode_info_personal', default="Mode actuel : Base de données personnelle (modifiable)")
+                self.mode_info_label.setText(mode_text)
+                self.mode_info_label.setStyleSheet("color: #4CAF50; font-style: italic; padding: 5px;")
+                
+                # Show stats, actions and import groups
+                self.stats_group.setVisible(True)
+                self.actions_group.setVisible(True)
+                self.import_group.setVisible(True)
+                
+                # Update statistics
+                self._update_statistics()
             else:
-                self.armory_items_label.setText("Aucun item")
-                self.armory_items_label.setStyleSheet("color: #888;")
-            
-            if latest_update:
-                self.armory_last_update_label.setText(latest_update.strftime("%d/%m/%Y %H:%M"))
-                self.armory_last_update_label.setStyleSheet("color: #4CAF50;")
-            else:
-                self.armory_last_update_label.setText("Jamais")
-                self.armory_last_update_label.setStyleSheet("color: #888;")
+                mode_text = lang.get('armory_settings.mode_info_internal', default="Mode actuel : Base de données interne (lecture seule)")
+                self.mode_info_label.setText(mode_text)
+                self.mode_info_label.setStyleSheet("color: #888; font-style: italic; padding: 5px;")
+                
+                # Hide stats, actions and import groups
+                self.stats_group.setVisible(False)
+                self.actions_group.setVisible(False)
+                self.import_group.setVisible(False)
                 
         except Exception as e:
-            logging.error(f"Erreur mise à jour statut armory: {e}", exc_info=True)
+            logging.error(f"Error updating database mode: {e}", exc_info=True)
+    
+    def _update_statistics(self):
+        """Update database statistics"""
+        try:
+            stats = self.db_manager.get_statistics()
+            
+            # Internal count
+            internal_count = stats.get("internal_count", 0)
+            self.internal_count_label.setText(str(internal_count))
+            self.internal_count_label.setStyleSheet("color: #4CAF50; font-weight: bold;")
+            
+            # Personal count
+            personal_count = stats.get("personal_count", -1)
+            if personal_count >= 0:
+                self.personal_count_label.setText(str(personal_count))
+                self.personal_count_label.setStyleSheet("color: #4CAF50; font-weight: bold;")
+            else:
+                not_available = lang.get('armory_settings.stats_not_available', default="Non disponible")
+                self.personal_count_label.setText(not_available)
+                self.personal_count_label.setStyleSheet("color: #888;")
+            
+            # User added count
+            user_added = stats.get("user_added_count", -1)
+            if user_added >= 0:
+                self.user_added_label.setText(str(user_added))
+                self.user_added_label.setStyleSheet("color: #2196F3; font-weight: bold;")
+            else:
+                not_available = lang.get('armory_settings.stats_not_available', default="Non disponible")
+                self.user_added_label.setText(not_available)
+                self.user_added_label.setStyleSheet("color: #888;")
+                
+        except Exception as e:
+            logging.error(f"Error updating statistics: {e}", exc_info=True)
+    
+    def _on_personal_db_toggled(self, checked: bool):
+        """Handle personal database checkbox toggle"""
+        try:
+            if checked:
+                # Check if personal database file exists
+                armor_path = self.config_manager.config.get("folders", {}).get("armor")
+                if not armor_path:
+                    armor_path = self.path_manager.get_app_root() / "Armory"
+                
+                personal_db_path = Path(armor_path) / "items_database.json"
+                
+                if not personal_db_path.exists():
+                    # Create personal database
+                    stats = self.db_manager.get_statistics()
+                    internal_count = stats.get("internal_count", 0)
+                    
+                    title = lang.get('armory_settings.create_db_title', default="Créer la base personnelle")
+                    message = lang.get('armory_settings.create_db_message', 
+                        default="Voulez-vous créer votre base de données personnelle ?\nCeci copiera la base interne ({internal_count} items) dans votre dossier Armory.")
+                    message = message.replace("{internal_count}", str(internal_count))
+                    
+                    reply = QMessageBox.question(self, title, message, 
+                                                QMessageBox.Yes | QMessageBox.No)
+                    
+                    if reply == QMessageBox.Yes:
+                        success, result = self.db_manager.create_personal_database()
+                        
+                        if success:
+                            # Reload config to reflect changes made by db_manager
+                            self.config_manager.load_config()
+                            
+                            success_title = lang.get('armory_settings.create_db_success_title', default="Base créée")
+                            success_message = lang.get('armory_settings.create_db_success_message',
+                                default="Base de données personnelle créée avec succès\nEmplacement : {path}")
+                            success_message = success_message.replace("{path}", result)
+                            
+                            QMessageBox.information(self, success_title, success_message)
+                            
+                            # Update UI to show stats/actions/import sections
+                            self._update_armory_database_mode()
+                        else:
+                            error_title = lang.get('armory_settings.create_db_error_title', default="Erreur de création")
+                            error_message = lang.get('armory_settings.create_db_error_message',
+                                default="Impossible de créer la base de données personnelle :\n{error}")
+                            error_message = error_message.replace("{error}", result)
+                            
+                            QMessageBox.critical(self, error_title, error_message)
+                            
+                            # Uncheck checkbox
+                            self.personal_db_check.setChecked(False)
+                    else:
+                        # User cancelled, uncheck checkbox
+                        self.personal_db_check.setChecked(False)
+                else:
+                    # Database file exists, just enable personal database mode
+                    self.config_manager.config.setdefault('armory', {})['use_personal_database'] = True
+                    self.config_manager.save_config()
+                    self._update_armory_database_mode()
+            else:
+                # Disable personal database mode (switch to internal)
+                self.config_manager.config.setdefault('armory', {})['use_personal_database'] = False
+                self.config_manager.save_config()
+                self._update_armory_database_mode()
+                
+        except Exception as e:
+            logging.error(f"Error toggling personal database: {e}", exc_info=True)
+            self.personal_db_check.setChecked(not checked)
+    
+    def _reset_personal_database(self):
+        """Reset personal database to internal copy"""
+        try:
+            stats = self.db_manager.get_statistics()
+            user_count = stats.get("user_added_count", 0)
+            internal_count = stats.get("internal_count", 0)
+            
+            title = lang.get('armory_settings.reset_confirm_title', default="Confirmer la réinitialisation")
+            message = lang.get('armory_settings.reset_confirm_message',
+                default="Êtes-vous sûr de vouloir réinitialiser votre base de données personnelle ?\n\n"
+                       "Ceci supprimera tous vos items ajoutés manuellement ({user_count} items) "
+                       "et restaurera la base interne ({internal_count} items).\n\n"
+                       "Cette action est irréversible.")
+            message = message.replace("{user_count}", str(user_count))
+            message = message.replace("{internal_count}", str(internal_count))
+            
+            reply = QMessageBox.warning(self, title, message,
+                                       QMessageBox.Yes | QMessageBox.No,
+                                       QMessageBox.No)
+            
+            if reply == QMessageBox.Yes:
+                success, result = self.db_manager.reset_personal_database()
+                
+                if success:
+                    success_title = lang.get('armory_settings.reset_success_title', default="Base réinitialisée")
+                    success_message = lang.get('armory_settings.reset_success_message',
+                        default="Base de données personnelle réinitialisée avec succès")
+                    
+                    QMessageBox.information(self, success_title, success_message)
+                    
+                    # Update statistics
+                    self._update_statistics()
+                else:
+                    error_title = lang.get('armory_settings.reset_error_title', default="Erreur de réinitialisation")
+                    error_message = lang.get('armory_settings.reset_error_message',
+                        default="Impossible de réinitialiser la base de données :\n{error}")
+                    error_message = error_message.replace("{error}", result)
+                    
+                    QMessageBox.critical(self, error_title, error_message)
+                    
+        except Exception as e:
+            logging.error(f"Error resetting personal database: {e}", exc_info=True)
             if hasattr(self, 'armory_items_label'):
                 self.armory_items_label.setText("Erreur")
                 self.armory_items_label.setStyleSheet("color: #f44336;")

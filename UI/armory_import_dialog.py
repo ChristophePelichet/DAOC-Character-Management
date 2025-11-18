@@ -362,7 +362,21 @@ class ArmoryImportDialog(QDialog):
         self.realm_combo.setEnabled(True)
         
         if success and self.imported_items:
+            # Check if personal database is enabled
+            from Functions.config_manager import config
+            use_personal = config.get('armory.use_personal_database', default=False)
+            auto_add = config.get('armory.auto_add_scraped_items', default=True)
+            
+            if use_personal and auto_add:
+                # Auto-add scraped items to personal database
+                self._auto_add_scraped_items()
+            elif use_personal and not auto_add:
+                # Ask user if they want to add scraped items
+                self._ask_add_scraped_items()
+            
+            # Enable save button for template imports (not for scraped items)
             self.save_button.setEnabled(True)
+            
             QMessageBox.information(self, 
                 lang.get("armory_import.import_finished_title", default="Import terminé"), 
                 message)
@@ -370,6 +384,87 @@ class ArmoryImportDialog(QDialog):
             QMessageBox.warning(self, 
                 lang.get("armory_import.import_error_title", default="Erreur d'import"), 
                 message)
+    
+    def _auto_add_scraped_items(self):
+        """Automatically add all scraped items to personal database"""
+        try:
+            from Functions.items_database_manager import ItemsDatabaseManager
+            from Functions.config_manager import ConfigManager
+            from Functions.path_manager import path_manager
+            
+            config_manager = ConfigManager()
+            db_manager = ItemsDatabaseManager(config_manager, path_manager)
+            
+            added_count = 0
+            realm = self.realm_combo.currentText()
+            
+            for item_data in self.imported_items:
+                success, message = db_manager.add_scraped_item(item_data, realm)
+                if success:
+                    added_count += 1
+            
+            if added_count > 0:
+                success_message = lang.get('armory_settings.add_scraped_success', 
+                    default="Item ajouté : {item_name}")
+                QMessageBox.information(self, 
+                    lang.get("armory_import.import_finished_title", default="Import terminé"),
+                    f"{added_count} items ajoutés à votre base de données personnelle")
+                
+        except Exception as e:
+            logging.error(f"Error auto-adding scraped items: {e}", exc_info=True)
+    
+    def _ask_add_scraped_items(self):
+        """Ask user if they want to add scraped items to personal database"""
+        try:
+            from Functions.items_database_manager import ItemsDatabaseManager
+            from Functions.config_manager import ConfigManager, config
+            from Functions.path_manager import path_manager
+            
+            # Create custom dialog with checkbox
+            dialog = QMessageBox(self)
+            dialog.setWindowTitle(lang.get('armory_settings.add_scraped_item_title', 
+                default="Ajouter à votre base ?"))
+            
+            item_count = len(self.imported_items)
+            message = f"{item_count} items ont été trouvés sur Eden.\n"
+            message += "Voulez-vous les ajouter à votre base de données personnelle ?"
+            dialog.setText(message)
+            
+            # Add checkbox for "Always add automatically"
+            always_check = QCheckBox(lang.get('armory_settings.add_scraped_item_always', 
+                default="Toujours ajouter automatiquement"))
+            dialog.setCheckBox(always_check)
+            
+            dialog.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+            dialog.setDefaultButton(QMessageBox.Yes)
+            
+            reply = dialog.exec()
+            
+            # Save preference if "Always add" is checked
+            if always_check.isChecked():
+                config.set('armory.auto_add_scraped_items', True)
+                config.save()
+            
+            if reply == QMessageBox.Yes:
+                # Add items to personal database
+                config_manager = ConfigManager()
+                db_manager = ItemsDatabaseManager(config_manager, path_manager)
+                
+                added_count = 0
+                realm = self.realm_combo.currentText()
+                
+                for item_data in self.imported_items:
+                    success, message = db_manager.add_scraped_item(item_data, realm)
+                    if success:
+                        added_count += 1
+                
+                if added_count > 0:
+                    QMessageBox.information(self,
+                        lang.get("armory_import.import_finished_title", default="Import terminé"),
+                        f"{added_count} items ajoutés à votre base de données personnelle")
+                        
+        except Exception as e:
+            logging.error(f"Error asking to add scraped items: {e}", exc_info=True)
             
     def _on_item_selected(self):
         """Affiche les détails de l'item sélectionné"""

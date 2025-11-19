@@ -277,21 +277,23 @@ class ItemsScraper:
     
     def _get_cache_key(self, item_name, realm=None):
         """
-        Génère une clé de cache unique pour un item
+        Génère une clé de cache composite pour un item (DB v2.0)
         
         Args:
             item_name: Nom de l'item
             realm: Royaume (All/Albion/Hibernia/Midgard) - optionnel
         
         Returns:
-            str: Clé de cache
+            str: Clé composite "name:realm" (lowercase)
         """
         # Normaliser le nom (lowercase, strip)
         normalized_name = item_name.strip().lower()
         
-        # Pour la recherche, on ignore le royaume car les items ont des noms uniques
-        # La clé est juste le nom normalisé
-        return normalized_name
+        # Normaliser le royaume (défaut: "all")
+        normalized_realm = (realm or "All").strip().lower()
+        
+        # Clé composite: "name:realm"
+        return f"{normalized_name}:{normalized_realm}"
     
     def get_item_id_from_cache(self, item_name, realm=None):
         """

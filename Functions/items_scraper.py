@@ -101,8 +101,20 @@ class ItemsScraper:
         "Oceanus Boreas (Midgard)": "Oceanus Mid",
         "Deep Volcanus": "Volcanus",
         "Dragon's Lair": "DL",
-        "Tuscan Glacier": "Glacier",
-        "Galladoria": "Galladoria"
+        "Tuscan Glacier": "Epic",
+        "Tuscaran Glacier": "Epic",
+        "Galladoria": "Epic",
+        "Caer Sidi": "Epic"
+    }
+    
+    # Mapping zone → currency
+    ZONE_CURRENCY = {
+        "DF": "Seals",
+        "SH": "Grimoires",
+        "ToA": "Glasses",
+        "Drake": "Scales",
+        "Epic": "Souls/Roots/Ices",
+        "Epik": "Souls/Roots/Ices"  # Ancienne orthographe
     }
     
     def __init__(self, eden_scraper):
@@ -786,24 +798,31 @@ class ItemsScraper:
         """
         return self.search_items(slot=slot, realm=realm)
     
-    def find_item_id(self, item_name, realm="All"):
+    def find_item_id(self, item_name, realm="All", force_scrape=False):
         """
-        Recherche l'ID d'un item dans cet ordre:
-        1. Bases de données (source + user)
+        Recherche l'ID d'un item pour un realm spécifique.
+        
+        ATTENTION: Cette fonction recherche UNE SEULE variante.
+        Pour alimenter la DB avec toutes les variantes, utiliser find_all_item_variants()
+        
+        Recherche dans cet ordre:
+        1. Bases de données (source + user) - sauf si force_scrape=True
         2. Cache web
-        3. Recherche en ligne sur Eden
+        3. Recherche en ligne sur Eden (r=0 puis filtrage par realm)
         
         Args:
             item_name: Nom de l'item
-            realm: Royaume (Hibernia, Albion, Midgard, All)
+            realm: Royaume spécifique (Hibernia, Albion, Midgard, All)
+            force_scrape: Si True, ignore les DBs et force la recherche web
         
         Returns:
-            str: ID de l'item ou None
+            str: ID de l'item pour ce realm ou None
         """
-        # 1. Check databases first (embedded + user)
-        db_id = self._get_item_from_databases(item_name, realm)
-        if db_id:
-            return db_id
+        # 1. Check databases first (embedded + user) - skip if force_scrape
+        if not force_scrape:
+            db_id = self._get_item_from_databases(item_name, realm)
+            if db_id:
+                return db_id
         
         # 2. Check web cache (items found via previous web searches)
         cached_id = self.get_item_id_from_cache(item_name, realm)
@@ -811,17 +830,59 @@ class ItemsScraper:
             self.logger.info(f"🎯 ID trouvé dans le cache web: {cached_id}", extra={"action": "CACHE"})
             return cached_id
         
-        # 3. Search online
+        # 3. Search online - utilise la nouvelle logique r=0 + filtrage
         self.logger.info(f"⚠️ Item non trouvé (DB/cache), recherche en ligne...", extra={"action": "SEARCH"})
         
+        # Utiliser find_all_item_variants puis filtrer par realm
+        variants = self.find_all_item_variants(item_name)
+        
+        if not variants:
+            return None
+        
+        # Filtrer par realm demandé
+        for variant in variants:
+            if variant['realm'] == realm or variant['realm'] == 'All' or realm == 'All':
+                item_id = variant['id']
+                self.logger.info(f"✅ ID trouvé pour {realm}: {item_id}", extra={"action": "ITEMDB"})
+                self.save_item_to_cache(item_name, realm, item_id)
+                return item_id
+        
+        # Si aucun match exact, prendre le premier
+        if variants:
+            item_id = variants[0]['id']
+            self.logger.warning(f"⚠️ Aucun match exact pour realm '{realm}', utilise premier résultat: {item_id}", extra={"action": "ITEMDB"})
+            self.save_item_to_cache(item_name, realm, item_id)
+            return item_id
+        
+        return None
+    
+    def find_all_item_variants(self, item_name):
+        """
+        Trouve TOUTES les variantes d'un item (tous les realms).
+        Utilisé pour alimenter la DB avec toutes les versions disponibles.
+        
+        Args:
+            item_name: Nom de l'item à rechercher
+        
+        Returns:
+            List[Dict]: Liste de toutes les variantes trouvées
+                [
+                    {'id': '139625', 'realm': 'Albion', 'name': 'Cudgel of the Undead'},
+                    {'id': '117565', 'realm': 'Hibernia', 'name': 'Cudgel of the Undead'},
+                    {'id': '112493', 'realm': 'Midgard', 'name': 'Cudgel of the Undead'}
+                ]
+                ou
+                [
+                    {'id': '112490', 'realm': 'All', 'name': 'Soulbinder\'s Belt'}
+                ]
+        """
         try:
-            # Build search URL
-            realm_id = self.REALM_MAP.get(realm, 0)
+            # Build search URL avec r=0 (ALL realms)
             import urllib.parse
             search_encoded = urllib.parse.quote(item_name)
-            search_url = f"{self.base_url}?s={search_encoded}&r={realm_id}"
+            search_url = f"{self.base_url}?s={search_encoded}&r=0"
             
-            self.logger.info(f"🔍 Recherche: {item_name} ({realm})", extra={"action": "ITEMDB"})
+            self.logger.info(f"🔍 Recherche TOUTES variantes: {item_name}", extra={"action": "ITEMDB"})
             self.logger.debug(f"📍 URL: {search_url}", extra={"action": "ITEMDB"})
             
             # Navigate to search URL
@@ -843,54 +904,145 @@ class ItemsScraper:
             # Small additional wait for JavaScript population
             time.sleep(3)
             
-            # DEBUG: Save HTML for inspection
-            from pathlib import Path
-            debug_folder = Path(__file__).parent.parent / 'Logs' / 'items_search_debug'
-            debug_folder.mkdir(parents=True, exist_ok=True)
-            safe_name = re.sub(r'[^\w\s-]', '_', item_name)
-            debug_file = debug_folder / f"search_{safe_name}_{realm}.html"
-            with open(debug_file, 'w', encoding='utf-8') as f:
-                f.write(self.driver.page_source)
-            self.logger.debug(f"💾 HTML recherche sauvegardé: {debug_file}", extra={"action": "ITEMDB"})
-            
             # Parse results
             soup = BeautifulSoup(self.driver.page_source, 'html.parser')
             
-            item_id = None
+            # Collecter TOUS les result_row avec leur icône realm
+            variants = []
+            result_rows = soup.find_all('tr', id=re.compile(r'^result_row_\d+$'))
             
-            # Method 1: Search in onclick attributes (multiple results or single result)
-            for link in soup.find_all('a', onclick=True):
-                onclick = link.get('onclick', '')
-                if 'item_go' in onclick:
-                    # Extract ID from onclick="item_go(ID)"
-                    match = re.search(r'item_go\((\d+)\)', onclick)
-                    if match:
-                        item_id = match.group(1)
-                        self.logger.info(f"✅ ID trouvé (onclick): {item_id}", extra={"action": "ITEMDB"})
-                        self.save_item_to_cache(item_name, realm, item_id)
-                        return item_id
+            self.logger.info(f"📊 {len(result_rows)} résultat(s) brut(s) trouvé(s)", extra={"action": "ITEMDB"})
             
-            # Method 2: Search in table rows with id="result_row_XXX"
-            if not item_id:
-                result_rows = soup.find_all('tr', id=re.compile(r'^result_row_\d+$'))
-                if result_rows:
-                    first_row = result_rows[0]
-                    row_id = first_row.get('id', '')
-                    match = re.search(r'result_row_(\d+)', row_id)
-                    if match:
-                        item_id = match.group(1)
-                        self.logger.info(f"✅ ID trouvé (result_row): {item_id}", extra={"action": "ITEMDB"})
-                        self.save_item_to_cache(item_name, realm, item_id)
-                        return item_id
+            # 🔍 DEBUG: Afficher la structure de la première ligne pour analyse
+            if result_rows and len(result_rows) > 0:
+                first_row = result_rows[0]
+                cells = first_row.find_all('td')
+                self.logger.debug(f"🔍 DEBUG - Structure de la première ligne ({len(cells)} colonnes):", extra={"action": "ITEMDB"})
+                for idx, cell in enumerate(cells):
+                    content = cell.get_text(strip=True)[:50]  # Limite à 50 caractères
+                    img = cell.find('img')
+                    img_src = img.get('src', '') if img else 'NO IMAGE'
+                    self.logger.debug(f"  Colonne {idx}: '{content}' | Image: {img_src}", extra={"action": "ITEMDB"})
             
-            self.logger.warning(f"❌ ID non trouvé pour: {item_name}", extra={"action": "ITEMDB"})
-            self.logger.debug(f"📝 Nombre de liens onclick trouvés: {len(soup.find_all('a', onclick=True))}", extra={"action": "ITEMDB"})
-            self.logger.debug(f"📝 Nombre de result_row trouvés: {len(soup.find_all('tr', id=re.compile(r'^result_row_')))}", extra={"action": "ITEMDB"})
-            return None
+            for row in result_rows:
+                # Extraire l'ID depuis result_row_XXXXX
+                row_id = row.get('id', '')
+                match = re.search(r'result_row_(\d+)', row_id)
+                if not match:
+                    continue
+                
+                item_id = match.group(1)
+                
+                # DEBUG: Afficher toutes les cellules de cette ligne
+                all_cells = row.find_all('td')
+                self.logger.debug(f"🔍 Processing ID {item_id} - {len(all_cells)} colonnes", extra={"action": "ITEMDB"})
+                
+                # Extraire les valeurs de toutes les colonnes de façon robuste
+                cells_text = [cell.get_text(strip=True) for cell in all_cells]
+                
+                # FILTRAGE 1: Vérifier le NOM EXACT (case-insensitive)
+                # La colonne avec le nom est généralement la 2ème <td> (index 1)
+                # Mais on cherche aussi dans les autres colonnes si ce n'est pas là
+                name_cell = all_cells[1] if len(all_cells) > 1 else None
+                if name_cell:
+                    found_name = name_cell.get_text(strip=True)
+                    # Comparaison case-insensitive
+                    if found_name.lower() != item_name.lower():
+                        self.logger.debug(f"  ⏭️  SKIP (nom différent): '{found_name}' != '{item_name}'", extra={"action": "ITEMDB"})
+                        continue
+                else:
+                    self.logger.warning(f"  ⚠️ Impossible de trouver le nom pour ID {item_id}", extra={"action": "ITEMDB"})
+                    continue
+                
+                # FILTRAGE 2: Vérifier le LEVEL ≥ 50
+                # Chercher dynamiquement la colonne qui contient un nombre entre 1 et 51
+                level = None
+                level_idx = None
+                level_text = "N/A"
+                for idx, text in enumerate(cells_text):
+                    if idx == 0 or idx == 1:  # Skip icône et nom
+                        continue
+                    try:
+                        val = int(text)
+                        if 1 <= val <= 51:  # Level DAOC range
+                            level = val
+                            level_idx = idx
+                            level_text = text
+                            self.logger.debug(f"  ✓ Level trouvé: {level} (colonne {idx})", extra={"action": "ITEMDB"})
+                            break
+                    except ValueError:
+                        continue
+                
+                if level is not None and level < 50:
+                    self.logger.debug(f"  ⏭️  SKIP (level < 50): Level {level}", extra={"action": "ITEMDB"})
+                    continue
+                
+                # FILTRAGE 3: Vérifier UTILITY ≥ 100
+                # Chercher dynamiquement la colonne qui contient un nombre décimal > 50
+                # IMPORTANT: Sauter la colonne du level trouvé précédemment
+                utility = None
+                utility_text = "N/A"
+                for idx, text in enumerate(cells_text):
+                    if idx == 0 or idx == 1:  # Skip icône et nom
+                        continue
+                    if level_idx is not None and idx == level_idx:  # SKIP la colonne level
+                        continue
+                    try:
+                        val = float(text)
+                        if val >= 50:  # Utility généralement > 50
+                            utility = val
+                            utility_text = text
+                            self.logger.debug(f"  ✓ Utility trouvée: {utility} (colonne {idx})", extra={"action": "ITEMDB"})
+                            break
+                    except ValueError:
+                        continue
+                
+                if utility is not None and utility < 100:
+                    self.logger.debug(f"  ⏭️  SKIP (utility < 100): Utility {utility}", extra={"action": "ITEMDB"})
+                    continue
+                elif utility is None:
+                    self.logger.debug(f"  ℹ️ Pas de colonne utility trouvée pour ID {item_id}, on continue", extra={"action": "ITEMDB"})
+                
+                # Extraire le realm depuis l'icône (OBLIGATOIRE)
+                # Chercher l'icône avec différents chemins possibles
+                realm_img = row.find('img', src=re.compile(r'(albion_logo|hibernia_logo|midgard_logo|all_logo)\.png'))
+                if not realm_img:
+                    self.logger.warning(f"⚠️ Pas d'icône realm pour ID {item_id}, SKIP", extra={"action": "ITEMDB"})
+                    continue
+                
+                src = realm_img.get('src', '')
+                if 'albion_logo' in src:
+                    item_realm = 'Albion'
+                elif 'hibernia_logo' in src:
+                    item_realm = 'Hibernia'
+                elif 'midgard_logo' in src:
+                    item_realm = 'Midgard'
+                elif 'all_logo' in src:
+                    item_realm = 'All'
+                else:
+                    self.logger.warning(f"⚠️ Icône realm inconnue: {src}, SKIP", extra={"action": "ITEMDB"})
+                    continue
+                
+                variant = {
+                    'id': item_id,
+                    'realm': item_realm,
+                    'name': found_name  # Utiliser le nom trouvé (casse originale)
+                }
+                variants.append(variant)
+                self.logger.debug(f"  ✓ Variante VALIDE: {item_realm} → ID {item_id} (Level {level_text if level_text else 'N/A'})", extra={"action": "ITEMDB"})
+            
+            if not variants:
+                self.logger.warning(f"❌ Aucune variante trouvée pour: {item_name}", extra={"action": "ITEMDB"})
+            else:
+                self.logger.info(f"✅ {len(variants)} variante(s) trouvée(s)", extra={"action": "ITEMDB"})
+            
+            return variants
             
         except Exception as e:
-            self.logger.error(f"Erreur recherche item ID: {e}", extra={"action": "ITEMDB"})
-            return None
+            self.logger.error(f"Erreur recherche variantes: {e}", extra={"action": "ITEMDB"})
+            import traceback
+            self.logger.debug(traceback.format_exc(), extra={"action": "ITEMDB"})
+            return []
     
     def get_item_details(self, item_id, realm="All", item_name=None):
         """
@@ -961,6 +1113,7 @@ class ItemsScraper:
                 'dps': None,          # Damage Per Second (weapons only)
                 'speed': None,        # Weapon Speed (weapons only)
                 'damage_type': None,  # Crush/Slash/Thrust (weapons only)
+                'usable_by': 'ALL',   # Classes that can use this item (default: ALL)
                 'merchants': []
             }
             
@@ -1028,6 +1181,10 @@ class ItemsScraper:
                         elif label == 'Damage Type':
                             item_data['damage_type'] = value
                             self.logger.debug(f"  Damage Type: {value}", extra={"action": "ITEMDB"})
+                        # Usable by (classes)
+                        elif label == 'Usable by':
+                            item_data['usable_by'] = value if value else 'ALL'
+                            self.logger.debug(f"  Usable by: {value}", extra={"action": "ITEMDB"})
             
             # Parse merchants section
             merchants_table = soup.find('table', id='table_merchants')
@@ -1093,18 +1250,30 @@ class ItemsScraper:
                                     merchant_data['zone'] = 'ToA'
                                 elif currency == 'Seals':
                                     merchant_data['zone'] = 'DF'
-                                elif currency == 'Roots':
-                                    merchant_data['zone'] = 'Epik'
+                                elif currency in ['Roots', 'Souls', 'Ices']:
+                                    merchant_data['zone'] = 'Epic'
                                 elif currency == 'Dragon Scales':
                                     # Afficher "Scales" comme devise
                                     merchant_data['price_parsed']['currency'] = 'Scales'
                                     merchant_data['zone'] = 'Drake'
                                 elif currency == 'Scales':
                                     merchant_data['zone'] = 'Drake'
+                                elif currency == 'Grimoires':
+                                    merchant_data['zone'] = 'SH'
                     
                     # Add merchant if we found a name
                     if merchant_data['name']:
                         item_data['merchants'].append(merchant_data)
+            
+            # Extraire merchant_zone, merchant_price et merchant_currency du premier vendeur pour la DB
+            if item_data['merchants']:
+                first_merchant = item_data['merchants'][0]
+                zone = first_merchant.get('zone')
+                item_data['merchant_zone'] = zone
+                if first_merchant.get('price_parsed'):
+                    item_data['merchant_price'] = str(first_merchant['price_parsed'].get('amount'))
+                # Ajouter la currency basée sur la zone
+                item_data['merchant_currency'] = self.ZONE_CURRENCY.get(zone)
             
             return item_data
             

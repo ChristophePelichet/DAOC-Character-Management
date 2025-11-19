@@ -56,7 +56,7 @@ def parse_template_file(file_path):
     
     return items
 
-def search_item_for_database(item_name, items_scraper, realm="All"):
+def search_item_for_database(item_name, items_scraper, realm="All", force_scrape=False):
     """
     Recherche un item et retourne les données formatées pour la base v2.0
     Inclut: id, name, realm, slot, type, model, dps, speed, damage_type, merchant
@@ -65,14 +65,15 @@ def search_item_for_database(item_name, items_scraper, realm="All"):
         item_name: Nom de l'item
         items_scraper: Instance de ItemsScraper
         realm: Royaume (défaut: All)
+        force_scrape: Si True, force le scraping web (pour refresh DB)
         
     Returns:
         dict: Données de l'item ou None si non trouvé
     """
-    print(f"    🔍 Recherche: {item_name} ({realm})")
+    print(f"    🔍 Recherche: {item_name} ({realm}) [force_scrape={force_scrape}]")
     
-    # Find ID
-    item_id = items_scraper.find_item_id(item_name, realm)
+    # Find ID (force web scraping if requested)
+    item_id = items_scraper.find_item_id(item_name, realm, force_scrape=force_scrape)
     
     if not item_id:
         print(f"      ❌ ID non trouvé")

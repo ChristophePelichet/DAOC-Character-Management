@@ -11,7 +11,7 @@ from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QFormLayout, QGroupBox, QLabel,
     QPushButton, QLineEdit, QComboBox, QCheckBox, QDialogButtonBox,
     QFileDialog, QListWidget, QStackedWidget, QWidget, QListWidgetItem,
-    QFrame, QMessageBox, QProgressDialog
+    QFrame, QMessageBox, QProgressDialog, QApplication
 )
 from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QIcon, QFont
@@ -1339,6 +1339,15 @@ class SettingsDialog(QDialog):
         clean_duplicates_button.clicked.connect(self._clean_duplicates)
         advanced_layout.addWidget(clean_duplicates_button)
         
+        # Refresh All Items button
+        refresh_items_button = QPushButton(lang.get('superadmin.refresh_items_button', 
+            default="🔄 Rafraîchir tous les items"))
+        refresh_items_button.setMinimumHeight(35)
+        refresh_items_button.setToolTip(lang.get('superadmin.refresh_items_tooltip', 
+            default="Re-scrape tous les items depuis Eden pour mettre à jour les données (Model, DPS, Speed, etc.)"))
+        refresh_items_button.clicked.connect(self._refresh_all_items)
+        advanced_layout.addWidget(refresh_items_button)
+        
         advanced_layout.addStretch()  # Push button to top
         
         advanced_group.setLayout(advanced_layout)
@@ -1731,6 +1740,7 @@ class SettingsDialog(QDialog):
                         lang.get("clean_eden_success_message", 
                                 default="✅ Le dossier Eden a été nettoyé.\n\n"
                                        "Dossier supprimé.")
+                    )
             except Exception as e:
                 QMessageBox.critical(
                     self,
@@ -2371,8 +2381,9 @@ class SettingsDialog(QDialog):
                 self.mode_info_label.setText(mode_text)
                 self.mode_info_label.setStyleSheet("color: #4CAF50; font-style: italic; padding: 5px;")
                 
-                # Show stats, actions and import groups
-                self.stats_group.setVisible(True)
+                # Show stats, actions and import groups (only if they exist)
+                if hasattr(self, 'stats_group'):
+                    self.stats_group.setVisible(True)
                 if hasattr(self, 'actions_group'):
                     self.actions_group.setVisible(True)
                 if hasattr(self, 'import_group'):
@@ -2385,8 +2396,9 @@ class SettingsDialog(QDialog):
                 self.mode_info_label.setText(mode_text)
                 self.mode_info_label.setStyleSheet("color: #888; font-style: italic; padding: 5px;")
                 
-                # Hide stats, actions and import groups
-                self.stats_group.setVisible(False)
+                # Hide stats, actions and import groups (only if they exist)
+                if hasattr(self, 'stats_group'):
+                    self.stats_group.setVisible(False)
                 if hasattr(self, 'actions_group'):
                     self.actions_group.setVisible(False)
                 if hasattr(self, 'import_group'):
@@ -2761,5 +2773,179 @@ class SettingsDialog(QDialog):
         except Exception as e:
             logging.error(f"Error cleaning duplicates: {e}", exc_info=True)
             QMessageBox.critical(self, "Erreur", f"Erreur lors du nettoyage:\n{e}")
+    
+    def _refresh_all_items(self):
+        """Refresh all items in the source database from Eden"""
+        try:
+            # 🔧 DEBUG MODE: Demander si on veut filtrer des items spécifiques
+            from PySide6.QtWidgets import QInputDialog
+            
+            filter_reply = QMessageBox.question(
+                self,
+                "🔧 Mode Debug",
+                "Voulez-vous rafraîchir UNIQUEMENT des items spécifiques ?\n\n"
+                "✅ OUI = Sélection manuelle d'items (pour debug)\n"
+                "❌ NON = Rafraîchir TOUS les items (30+ items, plusieurs minutes)",
+                QMessageBox.Yes | QMessageBox.No
+            )
+            
+            item_filter = None
+            if filter_reply == QMessageBox.Yes:
+                # Mode DEBUG: Demander les noms des items
+                items_text, ok = QInputDialog.getText(
+                    self,
+                    "🔧 Sélection d'items",
+                    "Entrez les noms des items à rafraîchir (séparés par des virgules) :\n\n"
+                    "Exemples :\n"
+                    "• Cloth Cap\n"
+                    "• Cudgel of the Undead, Soulbinder's Belt\n"
+                    "• Ring of the Azure\n\n"
+                    "⚠️ Respectez la casse exacte (majuscules/minuscules)"
+                )
+                
+                if not ok or not items_text.strip():
+                    QMessageBox.information(self, "Annulé", "Opération annulée.")
+                    return
+                
+                # Parser les noms d'items
+                item_filter = [name.strip() for name in items_text.split(',') if name.strip()]
+                
+                if not item_filter:
+                    QMessageBox.warning(self, "Erreur", "Aucun item valide saisi.")
+                    return
+                
+                # Confirmation avec liste des items
+                confirm_msg = f"Items sélectionnés ({len(item_filter)}) :\n\n"
+                confirm_msg += "\n".join(f"• {name}" for name in item_filter)
+                confirm_msg += "\n\nContinuer ?"
+                
+                confirm_reply = QMessageBox.question(self, "Confirmer", confirm_msg)
+                if confirm_reply != QMessageBox.Yes:
+                    return
+            
+            # Confirmation dialog
+            title = lang.get('superadmin.refresh_confirm_title', 
+                default="Confirmer le rafraîchissement")
+            
+            if item_filter:
+                message = f"Rafraîchissement de {len(item_filter)} item(s) sélectionné(s).\n\n"
+                message += "Items à traiter :\n" + "\n".join(f"• {name}" for name in item_filter)
+                message += "\n\n⚠️ Une sauvegarde sera créée automatiquement."
+            else:
+                message = lang.get('superadmin.refresh_confirm_message',
+                    default="Voulez-vous rafraîchir tous les items de la base source ?\n\n"
+                           "Ceci va re-scraper tous les items depuis Eden Herald pour mettre à jour:\n"
+                           "• Model ID (pour rendu 3D futur)\n"
+                           "• DPS, Speed, Damage Type (armes)\n"
+                           "• Type, Slot (équipement)\n"
+                           "• Prix et zone marchand\n\n"
+                           "⚠️ Cette opération peut prendre plusieurs minutes.\n"
+                           "Une sauvegarde sera créée automatiquement.")
+            
+            reply = QMessageBox.question(self, title, message,
+                                        QMessageBox.Yes | QMessageBox.No)
+            
+            if reply != QMessageBox.Yes:
+                return
+            
+            # Create progress dialog
+            from PySide6.QtWidgets import QProgressDialog
+            from PySide6.QtCore import Qt
+            
+            progress = QProgressDialog(
+                lang.get('superadmin.refresh_progress_description', 
+                    default="Rafraîchissement des items en cours..."),
+                lang.get('superadmin.refresh_progress_cancel', default="Annuler"),
+                0, 100, self
+            )
+            progress.setWindowTitle(lang.get('superadmin.refresh_progress_title', 
+                default="Rafraîchissement en cours"))
+            progress.setWindowModality(Qt.WindowModal)
+            progress.setMinimumDuration(0)
+            progress.show()
+            QApplication.processEvents()
+            
+            # Progress callback
+            def update_progress(current, total, item_name):
+                progress.setMaximum(total)
+                progress.setValue(current)
+                progress.setLabelText(
+                    f"{lang.get('superadmin.refresh_progress_description', default='Rafraîchissement des items en cours...')}\n\n"
+                    f"Item {current}/{total}: {item_name}"
+                )
+                QApplication.processEvents()
+                
+                # Check for cancellation
+                if progress.wasCanceled():
+                    raise InterruptedError("User cancelled refresh")
+            
+            # Import SuperAdminTools
+            logging.info("REFRESH: Importing SuperAdminTools...")
+            from Functions.superadmin_tools import SuperAdminTools
+            logging.info("REFRESH: Creating SuperAdminTools instance...")
+            superadmin = SuperAdminTools(self.path_manager)
+            logging.info(f"REFRESH: SuperAdminTools initialized with source_db_path={superadmin.source_db_path}")
+            
+            # Execute refresh
+            try:
+                logging.info(f"REFRESH: Calling refresh_all_items with filter={item_filter}...")
+                success, message, stats = superadmin.refresh_all_items(
+                    progress_callback=update_progress,
+                    item_filter=item_filter  # None = tous les items, ou liste spécifique
+                )
+                logging.info(f"REFRESH: Result - success={success}, stats={stats}")
+            except InterruptedError:
+                progress.close()
+                QMessageBox.information(self,
+                    lang.get('superadmin.refresh_cancelled_title', default="Rafraîchissement annulé"),
+                    lang.get('superadmin.refresh_cancelled_message', 
+                        default="Le rafraîchissement a été annulé.\n\n"
+                               "Les items traités avant l'annulation ont été sauvegardés.")
+                )
+                # Refresh statistics anyway
+                self._refresh_superadmin_stats()
+                return
+            
+            progress.close()
+            
+            # Show result
+            if success:
+                stats_text = f"\n\n{lang.get('superadmin.stats_title', default='Statistiques')}:\n"
+                stats_text += f"• {lang.get('superadmin.refresh_stats_total', default='Total items')}: {stats.get('total_items', 0)}\n"
+                stats_text += f"• {lang.get('superadmin.refresh_stats_updated', default='Mis à jour')}: {stats.get('updated', 0)}\n"
+                stats_text += f"• {lang.get('superadmin.refresh_stats_skipped', default='Inchangés')}: {stats.get('skipped', 0)}\n"
+                stats_text += f"• {lang.get('superadmin.refresh_stats_failed', default='Échecs')}: {stats.get('failed', 0)}\n\n"
+                
+                fields = stats.get('fields_updated', {})
+                stats_text += f"{lang.get('superadmin.refresh_fields_updated', default='Champs mis à jour')}:\n"
+                stats_text += f"• Model: {fields.get('model', 0)}\n"
+                stats_text += f"• DPS: {fields.get('dps', 0)}\n"
+                stats_text += f"• Speed: {fields.get('speed', 0)}\n"
+                stats_text += f"• Damage Type: {fields.get('damage_type', 0)}\n"
+                stats_text += f"• Type: {fields.get('type', 0)}\n"
+                stats_text += f"• Slot: {fields.get('slot', 0)}"
+                
+                QMessageBox.information(self,
+                    lang.get('superadmin.refresh_success_title', 
+                        default="Rafraîchissement réussi"),
+                    message + stats_text
+                )
+                
+                # Refresh statistics
+                self._refresh_superadmin_stats()
+            else:
+                QMessageBox.critical(self,
+                    lang.get('superadmin.refresh_error_title', 
+                        default="Erreur de rafraîchissement"),
+                    message
+                )
+                
+        except Exception as e:
+            logging.error(f"Error refreshing items: {e}", exc_info=True)
+            QMessageBox.critical(self, 
+                lang.get("error_title", default="Erreur"), 
+                lang.get("superadmin.refresh_error_message", 
+                    default="Erreur lors du rafraîchissement:\n{error}").replace("{error}", str(e))
+            )
 
 

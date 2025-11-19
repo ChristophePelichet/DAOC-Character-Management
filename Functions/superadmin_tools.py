@@ -16,6 +16,7 @@ Features:
 
 import json
 import shutil
+import time
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional
 from datetime import datetime
@@ -419,3 +420,242 @@ class SuperAdminTools:
         except Exception as e:
             logging.error(f"Error cleaning duplicates: {e}", extra={"action": "SUPERADMIN_CLEAN_ERROR"})
             return False, f"Error: {str(e)}", 0
+    
+    def refresh_all_items(self, progress_callback=None, item_filter: List[str] = None) -> Tuple[bool, str, Dict]:
+        """
+        Refresh all items in the database by re-scraping them from Eden.
+        
+        NOUVELLE LOGIQUE v2.0:
+        - Pour chaque item unique (nom), trouve TOUTES les variantes (tous realms)
+        - Crée/met à jour une entrée par realm dans la DB
+        - Exemple: "Cudgel of the Undead" → 3 entrées (Albion, Hibernia, Midgard)
+        
+        Args:
+            progress_callback: Optional callback(current, total, item_name) for progress updates
+            item_filter: Liste optionnelle de noms d'items à rafraîchir (pour debug)
+                        Si None, rafraîchit TOUS les items
+                        Exemple: ["Cloth Cap", "Cudgel of the Undead"]
+            
+        Returns:
+            Tuple[bool, str, Dict]: (Success, Message, Stats dict)
+        """
+        eden_scraper = None
+        
+        try:
+            if not self.source_db_path.exists():
+                return False, "Source database does not exist", {}
+            
+            # Load database
+            with open(self.source_db_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            
+            items = data.get("items", {})
+            
+            # Extraire les noms d'items uniques (ignorer les doublons de realm)
+            unique_items = {}
+            for key, item_data in items.items():
+                item_name = item_data.get("name", "")
+                if item_name and item_name not in unique_items:
+                    unique_items[item_name] = item_data
+            
+            total_items = len(unique_items)
+            
+            if total_items == 0:
+                return False, "Database is empty", {}
+            
+            # Backup before modification
+            logging.info("Creating backup before refresh...")
+            self.backup_source_database()
+            
+            # Initialize scraper with driver
+            logging.info("Initializing web scraper...")
+            start_init = time.time()
+            
+            cookie_manager = CookieManager()
+            eden_scraper = EdenScraper(cookie_manager)
+            
+            # Initialize Selenium driver (NOT headless for visibility)
+            driver_start = time.time()
+            if not eden_scraper.initialize_driver(headless=False, minimize=True):
+                return False, "Failed to initialize web driver", {}
+            logging.info(f"⏱️  Driver initialized in {time.time() - driver_start:.2f}s")
+            
+            # Load cookies
+            cookies_start = time.time()
+            if not eden_scraper.load_cookies():
+                eden_scraper.close()
+                return False, "Failed to load cookies. Please generate cookies first.", {}
+            logging.info(f"⏱️  Cookies loaded in {time.time() - cookies_start:.2f}s")
+            
+            logging.info(f"⏱️  Total initialization: {time.time() - start_init:.2f}s")
+            
+            items_scraper = ItemsScraper(eden_scraper)
+            
+            # Statistics
+            items_created = 0
+            items_updated = 0
+            variants_found = 0
+            failed_count = 0
+            fields_updated = {
+                'model': 0,
+                'dps': 0,
+                'speed': 0,
+                'damage_type': 0,
+                'type': 0,
+                'slot': 0,
+                'usable_by': 0
+            }
+            
+            # IMPORTANT: Partir de la base EXISTANTE (ne pas écraser)
+            # On va mettre à jour/ajouter les items, pas tout recréer
+            new_items = dict(items)  # Copie de la base actuelle
+            
+            # Process each unique item
+            for idx, item_name in enumerate(unique_items.keys(), 1):
+                # Appliquer le filtre si fourni
+                if item_filter is not None and item_name not in item_filter:
+                    logging.debug(f"⏭️  SKIP (not in filter): {item_name}")
+                    continue
+                
+                if progress_callback:
+                    progress_callback(idx, total_items, item_name)
+                
+                logging.info(f"Refreshing {idx}/{total_items}: {item_name}")
+                item_start = time.time()
+                
+                try:
+                    # Trouver TOUTES les variantes de l'item (tous realms)
+                    logging.debug(f"Searching ALL variants for '{item_name}'")
+                    variants = items_scraper.find_all_item_variants(item_name)
+                    
+                    if not variants:
+                        logging.warning(f"❌ No variants found for: {item_name}")
+                        failed_count += 1
+                        time.sleep(0.5)
+                        continue
+                    
+                    logging.info(f"✅ Found {len(variants)} variant(s) for '{item_name}'")
+                    variants_found += len(variants)
+                    
+                    # Scraper les détails de chaque variante
+                    for variant in variants:
+                        variant_start = time.time()
+                        item_id = variant['id']
+                        realm = variant['realm']
+                        
+                        logging.info(f"  Scraping variant: {realm} (ID: {item_id})")
+                        
+                        # Récupérer les détails complets
+                        item_details = items_scraper.get_item_details(item_id, realm, item_name)
+                        
+                        if not item_details:
+                            logging.warning(f"  ⚠️ Failed to get details for {realm} variant")
+                            continue
+                        
+                        # Créer la clé DB
+                        db_key = f"{item_name.lower()}:{realm.lower()}"
+                        
+                        # Vérifier si l'item existe déjà
+                        is_new = db_key not in items
+                        
+                        # Préparer les données complètes
+                        item_data = {
+                            "id": item_id,
+                            "name": item_name,
+                            "realm": realm,
+                            "slot": item_details.get("slot", "Unknown"),
+                            "type": item_details.get("type"),
+                            "model": item_details.get("model"),
+                            "dps": item_details.get("dps"),
+                            "speed": item_details.get("speed"),
+                            "damage_type": item_details.get("damage_type"),
+                            "usable_by": item_details.get("usable_by", "ALL"),
+                            "merchant_zone": item_details.get("merchant_zone"),
+                            "merchant_price": item_details.get("merchant_price"),
+                            "merchant_currency": item_details.get("merchant_currency"),
+                            "source": "internal"
+                        }
+                        
+                        # Stocker dans la nouvelle structure
+                        new_items[db_key] = item_data
+                        
+                        if is_new:
+                            items_created += 1
+                            logging.info(f"  ✨ NEW: {db_key}")
+                        else:
+                            items_updated += 1
+                            # Compter les champs mis à jour
+                            old_item = items.get(db_key, {})
+                            for field in ['model', 'dps', 'speed', 'damage_type', 'type', 'slot', 'usable_by']:
+                                if item_data.get(field) != old_item.get(field) and item_data.get(field):
+                                    fields_updated[field] += 1
+                            logging.info(f"  ♻️  UPDATED: {db_key}")
+                        
+                        logging.info(f"  ⏱️  Variant scraped in {time.time() - variant_start:.2f}s")
+                        time.sleep(1)  # Delay between variants
+                    
+                    logging.info(f"⏱️  Item '{item_name}' completed in {time.time() - item_start:.2f}s")
+                    time.sleep(2)  # Delay between items
+                    
+                except Exception as e:
+                    logging.error(f"Error refreshing {item_name}: {e}")
+                    import traceback
+                    logging.debug(traceback.format_exc())
+                    failed_count += 1
+                    time.sleep(0.5)
+                    continue
+            
+            # Update metadata
+            data["items"] = new_items
+            data["item_count"] = len(new_items)
+            data["last_updated"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            if "notes" not in data:
+                data["notes"] = []
+            # Note: last_updated suffit, pas besoin de dupliquer dans notes
+            
+            # Save updated database
+            save_start = time.time()
+            with open(self.source_db_path, 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=2, ensure_ascii=False)
+            logging.info(f"⏱️  Database saved in {time.time() - save_start:.2f}s")
+            
+            # Build statistics
+            stats = {
+                "unique_items_processed": total_items,
+                "variants_found": variants_found,
+                "items_created": items_created,
+                "items_updated": items_updated,
+                "failed": failed_count,
+                "total_db_entries": len(new_items),
+                "fields_updated": fields_updated
+            }
+            
+            message = f"Database refresh completed!\n\n"
+            message += f"Unique items processed: {total_items}\n"
+            message += f"Total variants found: {variants_found}\n"
+            message += f"New DB entries: {items_created}\n"
+            message += f"Updated DB entries: {items_updated}\n"
+            message += f"Failed: {failed_count}\n"
+            message += f"Total DB entries: {len(new_items)}\n\n"
+            message += f"Fields updated:\n"
+            message += f"• Model: {fields_updated['model']}\n"
+            message += f"• DPS: {fields_updated['dps']}\n"
+            message += f"• Speed: {fields_updated['speed']}\n"
+            message += f"• Damage Type: {fields_updated['damage_type']}\n"
+            message += f"• Type: {fields_updated['type']}\n"
+            message += f"• Slot: {fields_updated['slot']}\n"
+            message += f"• Usable By: {fields_updated['usable_by']}"
+            
+            logging.info(f"Database refresh completed: {stats}", extra={"action": "SUPERADMIN_REFRESH"})
+            return True, message, stats
+            
+        except Exception as e:
+            logging.error(f"Error refreshing database: {e}", extra={"action": "SUPERADMIN_REFRESH_ERROR"})
+            import traceback
+            logging.debug(traceback.format_exc())
+            return False, f"Error refreshing database: {str(e)}", {}
+        
+        finally:
+            # Close browser
+            if eden_scraper:
+                eden_scraper.close()

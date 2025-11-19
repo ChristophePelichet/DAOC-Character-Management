@@ -1,0 +1,12 @@
+- You are a coding assistant. UNDER NO CIRCUMSTANCES should you generate documentation, comments, JSDoc blocks, or README files unless the user explicitly asks for them.
+- Vous êtes un assistant de codage. Ne jamais générer de documentation, de commentaires, de blocs JSDoc, ou de fichiers de type README sans que l'utilisateur ne le demande explicitement.
+- Never modify existing documentation, changelogs, or readme files unless explicitly requested to do so.
+- Ne jamais modifier de documentation , changelog ou readme existant sans que cela n'aie été explicitement demandé.
+- In all documentation, never change the version unless explicitly requested.
+- Dans toutes les documentations , ne jamais changer de version sans que seloit sois explicitement demandé
+- Never perform a git commit, git push, git merge, or other git commands unless explicitly requested to do so.
+- Ne jamais faire de git commit , git push , git merge ou autres commandes git sans que cela ne soie explicitement demandé
+- Technical documentation must always be created in the “Documentation” folder, not “Documentation.”
+- Les documentations technique doivent toujours être crée dans le folder "Documentations" et non "Documentation".
+- Changelogs must always be created in the “Changelogs” folder.
+- Les changelogs doivent toujours être crée dans le folder "Changelogs".

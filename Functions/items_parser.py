@@ -58,7 +58,8 @@ def parse_template_file(file_path):
 
 def search_item_for_database(item_name, items_scraper, realm="All"):
     """
-    Recherche un item et retourne les données formatées pour la base
+    Recherche un item et retourne les données formatées pour la base v2.0
+    Inclut: id, name, realm, slot, type, model, dps, speed, damage_type, merchant
     
     Args:
         item_name: Nom de l'item
@@ -68,7 +69,7 @@ def search_item_for_database(item_name, items_scraper, realm="All"):
     Returns:
         dict: Données de l'item ou None si non trouvé
     """
-    print(f"    🔍 Recherche: {item_name}")
+    print(f"    🔍 Recherche: {item_name} ({realm})")
     
     # Find ID
     item_id = items_scraper.find_item_id(item_name, realm)
@@ -80,18 +81,23 @@ def search_item_for_database(item_name, items_scraper, realm="All"):
     print(f"      ✅ ID trouvé: {item_id}")
     
     # Get details
-    details = items_scraper.get_item_details(item_id, realm)
+    details = items_scraper.get_item_details(item_id, realm, item_name)
     
     if not details:
         print(f"      ❌ Détails non disponibles")
         return None
     
-    # Format for database
+    # Format for database v2.0 (minimal data)
     item_data = {
         "id": item_id,
         "name": details.get("name") or item_name,
+        "realm": details.get("realm") or realm,
         "slot": details.get("slot") or "Unknown",
-        "realm": details.get("realm") or realm
+        "type": details.get("type"),
+        "model": details.get("model"),
+        "dps": details.get("dps"),
+        "speed": details.get("speed"),
+        "damage_type": details.get("damage_type")
     }
     
     # Add merchant info if available
@@ -104,6 +110,12 @@ def search_item_for_database(item_name, items_scraper, realm="All"):
         item_data["merchant_price"] = str(price_parsed.get("amount")) if price_parsed else "Unknown"
         
         print(f"      ✅ Merchant: {item_data['merchant_zone']} - {item_data['merchant_price']}")
+        
+        # Log damage info if available
+        if item_data.get("dps"):
+            print(f"      ⚔️  Damage: DPS {item_data['dps']}, Speed {item_data['speed']}, Type {item_data['damage_type']}")
+        if item_data.get("model"):
+            print(f"      🎨 Model: {item_data['model']}")
     else:
         print(f"      ⚠️  Pas d'info merchant")
     

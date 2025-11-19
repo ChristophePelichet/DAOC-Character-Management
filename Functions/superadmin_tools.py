@@ -273,15 +273,17 @@ class SuperAdminTools:
                     item_name = item_basic["name"]
                     item_realm = item_basic["realm"]
                     
-                    logging.info(f"[{idx}/{total_items}] Searching: {item_name}")
+                    logging.info(f"[{idx}/{total_items}] Searching: {item_name} ({item_realm})")
                     
-                    # Check for duplicates before scraping
-                    if remove_duplicates and key in merged_items:
-                        existing_realm = merged_items[key].get("realm", "")
-                        if existing_realm.lower() == item_realm.lower():
-                            duplicates_count += 1
-                            logging.info(f"  Skipped (duplicate): {item_name}")
-                            continue
+                    # Generate composite key for v2.0 (name:realm)
+                    realm_lower = item_realm.lower() if item_realm != "All" else "all"
+                    composite_key = f"{key}:{realm_lower}"
+                    
+                    # Check for duplicates before scraping (using composite key)
+                    if remove_duplicates and composite_key in merged_items:
+                        duplicates_count += 1
+                        logging.info(f"  ⏭️  Skipped (duplicate): {item_name}:{item_realm}")
+                        continue
                     
                     # Search item details on Eden
                     item_data = search_item_for_database(item_name, items_scraper, item_realm)
@@ -291,9 +293,10 @@ class SuperAdminTools:
                         if "merchant_zone" in item_data and "merchant_price" in item_data:
                             # Add source field
                             item_data["source"] = "internal"
-                            merged_items[key] = item_data
+                            # Use composite key
+                            merged_items[composite_key] = item_data
                             added_count += 1
-                            logging.info(f"  ✅ Added: {item_name}")
+                            logging.info(f"  ✅ Added: {composite_key}")
                         else:
                             failed_count += 1
                             logging.warning(f"  ❌ Skipped (no merchant info): {item_name}")
@@ -306,12 +309,17 @@ class SuperAdminTools:
                 eden_scraper.close()
                 logging.info("Eden scraper closed")
             
-            # Build final database structure
+            # Build final database structure (v2.0)
             database = {
-                "version": "1.0",
-                "description": "DAOC Items Source Database - Internal Read-Only",
+                "version": "2.0",
+                "description": "DAOC Items Database - Multi-Realm Support (Minimal Data)",
                 "last_updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 "item_count": len(merged_items),
+                "notes": [
+                    "Composite keys format: 'item_name:realm' (lowercase)",
+                    "Only essential data: ID, name, realm, slot, type, model, damage info, merchant",
+                    "No stats, resistances, bonuses, level, or quality"
+                ],
                 "items": merged_items
             }
             

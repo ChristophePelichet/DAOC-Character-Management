@@ -191,7 +191,8 @@ class ItemsScraper:
     
     def _get_item_from_databases(self, item_name, realm=None):
         """
-        Recherche un item dans les bases de données (source + user)
+        Recherche un item dans les bases de données (source + user) avec clé composite
+        Supporte fallback sur realm "all" si realm spécifique non trouvé
         
         Args:
             item_name: Nom de l'item
@@ -200,19 +201,32 @@ class ItemsScraper:
         Returns:
             str: ID de l'item ou None si non trouvé
         """
-        cache_key = self._get_cache_key(item_name)
+        # Try realm-specific key first
+        cache_key = self._get_cache_key(item_name, realm)
         
         # Check source database first (embedded)
         try:
             if self.database_file.exists():
                 with open(self.database_file, 'r', encoding='utf-8') as f:
                     database = json.load(f)
+                    
+                    # Direct lookup with realm
                     item_data = database.get("items", {}).get(cache_key)
                     if item_data and item_data.get('id'):
                         item_id = item_data.get('id')
-                        self.logger.info(f"✅ Item trouvé dans DB source: {item_name} (ID: {item_id})", 
+                        self.logger.info(f"✅ Item trouvé dans DB source: {item_name} ({realm}) → ID {item_id}", 
                                        extra={"action": "DATABASE"})
                         return item_id
+                    
+                    # Fallback: try "all" realm if specific realm not found
+                    if realm and realm != "All":
+                        all_key = self._get_cache_key(item_name, "All")
+                        item_data = database.get("items", {}).get(all_key)
+                        if item_data and item_data.get('id'):
+                            item_id = item_data.get('id')
+                            self.logger.info(f"✅ Item trouvé dans DB source (All): {item_name} → ID {item_id}", 
+                                           extra={"action": "DATABASE"})
+                            return item_id
         except Exception as e:
             self.logger.debug(f"Erreur lecture DB source: {e}", extra={"action": "DATABASE"})
         
@@ -222,12 +236,24 @@ class ItemsScraper:
             if user_db_file.exists():
                 with open(user_db_file, 'r', encoding='utf-8') as f:
                     database = json.load(f)
+                    
+                    # Direct lookup with realm
                     item_data = database.get("items", {}).get(cache_key)
                     if item_data and item_data.get('id'):
                         item_id = item_data.get('id')
-                        self.logger.info(f"✅ Item trouvé dans DB user: {item_name} (ID: {item_id})", 
+                        self.logger.info(f"✅ Item trouvé dans DB user: {item_name} ({realm}) → ID {item_id}", 
                                        extra={"action": "DATABASE"})
                         return item_id
+                    
+                    # Fallback: try "all" realm
+                    if realm and realm != "All":
+                        all_key = self._get_cache_key(item_name, "All")
+                        item_data = database.get("items", {}).get(all_key)
+                        if item_data and item_data.get('id'):
+                            item_id = item_data.get('id')
+                            self.logger.info(f"✅ Item trouvé dans DB user (All): {item_name} → ID {item_id}", 
+                                           extra={"action": "DATABASE"})
+                            return item_id
         except Exception as e:
             self.logger.debug(f"Erreur lecture DB user: {e}", extra={"action": "DATABASE"})
         
@@ -929,11 +955,10 @@ class ItemsScraper:
                 'type': None,
                 'slot': None,
                 'realm': realm,
-                'level': None,
-                'quality': None,
-                'stats': {},
-                'resistances': {},
-                'bonuses': {},
+                'model': None,        # Model ID (visual appearance)
+                'dps': None,          # Damage Per Second (weapons only)
+                'speed': None,        # Weapon Speed (weapons only)
+                'damage_type': None,  # Crush/Slash/Thrust (weapons only)
                 'merchants': []
             }
             
@@ -985,27 +1010,22 @@ class ItemsScraper:
                         elif label == 'Slot':
                             item_data['slot'] = value
                             self.logger.debug(f"  Slot: {value}", extra={"action": "ITEMDB"})
-                        elif label == 'Quality':
-                            item_data['quality'] = value.replace('%', '').strip()
-                            self.logger.debug(f"  Quality: {value}", extra={"action": "ITEMDB"})
-                        elif label == 'Required Level':
-                            item_data['level'] = value
-                            self.logger.debug(f"  Level: {value}", extra={"action": "ITEMDB"})
                         elif label == 'Realm':
                             item_data['realm'] = value
-                        # Stats
-                        elif label in ['Strength', 'Constitution', 'Dexterity', 'Quickness', 'Acuity', 'Health', 'Power Pool']:
-                            item_data['stats'][label] = value
-                        # Resists
-                        elif label.startswith('Resist:'):
-                            resist_type = label.replace('Resist:', '').strip()
-                            item_data['resistances'][resist_type] = value
-                        # ToA bonuses
-                        elif label in ['Spell Range', 'Casting Speed', 'Arcane Syphon', 'Melee Speed', 'Armor Factor']:
-                            item_data['bonuses'][label] = value
-                        # All Skills
-                        elif label == 'All Skills':
-                            item_data['bonuses'][label] = value
+                        # Model ID
+                        elif label == 'Model':
+                            item_data['model'] = value
+                            self.logger.debug(f"  Model: {value}", extra={"action": "ITEMDB"})
+                        # Damage Info (weapons only)
+                        elif label == 'DPS':
+                            item_data['dps'] = value
+                            self.logger.debug(f"  DPS: {value}", extra={"action": "ITEMDB"})
+                        elif label == 'Speed':
+                            item_data['speed'] = value
+                            self.logger.debug(f"  Speed: {value}", extra={"action": "ITEMDB"})
+                        elif label == 'Damage Type':
+                            item_data['damage_type'] = value
+                            self.logger.debug(f"  Damage Type: {value}", extra={"action": "ITEMDB"})
             
             # Parse merchants section
             merchants_table = soup.find('table', id='table_merchants')

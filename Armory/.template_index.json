@@ -1,0 +1,17 @@
+{
+  "version": "1.0",
+  "last_updated": "2025-11-19T14:48:33.521745",
+  "templates": [
+    {
+      "file": "Bard_S3_low_cost_sans_ml10.txt",
+      "class": "Bard",
+      "realm": "Hibernia",
+      "season": "S3",
+      "tags": [
+        "low-cost"
+      ],
+      "item_count": 271,
+      "import_date": "2025-11-19T14:48:33.520959"
+    }
+  ]
+}

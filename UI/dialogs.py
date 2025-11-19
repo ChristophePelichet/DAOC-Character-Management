@@ -26,6 +26,7 @@ from Functions.character_manager import get_character_dir
 from Functions.logging_manager import get_log_dir, get_logger, log_with_action, LOGGER_CHARACTER
 from Functions.data_manager import DataManager
 from Functions.theme_manager import get_scaled_size
+from UI.template_import_dialog import TemplateImportDialog
 
 # Get CHARACTER logger
 logger_char = get_logger(LOGGER_CHARACTER)
@@ -1063,7 +1064,7 @@ class CharacterSheetWindow(QDialog):
                 QMessageBox.warning(self, lang.get("dialogs.titles.error"), lang.get("character_sheet.messages.character_id_error"))
                 return
             
-            dialog = ArmorManagementDialog(self, season, realm, character_name)
+            dialog = ArmorManagementDialog(self, season, realm, character_name, self.character_data)
             dialog.exec()
         except Exception as e:
             import traceback
@@ -2799,11 +2800,16 @@ class ConfigurationDialog(QDialog):
 class ArmorManagementDialog(QDialog):
     """Dialog for managing armor templates for a specific character."""
     
-    def __init__(self, parent, season, realm, character_name):
+    def __init__(self, parent, season, realm, character_name, character_data=None):
         super().__init__(parent)
         self.season = season
         self.realm = realm
         self.character_name = character_name
+        self.character_data = character_data or {}
+        
+        # Initialize DataManager for class translations
+        from Functions.data_manager import DataManager
+        self.data_manager = DataManager()
         
         from Functions.armor_manager import ArmorManager
         self.armor_manager = ArmorManager(season, realm, character_name)
@@ -2887,9 +2893,9 @@ class ArmorManagementDialog(QDialog):
         # Buttons
         button_layout = QHBoxLayout()
         
-        upload_button = QPushButton(lang.get("armoury_dialog.buttons.upload"))
-        upload_button.clicked.connect(self.upload_armor)
-        button_layout.addWidget(upload_button)
+        import_template_button = QPushButton(lang.get("armoury_dialog.buttons.import_template"))
+        import_template_button.clicked.connect(self.import_template)
+        button_layout.addWidget(import_template_button)
         
         refresh_button = QPushButton(lang.get("armoury_dialog.buttons.refresh"))
         refresh_button.clicked.connect(self.refresh_list)
@@ -2977,6 +2983,52 @@ class ArmorManagementDialog(QDialog):
                 except Exception as e:
                     logging.error(f"Erreur lors de l'upload du fichier d'armure : {e}")
                     QMessageBox.critical(self, lang.get("dialogs.titles.error"), lang.get("armoury_dialog.messages.upload_error", error=str(e)))
+    
+    def import_template(self):
+        """Opens new template import dialog."""
+        # Get character class from character_data
+        character_class = self.character_data.get('class', '')
+        realm = self.character_data.get('realm', '')
+        name = self.character_data.get('name', '')
+        
+        if not character_class:
+            QMessageBox.warning(
+                self,
+                lang.get("template_import.error_title"),
+                lang.get("template_import.error_no_class")
+            )
+            return
+        
+        # Get class translations from data_manager
+        class_fr = character_class
+        class_de = character_class
+        
+        if hasattr(self, 'data_manager') and self.data_manager:
+            realm_classes = self.data_manager.get_classes(realm)
+            for cls in realm_classes:
+                if cls.get('name') == character_class:
+                    class_fr = cls.get('name_fr', character_class)
+                    class_de = cls.get('name_de', character_class)
+                    break
+        
+        # Prepare character data for dialog
+        character_data = {
+            'character_class': character_class,
+            'class_fr': class_fr,
+            'class_de': class_de,
+            'realm': realm,
+            'name': name
+        }
+        
+        dialog = TemplateImportDialog(self, character_data)
+        if dialog.exec() == QDialog.Accepted:
+            # Template imported successfully, refresh list
+            self.refresh_list()
+            QMessageBox.information(
+                self,
+                "Succès",
+                "Template importé avec succès !"
+            )
     
     def parse_zenkcraft_template(self, content, season=""):
         """Parse Zenkcraft template and return formatted display."""

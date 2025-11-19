@@ -184,6 +184,50 @@ class ConfigManager:
             Section dictionary or empty dict if not found
         """
         return self.config.get(section, {})
+    
+    def get_current_season(self) -> str:
+        """
+        Get current season from game configuration.
+        
+        Returns:
+            Current season identifier (e.g., "S3")
+        """
+        return self.get("game.default_season", "S3")
+    
+    def get_available_seasons(self) -> list:
+        """
+        Get list of available seasons from game configuration.
+        
+        Returns:
+            List of season identifiers (e.g., ["S1", "S2", "S3"])
+        """
+        return self.get("game.seasons", ["S3"])
+    
+    def add_season(self, season: str, save: bool = True):
+        """
+        Add a new season to the available seasons list.
+        
+        Args:
+            season: Season identifier to add (e.g., "S4")
+            save: Whether to save config immediately
+        """
+        seasons = self.get_available_seasons()
+        if season not in seasons:
+            seasons.append(season)
+            self.set("game.seasons", seasons, save=save)
+    
+    def set_current_season(self, season: str, save: bool = True):
+        """
+        Set the current season.
+        
+        Args:
+            season: Season identifier (e.g., "S3")
+            save: Whether to save config immediately
+        """
+        # Add to available seasons if not present
+        self.add_season(season, save=False)
+        # Set as current
+        self.set("game.default_season", season, save=save)
 
 class SingletonConfig:
     _instance = None

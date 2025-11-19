@@ -45,8 +45,8 @@ def parse_template_file(file_path):
                 name_match = re.search(r'^Name:\s*(.+?)$', block, re.MULTILINE)
                 if name_match:
                     item_name = name_match.group(1).strip()
-                    # Skip empty names or duplicates
-                    if item_name and item_name not in items:
+                    # Skip empty names (length > 2 to avoid single char errors) or duplicates
+                    if item_name and len(item_name) > 2 and item_name not in items:
                         items.append(item_name)
         
         print(f"  ✅ {file_path.name}: {len(items)} items Loot trouvés")

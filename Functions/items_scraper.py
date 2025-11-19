@@ -298,6 +298,10 @@ class ItemsScraper:
         Returns:
             str: Clé composite "name:realm" (lowercase)
         """
+        # Vérifier que item_name n'est pas None/vide
+        if not item_name or not item_name.strip():
+            raise ValueError("item_name cannot be None or empty")
+        
         # Normaliser le nom (lowercase, strip)
         normalized_name = item_name.strip().lower()
         

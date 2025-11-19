@@ -150,8 +150,8 @@ class SuperAdminTools:
             try:
                 file_path_obj = Path(file_path)
                 
-                # Auto-detect realm from filename
-                detected_realm = realm
+                # Auto-detect realm from filename (MANDATORY for templates)
+                detected_realm = None
                 filename_lower = file_path_obj.stem.lower()
                 if "albion" in filename_lower:
                     detected_realm = "Albion"
@@ -159,6 +159,17 @@ class SuperAdminTools:
                     detected_realm = "Hibernia"
                 elif "midgard" in filename_lower or "mid" in filename_lower:
                     detected_realm = "Midgard"
+                
+                # Si aucun realm détecté dans le nom de fichier, utiliser le paramètre
+                # MAIS JAMAIS "All" pour des templates (ce sont des persos spécifiques)
+                if not detected_realm:
+                    if realm and realm != "All":
+                        detected_realm = realm
+                    else:
+                        # Impossible de déterminer le realm - ERREUR
+                        errors.append(f"Cannot determine realm for {file_path_obj.name}. Filename must contain 'Albion', 'Hibernia', or 'Midgard'")
+                        logging.error(f"Realm detection failed for {file_path_obj.name}", extra={"action": "SUPERADMIN_PARSE_ERROR"})
+                        continue
                 
                 # Use existing parser to get item names
                 item_names = parse_template_file(file_path)
@@ -184,6 +195,12 @@ class SuperAdminTools:
                 if item_names:
                     # Create item data for each name
                     for item_name in item_names:
+                        # Skip empty or None item names
+                        if not item_name or not item_name.strip():
+                            continue
+                        
+                        item_name = item_name.strip()
+                        
                         item_data = {
                             "name": item_name,
                             "realm": detected_realm,
@@ -267,43 +284,101 @@ class SuperAdminTools:
             duplicates_count = 0
             added_count = 0
             failed_count = 0
+            variants_found = 0
             
             try:
-                total_items = len(new_items_names)
-                for idx, (key, item_basic) in enumerate(new_items_names.items(), 1):
+                # Extraire les noms d'items uniques (sans duplication)
+                unique_items = {}
+                for key, item_basic in new_items_names.items():
                     item_name = item_basic["name"]
-                    item_realm = item_basic["realm"]
+                    if item_name not in unique_items:
+                        unique_items[item_name] = item_basic
+                
+                total_items = len(unique_items)
+                logging.info(f"Processing {total_items} unique items from templates")
+                
+                for idx, (item_name, item_basic) in enumerate(unique_items.items(), 1):
+                    logging.info(f"[{idx}/{total_items}] Processing: {item_name}")
                     
-                    logging.info(f"[{idx}/{total_items}] Searching: {item_name} ({item_realm})")
-                    
-                    # Generate composite key for v2.0 (name:realm)
-                    realm_lower = item_realm.lower() if item_realm != "All" else "all"
-                    composite_key = f"{key}:{realm_lower}"
-                    
-                    # Check for duplicates before scraping (using composite key)
-                    if remove_duplicates and composite_key in merged_items:
-                        duplicates_count += 1
-                        logging.info(f"  ⏭️  Skipped (duplicate): {item_name}:{item_realm}")
-                        continue
-                    
-                    # Search item details on Eden
-                    item_data = search_item_for_database(item_name, items_scraper, item_realm)
-                    
-                    if item_data:
-                        # Check if item has merchant information (mandatory for price calculations)
-                        if "merchant_zone" in item_data and "merchant_price" in item_data:
-                            # Add source field
-                            item_data["source"] = "internal"
-                            # Use composite key
-                            merged_items[composite_key] = item_data
-                            added_count += 1
-                            logging.info(f"  ✅ Added: {composite_key}")
-                        else:
+                    try:
+                        # Trouver TOUTES les variantes de l'item (tous realms)
+                        variants = items_scraper.find_all_item_variants(item_name)
+                        
+                        if not variants:
+                            logging.warning(f"  ❌ No variants found for: {item_name}")
                             failed_count += 1
-                            logging.warning(f"  ❌ Skipped (no merchant info): {item_name}")
-                    else:
+                            continue
+                        
+                        logging.info(f"  ✅ Found {len(variants)} variant(s)")
+                        variants_found += len(variants)
+                        
+                        # Scraper les détails de chaque variante
+                        for variant in variants:
+                            item_id = variant['id']
+                            variant_realm = variant.get('realm') or 'All'
+                            
+                            # Validate realm
+                            if not variant_realm or not variant_realm.strip():
+                                variant_realm = 'All'
+                            
+                            logging.info(f"    🔍 Scraping variant: {variant_realm} (ID: {item_id})")
+                            
+                            # Generate composite key
+                            realm_lower = variant_realm.lower() if variant_realm != "All" else "all"
+                            composite_key = f"{item_name.lower()}:{realm_lower}"
+                            
+                            # Check for duplicates before scraping
+                            if remove_duplicates and composite_key in merged_items:
+                                duplicates_count += 1
+                                logging.info(f"      ⏭️  Skipped (duplicate): {composite_key}")
+                                continue
+                            
+                            # Récupérer les détails complets
+                            item_details = items_scraper.get_item_details(item_id, variant_realm, item_name)
+                            
+                            if not item_details:
+                                logging.warning(f"      ⚠️  Failed to get details")
+                                continue
+                            
+                            # Format for database v2.0
+                            item_data = {
+                                "id": item_id,
+                                "name": item_details.get("name") or item_name,
+                                "realm": item_details.get("realm") or variant_realm,
+                                "slot": item_details.get("slot") or "Unknown",
+                                "type": item_details.get("type"),
+                                "model": item_details.get("model"),
+                                "dps": item_details.get("dps"),
+                                "speed": item_details.get("speed"),
+                                "damage_type": item_details.get("damage_type"),
+                                "usable_by": item_details.get("usable_by", "ALL"),
+                                "source": "internal"
+                            }
+                            
+                            # Add merchant info
+                            merchants = item_details.get('merchants', [])
+                            if merchants:
+                                merchant = merchants[0]
+                                price_parsed = merchant.get("price_parsed")
+                                
+                                item_data["merchant_zone"] = merchant.get("zone") or "Unknown"
+                                item_data["merchant_price"] = str(price_parsed.get("amount")) if price_parsed else "Unknown"
+                                item_data["merchant_currency"] = price_parsed.get("currency") if price_parsed else None
+                                
+                                # Save to merged items
+                                merged_items[composite_key] = item_data
+                                added_count += 1
+                                logging.info(f"      ✅ Added: {composite_key}")
+                            else:
+                                logging.warning(f"      ❌ Skipped (no merchant info)")
+                                failed_count += 1
+                        
+                    except Exception as e:
+                        logging.error(f"  ❌ Error processing {item_name}: {e}")
+                        import traceback
+                        logging.debug(traceback.format_exc())
                         failed_count += 1
-                        logging.warning(f"  ❌ Failed to fetch: {item_name}")
+                        continue
                         
             finally:
                 # Always close scraper
@@ -332,7 +407,8 @@ class SuperAdminTools:
             # Build statistics
             stats = {
                 "files_processed": len(file_paths),
-                "items_parsed": len(new_items_names),
+                "unique_items_processed": len(unique_items),
+                "variants_found": variants_found,
                 "items_added": added_count,
                 "items_failed": failed_count,
                 "duplicates_skipped": duplicates_count,
@@ -343,7 +419,8 @@ class SuperAdminTools:
             
             message = f"Database built successfully!\n\n"
             message += f"Files processed: {stats['files_processed']}\n"
-            message += f"Items parsed: {stats['items_parsed']}\n"
+            message += f"Unique items: {stats['unique_items_processed']}\n"
+            message += f"Variants found: {stats['variants_found']}\n"
             message += f"Items added: {stats['items_added']}\n"
             message += f"Items failed: {stats['items_failed']}\n"
             message += f"Duplicates skipped: {stats['duplicates_skipped']}\n"
@@ -541,7 +618,11 @@ class SuperAdminTools:
                     for variant in variants:
                         variant_start = time.time()
                         item_id = variant['id']
-                        realm = variant['realm']
+                        realm = variant.get('realm') or 'All'
+                        
+                        # Validate realm
+                        if not realm or not realm.strip():
+                            realm = 'All'
                         
                         logging.info(f"  Scraping variant: {realm} (ID: {item_id})")
                         
@@ -552,7 +633,7 @@ class SuperAdminTools:
                             logging.warning(f"  ⚠️ Failed to get details for {realm} variant")
                             continue
                         
-                        # Créer la clé DB
+                        # Créer la clé DB (realm is now guaranteed to be valid)
                         db_key = f"{item_name.lower()}:{realm.lower()}"
                         
                         # Vérifier si l'item existe déjà

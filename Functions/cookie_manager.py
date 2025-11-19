@@ -447,7 +447,8 @@ class CookieManager:
                 eden_logger.info("✅ Chrome (Selenium Manager) avec profil dédié")
                 return driver
             except Exception as e:
-                eden_logger.debug(f"Chrome système: {e}")
+                # Silent fail - normal if system Chrome not available
+                pass
             
             # Chrome download (only if authorized)
             if allow_download:

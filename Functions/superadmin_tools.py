@@ -160,13 +160,13 @@ class SuperAdminTools:
                 elif "midgard" in filename_lower or "mid" in filename_lower:
                     detected_realm = "Midgard"
                 
-                # Si aucun realm détecté dans le nom de fichier, utiliser le paramètre
-                # MAIS JAMAIS "All" pour des templates (ce sont des persos spécifiques)
+                # If no realm detected in filename, use parameter
+                # BUT NEVER "All" for templates (these are specific characters)
                 if not detected_realm:
                     if realm and realm != "All":
                         detected_realm = realm
                     else:
-                        # Impossible de déterminer le realm - ERREUR
+                        # Cannot determine realm - ERROR
                         errors.append(f"Cannot determine realm for {file_path_obj.name}. Filename must contain 'Albion', 'Hibernia', or 'Midgard'")
                         logging.error(f"Realm detection failed for {file_path_obj.name}", extra={"action": "SUPERADMIN_PARSE_ERROR"})
                         continue
@@ -228,9 +228,11 @@ class SuperAdminTools:
     
     def build_database_from_files(self, file_paths: List[str], realm: str = "All", 
                                    merge: bool = True, remove_duplicates: bool = True,
-                                   auto_backup: bool = True) -> Tuple[bool, str, Dict]:
+                                   auto_backup: bool = True, monitor=None) -> Tuple[bool, str, Dict]:
         """
         Build source database from multiple template files
+        
+        NOUVELLE VERSION: Utilise un QThread pour garder l'UI responsive
         
         Args:
             file_paths: List of .txt template file paths
@@ -238,10 +240,110 @@ class SuperAdminTools:
             merge: If True, merge with existing DB; if False, replace completely
             remove_duplicates: Remove items with same name + realm
             auto_backup: Automatically backup old DB before saving
+            monitor: Optional MassImportMonitor instance for UI feedback
         
         Returns:
             Tuple[bool, str, Dict]: (Success, Message, Statistics dict)
         """
+        worker = None  # Protection for cleanup
+        
+        try:
+            # If no monitor, use old method (for compatibility)
+            if monitor is None:
+                return self._build_database_sync(file_paths, realm, merge, remove_duplicates, auto_backup)
+            
+            # Utiliser le Worker Thread pour garder l'UI responsive
+            from Functions.import_worker import ImportWorker
+            from PySide6.QtCore import QEventLoop
+            
+            # Create worker
+            worker = ImportWorker(
+                file_paths=file_paths,
+                realm=realm,
+                merge=merge,
+                remove_duplicates=remove_duplicates,
+                auto_backup=auto_backup,
+                source_db_path=self.source_db_path,
+                path_manager=self.path_manager
+            )
+            
+            # Connect signals
+            worker.progress_updated.connect(lambda stats: monitor.update_stats(**stats))
+            worker.log_message.connect(lambda msg, level: monitor.log_message(msg, level))
+            
+            # Start import with template files list
+            total_items = len(file_paths)  # Approximation, will be updated
+            template_file_names = [Path(fp).name for fp in file_paths]
+            monitor.start_import(total_items, template_files=template_file_names)
+            
+            # Variable to store result
+            result_data = {'success': False, 'message': '', 'stats': {}}
+            
+            def on_finished(success, message, stats):
+                result_data['success'] = success
+                result_data['message'] = message
+                result_data['stats'] = stats
+                
+                logging.info(f"Import finished. Stats keys: {stats.keys() if stats else 'None'}")
+                if stats and 'filtered_items' in stats:
+                    logging.info(f"Filtered items count: {len(stats['filtered_items'])}")
+                
+                monitor.finish_import(success)
+                
+                # Pass filtered items to monitor for review option
+                if stats and 'filtered_items' in stats:
+                    monitor.set_filtered_items(stats['filtered_items'])
+                else:
+                    logging.warning("No filtered_items in stats or stats is None")
+                
+                loop.quit()
+            
+            worker.import_finished.connect(on_finished)
+            
+            # Start worker thread
+            worker.start()
+            
+            # Wait for completion (but UI stays responsive)
+            loop = QEventLoop()
+            loop.exec()
+            
+            return result_data['success'], result_data['message'], result_data['stats']
+            
+        except Exception as e:
+            logging.error(f"Error building database: {e}", extra={"action": "SUPERADMIN_BUILD_ERROR"})
+            
+            if monitor:
+                from PySide6.QtWidgets import QApplication
+                monitor.log_message(f"ERREUR CRITIQUE: {e}", "error")
+                monitor.finish_import(success=False)
+                QApplication.processEvents()
+            
+            return False, f"Error building database: {str(e)}", {}
+        
+        finally:
+            # Cleanup garanti du worker thread
+            if worker:
+                try:
+                    if worker.isRunning():
+                        logging.warning("Worker thread still running - forcing cleanup")
+                        worker.cleanup_external_resources()
+                        worker.wait(3000)  # Attendre max 3 secondes
+                        if worker.isRunning():
+                            worker.terminate()
+                            worker.wait()
+                    logging.info("Worker thread cleaned up")
+                except Exception as e:
+                    logging.warning(f"Error cleaning up worker thread: {e}")
+    
+    def _build_database_sync(self, file_paths: List[str], realm: str = "All",
+                             merge: bool = True, remove_duplicates: bool = True,
+                             auto_backup: bool = True) -> Tuple[bool, str, Dict]:
+        """
+        Synchronous version (legacy) - used when no monitor
+        Kept for compatibility
+        """
+        eden_scraper = None  # Protection for guaranteed cleanup
+        
         try:
             # Parse all template files to get item names
             new_items_names, parse_errors = self.parse_template_files(file_paths, realm)
@@ -260,7 +362,6 @@ class SuperAdminTools:
             
             # Load cookies
             if not eden_scraper.load_cookies():
-                eden_scraper.close()
                 return False, "Failed to load cookies. Please generate cookies first.", {}
             
             items_scraper = ItemsScraper(eden_scraper)
@@ -287,7 +388,7 @@ class SuperAdminTools:
             variants_found = 0
             
             try:
-                # Extraire les noms d'items uniques (sans duplication)
+                # Extract unique item names (without duplication)
                 unique_items = {}
                 for key, item_basic in new_items_names.items():
                     item_name = item_basic["name"]
@@ -301,7 +402,7 @@ class SuperAdminTools:
                     logging.info(f"[{idx}/{total_items}] Processing: {item_name}")
                     
                     try:
-                        # Trouver TOUTES les variantes de l'item (tous realms)
+                        # Find ALL item variants (all realms)
                         variants = items_scraper.find_all_item_variants(item_name)
                         
                         if not variants:
@@ -312,7 +413,7 @@ class SuperAdminTools:
                         logging.info(f"  ✅ Found {len(variants)} variant(s)")
                         variants_found += len(variants)
                         
-                        # Scraper les détails de chaque variante
+                        # Scrape details of each variant
                         for variant in variants:
                             item_id = variant['id']
                             variant_realm = variant.get('realm') or 'All'
@@ -333,7 +434,7 @@ class SuperAdminTools:
                                 logging.info(f"      ⏭️  Skipped (duplicate): {composite_key}")
                                 continue
                             
-                            # Récupérer les détails complets
+                            # Get full details
                             item_details = items_scraper.get_item_details(item_id, variant_realm, item_name)
                             
                             if not item_details:
@@ -379,11 +480,15 @@ class SuperAdminTools:
                         logging.debug(traceback.format_exc())
                         failed_count += 1
                         continue
-                        
+            
             finally:
-                # Always close scraper
-                eden_scraper.close()
-                logging.info("Eden scraper closed")
+                # Guaranteed cleanup even in case of error
+                if eden_scraper:
+                    try:
+                        eden_scraper.close()
+                        logging.info("Eden scraper closed")
+                    except Exception as e:
+                        logging.warning(f"Error closing Eden scraper: {e}")
             
             # Build final database structure (v2.0)
             database = {
@@ -401,6 +506,7 @@ class SuperAdminTools:
             
             # Save to file
             self.source_db_path.parent.mkdir(parents=True, exist_ok=True)
+            
             with open(self.source_db_path, 'w', encoding='utf-8') as f:
                 json.dump(database, f, indent=2, ensure_ascii=False)
             
@@ -434,7 +540,16 @@ class SuperAdminTools:
             
         except Exception as e:
             logging.error(f"Error building database: {e}", extra={"action": "SUPERADMIN_BUILD_ERROR"})
-            return False, f"Error building database: {str(e)}", {}
+            return False, f"Error building database: {str(e)}", None
+        
+        finally:
+            # Final guaranteed cleanup even in case of critical exception
+            if eden_scraper:
+                try:
+                    eden_scraper.close()
+                    logging.info("Final cleanup: Eden scraper closed in sync build")
+                except Exception as e:
+                    logging.warning(f"Final cleanup error in sync build: {e}")
     
     def clean_duplicates(self) -> Tuple[bool, str, int]:
         """
@@ -583,9 +698,9 @@ class SuperAdminTools:
                 'usable_by': 0
             }
             
-            # IMPORTANT: Partir de la base EXISTANTE (ne pas écraser)
-            # On va mettre à jour/ajouter les items, pas tout recréer
-            new_items = dict(items)  # Copie de la base actuelle
+            # IMPORTANT: Start from EXISTING database (don't overwrite)
+            # We will update/add items, not recreate everything
+            new_items = dict(items)  # Copy of current database
             
             # Process each unique item
             for idx, item_name in enumerate(unique_items.keys(), 1):
@@ -601,7 +716,7 @@ class SuperAdminTools:
                 item_start = time.time()
                 
                 try:
-                    # Trouver TOUTES les variantes de l'item (tous realms)
+                    # Find ALL item variants (all realms)
                     logging.debug(f"Searching ALL variants for '{item_name}'")
                     variants = items_scraper.find_all_item_variants(item_name)
                     
@@ -614,7 +729,7 @@ class SuperAdminTools:
                     logging.info(f"✅ Found {len(variants)} variant(s) for '{item_name}'")
                     variants_found += len(variants)
                     
-                    # Scraper les détails de chaque variante
+                    # Scrape details of each variant
                     for variant in variants:
                         variant_start = time.time()
                         item_id = variant['id']
@@ -626,20 +741,20 @@ class SuperAdminTools:
                         
                         logging.info(f"  Scraping variant: {realm} (ID: {item_id})")
                         
-                        # Récupérer les détails complets
+                        # Get full details
                         item_details = items_scraper.get_item_details(item_id, realm, item_name)
                         
                         if not item_details:
                             logging.warning(f"  ⚠️ Failed to get details for {realm} variant")
                             continue
                         
-                        # Créer la clé DB (realm is now guaranteed to be valid)
+                        # Create DB key (realm is now guaranteed to be valid)
                         db_key = f"{item_name.lower()}:{realm.lower()}"
                         
-                        # Vérifier si l'item existe déjà
+                        # Check if item already exists
                         is_new = db_key not in items
                         
-                        # Préparer les données complètes
+                        # Prepare full data
                         item_data = {
                             "id": item_id,
                             "name": item_name,
@@ -665,7 +780,7 @@ class SuperAdminTools:
                             logging.info(f"  ✨ NEW: {db_key}")
                         else:
                             items_updated += 1
-                            # Compter les champs mis à jour
+                            # Count updated fields
                             old_item = items.get(db_key, {})
                             for field in ['model', 'dps', 'speed', 'damage_type', 'type', 'slot', 'usable_by']:
                                 if item_data.get(field) != old_item.get(field) and item_data.get(field):

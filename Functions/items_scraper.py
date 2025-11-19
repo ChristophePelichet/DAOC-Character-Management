@@ -860,25 +860,22 @@ class ItemsScraper:
         
         return None
     
-    def find_all_item_variants(self, item_name):
+    def find_all_item_variants(self, item_name, return_filtered=False, skip_filters=False):
         """
         Trouve TOUTES les variantes d'un item (tous les realms).
         Utilisé pour alimenter la DB avec toutes les versions disponibles.
         
         Args:
             item_name: Nom de l'item à rechercher
+            return_filtered: Si True, retourne aussi les items filtrés avec raisons
+            skip_filters: Si True, ignore les filtres level/utility (retry mode)
         
         Returns:
-            List[Dict]: Liste de toutes les variantes trouvées
-                [
-                    {'id': '139625', 'realm': 'Albion', 'name': 'Cudgel of the Undead'},
-                    {'id': '117565', 'realm': 'Hibernia', 'name': 'Cudgel of the Undead'},
-                    {'id': '112493', 'realm': 'Midgard', 'name': 'Cudgel of the Undead'}
-                ]
-                ou
-                [
-                    {'id': '112490', 'realm': 'All', 'name': 'Soulbinder\'s Belt'}
-                ]
+            Si return_filtered=False:
+                List[Dict]: Liste de toutes les variantes trouvées
+            Si return_filtered=True:
+                Tuple[List[Dict], List[Dict]]: (variants, filtered_items)
+                filtered_items contient: [{'name': ..., 'realm': ..., 'reason': ..., 'level': ..., 'utility': ...}]
         """
         try:
             # Build search URL avec r=0 (ALL realms)
@@ -886,7 +883,10 @@ class ItemsScraper:
             search_encoded = urllib.parse.quote(item_name)
             search_url = f"{self.base_url}?s={search_encoded}&r=0"
             
-            self.logger.info(f"🔍 Recherche TOUTES variantes: {item_name}", extra={"action": "ITEMDB"})
+            if skip_filters:
+                self.logger.info(f"🔍 Recherche TOUTES variantes (SANS FILTRES): {item_name}", extra={"action": "ITEMDB"})
+            else:
+                self.logger.info(f"🔍 Recherche TOUTES variantes: {item_name}", extra={"action": "ITEMDB"})
             self.logger.debug(f"📍 URL: {search_url}", extra={"action": "ITEMDB"})
             
             # Navigate to search URL
@@ -913,7 +913,19 @@ class ItemsScraper:
             
             # Collecter TOUS les result_row avec leur icône realm
             variants = []
+            filtered_items = []  # Initialize filtered items list
             result_rows = soup.find_all('tr', id=re.compile(r'^result_row_\d+$'))
+            
+            # Counters for filtering reasons
+            skip_reasons = {
+                'name_mismatch': 0,
+                'level_too_low': 0,
+                'utility_too_low': 0,
+                'no_realm_icon': 0,
+                'no_name_cell': 0,
+                'no_merchant': 0,
+                'currency_not_supported': 0
+            }
             
             self.logger.info(f"📊 {len(result_rows)} résultat(s) brut(s) trouvé(s)", extra={"action": "ITEMDB"})
             
@@ -952,9 +964,12 @@ class ItemsScraper:
                     found_name = name_cell.get_text(strip=True)
                     # Comparaison case-insensitive
                     if found_name.lower() != item_name.lower():
+                        skip_reasons['name_mismatch'] += 1
                         self.logger.debug(f"  ⏭️  SKIP (nom différent): '{found_name}' != '{item_name}'", extra={"action": "ITEMDB"})
+                        # Don't store name mismatch in filtered_items (not the item we're looking for)
                         continue
                 else:
+                    skip_reasons['no_name_cell'] += 1
                     self.logger.warning(f"  ⚠️ Impossible de trouver le nom pour ID {item_id}", extra={"action": "ITEMDB"})
                     continue
                 
@@ -978,8 +993,25 @@ class ItemsScraper:
                         continue
                 
                 if level is not None and level < 50:
-                    self.logger.debug(f"  ⏭️  SKIP (level < 50): Level {level}", extra={"action": "ITEMDB"})
-                    continue
+                    if not skip_filters:
+                        skip_reasons['level_too_low'] += 1
+                        self.logger.debug(f"  ⏭️  SKIP (level < 50): Level {level} pour '{found_name}'", extra={"action": "ITEMDB"})
+                        # Store in filtered_items (we need realm first)
+                        # Will be completed after realm extraction
+                        filtered_info = {
+                            'name': found_name,
+                            'id': item_id,
+                            'reason': 'level_too_low',
+                            'level': level,
+                            'utility': None  # Will be filled if found
+                        }
+                        # Continue to get realm before storing
+                        skip_level = True
+                    else:
+                        self.logger.debug(f"  ✓ Level {level} (filter bypassed)", extra={"action": "ITEMDB"})
+                        skip_level = False
+                else:
+                    skip_level = False
                 
                 # FILTRAGE 3: Vérifier UTILITY ≥ 100
                 # Chercher dynamiquement la colonne qui contient un nombre décimal > 50
@@ -1002,16 +1034,36 @@ class ItemsScraper:
                         continue
                 
                 if utility is not None and utility < 100:
-                    self.logger.debug(f"  ⏭️  SKIP (utility < 100): Utility {utility}", extra={"action": "ITEMDB"})
-                    continue
+                    if not skip_filters:
+                        skip_reasons['utility_too_low'] += 1
+                        self.logger.debug(f"  ⏭️  SKIP (utility < 100): Utility {utility} pour '{found_name}'", extra={"action": "ITEMDB"})
+                        filtered_info = {
+                            'name': found_name,
+                            'id': item_id,
+                            'reason': 'utility_too_low',
+                            'level': level,
+                            'utility': utility
+                        }
+                        skip_utility = True
+                    else:
+                        self.logger.debug(f"  ✓ Utility {utility} (filter bypassed)", extra={"action": "ITEMDB"})
+                        skip_utility = False
                 elif utility is None:
-                    self.logger.debug(f"  ℹ️ Pas de colonne utility trouvée pour ID {item_id}, on continue", extra={"action": "ITEMDB"})
+                    self.logger.debug(f"  ℹ️ Pas de colonne utility trouvée pour '{found_name}' (ID {item_id}), on continue", extra={"action": "ITEMDB"})
+                    skip_utility = False
+                    if 'filtered_info' in locals() and 'skip_level' in locals() and skip_level:
+                        filtered_info['utility'] = None
+                else:
+                    skip_utility = False
+                    if 'filtered_info' in locals() and 'skip_level' in locals() and skip_level:
+                        filtered_info['utility'] = utility
                 
                 # Extraire le realm depuis l'icône (OBLIGATOIRE)
                 # Chercher l'icône avec différents chemins possibles
                 realm_img = row.find('img', src=re.compile(r'(albion_logo|hibernia_logo|midgard_logo|all_logo)\.png'))
                 if not realm_img:
-                    self.logger.warning(f"⚠️ Pas d'icône realm pour ID {item_id}, SKIP", extra={"action": "ITEMDB"})
+                    skip_reasons['no_realm_icon'] += 1
+                    self.logger.warning(f"⚠️ Pas d'icône realm pour '{found_name}' (ID {item_id}), SKIP", extra={"action": "ITEMDB"})
                     continue
                 
                 src = realm_img.get('src', '')
@@ -1027,6 +1079,19 @@ class ItemsScraper:
                     self.logger.warning(f"⚠️ Icône realm inconnue: {src}, SKIP", extra={"action": "ITEMDB"})
                     continue
                 
+                # If item was filtered, store it with realm info before skipping
+                if 'skip_level' in locals() and skip_level:
+                    filtered_info['realm'] = item_realm
+                    filtered_items.append(filtered_info)
+                    del filtered_info, skip_level  # Clean up
+                    continue
+                
+                if 'skip_utility' in locals() and skip_utility:
+                    filtered_info['realm'] = item_realm
+                    filtered_items.append(filtered_info)
+                    del filtered_info, skip_utility  # Clean up
+                    continue
+                
                 variant = {
                     'id': item_id,
                     'realm': item_realm,
@@ -1036,17 +1101,59 @@ class ItemsScraper:
                 self.logger.debug(f"  ✓ Variante VALIDE: {item_realm} → ID {item_id} (Level {level_text if level_text else 'N/A'})", extra={"action": "ITEMDB"})
             
             if not variants:
-                self.logger.warning(f"❌ Aucune variante trouvée pour: {item_name}", extra={"action": "ITEMDB"})
+                # Build detailed error message
+                total_skipped = sum(skip_reasons.values())
+                reasons_str = []
+                
+                if skip_reasons['name_mismatch'] > 0:
+                    reasons_str.append(f"{skip_reasons['name_mismatch']} nom différent")
+                if skip_reasons['level_too_low'] > 0:
+                    reasons_str.append(f"{skip_reasons['level_too_low']} level < 50")
+                if skip_reasons['utility_too_low'] > 0:
+                    reasons_str.append(f"{skip_reasons['utility_too_low']} utility < 100")
+                if skip_reasons['no_realm_icon'] > 0:
+                    reasons_str.append(f"{skip_reasons['no_realm_icon']} pas d'icône realm")
+                if skip_reasons['no_name_cell'] > 0:
+                    reasons_str.append(f"{skip_reasons['no_name_cell']} nom introuvable")
+                if skip_reasons['no_merchant'] > 0:
+                    reasons_str.append(f"{skip_reasons['no_merchant']} pas de vendeur")
+                if skip_reasons['currency_not_supported'] > 0:
+                    reasons_str.append(f"{skip_reasons['currency_not_supported']} devise non-supportée (BP/Bounty/etc.)")
+                
+                if total_skipped > 0 and reasons_str:
+                    reason_detail = ", ".join(reasons_str)
+                    self.logger.warning(
+                        f"❌ Aucune variante trouvée pour '{item_name}' - {len(result_rows)} résultat(s) ignoré(s): {reason_detail}",
+                        extra={"action": "ITEMDB"}
+                    )
+                elif len(result_rows) == 0:
+                    self.logger.warning(f"❌ Aucun résultat trouvé pour '{item_name}' sur Eden", extra={"action": "ITEMDB"})
+                else:
+                    self.logger.warning(f"❌ Aucune variante trouvée pour '{item_name}' (raison inconnue)", extra={"action": "ITEMDB"})
             else:
-                self.logger.info(f"✅ {len(variants)} variante(s) trouvée(s)", extra={"action": "ITEMDB"})
+                total_skipped = sum(skip_reasons.values())
+                if total_skipped > 0:
+                    self.logger.info(
+                        f"✅ {len(variants)} variante(s) trouvée(s) pour '{item_name}' ({total_skipped} résultat(s) filtré(s))",
+                        extra={"action": "ITEMDB"}
+                    )
+                else:
+                    self.logger.info(f"✅ {len(variants)} variante(s) trouvée(s) pour '{item_name}'", extra={"action": "ITEMDB"})
             
-            return variants
+            if return_filtered:
+                self.logger.debug(f"🔍 Returning {len(variants)} variants and {len(filtered_items)} filtered items", extra={"action": "ITEMDB"})
+                return variants, filtered_items
+            else:
+                return variants
             
         except Exception as e:
             self.logger.error(f"Erreur recherche variantes: {e}", extra={"action": "ITEMDB"})
             import traceback
             self.logger.debug(traceback.format_exc(), extra={"action": "ITEMDB"})
-            return []
+            if return_filtered:
+                return [], []
+            else:
+                return []
     
     def get_item_details(self, item_id, realm="All", item_name=None):
         """

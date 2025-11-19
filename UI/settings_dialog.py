@@ -2627,54 +2627,37 @@ class SettingsDialog(QDialog):
             if reply != QMessageBox.Yes:
                 return
             
-            # Show progress dialog
+            # Show Mass Import Monitor
             from PySide6.QtWidgets import QApplication
-            progress = QProgressDialog(
-                lang.get('superadmin.progress_description', 
-                    default="Construction de la base source en cours..."),
-                None, 0, 0, self
-            )
-            progress.setWindowTitle(lang.get('superadmin.progress_title', 
-                default="Construction en cours"))
-            progress.setWindowModality(Qt.WindowModal)
-            progress.show()
+            from UI.mass_import_monitor import MassImportMonitor
+            
+            monitor = MassImportMonitor(self)
+            monitor.show()
             QApplication.processEvents()
             
             # Import SuperAdminTools
             from Functions.superadmin_tools import SuperAdminTools
             superadmin = SuperAdminTools(self.path_manager)
             
-            # Execute build
+            # Execute build with monitor callback
             success, message, stats = superadmin.build_database_from_files(
                 file_paths=self.superadmin_selected_files,
                 realm=realm,
                 merge=merge,
                 remove_duplicates=remove_duplicates,
-                auto_backup=auto_backup
+                auto_backup=auto_backup,
+                monitor=monitor
             )
             
-            progress.close()
+            # Keep monitor open for review
+            # User can close it manually
             
             # Show result
             if success:
-                stats_label = lang.get('superadmin.stats_title', default="Statistiques")
-                total_label = lang.get('superadmin.stats_total', default="Total items")
-                albion_label = lang.get('superadmin.stats_albion', default="Albion")
-                hibernia_label = lang.get('superadmin.stats_hibernia', default="Hibernia")
-                midgard_label = lang.get('superadmin.stats_midgard', default="Midgard")
-                all_realms_label = lang.get('superadmin.stats_all_realms', default="Tous royaumes")
-                
-                stats_text = f"\n\n{stats_label}:\n"
-                stats_text += f"• {total_label}: {stats.get('total_items', 0)}\n"
-                stats_text += f"• {albion_label}: {stats.get('albion', 0)}\n"
-                stats_text += f"• {hibernia_label}: {stats.get('hibernia', 0)}\n"
-                stats_text += f"• {midgard_label}: {stats.get('midgard', 0)}\n"
-                stats_text += f"• {all_realms_label}: {stats.get('all_realms', 0)}"
-                
                 QMessageBox.information(self,
                     lang.get('superadmin.build_success_title', 
                         default="Construction réussie"),
-                    message + stats_text
+                    message
                 )
                 
                 # Refresh statistics

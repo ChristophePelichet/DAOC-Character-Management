@@ -17,6 +17,9 @@ from .cookie_manager import CookieManager
 def parse_template_file(file_path):
     """
     Parse un fichier .txt template et extrait tous les noms d'items de type Loot
+    Supporte 2 formats:
+    - Format standard: blocs séparés par double newline
+    - Format Zenkcraft: sections d'équipement (Helmet, Hands, etc.)
     
     Args:
         file_path: Chemin vers le fichier .txt (str ou Path)
@@ -34,22 +37,39 @@ def parse_template_file(file_path):
         with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
         
-        # Split content into item blocks (separated by double newlines)
-        # Each block contains: Name, Level, Utility, Source Type, etc.
-        item_blocks = re.split(r'\n\n+', content)
+        # Detect Zenkcraft format (has equipment sections like "Helmet", "Hands", etc.)
+        is_zenkcraft = bool(re.search(r'^(Helmet|Hands|Torso|Arms|Feet|Legs|Right Hand|Left Hand|Two Handed|Ranged|Neck|Cloak|Jewelry|Waist|L Ring|R Ring|L Wrist|R Wrist|Mythical)\s*$', content, re.MULTILINE))
         
-        for block in item_blocks:
-            # Check if this block has both "Name:" and "Source Type: Loot"
-            if 'Name:' in block and 'Source Type: Loot' in block:
-                # Extract item name
-                name_match = re.search(r'^Name:\s*(.+?)$', block, re.MULTILINE)
-                if name_match:
-                    item_name = name_match.group(1).strip()
-                    # Skip empty names (length > 2 to avoid single char errors) or duplicates
-                    if item_name and len(item_name) > 2 and item_name not in items:
-                        items.append(item_name)
+        if is_zenkcraft:
+            # Parse Zenkcraft format: split by equipment sections
+            # Sections are single words/phrases followed by item details
+            equipment_sections = re.split(r'\n(?=(?:Helmet|Hands|Torso|Arms|Feet|Legs|Right Hand|Left Hand|Two Handed|Ranged|Neck|Cloak|Jewelry|Waist|L Ring|R Ring|L Wrist|R Wrist|Mythical)\s*\n)', content)
+            
+            for section in equipment_sections:
+                # Check if section has Name: and Source Type: Loot
+                if 'Name:' in section and 'Source Type: Loot' in section:
+                    name_match = re.search(r'^Name:\s*(.+?)$', section, re.MULTILINE)
+                    if name_match:
+                        item_name = name_match.group(1).strip()
+                        # Skip empty names or duplicates
+                        if item_name and len(item_name) > 2 and item_name not in items:
+                            items.append(item_name)
+        else:
+            # Original format: double newline separated blocks
+            item_blocks = re.split(r'\n\n+', content)
+            
+            for block in item_blocks:
+                # Check if this block has both "Name:" and "Source Type: Loot"
+                if 'Name:' in block and 'Source Type: Loot' in block:
+                    # Extract item name
+                    name_match = re.search(r'^Name:\s*(.+?)$', block, re.MULTILINE)
+                    if name_match:
+                        item_name = name_match.group(1).strip()
+                        # Skip empty names (length > 2 to avoid single char errors) or duplicates
+                        if item_name and len(item_name) > 2 and item_name not in items:
+                            items.append(item_name)
         
-        print(f"  ✅ {file_path.name}: {len(items)} items Loot trouvés")
+        print(f"  ✅ {file_path.name}: {len(items)} items Loot trouvés {'(Zenkcraft)' if is_zenkcraft else ''}")
         
     except Exception as e:
         print(f"  ❌ Erreur lecture {file_path.name if hasattr(file_path, 'name') else file_path}: {e}")

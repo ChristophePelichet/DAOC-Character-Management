@@ -385,8 +385,8 @@
                 "status_no_date": "-"
             },
             "mass_import_monitor": {
-                "window_title": "📦 Import en Masse - Monitoring",
-                "title": "📦 Import en Masse - Monitoring en Temps Réel",
+                "window_title": "📦 Import en Masse",
+                "title": "📦 Import en Masse",
                 "stats_group": "📊 Statistiques en Temps Réel",
                 "unique_items": "🔍 Items uniques:",
                 "variants_found": "🌐 Variantes trouvées:",
@@ -414,7 +414,25 @@
                 "export_success": "Erreurs exportées vers:",
                 "export_error": "Impossible d'exporter les erreurs:",
                 "export_log_success": "Logs exportés vers:",
-                "export_log_error": "Impossible d'exporter les logs:"
+                "export_log_error": "Impossible d'exporter les logs:",
+                "start_import_message": "Démarrage de l'import en masse...",
+                "template_files_count": "{count} fichier(s) template à parser",
+                "unique_items_to_process": "{count} items uniques à traiter",
+                "import_finished_success": "Import terminé avec succès en {duration}",
+                "import_summary": "Résumé: {added} ajoutés, {duplicates} doublons, {failed} échecs",
+                "import_finished_message": "✅ Import terminé - {count} items ajoutés",
+                "import_finished_errors": "Import terminé avec des erreurs",
+                "import_finished_error_message": "❌ Import terminé avec des erreurs",
+                "filtered_items_warning": "{count} item(s) were filtered (Level/Utility restrictions)",
+                "retry_filtered_message": "🔄 Retrying {count} filtered item(s) WITHOUT restrictions...",
+                "retry_requested_for": "📝 Retry requested for: {items}",
+                "ignore_items_message": "🚫 Ignoring {count} item(s) permanently...",
+                "item_marked_ignored": "✓ Marked '{name}' as ignored",
+                "item_added_ignore_list": "✓ Added '{name}' to ignore list",
+                "items_ignored_success": "✅ Successfully ignored {count} item(s)",
+                "error_marking_ignored": "❌ Error marking items as ignored: {error}",
+                "export_errors_title": "Exporter les erreurs d'import",
+                "export_logs_title": "Exporter les logs d'import"
             },
             "failed_items": {
                 "title": "Examiner les Items Filtrés",
@@ -439,7 +457,9 @@
                 "confirm_title": "Confirmer le Réessai",
                 "confirm_message": "Réessayer l'import pour {count} item(s) SANS filtres ?\n\n⚠️ Ceci ignorera les restrictions de Niveau et d'Utilité.",
                 "ignore_confirm_title": "Confirmer l'Ignorage",
-                "ignore_confirm_message": "Ignorer définitivement {count} item(s) ?\n\n⚠️ Ces items n'apparaîtront plus dans les futurs imports.\nVous pourrez gérer les items ignorés plus tard."
+                "ignore_confirm_message": "Ignorer définitivement {count} item(s) ?\n\n⚠️ Ces items n'apparaîtront plus dans les futurs imports.\nVous pourrez gérer les items ignorés plus tard.",
+                "ignore_success_title": "Items Ignorés",
+                "ignore_success_message": "{count} item(s) ont été marqués comme ignorés.\n\nIls seront traités lorsque vous fermerez cette fenêtre."
             },
             "superadmin": {
                 "title": "SuperAdmin - Outils Administrateur",

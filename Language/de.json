@@ -385,8 +385,8 @@
                 "status_no_date": "-"
             },
             "mass_import_monitor": {
-                "window_title": "📦 Massenimport-Monitor",
-                "title": "📦 Massenimport - Echtzeit-Überwachung",
+                "window_title": "📦 Massenimport",
+                "title": "📦 Massenimport",
                 "stats_group": "📊 Echtzeit-Statistiken",
                 "unique_items": "🔍 Eindeutige Gegenstände:",
                 "variants_found": "🌐 Varianten gefunden:",
@@ -413,8 +413,26 @@
                 "no_errors": "Keine Fehler zum Exportieren",
                 "export_success": "Fehler exportiert nach:",
                 "export_error": "Fehler beim Exportieren:",
-                "export_log_success": "Protokolle exportiert nach:",
-                "export_log_error": "Protokolle konnten nicht exportiert werden:"
+                "export_log_success": "Logs exportiert nach:",
+                "export_log_error": "Logs können nicht exportiert werden:",
+                "start_import_message": "Massenimport starten...",
+                "template_files_count": "{count} Vorlagendatei(en) zu analysieren",
+                "unique_items_to_process": "{count} eindeutige Items zu verarbeiten",
+                "import_finished_success": "Import erfolgreich abgeschlossen in {duration}",
+                "import_summary": "Zusammenfassung: {added} hinzugefügt, {duplicates} Duplikate, {failed} Fehler",
+                "import_finished_message": "✅ Import abgeschlossen - {count} Items hinzugefügt",
+                "import_finished_errors": "Import mit Fehlern abgeschlossen",
+                "import_finished_error_message": "❌ Import mit Fehlern abgeschlossen",
+                "filtered_items_warning": "{count} Item(s) wurden gefiltert (Level/Utility-Einschränkungen)",
+                "retry_filtered_message": "🔄 {count} gefilterte Item(s) OHNE Einschränkungen erneut versuchen...",
+                "retry_requested_for": "📝 Wiederholung angefordert für: {items}",
+                "ignore_items_message": "🚫 {count} Item(s) dauerhaft ignorieren...",
+                "item_marked_ignored": "✓ '{name}' als ignoriert markiert",
+                "item_added_ignore_list": "✓ '{name}' zur Ignorierliste hinzugefügt",
+                "items_ignored_success": "✅ {count} Item(s) erfolgreich ignoriert",
+                "error_marking_ignored": "❌ Fehler beim Markieren von Items als ignoriert: {error}",
+                "export_errors_title": "Importfehler exportieren",
+                "export_logs_title": "Import-Logs exportieren"
             },
             "failed_items": {
                 "title": "Gefilterte Gegenstände prüfen",
@@ -439,7 +457,9 @@
                 "confirm_title": "Wiederholung bestätigen",
                 "confirm_message": "Import für {count} Gegenstand/Gegenstände OHNE Filter wiederholen?\n\n⚠️ Dies ignoriert Level- und Utility-Einschränkungen.",
                 "ignore_confirm_title": "Ignorieren bestätigen",
-                "ignore_confirm_message": "Dauerhaft {count} Gegenstand/Gegenstände ignorieren?\n\n⚠️ Diese Gegenstände werden nie wieder in zukünftigen Importen erscheinen.\nSie können ignorierte Gegenstände später verwalten."
+                "ignore_confirm_message": "Dauerhaft {count} Gegenstand/Gegenstände ignorieren?\n\n⚠️ Diese Gegenstände werden nie wieder in zukünftigen Importen erscheinen.\nSie können ignorierte Gegenstände später verwalten.",
+                "ignore_success_title": "Gegenstände ignoriert",
+                "ignore_success_message": "{count} Gegenstand/Gegenstände wurden als ignoriert markiert.\n\nSie werden verarbeitet, wenn Sie diesen Dialog schließen."
             },
             "superadmin": {
                 "title": "SuperAdmin - Administrator-Tools",

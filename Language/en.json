@@ -377,8 +377,8 @@
                 "status_no_date": "-"
             },
             "mass_import_monitor": {
-                "window_title": "📦 Mass Import Monitor",
-                "title": "📦 Mass Import - Real-Time Monitoring",
+                "window_title": "📦 Mass Import",
+                "title": "📦 Mass Import",
                 "stats_group": "📊 Real-Time Statistics",
                 "unique_items": "🔍 Unique items:",
                 "variants_found": "🌐 Variants found:",
@@ -406,7 +406,25 @@
                 "export_success": "Errors exported to:",
                 "export_error": "Unable to export errors:",
                 "export_log_success": "Logs exported to:",
-                "export_log_error": "Unable to export logs:"
+                "export_log_error": "Unable to export logs:",
+                "start_import_message": "Starting mass import...",
+                "template_files_count": "{count} template file(s) to parse",
+                "unique_items_to_process": "{count} unique items to process",
+                "import_finished_success": "Import completed successfully in {duration}",
+                "import_summary": "Summary: {added} added, {duplicates} duplicates, {failed} failures",
+                "import_finished_message": "✅ Import completed - {count} items added",
+                "import_finished_errors": "Import completed with errors",
+                "import_finished_error_message": "❌ Import completed with errors",
+                "filtered_items_warning": "{count} item(s) were filtered (Level/Utility restrictions)",
+                "retry_filtered_message": "🔄 Retrying {count} filtered item(s) WITHOUT restrictions...",
+                "retry_requested_for": "📝 Retry requested for: {items}",
+                "ignore_items_message": "🚫 Ignoring {count} item(s) permanently...",
+                "item_marked_ignored": "✓ Marked '{name}' as ignored",
+                "item_added_ignore_list": "✓ Added '{name}' to ignore list",
+                "items_ignored_success": "✅ Successfully ignored {count} item(s)",
+                "error_marking_ignored": "❌ Error marking items as ignored: {error}",
+                "export_errors_title": "Export Import Errors",
+                "export_logs_title": "Export Import Logs"
             },
             "failed_items": {
                 "title": "Review Filtered Items",
@@ -431,7 +449,9 @@
                 "confirm_title": "Confirm Retry",
                 "confirm_message": "Retry import for {count} item(s) WITHOUT filters?\n\n⚠️ This will ignore Level and Utility restrictions.",
                 "ignore_confirm_title": "Confirm Ignore",
-                "ignore_confirm_message": "Permanently ignore {count} item(s)?\n\n⚠️ These items will never appear in future imports.\nYou can manage ignored items later."
+                "ignore_confirm_message": "Permanently ignore {count} item(s)?\n\n⚠️ These items will never appear in future imports.\nYou can manage ignored items later.",
+                "ignore_success_title": "Items Ignored",
+                "ignore_success_message": "{count} item(s) have been marked as ignored.\n\nThey will be processed when you close this dialog."
             },
             "superadmin": {
                 "title": "SuperAdmin - Administrator Tools",

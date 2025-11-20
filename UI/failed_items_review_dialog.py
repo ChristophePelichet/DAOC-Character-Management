@@ -26,7 +26,7 @@ class FailedItemsReviewDialog(QDialog):
         self.selected_items = []
         self.ignored_items = []  # Items to permanently ignore
         
-        self.setWindowTitle(lang.get("failed_items.title", default="Review Filtered Items"))
+        self.setWindowTitle(lang.get("settings.pages.failed_items.title", default="Review Filtered Items"))
         self.setMinimumSize(800, 500)
         self.setWindowFlags(Qt.Window)
         
@@ -38,13 +38,13 @@ class FailedItemsReviewDialog(QDialog):
         layout = QVBoxLayout(self)
         
         # Header
-        header_label = QLabel(lang.get("failed_items.header", 
+        header_label = QLabel(lang.get("settings.pages.failed_items.header", 
             default=f"📋 {len(self.filtered_items)} item(s) were filtered during import"))
         header_label.setStyleSheet("font-size: 12pt; font-weight: bold; padding: 10px;")
         layout.addWidget(header_label)
         
         # Info label
-        info_label = QLabel(lang.get("failed_items.info", 
+        info_label = QLabel(lang.get("settings.pages.failed_items.info", 
             default="Select items to retry import WITHOUT filters (Level/Utility restrictions will be ignored)"))
         info_label.setStyleSheet("color: #ce9178; padding: 5px;")
         info_label.setWordWrap(True)
@@ -53,11 +53,11 @@ class FailedItemsReviewDialog(QDialog):
         # Buttons bar (top)
         button_layout = QHBoxLayout()
         
-        self.select_all_btn = QPushButton(lang.get("failed_items.select_all", default="☑ Select All"))
+        self.select_all_btn = QPushButton(lang.get("settings.pages.failed_items.select_all", default="☑ Select All"))
         self.select_all_btn.clicked.connect(self.select_all)
         button_layout.addWidget(self.select_all_btn)
         
-        self.deselect_all_btn = QPushButton(lang.get("failed_items.deselect_all", default="☐ Deselect All"))
+        self.deselect_all_btn = QPushButton(lang.get("settings.pages.failed_items.deselect_all", default="☐ Deselect All"))
         self.deselect_all_btn.clicked.connect(self.deselect_all)
         button_layout.addWidget(self.deselect_all_btn)
         
@@ -69,13 +69,18 @@ class FailedItemsReviewDialog(QDialog):
         self.table = QTableWidget()
         self.table.setColumnCount(6)
         self.table.setHorizontalHeaderLabels([
-            lang.get("failed_items.col_select", default="Select"),
-            lang.get("failed_items.col_name", default="Item Name"),
-            lang.get("failed_items.col_realm", default="Realm"),
-            lang.get("failed_items.col_reason", default="Filter Reason"),
-            lang.get("failed_items.col_level", default="Level"),
-            lang.get("failed_items.col_utility", default="Utility")
+            lang.get("settings.pages.failed_items.col_select", default="Select"),
+            lang.get("settings.pages.failed_items.col_name", default="Item Name"),
+            lang.get("settings.pages.failed_items.col_realm", default="Realm"),
+            lang.get("settings.pages.failed_items.col_reason", default="Filter Reason"),
+            lang.get("settings.pages.failed_items.col_level", default="Level"),
+            lang.get("settings.pages.failed_items.col_utility", default="Utility")
         ])
+        
+        # Enable text selection for copy/paste
+        self.table.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.table.setSelectionBehavior(QTableWidget.SelectItems)
+        self.table.setSelectionMode(QTableWidget.ExtendedSelection)
         
         # Column sizing
         header = self.table.horizontalHeader()
@@ -117,7 +122,7 @@ class FailedItemsReviewDialog(QDialog):
         action_layout = QHBoxLayout()
         action_layout.addStretch()
         
-        self.retry_btn = QPushButton(lang.get("failed_items.retry_selected", default="🔄 Retry Selected Items"))
+        self.retry_btn = QPushButton(lang.get("settings.pages.failed_items.retry_selected", default="🔄 Retry Selected Items"))
         self.retry_btn.setStyleSheet("""
             QPushButton {
                 background-color: #0e639c;
@@ -139,7 +144,7 @@ class FailedItemsReviewDialog(QDialog):
         self.retry_btn.setEnabled(False)
         action_layout.addWidget(self.retry_btn)
         
-        self.ignore_btn = QPushButton(lang.get("failed_items.ignore_selected", default="🚫 Ignore Selected Items"))
+        self.ignore_btn = QPushButton(lang.get("settings.pages.failed_items.ignore_selected", default="🚫 Ignore Selected Items"))
         self.ignore_btn.setStyleSheet("""
             QPushButton {
                 background-color: #854545;
@@ -161,7 +166,7 @@ class FailedItemsReviewDialog(QDialog):
         self.ignore_btn.setEnabled(False)
         action_layout.addWidget(self.ignore_btn)
         
-        self.cancel_btn = QPushButton(lang.get("failed_items.close", default="Close"))
+        self.cancel_btn = QPushButton(lang.get("settings.pages.failed_items.close", default="Close"))
         self.cancel_btn.clicked.connect(self.reject)
         action_layout.addWidget(self.cancel_btn)
         
@@ -184,7 +189,8 @@ class FailedItemsReviewDialog(QDialog):
             
             # Item name
             name_item = QTableWidgetItem(item.get('name', 'Unknown'))
-            name_item.setFlags(name_item.flags() & ~Qt.ItemIsEditable)
+            name_item.setFlags(name_item.flags() & ~Qt.ItemIsEditable | Qt.ItemIsSelectable)
+            name_item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
             self.table.setItem(row, 1, name_item)
             
             # Realm
@@ -207,17 +213,17 @@ class FailedItemsReviewDialog(QDialog):
             # Filter reason
             reason = item.get('reason', 'unknown')
             if reason == 'level_too_low':
-                reason_text = lang.get("failed_items.reason_level", default="Level < 50")
+                reason_text = lang.get("settings.pages.failed_items.reason_level", default="Level < 50")
                 reason_color = QColor("#ce9178")
             elif reason == 'utility_too_low':
-                reason_text = lang.get("failed_items.reason_utility", default="Utility < 100")
+                reason_text = lang.get("settings.pages.failed_items.reason_utility", default="Utility < 100")
                 reason_color = QColor("#c586c0")
             elif reason == 'no_merchant':
-                reason_text = lang.get("failed_items.reason_no_merchant", default="No Merchant")
+                reason_text = lang.get("settings.pages.failed_items.reason_no_merchant", default="No Merchant")
                 reason_color = QColor("#f48771")
             elif reason == 'currency_not_supported':
                 currency = item.get('currency', 'Unknown')
-                reason_text = lang.get("failed_items.reason_currency", default=f"Currency: {currency}")
+                reason_text = lang.get("settings.pages.failed_items.reason_currency", default=f"Currency: {currency}")
                 reason_color = QColor("#dcdcaa")
             else:
                 reason_text = reason
@@ -278,19 +284,19 @@ class FailedItemsReviewDialog(QDialog):
                 selected_count += 1
         
         self.stats_label.setText(
-            lang.get("failed_items.stats", selected=selected_count, total=len(self.filtered_items),
+            lang.get("settings.pages.failed_items.stats", selected=selected_count, total=len(self.filtered_items),
                     default=f"📊 {selected_count} / {len(self.filtered_items)} items selected for retry")
         )
         
         self.retry_btn.setEnabled(selected_count > 0)
         self.retry_btn.setText(
-            lang.get("failed_items.retry_selected", count=selected_count, 
+            lang.get("settings.pages.failed_items.retry_selected", count=selected_count, 
                     default=f"🔄 Retry Selected Items ({selected_count})")
         )
         
         self.ignore_btn.setEnabled(selected_count > 0)
         self.ignore_btn.setText(
-            lang.get("failed_items.ignore_selected", count=selected_count,
+            lang.get("settings.pages.failed_items.ignore_selected", count=selected_count,
                     default=f"🚫 Ignore Selected Items ({selected_count})")
         )
     
@@ -310,8 +316,8 @@ class FailedItemsReviewDialog(QDialog):
         # Confirmation
         reply = QMessageBox.question(
             self,
-            lang.get("failed_items.confirm_title", default="Confirm Retry"),
-            lang.get("failed_items.confirm_message", count=len(self.selected_items),
+            lang.get("settings.pages.failed_items.confirm_title", default="Confirm Retry"),
+            lang.get("settings.pages.failed_items.confirm_message", count=len(self.selected_items),
                     default=f"Retry import for {len(self.selected_items)} item(s) WITHOUT filters?\n\n"
                             f"⚠️ This will ignore Level and Utility restrictions."),
             QMessageBox.Yes | QMessageBox.No,
@@ -319,6 +325,8 @@ class FailedItemsReviewDialog(QDialog):
         )
         
         if reply == QMessageBox.Yes:
+            # Store selected items but DO NOT close dialog yet
+            # The parent will handle the retry and close the dialog when done
             self.accept()
     
     def get_selected_items(self):
@@ -345,8 +353,8 @@ class FailedItemsReviewDialog(QDialog):
         # Confirmation
         reply = QMessageBox.question(
             self,
-            lang.get("failed_items.ignore_confirm_title", default="Confirm Ignore"),
-            lang.get("failed_items.ignore_confirm_message", count=len(selected),
+            lang.get("settings.pages.failed_items.ignore_confirm_title", default="Confirm Ignore"),
+            lang.get("settings.pages.failed_items.ignore_confirm_message", count=len(selected),
                     default=f"Permanently ignore {len(selected)} item(s)?\n\n"
                             f"⚠️ These items will never appear in future imports.\n"
                             f"You can manage ignored items later."),
@@ -356,5 +364,36 @@ class FailedItemsReviewDialog(QDialog):
         
         if reply == QMessageBox.Yes:
             self.ignored_items = selected
-            # Return code 2 pour différencier de retry (1) et cancel (0)
-            self.done(2)
+            
+            # Remove ignored items from filtered_items and table
+            rows_to_remove = []
+            for row in range(self.table.rowCount()):
+                checkbox_widget = self.table.cellWidget(row, 0)
+                checkbox = checkbox_widget.findChild(QCheckBox)
+                if checkbox and checkbox.isChecked():
+                    rows_to_remove.append(row)
+            
+            # Remove rows in reverse order to avoid index issues
+            for row in reversed(rows_to_remove):
+                self.filtered_items.pop(row)
+                self.table.removeRow(row)
+            
+            # Update header and stats
+            header_label = self.findChild(QLabel)
+            if header_label:
+                header_label.setText(lang.get("settings.pages.failed_items.header", count=len(self.filtered_items),
+                    default=f"📋 {len(self.filtered_items)} item(s) were filtered during import"))
+            
+            self.update_stats()
+            
+            # Show confirmation message
+            QMessageBox.information(
+                self,
+                lang.get("settings.pages.failed_items.ignore_success_title", default="Items Ignored"),
+                lang.get("settings.pages.failed_items.ignore_success_message", count=len(selected),
+                        default=f"{len(selected)} item(s) have been marked as ignored.\n\nThey will be processed when you close this dialog.")
+            )
+            
+            # If no items left, close dialog
+            if len(self.filtered_items) == 0:
+                self.done(2)

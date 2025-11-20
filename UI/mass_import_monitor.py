@@ -13,7 +13,9 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QTextCursor
 
-from Functions.language_manager import lang
+from Functions.language_manager import LanguageManager
+
+lang = LanguageManager()
 
 
 class MassImportMonitor(QMainWindow):
@@ -21,7 +23,7 @@ class MassImportMonitor(QMainWindow):
     
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle(lang.get("mass_import_monitor.window_title", default="📦 Mass Import Monitor"))
+        self.setWindowTitle(lang.get("settings.pages.mass_import_monitor.window_title", default="📦 Mass Import Monitor"))
         self.setGeometry(150, 100, 1200, 700)
         
         # Make window independent and always movable
@@ -40,6 +42,7 @@ class MassImportMonitor(QMainWindow):
         self.current_item = None
         self.error_list = []  # Error list for tracking
         self.filtered_items = []  # Items filtered by level/utility restrictions
+        self.retry_worker = None  # Worker for retry operations
         
         # Central Widget
         central_widget = QWidget()
@@ -51,7 +54,7 @@ class MassImportMonitor(QMainWindow):
         # === HEADER: Title and time ===
         header_layout = QHBoxLayout()
         
-        title_label = QLabel(lang.get("mass_import_monitor.title", default="📦 Import en Masse - Monitoring en Temps Réel"))
+        title_label = QLabel(lang.get("settings.pages.mass_import_monitor.title", default="📦 Import en Masse - Monitoring en Temps Réel"))
         title_label.setStyleSheet("""
             QLabel {
                 font-size: 16pt;
@@ -76,7 +79,7 @@ class MassImportMonitor(QMainWindow):
         main_layout.addLayout(header_layout)
         
         # === STATISTICS PANEL ===
-        stats_group = QGroupBox(lang.get("mass_import_monitor.stats_group", default="📊 Statistiques en Temps Réel"))
+        stats_group = QGroupBox(lang.get("settings.pages.mass_import_monitor.stats_group", default="📊 Statistiques en Temps Réel"))
         stats_group.setStyleSheet("""
             QGroupBox {
                 font-weight: bold;
@@ -95,28 +98,28 @@ class MassImportMonitor(QMainWindow):
         stats_layout.setSpacing(10)
         
         # Row 1: Unique items and variants
-        self.unique_items_label = QLabel(lang.get("mass_import_monitor.unique_items", default="🔍 Items uniques:") + " 0")
+        self.unique_items_label = QLabel(lang.get("settings.pages.mass_import_monitor.unique_items", default="🔍 Items uniques:") + " 0")
         self.unique_items_label.setStyleSheet("font-size: 11pt; color: #dcdcaa;")
         stats_layout.addWidget(self.unique_items_label, 0, 0)
         
-        self.variants_label = QLabel(lang.get("mass_import_monitor.variants_found", default="🌐 Variantes trouvées:") + " 0")
+        self.variants_label = QLabel(lang.get("settings.pages.mass_import_monitor.variants_found", default="🌐 Variantes trouvées:") + " 0")
         self.variants_label.setStyleSheet("font-size: 11pt; color: #569cd6;")
         stats_layout.addWidget(self.variants_label, 0, 1)
         
-        self.processed_label = QLabel(lang.get("mass_import_monitor.items_processed", default="⚙️ Items traités:") + " 0 / 0")
+        self.processed_label = QLabel(lang.get("settings.pages.mass_import_monitor.items_processed", default="⚙️ Items traités:") + " 0 / 0")
         self.processed_label.setStyleSheet("font-size: 11pt; color: #9cdcfe;")
         stats_layout.addWidget(self.processed_label, 0, 2)
         
         # Row 2: Results
-        self.added_label = QLabel(lang.get("mass_import_monitor.added", default="✅ Ajoutés:") + " 0")
+        self.added_label = QLabel(lang.get("settings.pages.mass_import_monitor.added", default="✅ Ajoutés:") + " 0")
         self.added_label.setStyleSheet("font-size: 11pt; color: #4ec9b0;")
         stats_layout.addWidget(self.added_label, 1, 0)
         
-        self.duplicates_label = QLabel(lang.get("mass_import_monitor.duplicates", default="⏭️ Doublons ignorés:") + " 0")
+        self.duplicates_label = QLabel(lang.get("settings.pages.mass_import_monitor.duplicates", default="⏭️ Doublons ignorés:") + " 0")
         self.duplicates_label.setStyleSheet("font-size: 11pt; color: #ce9178;")
         stats_layout.addWidget(self.duplicates_label, 1, 1)
         
-        self.failed_label = QLabel(lang.get("mass_import_monitor.failed", default="❌ Échecs:") + " 0")
+        self.failed_label = QLabel(lang.get("settings.pages.mass_import_monitor.failed", default="❌ Échecs:") + " 0")
         self.failed_label.setStyleSheet("font-size: 11pt; color: #f48771;")
         stats_layout.addWidget(self.failed_label, 1, 2)
         
@@ -127,7 +130,7 @@ class MassImportMonitor(QMainWindow):
         files_logs_layout = QHBoxLayout()
         
         # === LOGS PANEL (LEFT) ===
-        logs_group = QGroupBox(lang.get("mass_import_monitor.logs_group", default="📋 Logs Détaillés"))
+        logs_group = QGroupBox(lang.get("settings.pages.mass_import_monitor.logs_group", default="📋 Logs Détaillés"))
         logs_group.setStyleSheet("""
             QGroupBox {
                 font-weight: bold;
@@ -142,7 +145,7 @@ class MassImportMonitor(QMainWindow):
         # Button bar above logs
         button_layout = QHBoxLayout()
         
-        self.clear_button = QPushButton(lang.get("mass_import_monitor.clear_button", default="🗑️ Effacer"))
+        self.clear_button = QPushButton(lang.get("settings.pages.mass_import_monitor.clear_button", default="🗑️ Effacer"))
         self.clear_button.clicked.connect(self.clear_logs)
         self.clear_button.setStyleSheet("""
             QPushButton {
@@ -152,7 +155,7 @@ class MassImportMonitor(QMainWindow):
         """)
         button_layout.addWidget(self.clear_button)
         
-        self.export_button = QPushButton(lang.get("mass_import_monitor.export_button", default="💾 Exporter"))
+        self.export_button = QPushButton(lang.get("settings.pages.mass_import_monitor.export_button", default="💾 Exporter"))
         self.export_button.clicked.connect(self.export_logs)
         self.export_button.setStyleSheet("""
             QPushButton {
@@ -164,7 +167,7 @@ class MassImportMonitor(QMainWindow):
         
         button_layout.addStretch()
         
-        self.autoscroll_label = QLabel(lang.get("mass_import_monitor.autoscroll", default="📜 Auto-scroll: ON"))
+        self.autoscroll_label = QLabel(lang.get("settings.pages.mass_import_monitor.autoscroll", default="📜 Auto-scroll: ON"))
         self.autoscroll_label.setStyleSheet("color: #4ec9b0; font-size: 9pt;")
         button_layout.addWidget(self.autoscroll_label)
         
@@ -189,7 +192,7 @@ class MassImportMonitor(QMainWindow):
         files_logs_layout.addWidget(logs_group, stretch=1)
         
         # === FILES PANEL (RIGHT) ===
-        files_group = QGroupBox(lang.get("mass_import_monitor.files_group", default="📁 Fichiers Template"))
+        files_group = QGroupBox(lang.get("settings.pages.mass_import_monitor.files_group", default="📁 Fichiers Template"))
         files_group.setStyleSheet("""
             QGroupBox {
                 font-weight: bold;
@@ -227,7 +230,7 @@ class MassImportMonitor(QMainWindow):
         main_layout.addLayout(files_logs_layout, stretch=1)
         
         # === PROGRESS BAR ===
-        progress_group = QGroupBox(lang.get("mass_import_monitor.progress_group", default="📈 Progression"))
+        progress_group = QGroupBox(lang.get("settings.pages.mass_import_monitor.progress_group", default="📈 Progression"))
         progress_layout = QVBoxLayout()
         
         self.progress_bar = QProgressBar()
@@ -254,7 +257,7 @@ class MassImportMonitor(QMainWindow):
         """)
         progress_layout.addWidget(self.progress_bar)
         
-        self.current_item_label = QLabel(lang.get("mass_import_monitor.waiting", default="En attente..."))
+        self.current_item_label = QLabel(lang.get("settings.pages.mass_import_monitor.waiting", default="En attente..."))
         self.current_item_label.setStyleSheet("""
             QLabel {
                 font-size: 10pt;
@@ -271,7 +274,7 @@ class MassImportMonitor(QMainWindow):
         main_layout.addWidget(progress_group)
         
         # === ERRORS PANEL ===
-        errors_group = QGroupBox(lang.get("mass_import_monitor.errors_group", default="⚠️ Suivi des Erreurs"))
+        errors_group = QGroupBox(lang.get("settings.pages.mass_import_monitor.errors_group", default="⚠️ Suivi des Erreurs"))
         errors_group.setStyleSheet("""
             QGroupBox {
                 font-weight: bold;
@@ -286,7 +289,7 @@ class MassImportMonitor(QMainWindow):
         # Error buttons
         error_buttons_layout = QHBoxLayout()
         
-        self.clear_errors_button = QPushButton(lang.get("mass_import_monitor.clear_errors", default="🗑️ Effacer erreurs"))
+        self.clear_errors_button = QPushButton(lang.get("settings.pages.mass_import_monitor.clear_errors", default="🗑️ Effacer erreurs"))
         self.clear_errors_button.clicked.connect(self.clear_errors)
         self.clear_errors_button.setStyleSheet("""
             QPushButton {
@@ -296,7 +299,7 @@ class MassImportMonitor(QMainWindow):
         """)
         error_buttons_layout.addWidget(self.clear_errors_button)
         
-        self.export_errors_button = QPushButton(lang.get("mass_import_monitor.export_errors", default="💾 Exporter erreurs"))
+        self.export_errors_button = QPushButton(lang.get("settings.pages.mass_import_monitor.export_errors", default="💾 Exporter erreurs"))
         self.export_errors_button.clicked.connect(self.export_errors)
         self.export_errors_button.setStyleSheet("""
             QPushButton {
@@ -308,7 +311,7 @@ class MassImportMonitor(QMainWindow):
         
         error_buttons_layout.addStretch()
         
-        self.error_count_label = QLabel(lang.get("mass_import_monitor.error_count", count=0, default="0 erreur(s)"))
+        self.error_count_label = QLabel(lang.get("settings.pages.mass_import_monitor.error_count", count=0, default="0 erreur(s)"))
         self.error_count_label.setStyleSheet("color: #f48771; font-weight: bold; font-size: 10pt;")
         error_buttons_layout.addWidget(self.error_count_label)
         
@@ -336,13 +339,13 @@ class MassImportMonitor(QMainWindow):
         # === FOOTER ===
         footer_layout = QHBoxLayout()
         
-        self.info_label = QLabel(lang.get("mass_import_monitor.ready", default="Prêt à démarrer l'import..."))
+        self.info_label = QLabel(lang.get("settings.pages.mass_import_monitor.ready", default="Prêt à démarrer l'import..."))
         self.info_label.setStyleSheet("color: #808080; font-style: italic; font-size: 9pt;")
         footer_layout.addWidget(self.info_label)
         
         footer_layout.addStretch()
         
-        self.review_filtered_btn = QPushButton(lang.get("mass_import_monitor.review_filtered", default="🔍 Review Filtered Items"))
+        self.review_filtered_btn = QPushButton(lang.get("settings.pages.mass_import_monitor.review_filtered", default="🔍 Review Filtered Items"))
         self.review_filtered_btn.clicked.connect(self.open_review_filtered_dialog)
         self.review_filtered_btn.setVisible(False)  # Hidden until filtered items exist
         self.review_filtered_btn.setStyleSheet("""
@@ -360,7 +363,7 @@ class MassImportMonitor(QMainWindow):
         """)
         footer_layout.addWidget(self.review_filtered_btn)
         
-        self.close_button = QPushButton(lang.get("mass_import_monitor.close_button", default="❌ Fermer"))
+        self.close_button = QPushButton(lang.get("settings.pages.mass_import_monitor.close_button", default="❌ Fermer"))
         self.close_button.clicked.connect(self.close)
         self.close_button.setEnabled(False)  # Disabled during import
         self.close_button.setStyleSheet("""
@@ -409,10 +412,10 @@ class MassImportMonitor(QMainWindow):
         
         self.close_button.setEnabled(False)
         
-        self.log_message("Démarrage de l'import en masse...", "info")
+        self.log_message(lang.get("settings.pages.mass_import_monitor.start_import_message", default="Démarrage de l'import en masse..."), "info")
         if template_files:
-            self.log_message(f"{len(template_files)} fichier(s) template à parser", "info")
-        self.log_message(f"{total_items} items uniques à traiter", "info")
+            self.log_message(lang.get("settings.pages.mass_import_monitor.template_files_count", count=len(template_files), default=f"{len(template_files)} fichier(s) template à parser"), "info")
+        self.log_message(lang.get("settings.pages.mass_import_monitor.unique_items_to_process", count=total_items, default=f"{total_items} items uniques à traiter"), "info")
     
     def finish_import(self, success=True):
         """Finish import"""
@@ -429,13 +432,13 @@ class MassImportMonitor(QMainWindow):
         
         if success:
             self.log_message("", "separator")
-            self.log_message(f"Import terminé avec succès en {self.format_duration(elapsed)}", "success")
-            self.log_message(f"Résumé: {self.items_added} ajoutés, {self.duplicates_skipped} doublons, {self.items_failed} échecs", "info")
-            self.info_label.setText(f"✅ Import terminé - {self.items_added} items ajoutés")
+            self.log_message(lang.get("settings.pages.mass_import_monitor.import_finished_success", duration=self.format_duration(elapsed), default=f"Import terminé avec succès en {self.format_duration(elapsed)}"), "success")
+            self.log_message(lang.get("settings.pages.mass_import_monitor.import_summary", added=self.items_added, duplicates=self.duplicates_skipped, failed=self.items_failed, default=f"Résumé: {self.items_added} ajoutés, {self.duplicates_skipped} doublons, {self.items_failed} échecs"), "info")
+            self.info_label.setText(lang.get("settings.pages.mass_import_monitor.import_finished_message", count=self.items_added, default=f"✅ Import terminé - {self.items_added} items ajoutés"))
         else:
             self.log_message("", "separator")
-            self.log_message("Import terminé avec des erreurs", "error")
-            self.info_label.setText("❌ Import terminé avec des erreurs")
+            self.log_message(lang.get("settings.pages.mass_import_monitor.import_finished_errors", default="Import terminé avec des erreurs"), "error")
+            self.info_label.setText(lang.get("settings.pages.mass_import_monitor.import_finished_error_message", default="❌ Import terminé avec des erreurs"))
     
     def update_stats(self, **kwargs):
         """Update statistics
@@ -492,6 +495,14 @@ class MassImportMonitor(QMainWindow):
         
         # Force UI refresh to prevent freezing
         QApplication.processEvents()
+    
+    def update_stats_slot(self, stats):
+        """Slot for update_stats signal from worker thread"""
+        self.update_stats(**stats)
+    
+    def log_message_slot(self, msg, level):
+        """Slot for log_message signal from worker thread"""
+        self.log_message(msg, level)
     
     def log_message(self, message, level="info"):
         """Add message to log with coloring
@@ -599,7 +610,7 @@ class MassImportMonitor(QMainWindow):
         
         file_path, _ = QFileDialog.getSaveFileName(
             self,
-            "Exporter les erreurs d'import",
+            lang.get("settings.pages.mass_import_monitor.export_errors_title", default="Exporter les erreurs d'import"),
             filename,
             "Fichiers texte (*.txt);;Tous les fichiers (*.*)"
         )
@@ -637,7 +648,7 @@ class MassImportMonitor(QMainWindow):
         
         file_path, _ = QFileDialog.getSaveFileName(
             self,
-            "Exporter les logs d'import",
+            lang.get("settings.pages.mass_import_monitor.export_logs_title", default="Exporter les logs d'import"),
             filename,
             "Fichiers texte (*.txt);;Tous les fichiers (*.*)"
         )
@@ -688,10 +699,10 @@ class MassImportMonitor(QMainWindow):
         if filtered_items and len(filtered_items) > 0:
             self.review_filtered_btn.setVisible(True)
             self.review_filtered_btn.setText(
-                lang.get("mass_import_monitor.review_filtered", count=len(filtered_items),
+                lang.get("settings.pages.mass_import_monitor.review_filtered", count=len(filtered_items),
                         default=f"🔍 Review Filtered Items ({len(filtered_items)})")
             )
-            self.log_message(f"{len(filtered_items)} item(s) were filtered (Level/Utility restrictions)", "warning")
+            self.log_message(lang.get("settings.pages.mass_import_monitor.filtered_items_warning", count=len(filtered_items), default=f"{len(filtered_items)} item(s) were filtered (Level/Utility restrictions)"), "warning")
             logging.info(f"Review button shown with {len(filtered_items)} items")
             
             # Force UI update
@@ -715,7 +726,16 @@ class MassImportMonitor(QMainWindow):
             self.log_message(f"DEBUG: Retrieved {len(selected_items)} selected items from dialog", "info")
             if selected_items:
                 self.log_message("", "separator")
-                self.log_message(f"🔄 Retrying {len(selected_items)} filtered item(s) WITHOUT restrictions...", "info")
+                self.log_message(lang.get("settings.pages.mass_import_monitor.retry_filtered_message", count=len(selected_items), default=f"🔄 Retrying {len(selected_items)} filtered item(s) WITHOUT restrictions..."), "info")
+                
+                # Show the dialog is closed, import will continue in background
+                from PySide6.QtWidgets import QMessageBox
+                QMessageBox.information(
+                    self,
+                    "Retry in Progress",
+                    f"Retrying {len(selected_items)} item(s).\n\nThe import will continue in the Mass Import Monitor window."
+                )
+                
                 self.emit_retry_request(selected_items)
             else:
                 self.log_message("DEBUG: No items selected, skipping retry", "warning")
@@ -724,21 +744,23 @@ class MassImportMonitor(QMainWindow):
             ignored_items = dialog.get_ignored_items()
             if ignored_items:
                 self.log_message("", "separator")
-                self.log_message(f"🚫 Ignoring {len(ignored_items)} item(s) permanently...", "info")
+                self.log_message(lang.get("settings.pages.mass_import_monitor.ignore_items_message", count=len(ignored_items), default=f"🚫 Ignoring {len(ignored_items)} item(s) permanently..."), "info")
                 self.mark_items_as_ignored(ignored_items)
     
     def emit_retry_request(self, items_to_retry):
         """Emit signal or callback to retry import for specific items"""
-        self.log_message(f"📝 Retry requested for: {', '.join([i.get('name', 'Unknown') for i in items_to_retry])}", "info")
+        items_names = ', '.join([i.get('name', 'Unknown') for i in items_to_retry])
+        self.log_message(lang.get("settings.pages.mass_import_monitor.retry_requested_for", items=items_names, default=f"📝 Retry requested for: {items_names}"), "info")
         
         # Create a new worker to retry these items WITHOUT filters
-        from Functions.import_worker import ImportWorker
-        from Functions.superadmin_tools import SuperAdminTools
-        from PySide6.QtCore import QEventLoop
+        try:
+            from Functions.import_worker import ImportWorker
+        except ImportError as e:
+            self.log_message(f"Error importing ImportWorker: {e}", "error")
+            return
         
-        # Create temporary file paths with just the item names
-        import tempfile
         from pathlib import Path
+        import tempfile
         
         temp_files = []
         
@@ -775,7 +797,8 @@ class MassImportMonitor(QMainWindow):
             
             # Create worker with skip_filters=True
             try:
-                worker = ImportWorker(
+                # Store worker reference to prevent garbage collection
+                self.retry_worker = ImportWorker(
                     file_paths=temp_files,
                     realm="All",
                     merge=True,
@@ -785,8 +808,11 @@ class MassImportMonitor(QMainWindow):
                     path_manager=None,
                     skip_filters_mode=True  # NEW PARAMETER
                 )
+                
             except Exception as e:
                 self.log_message(f"Error creating worker: {e}", "error")
+                import traceback
+                self.log_message(f"Traceback: {traceback.format_exc()}", "error")
                 # Clean up temp files
                 for tf in temp_files:
                     try:
@@ -796,8 +822,9 @@ class MassImportMonitor(QMainWindow):
                 return
             
             # Connect signals
-            worker.progress_updated.connect(lambda stats: self.update_stats(**stats))
-            worker.log_message.connect(lambda msg, level: self.log_message(msg, level))
+            from PySide6.QtCore import Qt
+            self.retry_worker.progress_updated.connect(self.update_stats_slot)
+            self.retry_worker.log_message.connect(self.log_message_slot)
             
             # Reset stats for retry
             self.items_processed = 0
@@ -807,6 +834,7 @@ class MassImportMonitor(QMainWindow):
             
             def on_finished(success, message, stats):
                 try:
+                    self.log_message("Retry completed successfully", "info")
                     self.finish_import(success)
                     
                     # Clean up temp files
@@ -816,15 +844,34 @@ class MassImportMonitor(QMainWindow):
                         except:
                             pass
                     
-                    self.log_message("Retry completed successfully", "info")
+                    # Schedule worker for deletion instead of immediate cleanup
+                    if self.retry_worker is not None:
+                        # Disconnect signals
+                        try:
+                            self.retry_worker.progress_updated.disconnect()
+                            self.retry_worker.log_message.disconnect()
+                            self.retry_worker.import_finished.disconnect()
+                        except:
+                            pass
+                        
+                        # Let Qt handle the deletion properly
+                        self.retry_worker.deleteLater()
+                        self.retry_worker = None
+                        
                 except Exception as e:
                     self.log_message(f"Error in retry finish: {e}", "error")
+                    import traceback
+                    self.log_message(f"Traceback: {traceback.format_exc()}", "error")
             
-            worker.import_finished.connect(on_finished)
+            self.retry_worker.import_finished.connect(on_finished, Qt.QueuedConnection)
             
             # Start retry
             self.start_import(len(items_to_retry))
-            worker.start()
+            
+            # Keep close button enabled during retry so user can close if needed
+            self.close_button.setEnabled(True)
+            
+            self.retry_worker.start()
             
         except Exception as e:
             self.log_message(f"CRASH during retry: {str(e)}", "error")
@@ -871,7 +918,7 @@ class MassImportMonitor(QMainWindow):
                         item_data['ignore_item'] = True
                         ignored_count += 1
                         found = True
-                        self.log_message(f"  ✓ Marked '{item_name}' as ignored", "info")
+                        self.log_message(lang.get("settings.pages.mass_import_monitor.item_marked_ignored", name=item_name, default=f"  ✓ Marked '{item_name}' as ignored"), "info")
                 
                 if not found:
                     # Item not in DB yet, add it with ignore flag
@@ -882,13 +929,13 @@ class MassImportMonitor(QMainWindow):
                         "ignore_item": True
                     }
                     ignored_count += 1
-                    self.log_message(f"  ✓ Added '{item_name}' to ignore list", "info")
+                    self.log_message(lang.get("settings.pages.mass_import_monitor.item_added_ignore_list", name=item_name, default=f"  ✓ Added '{item_name}' to ignore list"), "info")
             
             # Save updated DB
             with open(db_path, 'w', encoding='utf-8') as f:
                 json.dump(db_data, f, indent=2, ensure_ascii=False)
             
-            self.log_message(f"✅ Successfully ignored {ignored_count} item(s)", "success")
+            self.log_message(lang.get("settings.pages.mass_import_monitor.items_ignored_success", count=ignored_count, default=f"✅ Successfully ignored {ignored_count} item(s)"), "success")
             
             # Remove ignored items from filtered_items list
             self.filtered_items = [
@@ -900,8 +947,30 @@ class MassImportMonitor(QMainWindow):
             self.set_filtered_items(self.filtered_items)
             
         except Exception as e:
-            self.log_message(f"❌ Error marking items as ignored: {e}", "error")
+            self.log_message(lang.get("settings.pages.mass_import_monitor.error_marking_ignored", error=str(e), default=f"❌ Error marking items as ignored: {e}"), "error")
             import traceback
             self.log_message(f"Traceback: {traceback.format_exc()}", "error")
+    
+    def closeEvent(self, event):
+        """Handle window close event"""
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info("MassImportMonitor closeEvent triggered")
+        
+        # If a retry worker is running, warn and wait
+        if hasattr(self, 'retry_worker') and self.retry_worker is not None:
+            if self.retry_worker.isRunning():
+                logger.warning("Retry worker still running, waiting for completion...")
+                self.retry_worker.wait(5000)  # Wait up to 5 seconds
+                logger.info("Retry worker finished")
+        
+        # Stop timers
+        if hasattr(self, 'timer'):
+            self.timer.stop()
+        if hasattr(self, 'ui_refresh_timer'):
+            self.ui_refresh_timer.stop()
+        
+        logger.info("MassImportMonitor closing normally")
+        event.accept()
 
 

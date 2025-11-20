@@ -1,8 +1,8 @@
 {
   "version": "2.0",
   "description": "DAOC Items Database - Multi-Realm Support (Minimal Data)",
-  "last_updated": "2025-11-20 07:42:33",
-  "item_count": 86,
+  "last_updated": "2025-11-20 07:29:24",
+  "item_count": 85,
   "notes": [
     "Composite keys format: 'item_name:realm' (lowercase)",
     "Only essential data: ID, name, realm, slot, type, model, damage info, merchant",
@@ -1328,23 +1328,6 @@
       "merchant_zone": "ToA",
       "merchant_price": "700",
       "merchant_currency": "Atlantean Glass"
-    },
-    "ring of arcane gestures:albion": {
-      "id": "163481",
-      "name": "Ring of Arcane Gestures",
-      "realm": "Albion",
-      "slot": "Ring",
-      "type": "Magical",
-      "model": "103",
-      "dps": null,
-      "speed": null,
-      "damage_type": null,
-      "usable_by": "ALL",
-      "source": "internal",
-      "bypass_filters": true,
-      "merchant_zone": "Drake",
-      "merchant_price": "625",
-      "merchant_currency": "Scales"
     }
   }
 }

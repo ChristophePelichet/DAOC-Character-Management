@@ -402,17 +402,19 @@ class TreeManager:
     def select_all_characters(self):
         """Coche tous les personnages"""
         for row in range(self.model.rowCount()):
-            selection_item = self.model.item(row, 0)
-            if selection_item:
-                selection_item.setCheckState(Qt.Checked)
+            index = self.model.index(row, 0)
+            # Utiliser setData au lieu de setCheckState pour forcer le signal
+            self.model.setData(index, Qt.Checked, Qt.CheckStateRole)
+        
         logging.debug(f"All {self.model.rowCount()} characters selected")
         
     def deselect_all_characters(self):
         """Décoche tous les personnages"""
         for row in range(self.model.rowCount()):
-            selection_item = self.model.item(row, 0)
-            if selection_item:
-                selection_item.setCheckState(Qt.Unchecked)
+            index = self.model.index(row, 0)
+            # Utiliser setData au lieu de setCheckState pour forcer le signal
+            self.model.setData(index, Qt.Unchecked, Qt.CheckStateRole)
+        
         logging.debug("All characters deselected")
         
     def get_selected_character(self):

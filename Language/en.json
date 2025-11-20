@@ -117,7 +117,9 @@
         "bulk_actions": {
             "label": "Bulk Actions",
             "delete_checked": "Bulk Delete",
-            "delete": "Delete Selection"
+            "delete": "Delete Selection",
+            "select_all": "✓ Select All",
+            "deselect_all": "✗ Deselect All"
         },
         "action": {
             "label": "Action",

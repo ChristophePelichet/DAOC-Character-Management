@@ -138,16 +138,33 @@ class UIManager:
         return self.context_menu
         
     def create_delete_button(self, parent_layout):
-        """Crée le bouton de suppression de la sélection en bas de la liste"""
-        delete_button_layout = QHBoxLayout()
+        """Crée les boutons d'action groupée en bas de la liste"""
+        action_button_layout = QHBoxLayout()
         
-        delete_button = QPushButton(lang.get("bulk_action_delete", default="Supprimer la sélection"))
-        delete_button.clicked.connect(self.main_window.execute_bulk_action)
-        delete_button_layout.addWidget(delete_button)
+        # Bouton "Tout sélectionner"
+        select_all_text = lang.get("menu.bulk_actions.select_all", default="✓ Select All")
+        logging.debug(f"Creating select_all_button with text: {select_all_text}")
+        self.select_all_button = QPushButton(select_all_text)
+        self.select_all_button.clicked.connect(self.main_window.select_all_characters)
+        action_button_layout.addWidget(self.select_all_button)
         
-        delete_button_layout.addStretch()  # Aligné à gauche
+        # Bouton "Tout désélectionner"
+        deselect_all_text = lang.get("menu.bulk_actions.deselect_all", default="✗ Deselect All")
+        logging.debug(f"Creating deselect_all_button with text: {deselect_all_text}")
+        self.deselect_all_button = QPushButton(deselect_all_text)
+        self.deselect_all_button.clicked.connect(self.main_window.deselect_all_characters)
+        action_button_layout.addWidget(self.deselect_all_button)
         
-        parent_layout.addLayout(delete_button_layout)
+        # Bouton "Supprimer la sélection"
+        delete_text = lang.get("menu.bulk_actions.delete", default="Delete Selection")
+        logging.debug(f"Creating delete_button with text: {delete_text}")
+        self.delete_button = QPushButton(delete_text)
+        self.delete_button.clicked.connect(self.main_window.execute_bulk_action)
+        action_button_layout.addWidget(self.delete_button)
+        
+        action_button_layout.addStretch()  # Aligné à gauche
+        
+        parent_layout.addLayout(action_button_layout)
     
     def create_eden_status_bar(self, parent_layout):
         """Crée la barre de statut de connexion Eden et la section Informations"""
@@ -517,6 +534,31 @@ class UIManager:
         self.main_window.setWindowTitle(lang.get("window_title"))
         self.create_menu_bar()
         self.create_context_menu()
+        
+        # Mettre à jour les boutons d'action groupée
+        if hasattr(self, 'select_all_button'):
+            new_text = lang.get("menu.bulk_actions.select_all", default="✓ Select All")
+            logging.debug(f"Updating select_all_button text to: {new_text}")
+            self.select_all_button.setText(new_text)
+            self.select_all_button.update()
+        else:
+            logging.warning("select_all_button attribute not found")
+            
+        if hasattr(self, 'deselect_all_button'):
+            new_text = lang.get("menu.bulk_actions.deselect_all", default="✗ Deselect All")
+            logging.debug(f"Updating deselect_all_button text to: {new_text}")
+            self.deselect_all_button.setText(new_text)
+            self.deselect_all_button.update()
+        else:
+            logging.warning("deselect_all_button attribute not found")
+            
+        if hasattr(self, 'delete_button'):
+            new_text = lang.get("menu.bulk_actions.delete", default="Delete Selection")
+            logging.debug(f"Updating delete_button text to: {new_text}")
+            self.delete_button.setText(new_text)
+            self.delete_button.update()
+        else:
+            logging.warning("delete_button attribute not found")
         
         # Mettre à jour les titres des groupes de la barre de statut Eden
         if hasattr(self, 'status_group'):

@@ -43,12 +43,18 @@
 - **Variable names in English**
 - **Function/class names in English**
 - **Only UI strings use lang.get() for translations**
+- **NEVER hardcode user-facing text in code** - Always use Language/*.json files with lang.get()
+- **Always implement retranslate_ui() for dialogs/windows** - UI must refresh when language changes
+- **Always think about refreshing UI items when language changes** - Update labels, buttons, menus, etc.
 
 **Français:**
 - **Tous les commentaires de code DOIVENT être en anglais**
 - **Noms de variables en anglais**
 - **Noms de fonctions/classes en anglais**
 - **Seules les chaînes UI utilisent lang.get() pour les traductions**
+- **JAMAIS de texte utilisateur hardcodé dans le code** - Toujours utiliser les fichiers Language/*.json avec lang.get()
+- **Toujours implémenter retranslate_ui() pour les dialogues/fenêtres** - L'UI doit se rafraîchir au changement de langue
+- **Toujours penser au refresh des items au changement de langue** - Mettre à jour labels, boutons, menus, etc.
 
 ## 📁 Folder Structure Rules
 

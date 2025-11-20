@@ -117,7 +117,9 @@
         "bulk_actions": {
             "label": "Massenaktionen",
             "delete_checked": "Massenlöschung",
-            "delete": "Auswahl löschen"
+            "delete": "Auswahl löschen",
+            "select_all": "✓ Alles auswählen",
+            "deselect_all": "✗ Alles abwählen"
         },
         "action": {
             "label": "Aktion",

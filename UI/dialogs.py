@@ -1065,7 +1065,7 @@ class CharacterSheetWindow(QDialog):
                 return
             
             dialog = ArmorManagementDialog(self, season, realm, character_name, self.character_data)
-            dialog.exec()
+            dialog.show()  # Non-modal: permet d'utiliser le reste de l'application
         except Exception as e:
             import traceback
             error_msg = lang.get("character_sheet.messages.armor_manager_error", error=str(e), traceback=traceback.format_exc())
@@ -2812,7 +2812,9 @@ class ArmorManagementDialog(QDialog):
         self.data_manager = DataManager()
         
         from Functions.armor_manager import ArmorManager
+        from Functions.template_manager import TemplateManager
         self.armor_manager = ArmorManager(season, realm, character_name)
+        self.template_manager = TemplateManager()
         
         self.setWindowTitle(lang.get("armoury_dialog.title", name=character_name, realm=realm, season=season))
         self.resize(1400, 700)  # Larger window for better split visibility
@@ -2872,6 +2874,17 @@ class ArmorManagementDialog(QDialog):
         preview_font.setStyleHint(QFont.Monospace)
         self.preview_area.setFont(preview_font)
         
+        # Fix contrast for placeholder text (visible on dark themes)
+        self.preview_area.setStyleSheet("""
+            QTextEdit {
+                background-color: #2b2b2b;
+                color: #e0e0e0;
+            }
+            QTextEdit[readOnly="true"] {
+                background-color: #2b2b2b;
+            }
+        """)
+        
         right_layout.addWidget(self.preview_area)
         
         # Download button in preview panel
@@ -2913,20 +2926,36 @@ class ArmorManagementDialog(QDialog):
         self.refresh_list()
     
     def refresh_list(self):
-        """Refreshes the armor files list."""
+        """Refreshes the armor files list using TemplateManager."""
         try:
-            armors = self.armor_manager.list_armors()
-            self.table.setRowCount(len(armors))
+            # Get character class from character_data
+            character_class = self.character_data.get('class', '')
             
-            for row, armor in enumerate(armors):
+            if not character_class:
+                logging.warning("No character class found, cannot filter templates")
+                self.table.setRowCount(0)
+                return
+            
+            # Use TemplateManager to get templates for this class and realm
+            templates = self.template_manager.search_templates(
+                character_class=character_class,
+                season=None  # Show all seasons for now
+            )
+            
+            # Filter by realm
+            realm_templates = [t for t in templates if t.get('metadata') and t['metadata'].realm == self.realm]
+            
+            self.table.setRowCount(len(realm_templates))
+            
+            for row, template in enumerate(realm_templates):
                 # Filename only (Season and Modified Date now shown in preview)
-                filename_item = QTableWidgetItem(armor['filename'])
+                filename_item = QTableWidgetItem(template['file'])
                 self.table.setItem(row, 0, filename_item)
             
-            logging.info(f"Liste des armures actualisée : {len(armors)} fichier(s)")
+            logging.info(f"Liste des templates actualisée : {len(realm_templates)} fichier(s) pour classe {character_class}")
             
         except Exception as e:
-            logging.error(f"Erreur lors du rafraîchissement de la liste des armures : {e}")
+            logging.error(f"Erreur lors du rafraîchissement de la liste des templates : {e}")
             QMessageBox.critical(self, lang.get("dialogs.titles.error"), lang.get("armoury_dialog.messages.refresh_error", error=str(e)))
     
     def upload_armor(self):
@@ -3370,48 +3399,42 @@ class ArmorManagementDialog(QDialog):
         self.preview_download_button.setEnabled(True)
         
         try:
-            # Get file path and file info
-            armors = self.armor_manager.list_armors()
-            armor_info = next((a for a in armors if a['filename'] == filename), None)
+            # Get file path using TemplateManager
+            template_path = self.template_manager._get_template_path(self.realm, filename)
             
-            if not armor_info:
+            if not template_path.exists():
                 self.preview_area.setPlainText(lang.get("armoury_dialog.preview.file_not_found", filename=filename))
                 return
             
-            file_path = armor_info['path']
+            # Read file content
+            with open(template_path, 'r', encoding='utf-8') as f:
+                content = f.read()
             
-            if file_path and os.path.exists(file_path):
-                # Read file content
-                with open(file_path, 'r', encoding='utf-8') as f:
-                    content = f.read()
-                
-                # Parse and format Zenkcraft template (metadata will be added inside)
-                formatted_content = self.parse_zenkcraft_template(content, self.season)
-                
-                # Convert to HTML with color support
-                import re
-                
-                # Step 1: Replace color markers with HTML spans
-                color_pattern = r'%%COLOR_START:(.+?)%%(.*?)%%COLOR_END%%'
-                
-                def replace_color(match):
-                    color = match.group(1)
-                    text = match.group(2)
-                    return f"<span style='color:{color}'>{text}</span>"
-                
-                formatted_content = re.sub(color_pattern, replace_color, formatted_content)
-                
-                # Step 2: Replace spaces OUTSIDE HTML tags (negative lookahead to avoid spaces inside <...>)
-                formatted_content = re.sub(r' (?![^<]*>)', '&nbsp;', formatted_content)
-                
-                # Step 3: Convert newlines to <br>
-                html_content = formatted_content.replace('\n', '<br>')
-                html_content = f"<div style='line-height: 1.1;'>{html_content}</div>"
-                
-                # Display formatted content
-                self.preview_area.setHtml(html_content)
-            else:
-                self.preview_area.setPlainText(lang.get("armoury_dialog.preview.file_not_found", filename=filename))
+            # Parse and format Zenkcraft template (metadata will be added inside)
+            formatted_content = self.parse_zenkcraft_template(content, self.season)
+            
+            # Convert to HTML with color support
+            import re
+            
+            # Step 1: Replace color markers with HTML spans
+            color_pattern = r'%%COLOR_START:(.+?)%%(.*?)%%COLOR_END%%'
+            
+            def replace_color(match):
+                color = match.group(1)
+                text = match.group(2)
+                return f"<span style='color:{color}'>{text}</span>"
+            
+            formatted_content = re.sub(color_pattern, replace_color, formatted_content)
+            
+            # Step 2: Replace spaces OUTSIDE HTML tags (negative lookahead to avoid spaces inside <...>)
+            formatted_content = re.sub(r' (?![^<]*>)', '&nbsp;', formatted_content)
+            
+            # Step 3: Convert newlines to <br>
+            html_content = formatted_content.replace('\n', '<br>')
+            html_content = f"<div style='line-height: 1.1;'>{html_content}</div>"
+            
+            # Display formatted content
+            self.preview_area.setHtml(html_content)
         except Exception as e:
             logging.error(f"Erreur lors de la prévisualisation : {e}")
             self.preview_area.setPlainText(lang.get("armoury_dialog.preview.error", error=str(e)))
@@ -3419,7 +3442,24 @@ class ArmorManagementDialog(QDialog):
     def open_armor(self, filename):
         """Opens an armor file with the default application."""
         try:
-            self.armor_manager.open_armor(filename)
+            import subprocess
+            import platform
+            
+            template_path = self.template_manager._get_template_path(self.realm, filename)
+            
+            if not template_path.exists():
+                QMessageBox.warning(self, lang.get("dialogs.titles.error"), 
+                    lang.get("armoury_dialog.messages.file_not_found", filename=filename))
+                return
+            
+            # Open file with default application
+            if platform.system() == 'Windows':
+                os.startfile(str(template_path))
+            elif platform.system() == 'Darwin':  # macOS
+                subprocess.run(['open', str(template_path)])
+            else:  # Linux
+                subprocess.run(['xdg-open', str(template_path)])
+            
             logging.info(f"Ouverture du fichier d'armure : {filename}")
         except Exception as e:
             logging.error(f"Erreur lors de l'ouverture du fichier d'armure : {e}")
@@ -3437,14 +3477,23 @@ class ArmorManagementDialog(QDialog):
         
         if reply == QMessageBox.Yes:
             try:
-                self.armor_manager.delete_armor(filename)
-                QMessageBox.information(
-                    self, 
-                    lang.get("dialogs.titles.success"),
-                    lang.get("armoury_dialog.messages.delete_success", filename=filename)
-                )
-                self.refresh_list()
-                logging.info(f"Fichier d'armure supprimé : {filename}")
+                # Use TemplateManager to delete template
+                success = self.template_manager.delete_template(filename, self.realm)
+                
+                if success:
+                    QMessageBox.information(
+                        self, 
+                        lang.get("dialogs.titles.success"),
+                        lang.get("armoury_dialog.messages.delete_success", filename=filename)
+                    )
+                    self.refresh_list()
+                    logging.info(f"Fichier d'armure supprimé : {filename}")
+                else:
+                    QMessageBox.warning(
+                        self,
+                        lang.get("dialogs.titles.error"),
+                        lang.get("armoury_dialog.messages.delete_error", error="Delete operation failed")
+                    )
             except Exception as e:
                 logging.error(f"Erreur lors de la suppression du fichier d'armure : {e}")
                 QMessageBox.critical(self, lang.get("dialogs.titles.error"), lang.get("armoury_dialog.messages.delete_error", error=str(e)))
@@ -3510,11 +3559,10 @@ class ArmorManagementDialog(QDialog):
     def download_armor(self, filename):
         """Downloads/exports the armor file to a user-selected location."""
         try:
-            # Get source file path
-            armors = self.armor_manager.list_armors()
-            source_file = next((a['path'] for a in armors if a['filename'] == filename), None)
+            # Get source file path using TemplateManager
+            source_file = self.template_manager._get_template_path(self.realm, filename)
             
-            if not source_file:
+            if not source_file.exists():
                 QMessageBox.warning(
                     self,
                     lang.get("dialogs.titles.error"),
@@ -3532,7 +3580,7 @@ class ArmorManagementDialog(QDialog):
             
             if save_path:
                 import shutil
-                shutil.copy2(source_file, save_path)
+                shutil.copy2(str(source_file), save_path)
                 QMessageBox.information(
                     self,
                     lang.get("dialogs.titles.success"),

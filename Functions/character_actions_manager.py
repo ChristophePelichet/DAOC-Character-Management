@@ -344,8 +344,8 @@ class CharacterActionsManager:
                 return
                 
             from UI.dialogs import ArmorManagementDialog
-            dialog = ArmorManagementDialog(self.main_window, season, realm, character_name)
-            dialog.exec()
+            dialog = ArmorManagementDialog(self.main_window, season, realm, character_name, char)
+            dialog.show()  # Non-modal: permet d'utiliser le reste de l'application
         except Exception as e:
             import traceback
             error_msg = f"Erreur lors de l'ouverture de la gestion des armures:\n{str(e)}\n\n{traceback.format_exc()}"

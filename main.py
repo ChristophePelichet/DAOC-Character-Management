@@ -491,6 +491,16 @@ class CharacterApp(QMainWindow):
     def execute_bulk_action(self):
         """Exécute l'action de suppression groupée"""
         self.actions_manager.delete_checked_characters()
+    
+    def select_all_characters(self):
+        """Sélectionne tous les personnages dans la liste"""
+        self.tree_manager.select_all_characters()
+        self.update_selection_count()
+    
+    def deselect_all_characters(self):
+        """Désélectionne tous les personnages dans la liste"""
+        self.tree_manager.deselect_all_characters()
+        self.update_selection_count()
             
     def open_armor_management_global(self):
         """Ouvre la gestion des armures (appelé depuis menu contextuel)"""
@@ -590,7 +600,7 @@ class CharacterApp(QMainWindow):
         
         # Use new modern settings dialog
         from UI.settings_dialog import SettingsDialog
-        dialog = SettingsDialog(
+        self.settings_dialog = SettingsDialog(
             self, self.available_languages,
             available_seasons=seasons,
             available_servers=servers,
@@ -598,10 +608,13 @@ class CharacterApp(QMainWindow):
         )
         
         # Show non-modal (don't block)
-        dialog.show()
+        self.settings_dialog.show()
         
         # Connect accepted signal to save (but don't close dialog)
-        dialog.accepted.connect(lambda: self.save_configuration(dialog, close_dialog=False))
+        self.settings_dialog.accepted.connect(lambda: self.save_configuration(self.settings_dialog, close_dialog=False))
+        
+        # Connect destroyed signal to clear reference
+        self.settings_dialog.destroyed.connect(lambda: setattr(self, 'settings_dialog', None))
             
     def save_configuration(self, dialog, close_dialog=True):
         """Sauvegarde la configuration"""
@@ -823,7 +836,20 @@ class CharacterApp(QMainWindow):
         logging.info(f"Changing language to {lang_code}")
         config.set("ui.language", lang_code)
         lang.set_language(lang_code)
+        
+        # Check if settings dialog is open
+        settings_was_open = hasattr(self, 'settings_dialog') and self.settings_dialog and self.settings_dialog.isVisible()
+        
+        # Close all open dialogs to force refresh on next open
+        for widget in QApplication.topLevelWidgets():
+            if isinstance(widget, QDialog) and widget != self and widget.isVisible():
+                widget.close()
+        
         self.retranslate_ui()
+        
+        # Reopen settings dialog if it was open
+        if settings_was_open:
+            self.open_configuration()
         
     def retranslate_ui(self):
         """Met à jour toutes les traductions de l'interface"""

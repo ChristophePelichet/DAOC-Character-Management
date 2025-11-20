@@ -8,9 +8,7 @@ from PySide6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QTableWidget,
                                QCheckBox, QMessageBox, QWidget)
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor
-from Functions.language_manager import LanguageManager
-
-lang = LanguageManager()
+from Functions.language_manager import lang
 
 
 class FailedItemsReviewDialog(QDialog):

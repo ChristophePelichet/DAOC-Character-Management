@@ -426,7 +426,12 @@
                 "items_ignored_success": "✅ Successfully ignored {count} item(s)",
                 "error_marking_ignored": "❌ Error marking items as ignored: {error}",
                 "export_errors_title": "Export Import Errors",
-                "export_logs_title": "Export Import Logs"
+                "export_logs_title": "Export Import Logs",
+                "retry_in_progress_title": "Retry in Progress",
+                "retry_in_progress_message": "Retrying {count} item(s).\n\nThe import will continue in the Mass Import Monitor window.",
+                "start_button": "▶️ Start Import",
+                "ready_to_start": "✅ Ready to import {count} template(s). Click 'Start Import' to begin.",
+                "import_prepared": "📥 {count} template file(s) loaded. Ready to start."
             },
             "failed_items": {
                 "title": "Review Filtered Items",

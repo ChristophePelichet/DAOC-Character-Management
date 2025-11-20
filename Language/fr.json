@@ -434,7 +434,12 @@
                 "items_ignored_success": "✅ Successfully ignored {count} item(s)",
                 "error_marking_ignored": "❌ Error marking items as ignored: {error}",
                 "export_errors_title": "Exporter les erreurs d'import",
-                "export_logs_title": "Exporter les logs d'import"
+                "export_logs_title": "Exporter les logs d'import",
+                "retry_in_progress_title": "Réessai en cours",
+                "retry_in_progress_message": "Réessai de {count} item(s).\n\nL'import continuera dans la fenêtre Import en Masse.",
+                "start_button": "▶️ Démarrer l'Import",
+                "ready_to_start": "✅ Prêt à importer {count} template(s). Cliquez sur 'Démarrer l'Import' pour commencer.",
+                "import_prepared": "📥 {count} fichier(s) template chargé(s). Prêt à démarrer."
             },
             "failed_items": {
                 "title": "Examiner les Items Filtrés",

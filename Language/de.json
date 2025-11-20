@@ -434,7 +434,12 @@
                 "items_ignored_success": "✅ {count} Item(s) erfolgreich ignoriert",
                 "error_marking_ignored": "❌ Fehler beim Markieren von Items als ignoriert: {error}",
                 "export_errors_title": "Importfehler exportieren",
-                "export_logs_title": "Import-Logs exportieren"
+                "export_logs_title": "Import-Logs exportieren",
+                "retry_in_progress_title": "Wiederholung läuft",
+                "retry_in_progress_message": "{count} Item(s) werden wiederholt.\n\nDer Import wird im Massenimport-Monitor-Fenster fortgesetzt.",
+                "start_button": "▶️ Import starten",
+                "ready_to_start": "✅ Bereit zum Importieren von {count} Vorlage(n). Klicken Sie auf 'Import starten', um zu beginnen.",
+                "import_prepared": "📥 {count} Vorlagendatei(en) geladen. Bereit zum Starten."
             },
             "failed_items": {
                 "title": "Gefilterte Gegenstände prüfen",

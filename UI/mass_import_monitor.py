@@ -13,9 +13,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QTextCursor
 
-from Functions.language_manager import LanguageManager
-
-lang = LanguageManager()
+from Functions.language_manager import lang
 
 
 class MassImportMonitor(QMainWindow):
@@ -46,6 +44,10 @@ class MassImportMonitor(QMainWindow):
         self.error_list = []  # Error list for tracking
         self.filtered_items = []  # Items filtered by level/utility restrictions
         self.retry_worker = None  # Worker for retry operations
+        self.main_worker = None  # Worker for main import
+        
+        # Import parameters (set when prepare_import is called)
+        self.pending_import_params = None  # Will store: {file_paths, realm, merge, remove_duplicates, auto_backup, source_db_path, path_manager}
         
         # Central Widget
         central_widget = QWidget()
@@ -57,7 +59,7 @@ class MassImportMonitor(QMainWindow):
         # === HEADER: Title and time ===
         header_layout = QHBoxLayout()
         
-        title_label = QLabel(lang.get("settings.pages.mass_import_monitor.title", default="📦 Import en Masse - Monitoring en Temps Réel"))
+        title_label = QLabel(lang.get("settings.pages.mass_import_monitor.title", default="📦 Mass Import - Real-Time Monitoring"))
         title_label.setStyleSheet("""
             QLabel {
                 font-size: 16pt;
@@ -82,7 +84,7 @@ class MassImportMonitor(QMainWindow):
         main_layout.addLayout(header_layout)
         
         # === STATISTICS PANEL ===
-        stats_group = QGroupBox(lang.get("settings.pages.mass_import_monitor.stats_group", default="📊 Statistiques en Temps Réel"))
+        stats_group = QGroupBox(lang.get("settings.pages.mass_import_monitor.stats_group", default="📊 Real-Time Statistics"))
         stats_group.setStyleSheet("""
             QGroupBox {
                 font-weight: bold;
@@ -101,20 +103,20 @@ class MassImportMonitor(QMainWindow):
         stats_layout.setSpacing(10)
         
         # Row 1: Unique items and variants
-        self.unique_items_label = QLabel(lang.get("settings.pages.mass_import_monitor.unique_items", default="🔍 Items uniques:") + " 0")
+        self.unique_items_label = QLabel(lang.get("settings.pages.mass_import_monitor.unique_items", default="🔍 Unique items:") + " 0")
         self.unique_items_label.setStyleSheet("font-size: 11pt; color: #dcdcaa;")
         stats_layout.addWidget(self.unique_items_label, 0, 0)
         
-        self.variants_label = QLabel(lang.get("settings.pages.mass_import_monitor.variants_found", default="🌐 Variantes trouvées:") + " 0")
+        self.variants_label = QLabel(lang.get("settings.pages.mass_import_monitor.variants_found", default="🌐 Variants found:") + " 0")
         self.variants_label.setStyleSheet("font-size: 11pt; color: #569cd6;")
         stats_layout.addWidget(self.variants_label, 0, 1)
         
-        self.processed_label = QLabel(lang.get("settings.pages.mass_import_monitor.items_processed", default="⚙️ Items traités:") + " 0 / 0")
+        self.processed_label = QLabel(lang.get("settings.pages.mass_import_monitor.items_processed", default="⚙️ Items processed:") + " 0 / 0")
         self.processed_label.setStyleSheet("font-size: 11pt; color: #9cdcfe;")
         stats_layout.addWidget(self.processed_label, 0, 2)
         
         # Row 2: Results
-        self.added_label = QLabel(lang.get("settings.pages.mass_import_monitor.added", default="✅ Ajoutés:") + " 0")
+        self.added_label = QLabel(lang.get("settings.pages.mass_import_monitor.added", default="✅ Added:") + " 0")
         self.added_label.setStyleSheet("font-size: 11pt; color: #4ec9b0;")
         stats_layout.addWidget(self.added_label, 1, 0)
         
@@ -348,6 +350,28 @@ class MassImportMonitor(QMainWindow):
         
         footer_layout.addStretch()
         
+        # Start button (initially visible, hidden after start)
+        self.start_button = QPushButton(lang.get("settings.pages.mass_import_monitor.start_button", default="▶️ Start Import"))
+        self.start_button.clicked.connect(self.start_import_manual)
+        self.start_button.setStyleSheet("""
+            QPushButton {
+                background-color: #4ec9b0;
+                color: #1e1e1e;
+                padding: 8px 25px;
+                font-size: 11pt;
+                font-weight: bold;
+                border-radius: 3px;
+            }
+            QPushButton:hover {
+                background-color: #5ed9c0;
+            }
+            QPushButton:disabled {
+                background-color: #3a3a3a;
+                color: #808080;
+            }
+        """)
+        footer_layout.addWidget(self.start_button)
+        
         self.review_filtered_btn = QPushButton(lang.get("settings.pages.mass_import_monitor.review_filtered", default="🔍 Review Filtered Items"))
         self.review_filtered_btn.clicked.connect(self.open_review_filtered_dialog)
         self.review_filtered_btn.setVisible(False)  # Hidden until filtered items exist
@@ -414,6 +438,121 @@ class MassImportMonitor(QMainWindow):
         if template_files:
             self.log_message(lang.get("settings.pages.mass_import_monitor.template_files_count", count=len(template_files), default=f"{len(template_files)} fichier(s) template à parser"), "info")
         self.log_message(lang.get("settings.pages.mass_import_monitor.unique_items_to_process", count=total_items, default=f"{total_items} items uniques à traiter"), "info")
+    
+    def prepare_import(self, file_paths, realm, merge, remove_duplicates, auto_backup, source_db_path, path_manager):
+        """Prepare import parameters without starting - wait for manual start"""
+        self.pending_import_params = {
+            'file_paths': file_paths,
+            'realm': realm,
+            'merge': merge,
+            'remove_duplicates': remove_duplicates,
+            'auto_backup': auto_backup,
+            'source_db_path': source_db_path,
+            'path_manager': path_manager
+        }
+        
+        # Display template files
+        from pathlib import Path
+        template_file_names = [Path(fp).name for fp in file_paths]
+        files_text = "\n".join([f"📄 {file}" for file in template_file_names])
+        self.files_widget.setHtml(f'<pre style="color: #dcdcaa;">{files_text}</pre>')
+        
+        # Update info label
+        self.info_label.setText(lang.get("settings.pages.mass_import_monitor.ready_to_start", count=len(file_paths), default=f"✅ Ready to import {len(file_paths)} template(s). Click 'Start Import' to begin."))
+        self.info_label.setStyleSheet("color: #4ec9b0; font-style: normal; font-size: 10pt; font-weight: bold;")
+        
+        # Enable start button
+        self.start_button.setEnabled(True)
+        
+        self.log_message(lang.get("settings.pages.mass_import_monitor.import_prepared", count=len(file_paths), default=f"📥 {len(file_paths)} template file(s) loaded. Ready to start."), "info")
+    
+    def start_import_manual(self):
+        """Manually start the import with prepared parameters"""
+        if not self.pending_import_params:
+            self.log_message("❌ No import prepared. Please load templates first.", "error")
+            return
+        
+        # Disable start button
+        self.start_button.setEnabled(False)
+        self.start_button.setVisible(False)
+        
+        # Import and start worker
+        from Functions.import_worker import ImportWorker
+        from PySide6.QtCore import Qt
+        from pathlib import Path
+        
+        params = self.pending_import_params
+        
+        self.main_worker = ImportWorker(
+            file_paths=params['file_paths'],
+            realm=params['realm'],
+            merge=params['merge'],
+            remove_duplicates=params['remove_duplicates'],
+            auto_backup=params['auto_backup'],
+            source_db_path=params['source_db_path'],
+            path_manager=params['path_manager']
+        )
+        
+        # Connect signals
+        self.main_worker.progress_updated.connect(self.update_stats_slot)
+        self.main_worker.log_message.connect(self.log_message_slot)
+        
+        def on_import_finished(success, message, stats):
+            """Handle import completion (business logic)"""
+            try:
+                self.finish_import(success)
+                
+                # Pass filtered items to monitor for review option
+                if stats and 'filtered_items' in stats:
+                    self.set_filtered_items(stats['filtered_items'])
+                    
+            except Exception as e:
+                self.log_message(f"Error in import finish: {e}", "error")
+                import traceback
+                self.log_message(f"Traceback: {traceback.format_exc()}", "error")
+        
+        def on_thread_finished():
+            """Handle thread termination (cleanup resources)"""
+            try:
+                self.log_message("Main import worker thread finished, cleaning up...", "info")
+                
+                if self.main_worker is not None:
+                    # Wait for thread to fully stop
+                    if not self.main_worker.wait(5000):  # Wait up to 5 seconds
+                        self.log_message("Warning: Thread did not finish in time", "warning")
+                    
+                    # Disconnect signals safely
+                    try:
+                        self.main_worker.progress_updated.disconnect()
+                        self.main_worker.log_message.disconnect()
+                        self.main_worker.import_finished.disconnect()
+                        self.main_worker.finished.disconnect()
+                    except:
+                        pass
+                    
+                    # Schedule deletion
+                    self.main_worker.deleteLater()
+                    self.main_worker = None
+                    self.log_message("Main import worker cleaned up successfully", "info")
+                    
+            except Exception as cleanup_error:
+                self.log_message(f"Error in thread cleanup: {cleanup_error}", "warning")
+                import traceback
+                self.log_message(f"Traceback: {traceback.format_exc()}", "warning")
+        
+        # Connect import_finished for business logic
+        self.main_worker.import_finished.connect(on_import_finished, Qt.QueuedConnection)
+        
+        # Connect finished (QThread signal) for cleanup - this is emitted when thread actually stops
+        self.main_worker.finished.connect(on_thread_finished, Qt.QueuedConnection)
+        
+        # Start import UI
+        total_items = len(params['file_paths'])
+        template_file_names = [Path(fp).name for fp in params['file_paths']]
+        self.start_import(total_items, template_files=template_file_names)
+        
+        # Start worker thread
+        self.main_worker.start()
     
     def finish_import(self, success=True):
         """Finish import"""
@@ -718,8 +857,8 @@ class MassImportMonitor(QMainWindow):
                 from PySide6.QtWidgets import QMessageBox
                 QMessageBox.information(
                     self,
-                    "Retry in Progress",
-                    f"Retrying {len(selected_items)} item(s).\n\nThe import will continue in the Mass Import Monitor window."
+                    lang.get("settings.pages.mass_import_monitor.retry_in_progress_title", default="Retry in Progress"),
+                    lang.get("settings.pages.mass_import_monitor.retry_in_progress_message", count=len(selected_items), default=f"Retrying {len(selected_items)} item(s).\n\nThe import will continue in the Mass Import Monitor window.")
                 )
                 
                 self.emit_retry_request(selected_items)

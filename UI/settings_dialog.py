@@ -2630,53 +2630,26 @@ class SettingsDialog(QDialog):
             # Show Mass Import Monitor
             from PySide6.QtWidgets import QApplication
             from UI.mass_import_monitor import MassImportMonitor
+            from pathlib import Path
             
             monitor = MassImportMonitor(self)
-            monitor.show()
-            QApplication.processEvents()
             
-            # Import SuperAdminTools
-            from Functions.superadmin_tools import SuperAdminTools
-            superadmin = SuperAdminTools(self.path_manager)
-            
-            # Execute build with monitor callback
-            success, message, stats = superadmin.build_database_from_files(
+            # Prepare import parameters (don't start automatically)
+            monitor.prepare_import(
                 file_paths=self.superadmin_selected_files,
                 realm=realm,
                 merge=merge,
                 remove_duplicates=remove_duplicates,
                 auto_backup=auto_backup,
-                monitor=monitor
+                source_db_path=Path("Data/items_database_src.json"),
+                path_manager=self.path_manager
             )
             
-            # Keep monitor open for review
-            # User can close it manually
+            monitor.show()
+            QApplication.processEvents()
             
-            # Show result
-            if success:
-                QMessageBox.information(self,
-                    lang.get('superadmin.build_success_title', 
-                        default="Construction réussie"),
-                    message
-                )
-                
-                # Refresh statistics
-                self._refresh_superadmin_stats()
-                
-                # Clear selection
-                self.superadmin_selected_files = []
-                self.superadmin_files_label.setText(
-                    lang.get('superadmin.no_files_selected', 
-                        default="Aucun fichier sélectionné")
-                )
-                self.superadmin_files_label.setStyleSheet("color: #888; font-style: italic;")
-            else:
-                QMessageBox.critical(self,
-                    lang.get('superadmin.build_error_title', 
-                        default="Erreur de construction"),
-                    message
-                )
-                
+            # User will click "Start Import" button to begin
+            
         except Exception as e:
             logging.error(f"Error executing database build: {e}", exc_info=True)
             QMessageBox.critical(self, "Erreur", f"Erreur lors de la construction:\n{e}")

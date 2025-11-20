@@ -278,7 +278,18 @@ class ImportWorker(QThread):
                             # Check duplicates
                             if self.remove_duplicates and composite_key in merged_items:
                                 duplicates_count += 1
-                                self.log_message.emit(f"    Duplicate skipped: {composite_key}", "duplicate")
+                                
+                                # If in skip_filters mode (retry), update existing item to add bypass_filters flag
+                                if self.skip_filters_mode:
+                                    existing_item = merged_items[composite_key]
+                                    if not existing_item.get("bypass_filters", False):
+                                        existing_item["bypass_filters"] = True
+                                        self.log_message.emit(f"    🔓 Duplicate found, added bypass_filters flag: {composite_key}", "info")
+                                    else:
+                                        self.log_message.emit(f"    ⏭️ Duplicate skipped (already has bypass_filters): {composite_key}", "duplicate")
+                                else:
+                                    self.log_message.emit(f"    ⏭️ Duplicate skipped: {composite_key}", "duplicate")
+                                
                                 self.progress_updated.emit({'duplicates': duplicates_count})
                                 continue
                             

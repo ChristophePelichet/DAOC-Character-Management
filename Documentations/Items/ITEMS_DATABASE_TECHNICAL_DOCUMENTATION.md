@@ -2453,12 +2453,281 @@ if current_version != internal_version:
 
 ---
 
+---
+
+## Appendix G: Mass Import System & Threading Architecture (v2.1)
+
+### Overview
+
+The mass import system was completely rewritten in November 2025 to fix critical crashes that occurred during retry operations. The root cause was improper use of `QApplication.processEvents()` in signal callbacks from worker threads.
+
+### Critical Bug Fix: QApplication.processEvents() Removal
+
+#### Problem Identified
+
+**Symptoms:**
+- Application crashed immediately after "Retry completed successfully" message
+- Crash occurred ONLY when using retry functionality
+- Main import worked fine, but retry always failed
+- No visible error in worker thread logs
+
+**Root Cause:**
+`QApplication.processEvents()` was being called in multiple locations within signal callbacks that were triggered by cross-thread signals from `ImportWorker` (QThread). This caused:
+
+1. **Reentrancy Issues**: Event loop manually pumped while already processing events
+2. **Object Deletion Race Conditions**: Objects deleted while still in use
+3. **Signal Handler Corruption**: Callbacks re-entered before completing
+4. **Qt Event Queue Corruption**: Manual event processing conflicted with automatic processing
+
+**Locations of Dangerous processEvents() Calls:**
+
+```python
+# REMOVED - Line 428 in finish_import()
+def finish_import(self, success=True):
+    self.timer.stop()
+    self.ui_refresh_timer.stop()
+    self.close_button.setEnabled(True)
+    
+    QApplication.processEvents()  # ← CRASH TRIGGER #1
+    # ... rest of method
+
+# REMOVED - Line 493 in update_stats()
+def update_stats(self, **kwargs):
+    # ... update UI elements
+    QApplication.processEvents()  # ← CRASH TRIGGER #2
+
+# REMOVED - Line 570 in _force_ui_refresh()
+def _force_ui_refresh(self):
+    QApplication.processEvents()  # ← CRASH TRIGGER #3
+
+# REMOVED - Line 705 in show_review_filtered_btn()
+def show_review_filtered_btn(self, filtered_items):
+    # ... update button
+    QApplication.processEvents()  # ← CRASH TRIGGER #4
+```
+
+#### Solution Implemented
+
+**Complete Removal Strategy:**
+
+1. **Removed ALL processEvents() calls** from callback methods
+2. **Deleted ui_refresh_timer** mechanism entirely (called processEvents every 50ms)
+3. **Deleted _force_ui_refresh()** function
+4. **Added explanatory comments** at removal sites
+
+**Why This Works:**
+
+Qt's automatic event loop handles UI updates safely:
+- Signals with `Qt.QueuedConnection` are queued and processed safely
+- UI updates from main thread happen automatically
+- No manual event pumping needed
+- Thread-safe by design
+
+**Modified Code:**
+
+```python
+# AFTER FIX - finish_import()
+def finish_import(self, success=True):
+    """Finish import"""
+    # NO processEvents() - causes crashes when called from signal callbacks
+    self.timer.stop()
+    self.close_button.setEnabled(True)
+    
+    elapsed = (datetime.now() - self.start_time).total_seconds() if self.start_time else 0
+    # ... rest of method (UI updates happen automatically)
+
+# AFTER FIX - update_stats()
+def update_stats(self, **kwargs):
+    # ... update UI elements
+    # NO processEvents() - UI updates automatically via Qt's event loop
+
+# DELETED - _force_ui_refresh() removed entirely
+
+# DELETED - ui_refresh_timer removed entirely
+# Lines 384-385, 407, 424, 562-568, 964-965 all removed
+```
+
+### Threading Architecture Improvements
+
+#### Worker Thread Signal Connections
+
+**Before Fix (UNSAFE):**
+```python
+# Direct connections or missing QueuedConnection
+self.retry_worker.progress_updated.connect(self.update_stats)
+self.retry_worker.log_message.connect(self.log_message)
+self.retry_worker.import_finished.connect(on_finished)
+```
+
+**After Fix (SAFE):**
+```python
+# Explicit QueuedConnection for cross-thread safety
+from PySide6.QtCore import Qt
+
+self.retry_worker.progress_updated.connect(self.update_stats_slot, Qt.QueuedConnection)
+self.retry_worker.log_message.connect(self.log_message_slot, Qt.QueuedConnection)
+self.retry_worker.import_finished.connect(on_finished, Qt.QueuedConnection)
+```
+
+#### Dedicated Slot Methods
+
+**Added for thread safety:**
+
+```python
+def update_stats_slot(self, stats):
+    """Slot for update_stats signal from worker thread"""
+    self.update_stats(**stats)
+
+def log_message_slot(self, msg, level):
+    """Slot for log_message signal from worker thread"""
+    self.log_message(msg, level)
+```
+
+**Benefits:**
+- Clear separation between worker signals and UI updates
+- Explicit slot methods are easier to debug
+- QueuedConnection works more reliably with named methods
+- Better code organization and readability
+
+#### Worker Cleanup Strategy
+
+**Before Fix (UNSAFE):**
+```python
+def on_finished(success, message, stats):
+    self.finish_import(success)
+    # Direct deletion - could cause issues
+    del self.retry_worker
+    self.retry_worker = None
+```
+
+**After Fix (SAFE):**
+```python
+def on_finished(success, message, stats):
+    try:
+        self.log_message("Retry completed successfully", "info")
+        self.finish_import(success)
+        
+        # Clean up temp files
+        for tf in temp_files:
+            try:
+                Path(tf).unlink()
+            except:
+                pass
+        
+        # Schedule worker for deletion instead of immediate cleanup
+        if self.retry_worker is not None:
+            # Disconnect signals first
+            try:
+                self.retry_worker.progress_updated.disconnect()
+                self.retry_worker.log_message.disconnect()
+                self.retry_worker.import_finished.disconnect()
+            except:
+                pass
+            
+            # Let Qt handle the deletion properly
+            self.retry_worker.deleteLater()
+            self.retry_worker = None
+            
+    except Exception as e:
+        self.log_message(f"Error in retry finish: {e}", "error")
+        import traceback
+        self.log_message(f"Traceback: {traceback.format_exc()}", "error")
+```
+
+**Key Improvements:**
+1. **Signal Disconnection**: Prevents callbacks on deleted objects
+2. **deleteLater()**: Qt-managed delayed deletion
+3. **Exception Handling**: Catches and logs any cleanup errors
+4. **Null Check**: Verifies worker exists before cleanup
+
+#### Window Close Protection
+
+**Added closeEvent override:**
+
+```python
+def closeEvent(self, event):
+    """Handle window close event safely"""
+    # Wait for worker to finish if running
+    if hasattr(self, 'retry_worker') and self.retry_worker is not None:
+        if self.retry_worker.isRunning():
+            self.retry_worker.wait(5000)  # Wait up to 5 seconds
+    
+    # Stop timers
+    if hasattr(self, 'timer'):
+        self.timer.stop()
+    
+    logger.info("MassImportMonitor closing normally")
+    event.accept()
+```
+
+**Protection Against:**
+- Closing window while worker thread is running
+- Timer still firing after window closed
+- Orphaned worker threads
+
+### Performance Impact
+
+**Before Fix:**
+- UI refresh timer: Every 50ms (20 calls/second)
+- processEvents() calls: 4+ per import operation
+- Thread safety: Compromised
+- Stability: Crashes on retry
+
+**After Fix:**
+- UI refresh timer: Removed
+- processEvents() calls: 0 (none)
+- Thread safety: Guaranteed by Qt
+- Stability: No crashes
+- Performance: **Improved** (no manual event pumping overhead)
+
+### Testing & Validation
+
+**Test Cases Verified:**
+
+1. ✅ **Normal Import**: Works without crashes
+2. ✅ **Retry Single Item**: No crash after completion
+3. ✅ **Retry Multiple Items**: All items processed, no crash
+4. ✅ **Window Close During Import**: Graceful shutdown
+5. ✅ **Rapid UI Updates**: Smooth without processEvents()
+6. ✅ **Long-Running Imports**: No UI freeze, no crashes
+
+**Stress Tests:**
+- 100+ items import: Stable
+- Rapid retry operations: Stable
+- Window resize during import: Responsive
+- Multiple failed items retry: Stable
+
+### Lessons Learned
+
+**Never use QApplication.processEvents() when:**
+1. Inside signal callbacks from worker threads
+2. In methods called by cross-thread signals
+3. As a "fix" for UI freezing (symptom of poor design)
+4. In event loops that Qt manages automatically
+
+**Always use instead:**
+1. `Qt.QueuedConnection` for cross-thread signals
+2. `deleteLater()` for Qt object cleanup
+3. Dedicated slot methods for signal handlers
+4. Proper thread synchronization (wait(), mutexes)
+5. Qt's automatic event loop processing
+
+**Thread Safety Checklist:**
+- [ ] Worker uses QThread, not QRunnable (if signals needed)
+- [ ] All cross-thread signals use Qt.QueuedConnection
+- [ ] No processEvents() in callbacks
+- [ ] Worker cleanup uses deleteLater()
+- [ ] closeEvent waits for worker completion
+- [ ] Exception handling in all callbacks
+
+---
+
 ## Document Information
 
 **Created:** 2025-11-19  
-**Version:** 2.0  
+**Version:** 2.1  
 **Author:** Technical Documentation Team  
-**Last Reviewed:** 2025-11-19
+**Last Reviewed:** 2025-11-20
 
 **Related Documents:**
 - `Data/items_database_src.json` - Internal database file
@@ -2466,8 +2735,17 @@ if current_version != internal_version:
 - `Functions/items_scraper.py` - Scraper implementation
 - `Functions/superadmin_tools.py` - Database management
 - `Functions/items_database_manager.py` - Dual-mode manager
+- `UI/mass_import_monitor.py` - Import monitoring window with threading
 
 **Change Log:**
+- 2025-11-20 v2.1: Added Mass Import System & Threading Architecture section
+  - Documented critical processEvents() crash fix
+  - Added threading architecture improvements
+  - Added worker cleanup strategy
+  - Added window close protection
+  - Added performance impact analysis
+  - Added testing validation results
+  - Added lessons learned and best practices
 - 2025-11-19 v2.0: Consolidated DUAL_MODE_DATABASE_EN.md content
   - Added dual-mode architecture documentation
   - Added ItemsDatabaseManager API reference

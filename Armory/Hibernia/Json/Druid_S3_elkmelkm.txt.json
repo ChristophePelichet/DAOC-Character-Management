@@ -1,0 +1,19 @@
+{
+  "version": "1.0",
+  "template_name": "Druid_S3_elkmelkm.txt",
+  "metadata": {
+    "class": "Druid",
+    "class_fr": "Druide",
+    "class_de": "Druide",
+    "realm": "Hibernia",
+    "season": "S3",
+    "description": "élkmélkm",
+    "tags": [],
+    "source_file": "Eden - Hibernia - Bard_Summary.txt",
+    "import_date": "2025-11-20T10:14:29.873259",
+    "imported_by_character": "Ewo",
+    "item_count": 271,
+    "auto_generated": true
+  },
+  "notes": ""
+}

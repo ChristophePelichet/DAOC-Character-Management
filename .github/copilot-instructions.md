@@ -1,26 +1,72 @@
-# Instructions Copilot - Workflow Complet de Fonctionnalité
+# Copilot Instructions - Base Rules
 
-Lorsque l'utilisateur demande de développer, modifier ou corriger une fonctionnalité, suivre **automatiquement** le workflow complet décrit dans `.prompts/feature_complete.prompt.md` :
+## 🚫 NEVER DO AUTOMATICALLY
 
-## Workflow Automatique (7 étapes)
+**ONLY on explicit user request:**
+- ❌ Git commit
+- ❌ Git push
+- ❌ Git merge
+- ❌ Documentation modifications (README, CHANGELOG, etc.)
+- ❌ Translations (Language/*.json)
+- ❌ Generate documentation, comments, JSDoc blocks, or README files
+- ❌ Modify existing documentation, changelogs, or readme files
+- ❌ Change version numbers in documentation
 
-1. **Implémentation** : Coder la fonctionnalité demandée
-2. **Traductions** : Ajouter/modifier automatiquement dans FR/EN/DE (Language/*.json)
-3. **Changelog** : Mettre à jour les 4-5 fichiers changelog obligatoires
-4. **Commit** : Message structuré en anglais (types conventionnels)
-5. **Push** : Vers la branche actuelle
-6. **Merge** : Sur main avec --no-ff (AUTOMATIQUE)
-7. **Confirmation** : Statistiques complètes
+**UNIQUEMENT sur demande explicite de l'utilisateur :**
+- ❌ Git commit
+- ❌ Git push
+- ❌ Git merge
+- ❌ Modifications de documentation (README, CHANGELOG, etc.)
+- ❌ Traductions (Language/*.json)
+- ❌ Générer de la documentation, commentaires, blocs JSDoc, ou fichiers README
+- ❌ Modifier la documentation existante, changelogs, ou fichiers readme
+- ❌ Changer les numéros de version dans la documentation
 
-## Règles Strictes
+## ✅ Standard Workflow
 
-- ✅ **AUTOMATIQUE** : Aucune confirmation demandée
-- ✅ **Traductions** : TOUJOURS FR/EN/DE pour textes UI
-- ✅ **Changelog** : 4 fichiers minimum (Full FR/EN + Simple FR/EN)
-- ✅ **Commit** : Anglais uniquement, 9 sections structurées
-- ✅ **Merge** : Flag --no-ff OBLIGATOIRE
-- ⚠️ **Exception** : Arrêt uniquement si conflits
+**When user requests a feature/fix:**
 
-## Référence Complète
+1. **Implementation ONLY**: Write the requested code
+2. **STOP**: Wait for user instructions
+3. **Ask user** if they want: commit, translations, documentation, etc.
 
-Pour tous les détails, voir : `.prompts/feature_complete.prompt.md`
+**Lorsque l'utilisateur demande une fonctionnalité/correction :**
+
+1. **Implémentation UNIQUEMENT** : Écrire le code demandé
+2. **STOP** : Attendre les instructions de l'utilisateur
+3. **Demander à l'utilisateur** s'il veut : commit, traductions, documentation, etc.
+
+## 📝 Code Rules
+
+**English:**
+- **All code comments MUST be in English**
+- **Variable names in English**
+- **Function/class names in English**
+- **Only UI strings use lang.get() for translations**
+
+**Français:**
+- **Tous les commentaires de code DOIVENT être en anglais**
+- **Noms de variables en anglais**
+- **Noms de fonctions/classes en anglais**
+- **Seules les chaînes UI utilisent lang.get() pour les traductions**
+
+## 📁 Folder Structure Rules
+
+**English:**
+- **Technical documentation**: Must be created in `Documentation/` folder (not "Documentation")
+- **Changelogs**: Must be created in `Changelogs/` folder
+
+**Français:**
+- **Documentation technique** : Doit être créée dans le dossier `Documentation/` (pas "Documentation")
+- **Changelogs** : Doivent être créés dans le dossier `Changelogs/`
+
+## 🔗 Complete Workflow (only if explicitly requested)
+
+If user says "use complete workflow" or "apply full process":
+See `.prompts/feature_complete.prompt.md` for the 7-step automated process
+
+Si l'utilisateur dit "utilise le workflow complet" ou "applique le processus complet" :
+Voir `.prompts/feature_complete.prompt.md` pour le processus automatisé en 7 étapes
+
+**Otherwise: Code only, then STOP and wait**
+**Sinon : Code uniquement, puis STOP et attendre**

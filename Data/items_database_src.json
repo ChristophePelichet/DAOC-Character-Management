@@ -1,7 +1,7 @@
 {
   "version": "2.0",
   "description": "DAOC Items Database - Multi-Realm Support (Minimal Data)",
-  "last_updated": "2025-11-20 07:42:33",
+  "last_updated": "2025-11-20 12:47:36",
   "item_count": 86,
   "notes": [
     "Composite keys format: 'item_name:realm' (lowercase)",

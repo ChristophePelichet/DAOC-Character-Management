@@ -380,10 +380,6 @@ class MassImportMonitor(QMainWindow):
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_elapsed_time)
         
-        # Timer to force UI refresh during import (anti-freeze)
-        self.ui_refresh_timer = QTimer()
-        self.ui_refresh_timer.timeout.connect(self._force_ui_refresh)
-        
         # Auto-scroll enabled by default
         self.auto_scroll = True
         
@@ -408,7 +404,6 @@ class MassImportMonitor(QMainWindow):
         self.progress_bar.setValue(0)
         
         self.timer.start(100)  # Update every 100ms
-        self.ui_refresh_timer.start(50)  # Force UI refresh every 50ms (anti-freeze)
         
         self.close_button.setEnabled(False)
         
@@ -419,14 +414,9 @@ class MassImportMonitor(QMainWindow):
     
     def finish_import(self, success=True):
         """Finish import"""
-        from PySide6.QtWidgets import QApplication
-        
+        # NO processEvents() - causes crashes when called from signal callbacks
         self.timer.stop()
-        self.ui_refresh_timer.stop()  # Stop anti-freeze timer
         self.close_button.setEnabled(True)
-        
-        # Force UI update
-        QApplication.processEvents()
         
         elapsed = (datetime.now() - self.start_time).total_seconds() if self.start_time else 0
         
@@ -493,8 +483,7 @@ class MassImportMonitor(QMainWindow):
         # Update unique items count
         self.unique_items_label.setText(f"{lang.get('mass_import_monitor.unique_items', default='🔍 Items uniques:')} {self.items_total}")
         
-        # Force UI refresh to prevent freezing
-        QApplication.processEvents()
+        # NO processEvents() - UI updates automatically via Qt's event loop
     
     def update_stats_slot(self, stats):
         """Slot for update_stats signal from worker thread"""
@@ -567,11 +556,6 @@ class MassImportMonitor(QMainWindow):
             minutes = int((elapsed % 3600) // 60)
             seconds = int(elapsed % 60)
             self.time_label.setText(f"⏱️ {hours:02d}:{minutes:02d}:{seconds:02d}")
-    
-    def _force_ui_refresh(self):
-        """Force UI refresh to prevent freeze (called every 50ms)"""
-        from PySide6.QtWidgets import QApplication
-        QApplication.processEvents()
     
     def format_duration(self, seconds):
         """Format duration in seconds to readable format"""
@@ -705,8 +689,7 @@ class MassImportMonitor(QMainWindow):
             self.log_message(lang.get("settings.pages.mass_import_monitor.filtered_items_warning", count=len(filtered_items), default=f"{len(filtered_items)} item(s) were filtered (Level/Utility restrictions)"), "warning")
             logging.info(f"Review button shown with {len(filtered_items)} items")
             
-            # Force UI update
-            QApplication.processEvents()
+            # NO processEvents() - UI updates automatically
         else:
             self.review_filtered_btn.setVisible(False)
             logging.info("Review button hidden (no filtered items)")
@@ -967,8 +950,6 @@ class MassImportMonitor(QMainWindow):
         # Stop timers
         if hasattr(self, 'timer'):
             self.timer.stop()
-        if hasattr(self, 'ui_refresh_timer'):
-            self.ui_refresh_timer.stop()
         
         logger.info("MassImportMonitor closing normally")
         event.accept()

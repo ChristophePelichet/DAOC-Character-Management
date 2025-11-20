@@ -16,7 +16,8 @@ from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QFormLayout, QGroupBox, QLabel, 
     QPushButton, QLineEdit, QComboBox, QCheckBox, QSlider, QMessageBox,
     QDialogButtonBox, QFileDialog, QTableWidget, QTableWidgetItem, QHeaderView,
-    QWidget, QTextEdit, QApplication, QProgressBar, QMenu, QGridLayout, QFrame, QScrollArea, QSplitter
+    QWidget, QTextEdit, QApplication, QProgressBar, QMenu, QGridLayout, QFrame, QScrollArea, QSplitter,
+    QListWidget
 )
 from PySide6.QtCore import Qt, QThread, Signal, QTimer
 from PySide6.QtGui import QBrush, QColor, QIcon, QPixmap
@@ -2813,8 +2814,20 @@ class ArmorManagementDialog(QDialog):
         
         from Functions.armor_manager import ArmorManager
         from Functions.template_manager import TemplateManager
+        from Functions.items_database_manager import ItemsDatabaseManager
+        from Functions.config_manager import ConfigManager
+        from Functions.path_manager import PathManager
+        
         self.armor_manager = ArmorManager(season, realm, character_name)
         self.template_manager = TemplateManager()
+        
+        # Initialize ItemsDatabaseManager for price lookups
+        self.config_manager = ConfigManager()
+        self.path_manager = PathManager()
+        self.db_manager = ItemsDatabaseManager(self.config_manager, self.path_manager)
+        
+        # Track items without prices for search functionality
+        self.items_without_price = []
         
         self.setWindowTitle(lang.get("armoury_dialog.title", name=character_name, realm=realm, season=season))
         self.resize(1400, 700)  # Larger window for better split visibility
@@ -2887,11 +2900,23 @@ class ArmorManagementDialog(QDialog):
         
         right_layout.addWidget(self.preview_area)
         
+        # Button layout for preview actions
+        preview_buttons_layout = QHBoxLayout()
+        
         # Download button in preview panel
         self.preview_download_button = QPushButton(lang.get("armoury_dialog.context_menu.download", default="Download"))
         self.preview_download_button.setEnabled(False)  # Disabled until file selected
         self.preview_download_button.clicked.connect(self.download_selected_armor)
-        right_layout.addWidget(self.preview_download_button)
+        preview_buttons_layout.addWidget(self.preview_download_button)
+        
+        # Search missing prices button
+        self.search_prices_button = QPushButton("🔍 " + lang.get("armoury_dialog.buttons.search_missing_prices", default="Search Missing Prices"))
+        self.search_prices_button.setEnabled(False)  # Disabled until items_without_price is populated
+        self.search_prices_button.clicked.connect(self.search_missing_prices)
+        self.search_prices_button.setToolTip(lang.get("armoury_dialog.tooltips.search_missing_prices", default="Search online for items without price in database"))
+        preview_buttons_layout.addWidget(self.search_prices_button)
+        
+        right_layout.addLayout(preview_buttons_layout)
         
         splitter.addWidget(right_widget)
         
@@ -3061,6 +3086,22 @@ class ArmorManagementDialog(QDialog):
     
     def parse_zenkcraft_template(self, content, season=""):
         """Parse Zenkcraft template and return formatted display."""
+        import json
+        
+        # Load metadata JSON for prices (if exists)
+        metadata = {}
+        try:
+            # Get current selected filename for metadata lookup
+            selected_items = self.table.selectedItems()
+            if selected_items:
+                filename = selected_items[0].text()
+                metadata_path = self.template_manager._get_metadata_path(self.realm, filename)
+                if metadata_path.exists():
+                    with open(metadata_path, 'r', encoding='utf-8') as f:
+                        metadata = json.load(f)
+        except Exception as e:
+            logging.debug(f"Could not load metadata for price lookup: {e}")
+        
         lines = content.split('\n')
         
         # Extract character info
@@ -3082,6 +3123,57 @@ class ArmorManagementDialog(QDialog):
                 last_saved = line.replace("Last Saved:", "").strip()
             elif line.startswith("Version:"):
                 version = line.replace("Version:", "").strip()
+        
+        # Helper function to get item price from template JSON or database
+        def get_item_price(item_name):
+            """
+            Lookup item price with priority chain:
+            1. Template metadata JSON (manually added prices via search)
+            2. Database (internal or personal) with realm-aware search
+            
+            Search strategy for database:
+            - Priority 1: Item specific to current realm (e.g., "item:hibernia")
+            - Priority 2: Item available to all realms (e.g., "item:all")
+            - Priority 3: Item without realm suffix (legacy format)
+            
+            Returns tuple: (formatted_price_string, source) or (None, None)
+            - source can be: 'json' (from template) or 'db' (from database)
+            """
+            try:
+                # Step 1: Check template metadata JSON for stored price (highest priority)
+                if metadata and 'prices' in metadata:
+                    if item_name in metadata['prices']:
+                        return (metadata['prices'][item_name], 'json')
+                
+                # Step 2: Try database with realm-aware search
+                item_name_lower = item_name.lower()
+                realm_lower = self.realm.lower()
+                
+                # Priority 1: Try with specific realm suffix (e.g., "dirge of sheeroe hills:hibernia")
+                search_key_realm = f"{item_name_lower}:{realm_lower}"
+                item_data = self.db_manager.search_item(search_key_realm)
+                
+                # Priority 2: Try with ":all" suffix (e.g., "searing fiend necklace:all")
+                if not item_data:
+                    search_key_all = f"{item_name_lower}:all"
+                    item_data = self.db_manager.search_item(search_key_all)
+                
+                # Priority 3: Try without realm suffix (legacy items or direct search)
+                if not item_data:
+                    item_data = self.db_manager.search_item(item_name)
+                
+                # Format price if found in database
+                if item_data and 'merchant_price' in item_data:
+                    price = item_data['merchant_price']
+                    currency = item_data.get('merchant_currency', '')
+                    if currency:
+                        return (f"{price} {currency}", 'db')
+                    return (price, 'db')
+                
+            except Exception as e:
+                logging.debug(f"Failed to lookup price for '{item_name}': {e}")
+            
+            return (None, None)
         
         # Parse Stats section
         stats = {}
@@ -3307,76 +3399,76 @@ class ArmorManagementDialog(QDialog):
             jewelry_items = [item for item in loot_items if item['slot'] in jewelry_slots]
             weapon_items = [item for item in loot_items if item['slot'] in weapon_slots]
             
+            # Calculate GLOBAL max length for perfect alignment across ALL categories
+            all_loot = armor_items + jewelry_items + weapon_items
+            max_len = max(len(f"{item['name']} ({item['slot']})") for item in all_loot) if all_loot else 0
+            
+            # Track items without prices for the search button
+            items_without_price = []
+            
             # Display Armor pieces
             if armor_items:
                 output.append("")
                 output.append(f"    🛡️  {lang.get('armoury_dialog.preview.equipment_categories.armor_pieces')} :")
                 for item in armor_items:
-                    output.append(f"      • {item['name']} ({item['slot']})")
+                    item_text = f"{item['name']} ({item['slot']})"
+                    price_str, price_source = get_item_price(item['name'])
+                    padding = max_len - len(item_text)
+                    if price_str:
+                        # Different icon based on source: 💰 = DB, 📝 = JSON template
+                        icon = "📝" if price_source == 'json' else "💰"
+                        output.append(f"      • {item_text}{' ' * padding}  {icon} {price_str}")
+                    else:
+                        # No price found - add indicator and track for search button
+                        items_without_price.append(item['name'])
+                        output.append(f"      • {item_text}{' ' * padding}  ❓")
             
             # Display Jewelry items grouped side by side
             if jewelry_items:
                 output.append("")
                 output.append(f"    💍 {lang.get('armoury_dialog.preview.equipment_categories.jewelry')} :")
-                
-                # Create a dictionary to quickly find items by slot
-                jewelry_dict = {item['slot']: item for item in jewelry_items}
-                
-                # Group 1: L Ring │ R Ring
-                left_ring = jewelry_dict.get('L Ring')
-                right_ring = jewelry_dict.get('R Ring')
-                if left_ring or right_ring:
-                    left_str = f"{left_ring['name']} (L Ring)" if left_ring else " " * 35
-                    right_str = f"{right_ring['name']} (R Ring)" if right_ring else ""
-                    if right_ring:
-                        output.append(f"      • {left_str:<35} │ {right_str}")
+                for item in jewelry_items:
+                    item_text = f"{item['name']} ({item['slot']})"
+                    price_str, price_source = get_item_price(item['name'])
+                    padding = max_len - len(item_text)
+                    if price_str:
+                        # Different icon based on source: 💰 = DB, 📝 = JSON template
+                        icon = "📝" if price_source == 'json' else "💰"
+                        output.append(f"      • {item_text}{' ' * padding}  {icon} {price_str}")
                     else:
-                        output.append(f"      • {left_str}")
-                
-                # Group 2: L Wrist │ R Wrist
-                left_wrist = jewelry_dict.get('L Wrist')
-                right_wrist = jewelry_dict.get('R Wrist')
-                if left_wrist or right_wrist:
-                    left_str = f"{left_wrist['name']} (L Wrist)" if left_wrist else " " * 35
-                    right_str = f"{right_wrist['name']} (R Wrist)" if right_wrist else ""
-                    if right_wrist:
-                        output.append(f"      • {left_str:<35} │ {right_str}")
-                    else:
-                        output.append(f"      • {left_str}")
-                
-                # Group 3: Jewelry │ Waist
-                jewelry = jewelry_dict.get('Jewelry')
-                waist = jewelry_dict.get('Waist')
-                if jewelry or waist:
-                    left_str = f"{jewelry['name']} (Jewelry)" if jewelry else " " * 35
-                    right_str = f"{waist['name']} (Waist)" if waist else ""
-                    if waist:
-                        output.append(f"      • {left_str:<35} │ {right_str}")
-                    else:
-                        output.append(f"      • {left_str}")
-                
-                # Group 4: Neck │ Cloak
-                neck = jewelry_dict.get('Neck')
-                cloak = jewelry_dict.get('Cloak')
-                if neck or cloak:
-                    left_str = f"{neck['name']} (Neck)" if neck else " " * 35
-                    right_str = f"{cloak['name']} (Cloak)" if cloak else ""
-                    if cloak:
-                        output.append(f"      • {left_str:<35} │ {right_str}")
-                    else:
-                        output.append(f"      • {left_str}")
-                
-                # Mythical (standalone)
-                mythical = jewelry_dict.get('Mythical')
-                if mythical:
-                    output.append(f"      • {mythical['name']} (Mythical)")
+                        # No price found - add indicator and track for search button
+                        items_without_price.append(item['name'])
+                        output.append(f"      • {item_text}{' ' * padding}  ❓")
             
             # Display Weapons
             if weapon_items:
                 output.append("")
                 output.append(f"    ⚔️  {lang.get('armoury_dialog.preview.equipment_categories.weapons')} :")
                 for item in weapon_items:
-                    output.append(f"      • {item['name']} ({item['slot']})")
+                    item_text = f"{item['name']} ({item['slot']})"
+                    price_str, price_source = get_item_price(item['name'])
+                    padding = max_len - len(item_text)
+                    if price_str:
+                        # Different icon based on source: 💰 = DB, 📝 = JSON template
+                        icon = "📝" if price_source == 'json' else "💰"
+                        output.append(f"      • {item_text}{' ' * padding}  {icon} {price_str}")
+                    else:
+                        # No price found - add indicator and track for search button
+                        items_without_price.append(item['name'])
+                        output.append(f"      • {item_text}{' ' * padding}  ❓")
+            
+            # Add info about missing prices if any
+            if items_without_price:
+                output.append("")
+                output.append(f"  ℹ️  Price indicators:")
+                output.append(f"      💰 = Database   📝 = Template   ❓ = Missing")
+                output.append("")
+                output.append(f"  {len(items_without_price)} item(s) without price")
+                
+                # Store items_without_price for search button
+                self.items_without_price = items_without_price
+            else:
+                self.items_without_price = []
             
             output.append("")
         
@@ -3389,6 +3481,7 @@ class ArmorManagementDialog(QDialog):
             self.preview_area.clear()
             self.preview_area.setPlaceholderText(lang.get("armoury_dialog.preview.no_selection"))
             self.preview_download_button.setEnabled(False)
+            self.search_prices_button.setEnabled(False)
             return
         
         # Get filename from the first column of selected row
@@ -3435,6 +3528,15 @@ class ArmorManagementDialog(QDialog):
             
             # Display formatted content
             self.preview_area.setHtml(html_content)
+            
+            # Enable/disable search button based on items_without_price
+            if hasattr(self, 'items_without_price') and self.items_without_price:
+                self.search_prices_button.setEnabled(True)
+                self.search_prices_button.setText(f"🔍 Search Prices ({len(self.items_without_price)} items)")
+            else:
+                self.search_prices_button.setEnabled(False)
+                self.search_prices_button.setText("🔍 Search Missing Prices")
+                
         except Exception as e:
             logging.error(f"Erreur lors de la prévisualisation : {e}")
             self.preview_area.setPlainText(lang.get("armoury_dialog.preview.error", error=str(e)))
@@ -3590,6 +3692,44 @@ class ArmorManagementDialog(QDialog):
         except Exception as e:
             logging.error(f"Erreur lors du téléchargement du fichier d'armure : {e}")
             QMessageBox.critical(self, lang.get("dialogs.titles.error"), lang.get("armoury_dialog.messages.download_error", error=str(e)))
+    
+    def search_missing_prices(self):
+        """Search for missing item prices online using Eden scraper."""
+        if not hasattr(self, 'items_without_price') or not self.items_without_price:
+            QMessageBox.information(
+                self,
+                lang.get("armoury_dialog.search_prices.title", default="Search Prices"),
+                lang.get("armoury_dialog.search_prices.no_items", default="No items without price to search.")
+            )
+            return
+        
+        # Get selected filename
+        selected_items = self.table.selectedItems()
+        if not selected_items:
+            QMessageBox.warning(
+                self,
+                lang.get("armoury_dialog.search_prices.title", default="Search Prices"),
+                lang.get("armoury_dialog.search_prices.no_selection", default="Please select an armor file first.")
+            )
+            return
+        
+        filename = selected_items[0].text()
+        
+        # Show search dialog
+        from Functions.cookie_manager import CookieManager
+        
+        dialog = SearchMissingPricesDialog(
+            self,
+            self.items_without_price,
+            self.realm,
+            self.template_manager,
+            filename,
+            CookieManager()
+        )
+        
+        if dialog.exec() == QDialog.Accepted:
+            # Refresh preview to show updated prices
+            self.on_selection_changed()
 
 
 class ArmorUploadPreviewDialog(QDialog):
@@ -7118,3 +7258,297 @@ class BackupSettingsDialog(QDialog):
             logging.error(f"Error saving backup settings: {e}", exc_info=True)
             QMessageBox.critical(self, lang.get("error_title"),
                                f"{lang.get('backup_settings_error')} : {str(e)}")
+
+
+class SearchMissingPricesDialog(QDialog):
+    """Dialog to search for missing item prices online."""
+    
+    def __init__(self, parent, items_without_price, realm, template_manager, filename, cookie_manager):
+        super().__init__(parent)
+        self.items_without_price = items_without_price
+        self.realm = realm
+        self.template_manager = template_manager
+        self.filename = filename
+        self.cookie_manager = cookie_manager
+        self.active_scraper = None  # Track active scraper for cleanup
+        
+        self.setWindowTitle(lang.get("search_prices_dialog.title", default="Search Missing Prices"))
+        self.setWindowFlags(Qt.Window | Qt.WindowCloseButtonHint)
+        self.resize(700, 500)
+        
+        layout = QVBoxLayout(self)
+        
+        # Info label
+        info_text = lang.get(
+            "search_prices_dialog.info",
+            default=f"Found {len(items_without_price)} item(s) without price in database.\nClick 'Search All' to search online or select individual items."
+        )
+        info_label = QLabel(info_text)
+        info_label.setWordWrap(True)
+        layout.addWidget(info_label)
+        
+        # Progress bar
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setVisible(False)
+        layout.addWidget(self.progress_bar)
+        
+        # Items list
+        self.items_list = QListWidget()
+        self.items_list.addItems(items_without_price)
+        self.items_list.setSelectionMode(QListWidget.MultiSelection)
+        layout.addWidget(self.items_list)
+        
+        # Status label
+        self.status_label = QLabel("")
+        self.status_label.setWordWrap(True)
+        layout.addWidget(self.status_label)
+        
+        # Buttons
+        button_layout = QHBoxLayout()
+        
+        self.select_all_button = QPushButton(lang.get("search_prices_dialog.select_all", default="Select All"))
+        self.select_all_button.clicked.connect(self.select_all_items)
+        button_layout.addWidget(self.select_all_button)
+        
+        self.deselect_all_button = QPushButton(lang.get("search_prices_dialog.deselect_all", default="Deselect All"))
+        self.deselect_all_button.clicked.connect(self.deselect_all_items)
+        button_layout.addWidget(self.deselect_all_button)
+        
+        button_layout.addStretch()
+        
+        self.search_button = QPushButton(lang.get("search_prices_dialog.search_selected", default="Search Selected"))
+        self.search_button.clicked.connect(self.search_selected_items)
+        button_layout.addWidget(self.search_button)
+        
+        self.close_button = QPushButton(lang.get("search_prices_dialog.close", default="Close"))
+        self.close_button.clicked.connect(self.close)
+        button_layout.addWidget(self.close_button)
+        
+        layout.addLayout(button_layout)
+    
+    def select_all_items(self):
+        """Select all items in the list."""
+        for i in range(self.items_list.count()):
+            self.items_list.item(i).setSelected(True)
+    
+    def deselect_all_items(self):
+        """Deselect all items in the list."""
+        self.items_list.clearSelection()
+    
+    def _update_template_price(self, item_name, price):
+        """Update item price directly in template metadata JSON file.
+        
+        Args:
+            item_name: Name of the item to update
+            price: Price string to set (e.g., "1g 50s 25c")
+        
+        Returns:
+            bool: True if successful, False otherwise
+        """
+        try:
+            import json
+            
+            # Get metadata JSON path (not the template text file)
+            metadata_path = self.template_manager._get_metadata_path(self.realm, self.filename)
+            
+            # Load or create metadata
+            if metadata_path.exists():
+                with open(metadata_path, 'r', encoding='utf-8') as f:
+                    metadata = json.load(f)
+            else:
+                # Create new metadata structure
+                metadata = {
+                    "template_name": self.filename,
+                    "realm": self.realm,
+                    "prices": {}
+                }
+            
+            # Ensure prices dict exists
+            if 'prices' not in metadata:
+                metadata['prices'] = {}
+            
+            # Update price
+            metadata['prices'][item_name] = price
+            
+            # Create directory if needed
+            metadata_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            # Save metadata
+            with open(metadata_path, 'w', encoding='utf-8') as f:
+                json.dump(metadata, f, indent=2, ensure_ascii=False)
+            
+            logging.info(f"Updated {item_name} price to {price} in metadata: {metadata_path}")
+            return True
+            
+        except Exception as e:
+            logging.error(f"Error updating template price: {e}", exc_info=True)
+            return False
+    
+    def search_selected_items(self):
+        """Search for prices of selected items."""
+        selected_items = [item.text() for item in self.items_list.selectedItems()]
+        
+        if not selected_items:
+            QMessageBox.warning(
+                self,
+                lang.get("search_prices_dialog.no_selection_title", default="No Selection"),
+                lang.get("search_prices_dialog.no_selection_message", default="Please select items to search.")
+            )
+            return
+        
+        # Confirm action
+        reply = QMessageBox.question(
+            self,
+            lang.get("search_prices_dialog.confirm_title", default="Confirm Search"),
+            lang.get("search_prices_dialog.confirm_message", default=f"Search online for {len(selected_items)} item(s)?"),
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.Yes
+        )
+        
+        if reply != QMessageBox.Yes:
+            return
+        
+        # Disable buttons during search
+        self.search_button.setEnabled(False)
+        self.select_all_button.setEnabled(False)
+        self.deselect_all_button.setEnabled(False)
+        self.close_button.setEnabled(False)
+        
+        # Show progress
+        self.progress_bar.setVisible(True)
+        self.progress_bar.setMaximum(len(selected_items))
+        self.progress_bar.setValue(0)
+        
+        # Perform search
+        eden_scraper = None  # Track scraper for cleanup
+        try:
+            self.status_label.setText(lang.get("search_prices_dialog.status_connecting", default="Connecting to Eden Herald..."))
+            QApplication.processEvents()
+            
+            # Initialize scraper using centralized connection function (like CharacterProfileScraper.connect())
+            from Functions.cookie_manager import CookieManager
+            from Functions.eden_scraper import _connect_to_eden_herald
+            from Functions.items_scraper import ItemsScraper
+            
+            cookie_manager = CookieManager()
+            
+            # Use centralized connection function that handles everything
+            eden_scraper, error_message = _connect_to_eden_herald(
+                cookie_manager=cookie_manager,
+                headless=False  # Visible browser
+            )
+            
+            # Store in instance variable for cleanup on dialog close
+            self.active_scraper = eden_scraper
+            
+            if not eden_scraper:
+                QMessageBox.critical(
+                    self,
+                    lang.get("search_prices_dialog.error_title", default="Connection Error"),
+                    error_message or lang.get("search_prices_dialog.error_connection", default="Failed to connect to Eden Herald")
+                )
+                return
+            
+            # Create ItemsScraper with connected scraper
+            items_scraper = ItemsScraper(eden_scraper)
+            
+            # Search each item
+            found_count = 0
+            failed_items = []
+            
+            for idx, item_name in enumerate(selected_items):
+                self.status_label.setText(lang.get("search_prices_dialog.status_searching", default=f"Searching: {item_name}..."))
+                QApplication.processEvents()
+                
+                try:
+                    # Search item WITHOUT filters (user wants all results for missing prices)
+                    from Functions.items_parser import search_item_for_database
+                    item_data = search_item_for_database(item_name, items_scraper, self.realm, force_scrape=True, skip_filters=True)
+                    
+                    if item_data and item_data.get('merchant_price'):
+                        # Format price with currency
+                        price = item_data.get('merchant_price')
+                        currency = item_data.get('merchant_currency', '')
+                        price_with_currency = f"{price} {currency}" if currency else price
+                        
+                        # Update template JSON directly
+                        success = self._update_template_price(item_name, price_with_currency)
+                        if success:
+                            found_count += 1
+                            logging.info(f"Added price for {item_name}: {price_with_currency}")
+                        else:
+                            failed_items.append(f"{item_name} (save error)")
+                            logging.error(f"Failed to save {item_name} to template")
+                    else:
+                        failed_items.append(f"{item_name} (not found)")
+                        logging.warning(f"No price found for {item_name}")
+                
+                except Exception as e:
+                    failed_items.append(f"{item_name} (error: {str(e)})")
+                    logging.error(f"Error searching {item_name}: {e}", exc_info=True)
+                
+                self.progress_bar.setValue(idx + 1)
+                QApplication.processEvents()
+            
+            # Show results
+            result_message = lang.get(
+                "search_prices_dialog.results",
+                default=f"Search completed:\n✅ Found: {found_count}/{len(selected_items)}\n❌ Failed: {len(failed_items)}"
+            )
+            
+            if failed_items:
+                result_message += f"\n\nFailed items:\n" + "\n".join(failed_items[:10])
+                if len(failed_items) > 10:
+                    result_message += f"\n... and {len(failed_items) - 10} more"
+            
+            QMessageBox.information(
+                self,
+                lang.get("search_prices_dialog.complete_title", default="Search Complete"),
+                result_message
+            )
+            
+            self.status_label.setText(lang.get("search_prices_dialog.status_complete", default=f"Complete: {found_count} prices added"))
+            
+            # Refresh parent preview to show updated prices
+            if found_count > 0 and hasattr(self.parent(), 'on_selection_changed'):
+                self.parent().on_selection_changed()
+            
+        except Exception as e:
+            logging.error(f"Error during price search: {e}", exc_info=True)
+            QMessageBox.critical(
+                self,
+                lang.get("search_prices_dialog.error_title", default="Error"),
+                lang.get("search_prices_dialog.error_search", default=f"Search failed:\n{str(e)}")
+            )
+        
+        finally:
+            # CRITICAL: Always close browser to prevent zombie processes
+            if eden_scraper:
+                try:
+                    eden_scraper.close()
+                    logging.info("Eden scraper closed successfully")
+                except Exception as e:
+                    logging.error(f"Error closing scraper: {e}", exc_info=True)
+            
+            self.active_scraper = None  # Clear reference
+            self._reset_ui()
+    
+    def closeEvent(self, event):
+        """Clean up scraper when dialog is closed."""
+        if self.active_scraper:
+            try:
+                logging.info("Closing active scraper on dialog close")
+                self.active_scraper.close()
+                self.active_scraper = None
+            except Exception as e:
+                logging.error(f"Error closing scraper on dialog close: {e}", exc_info=True)
+        
+        super().closeEvent(event)
+    
+    def _reset_ui(self):
+        """Reset UI elements after search."""
+        self.search_button.setEnabled(True)
+        self.select_all_button.setEnabled(True)
+        self.deselect_all_button.setEnabled(True)
+        self.close_button.setEnabled(True)
+        self.progress_bar.setVisible(False)

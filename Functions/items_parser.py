@@ -76,7 +76,7 @@ def parse_template_file(file_path):
     
     return items
 
-def search_item_for_database(item_name, items_scraper, realm="All", force_scrape=False):
+def search_item_for_database(item_name, items_scraper, realm="All", force_scrape=False, skip_filters=False):
     """
     Recherche un item et retourne les données formatées pour la base v2.0
     Inclut: id, name, realm, slot, type, model, dps, speed, damage_type, merchant
@@ -86,14 +86,15 @@ def search_item_for_database(item_name, items_scraper, realm="All", force_scrape
         items_scraper: Instance de ItemsScraper
         realm: Royaume (défaut: All)
         force_scrape: Si True, force le scraping web (pour refresh DB)
+        skip_filters: Si True, ignore les filtres level/utility (retry mode)
         
     Returns:
         dict: Données de l'item ou None si non trouvé
     """
-    print(f"    🔍 Recherche: {item_name} ({realm}) [force_scrape={force_scrape}]")
+    print(f"    🔍 Recherche: {item_name} ({realm}) [force_scrape={force_scrape}, skip_filters={skip_filters}]")
     
-    # Find ID (force web scraping if requested)
-    item_id = items_scraper.find_item_id(item_name, realm, force_scrape=force_scrape)
+    # Find ID (force web scraping if requested, with optional filter bypass)
+    item_id = items_scraper.find_item_id(item_name, realm, force_scrape=force_scrape, skip_filters=skip_filters)
     
     if not item_id:
         print(f"      ❌ ID non trouvé")
@@ -129,8 +130,9 @@ def search_item_for_database(item_name, items_scraper, realm="All", force_scrape
         
         item_data["merchant_zone"] = merchant.get("zone") or "Unknown"
         item_data["merchant_price"] = str(price_parsed.get("amount")) if price_parsed else "Unknown"
+        item_data["merchant_currency"] = price_parsed.get("currency") if price_parsed else ""
         
-        print(f"      ✅ Merchant: {item_data['merchant_zone']} - {item_data['merchant_price']}")
+        print(f"      ✅ Merchant: {item_data['merchant_zone']} - {item_data['merchant_price']} {item_data.get('merchant_currency', '')}")
         
         # Log damage info if available
         if item_data.get("dps"):

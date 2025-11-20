@@ -802,7 +802,7 @@ class ItemsScraper:
         """
         return self.search_items(slot=slot, realm=realm)
     
-    def find_item_id(self, item_name, realm="All", force_scrape=False):
+    def find_item_id(self, item_name, realm="All", force_scrape=False, skip_filters=False):
         """
         Recherche l'ID d'un item pour un realm spécifique.
         
@@ -818,6 +818,7 @@ class ItemsScraper:
             item_name: Nom de l'item
             realm: Royaume spécifique (Hibernia, Albion, Midgard, All)
             force_scrape: Si True, ignore les DBs et force la recherche web
+            skip_filters: Si True, ignore les filtres level/utility (retry mode)
         
         Returns:
             str: ID de l'item pour ce realm ou None
@@ -837,8 +838,8 @@ class ItemsScraper:
         # 3. Search online - utilise la nouvelle logique r=0 + filtrage
         self.logger.info(f"⚠️ Item non trouvé (DB/cache), recherche en ligne...", extra={"action": "SEARCH"})
         
-        # Utiliser find_all_item_variants puis filtrer par realm
-        variants = self.find_all_item_variants(item_name)
+        # Utiliser find_all_item_variants puis filtrer par realm (with optional skip_filters)
+        variants = self.find_all_item_variants(item_name, skip_filters=skip_filters)
         
         if not variants:
             return None

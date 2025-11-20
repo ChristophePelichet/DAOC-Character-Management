@@ -1,5 +1,8 @@
 # Copilot Instructions - Base Rules
 
+**⚠️ IMPORTANT: All additions to this document MUST be in both French AND English**
+**⚠️ IMPORTANT : Tous les ajouts à ce document DOIVENT être en français ET en anglais**
+
 ## 🚫 NEVER DO AUTOMATICALLY
 
 **ONLY on explicit user request:**
@@ -65,6 +68,16 @@
 **Français:**
 - **Documentation technique** : Doit être créée dans le dossier `Documentation/` (pas "Documentation")
 - **Changelogs** : Doivent être créés dans le dossier `Changelogs/`
+
+## 🔬 Testing Rules
+
+**English:**
+- **Always run main.py from the virtual environment** - Use `python .\main.py` after activating `.venv`
+- **Never run tests outside .venv** - Dependencies are installed in virtual environment only
+
+**Français:**
+- **Toujours exécuter main.py depuis l'environnement virtuel** - Utiliser `python .\main.py` après activation de `.venv`
+- **Jamais de tests hors .venv** - Les dépendances sont installées uniquement dans l'environnement virtuel
 
 ## 🔗 Complete Workflow (only if explicitly requested)
 

@@ -3084,6 +3084,65 @@ class ArmorManagementDialog(QDialog):
                 "Template importé avec succès !"
             )
     
+    def _sync_template_prices_with_db(self, metadata_path, metadata):
+        """
+        Sync template prices with database.
+        Check if items with prices in JSON now exist in DB.
+        If yes: remove from JSON (DB will be used instead).
+        If no: keep in JSON.
+        
+        Args:
+            metadata_path: Path to the metadata JSON file
+            metadata: Loaded metadata dict
+        """
+        if not metadata or 'prices' not in metadata:
+            return
+        
+        prices_dict = metadata.get('prices', {})
+        if not prices_dict:
+            return
+        
+        items_to_remove = []
+        realm_lower = self.realm.lower()
+        
+        try:
+            for item_name in prices_dict.keys():
+                # Check if item now exists in database
+                item_name_lower = item_name.lower()
+                
+                # Try realm-specific search
+                search_key_realm = f"{item_name_lower}:{realm_lower}"
+                item_data = self.db_manager.search_item(search_key_realm)
+                
+                # Try ":all" suffix
+                if not item_data:
+                    search_key_all = f"{item_name_lower}:all"
+                    item_data = self.db_manager.search_item(search_key_all)
+                
+                # Try without suffix
+                if not item_data:
+                    item_data = self.db_manager.search_item(item_name)
+                
+                # If item found in DB with a price, mark for removal from JSON
+                if item_data and 'merchant_price' in item_data:
+                    items_to_remove.append(item_name)
+                    logging.info(f"Item '{item_name}' now found in DB, will remove from template JSON")
+            
+            # Remove items from JSON if any found in DB
+            if items_to_remove:
+                for item_name in items_to_remove:
+                    del metadata['prices'][item_name]
+                
+                # Save updated metadata
+                import json
+                with open(metadata_path, 'w', encoding='utf-8') as f:
+                    json.dump(metadata, f, indent=2, ensure_ascii=False)
+                
+                logging.info(f"Synced {len(items_to_remove)} items from template JSON to DB")
+                
+        except Exception as e:
+            logging.error(f"Error syncing template prices with DB: {e}", exc_info=True)
+    
     def parse_zenkcraft_template(self, content, season=""):
         """Parse Zenkcraft template and return formatted display."""
         import json
@@ -3099,6 +3158,9 @@ class ArmorManagementDialog(QDialog):
                 if metadata_path.exists():
                     with open(metadata_path, 'r', encoding='utf-8') as f:
                         metadata = json.load(f)
+                    
+                    # Sync prices: check if items in JSON now exist in DB
+                    self._sync_template_prices_with_db(metadata_path, metadata)
         except Exception as e:
             logging.debug(f"Could not load metadata for price lookup: {e}")
         
@@ -3166,6 +3228,19 @@ class ArmorManagementDialog(QDialog):
                 if item_data and 'merchant_price' in item_data:
                     price = item_data['merchant_price']
                     currency = item_data.get('merchant_currency', '')
+                    
+                    # Fallback: infer currency from merchant_zone if missing
+                    if not currency:
+                        merchant_zone = item_data.get('merchant_zone', '')
+                        currency_map = {
+                            'Drake': 'Scales',
+                            'Phoenix': 'Souls/Roots/Ices',
+                            'Demon': 'Glasses',
+                            'Summoner': 'Seals',
+                            'Behemoth': 'Grimoires'
+                        }
+                        currency = currency_map.get(merchant_zone, '')
+                    
                     if currency:
                         return (f"{price} {currency}", 'db')
                     return (price, 'db')

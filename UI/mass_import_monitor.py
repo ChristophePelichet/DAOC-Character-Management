@@ -31,6 +31,9 @@ class MassImportMonitor(QMainWindow):
             Qt.Window  # Independent window (removed StaysOnTop)
         )
         
+        # CRITICAL: Prevent this window from closing the entire application
+        self.setAttribute(Qt.WA_QuitOnClose, False)
+        
         # Tracking variables
         self.start_time = None
         self.items_processed = 0
@@ -815,7 +818,8 @@ class MassImportMonitor(QMainWindow):
             self.items_failed = 0
             self.duplicates_skipped = 0
             
-            def on_finished(success, message, stats):
+            def on_import_finished(success, message, stats):
+                """Handle import completion (business logic)"""
                 try:
                     self.log_message("Retry completed successfully", "info")
                     self.finish_import(success)
@@ -826,27 +830,46 @@ class MassImportMonitor(QMainWindow):
                             Path(tf).unlink()
                         except:
                             pass
-                    
-                    # Schedule worker for deletion instead of immediate cleanup
-                    if self.retry_worker is not None:
-                        # Disconnect signals
-                        try:
-                            self.retry_worker.progress_updated.disconnect()
-                            self.retry_worker.log_message.disconnect()
-                            self.retry_worker.import_finished.disconnect()
-                        except:
-                            pass
-                        
-                        # Let Qt handle the deletion properly
-                        self.retry_worker.deleteLater()
-                        self.retry_worker = None
                         
                 except Exception as e:
                     self.log_message(f"Error in retry finish: {e}", "error")
                     import traceback
                     self.log_message(f"Traceback: {traceback.format_exc()}", "error")
             
-            self.retry_worker.import_finished.connect(on_finished, Qt.QueuedConnection)
+            def on_thread_finished():
+                """Handle thread termination (cleanup resources)"""
+                try:
+                    self.log_message("Retry worker thread finished, cleaning up...", "info")
+                    
+                    if self.retry_worker is not None:
+                        # Wait for thread to fully stop
+                        if not self.retry_worker.wait(5000):  # Wait up to 5 seconds
+                            self.log_message("Warning: Thread did not finish in time", "warning")
+                        
+                        # Disconnect signals safely
+                        try:
+                            self.retry_worker.progress_updated.disconnect()
+                            self.retry_worker.log_message.disconnect()
+                            self.retry_worker.import_finished.disconnect()
+                            self.retry_worker.finished.disconnect()
+                        except:
+                            pass
+                        
+                        # Schedule deletion
+                        self.retry_worker.deleteLater()
+                        self.retry_worker = None
+                        self.log_message("Retry worker cleaned up successfully", "info")
+                        
+                except Exception as cleanup_error:
+                    self.log_message(f"Error in thread cleanup: {cleanup_error}", "warning")
+                    import traceback
+                    self.log_message(f"Traceback: {traceback.format_exc()}", "warning")
+            
+            # Connect import_finished for business logic
+            self.retry_worker.import_finished.connect(on_import_finished, Qt.QueuedConnection)
+            
+            # Connect finished (QThread signal) for cleanup - this is emitted when thread actually stops
+            self.retry_worker.finished.connect(on_thread_finished, Qt.QueuedConnection)
             
             # Start retry
             self.start_import(len(items_to_retry))

@@ -7512,6 +7512,9 @@ class SearchMissingPricesDialog(QDialog):
             # Refresh parent preview to show updated prices
             if found_count > 0 and hasattr(self.parent(), 'on_selection_changed'):
                 self.parent().on_selection_changed()
+                
+                # Refresh the items list in this dialog to remove found items
+                self._refresh_items_list()
             
         except Exception as e:
             logging.error(f"Error during price search: {e}", exc_info=True)
@@ -7552,3 +7555,42 @@ class SearchMissingPricesDialog(QDialog):
         self.deselect_all_button.setEnabled(True)
         self.close_button.setEnabled(True)
         self.progress_bar.setVisible(False)
+    
+    def _refresh_items_list(self):
+        """Refresh the items list from parent to remove items that now have prices."""
+        if hasattr(self.parent(), 'items_without_price'):
+            # Get updated list from parent
+            updated_items = self.parent().items_without_price
+            
+            # Update our internal list
+            self.items_without_price = updated_items
+            
+            # Clear and repopulate the list widget
+            self.items_list.clear()
+            self.items_list.addItems(updated_items)
+            
+            # Update info label
+            if updated_items:
+                info_text = lang.get(
+                    "search_prices_dialog.info",
+                    default=f"Found {len(updated_items)} item(s) without price in database.\nClick 'Search All' to search online or select individual items."
+                )
+                # Get the info label (first label in layout)
+                info_label = self.layout().itemAt(0).widget()
+                if isinstance(info_label, QLabel):
+                    info_label.setText(info_text)
+            else:
+                # No more items without price - show success message
+                info_text = lang.get(
+                    "search_prices_dialog.all_found",
+                    default="✅ All items now have prices!"
+                )
+                info_label = self.layout().itemAt(0).widget()
+                if isinstance(info_label, QLabel):
+                    info_label.setText(info_text)
+                    info_label.setStyleSheet("color: green; font-weight: bold;")
+                
+                # Disable search button
+                self.search_button.setEnabled(False)
+                self.select_all_button.setEnabled(False)
+                self.deselect_all_button.setEnabled(False)

@@ -213,7 +213,7 @@ class TemplateImportDialog(QDialog):
         season = self.season_combo.currentText()
         
         # Enable import button only if file and description are set
-        can_import = self.selected_file is not None and description and season != "Personnalisé..."
+        can_import = bool(self.selected_file is not None and description and season != "Personnalisé...")
         self.import_button.setEnabled(can_import)
         
         if not description:

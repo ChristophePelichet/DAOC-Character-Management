@@ -387,8 +387,8 @@
                 "status_no_date": "-"
             },
             "mass_import_monitor": {
-                "window_title": "📦 Import en Masse",
-                "title": "📦 Import en Masse",
+                "window_title": "🔧 Database Management Tools",
+                "title": "🔧 Database Management Tools",
                 "stats_group": "📊 Statistiques en Temps Réel",
                 "unique_items": "🔍 Items uniques:",
                 "variants_found": "🌐 Variantes trouvées:",

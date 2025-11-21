@@ -633,6 +633,204 @@ When retry is clicked:
 
 ---
 
+## Item Categorization System
+
+### Overview
+
+The Item Categorization System allows users to categorize items found in Eden without merchant prices, replacing the generic ❓ unknown marker with meaningful categories.
+
+**Categories:**
+- 🏆 **Quest Reward** (`quest_reward`) - Items from quest rewards
+- 🎉 **Event Reward** (`event_reward`) - Items from seasonal/special events
+- ❓ **Unknown** (`unknown`) - Default for uncategorized priceless items
+
+**Multi-Language Support:** Each category has labels in EN/FR/DE
+
+### Category Storage
+
+**Location:** `Functions/items_database_manager.py`
+
+```python
+ITEM_CATEGORIES = {
+    "quest_reward": {
+        "icon": "🏆",
+        "label_en": "Quest Reward",
+        "label_fr": "Récompense de quête",
+        "label_de": "Questbelohnung"
+    },
+    "event_reward": {
+        "icon": "🎉",
+        "label_en": "Event Reward",
+        "label_fr": "Récompense d'événement",
+        "label_de": "Event-Belohnung"
+    },
+    "unknown": {
+        "icon": "❓",
+        "label_en": "Unknown",
+        "label_fr": "Inconnu",
+        "label_de": "Unbekannt"
+    }
+}
+```
+
+### Database Fields
+
+**New Fields in items_database:**
+- `item_category` - Category key (quest_reward/event_reward/unknown)
+- `ignore_item` - Auto-set to `true` when category assigned (prevents future price searches)
+
+**Example:**
+```json
+{
+  "battled mantle of samhain:hibernia": {
+    "id": "172635",
+    "name": "Battled Mantle of Samhain",
+    "realm": "Hibernia",
+    "item_category": "quest_reward",
+    "ignore_item": true
+  }
+}
+```
+
+### Categorization Workflow
+
+**Entry Points:**
+
+1. **Search Missing Prices Dialog** (`UI/dialogs.py`)
+   - User selects item without price
+   - Clicks "Ignore" button
+   - ItemCategoryDialog opens
+   - User selects category (🏆/🎉/❓)
+   - Item saved with category + ignore_item=true
+
+2. **Failed Items Review Dialog** (`UI/failed_items_review_dialog.py`)
+   - Shows items filtered during mass import
+   - User clicks "Ignore" on item
+   - ItemCategoryDialog opens
+   - Category assigned and saved
+
+### ItemCategoryDialog
+
+**File:** `UI/failed_items_review_dialog.py` (lines 65-145)
+
+**Components:**
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Categorize Item                                 [✖]        │
+├─────────────────────────────────────────────────────────────┤
+│  Item: Battled Mantle of Samhain (Hibernia)                │
+│                                                              │
+│  Select a category:                                         │
+│  ○ 🏆 Quest Reward                                          │
+│  ○ 🎉 Event Reward                                          │
+│  ○ ❓ Unknown                                                │
+│                                                              │
+│  [✖ Cancel]  [✔ OK]                                         │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Features:**
+- QRadioButton group with icons + localized labels
+- Default selection: Unknown
+- Multi-language labels via `get_category_label(key, lang)`
+
+### Preview Display
+
+**Location:** `UI/dialogs.py` - `ArmorManagementDialog.parse_zenkcraft_template()`
+
+**Display Logic:**
+
+```python
+def get_item_price(item_name: str) -> tuple:
+    """Returns (price_str, source, category)"""
+    # Search order: Template JSON → Database (realm-aware)
+    # 1. item:hibernia
+    # 2. item:all
+    # 3. item (fallback)
+    
+    if db_item:
+        category = db_item.get('item_category')
+        if category:
+            icon = get_category_icon(category)
+            label = get_category_label(category, language)
+            return (f"{icon} {label}", "db", category)
+        
+        # Has price
+        if merchant_price:
+            return (f"💰 {merchant_price} {currency}", "db", None)
+    
+    return ("❓ Unknown", "default", "unknown")
+```
+
+**Format Examples:**
+```
+Armor Section:
+  📊 Cloth Cap                 💰 125 Scales (Drake)    [DB]
+  📊 Soulbinder's Belt         💰 150 Scales (Drake)    [DB]
+  📊 Battled Mantle            🏆 Quest Reward          [DB]
+```
+
+**Alignment Solution:**
+- HTML `<span>` with `min-width:200px` for item display
+- Emoji family consistency (🏆 U+1F3C6, 💰 U+1F4B0, 🎉 U+1F389 - same Unicode range)
+- Spaces converted to `&nbsp;` for HTML rendering
+- Monospace font: Courier New 10pt
+
+### Helper Methods
+
+**File:** `Functions/items_database_manager.py`
+
+```python
+def get_category_label(category_key: str, language: str = "en") -> str:
+    """Get localized category label"""
+    category = ITEM_CATEGORIES.get(category_key)
+    if not category:
+        return "Unknown"
+    
+    label_key = f"label_{language}"
+    return category.get(label_key, category.get("label_en", "Unknown"))
+
+def get_category_icon(category_key: str) -> str:
+    """Get category emoji icon"""
+    category = ITEM_CATEGORIES.get(category_key)
+    return category.get("icon", "❓") if category else "❓"
+
+def set_item_category(item_name: str, realm: str, category: str) -> bool:
+    """Set item category and ignore_item flag"""
+    # Search database for item
+    # Set item_category and ignore_item=True
+    # Save database
+```
+
+### Multi-Source Database Search
+
+**Realm-Aware Search Order:**
+
+1. `{item_name}:{realm}` - Exact realm match (e.g., "cloth cap:hibernia")
+2. `{item_name}:all` - Common item (e.g., "cloth cap:all")
+3. `{item_name}` - Legacy fallback (no realm suffix)
+
+**Why:** Template JSON stores items without realm, database uses composite keys with realm.
+
+**Implementation:**
+```python
+# Try realm-specific first
+db_key_realm = f"{item_name_lower}:{realm_lower}"
+if db_key_realm in db_items:
+    return db_items[db_key_realm]
+
+# Try "all" realm
+db_key_all = f"{item_name_lower}:all"
+if db_key_all in db_items:
+    return db_items[db_key_all]
+
+# Fallback: search without realm
+if item_name_lower in db_items:
+    return db_items[item_name_lower]
+```
+
+---
+
 ## Price Search System
 
 ### Overview

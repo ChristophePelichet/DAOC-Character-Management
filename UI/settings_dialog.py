@@ -1190,98 +1190,23 @@ class SettingsDialog(QDialog):
         layout.addWidget(title)
         layout.addSpacing(20)
         
-        # === ARMORY SECTION ===
-        armory_section = QGroupBox("🛡️ " + lang.get('superadmin.armory_section_title', default="Armurerie"))
+        # === ITEMS DATABASE SECTION ===
+        armory_section = QGroupBox("🗄️ " + lang.get('superadmin.items_database_section_title', default="Items Database"))
         armory_layout = QVBoxLayout()
         
-        # === WARNING (inside Armory section) ===
+        # === WARNING (inside Items Database section) ===
         warning_label = QLabel("⚠️ " + lang.get('superadmin.warning', default='Ces outils modifient la base de données source embarquée. Usage réservé aux développeurs.'))
         warning_label.setStyleSheet("background-color: #fff3cd; color: #856404; padding: 10px; border-radius: 5px; font-weight: bold;")
         warning_label.setWordWrap(True)
         armory_layout.addWidget(warning_label)
         armory_layout.addSpacing(10)
         
-        # === BUILD SOURCE DATABASE GROUP ===
-        build_group = QGroupBox(lang.get('superadmin.build_group_title', 
-            default="📦 Construire la base source"))
-        build_layout = QVBoxLayout()
-        
-        # File selection
-        select_files_layout = QHBoxLayout()
-        select_files_label = QLabel(lang.get('superadmin.files_label', default="Fichiers templates (.txt):"))
-        self.superadmin_files_label = QLabel(lang.get('superadmin.no_files_selected', default="Aucun fichier sélectionné"))
-        self.superadmin_files_label.setStyleSheet("color: #888; font-style: italic;")
-        
-        select_files_button = QPushButton(lang.get('superadmin.select_button', default="Sélectionner"))
-        select_files_button.setToolTip(lang.get('superadmin.build_button_tooltip', 
-            default="Sélectionner plusieurs fichiers .txt contenant des templates d'items"))
-        select_files_button.clicked.connect(self._select_template_files)
-        
-        select_files_layout.addWidget(select_files_label)
-        select_files_layout.addWidget(self.superadmin_files_label, 1)
-        select_files_layout.addWidget(select_files_button)
-        build_layout.addLayout(select_files_layout)
-        
-        # Realm selection
-        realm_layout = QHBoxLayout()
-        realm_label = QLabel(lang.get('superadmin.realm_label', default="Royaume:"))
-        self.superadmin_realm_combo = QComboBox()
-        
-        # Add realm options with translations
-        self.superadmin_realm_combo.addItem(lang.get('superadmin.realm_auto', default="Auto-détection"))
-        self.superadmin_realm_combo.addItem("Albion")
-        self.superadmin_realm_combo.addItem("Hibernia")
-        self.superadmin_realm_combo.addItem("Midgard")
-        
-        self.superadmin_realm_combo.setToolTip(lang.get('superadmin.realm_tooltip', 
-            default="Royaume des items (auto-détection depuis les noms de fichiers si activé)"))
-        realm_layout.addWidget(realm_label)
-        realm_layout.addWidget(self.superadmin_realm_combo)
-        realm_layout.addStretch()
-        build_layout.addLayout(realm_layout)
-        
-        build_layout.addSpacing(10)
-        
-        # Options
-        self.superadmin_merge_check = QCheckBox(lang.get('superadmin.options_merge', 
-            default="Fusionner avec la base existante"))
-        self.superadmin_merge_check.setToolTip(lang.get('superadmin.options_merge_tooltip', 
-            default="Si décoché, la base sera écrasée. Si coché, les nouveaux items seront ajoutés à la base existante."))
-        self.superadmin_merge_check.setChecked(True)
-        build_layout.addWidget(self.superadmin_merge_check)
-        
-        self.superadmin_dedup_check = QCheckBox(lang.get('superadmin.options_remove_duplicates', 
-            default="Supprimer les doublons"))
-        self.superadmin_dedup_check.setToolTip(lang.get('superadmin.options_remove_duplicates_tooltip', 
-            default="Supprime les items avec le même nom + royaume"))
-        self.superadmin_dedup_check.setChecked(True)
-        build_layout.addWidget(self.superadmin_dedup_check)
-        
-        self.superadmin_backup_check = QCheckBox(lang.get('superadmin.options_auto_backup', 
-            default="Sauvegarde automatique"))
-        self.superadmin_backup_check.setToolTip(lang.get('superadmin.options_auto_backup_tooltip', 
-            default="Crée une sauvegarde horodatée avant modification"))
-        self.superadmin_backup_check.setChecked(True)
-        build_layout.addWidget(self.superadmin_backup_check)
-        
-        build_layout.addSpacing(10)
-        
-        # Execute button
-        build_execute_button = QPushButton(lang.get('superadmin.build_execute_button', 
-            default="Construire la base source"))
-        build_execute_button.clicked.connect(self._execute_build_database)
-        build_layout.addWidget(build_execute_button)
-        
-        build_group.setLayout(build_layout)
-        armory_layout.addWidget(build_group)
-        armory_layout.addSpacing(15)
-        
         # === STATISTICS AND ADVANCED OPERATIONS (side by side) ===
         stats_advanced_layout = QHBoxLayout()
         
         # === STATISTICS GROUP (left side - 50%) ===
         stats_group = QGroupBox(lang.get('superadmin.stats_group_title', 
-            default="📊 Statistiques de la base source"))
+            default="📊 Items Database Statistics"))
         stats_layout = QFormLayout()
         
         self.superadmin_stats_dbname = QLabel("items_database_src.json")
@@ -1331,8 +1256,17 @@ class SettingsDialog(QDialog):
             default="⚙️ Opérations avancées"))
         advanced_layout = QVBoxLayout()
         
+        # Database Import button (first position)
+        database_import_button = QPushButton(lang.get('superadmin.database_import_button', 
+            default="🔧 Database Management Tools"))
+        database_import_button.setMinimumHeight(35)
+        database_import_button.setToolTip(lang.get('superadmin.database_import_tooltip', 
+            default="Ouvrir la fenêtre Database Management Tools pour sélectionner et importer des templates dans la base source"))
+        database_import_button.clicked.connect(self._open_mass_import_monitor)
+        advanced_layout.addWidget(database_import_button)
+        
         clean_duplicates_button = QPushButton(lang.get('superadmin.clean_duplicates_button', 
-            default="Nettoyer les doublons"))
+            default="🧹 Nettoyer les doublons"))
         clean_duplicates_button.setMinimumHeight(35)
         clean_duplicates_button.setToolTip(lang.get('superadmin.clean_duplicates_tooltip', 
             default="Supprime les items en double (même nom + royaume) dans la base source"))
@@ -1356,7 +1290,7 @@ class SettingsDialog(QDialog):
         # Add the horizontal layout to armory layout
         armory_layout.addLayout(stats_advanced_layout)
         
-        # Close Armory section
+        # Close Items Database section
         armory_section.setLayout(armory_layout)
         layout.addWidget(armory_section)
         
@@ -2584,75 +2518,30 @@ class SettingsDialog(QDialog):
             logging.error(f"Error selecting template files: {e}", exc_info=True)
             QMessageBox.critical(self, "Erreur", f"Impossible de sélectionner les fichiers:\n{e}")
     
-    def _execute_build_database(self):
-        """Execute database build from selected template files"""
+    def _open_mass_import_monitor(self):
+        """Open Database Management Tools window"""
         try:
-            # Check if files are selected
-            if not hasattr(self, 'superadmin_selected_files') or not self.superadmin_selected_files:
-                QMessageBox.warning(self, 
-                    lang.get('superadmin.no_files_selected_title', default="Aucun fichier"),
-                    lang.get('superadmin.no_files_selected_message', 
-                        default="Veuillez sélectionner au moins un fichier template.")
-                )
-                return
-            
-            # Get options
-            realm_index = self.superadmin_realm_combo.currentIndex()
-            realm_map = {0: None, 1: "Albion", 2: "Hibernia", 3: "Midgard"}
-            realm = realm_map[realm_index]
-            
-            merge = self.superadmin_merge_check.isChecked()
-            remove_duplicates = self.superadmin_dedup_check.isChecked()
-            auto_backup = self.superadmin_backup_check.isChecked()
-            
-            # Confirmation dialog
-            count = len(self.superadmin_selected_files)
-            title = lang.get('superadmin.build_confirm_title', default="Confirmer la construction")
-            
-            yes_text = lang.get('common.yes', default="Oui")
-            no_text = lang.get('common.no', default="Non")
-            auto_text = lang.get('superadmin.realm_auto', default="Auto-détection")
-            
-            message = lang.get('superadmin.build_confirm_message',
-                default="Construire la base source avec {count} fichier(s) ?\n\nRoyaume: {realm}\nFusionner: {merge}\nSupprimer doublons: {dedup}\nSauvegarde auto: {backup}")
-            message = message.replace("{count}", str(count))
-            message = message.replace("{realm}", realm or auto_text)
-            message = message.replace("{merge}", yes_text if merge else no_text)
-            message = message.replace("{dedup}", yes_text if remove_duplicates else no_text)
-            message = message.replace("{backup}", yes_text if auto_backup else no_text)
-            
-            reply = QMessageBox.question(self, title, message,
-                                        QMessageBox.Yes | QMessageBox.No)
-            
-            if reply != QMessageBox.Yes:
-                return
-            
-            # Show Mass Import Monitor
             from PySide6.QtWidgets import QApplication
             from UI.mass_import_monitor import MassImportMonitor
-            from pathlib import Path
             
+            # Create and show Database Management Tools
             monitor = MassImportMonitor(self)
             
-            # Prepare import parameters (don't start automatically)
-            monitor.prepare_import(
-                file_paths=self.superadmin_selected_files,
-                realm=realm,
-                merge=merge,
-                remove_duplicates=remove_duplicates,
-                auto_backup=auto_backup,
-                source_db_path=Path("Data/items_database_src.json"),
+            # Pass default settings to monitor (using default values since widgets were removed)
+            monitor.set_default_options(
+                realm=None,  # Auto-detection
+                merge=True,
+                remove_duplicates=True,
+                auto_backup=True,
                 path_manager=self.path_manager
             )
             
             monitor.show()
             QApplication.processEvents()
             
-            # User will click "Start Import" button to begin
-            
         except Exception as e:
-            logging.error(f"Error executing database build: {e}", exc_info=True)
-            QMessageBox.critical(self, "Erreur", f"Erreur lors de la construction:\n{e}")
+            logging.error(f"Error opening Database Management Tools: {e}", exc_info=True)
+            QMessageBox.critical(self, "Erreur", f"Erreur lors de l'ouverture de Database Management Tools:\n{e}")
     
     def _refresh_superadmin_stats(self):
         """Refresh SuperAdmin statistics display"""

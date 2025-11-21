@@ -1,6 +1,6 @@
 """
-Mass Import Monitor Window
-Detailed monitoring window for mass item import
+Database Management Tools Window
+Detailed monitoring window for database management and mass item import
 """
 
 import logging
@@ -8,7 +8,7 @@ from datetime import datetime
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QGroupBox,
     QTextEdit, QPushButton, QLabel, QProgressBar, QFileDialog,
-    QGridLayout, QFrame
+    QGridLayout, QFrame, QComboBox, QCheckBox
 )
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QTextCursor
@@ -21,7 +21,7 @@ class MassImportMonitor(QMainWindow):
     
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle(lang.get("settings.pages.mass_import_monitor.window_title", default="📦 Mass Import Monitor"))
+        self.setWindowTitle(lang.get("settings.pages.mass_import_monitor.window_title", default="🔧 Database Management Tools"))
         self.setGeometry(150, 100, 1200, 700)
         
         # Make window independent and always movable
@@ -82,6 +82,65 @@ class MassImportMonitor(QMainWindow):
         header_layout.addWidget(self.time_label)
         
         main_layout.addLayout(header_layout)
+        
+        # === OPTIONS PANEL ===
+        options_group = QGroupBox(lang.get("settings.pages.mass_import_monitor.options_group", default="⚙️ Import Options"))
+        options_group.setStyleSheet("""
+            QGroupBox {
+                font-weight: bold;
+                border: 2px solid #3a3a3a;
+                border-radius: 5px;
+                margin-top: 10px;
+                padding-top: 10px;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 5px;
+            }
+        """)
+        options_layout = QHBoxLayout()
+        
+        # Realm selection
+        realm_label = QLabel(lang.get('superadmin.realm_label', default="Realm:"))
+        self.realm_combo = QComboBox()
+        self.realm_combo.addItem(lang.get('superadmin.realm_auto', default="Auto-detection"))
+        self.realm_combo.addItem("Albion")
+        self.realm_combo.addItem("Hibernia")
+        self.realm_combo.addItem("Midgard")
+        self.realm_combo.setToolTip(lang.get('superadmin.realm_tooltip', 
+            default="Item realm (auto-detection from file names if enabled)"))
+        options_layout.addWidget(realm_label)
+        options_layout.addWidget(self.realm_combo)
+        
+        options_layout.addSpacing(20)
+        
+        # Checkboxes
+        self.merge_check = QCheckBox(lang.get('superadmin.options_merge', 
+            default="Merge with existing database"))
+        self.merge_check.setToolTip(lang.get('superadmin.options_merge_tooltip', 
+            default="If unchecked, database will be overwritten. If checked, new items will be added to existing database."))
+        self.merge_check.setChecked(True)
+        options_layout.addWidget(self.merge_check)
+        
+        self.dedup_check = QCheckBox(lang.get('superadmin.options_remove_duplicates', 
+            default="Remove duplicates"))
+        self.dedup_check.setToolTip(lang.get('superadmin.options_remove_duplicates_tooltip', 
+            default="Remove items with same name + realm"))
+        self.dedup_check.setChecked(True)
+        options_layout.addWidget(self.dedup_check)
+        
+        self.backup_check = QCheckBox(lang.get('superadmin.options_auto_backup', 
+            default="Auto-backup"))
+        self.backup_check.setToolTip(lang.get('superadmin.options_auto_backup_tooltip', 
+            default="Create timestamped backup before modification"))
+        self.backup_check.setChecked(True)
+        options_layout.addWidget(self.backup_check)
+        
+        options_layout.addStretch()
+        
+        options_group.setLayout(options_layout)
+        main_layout.addWidget(options_group)
         
         # === STATISTICS PANEL ===
         stats_group = QGroupBox(lang.get("settings.pages.mass_import_monitor.stats_group", default="📊 Real-Time Statistics"))
@@ -438,6 +497,86 @@ class MassImportMonitor(QMainWindow):
         if template_files:
             self.log_message(lang.get("settings.pages.mass_import_monitor.template_files_count", count=len(template_files), default=f"{len(template_files)} fichier(s) template à parser"), "info")
         self.log_message(lang.get("settings.pages.mass_import_monitor.unique_items_to_process", count=total_items, default=f"{total_items} items uniques à traiter"), "info")
+    
+    def set_default_options(self, realm, merge, remove_duplicates, auto_backup, path_manager):
+        """Set default import options and initialize UI widgets"""
+        from pathlib import Path
+        
+        # Store path_manager
+        self.path_manager = path_manager
+        self.source_db_path = Path("Data/items_database_src.json")
+        
+        # Set widget values from parameters
+        realm_map = {None: 0, "Albion": 1, "Hibernia": 2, "Midgard": 3}
+        self.realm_combo.setCurrentIndex(realm_map.get(realm, 0))
+        self.merge_check.setChecked(merge)
+        self.dedup_check.setChecked(remove_duplicates)
+        self.backup_check.setChecked(auto_backup)
+        
+        # Update info label to show ready state
+        self.info_label.setText(lang.get("settings.pages.mass_import_monitor.select_files_message", 
+            default="📂 Click 'Select Templates' to choose template files to import."))
+        self.info_label.setStyleSheet("color: #569cd6; font-style: italic; font-size: 10pt;")
+        
+        # Disable start button until files are selected
+        self.start_button.setEnabled(False)
+        self.start_button.setText(lang.get("settings.pages.mass_import_monitor.select_templates_button", 
+            default="📁 Select Templates"))
+        self.start_button.clicked.disconnect()
+        self.start_button.clicked.connect(self.select_template_files)
+        self.start_button.setEnabled(True)
+        
+        self.log_message(lang.get("settings.pages.mass_import_monitor.ready_to_select", 
+            default="✅ Ready. Please select template files to import."), "info")
+    
+    def select_template_files(self):
+        """Open file dialog to select template files"""
+        try:
+            title = lang.get('superadmin.select_files_title', 
+                default="Sélectionner les fichiers templates")
+            file_filter = "Template files (*.txt);;All files (*.*)"
+            
+            files, _ = QFileDialog.getOpenFileNames(self, title, "", file_filter)
+            
+            if files:
+                # Files selected - prepare import
+                from pathlib import Path
+                
+                # Display template files
+                template_file_names = [Path(fp).name for fp in files]
+                files_text = "\n".join([f"📄 {file}" for file in template_file_names])
+                self.files_widget.setHtml(f'<pre style="color: #dcdcaa;">{files_text}</pre>')
+                
+                # Get options from widgets
+                realm_index = self.realm_combo.currentIndex()
+                realm_map = {0: None, 1: "Albion", 2: "Hibernia", 3: "Midgard"}
+                realm = realm_map[realm_index]
+                
+                # Prepare import with selected files and current widget values
+                self.prepare_import(
+                    file_paths=files,
+                    realm=realm,
+                    merge=self.merge_check.isChecked(),
+                    remove_duplicates=self.dedup_check.isChecked(),
+                    auto_backup=self.backup_check.isChecked(),
+                    source_db_path=self.source_db_path,
+                    path_manager=self.path_manager
+                )
+                
+                # Change button to Start Import
+                self.start_button.setText(lang.get("settings.pages.mass_import_monitor.start_button", 
+                    default="▶️ Start Import"))
+                self.start_button.clicked.disconnect()
+                self.start_button.clicked.connect(self.start_import_manual)
+                
+            else:
+                # No files selected
+                self.log_message(lang.get("settings.pages.mass_import_monitor.no_files_selected", 
+                    default="⚠️ No files selected."), "warning")
+                
+        except Exception as e:
+            logging.error(f"Error selecting template files: {e}", exc_info=True)
+            self.log_message(f"❌ Error selecting files: {e}", "error")
     
     def prepare_import(self, file_paths, realm, merge, remove_duplicates, auto_backup, source_db_path, path_manager):
         """Prepare import parameters without starting - wait for manual start"""
@@ -858,7 +997,7 @@ class MassImportMonitor(QMainWindow):
                 QMessageBox.information(
                     self,
                     lang.get("settings.pages.mass_import_monitor.retry_in_progress_title", default="Retry in Progress"),
-                    lang.get("settings.pages.mass_import_monitor.retry_in_progress_message", count=len(selected_items), default=f"Retrying {len(selected_items)} item(s).\n\nThe import will continue in the Mass Import Monitor window.")
+                    lang.get("settings.pages.mass_import_monitor.retry_in_progress_message", count=len(selected_items), default=f"Retrying {len(selected_items)} item(s).\n\nThe import will continue in the Database Management Tools window.")
                 )
                 
                 self.emit_retry_request(selected_items)

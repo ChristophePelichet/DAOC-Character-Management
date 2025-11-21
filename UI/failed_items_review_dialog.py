@@ -348,6 +348,24 @@ class FailedItemsReviewDialog(QDialog):
         if not selected:
             return
         
+        # For each selected item, ask for categorization
+        from UI.dialogs import ItemCategoryDialog
+        from Functions.items_database_manager import ItemsDatabaseManager
+        
+        categorized_count = 0
+        for item in selected:
+            item_name = item.get('name', item.get('original_search', 'Unknown'))
+            
+            # Show categorization dialog
+            category_dialog = ItemCategoryDialog(item_name, parent=self)
+            if category_dialog.exec() == QDialog.Accepted:
+                selected_category = category_dialog.get_selected_category()
+                
+                # Save category to database
+                ItemsDatabaseManager.set_item_category(item_name, selected_category)
+                categorized_count += 1
+            # If user cancels, item is still ignored but without category
+        
         # Confirmation
         reply = QMessageBox.question(
             self,
@@ -355,6 +373,7 @@ class FailedItemsReviewDialog(QDialog):
             lang.get("settings.pages.failed_items.ignore_confirm_message", count=len(selected),
                     default=f"Permanently ignore {len(selected)} item(s)?\n\n"
                             f"⚠️ These items will never appear in future imports.\n"
+                            f"✅ {categorized_count} item(s) categorized.\n"
                             f"You can manage ignored items later."),
             QMessageBox.Yes | QMessageBox.No,
             QMessageBox.No

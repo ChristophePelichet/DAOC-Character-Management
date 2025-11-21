@@ -1,4 +1,4 @@
-# Items Database - Technical Documentation
+﻿# Items Database - Technical Documentation
 **Version:** 2.0  
 **Last Updated:** 2025-11-19  
 **Project:** DAOC Character Management  
@@ -228,7 +228,567 @@ Each item entry contains **13 fields**:
 | `merchant_zone` | string | ❌ No | null | Merchant zone |
 | `merchant_price` | string | ❌ No | null | Item price |
 | `merchant_currency` | string | ❌ No | null | Currency type |
+| `item_category` | string | ❌ No | null | Category for priceless items |
+| `ignore_item` | bool | ❌ No | false | Skip price searches |
 | `source` | string | ✅ Yes | "internal" | Data source |
+
+---
+
+## 2.5 Item Categorization System
+
+### Overview
+
+The Item Categorization System allows users to categorize items found in Eden without merchant prices (quest rewards, event rewards) instead of showing generic "❓ Unknown" marker.
+
+### Categories
+
+**Available Categories:**
+
+| Key | Icon | Label (EN) | Label (FR) | Label (DE) |
+|-----|------|-----------|-----------|------------|
+| `quest_reward` | 🏆 | Quest Reward | Quest Reward | Questbelohnung |
+| `event_reward` | 🎉 | Event Reward | Event Reward | Event-Belohnung |
+| `unknown` | ❓ | Unknown | Unknown | Unbekannt |
+
+**Storage:** `Functions/items_database_manager.py` - `ITEM_CATEGORIES` constant
+
+### Database Fields
+
+#### item_category
+
+**Type:** `string` (optional)  
+**Values:** `"quest_reward"`, `"event_reward"`, `"unknown"`, or `null`  
+**Purpose:** Categorize items without merchant prices
+
+**Example:**
+```json
+{
+  "battled mantle of samhain:hibernia": {
+    "id": "172635",
+    "name": "Battled Mantle of Samhain",
+    "item_category": "quest_reward"
+  }
+}
+```
+
+#### ignore_item
+
+**Type:** `boolean` (optional)  
+**Default:** `false`  
+**Purpose:** Exclude item from future price searches
+
+**Auto-Set:** Automatically set to `true` when `item_category` is assigned
+
+**Use Cases:**
+- Quest rewards (no merchants, never will have price)
+- Event rewards (seasonal items)
+- Known priceless items (avoid repeated search failures)
+
+**Example:**
+```json
+{
+  "hibernia medal of honor:hibernia": {
+    "id": "172641",
+    "name": "Hibernia Medal of Honor",
+    "item_category": "quest_reward",
+    "ignore_item": true
+  }
+}
+```
+
+### API Methods
+
+**File:** `Functions/items_database_manager.py`
+
+#### get_item_categories()
+
+```python
+def get_item_categories() -> dict:
+    """
+    Get all available item categories.
+    
+    Returns:
+        dict: ITEM_CATEGORIES constant with icon/label_en/label_fr/label_de
+    """
+```
+
+#### get_category_label()
+
+```python
+def get_category_label(category_key: str, language: str = "en") -> str:
+    """
+    Get localized label for category.
+    
+    Args:
+        category_key: Category key (quest_reward/event_reward/unknown)
+        language: Language code (en/fr/de)
+    
+    Returns:
+        str: Localized label or "Unknown" if not found
+    
+    Example:
+        >>> get_category_label("quest_reward", "en")
+        "Quest Reward"
+    """
+```
+
+#### get_category_icon()
+
+```python
+def get_category_icon(category_key: str) -> str:
+    """
+    Get emoji icon for category.
+    
+    Args:
+        category_key: Category key
+    
+    Returns:
+        str: Emoji icon (🏆/🎉/❓)
+    
+    Example:
+        >>> get_category_icon("quest_reward")
+        "🏆"
+    """
+```
+
+#### set_item_category()
+
+```python
+def set_item_category(item_name: str, realm: str, category: str) -> bool:
+    """
+    Set item category and ignore_item flag.
+    
+    Args:
+        item_name: Item name
+        realm: Item realm (Albion/Hibernia/Midgard/All)
+        category: Category key (quest_reward/event_reward/unknown)
+    
+    Returns:
+        bool: True if successful, False otherwise
+    
+    Side Effects:
+        - Sets item_category field
+        - Sets ignore_item to True
+        - Saves database
+    
+    Example:
+        >>> set_item_category("Battled Mantle of Samhain", "Hibernia", "quest_reward")
+        True
+    """
+```
+
+### User Workflow
+
+**Categorization Entry Points:**
+
+1. **Search Missing Prices Dialog** (`UI/dialogs.py`)
+   ```
+   User Action: Select item → Click "Ignore" button
+   Result: ItemCategoryDialog opens
+   ```
+
+2. **Failed Items Review Dialog** (`UI/failed_items_review_dialog.py`)
+   ```
+   User Action: Select filtered item → Click "Ignore" button
+   Result: ItemCategoryDialog opens
+   ```
+
+**ItemCategoryDialog Flow:**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Categorize Item                              [✖]        │
+├─────────────────────────────────────────────────────────────┤
+│  Item: Battled Mantle of Samhain (Hibernia)                │
+│                                                              │
+│  Select a category:                                │
+│  ○ 🏆 Quest Reward                                   │
+│  ○ 🎉 Event Reward                                │
+│  ○ ❓ Unknown                                                │
+│                                                              │
+│  [✖ Annuler]  [✔ Valider]                                   │
+└─────────────────────────────────────────────────────────────┘
+
+1. User selects category (QRadioButton)
+2. Clicks "OK"
+3. Database updated:
+   - item_category = selected category
+   - ignore_item = True
+4. Dialog closes
+5. Item removed from search results (if in Search Missing Prices)
+```
+
+### Display Integration
+
+**Template Preview** (`UI/dialogs.py` - `ArmorManagementDialog`)
+
+**Before Categorization:**
+```
+📊 Battled Mantle             ❓ Unknown              [DB]
+```
+
+**After Categorization (quest_reward):**
+```
+📊 Battled Mantle             🏆 Quest Reward         [DB]
+```
+
+**Implementation:**
+```python
+def get_item_price(item_name: str, realm: str) -> tuple:
+    """Returns (price_str, source, category)"""
+    
+    # Search database (realm-aware)
+    db_item = search_item_in_db(item_name, realm)
+    
+    if db_item:
+        category = db_item.get('item_category')
+        if category:
+            icon = get_category_icon(category)
+            label = get_category_label(category, current_language)
+            return (f"{icon} {label}", "db", category)
+        
+        # Has merchant price
+        if db_item.get('merchant_price'):
+            price = db_item['merchant_price']
+            currency = db_item['merchant_currency']
+            return (f"💰 {price} {currency}", "db", None)
+    
+    # No data found
+    return ("❓ Unknown", "default", "unknown")
+```
+
+### Best Practices
+
+#### ✅ DO: Categorize Quest/Event Items
+
+```python
+# Items that will NEVER have merchant prices
+quest_items = [
+    "Battled Mantle of Samhain",
+    "Hibernia Medal of Honor",
+    "Epic Quest Reward Item"
+]
+
+# Set category to prevent repeated search failures
+for item in quest_items:
+    set_item_category(item, realm, "quest_reward")
+```
+
+#### ✅ DO: Use Unknown for Temporary Items
+
+```python
+# Items you're not sure about yet
+set_item_category("Mystery Item", realm, "unknown")
+# Can recategorize later when confirmed
+```
+
+#### ❌ DON'T: Categorize Items with Merchants
+
+```python
+# WRONG: Item has merchant price
+item_data = {
+    "merchant_price": "125",
+    "merchant_currency": "Scales",
+    "item_category": "quest_reward"  # ← Contradictory!
+}
+
+# CORRECT: Only categorize priceless items
+if not item.get('merchant_price'):
+    set_item_category(item_name, realm, category)
+```
+
+#### ✅ DO: Respect ignore_item Flag
+
+```python
+# When searching for missing prices
+for item in template_items:
+    db_item = search_item(item)
+    
+    if db_item and db_item.get('ignore_item'):
+        continue  # Skip this item, already categorized
+    
+    # Proceed with price search
+    scrape_item_price(item)
+```
+
+---
+
+## 2.5 Item Categorization System
+
+### Overview
+
+The Item Categorization System allows users to categorize items found in Eden without merchant prices (quest rewards, event rewards) instead of showing generic "❓ Unknown" marker.
+
+### Categories
+
+**Available Categories:**
+
+| Key | Icon | Label (EN) | Label (FR) | Label (DE) |
+|-----|------|-----------|-----------|------------|
+| `quest_reward` | 🏆 | Quest Reward | Quest Reward | Questbelohnung |
+| `event_reward` | 🎉 | Event Reward | Event Reward | Event-Belohnung |
+| `unknown` | ❓ | Unknown | Unknown | Unbekannt |
+
+**Storage:** `Functions/items_database_manager.py` - `ITEM_CATEGORIES` constant
+
+### Database Fields
+
+#### item_category
+
+**Type:** `string` (optional)  
+**Values:** `"quest_reward"`, `"event_reward"`, `"unknown"`, or `null`  
+**Purpose:** Categorize items without merchant prices
+
+**Example:**
+```json
+{
+  "battled mantle of samhain:hibernia": {
+    "id": "172635",
+    "name": "Battled Mantle of Samhain",
+    "item_category": "quest_reward"
+  }
+}
+```
+
+#### ignore_item
+
+**Type:** `boolean` (optional)  
+**Default:** `false`  
+**Purpose:** Exclude item from future price searches
+
+**Auto-Set:** Automatically set to `true` when `item_category` is assigned
+
+**Use Cases:**
+- Quest rewards (no merchants, never will have price)
+- Event rewards (seasonal items)
+- Known priceless items (avoid repeated search failures)
+
+**Example:**
+```json
+{
+  "hibernia medal of honor:hibernia": {
+    "id": "172641",
+    "name": "Hibernia Medal of Honor",
+    "item_category": "quest_reward",
+    "ignore_item": true
+  }
+}
+```
+
+### API Methods
+
+**File:** `Functions/items_database_manager.py`
+
+#### get_item_categories()
+
+```python
+def get_item_categories() -> dict:
+    """
+    Get all available item categories.
+    
+    Returns:
+        dict: ITEM_CATEGORIES constant with icon/label_en/label_fr/label_de
+    """
+```
+
+#### get_category_label()
+
+```python
+def get_category_label(category_key: str, language: str = "en") -> str:
+    """
+    Get localized label for category.
+    
+    Args:
+        category_key: Category key (quest_reward/event_reward/unknown)
+        language: Language code (en/fr/de)
+    
+    Returns:
+        str: Localized label or "Unknown" if not found
+    
+    Example:
+        >>> get_category_label("quest_reward", "en")
+        "Quest Reward"
+    """
+```
+
+#### get_category_icon()
+
+```python
+def get_category_icon(category_key: str) -> str:
+    """
+    Get emoji icon for category.
+    
+    Args:
+        category_key: Category key
+    
+    Returns:
+        str: Emoji icon (🏆/🎉/❓)
+    
+    Example:
+        >>> get_category_icon("quest_reward")
+        "🏆"
+    """
+```
+
+#### set_item_category()
+
+```python
+def set_item_category(item_name: str, realm: str, category: str) -> bool:
+    """
+    Set item category and ignore_item flag.
+    
+    Args:
+        item_name: Item name
+        realm: Item realm (Albion/Hibernia/Midgard/All)
+        category: Category key (quest_reward/event_reward/unknown)
+    
+    Returns:
+        bool: True if successful, False otherwise
+    
+    Side Effects:
+        - Sets item_category field
+        - Sets ignore_item to True
+        - Saves database
+    
+    Example:
+        >>> set_item_category("Battled Mantle of Samhain", "Hibernia", "quest_reward")
+        True
+    """
+```
+
+### User Workflow
+
+**Categorization Entry Points:**
+
+1. **Search Missing Prices Dialog** (`UI/dialogs.py`)
+   ```
+   User Action: Select item → Click "Ignore" button
+   Result: ItemCategoryDialog opens
+   ```
+
+2. **Failed Items Review Dialog** (`UI/failed_items_review_dialog.py`)
+   ```
+   User Action: Select filtered item → Click "Ignore" button
+   Result: ItemCategoryDialog opens
+   ```
+
+**ItemCategoryDialog Flow:**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Categorize Item                              [✖]        │
+├─────────────────────────────────────────────────────────────┤
+│  Item: Battled Mantle of Samhain (Hibernia)                │
+│                                                              │
+│  Select a category:                                │
+│  ○ 🏆 Quest Reward                                   │
+│  ○ 🎉 Event Reward                                │
+│  ○ ❓ Unknown                                                │
+│                                                              │
+│  [✖ Annuler]  [✔ Valider]                                   │
+└─────────────────────────────────────────────────────────────┘
+
+1. User selects category (QRadioButton)
+2. Clicks "OK"
+3. Database updated:
+   - item_category = selected category
+   - ignore_item = True
+4. Dialog closes
+5. Item removed from search results (if in Search Missing Prices)
+```
+
+### Display Integration
+
+**Template Preview** (`UI/dialogs.py` - `ArmorManagementDialog`)
+
+**Before Categorization:**
+```
+📊 Battled Mantle             ❓ Unknown              [DB]
+```
+
+**After Categorization (quest_reward):**
+```
+📊 Battled Mantle             🏆 Quest Reward         [DB]
+```
+
+**Implementation:**
+```python
+def get_item_price(item_name: str, realm: str) -> tuple:
+    """Returns (price_str, source, category)"""
+    
+    # Search database (realm-aware)
+    db_item = search_item_in_db(item_name, realm)
+    
+    if db_item:
+        category = db_item.get('item_category')
+        if category:
+            icon = get_category_icon(category)
+            label = get_category_label(category, current_language)
+            return (f"{icon} {label}", "db", category)
+        
+        # Has merchant price
+        if db_item.get('merchant_price'):
+            price = db_item['merchant_price']
+            currency = db_item['merchant_currency']
+            return (f"💰 {price} {currency}", "db", None)
+    
+    # No data found
+    return ("❓ Unknown", "default", "unknown")
+```
+
+### Best Practices
+
+#### ✅ DO: Categorize Quest/Event Items
+
+```python
+# Items that will NEVER have merchant prices
+quest_items = [
+    "Battled Mantle of Samhain",
+    "Hibernia Medal of Honor",
+    "Epic Quest Reward Item"
+]
+
+# Set category to prevent repeated search failures
+for item in quest_items:
+    set_item_category(item, realm, "quest_reward")
+```
+
+#### ✅ DO: Use Unknown for Temporary Items
+
+```python
+# Items you're not sure about yet
+set_item_category("Mystery Item", realm, "unknown")
+# Can recategorize later when confirmed
+```
+
+#### ❌ DON'T: Categorize Items with Merchants
+
+```python
+# WRONG: Item has merchant price
+item_data = {
+    "merchant_price": "125",
+    "merchant_currency": "Scales",
+    "item_category": "quest_reward"  # ← Contradictory!
+}
+
+# CORRECT: Only categorize priceless items
+if not item.get('merchant_price'):
+    set_item_category(item_name, realm, category)
+```
+
+#### ✅ DO: Respect ignore_item Flag
+
+```python
+# When searching for missing prices
+for item in template_items:
+    db_item = search_item(item)
+    
+    if db_item and db_item.get('ignore_item'):
+        continue  # Skip this item, already categorized
+    
+    # Proceed with price search
+    scrape_item_price(item)
+```
 
 ---
 

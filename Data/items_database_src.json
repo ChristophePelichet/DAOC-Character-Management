@@ -1203,13 +1203,15 @@
       "id": "65541",
       "name": "battled mantle of samhain",
       "realm": "Hibernia",
-      "ignore_item": true
+      "ignore_item": true,
+      "item_category": "quest_reward"
     },
     "hibernia medal of honor:hibernia": {
       "id": "162583",
       "name": "hibernia medal of honor",
       "realm": "Hibernia",
-      "ignore_item": true
+      "ignore_item": true,
+      "item_category": "quest_reward"
     },
     "hydra eyes bracer:hibernia": {
       "id": "149071",

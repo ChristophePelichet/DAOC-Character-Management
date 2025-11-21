@@ -24,6 +24,35 @@ from Functions.path_manager import PathManager
 import logging
 
 
+# ============================================================================
+# ITEM CATEGORIES CONSTANTS
+# ============================================================================
+
+ITEM_CATEGORIES = {
+    "quest_reward": {
+        "icon": "🏆",
+        "label_fr": "Récompense de quête",
+        "label_en": "Quest Reward",
+        "label_de": "Questbelohnung",
+        "show_in_preview": True
+    },
+    "event_reward": {
+        "icon": "🎉",
+        "label_fr": "Récompense d'événement",
+        "label_en": "Event Reward",
+        "label_de": "Eventbelohnung",
+        "show_in_preview": True
+    },
+    "unknown": {
+        "icon": "❓",
+        "label_fr": "Prix inconnu",
+        "label_en": "Unknown Price",
+        "label_de": "Unbekannter Preis",
+        "show_in_preview": False
+    }
+}
+
+
 class ItemsDatabaseManager:
     """Manages access to items databases with dual-mode support"""
 
@@ -360,4 +389,95 @@ class ItemsDatabaseManager:
             
         except Exception as e:
             logging.error(f"Error resetting personal database: {e}", extra={"action": "ITEMDB_RESET_ERROR"})
+            return False, str(e)
+
+    @staticmethod
+    def get_item_categories():
+        """
+        Get all available item categories
+        
+        Returns:
+            Dict: ITEM_CATEGORIES dictionary
+        """
+        return ITEM_CATEGORIES
+
+    @staticmethod
+    def get_category_label(category_key: str, language: str = "en") -> str:
+        """
+        Get translated label for a category
+        
+        Args:
+            category_key: Category key (quest_reward, event_reward, unknown)
+            language: Language code (en, fr, or de)
+            
+        Returns:
+            str: Translated label
+        """
+        category = ITEM_CATEGORIES.get(category_key, ITEM_CATEGORIES["unknown"])
+        label_key = f"label_{language}" if language in ["en", "fr", "de"] else "label_en"
+        return category.get(label_key, category["label_en"])
+
+    @staticmethod
+    def get_category_icon(category_key: str) -> str:
+        """
+        Get icon for a category
+        
+        Args:
+            category_key: Category key (quest_reward, event_reward, unknown)
+            
+        Returns:
+            str: Icon emoji
+        """
+        category = ITEM_CATEGORIES.get(category_key, ITEM_CATEGORIES["unknown"])
+        return category.get("icon", "❓")
+
+    def set_item_category(self, item_name: str, category: str) -> Tuple[bool, str]:
+        """
+        Set category for an item (quest_reward, event_reward, unknown)
+        Also sets ignore_item to True if category is not unknown
+        
+        Args:
+            item_name: Item name
+            category: Category key
+            
+        Returns:
+            Tuple[bool, str]: (Success, Message)
+        """
+        if category not in ITEM_CATEGORIES:
+            return False, f"Invalid category: {category}"
+        
+        try:
+            # Get active database path (must be personal database)
+            db_path = self.get_active_database_path()
+            
+            # If using internal database, create personal database first
+            if db_path == self.internal_db_path:
+                success, msg = self.create_personal_database()
+                if not success:
+                    return False, f"Failed to create personal database: {msg}"
+                db_path = self.get_active_database_path()
+            
+            database = self._load_database(db_path)
+            items = database.get("items", {})
+            
+            # Find item (case-insensitive)
+            item_key = item_name.lower()
+            if item_key not in items:
+                return False, f"Item '{item_name}' not found in database"
+            
+            # Update item
+            items[item_key]["item_category"] = category
+            items[item_key]["ignore_item"] = (category != "unknown")  # Ignore if categorized
+            
+            # Save database
+            database["items"] = items
+            if not self._save_database(db_path, database):
+                return False, "Failed to save database"
+            
+            category_label = self.get_category_label(category, "en")
+            logging.info(f"Set category '{category}' for item '{item_name}'", extra={"action": "ITEMDB_CATEGORY"})
+            return True, f"Category set to: {category_label}"
+            
+        except Exception as e:
+            logging.error(f"Error setting item category: {e}", extra={"action": "ITEMDB_CATEGORY_ERROR"})
             return False, str(e)

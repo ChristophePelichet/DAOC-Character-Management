@@ -379,8 +379,8 @@
                 "status_no_date": "-"
             },
             "mass_import_monitor": {
-                "window_title": "📦 Mass Import",
-                "title": "📦 Mass Import",
+                "window_title": "🔧 Database Management Tools",
+                "title": "🔧 Database Management Tools",
                 "stats_group": "📊 Real-Time Statistics",
                 "unique_items": "🔍 Unique items:",
                 "variants_found": "🌐 Variants found:",

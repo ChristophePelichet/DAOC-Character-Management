@@ -17,7 +17,7 @@ from PySide6.QtWidgets import (
     QPushButton, QLineEdit, QComboBox, QCheckBox, QSlider, QMessageBox,
     QDialogButtonBox, QFileDialog, QTableWidget, QTableWidgetItem, QHeaderView,
     QWidget, QTextEdit, QApplication, QProgressBar, QMenu, QGridLayout, QFrame, QScrollArea, QSplitter,
-    QListWidget
+    QListWidget, QButtonGroup, QRadioButton
 )
 from PySide6.QtCore import Qt, QThread, Signal, QTimer
 from PySide6.QtGui import QBrush, QColor, QIcon, QPixmap
@@ -27,6 +27,7 @@ from Functions.character_manager import get_character_dir
 from Functions.logging_manager import get_log_dir, get_logger, log_with_action, LOGGER_CHARACTER
 from Functions.data_manager import DataManager
 from Functions.theme_manager import get_scaled_size
+from Functions.items_database_manager import ItemsDatabaseManager
 from UI.template_import_dialog import TemplateImportDialog
 
 # Get CHARACTER logger
@@ -3229,14 +3230,15 @@ class ArmorManagementDialog(QDialog):
             - Priority 2: Item available to all realms (e.g., "item:all")
             - Priority 3: Item without realm suffix (legacy format)
             
-            Returns tuple: (formatted_price_string, source) or (None, None)
+            Returns tuple: (formatted_price_string, source, item_category) or (None, None, None)
             - source can be: 'json' (from template) or 'db' (from database)
+            - item_category: Category key if item is categorized (quest_reward, event_reward, unknown) or None
             """
             try:
                 # Step 1: Check template metadata JSON for stored price (highest priority)
                 if metadata and 'prices' in metadata:
                     if item_name in metadata['prices']:
-                        return (metadata['prices'][item_name], 'json')
+                        return (metadata['prices'][item_name], 'json', None)
                 
                 # Step 2: Try database with realm-aware search
                 item_name_lower = item_name.lower()
@@ -3254,6 +3256,9 @@ class ArmorManagementDialog(QDialog):
                 # Priority 3: Try without realm suffix (legacy items or direct search)
                 if not item_data:
                     item_data = self.db_manager.search_item(item_name)
+                
+                # Check if item is categorized (quest_reward, event_reward, unknown)
+                item_category = item_data.get('item_category') if item_data else None
                 
                 # Format price if found in database
                 if item_data and 'merchant_price' in item_data:
@@ -3274,13 +3279,52 @@ class ArmorManagementDialog(QDialog):
                         currency = currency_map.get(merchant_zone, '')
                     
                     if currency:
-                        return (f"{price} {currency}", 'db')
-                    return (price, 'db')
+                        return (f"{price} {currency}", 'db', item_category)
+                    return (price, 'db', item_category)
+                
+                # Return category even if no price found
+                if item_category:
+                    return (None, None, item_category)
                 
             except Exception as e:
                 logging.debug(f"Failed to lookup price for '{item_name}': {e}")
             
-            return (None, None)
+            return (None, None, None)
+        
+        # Helper function to format item display (price or category)
+        def format_item_display(item_name, price_str, price_source, item_category):
+            """
+            Format item display with price or category
+            
+            Args:
+                item_name: Name of the item
+                price_str: Price string if available (or None)
+                price_source: Source of price ('json', 'db', or None)
+                item_category: Category key ('quest_reward', 'event_reward', 'unknown', or None)
+            
+            Returns:
+                str: Formatted display string (icon + price/category) with FIXED WIDTH using HTML
+            """
+            if price_str:
+                # Has price: show icon + price
+                icon = "📝" if price_source == 'json' else "💰"
+                result = f"{icon} {price_str}"
+            elif item_category and item_category != "unknown":
+                # No price but has category: show category
+                from Functions.items_database_manager import ItemsDatabaseManager
+                icon = ItemsDatabaseManager.get_category_icon(item_category)
+                # Use current language from lang manager
+                current_lang = lang.current_language if hasattr(lang, 'current_language') else 'en'
+                label = ItemsDatabaseManager.get_category_label(item_category, current_lang)
+                result = f"{icon} {label}"
+            else:
+                # No price, no category: unknown
+                result = "❓"
+            
+            # SOLUTION: Use HTML with fixed-width span to force alignment
+            # Wrap in a span with min-width to ensure consistent spacing
+            # The HTML renderer in Qt will handle this properly
+            return f'<span style="display:inline-block; min-width:200px;">{result}</span>'
         
         # Parse Stats section
         stats = {}
@@ -3601,14 +3645,15 @@ class ArmorManagementDialog(QDialog):
                 output.append(f"    🛡️  {lang.get('armoury_dialog.preview.equipment_categories.armor_pieces')} :")
                 for item in armor_items:
                     item_text = f"{item['name']} ({item['slot']})"
-                    price_str, price_source = get_item_price(item['name'])
+                    price_str, price_source, item_category = get_item_price(item['name'])
                     padding = max_len - len(item_text)
+                    
+                    # Format display (price or category)
+                    display = format_item_display(item['name'], price_str, price_source, item_category)
+                    output.append(f"      • {item_text}{' ' * padding}  {display}")
+                    
+                    # Accumulate currency totals (only if price found)
                     if price_str:
-                        # Different icon based on source: 💰 = DB, 📝 = JSON template
-                        icon = "📝" if price_source == 'json' else "💰"
-                        output.append(f"      • {item_text}{' ' * padding}  {icon} {price_str}")
-                        
-                        # Accumulate currency totals
                         try:
                             if price_source == 'json' and isinstance(price_str, dict):
                                 price = int(price_str.get('price', 0))
@@ -3622,10 +3667,9 @@ class ArmorManagementDialog(QDialog):
                                     currency_totals_temp[currency] += price
                         except:
                             pass
-                    else:
-                        # No price found - add indicator and track for search button
+                    elif not item_category or item_category == "unknown":
+                        # No price and no category: track for search button
                         items_without_price.append(item['name'])
-                        output.append(f"      • {item_text}{' ' * padding}  ❓")
             
             # Display Jewelry items (2 columns layout)
             if jewelry_items:
@@ -3662,13 +3706,10 @@ class ArmorManagementDialog(QDialog):
                     if left_slot in jewelry_dict:
                         left_item = jewelry_dict[left_slot]
                         left_text = f"{left_item['name']} ({left_item['slot']})"
-                        left_price_str, left_price_source = get_item_price(left_item['name'])
+                        left_price_str, left_price_source, left_item_category = get_item_price(left_item['name'])
                         left_name_padded = left_text.ljust(max_item_name_width)
-                        if left_price_str:
-                            left_icon = "📝" if left_price_source == 'json' else "💰"
-                            full_line = f"• {left_name_padded}  {left_icon} {left_price_str}"
-                        else:
-                            full_line = f"• {left_name_padded}  ❓"
+                        left_display = format_item_display(left_item['name'], left_price_str, left_price_source, left_item_category)
+                        full_line = f"• {left_name_padded}  {left_display}"
                         max_left_total_width = max(max_left_total_width, len(full_line))
                 
                 max_left_total_width = max(max_left_total_width, 50)  # Minimum total width
@@ -3680,16 +3721,13 @@ class ArmorManagementDialog(QDialog):
                     # Build left column
                     if left_item:
                         left_text = f"{left_item['name']} ({left_item['slot']})"
-                        left_price_str, left_price_source = get_item_price(left_item['name'])
-                        
-                        # Pad item name first, then add price
+                        left_price_str, left_price_source, left_item_category = get_item_price(left_item['name'])
                         left_name_padded = left_text.ljust(max_item_name_width)
+                        left_display = format_item_display(left_item['name'], left_price_str, left_price_source, left_item_category)
+                        left_output = f"• {left_name_padded}  {left_display}"
                         
+                        # Accumulate currency totals
                         if left_price_str:
-                            left_icon = "📝" if left_price_source == 'json' else "💰"
-                            left_output = f"• {left_name_padded}  {left_icon} {left_price_str}"
-                            
-                            # Accumulate currency totals
                             try:
                                 if left_price_source == 'json' and isinstance(left_price_str, dict):
                                     price = int(left_price_str.get('price', 0))
@@ -3703,11 +3741,10 @@ class ArmorManagementDialog(QDialog):
                                         currency_totals_temp[currency] += price
                             except:
                                 pass
-                        else:
+                        elif not left_item_category or left_item_category == "unknown":
                             items_without_price.append(left_item['name'])
-                            left_output = f"• {left_name_padded}  ❓"
                         
-                        # Pad entire left line to max width for separator alignment
+                        # Pad entire left line to max width
                         left_output = left_output.ljust(max_left_total_width)
                     else:
                         left_output = " " * max_left_total_width
@@ -3715,16 +3752,13 @@ class ArmorManagementDialog(QDialog):
                     # Build right column
                     if right_item:
                         right_text = f"{right_item['name']} ({right_item['slot']})"
-                        right_price_str, right_price_source = get_item_price(right_item['name'])
-                        
-                        # Pad item name first, then add price
+                        right_price_str, right_price_source, right_item_category = get_item_price(right_item['name'])
                         right_name_padded = right_text.ljust(max_item_name_width)
+                        right_display = format_item_display(right_item['name'], right_price_str, right_price_source, right_item_category)
+                        right_output = f"• {right_name_padded}  {right_display}"
                         
+                        # Accumulate currency totals
                         if right_price_str:
-                            right_icon = "📝" if right_price_source == 'json' else "💰"
-                            right_output = f"• {right_name_padded}  {right_icon} {right_price_str}"
-                            
-                            # Accumulate currency totals
                             try:
                                 if right_price_source == 'json' and isinstance(right_price_str, dict):
                                     price = int(right_price_str.get('price', 0))
@@ -3738,13 +3772,12 @@ class ArmorManagementDialog(QDialog):
                                         currency_totals_temp[currency] += price
                             except:
                                 pass
-                        else:
+                        elif not right_item_category or right_item_category == "unknown":
                             items_without_price.append(right_item['name'])
-                            right_output = f"• {right_name_padded}  ❓"
                     else:
                         right_output = ""
                     
-                    # Merge columns with separator (left column now has fixed total width)
+                    # Merge columns with separator
                     if right_output:
                         output.append(f"      {left_output}  │  {right_output}")
                     elif left_item:
@@ -3756,14 +3789,15 @@ class ArmorManagementDialog(QDialog):
                 output.append(f"    ⚔️  {lang.get('armoury_dialog.preview.equipment_categories.weapons')} :")
                 for item in weapon_items:
                     item_text = f"{item['name']} ({item['slot']})"
-                    price_str, price_source = get_item_price(item['name'])
+                    price_str, price_source, item_category = get_item_price(item['name'])
                     padding = max_len - len(item_text)
+                    
+                    # Format display (price or category)
+                    display = format_item_display(item['name'], price_str, price_source, item_category)
+                    output.append(f"      • {item_text}{' ' * padding}  {display}")
+                    
+                    # Accumulate currency totals (only if price found)
                     if price_str:
-                        # Different icon based on source: 💰 = DB, 📝 = JSON template
-                        icon = "📝" if price_source == 'json' else "💰"
-                        output.append(f"      • {item_text}{' ' * padding}  {icon} {price_str}")
-                        
-                        # Accumulate currency totals
                         try:
                             if price_source == 'json' and isinstance(price_str, dict):
                                 price = int(price_str.get('price', 0))
@@ -3777,16 +3811,16 @@ class ArmorManagementDialog(QDialog):
                                     currency_totals_temp[currency] += price
                         except:
                             pass
-                    else:
-                        # No price found - add indicator and track for search button
+                    elif not item_category or item_category == "unknown":
+                        # No price and no category: track for search button
                         items_without_price.append(item['name'])
-                        output.append(f"      • {item_text}{' ' * padding}  ❓")
             
-            # Add info about missing prices if any
+            # Add info about price indicators and categories
             if items_without_price:
                 output.append("")
                 output.append(f"  ℹ️  Price indicators:")
                 output.append(f"      💰 = Database   📝 = Template   ❓ = Missing")
+                output.append(f"      ⚔️ = Quest Reward   🎉 = Event Reward")
                 
                 # Store items_without_price for search button
                 self.items_without_price = items_without_price
@@ -3797,12 +3831,8 @@ class ArmorManagementDialog(QDialog):
             
             # ========== SECTION 7: CURRENCY SUMMARY (only if prices found) ==========
             if currency_totals_temp:
-                # Add adaptive separator line before currency section
-                max_line_width = 80
-                for line in output:
-                    clean_line = remove_color_markers_for_width(line)
-                    max_line_width = max(max_line_width, len(clean_line))
-                output.append("═" * max_line_width)
+                # Add fixed separator line before currency section (94 characters)
+                output.append("═" * 94)
                 output.append("")
                 
                 # Add missing items counter next to title
@@ -7825,8 +7855,27 @@ class SearchMissingPricesDialog(QDialog):
                             failed_items.append(f"{item_name} (save error)")
                             logging.error(f"Failed to save {item_name} to template")
                     else:
-                        failed_items.append(f"{item_name} (not found)")
+                        # No price found - offer categorization
                         logging.warning(f"No price found for {item_name}")
+                        
+                        # Show categorization dialog
+                        category_dialog = ItemCategoryDialog(item_name, parent=self)
+                        if category_dialog.exec() == QDialog.Accepted:
+                            selected_category = category_dialog.get_selected_category()
+                            
+                            # Save category to database
+                            ItemsDatabaseManager.set_item_category(item_name, selected_category)
+                            
+                            # Get category label for display
+                            category_label = ItemsDatabaseManager.get_category_label(selected_category, lang.current_language)
+                            category_icon = ItemsDatabaseManager.get_category_icon(selected_category)
+                            
+                            found_count += 1  # Count as handled
+                            logging.info(f"Categorized {item_name} as: {selected_category}")
+                        else:
+                            # User cancelled categorization
+                            failed_items.append(f"{item_name} (not categorized)")
+                            logging.warning(f"User cancelled categorization for {item_name}")
                 
                 except Exception as e:
                     failed_items.append(f"{item_name} (error: {str(e)})")
@@ -7913,29 +7962,87 @@ class SearchMissingPricesDialog(QDialog):
             # Clear and repopulate the list widget
             self.items_list.clear()
             self.items_list.addItems(updated_items)
+
+
+# ============================================================================
+# ITEM CATEGORY DIALOG
+# ============================================================================
+
+class ItemCategoryDialog(QDialog):
+    """Dialog to categorize an item without price (quest_reward, event_reward, unknown)"""
+    
+    def __init__(self, item_name, parent=None):
+        super().__init__(parent)
+        self.item_name = item_name
+        self.selected_category = None
+        
+        self.setWindowTitle(lang.get("item_category_dialog.title", default="Categorize Item"))
+        self.setWindowFlags(Qt.Dialog | Qt.WindowCloseButtonHint)
+        self.resize(500, 250)
+        
+        layout = QVBoxLayout(self)
+        
+        # Info label
+        info_text = lang.get(
+            "item_category_dialog.info",
+            default=f"Item '{item_name}' has no price in database.\nPlease categorize this item:"
+        )
+        info_label = QLabel(info_text.replace("{item_name}", item_name))
+        info_label.setWordWrap(True)
+        info_label.setStyleSheet("font-size: 11pt; padding: 10px;")
+        layout.addWidget(info_label)
+        
+        # Category selection
+        category_group = QGroupBox(lang.get("item_category_dialog.category_group", default="Category"))
+        category_layout = QVBoxLayout(category_group)
+        
+        from Functions.items_database_manager import ItemsDatabaseManager
+        categories = ItemsDatabaseManager.get_item_categories()
+        
+        self.category_buttons = QButtonGroup(self)
+        
+        # Create radio button for each category (except 'unknown')
+        for category_key, category_data in categories.items():
+            if category_key == "unknown":
+                continue  # Skip unknown, it's the default fallback
             
-            # Update info label
-            if updated_items:
-                info_text = lang.get(
-                    "search_prices_dialog.info",
-                    default=f"Found {len(updated_items)} item(s) without price in database.\nClick 'Search All' to search online or select individual items."
-                )
-                # Get the info label (first label in layout)
-                info_label = self.layout().itemAt(0).widget()
-                if isinstance(info_label, QLabel):
-                    info_label.setText(info_text)
-            else:
-                # No more items without price - show success message
-                info_text = lang.get(
-                    "search_prices_dialog.all_found",
-                    default="✅ All items now have prices!"
-                )
-                info_label = self.layout().itemAt(0).widget()
-                if isinstance(info_label, QLabel):
-                    info_label.setText(info_text)
-                    info_label.setStyleSheet("color: green; font-weight: bold;")
-                
-                # Disable search button
-                self.search_button.setEnabled(False)
-                self.select_all_button.setEnabled(False)
-                self.deselect_all_button.setEnabled(False)
+            icon = category_data["icon"]
+            # Get label in current language
+            from Functions.language_manager import lang
+            current_lang = lang.current_language if hasattr(lang, 'current_language') else 'en'
+            label = ItemsDatabaseManager.get_category_label(category_key, current_lang)
+            
+            radio = QRadioButton(f"{icon}  {label}")
+            radio.setProperty("category_key", category_key)
+            radio.setStyleSheet("font-size: 10pt; padding: 5px;")
+            self.category_buttons.addButton(radio)
+            category_layout.addWidget(radio)
+        
+        # Select first option by default
+        if self.category_buttons.buttons():
+            self.category_buttons.buttons()[0].setChecked(True)
+        
+        layout.addWidget(category_group)
+        
+        # Buttons
+        button_layout = QHBoxLayout()
+        button_layout.addStretch()
+        
+        cancel_btn = QPushButton(lang.get("item_category_dialog.cancel", default="Cancel"))
+        cancel_btn.clicked.connect(self.reject)
+        button_layout.addWidget(cancel_btn)
+        
+        ok_btn = QPushButton(lang.get("item_category_dialog.ok", default="OK"))
+        ok_btn.setStyleSheet("background-color: #0e639c; color: white; padding: 5px 15px;")
+        ok_btn.clicked.connect(self.accept)
+        ok_btn.setDefault(True)
+        button_layout.addWidget(ok_btn)
+        
+        layout.addLayout(button_layout)
+    
+    def get_selected_category(self):
+        """Get the selected category key"""
+        checked_button = self.category_buttons.checkedButton()
+        if checked_button:
+            return checked_button.property("category_key")
+        return "unknown"

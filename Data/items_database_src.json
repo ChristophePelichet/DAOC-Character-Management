@@ -1,8 +1,8 @@
 {
   "version": "2.0",
   "description": "DAOC Items Database - Multi-Realm Support (Minimal Data)",
-  "last_updated": "2025-11-20 19:15:14",
-  "item_count": 92,
+  "last_updated": "2025-11-21 08:56:12",
+  "item_count": 108,
   "notes": [
     "Composite keys format: 'item_name:realm' (lowercase)",
     "Only essential data: ID, name, realm, slot, type, model, damage info, merchant",
@@ -872,7 +872,7 @@
       "source": "internal",
       "merchant_zone": "Epic",
       "merchant_price": "600",
-      "merchant_currency": "Roots"
+      "merchant_currency": "Souls/Roots/Ices"
     },
     "warshadow bracer:hibernia": {
       "id": "112300",
@@ -904,7 +904,7 @@
       "source": "internal",
       "merchant_zone": "Epic",
       "merchant_price": "600",
-      "merchant_currency": "Roots"
+      "merchant_currency": "Souls/Roots/Ices"
     },
     "dirge of sheeroe hills:hibernia": {
       "id": "163426",
@@ -949,10 +949,10 @@
       "speed": null,
       "damage_type": null,
       "usable_by": "ALL",
-      "source": "internal",
       "merchant_zone": "Epic",
       "merchant_price": "500",
-      "merchant_currency": "Gold"
+      "merchant_currency": "Souls/Roots/Ices",
+      "source": "internal"
     },
     "veil-touched hauberk:hibernia": {
       "id": "163416",
@@ -981,10 +981,10 @@
       "speed": null,
       "damage_type": null,
       "usable_by": "ALL",
-      "source": "internal",
       "merchant_zone": "Epic",
-      "merchant_price": "Unknown",
-      "merchant_currency": null
+      "merchant_price": null,
+      "merchant_currency": "Souls/Roots/Ices",
+      "source": "internal"
     },
     "staff of ageless power:midgard": {
       "id": "163441",
@@ -1032,7 +1032,7 @@
       "source": "internal",
       "merchant_zone": "SH",
       "merchant_price": "500",
-      "merchant_currency": "Grimoire Pages"
+      "merchant_currency": "Grimoires"
     },
     "band of eternity:midgard": {
       "id": "139633",
@@ -1048,7 +1048,7 @@
       "source": "internal",
       "merchant_zone": "SH",
       "merchant_price": "500",
-      "merchant_currency": "Grimoire Pages"
+      "merchant_currency": "Grimoires"
     },
     "band of eternity:hibernia": {
       "id": "139639",
@@ -1064,7 +1064,7 @@
       "source": "internal",
       "merchant_zone": "SH",
       "merchant_price": "500",
-      "merchant_currency": "Grimoire Pages"
+      "merchant_currency": "Grimoires"
     },
     "bracer of embodiment:midgard": {
       "id": "112492",
@@ -1096,7 +1096,7 @@
       "source": "internal",
       "merchant_zone": "ToA",
       "merchant_price": "900",
-      "merchant_currency": "Atlantean Glass"
+      "merchant_currency": "Glasses"
     },
     "astral robe of virulence:albion": {
       "id": "137418",
@@ -1112,7 +1112,7 @@
       "source": "internal",
       "merchant_zone": "ToA",
       "merchant_price": "900",
-      "merchant_currency": "Atlantean Glass"
+      "merchant_currency": "Glasses"
     },
     "astral staff of swarms:albion": {
       "id": "137415",
@@ -1129,7 +1129,7 @@
       "bypass_filters": false,
       "merchant_zone": "ToA",
       "merchant_price": "900",
-      "merchant_currency": "Atlantean Glass"
+      "merchant_currency": "Glasses"
     },
     "astral staff of swarms:midgard": {
       "id": "137446",
@@ -1146,7 +1146,7 @@
       "bypass_filters": false,
       "merchant_zone": "ToA",
       "merchant_price": "900",
-      "merchant_currency": "Atlantean Glass"
+      "merchant_currency": "Glasses"
     },
     "astral staff of swarms:hibernia": {
       "id": "137471",
@@ -1163,7 +1163,7 @@
       "bypass_filters": false,
       "merchant_zone": "ToA",
       "merchant_price": "900",
-      "merchant_currency": "Atlantean Glass"
+      "merchant_currency": "Glasses"
     },
     "thorn:hibernia": {
       "id": "138384",
@@ -1180,7 +1180,7 @@
       "bypass_filters": true,
       "merchant_zone": "ToA",
       "merchant_price": "650",
-      "merchant_currency": "Atlantean Glass"
+      "merchant_currency": "Glasses"
     },
     "director's ring of oblivion:all": {
       "id": "110893",
@@ -1226,7 +1226,7 @@
       "bypass_filters": true,
       "merchant_zone": "Epic",
       "merchant_price": "625",
-      "merchant_currency": "Roots"
+      "merchant_currency": "Souls/Roots/Ices"
     },
     "saliva-flecked sabatons:hibernia": {
       "id": "117871",
@@ -1243,7 +1243,7 @@
       "bypass_filters": true,
       "merchant_zone": "SH",
       "merchant_price": "600",
-      "merchant_currency": "Grimoire Pages"
+      "merchant_currency": "Grimoires"
     },
     "saliva-flecked sabatons:albion": {
       "id": "117458",
@@ -1260,7 +1260,7 @@
       "bypass_filters": true,
       "merchant_zone": "SH",
       "merchant_price": "600",
-      "merchant_currency": "Grimoire Pages"
+      "merchant_currency": "Grimoires"
     },
     "saliva-flecked sabatons:midgard": {
       "id": "117490",
@@ -1277,7 +1277,7 @@
       "bypass_filters": true,
       "merchant_zone": "SH",
       "merchant_price": "600",
-      "merchant_currency": "Grimoire Pages"
+      "merchant_currency": "Grimoires"
     },
     "filigree antalya ring:albion": {
       "id": "136618",
@@ -1294,7 +1294,7 @@
       "bypass_filters": true,
       "merchant_zone": "ToA",
       "merchant_price": "700",
-      "merchant_currency": "Atlantean Glass"
+      "merchant_currency": "Glasses"
     },
     "filigree antalya ring:midgard": {
       "id": "136643",
@@ -1311,7 +1311,7 @@
       "bypass_filters": true,
       "merchant_zone": "ToA",
       "merchant_price": "700",
-      "merchant_currency": "Atlantean Glass"
+      "merchant_currency": "Glasses"
     },
     "filigree antalya ring:hibernia": {
       "id": "136668",
@@ -1328,7 +1328,7 @@
       "bypass_filters": true,
       "merchant_zone": "ToA",
       "merchant_price": "700",
-      "merchant_currency": "Atlantean Glass"
+      "merchant_currency": "Glasses"
     },
     "ring of arcane gestures:albion": {
       "id": "163481",
@@ -1362,7 +1362,7 @@
       "bypass_filters": true,
       "merchant_zone": "ToA",
       "merchant_price": "600",
-      "merchant_currency": "Atlantean Glass"
+      "merchant_currency": "Glasses"
     },
     "belt of heavenly bodies:midgard": {
       "id": "138174",
@@ -1379,7 +1379,7 @@
       "bypass_filters": true,
       "merchant_zone": "ToA",
       "merchant_price": "600",
-      "merchant_currency": "Atlantean Glass"
+      "merchant_currency": "Glasses"
     },
     "belt of heavenly bodies:hibernia": {
       "id": "138217",
@@ -1396,7 +1396,7 @@
       "bypass_filters": true,
       "merchant_zone": "ToA",
       "merchant_price": "600",
-      "merchant_currency": "Atlantean Glass"
+      "merchant_currency": "Glasses"
     },
     "arcane-infused armband:hibernia": {
       "id": "117564",
@@ -1413,7 +1413,7 @@
       "bypass_filters": true,
       "merchant_zone": "SH",
       "merchant_price": "600",
-      "merchant_currency": "Grimoire Pages"
+      "merchant_currency": "Grimoires"
     },
     "arcane-infused armband:albion": {
       "id": "117447",
@@ -1430,7 +1430,7 @@
       "bypass_filters": true,
       "merchant_zone": "SH",
       "merchant_price": "600",
-      "merchant_currency": "Grimoire Pages"
+      "merchant_currency": "Grimoires"
     },
     "arcane-infused armband:midgard": {
       "id": "117486",
@@ -1447,7 +1447,279 @@
       "bypass_filters": true,
       "merchant_zone": "SH",
       "merchant_price": "600",
-      "merchant_currency": "Grimoire Pages"
+      "merchant_currency": "Grimoires"
+    },
+    "buckler of crystalline mist:hibernia": {
+      "id": "163401",
+      "name": "Buckler of Crystalline Mist",
+      "realm": "Hibernia",
+      "slot": "Left Hand",
+      "type": "Shield",
+      "model": "3888",
+      "dps": "16.5",
+      "speed": "2.5",
+      "damage_type": "Crush",
+      "usable_by": "ALL",
+      "source": "internal",
+      "bypass_filters": true,
+      "merchant_zone": "Drake",
+      "merchant_price": "450",
+      "merchant_currency": "Scales"
+    },
+    "gatekeeper bracer of bedlam:all": {
+      "id": "110902",
+      "name": "Gatekeeper Bracer of Bedlam",
+      "realm": "All",
+      "slot": "Bracer",
+      "type": "Magical",
+      "model": "598",
+      "dps": null,
+      "speed": null,
+      "damage_type": null,
+      "usable_by": "ALL",
+      "source": "internal",
+      "bypass_filters": true,
+      "merchant_zone": "DF",
+      "merchant_price": "500",
+      "merchant_currency": "Seals"
+    },
+    "howling wraith bracer:all": {
+      "id": "121953",
+      "name": "Howling Wraith Bracer",
+      "realm": "All",
+      "slot": "Bracer",
+      "type": "Magical",
+      "model": "598",
+      "dps": null,
+      "speed": null,
+      "damage_type": null,
+      "usable_by": "ALL",
+      "source": "internal",
+      "bypass_filters": true,
+      "merchant_zone": "ToA",
+      "merchant_price": "650",
+      "merchant_currency": "Glasses"
+    },
+    "semi-ethereal gloves:hibernia": {
+      "id": "112121",
+      "name": "Semi-ethereal Gloves",
+      "realm": "Hibernia",
+      "slot": "Gloves",
+      "type": "Cloth",
+      "model": "4102",
+      "dps": null,
+      "speed": null,
+      "damage_type": null,
+      "usable_by": "ALL",
+      "source": "internal",
+      "bypass_filters": false,
+      "merchant_zone": "Epic",
+      "merchant_price": "450",
+      "merchant_currency": "Souls/Roots/Ices"
+    },
+    "band of clandestinity:albion": {
+      "id": "139660",
+      "name": "Band of Clandestinity",
+      "realm": "Albion",
+      "slot": "Ring",
+      "type": "Magical",
+      "model": "103",
+      "dps": null,
+      "speed": null,
+      "damage_type": null,
+      "usable_by": "ALL",
+      "source": "internal",
+      "bypass_filters": false,
+      "merchant_zone": "SH",
+      "merchant_price": "600",
+      "merchant_currency": "Grimoires"
+    },
+    "band of clandestinity:midgard": {
+      "id": "139667",
+      "name": "Band of Clandestinity",
+      "realm": "Midgard",
+      "slot": "Ring",
+      "type": "Magical",
+      "model": "103",
+      "dps": null,
+      "speed": null,
+      "damage_type": null,
+      "usable_by": "ALL",
+      "source": "internal",
+      "bypass_filters": false,
+      "merchant_zone": "SH",
+      "merchant_price": "600",
+      "merchant_currency": "Grimoires"
+    },
+    "band of clandestinity:hibernia": {
+      "id": "139673",
+      "name": "Band of Clandestinity",
+      "realm": "Hibernia",
+      "slot": "Ring",
+      "type": "Magical",
+      "model": "103",
+      "dps": null,
+      "speed": null,
+      "damage_type": null,
+      "usable_by": "ALL",
+      "source": "internal",
+      "bypass_filters": false,
+      "merchant_zone": "SH",
+      "merchant_price": "600",
+      "merchant_currency": "Grimoires"
+    },
+    "bracer of snow:midgard": {
+      "id": "132222",
+      "name": "Bracer of Snow",
+      "realm": "Midgard",
+      "slot": "Bracer",
+      "type": "Magical",
+      "model": "598",
+      "dps": null,
+      "speed": null,
+      "damage_type": null,
+      "usable_by": "ALL",
+      "source": "internal",
+      "bypass_filters": true,
+      "merchant_zone": "ToA",
+      "merchant_price": "650",
+      "merchant_currency": "Glasses"
+    },
+    "bracer of snow:hibernia": {
+      "id": "132252",
+      "name": "Bracer of Snow",
+      "realm": "Hibernia",
+      "slot": "Bracer",
+      "type": "Magical",
+      "model": "598",
+      "dps": null,
+      "speed": null,
+      "damage_type": null,
+      "usable_by": "ALL",
+      "source": "internal",
+      "bypass_filters": true,
+      "merchant_zone": "ToA",
+      "merchant_price": "650",
+      "merchant_currency": "Glasses"
+    },
+    "bloody suede boots:hibernia": {
+      "id": "163427",
+      "name": "Bloody Suede Boots",
+      "realm": "Hibernia",
+      "slot": "Boots",
+      "type": "Leather",
+      "model": "4078",
+      "dps": null,
+      "speed": null,
+      "damage_type": null,
+      "usable_by": "ALL",
+      "source": "internal",
+      "bypass_filters": false,
+      "merchant_zone": "Drake",
+      "merchant_price": "250",
+      "merchant_currency": "Scales"
+    },
+    "astral torporific leggings:albion": {
+      "id": "137422",
+      "name": "Astral Torporific Leggings",
+      "realm": "Albion",
+      "slot": "Legs",
+      "type": "Leather",
+      "model": "2150",
+      "dps": null,
+      "speed": null,
+      "damage_type": null,
+      "usable_by": "ALL",
+      "source": "internal",
+      "bypass_filters": false,
+      "merchant_zone": "ToA",
+      "merchant_price": "800",
+      "merchant_currency": "Glasses"
+    },
+    "astral torporific leggings:midgard": {
+      "id": "137450",
+      "name": "Astral Torporific Leggings",
+      "realm": "Midgard",
+      "slot": "Legs",
+      "type": "Leather",
+      "model": "2150",
+      "dps": null,
+      "speed": null,
+      "damage_type": null,
+      "usable_by": "ALL",
+      "source": "internal",
+      "bypass_filters": false,
+      "merchant_zone": "ToA",
+      "merchant_price": "800",
+      "merchant_currency": "Glasses"
+    },
+    "astral torporific leggings:hibernia": {
+      "id": "137475",
+      "name": "Astral Torporific Leggings",
+      "realm": "Hibernia",
+      "slot": "Legs",
+      "type": "Leather",
+      "model": "2151",
+      "dps": null,
+      "speed": null,
+      "damage_type": null,
+      "usable_by": "ALL",
+      "source": "internal",
+      "bypass_filters": false,
+      "merchant_zone": "ToA",
+      "merchant_price": "800",
+      "merchant_currency": "Glasses"
+    },
+    "soul glimmer:hibernia": {
+      "id": "163411",
+      "name": "Soul Glimmer",
+      "realm": "Hibernia",
+      "slot": "Right Hand",
+      "type": "Piercing",
+      "model": "3898",
+      "dps": "16.5",
+      "speed": "4.2",
+      "damage_type": "Thrust",
+      "usable_by": "ALL",
+      "source": "internal",
+      "bypass_filters": false,
+      "merchant_zone": "Drake",
+      "merchant_price": "450",
+      "merchant_currency": "Scales"
+    },
+    "bracer of the fomor:hibernia": {
+      "id": "149070",
+      "name": "Bracer of the Fomor",
+      "realm": "Hibernia",
+      "slot": "Bracer",
+      "type": "Magical",
+      "model": "598",
+      "dps": null,
+      "speed": null,
+      "damage_type": null,
+      "usable_by": "ALL",
+      "source": "internal",
+      "bypass_filters": false,
+      "merchant_zone": "Epic",
+      "merchant_price": "625",
+      "merchant_currency": "Souls/Roots/Ices"
+    },
+    "director's ring of chaos:all": {
+      "id": "110894",
+      "name": "Director's Ring of Chaos",
+      "realm": "All",
+      "slot": "Ring",
+      "type": "Magical",
+      "model": "103",
+      "dps": null,
+      "speed": null,
+      "damage_type": null,
+      "usable_by": "ALL",
+      "source": "internal",
+      "bypass_filters": true,
+      "merchant_zone": "DF",
+      "merchant_price": "500",
+      "merchant_currency": "Seals"
     }
   }
 }

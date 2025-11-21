@@ -1,9 +1,9 @@
 {
   "version": "1.0",
-  "last_updated": "2025-11-20T10:14:29.873703",
+  "last_updated": "2025-11-20T19:00:55.670234",
   "templates": [
     {
-      "file": "Bard_S3_low_cost_sans_ml10.txt",
+      "file": "Bard_S3_basique_sans_ml10.txt",
       "class": "Bard",
       "realm": "Hibernia",
       "season": "S3",
@@ -11,16 +11,7 @@
         "low-cost"
       ],
       "item_count": 271,
-      "import_date": "2025-11-19T14:48:33.520959"
-    },
-    {
-      "file": "Druid_S3_elkmelkm.txt",
-      "class": "Druid",
-      "realm": "Hibernia",
-      "season": "S3",
-      "tags": [],
-      "item_count": 271,
-      "import_date": "2025-11-20T10:14:29.873259"
+      "import_date": "2025-11-20T19:00:55.669922"
     }
   ]
 }

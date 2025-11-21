@@ -1,21 +1,22 @@
 {
   "version": "1.0",
-  "template_name": "Bard_S3_low_cost_sans_ml10.txt",
+  "template_name": "Bard_S3_basique_sans_ml10.txt",
   "metadata": {
     "class": "Bard",
     "class_fr": "Barde",
     "class_de": "Barde",
     "realm": "Hibernia",
     "season": "S3",
-    "description": "low cost sans ml10",
+    "description": "basique_sans_ml10",
     "tags": [
       "low-cost"
     ],
     "source_file": "Eden - Hibernia - Bard_Summary.txt",
-    "import_date": "2025-11-19T14:48:33.520959",
+    "import_date": "2025-11-20T19:00:55.669922",
     "imported_by_character": "Ewosong  TheBlindWoman",
     "item_count": 271,
     "auto_generated": true
   },
-  "notes": ""
+  "notes": "",
+  "prices": {}
 }

@@ -1,95 +1,95 @@
-# 🚀 Améliorations Futures - DAOC Character Management
+# 🚀 Future Improvements - DAOC Character Management
 
-Liste des idées d'améliorations et fonctionnalités à développer ultérieurement.
-
----
-
-## 📋 Vue d'Ensemble
-
-### Système de Thèmes
-- [ ] [Éditeur de Thème Intégré](#1-éditeur-de-thème-intégré)
-- [ ] [Génération Automatique de Variantes](#2-génération-automatique-de-variantes)
-- [ ] [Import/Export de Thèmes](#3-importexport-de-thèmes)
-
-### Système de Gestion des Items Ignorés
-- [ ] [Interface de Gestion des Items Ignorés](#4-interface-de-gestion-des-items-ignorés)
-- [ ] [Bouton Unignore pour Réactiver un Item](#5-bouton-unignore-pour-réactiver-un-item)
-- [ ] [Export/Import de la Liste d'Items Ignorés](#6-exportimport-de-la-liste-ditems-ignorés)
+List of improvement ideas and features to develop later.
 
 ---
 
-## 🎨 Système de Thèmes
+## 📋 Overview
 
-### 1. Éditeur de Thème Intégré
-- Interface graphique pour créer/modifier des thèmes directement dans l'application
-- Sélecteurs de couleurs pour chaque élément (fenêtre, texte, boutons, etc.)
-- Prévisualisation en temps réel des modifications
-- Sauvegarde automatique dans un nouveau fichier JSON
+### Theme System
+- [ ] [Integrated Theme Editor](#1-integrated-theme-editor)
+- [ ] [Automatic Variant Generation](#2-automatic-variant-generation)
+- [ ] [Theme Import/Export](#3-theme-importexport)
 
-### 2. Génération Automatique de Variantes
-- À partir d'une couleur de base, générer automatiquement :
-  - Couleurs complémentaires (texte, arrière-plan, surbrillance)
-  - Variations désactivées (grisées)
-  - Palette harmonieuse complète
-- Algorithmes de contraste pour assurer la lisibilité
-- Génération de variantes claires/sombres d'un même thème
-
-### 3. Import/Export de Thèmes
-- Partage de thèmes entre utilisateurs
-- Format d'export standardisé (JSON avec métadonnées)
-- Bibliothèque de thèmes communautaires
-- Validation automatique des thèmes importés
+### Ignored Items Management System
+- [ ] [Ignored Items Management Interface](#4-ignored-items-management-interface)
+- [ ] [Unignore Button to Reactivate an Item](#5-unignore-button-to-reactivate-an-item)
+- [ ] [Export/Import Ignored Items List](#6-exportimport-ignored-items-list)
 
 ---
 
-## 📋 Fonctionnalités à Ajouter
+## 🎨 Theme System
 
-### Système de Gestion des Items Ignorés
+### 1. Integrated Theme Editor
+- Graphical interface to create/modify themes directly in the application
+- Color pickers for each element (window, text, buttons, etc.)
+- Real-time preview of modifications
+- Automatic save to a new JSON file
 
-#### 4. Interface de Gestion des Items Ignorés
-**Objectif** : Permettre la visualisation et la gestion complète des items marqués comme ignorés
+### 2. Automatic Variant Generation
+- From a base color, automatically generate:
+  - Complementary colors (text, background, highlight)
+  - Disabled variations (grayed out)
+  - Complete harmonious palette
+- Contrast algorithms to ensure readability
+- Generation of light/dark variants of the same theme
 
-**Fonctionnalités** :
-- Fenêtre dédiée listant tous les items avec `ignore_item: true`
-- Table avec colonnes : Nom, Royaume, Raison initiale, Date d'ignorage
-- Tri et filtrage par royaume/nom
-- Recherche rapide dans la liste
-- Compteur total d'items ignorés
-- Accès via menu "Tools" ou bouton dans Mass Import
+### 3. Theme Import/Export
+- Theme sharing between users
+- Standardized export format (JSON with metadata)
+- Community theme library
+- Automatic validation of imported themes
 
-**Bénéfices** :
-- Transparence sur les items ignorés
-- Évite les oublis (items ignorés par erreur)
-- Facilite l'audit de la base de données
+---
 
-#### 5. Bouton Unignore pour Réactiver un Item
-**Objectif** : Permettre de retirer le flag `ignore_item` d'un ou plusieurs items
+## 📋 Features to Add
 
-**Fonctionnalités** :
-- Bouton "Unignore" dans l'interface de gestion (point 4)
-- Sélection multiple d'items à réactiver
-- Confirmation avant suppression du flag
-- Log de l'action dans les logs de debug
-- Mise à jour automatique de la DB
+### Ignored Items Management System
 
-**Workflow** :
-1. User ouvre l'interface de gestion des items ignorés
-2. Sélectionne un ou plusieurs items (ex: item de quête devenu utile)
-3. Clique "Unignore" → Confirmation
-4. Flag `ignore_item` retiré de la DB
-5. Item réapparaîtra dans les futurs imports
+#### 4. Ignored Items Management Interface
+**Objective**: Allow visualization and complete management of items marked as ignored
 
-**Bénéfices** :
-- Flexibilité pour corriger des erreurs
-- Adaptation aux changements de contenu du jeu
-- Pas besoin d'éditer manuellement le JSON
+**Features**:
+- Dedicated window listing all items with `ignore_item: true`
+- Table with columns: Name, Realm, Initial Reason, Ignore Date
+- Sorting and filtering by realm/name
+- Quick search in the list
+- Total counter of ignored items
+- Access via "Tools" menu or button in Mass Import
 
-#### 6. Export/Import de la Liste d'Items Ignorés
-**Objectif** : Partager ou sauvegarder la liste d'items ignorés
+**Benefits**:
+- Transparency on ignored items
+- Avoids oversights (items ignored by mistake)
+- Facilitates database auditing
 
-**Fonctionnalités Export** :
-- Bouton "Export Ignored List" dans l'interface de gestion
-- Format JSON lisible avec métadonnées :
+#### 5. Unignore Button to Reactivate an Item
+**Objective**: Allow removing the `ignore_item` flag from one or more items
+
+**Features**:
+- "Unignore" button in the management interface (point 4)
+- Multiple selection of items to reactivate
+- Confirmation before flag removal
+- Action logging in debug logs
+- Automatic DB update
+
+**Workflow**:
+1. User opens the ignored items management interface
+2. Selects one or more items (e.g., quest item that became useful)
+3. Clicks "Unignore" → Confirmation
+4. `ignore_item` flag removed from DB
+5. Item will reappear in future imports
+
+**Benefits**:
+- Flexibility to correct errors
+- Adaptation to game content changes
+- No need to manually edit JSON
+
+#### 6. Export/Import Ignored Items List
+**Objective**: Share or save the ignored items list
+
+**Export Features**:
+- "Export Ignored List" button in the management interface
+- Readable JSON format with metadata:
   ```json
   {
     "version": "1.0",
@@ -105,53 +105,77 @@ Liste des idées d'améliorations et fonctionnalités à développer ultérieure
     ]
   }
   ```
-- Export vers fichier `.ignore-list.json`
-- Option pour filtrer par royaume avant export
+- Export to `.ignore-list.json` file
+- Option to filter by realm before export
 
-**Fonctionnalités Import** :
-- Bouton "Import Ignored List"
-- Sélection d'un fichier `.ignore-list.json`
-- Aperçu des items avant import
-- Options :
-  - Merge (ajouter aux items ignorés existants)
-  - Replace (remplacer la liste actuelle)
-- Validation du format avant import
-- Rapport d'import : X items ajoutés, Y déjà présents
+**Import Features**:
+- "Import Ignored List" button
+- Selection of a `.ignore-list.json` file
+- Item preview before import
+- Options:
+  - Merge (add to existing ignored items)
+  - Replace (replace current list)
+- Format validation before import
+- Import report: X items added, Y already present
 
-**Cas d'Usage** :
-- **Partage entre joueurs** : "Voici ma liste d'items de quête à ignorer"
-- **Backup** : Sauvegarder avant réinstallation
-- **Template** : Créer une liste commune pour une guilde
-- **Migration** : Transférer entre serveurs/saisons
+**Use Cases**:
+- **Player sharing**: "Here's my quest items to ignore list"
+- **Backup**: Save before reinstallation
+- **Template**: Create a common list for a guild
+- **Migration**: Transfer between servers/seasons
 
-**Bénéfices** :
-- Gain de temps pour nouveaux utilisateurs
-- Standardisation des configurations
-- Sécurité (backup avant modifications)
-
----
-
-## 💡 Idées Complémentaires
-
-### Items Ignorés - Fonctionnalités Avancées
-- [ ] **Raison d'ignorage personnalisée** : Champ texte libre pour documenter pourquoi un item est ignoré
-- [ ] **Catégories d'ignorage** : Tags (Quest, Duplicate, Obsolete, Low Priority)
-- [ ] **Ignorage temporaire** : Date d'expiration du flag (utile pour events limités)
-- [ ] **Statistiques** : Graphique des raisons d'ignorage, top items ignorés par catégorie
-- [ ] **Suggestions automatiques** : IA détectant les patterns (items de quête récurrents)
-- [ ] **Historique d'ignorage** : Journal avec date/heure/user de chaque modification
+**Benefits**:
+- Time saving for new users
+- Configuration standardization
+- Security (backup before modifications)
 
 ---
 
-*(Cette section sera complétée au fur et à mesure du développement)*
+## 💡 Additional Ideas
+
+### Ignored Items - Advanced Features
+- [ ] **Custom ignore reason**: Free text field to document why an item is ignored
+- [ ] **Ignore categories**: Tags (Quest, Duplicate, Obsolete, Low Priority)
+- [ ] **Temporary ignore**: Flag expiration date (useful for limited events)
+- [ ] **Statistics**: Graph of ignore reasons, top ignored items by category
+- [ ] **Automatic suggestions**: AI detecting patterns (recurring quest items)
+- [ ] **Ignore history**: Log with date/time/user of each modification
+
+---
+
+*(This section will be completed as development progresses)*
 
 
 
 ---
-## 💡 Idées en Vrac
+## 💡 Miscellaneous Ideas
 
-*(Brainstorming d'idées à affiner plus tard)*
+*(Brainstorming ideas to refine later)*
+
+### 7. Owned Items Tracking System (Armory)
+**Objective**: Allow checking items from a template that the player already owns to automatically calculate missing currencies
+
+**Features**:
+- Interactive table with checkboxes for each template item
+- Columns: ✓ Owned | Item | Price | Currency | Zone
+- Real-time dynamic calculation:
+  ```
+  Scales        12 / 50   (38 missing)
+  Souls          0 / 25   (25 missing)
+  ```
+- Checkbox state saving per template/character
+- Quick reset for new template
+
+**Benefits**:
+- Precise planning of necessary farming
+- Visualization of progress towards complete template
+- Avoids buying already owned items
+- Farm run optimization by zone
+
+**Current Status**: 
+- ✅ Display of total currency summary by type (in text preview with frame)
+- ❌ Checkbox system and owned/missing calculation **to be implemented later**
 
 ---
 
-**Note** : Ce fichier sert de backlog informel. Les éléments prioritaires seront transformés en issues/branches de développement au moment opportun.
+**Note**: This file serves as an informal backlog. Priority items will be turned into issues/development branches at the appropriate time.

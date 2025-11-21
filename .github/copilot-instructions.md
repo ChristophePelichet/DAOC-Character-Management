@@ -64,10 +64,20 @@
 **English:**
 - **Technical documentation**: Must be created in `Documentation/` folder (not "Documentation")
 - **Changelogs**: Must be created in `Changelogs/` folder
+- **Utility scripts**: Must be created in `Tools/` folder with appropriate subdirectory:
+  - `Tools/DataScraping/` - Web scraping scripts (Eden, official DAOC website)
+  - `Tools/DatabaseMaintenance/` - Database repair, migration, consistency checks
+  - `Tools/Development/` - Development and debugging utilities
+- **Debug scripts cleanup**: When debug scripts are no longer needed, delete them. If keeping a debug script, update `Tools/README.md` to document it.
 
 **Français:**
 - **Documentation technique** : Doit être créée dans le dossier `Documentation/` (pas "Documentation")
 - **Changelogs** : Doivent être créés dans le dossier `Changelogs/`
+- **Scripts utilitaires** : Doivent être créés dans le dossier `Tools/` avec le sous-dossier approprié :
+  - `Tools/DataScraping/` - Scripts de web scraping (Eden, site officiel DAOC)
+  - `Tools/DatabaseMaintenance/` - Réparation de base de données, migration, vérifications de cohérence
+  - `Tools/Development/` - Utilitaires de développement et débogage
+- **Nettoyage des scripts de debug** : Quand les scripts de debug ne sont plus nécessaires, les supprimer. Si on garde un script de debug, mettre à jour `Tools/README.md` pour le documenter.
 
 ## 🔬 Testing Rules
 

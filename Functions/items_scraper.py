@@ -1365,12 +1365,14 @@ class ItemsScraper:
                                 elif currency in ['Roots', 'Souls', 'Ices']:
                                     merchant_data['zone'] = 'Epic'
                                 elif currency == 'Dragon Scales':
-                                    # Afficher "Scales" comme devise
+                                    # Normalize "Dragon Scales" to "Scales"
                                     merchant_data['price_parsed']['currency'] = 'Scales'
                                     merchant_data['zone'] = 'Drake'
                                 elif currency == 'Scales':
                                     merchant_data['zone'] = 'Drake'
-                                elif currency == 'Grimoires':
+                                elif currency in ['Grimoires', 'Grimoire Pages']:
+                                    # Normalize "Grimoire Pages" to "Grimoires"
+                                    merchant_data['price_parsed']['currency'] = 'Grimoires'
                                     merchant_data['zone'] = 'SH'
                     
                     # Add merchant if we found a name

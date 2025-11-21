@@ -42,7 +42,7 @@ class HeraldScraperWorker(QThread):
         self.url = url
         
     def run(self):
-        """Exécute le scraping en arrière-plan"""
+        """Execute scraping in background"""
         try:
             from Functions.eden_scraper import scrape_character_from_url
             from Functions.cookie_manager import CookieManager
@@ -66,7 +66,7 @@ class CharacterSheetWindow(QDialog):
         char_name = self.character_data.get('name', 'N/A')
         self.realm = self.character_data.get('realm', 'Albion')
         
-        # Flag pour savoir si un scraping Herald est en cours
+        # Flag to know if Herald scraping is in progress
         self.herald_scraping_in_progress = False
 
         self.setWindowTitle(lang.get("character_sheet_title", name=char_name))
@@ -76,13 +76,13 @@ class CharacterSheetWindow(QDialog):
         self.setWindowFlags(self.windowFlags() | Qt.WindowMaximizeButtonHint)
         self.setSizeGripEnabled(True)  # Add resize grip in bottom-right corner
         
-        # Connecter au signal de fin de validation Herald si disponible
+        # Connect to Herald validation end signal if available
         if hasattr(parent, 'ui_manager'):
             ui_manager = parent.ui_manager
-            # Connecter au signal finished du thread Eden pour réactiver les boutons
+            # Connect to Eden thread finished signal to reactivate buttons
             if hasattr(ui_manager, 'eden_status_thread') and ui_manager.eden_status_thread:
                 ui_manager.eden_status_thread.finished.connect(self._update_herald_buttons_state)
-            # Initialiser l'état des boutons après leur création (via QTimer pour s'assurer qu'ils existent)
+            # Initialize button states after creation (via QTimer to ensure they exist)
             from PySide6.QtCore import QTimer
             QTimer.singleShot(0, self._update_herald_buttons_state)
 
@@ -103,7 +103,7 @@ class CharacterSheetWindow(QDialog):
         # === RIGHT SIDE: All content ===
         layout = QVBoxLayout()
         
-        # Eden Herald Section - EN HAUT for FACILITER the MISE À JOUR
+        # Eden Herald Section - AT THE TOP to FACILITATE UPDATE
         eden_group = QGroupBox(lang.get("character_sheet.labels.eden_herald"))
         eden_layout = QVBoxLayout()
         
@@ -130,11 +130,11 @@ class CharacterSheetWindow(QDialog):
         self.update_herald_button.setToolTip(lang.get("character_sheet.labels.update_from_herald_tooltip"))
         self.update_herald_button.clicked.connect(self.update_from_herald)
         self.update_herald_button.setMinimumHeight(30)
-        # Mettre en évidence the bouton of mise à jour
+        # Highlight the update button
         self.update_herald_button.setStyleSheet("QPushButton { font-weight: bold; padding: 8px; }")
         herald_buttons_layout.addWidget(self.update_herald_button)
         
-        # Définir des stretch égaux for the deux boutons
+        # Set equal stretch for both buttons
         herald_buttons_layout.setStretch(0, 1)
         herald_buttons_layout.setStretch(1, 1)
         
@@ -142,7 +142,7 @@ class CharacterSheetWindow(QDialog):
         eden_group.setLayout(eden_layout)
         layout.addWidget(eden_group)
         
-        # Séparateur visuel
+        # Visual separator
         layout.addSpacing(10)
         
         # Basic Information Section
@@ -172,7 +172,7 @@ class CharacterSheetWindow(QDialog):
         self._populate_classes_sheet()
         current_class = self.character_data.get('class', '')
         if current_class:
-            # Utiliser findData for sélectionner par itemData (nom anglais) au lieu of the texte affiché
+            # Use findData to select by itemData (English name) instead of displayed text
             class_index = self.class_combo.findData(current_class)
             if class_index >= 0:
                 self.class_combo.setCurrentIndex(class_index)
@@ -184,7 +184,7 @@ class CharacterSheetWindow(QDialog):
         self._populate_races_sheet()
         current_race = self.character_data.get('race', '')
         if current_race:
-            # Utiliser findData for sélectionner par itemData (nom anglais) au lieu of the texte affiché
+            # Use findData to select by itemData (English name) instead of displayed text
             race_index = self.race_combo.findData(current_race)
             if race_index >= 0:
                 self.race_combo.setCurrentIndex(race_index)
@@ -539,7 +539,7 @@ class CharacterSheetWindow(QDialog):
         elif not herald_validation_done:
             self.update_rvr_button.setEnabled(False)
             self.update_rvr_button.setToolTip(lang.get("character_sheet.labels.herald_validation_pending"))
-            # S'abonner au signal de fin de validation pour réactiver le bouton
+            # Subscribe to validation end signal to reactivate the button
             if hasattr(self.parent_app, 'ui_manager') and hasattr(self.parent_app.ui_manager, 'eden_status_thread'):
                 thread = self.parent_app.ui_manager.eden_status_thread
                 if thread:
@@ -564,7 +564,7 @@ class CharacterSheetWindow(QDialog):
         realm_rank_layout = QVBoxLayout()
         
         realm_points = self.character_data.get('realm_points', 0)
-        # Convertir realm_points en entier s'il s'agit d'une chaîne
+        # Convert realm_points to integer if it's a string
         if isinstance(realm_points, str):
             realm_points = int(realm_points.replace(' ', '').replace('\xa0', '').replace(',', ''))
         
@@ -821,7 +821,7 @@ class CharacterSheetWindow(QDialog):
     
     def update_rank_display(self, realm_points):
         """Updates current rank and title display."""
-        # Convertir realm_points en entier s'il s'agit d'une chaîne
+        # Convert realm_points to integer if it's a string
         if isinstance(realm_points, str):
             realm_points = int(realm_points.replace(' ', '').replace('\xa0', '').replace(',', ''))
         
@@ -1074,8 +1074,8 @@ class CharacterSheetWindow(QDialog):
             QMessageBox.critical(self, lang.get("dialogs.titles.error"), error_msg)
     
     def on_herald_url_changed(self, text):
-        """Active/désactive le bouton de mise à jour des stats selon l'URL Herald"""
-        # Ne pas réactiver les boutons si un scraping Herald est en cours
+        """Enable/disable the stats update button based on the Herald URL"""
+        # Don't re-enable buttons if Herald scraping is in progress
         if self.herald_scraping_in_progress:
             return
             
@@ -1088,11 +1088,11 @@ class CharacterSheetWindow(QDialog):
             self.update_rvr_button.setToolTip("Veuillez d'abord configurer l'URL Herald")
     
     def _is_herald_validation_done(self):
-        """Vérifie si la validation Herald du démarrage est terminée"""
+        """Check if Herald startup validation is complete"""
         if not hasattr(self.parent_app, 'ui_manager'):
-            return True  # Si pas de ui_manager, considérer comme fait
+            return True  # If no ui_manager, consider as done
         
-        # Vérifier si le thread de validation est en cours
+        # Check if validation thread is running
         if hasattr(self.parent_app.ui_manager, 'eden_status_thread'):
             thread = self.parent_app.ui_manager.eden_status_thread
             if thread and thread.isRunning():
@@ -1101,15 +1101,15 @@ class CharacterSheetWindow(QDialog):
         return True
     
     def _on_herald_validation_finished(self, accessible, message):
-        """Appelé quand la validation Herald du démarrage se termine"""
-        # Réactiver le bouton si Herald accessible ET qu'une URL est configurée
+        """Called when Herald startup validation completes"""
+        # Re-enable button if Herald accessible AND a URL is configured
         herald_url = self.character_data.get('url', '').strip()
         if accessible and herald_url:
             self.update_rvr_button.setEnabled(True)
             self.update_rvr_button.setToolTip(lang.get("update_rvr_pvp_tooltip"))
     
     def show_stats_info(self):
-        """Affiche une fenêtre d'information sur les statistiques"""
+        """Display an information window about statistics"""
         QMessageBox.information(
             self,
             lang.get("stats_info_title"),
@@ -1249,7 +1249,7 @@ class CharacterSheetWindow(QDialog):
             self.herald_url_edit.setText(url)
         
         try:
-            # Ouvrir l'URL with the cookies in un thread séparé
+            # Open the URL with cookies in a separate thread
             import threading
             thread = threading.Thread(target=self._open_url_in_thread, args=(url,), daemon=True)
             thread.start()
@@ -1261,7 +1261,7 @@ class CharacterSheetWindow(QDialog):
             )
     
     def _open_url_in_thread(self, url):
-        """Ouvre l'URL avec les cookies dans un thread séparé."""
+        """Open URL with cookies in a separate thread."""
         try:
             from Functions.cookie_manager import CookieManager
             cookie_manager = CookieManager()
@@ -1275,7 +1275,7 @@ class CharacterSheetWindow(QDialog):
             logging.error(f"Erreur lors de l'ouverture de l'URL avec cookies: {e}")
     
     def update_rvr_stats(self):
-        """Met à jour les statistiques RvR depuis le Herald"""
+        """Update RvR statistics from Herald"""
         url = self.herald_url_edit.text().strip()
         
         if not url:
@@ -1299,13 +1299,13 @@ class CharacterSheetWindow(QDialog):
             url = 'https://' + url
             self.herald_url_edit.setText(url)
         
-        # Désactiver le bouton pendant la mise à jour
+        # Disable button during update
         self.update_rvr_button.setEnabled(False)
         
-        # Import des composants nécessaires
+        # Import required components
         from UI.progress_dialog_base import ProgressStepsDialog, StepConfiguration
         
-        # Construire les étapes (SCRAPER_INIT + STATS_SCRAPING + CLEANUP)
+        # Build steps (SCRAPER_INIT + STATS_SCRAPING + CLEANUP)
         steps = StepConfiguration.build_steps(
             StepConfiguration.SCRAPER_INIT,   # Step 0: Init scraper
             StepConfiguration.STATS_SCRAPING, # Steps 1-5: RvR, PvP, PvE, Wealth, Achievements
@@ -1323,7 +1323,7 @@ class CharacterSheetWindow(QDialog):
             allow_cancel=False
         )
         
-        # Créer le thread de mise à jour
+        # Create update thread
         self.stats_update_thread = StatsUpdateThread(url)
         
         # ✅ Pattern 1 : Connecter via wrappers thread-safe
@@ -1338,7 +1338,7 @@ class CharacterSheetWindow(QDialog):
         # ✅ Pattern 4 : Connecter rejected AVANT show()
         self.progress_dialog.rejected.connect(self._on_stats_progress_dialog_closed)
         
-        # Afficher le dialogue et démarrer le worker
+        # Show dialog and start worker
         self.progress_dialog.show()
         self.stats_update_thread.start()
     
@@ -1368,25 +1368,25 @@ class CharacterSheetWindow(QDialog):
                 pass
     
     def _on_stats_progress_dialog_closed(self):
-        """✅ Pattern 4 : Appelé quand utilisateur ferme le dialogue de stats"""
+        """✅ Pattern 4: Called when user closes stats dialog"""
         import logging
         logging.info("Dialogue stats fermé par utilisateur - Arrêt mise à jour")
         
-        # Arrêter le thread proprement
+        # Stop thread cleanly
         self._stop_stats_thread()
         
-        # Réactiver le bouton
+        # Re-enable button
         if not self.herald_scraping_in_progress:
             self.update_rvr_button.setEnabled(True)
     
     def _stop_stats_thread(self):
-        """✅ Pattern 2 + 3 : Arrête le thread stats avec cleanup complet"""
+        """✅ Pattern 2 + 3: Stop stats thread with complete cleanup"""
         if hasattr(self, 'stats_update_thread') and self.stats_update_thread:
             if self.stats_update_thread.isRunning():
-                # 1. Demander arrêt gracieux
+                # 1. Request graceful stop
                 self.stats_update_thread.request_stop()
                 
-                # 2. Déconnecter signaux
+                # 2. Disconnect signals
                 try:
                     self.stats_update_thread.step_started.disconnect()
                     self.stats_update_thread.step_completed.disconnect()
@@ -1425,7 +1425,7 @@ class CharacterSheetWindow(QDialog):
                 delattr(self, 'progress_dialog')
     
     def _on_stats_updated(self, results):
-        """Appelé quand les stats sont mises à jour (succès ou partiel)"""
+        """Called when stats are updated (success or partial)"""
         from PySide6.QtCore import QTimer
         
         # Fermer le dialogue de progression
@@ -1434,7 +1434,7 @@ class CharacterSheetWindow(QDialog):
             self.progress_dialog.complete_all(success_text)
             QTimer.singleShot(1500, self.progress_dialog.close)
         
-        # Extraire les résultats
+        # Extract results
         result_rvr = results.get('rvr', {})
         result_pvp = results.get('pvp', {})
         result_pve = results.get('pve', {})
@@ -1444,7 +1444,7 @@ class CharacterSheetWindow(QDialog):
         all_success = result_rvr.get('success') and result_pvp.get('success') and result_pve.get('success') and result_wealth.get('success')
         
         if all_success:
-            # Mise à jour complète réussie
+            # Complete successful update
             self._update_all_stats_ui(result_rvr, result_pvp, result_pve, result_wealth, result_achievements)
             
             # Sauvegarder dans le JSON
@@ -1452,7 +1452,7 @@ class CharacterSheetWindow(QDialog):
             success, msg = save_character(self.character_data, allow_overwrite=True)
             
             if success:
-                # Message de succès
+                # Success message
                 tower = result_rvr['tower_captures']
                 keep = result_rvr['keep_captures']
                 relic = result_rvr['relic_captures']
@@ -1510,7 +1510,7 @@ class CharacterSheetWindow(QDialog):
                 )
         
         elif result_rvr.get('success') and not result_pvp.get('success'):
-            # Mise à jour partielle : RvR OK, PvP KO
+            # Partial update: RvR OK, PvP KO
             self._update_partial_stats_ui(result_rvr, None, None, None, None)
             
             QMessageBox.warning(
@@ -1520,7 +1520,7 @@ class CharacterSheetWindow(QDialog):
             )
         
         elif not result_rvr.get('success') and result_pvp.get('success'):
-            # Mise à jour partielle : PvP OK, RvR KO
+            # Partial update: PvP OK, RvR KO
             self._update_partial_stats_ui(None, result_pvp, None, None, None)
             
             QMessageBox.warning(
@@ -1530,7 +1530,7 @@ class CharacterSheetWindow(QDialog):
             )
         
         else:
-            # Échec complet ou multiple
+            # Complete or multiple failure
             error_msg = f"{lang.get('character_sheet.messages.stats_fetch_failed')}\n\n"
             if not result_rvr.get('success'):
                 error_msg += f"❌ RvR Captures: {result_rvr.get('error', lang.get('character_sheet.messages.unknown_error'))}\n"
@@ -1548,7 +1548,7 @@ class CharacterSheetWindow(QDialog):
             self.update_rvr_button.setEnabled(True)
     
     def _on_stats_failed(self, error_message):
-        """Appelé en cas d'échec complet de la mise à jour"""
+        """Called in case of complete update failure"""
         from PySide6.QtCore import QTimer
         
         # Fermer le dialogue de progression
@@ -1564,17 +1564,17 @@ class CharacterSheetWindow(QDialog):
             f"{lang.get('character_sheet.messages.stats_fetch_failed')}\n{error_message}"
         )
         
-        # Réactiver le bouton
+        # Re-enable button
         if not self.herald_scraping_in_progress:
             self.update_rvr_button.setEnabled(True)
         
         log_with_action(logger_char, "error", f"Stats update error: {error_message}", action="ERROR")
     
     def _update_herald_buttons_state(self):
-        """Met à jour l'état des boutons Herald selon l'état de validation Eden"""
+        """Update Herald button states based on Eden validation status"""
         from Functions.language_manager import lang
         
-        # Vérifier si validation en cours
+        # Check if validation is in progress
         main_window = self.parent()
         is_validation_running = False
         
@@ -1586,7 +1586,7 @@ class CharacterSheetWindow(QDialog):
                 ui_manager.eden_status_thread.isRunning()
             )
         
-        # Mettre à jour le bouton "Update from Herald"
+        # Update "Update from Herald" button
         if hasattr(self, 'update_herald_button'):
             if is_validation_running:
                 self.update_herald_button.setEnabled(False)
@@ -1595,7 +1595,7 @@ class CharacterSheetWindow(QDialog):
                 self.update_herald_button.setEnabled(True)
                 self.update_herald_button.setToolTip(lang.get("character_sheet.labels.update_from_herald_tooltip"))
         
-        # Mettre à jour le bouton "Update RvR Stats"
+        # Update "Update RvR Stats" button
         if hasattr(self, 'update_rvr_button'):
             herald_url = self.herald_url_edit.text().strip() if hasattr(self, 'herald_url_edit') else ''
             
@@ -1603,14 +1603,14 @@ class CharacterSheetWindow(QDialog):
                 self.update_rvr_button.setEnabled(False)
                 self.update_rvr_button.setToolTip(lang.get("herald_buttons.validation_in_progress", default="⏳ Validation Eden en cours... Veuillez patienter"))
             elif not herald_url or self.herald_scraping_in_progress:
-                # Garder l'état désactivé si pas d'URL ou scraping en cours
+                # Keep disabled state if no URL or scraping in progress
                 pass
             else:
                 self.update_rvr_button.setEnabled(True)
                 self.update_rvr_button.setToolTip(lang.get("update_rvr_pvp_tooltip"))
     
     def _update_all_stats_ui(self, result_rvr, result_pvp, result_pve, result_wealth, result_achievements):
-        """Met à jour tous les labels UI avec les stats complètes"""
+        """Update all UI labels with complete stats"""
         # RvR Captures
         tower = result_rvr['tower_captures']
         keep = result_rvr['keep_captures']
@@ -1681,7 +1681,7 @@ class CharacterSheetWindow(QDialog):
             self._update_achievements_display(achievements)
             self.character_data['achievements'] = achievements
         
-        # Mettre à jour character_data
+        # Update character_data
         self.character_data['tower_captures'] = tower
         self.character_data['keep_captures'] = keep
         self.character_data['relic_captures'] = relic
@@ -1709,7 +1709,7 @@ class CharacterSheetWindow(QDialog):
         self.character_data['money'] = money
     
     def _update_partial_stats_ui(self, result_rvr, result_pvp, result_pve, result_wealth, result_achievements):
-        """Met à jour UI et character_data pour mise à jour partielle"""
+        """Update UI and character_data for partial update"""
         from Functions.character_manager import save_character
         
         if result_rvr and result_rvr.get('success'):
@@ -1779,7 +1779,7 @@ class CharacterSheetWindow(QDialog):
             save_character(self.character_data, allow_overwrite=True)
     
     def update_from_herald(self):
-        """Met à jour les données du personnage depuis Herald"""
+        """Update character data from Herald"""
         url = self.herald_url_edit.text().strip()
         
         if not url:
@@ -1806,20 +1806,20 @@ class CharacterSheetWindow(QDialog):
             url = 'https://' + url
             self.herald_url_edit.setText(url)
         
-        # Désactiver tous les boutons pendant la mise à jour
+        # Disable all buttons during update
         self.update_herald_button.setEnabled(False)
         self.open_herald_button.setEnabled(False)
         self.update_rvr_button.setEnabled(False)
         
-        # Import des composants nécessaires
+        # Import required components
         from UI.progress_dialog_base import ProgressStepsDialog, StepConfiguration
         
-        # Construire les étapes (CHARACTER_UPDATE)
+        # Build steps (CHARACTER_UPDATE)
         steps = StepConfiguration.build_steps(
             StepConfiguration.CHARACTER_UPDATE  # 8 steps: Extract name → Init → Load cookies → Navigate → Wait → Extract data → Format → Close
         )
         
-        # Créer le dialogue de progression
+        # Create progress dialog
         self.progress_dialog = ProgressStepsDialog(
             parent=self,
             title=lang.get("progress_character_update_title", default="🌐 Mise à jour depuis Herald..."),
@@ -1830,7 +1830,7 @@ class CharacterSheetWindow(QDialog):
             allow_cancel=False
         )
         
-        # Créer le thread de mise à jour
+        # Create update thread
         self.char_update_thread = CharacterUpdateThread(url)
         
         # ✅ Pattern 1 : Connecter via wrappers thread-safe
@@ -1844,7 +1844,7 @@ class CharacterSheetWindow(QDialog):
         # ✅ Pattern 4 : Connecter rejected AVANT show()
         self.progress_dialog.rejected.connect(self._on_char_update_progress_dialog_closed)
         
-        # Afficher le dialogue et démarrer le worker
+        # Show dialog and start worker
         self.progress_dialog.show()
         self.char_update_thread.start()
     
@@ -1874,14 +1874,14 @@ class CharacterSheetWindow(QDialog):
                 pass
     
     def _on_char_update_progress_dialog_closed(self):
-        """✅ Pattern 4 : Appelé quand utilisateur ferme le dialogue de character update"""
+        """✅ Pattern 4: Called when user closes character update dialog"""
         import logging
         logging.info("Dialogue character update fermé par utilisateur - Arrêt mise à jour")
         
-        # Arrêter le thread proprement
+        # Stop thread cleanly
         self._stop_char_update_thread()
         
-        # Réactiver les boutons
+        # Re-enable buttons
         self.herald_scraping_in_progress = False
         self.update_herald_button.setEnabled(True)
         self.open_herald_button.setEnabled(True)
@@ -1889,13 +1889,13 @@ class CharacterSheetWindow(QDialog):
             self.update_rvr_button.setEnabled(True)
     
     def _stop_char_update_thread(self):
-        """✅ Pattern 2 + 3 : Arrête le thread character update avec cleanup complet"""
+        """✅ Pattern 2 + 3: Stop character update thread with complete cleanup"""
         if hasattr(self, 'char_update_thread') and self.char_update_thread:
             if self.char_update_thread.isRunning():
-                # 1. Demander arrêt gracieux
+                # 1. Request graceful stop
                 self.char_update_thread.request_stop()
                 
-                # 2. Déconnecter signaux
+                # 2. Disconnect signals
                 try:
                     self.char_update_thread.step_started.disconnect()
                     self.char_update_thread.step_completed.disconnect()
@@ -1944,13 +1944,13 @@ class CharacterSheetWindow(QDialog):
         event.accept()
     
     def _on_herald_scraping_finished(self, success, new_data, error_msg):
-        """Callback appelé quand le scraping est terminé"""
+        """Callback called when scraping is complete"""
         from PySide6.QtCore import QTimer
         
-        # Marquer que le scraping Herald est terminé
+        # Mark that Herald scraping is complete
         self.herald_scraping_in_progress = False
         
-        # Fermer le dialogue de progression avec message de succès ou erreur
+        # Close progress dialog with success or error message
         if hasattr(self, 'progress_dialog'):
             if success:
                 success_text = lang.get("progress_character_complete", default="✅ Données récupérées")
@@ -1961,10 +1961,10 @@ class CharacterSheetWindow(QDialog):
                 self.progress_dialog.set_status_message(error_text, "#F44336")
                 QTimer.singleShot(2000, self.progress_dialog.close)
         
-        # Utiliser try/finally pour garantir la réactivation des boutons et le nettoyage du thread
+        # Use try/finally to guarantee button re-enabling and thread cleanup
         try:
             if not success:
-                # ✅ CRITICAL: Arrêter le thread AVANT d'afficher l'erreur
+                # ✅ CRITICAL: Stop thread BEFORE displaying error
                 self._stop_char_update_thread()
                 
                 QMessageBox.critical(
@@ -1974,12 +1974,12 @@ class CharacterSheetWindow(QDialog):
                 )
                 return
             
-            # Créer le dialogue pour détecter les changements
+            # Create dialog to detect changes
             dialog = CharacterUpdateDialog(self, self.character_data, new_data, self.character_data['name'])
             
-            # Vérifier s'il y a au moins un changement
+            # Check if there's at least one change
             if not dialog.has_changes():
-                # ✅ CRITICAL: Arrêter le thread AVANT d'afficher le message
+                # ✅ CRITICAL: Stop thread BEFORE displaying message
                 self._stop_char_update_thread()
                 
                 QMessageBox.information(
@@ -2001,12 +2001,12 @@ class CharacterSheetWindow(QDialog):
                     )
                     return
                 
-                # Appliquer the changements sélectionnés directement in character_data
+                # Apply selected changes directly to character_data
                 for field, value in selected_changes.items():
                     self.character_data[field] = value
                 
-                # Mettre à jour all the champs of l'interface for l'affichage immédiat
-                # (on reconstruit l'affichage complet plutôt that of mettre à jour champ par champ)
+                # Update all interface fields for immediate display
+                # (rebuild complete display rather than update field by field)
                 
                 # Level
                 if 'level' in selected_changes:
@@ -2038,10 +2038,10 @@ class CharacterSheetWindow(QDialog):
                     if isinstance(realm_points, str):
                         realm_points = int(realm_points.replace(' ', '').replace('\xa0', '').replace(',', ''))
                     
-                    # Mettre à jour l'affichage of the rang and of the titre
+                    # Update rank and title display
                     self.update_rank_display(realm_points)
                     
-                    # Mettre à jour the dropdowns of rang/niveau
+                    # Update rank/level dropdowns
                     if hasattr(self.parent_app, 'data_manager'):
                         rank_info = self.parent_app.data_manager.get_realm_rank_info(self.realm, realm_points)
                         if rank_info:
@@ -2051,15 +2051,15 @@ class CharacterSheetWindow(QDialog):
                             if level_match:
                                 current_level = int(level_match.group(1))
                                 
-                                # Mettre à jour the dropdown of rang
+                                # Update rank dropdown
                                 self.rank_combo.blockSignals(True)
                                 self.rank_combo.setCurrentIndex(current_rank - 1)
                                 self.rank_combo.blockSignals(False)
                                 
-                                # Mettre à jour the dropdown of niveau
+                                # Update level dropdown
                                 self.update_level_dropdown(current_rank, current_level)
                 
-                # Save directement character_data (not via save_basic_info qui récupère depuis l'interface)
+                # Save character_data directly (not via save_basic_info which retrieves from interface)
                 from Functions.character_manager import save_character
                 success, msg = save_character(self.character_data, allow_overwrite=True)
                 
@@ -2088,13 +2088,13 @@ class CharacterSheetWindow(QDialog):
                         sys.stderr.flush()
                         logging.warning(f"[BACKUP_TRIGGER] Backup after skills/armor modification failed: {e}")
                 
-                # Rafraîchir the liste des personnages in the fenêtre principale
+                # Refresh character list in main window
                 if hasattr(self.parent_app, 'tree_manager'):
                     self.parent_app.tree_manager.refresh_character_list()
                 elif hasattr(self.parent_app, 'refresh_character_list'):
                     self.parent_app.refresh_character_list()
                 
-                # Message of succès
+                # Success message
                 QMessageBox.information(
                     self,
                     lang.get("success_title", default="Succès"),
@@ -2108,18 +2108,18 @@ class CharacterSheetWindow(QDialog):
                 )
         
         finally:
-            # ✅ Nettoyage final si pas déjà fait (sécurité)
+            # ✅ Final cleanup if not already done (security)
             if hasattr(self, 'char_update_thread') and self.char_update_thread:
                 self._stop_char_update_thread()
             
-            # Réactiver tous les boutons TOUJOURS, même en cas d'erreur ou de return anticipé
+            # Always re-enable all buttons, even in case of error or early return
             herald_url = self.herald_url_edit.text().strip()
             
             self.update_herald_button.setEnabled(bool(herald_url))
             self.open_herald_button.setEnabled(bool(herald_url))
             self.update_rvr_button.setEnabled(bool(herald_url))
             
-            # Forcer la mise à jour visuelle
+            # Force visual update
             QApplication.processEvents()
     
     def rename_character(self):
@@ -2492,13 +2492,13 @@ class ConfigurationDialog(QDialog):
         from Functions.theme_manager import get_available_themes
         self.theme_combo = QComboBox()
         self.available_themes = get_available_themes()
-        # Trier les thèmes par nom (alphabétique)
+        # Sort themes alphabetically by name
         sorted_themes = sorted(self.available_themes.items(), key=lambda x: x[1])
         for theme_id, theme_name in sorted_themes:
             self.theme_combo.addItem(theme_name, theme_id)
         general_layout.addRow(lang.get("config_theme_label"), self.theme_combo)
         
-        # Font Scale ComboBox (100% à 200% par pas de 25%)
+        # Font Scale ComboBox (100% to 200% in steps of 25%)
         self.font_scale_combo = QComboBox()
         self.font_scale_values = [1.0, 1.25, 1.5, 1.75, 2.0]  # 100%, 125%, 150%, 175%, 200%
         for scale in self.font_scale_values:
@@ -2520,7 +2520,7 @@ class ConfigurationDialog(QDialog):
         all_browsers = ['Chrome', 'Edge', 'Firefox']
         self.browser_combo.addItems(all_browsers)
         
-        # Indiquer quels navigateurs sont détectés
+        # Indicate which browsers are detected
         if available_browsers:
             tooltip = f"Navigateurs détectés sur cette machine: {', '.join(available_browsers)}"
         else:
@@ -2638,7 +2638,7 @@ class ConfigurationDialog(QDialog):
 
         content_layout.addStretch()
         
-        # Ajouter le widget de contenu à la zone scrollable
+        # Add content widget to scrollable area
         scroll_area.setWidget(content_widget)
         main_layout.addWidget(scroll_area)
 
@@ -2687,7 +2687,7 @@ class ConfigurationDialog(QDialog):
         
         # Font Scale
         current_font_scale = config.get("ui.font_scale", 1.0)
-        # Trouver l'index correspondant à la valeur dans le ComboBox
+        # Find index matching value in ComboBox
         scale_index = self.font_scale_combo.findData(current_font_scale)
         if scale_index == -1:  # Si la valeur exacte n'existe pas, trouver la plus proche
             closest_index = 0
@@ -2746,7 +2746,7 @@ class ConfigurationDialog(QDialog):
         self.browse_folder(self.cookies_path_edit, "select_folder_dialog_title")
     
     def open_armory_import(self):
-        """Ouvre le dialogue d'import d'items pour l'armurerie"""
+        """Open item import dialog for armory"""
         from UI.armory_import_dialog import ArmoryImportDialog
         
         dialog = ArmoryImportDialog(self)
@@ -2756,7 +2756,7 @@ class ConfigurationDialog(QDialog):
         self.update_armory_db_info()
     
     def update_armory_db_info(self):
-        """Met à jour les informations sur la base de données d'armurerie"""
+        """Update armory database information"""
         # Check if the label exists (in case method is called before UI is fully created)
         if not hasattr(self, 'armory_db_info_label'):
             return
@@ -2875,30 +2875,61 @@ class ArmorManagementDialog(QDialog):
         preview_header.setFont(preview_header_font)
         right_layout.addWidget(preview_header)
         
-        # Preview content area
+        # Preview content area - Container widget with dark theme
+        preview_container = QWidget()
+        preview_container_layout = QVBoxLayout(preview_container)
+        preview_container_layout.setContentsMargins(0, 0, 0, 0)
+        preview_container_layout.setSpacing(10)
+        
+        # Apply dark theme to entire preview container
+        from PySide6.QtGui import QFont
+        preview_container.setStyleSheet("""
+            QWidget {
+                background-color: #2b2b2b;
+                color: #e0e0e0;
+            }
+            QTextEdit {
+                background-color: #2b2b2b;
+                color: #e0e0e0;
+                border: none;
+            }
+            QLabel {
+                color: #e0e0e0;
+                background-color: transparent;
+            }
+            QTableWidget {
+                background-color: #2b2b2b;
+                color: #e0e0e0;
+                gridline-color: #404040;
+                border: none;
+            }
+            QTableWidget::item {
+                color: #e0e0e0;
+                background-color: #2b2b2b;
+            }
+            QHeaderView::section {
+                background-color: #1e1e1e;
+                color: #e0e0e0;
+                border: 1px solid #404040;
+                padding: 4px;
+            }
+        """)
+        
+        # 1. Text preview area
         self.preview_area = QTextEdit()
         self.preview_area.setReadOnly(True)
         self.preview_area.setPlaceholderText(lang.get("armoury_dialog.preview.no_selection"))
-        self.preview_area.setMinimumWidth(350)  # Ensure preview panel has minimum width
+        self.preview_area.setMinimumWidth(350)
         
-        # Force Courier New font for the entire widget
-        from PySide6.QtGui import QFont
+        # Force Courier New font
         preview_font = QFont("Courier New", 10)
         preview_font.setStyleHint(QFont.Monospace)
         self.preview_area.setFont(preview_font)
         
-        # Fix contrast for placeholder text (visible on dark themes)
-        self.preview_area.setStyleSheet("""
-            QTextEdit {
-                background-color: #2b2b2b;
-                color: #e0e0e0;
-            }
-            QTextEdit[readOnly="true"] {
-                background-color: #2b2b2b;
-            }
-        """)
+        preview_container_layout.addWidget(self.preview_area, 1)  # Stretch factor 1
         
-        right_layout.addWidget(self.preview_area)
+        # Add preview container to right layout
+        right_layout.addWidget(preview_container)
         
         # Button layout for preview actions
         preview_buttons_layout = QHBoxLayout()
@@ -3233,11 +3264,12 @@ class ArmorManagementDialog(QDialog):
                     if not currency:
                         merchant_zone = item_data.get('merchant_zone', '')
                         currency_map = {
-                            'Drake': 'Scales',
-                            'Phoenix': 'Souls/Roots/Ices',
-                            'Demon': 'Glasses',
-                            'Summoner': 'Seals',
-                            'Behemoth': 'Grimoires'
+                            "DF": "Seals",           # Darkness Falls
+                            "SH": "Grimoires",       # Shrouded Isles
+                            "ToA": "Glasses",        # Trials of Atlantis
+                            "Drake": "Scales",       
+                            "Epic": "Souls/Roots/Ices",
+                            "Epik": "Souls/Roots/Ices"  # Ancienne orthographe
                         }
                         currency = currency_map.get(merchant_zone, '')
                     
@@ -3298,7 +3330,7 @@ class ArmorManagementDialog(QDialog):
                     bonus_name = parts[0].strip()
                     bonus_value = parts[1].strip()
                     # Skip unwanted entries
-                    if bonus_name not in ["Level", "Utility", "Source Type"]:
+                    if bonus_name not in ["Level", "Utility", "Source Type", "Name"]:
                         bonuses[bonus_name] = bonus_value
             
             elif current_section == "resists" and "%" in line:
@@ -3374,24 +3406,20 @@ class ArmorManagementDialog(QDialog):
         
         equipment_count = len(equipment)
         
-        # Build formatted output
+        # Build formatted output with adaptive sections
         output = []
-        output.append("━" * 50)
-        output.append(f"🛡️  {char_name.upper()} (Level {char_level})")
-        output.append("━" * 50)
-        if version:
-            output.append(f"⚙️  Zenkcraft {version}")
-        if season:
-            output.append(f"📦 Season: {season}")
-        if last_saved:
-            output.append(f"📅 Last Saved: {last_saved}")
-        output.append("")
         
-        # Stats (colored numbers: green=equal, orange=over cap, red=under cap)
+        # ========== SECTIONS 1-4: TWO-COLUMN LAYOUT - TWO INDEPENDENT BLOCKS ==========
+        
+        # BLOCK 1: STATS │ RESISTANCES
+        stats_lines = []
+        resist_lines = []
+        
+        # Build STATS content
         if stats:
-            output.append("📊 STATS")
-            for stat_name, (current, cap) in stats.items():
-                # Determine color for numbers
+            stats_lines.append("📊  STATS")
+            stats_list = list(stats.items())
+            for stat_name, (current, cap) in stats_list:
                 if current == cap:
                     color = "#4CAF50"  # Green
                 elif current > cap:
@@ -3399,71 +3427,156 @@ class ArmorManagementDialog(QDialog):
                 else:
                     color = "#F44336"  # Red
                 
-                # Build HTML directly with proper formatting
-                stat_label = stat_name.ljust(14)
+                stat_label = stat_name.ljust(15)
                 current_str = str(current).rjust(3)
-                cap_str = str(cap).ljust(3)
-                # Use %%COLOR%% markers that will be replaced with HTML later
-                output.append(f"  {stat_label} %%COLOR_START:{color}%%{current_str} / {cap_str}%%COLOR_END%%")
-            output.append("")
+                cap_str = str(cap).rjust(3)
+                stats_lines.append(f"  {stat_label} %%COLOR_START:{color}%%{current_str} / {cap_str}%%COLOR_END%%")
         
-        # Bonuses (2 columns with vertical separator)
+        # Build RESISTANCES content
+        if resists:
+            resist_lines.append("🛡️  RESISTANCES")
+            resist_list = list(resists.items())
+            for i in range(0, len(resist_list), 2):
+                resist1_name, resist1_value = resist_list[i]
+                resist1 = f"{resist1_name:8} {resist1_value:>2}%"
+                
+                if i + 1 < len(resist_list):
+                    resist2_name, resist2_value = resist_list[i + 1]
+                    resist2 = f"{resist2_name:8} {resist2_value:>2}%"
+                else:
+                    resist2 = ""
+                
+                resist_lines.append(f"  {resist1}  /  {resist2}")
+        
+        # BLOCK 2: SKILLS │ BONUSES
+        skills_lines = []
+        bonuses_lines = []
+        
+        # Build SKILLS content
+        if skills:
+            skills_lines.append("📚  SKILLS")
+            skills_list = list(skills.items())
+            for skill_name, skill_level in skills_list:
+                skills_lines.append(f"  {skill_name.ljust(20)} {skill_level}")
+        
+        # Build BONUSES content
         if bonuses:
-            output.append("✨ BONUSES")
+            bonuses_lines.append("✨  BONUSES")
             bonus_items = list(bonuses.items())
             for i in range(0, len(bonus_items), 2):
                 left_name, left_value = bonus_items[i]
-                left = f"{left_name:18} {left_value:>5}"
+                left = f"{left_name:20} {left_value:>5}"
                 
                 if i+1 < len(bonus_items):
                     right_name, right_value = bonus_items[i+1]
-                    right = f"{right_name:18} {right_value:>5}"
+                    right = f"{right_name:20} {right_value:>5}"
                 else:
-                    right = " " * 24
+                    right = " " * 26  # Adjusted for new width (20 + 1 + 5)
                 
-                output.append(f"  {left}  │  {right}")
-            output.append("")
+                bonuses_lines.append(f"  {left}  /  {right}")
         
-        # Resists (3 columns with vertical separator)
-        if resists:
-            output.append("🛡️  RESISTANCES")
-            resist_items = list(resists.items())
-            for i in range(0, len(resist_items), 3):
-                parts = []
-                for j in range(3):
-                    if i+j < len(resist_items):
-                        name, value = resist_items[i+j]
-                        parts.append(f"{name:8} {value:>2}%")
-                    else:
-                        parts.append(" " * 11)
-                output.append(f"  {parts[0]}  │  {parts[1]}  │  {parts[2]}")
-            output.append("")
+        # Helper function to merge two columns
+        def merge_two_columns(left_lines, right_lines):
+            """Merge two columns with proper alignment."""
+            result = []
+            
+            def remove_color_markers(text):
+                """Remove all color markers from text for accurate width calculation."""
+                text = text.replace("%%COLOR_START:#4CAF50%%", "")
+                text = text.replace("%%COLOR_START:#FF9800%%", "")
+                text = text.replace("%%COLOR_START:#F44336%%", "")
+                text = text.replace("%%COLOR_END%%", "")
+                return text
+            
+            # Calculate max width from NON-TITLE lines
+            max_left_width = 0
+            for line in left_lines:
+                if line.strip() and not any(emoji in line for emoji in ["📊", "📚", "🛡️", "✨"]):
+                    clean_line = remove_color_markers(line)
+                    max_left_width = max(max_left_width, len(clean_line))
+            
+            max_left_width = max(max_left_width, 30)  # Minimum width
+            
+            # Merge the two columns
+            max_lines = max(len(left_lines), len(right_lines))
+            
+            for i in range(max_lines):
+                left_line = left_lines[i] if i < len(left_lines) else ""
+                right_line = right_lines[i] if i < len(right_lines) else ""
+                
+                # Check if this is a title line
+                is_title_line = any(emoji in left_line for emoji in ["📊", "📚", "🛡️", "✨"]) or \
+                                any(emoji in right_line for emoji in ["📊", "📚", "🛡️", "✨"])
+                
+                if right_line and left_line.strip() and not is_title_line:
+                    # Data line with separator
+                    clean_left = remove_color_markers(left_line)
+                    padding = max_left_width - len(clean_left)
+                    result.append(f"{left_line}{' ' * padding}  │  {right_line}")
+                elif left_line and right_line and is_title_line:
+                    # Title line without separator
+                    clean_left = remove_color_markers(left_line)
+                    padding = max_left_width - len(clean_left)
+                    result.append(f"{left_line}{' ' * padding}     {right_line}")
+                elif left_line:
+                    result.append(left_line)
+                elif right_line:
+                    result.append(" " * (max_left_width + 2) + "│  " + right_line)
+            
+            return result
         
-        # Skills (vertical list)
-        if skills:
-            output.append("📚 SKILLS")
-            for skill_name, skill_level in skills.items():
-                output.append(f"  {skill_name:20} {skill_level}")
-            output.append("")
+        # Merge BLOCK 1: STATS │ RESISTANCES
+        if stats_lines or resist_lines:
+            block1_output = merge_two_columns(stats_lines, resist_lines)
+            output.extend(block1_output)
+            output.append("")  # Spacing between blocks
         
-        # Equipment summary with Spellcraft and Loot details
-        output.append(f"⚔️  ÉQUIPEMENT ({equipment_count}/18 slots)")
+        # Merge BLOCK 2: SKILLS │ BONUSES
+        if skills_lines or bonuses_lines:
+            block2_output = merge_two_columns(skills_lines, bonuses_lines)
+            output.extend(block2_output)
+            output.append("")  # Spacing after section
+        
+        # Calculate separator line width based on actual content width
+        def remove_color_markers_for_width(text):
+            """Remove color markers for accurate width calculation."""
+            text = text.replace("%%COLOR_START:#4CAF50%%", "")
+            text = text.replace("%%COLOR_START:#FF9800%%", "")
+            text = text.replace("%%COLOR_START:#F44336%%", "")
+            text = text.replace("%%COLOR_END%%", "")
+            return text
+        
+        max_line_width = 80  # Minimum width
+        for line in output:
+            clean_line = remove_color_markers_for_width(line)
+            max_line_width = max(max_line_width, len(clean_line))
+        
+        # Add separator line that matches the content width
+        output.append("═" * max_line_width)
         output.append("")
         
+        # ========== SECTION 5: EQUIPMENT SUMMARY ==========
         # Separate Spellcraft and Loot items
         spellcraft_items = [item for item in equipment if item['source_type'].lower() == 'spellcraft']
         loot_items = [item for item in equipment if item['source_type'].lower() == 'loot']
         
-        # Display Spellcraft items (count + slots)
-        if spellcraft_items:
-            slots = [item['slot'] for item in spellcraft_items]
-            slots_str = ", ".join(slots)
-            output.append(f"  🔨 Spellcraft : {len(spellcraft_items)} ({slots_str})")
-            output.append("")
+        # Build equipment header with counts
+        equipment_header = "⚔️  ÉQUIPEMENT ("
+        if spellcraft_items and loot_items:
+            equipment_header += f"🔨 Spellcraft : {len(spellcraft_items)} │ 💎 Loot : {len(loot_items)}"
+        elif spellcraft_items:
+            equipment_header += f"🔨 Spellcraft : {len(spellcraft_items)}"
+        elif loot_items:
+            equipment_header += f"💎 Loot : {len(loot_items)}"
+        else:
+            equipment_header += f"{equipment_count}/18 slots"
+        equipment_header += ")"
         
-        # Display Loot items with categories: Armor, Jewelry, Weapons
+        output.append(equipment_header)
+        output.append("")  # Add spacing after equipment header
+        
+        # ========== SECTION 6: LOOT ITEMS (if present) ==========
         if loot_items:
-            output.append("  💎 Loot :")
             
             # Categorize items
             armor_slots = ['Helmet', 'Hands', 'Torso', 'Arms', 'Feet', 'Legs']
@@ -3478,12 +3591,13 @@ class ArmorManagementDialog(QDialog):
             all_loot = armor_items + jewelry_items + weapon_items
             max_len = max(len(f"{item['name']} ({item['slot']})") for item in all_loot) if all_loot else 0
             
-            # Track items without prices for the search button
+            # Track items without prices and currency totals
             items_without_price = []
+            from collections import defaultdict
+            currency_totals_temp = defaultdict(int)
             
             # Display Armor pieces
             if armor_items:
-                output.append("")
                 output.append(f"    🛡️  {lang.get('armoury_dialog.preview.equipment_categories.armor_pieces')} :")
                 for item in armor_items:
                     item_text = f"{item['name']} ({item['slot']})"
@@ -3493,27 +3607,148 @@ class ArmorManagementDialog(QDialog):
                         # Different icon based on source: 💰 = DB, 📝 = JSON template
                         icon = "📝" if price_source == 'json' else "💰"
                         output.append(f"      • {item_text}{' ' * padding}  {icon} {price_str}")
+                        
+                        # Accumulate currency totals
+                        try:
+                            if price_source == 'json' and isinstance(price_str, dict):
+                                price = int(price_str.get('price', 0))
+                                currency = price_str.get('currency', '?')
+                                currency_totals_temp[currency] += price
+                            else:
+                                parts = str(price_str).split()
+                                if len(parts) >= 2:
+                                    price = int(parts[0])
+                                    currency = ' '.join(parts[1:])
+                                    currency_totals_temp[currency] += price
+                        except:
+                            pass
                     else:
                         # No price found - add indicator and track for search button
                         items_without_price.append(item['name'])
                         output.append(f"      • {item_text}{' ' * padding}  ❓")
             
-            # Display Jewelry items grouped side by side
+            # Display Jewelry items (2 columns layout)
             if jewelry_items:
                 output.append("")
                 output.append(f"    💍 {lang.get('armoury_dialog.preview.equipment_categories.jewelry')} :")
-                for item in jewelry_items:
-                    item_text = f"{item['name']} ({item['slot']})"
-                    price_str, price_source = get_item_price(item['name'])
-                    padding = max_len - len(item_text)
-                    if price_str:
-                        # Different icon based on source: 💰 = DB, 📝 = JSON template
-                        icon = "📝" if price_source == 'json' else "💰"
-                        output.append(f"      • {item_text}{' ' * padding}  {icon} {price_str}")
+                
+                # Organize jewelry in logical pairs
+                jewelry_dict = {item['slot']: item for item in jewelry_items}
+                
+                # Define pairs: (left_slot, right_slot) - NEW ORDER
+                pairs = [
+                    ('Mythical', None),
+                    ('Neck', 'Cloak'),
+                    ('Jewelry', 'Waist'),
+                    ('L Ring', 'R Ring'),
+                    ('L Wrist', 'R Wrist')
+                ]
+                
+                # Pre-calculate max item name width (without price) for alignment
+                max_item_name_width = 0
+                for left_slot, right_slot in pairs:
+                    if left_slot in jewelry_dict:
+                        left_text = f"{jewelry_dict[left_slot]['name']} ({jewelry_dict[left_slot]['slot']})"
+                        max_item_name_width = max(max_item_name_width, len(left_text))
+                    if right_slot and right_slot in jewelry_dict:
+                        right_text = f"{jewelry_dict[right_slot]['name']} ({jewelry_dict[right_slot]['slot']})"
+                        max_item_name_width = max(max_item_name_width, len(right_text))
+                
+                max_item_name_width = max(max_item_name_width, 35)  # Minimum width
+                
+                # Pre-calculate max total width including prices for left column alignment
+                max_left_total_width = 0
+                for left_slot, right_slot in pairs:
+                    if left_slot in jewelry_dict:
+                        left_item = jewelry_dict[left_slot]
+                        left_text = f"{left_item['name']} ({left_item['slot']})"
+                        left_price_str, left_price_source = get_item_price(left_item['name'])
+                        left_name_padded = left_text.ljust(max_item_name_width)
+                        if left_price_str:
+                            left_icon = "📝" if left_price_source == 'json' else "💰"
+                            full_line = f"• {left_name_padded}  {left_icon} {left_price_str}"
+                        else:
+                            full_line = f"• {left_name_padded}  ❓"
+                        max_left_total_width = max(max_left_total_width, len(full_line))
+                
+                max_left_total_width = max(max_left_total_width, 50)  # Minimum total width
+                
+                for left_slot, right_slot in pairs:
+                    left_item = jewelry_dict.get(left_slot)
+                    right_item = jewelry_dict.get(right_slot) if right_slot else None
+                    
+                    # Build left column
+                    if left_item:
+                        left_text = f"{left_item['name']} ({left_item['slot']})"
+                        left_price_str, left_price_source = get_item_price(left_item['name'])
+                        
+                        # Pad item name first, then add price
+                        left_name_padded = left_text.ljust(max_item_name_width)
+                        
+                        if left_price_str:
+                            left_icon = "📝" if left_price_source == 'json' else "💰"
+                            left_output = f"• {left_name_padded}  {left_icon} {left_price_str}"
+                            
+                            # Accumulate currency totals
+                            try:
+                                if left_price_source == 'json' and isinstance(left_price_str, dict):
+                                    price = int(left_price_str.get('price', 0))
+                                    currency = left_price_str.get('currency', '?')
+                                    currency_totals_temp[currency] += price
+                                else:
+                                    parts = str(left_price_str).split()
+                                    if len(parts) >= 2:
+                                        price = int(parts[0])
+                                        currency = ' '.join(parts[1:])
+                                        currency_totals_temp[currency] += price
+                            except:
+                                pass
+                        else:
+                            items_without_price.append(left_item['name'])
+                            left_output = f"• {left_name_padded}  ❓"
+                        
+                        # Pad entire left line to max width for separator alignment
+                        left_output = left_output.ljust(max_left_total_width)
                     else:
-                        # No price found - add indicator and track for search button
-                        items_without_price.append(item['name'])
-                        output.append(f"      • {item_text}{' ' * padding}  ❓")
+                        left_output = " " * max_left_total_width
+                    
+                    # Build right column
+                    if right_item:
+                        right_text = f"{right_item['name']} ({right_item['slot']})"
+                        right_price_str, right_price_source = get_item_price(right_item['name'])
+                        
+                        # Pad item name first, then add price
+                        right_name_padded = right_text.ljust(max_item_name_width)
+                        
+                        if right_price_str:
+                            right_icon = "📝" if right_price_source == 'json' else "💰"
+                            right_output = f"• {right_name_padded}  {right_icon} {right_price_str}"
+                            
+                            # Accumulate currency totals
+                            try:
+                                if right_price_source == 'json' and isinstance(right_price_str, dict):
+                                    price = int(right_price_str.get('price', 0))
+                                    currency = right_price_str.get('currency', '?')
+                                    currency_totals_temp[currency] += price
+                                else:
+                                    parts = str(right_price_str).split()
+                                    if len(parts) >= 2:
+                                        price = int(parts[0])
+                                        currency = ' '.join(parts[1:])
+                                        currency_totals_temp[currency] += price
+                            except:
+                                pass
+                        else:
+                            items_without_price.append(right_item['name'])
+                            right_output = f"• {right_name_padded}  ❓"
+                    else:
+                        right_output = ""
+                    
+                    # Merge columns with separator (left column now has fixed total width)
+                    if right_output:
+                        output.append(f"      {left_output}  │  {right_output}")
+                    elif left_item:
+                        output.append(f"      {left_output}")
             
             # Display Weapons
             if weapon_items:
@@ -3527,6 +3762,21 @@ class ArmorManagementDialog(QDialog):
                         # Different icon based on source: 💰 = DB, 📝 = JSON template
                         icon = "📝" if price_source == 'json' else "💰"
                         output.append(f"      • {item_text}{' ' * padding}  {icon} {price_str}")
+                        
+                        # Accumulate currency totals
+                        try:
+                            if price_source == 'json' and isinstance(price_str, dict):
+                                price = int(price_str.get('price', 0))
+                                currency = price_str.get('currency', '?')
+                                currency_totals_temp[currency] += price
+                            else:
+                                parts = str(price_str).split()
+                                if len(parts) >= 2:
+                                    price = int(parts[0])
+                                    currency = ' '.join(parts[1:])
+                                    currency_totals_temp[currency] += price
+                        except:
+                            pass
                     else:
                         # No price found - add indicator and track for search button
                         items_without_price.append(item['name'])
@@ -3537,8 +3787,6 @@ class ArmorManagementDialog(QDialog):
                 output.append("")
                 output.append(f"  ℹ️  Price indicators:")
                 output.append(f"      💰 = Database   📝 = Template   ❓ = Missing")
-                output.append("")
-                output.append(f"  {len(items_without_price)} item(s) without price")
                 
                 # Store items_without_price for search button
                 self.items_without_price = items_without_price
@@ -3546,8 +3794,30 @@ class ArmorManagementDialog(QDialog):
                 self.items_without_price = []
             
             output.append("")
+            
+            # ========== SECTION 7: CURRENCY SUMMARY (only if prices found) ==========
+            if currency_totals_temp:
+                # Add adaptive separator line before currency section
+                max_line_width = 80
+                for line in output:
+                    clean_line = remove_color_markers_for_width(line)
+                    max_line_width = max(max_line_width, len(clean_line))
+                output.append("═" * max_line_width)
+                output.append("")
+                
+                # Add missing items counter next to title
+                missing_count = f" ({len(self.items_without_price)} item(s) without price)" if self.items_without_price else ""
+                output.append(f"💰 CURRENCY SUMMARY{missing_count}")
+                output.append("")
+                for currency, total in sorted(currency_totals_temp.items()):
+                    currency_str = currency[:25].ljust(25)
+                    total_str = str(total).rjust(6)
+                    output.append(f"  {currency_str} {total_str}")
+                output.append("")
         
         return "\n".join(output)
+    
+
     
     def on_selection_changed(self):
         """Updates the preview when a file is selected."""
@@ -3578,7 +3848,7 @@ class ArmorManagementDialog(QDialog):
             with open(template_path, 'r', encoding='utf-8') as f:
                 content = f.read()
             
-            # Parse and format Zenkcraft template (metadata will be added inside)
+            # Parse and format Zenkcraft template
             formatted_content = self.parse_zenkcraft_template(content, self.season)
             
             # Convert to HTML with color support
@@ -3946,18 +4216,18 @@ class ArmorUploadPreviewDialog(QDialog):
 
 
 class ConnectionTestThread(QThread):
-    """Thread pour tester la connexion Eden en arrière-plan"""
-    finished = Signal(dict)  # Signal émis with the résultat of the test
+    """Thread to test Eden connection in background"""
+    finished = Signal(dict)  # Signal emitted with test result
     
     def __init__(self, parent=None):
         super().__init__(parent)
-        # Ne pas stocker de référence à cookie_manager
-        # pour éviter les problèmes si la fenêtre est détruite
+        # Don't store reference to cookie_manager
+        # to avoid issues if window is destroyed
     
     def run(self):
-        """Exécute le test de connexion"""
-        # Créer une instance locale de CookieManager pour éviter les références
-        # à des objets détruits si la fenêtre est fermée pendant le test
+        """Execute connection test"""
+        # Create local CookieManager instance to avoid references
+        # to destroyed objects if window is closed during test
         from Functions.cookie_manager import CookieManager
         cookie_manager = CookieManager()
         result = cookie_manager.test_eden_connection()
@@ -3965,7 +4235,7 @@ class ConnectionTestThread(QThread):
 
 
 class CookieManagerDialog(QDialog):
-    """Dialog pour gérer les cookies Eden pour le scraping"""
+    """Dialog to manage Eden cookies for scraping"""
     
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -4003,7 +4273,7 @@ class CookieManagerDialog(QDialog):
         self.expiry_label.setTextFormat(Qt.RichText)
         info_layout.addWidget(self.expiry_label)
         
-        # Label for afficher the navigateur utilisé
+        # Label to display browser used
         self.browser_label = QLabel()
         self.browser_label.setWordWrap(True)
         self.browser_label.setTextFormat(Qt.RichText)
@@ -4063,7 +4333,7 @@ class CookieManagerDialog(QDialog):
         self.chrome_profile_size_label.setWordWrap(True)
         chrome_layout.addWidget(self.chrome_profile_size_label)
         
-        # Note: Bouton de purge supprimé - utilisez "Nettoyer Eden" dans les paramètres Herald
+        # Note: Purge button removed - use "Clean Eden" in Herald settings
         
         chrome_group.setLayout(chrome_layout)
         layout.addWidget(chrome_group)
@@ -4073,13 +4343,13 @@ class CookieManagerDialog(QDialog):
         close_button.clicked.connect(self.accept)
         layout.addWidget(close_button)
         
-        # Afficher l'état initial et la taille du profil
+        # Display initial state and profile size
         self.refresh_status()
         self.update_chrome_profile_size()
     
     def start_connection_test(self):
-        """Lance le test de connexion en arrière-plan"""
-        # Annuler un test en cours si existant
+        """Start connection test in background"""
+        # Cancel ongoing test if existing
         if self.connection_thread and self.connection_thread.isRunning():
             try:
                 self.connection_thread.finished.disconnect()
@@ -4088,16 +4358,16 @@ class CookieManagerDialog(QDialog):
             self.connection_thread.quit()
             self.connection_thread.wait()
         
-        # Créer un nouveau thread avec la fenêtre principale comme parent
-        # pour qu'il survive à la fermeture de cette fenêtre de dialog
+        # Create new thread with main window as parent
+        # so it survives closing this dialog window
         main_window = self.parent() if self.parent() else None
         self.connection_thread = ConnectionTestThread(parent=main_window)
         self.connection_thread.finished.connect(self.on_connection_test_finished)
         self.connection_thread.start()
     
     def on_connection_test_finished(self, result):
-        """Appelé quand le test de connexion est terminé"""
-        # Retrieve the infos actuelles for mettre à jour l'affichage
+        """Called when connection test is complete"""
+        # Retrieve current info to update display
         info = self.cookie_manager.get_cookie_info()
         if info and info['is_valid']:
             expiry_date = info['expiry_date']
@@ -4114,14 +4384,14 @@ class CookieManagerDialog(QDialog):
                 else:
                     connection_status = f"{lang.get('cookie_manager.eden_access')} <span style='color: orange;'>⚠️ {result['message']}</span>"
             
-            # Mettre à jour l'affichage
+            # Update display
             self.expiry_label.setText(
                 f"{lang.get('cookie_manager.expiry_date', date=expiry_date.strftime('%d/%m/%Y à %H:%M'))}<br/>"
                 f"{lang.get('cookie_manager.remaining_validity', days=days)}<br/>"
                 f"{connection_status}"
             )
             
-            # Afficher le navigateur utilisé pour le test (si disponible dans le résultat)
+            # Display browser used for test (if available in result)
             browser_used = result.get('browser_used')
             if browser_used:
                 browser_icon = {'Chrome': '🔵', 'Edge': '🔷', 'Firefox': '🦊'}.get(browser_used, '🌐')
@@ -4132,7 +4402,7 @@ class CookieManagerDialog(QDialog):
                 self.browser_label.setText("")
     
     def refresh_status(self):
-        """Actualise l'affichage de l'état des cookies"""
+        """Update cookie status display"""
         info = self.cookie_manager.get_cookie_info()
         
         if info is None:
@@ -4154,7 +4424,7 @@ class CookieManagerDialog(QDialog):
             self.delete_button.setEnabled(True)
             
         elif not info['is_valid']:
-            # Cookies expirés
+            # Expired cookies
             self.status_label.setText(lang.get("cookie_manager.status_expired"))
             self.status_label.setStyleSheet("color: orange;")
             self.expiry_label.setText("")
@@ -4187,14 +4457,14 @@ class CookieManagerDialog(QDialog):
             else:
                 self.expiry_label.setStyleSheet("color: green;")
             
-            # Afficher the infos of base immédiatement
+            # Display base info immediately
             self.expiry_label.setText(
                 f"{lang.get('cookie_manager.expiry_date', date=expiry_date.strftime('%d/%m/%Y à %H:%M'))}<br/>"
                 f"{lang.get('cookie_manager.remaining_validity', days=days)}<br/>"
                 f"{lang.get('cookie_manager.eden_access')} {lang.get('cookie_manager.eden_testing')}"
             )
             
-            # Lancer the test of connexion en arrière-plan
+            # Launch connection test in background
             self.start_connection_test()
             
             details = lang.get("cookie_manager.total_cookies_display", count=info['total_cookies']) + "<br/>"
@@ -4208,12 +4478,12 @@ class CookieManagerDialog(QDialog):
             self.details_label.setText(details)
             self.delete_button.setEnabled(True)
         
-        # Réinitialiser the label of the navigateur (sera mis à jour after test/génération)
+        # Reset browser label (will be updated after test/generation)
         if not (info and info.get('is_valid')):
             self.browser_label.setText("")
     
     def browse_cookie_file(self):
-        """Ouvre un dialog pour sélectionner un fichier de cookies"""
+        """Open dialog to select a cookie file"""
         file_path, _ = QFileDialog.getOpenFileName(
             self,
             lang.get("cookie_manager.browse_dialog_title"),
@@ -4223,7 +4493,7 @@ class CookieManagerDialog(QDialog):
         
         if file_path:
             self.cookie_path_edit.setText(file_path)
-            # Importer automatiquement after sélection
+            # Auto-import after selection
             self.import_from_path()
     
     def import_from_path(self):
@@ -4261,7 +4531,7 @@ class CookieManagerDialog(QDialog):
             self.cookie_path_edit.clear()
             self.refresh_status()
             
-            # Rafraîchir the statut Eden in the fenêtre principale
+            # Refresh Eden status in main window
             if self.parent() and hasattr(self.parent(), 'ui_manager'):
                 self.parent().ui_manager.check_eden_status()
         else:
@@ -4272,7 +4542,7 @@ class CookieManagerDialog(QDialog):
             )
     
     def delete_cookies(self):
-        """Supprime les cookies après confirmation"""
+        """Delete cookies after confirmation"""
         reply = QMessageBox.question(
             self,
             lang.get("cookie_manager.delete_confirm_title"),
@@ -4292,7 +4562,7 @@ class CookieManagerDialog(QDialog):
                 )
                 self.refresh_status()
                 
-                # Rafraîchir the statut Eden in the fenêtre principale
+                # Refresh Eden status in main window
                 if self.parent() and hasattr(self.parent(), 'ui_manager'):
                     self.parent().ui_manager.check_eden_status()
             else:
@@ -4303,7 +4573,7 @@ class CookieManagerDialog(QDialog):
                 )
     
     def update_chrome_profile_size(self):
-        """Met à jour l'affichage de la taille du profil Chrome"""
+        """Update Chrome profile size display"""
         size_bytes = self.cookie_manager.get_chrome_profile_size()
         
         if size_bytes == 0:
@@ -4320,22 +4590,22 @@ class CookieManagerDialog(QDialog):
         self.chrome_profile_size_label.setText(size_text)
     
     def generate_cookies(self):
-        """Génère de nouveaux cookies via authentification navigateur (VERSION MIGRÉE)"""
+        """Generate new cookies via browser authentication (MIGRATED VERSION)"""
         
-        # Lire la configuration
+        # Read configuration
         from Functions.config_manager import config
         preferred_browser = config.get('system.preferred_browser', 'Chrome')
         allow_download = config.get('system.allow_browser_download', False)
         
-        # Import des composants
+        # Import components
         from UI.progress_dialog_base import ProgressStepsDialog, StepConfiguration
         
-        # Construire les étapes (PAS de connexion Herald - génération cookies)
+        # Build steps (NO Herald connection - cookie generation)
         steps = StepConfiguration.build_steps(
-            StepConfiguration.COOKIE_GENERATION  # 6 étapes
+            StepConfiguration.COOKIE_GENERATION  # 6 steps
         )
         
-        # Créer le dialogue de progression
+        # Create progress dialog
         self.progress_dialog = ProgressStepsDialog(
             parent=self,
             title=lang.get("progress_cookie_gen_title", default="🍪 Génération des cookies..."),
@@ -4346,7 +4616,7 @@ class CookieManagerDialog(QDialog):
             allow_cancel=True  # Permet annulation
         )
         
-        # Créer le thread
+        # Create thread
         self.cookie_gen_thread = CookieGenThread(preferred_browser, allow_download)
         
         # ✅ Pattern 1: Connect via wrappers thread-safe
@@ -4359,7 +4629,7 @@ class CookieManagerDialog(QDialog):
         # ✅ Pattern 4: Connect rejected signal
         self.progress_dialog.rejected.connect(self._on_cookie_progress_dialog_closed)
         
-        # Désactiver boutons pendant génération
+        # Disable buttons during generation
         self.generate_button.setEnabled(False)
         self.cookie_path_edit.setEnabled(False)
         
@@ -4396,10 +4666,10 @@ class CookieManagerDialog(QDialog):
                 pass
     
     def _on_cookie_user_action_required(self, browser_name, message):
-        """Dialogue interactif pour confirmer connexion utilisateur (Étape 2)"""
+        """Interactive dialog to confirm user connection (Step 2)"""
         from PySide6.QtWidgets import QMessageBox
         
-        # Créer dialogue de confirmation
+        # Create confirmation dialog
         wait_msg = QMessageBox(self)
         wait_msg.setIcon(QMessageBox.Information)
         wait_msg.setWindowTitle(lang.get("cookie_manager.user_action_title"))
@@ -4410,7 +4680,7 @@ class CookieManagerDialog(QDialog):
         
         result = wait_msg.exec()
         
-        # Informer le thread de la décision utilisateur
+        # Inform thread of user decision
         if result == QMessageBox.Ok:
             self.cookie_gen_thread.set_user_confirmation(True)
         else:
@@ -4419,19 +4689,19 @@ class CookieManagerDialog(QDialog):
             self._stop_cookie_gen_thread()
     
     def _on_cookie_progress_dialog_closed(self):
-        """✅ Pattern 4: Arrêt propre quand dialog fermé par utilisateur"""
+        """✅ Pattern 4: Clean stop when dialog closed by user"""
         import logging
         logging.info("Dialogue cookie gen fermé par utilisateur - Arrêt génération")
         self._stop_cookie_gen_thread()
     
     def _stop_cookie_gen_thread(self):
-        """✅ Pattern 2+3: Arrêt propre du thread avec cleanup AVANT terminate"""
+        """✅ Pattern 2+3: Clean thread stop with cleanup BEFORE terminate"""
         if hasattr(self, 'cookie_gen_thread') and self.cookie_gen_thread:
             if self.cookie_gen_thread.isRunning():
-                # ✅ Pattern 3: Demander arrêt gracieux
+                # ✅ Pattern 3: Request graceful stop
                 self.cookie_gen_thread.request_stop()
                 
-                # Déconnecter les signaux
+                # Disconnect signals
                 try:
                     self.cookie_gen_thread.step_started.disconnect()
                     self.cookie_gen_thread.step_completed.disconnect()
@@ -4469,16 +4739,16 @@ class CookieManagerDialog(QDialog):
             if hasattr(self, 'progress_dialog'):
                 delattr(self, 'progress_dialog')
         
-        # Réactiver boutons
+        # Re-enable buttons
         self.generate_button.setEnabled(True)
         self.cookie_path_edit.setEnabled(True)
     
     def _on_cookie_generation_finished(self, success, message, cookie_count):
-        """Callback appelé quand la génération est terminée"""
+        """Callback called when generation is complete"""
         from PySide6.QtCore import QTimer
         from PySide6.QtWidgets import QMessageBox
         
-        # Afficher succès/erreur dans le dialogue
+        # Display success/error in dialog
         if hasattr(self, 'progress_dialog') and self.progress_dialog:
             try:
                 if success:
@@ -4491,17 +4761,17 @@ class CookieManagerDialog(QDialog):
                 # Attendre 1.5s puis fermer
                 QTimer.singleShot(1500, lambda: self._process_cookie_result(success, message, cookie_count))
             except RuntimeError:
-                # Dialog déjà supprimé
+                # Dialog already deleted
                 self._process_cookie_result(success, message, cookie_count)
         else:
             self._process_cookie_result(success, message, cookie_count)
     
     def _process_cookie_result(self, success, message, cookie_count):
-        """Traiter le résultat de la génération après affichage du status"""
-        # Fermer et nettoyer
+        """Process generation result after displaying status"""
+        # Close and cleanup
         self._stop_cookie_gen_thread()
         
-        # Afficher résultat final
+        # Display final result
         if success:
             from PySide6.QtWidgets import QMessageBox
             QMessageBox.information(
@@ -4510,7 +4780,7 @@ class CookieManagerDialog(QDialog):
                 f"{lang.get('cookie_manager.import_success_message')}\n\n{message}"
             )
         elif message and "Annulé" not in message:
-            # Afficher erreur seulement si pas annulé
+            # Display error only if not cancelled
             from PySide6.QtWidgets import QMessageBox
             QMessageBox.critical(
                 self,
@@ -4521,7 +4791,7 @@ class CookieManagerDialog(QDialog):
         # Actualiser le statut
         self.refresh_status()
         
-        # Rafraîchir le statut Eden dans la fenêtre principale si cookies générés
+        # Refresh Eden status in main window if cookies generated
         if success and self.parent() and hasattr(self.parent(), 'ui_manager'):
             self.parent().ui_manager.check_eden_status()
     
@@ -4530,14 +4800,14 @@ class CookieManagerDialog(QDialog):
         Gère la fermeture de la fenêtre.
         Le thread continue en arrière-plan (avec parent=main_window) jusqu'à sa fin naturelle.
         """
-        # Si un thread de connexion est en cours, déconnecter notre callback
-        # Le thread continuera avec son parent (main_window) et se terminera proprement
+        # If connection test thread is running, disconnect our callback
+        # Thread will continue with its parent (main_window) and terminate cleanly
         if self.connection_thread and self.connection_thread.isRunning():
             try:
                 self.connection_thread.finished.disconnect(self.on_connection_test_finished)
             except:
                 pass
-            # Ne plus garder de référence au thread
+            # No longer keep reference to thread
             self.connection_thread = None
         
         # Accepter la fermeture
@@ -4563,21 +4833,21 @@ class CookieGenThread(QThread):
         self.preferred_browser = preferred_browser or 'Chrome'
         self.allow_download = allow_download
         
-        # ✅ Pattern 3 : Flag d'interruption
+        # ✅ Pattern 3: Interruption flag
         self._stop_requested = False
         
-        # ✅ Pattern 2 : Référence ressource externe (driver Selenium)
+        # ✅ Pattern 2: External resource reference (Selenium driver)
         self._driver = None
         
-        # Variable pour stocker si l'utilisateur a confirmé la connexion
+        # Variable to store if user confirmed connection
         self._user_confirmed = False
     
     def request_stop(self):
-        """✅ Pattern 3 : Demande arrêt gracieux"""
+        """✅ Pattern 3: Request graceful stop"""
         self._stop_requested = True
     
     def cleanup_external_resources(self):
-        """✅ Pattern 2 : Cleanup forcé du driver (appelé depuis thread principal)"""
+        """✅ Pattern 2: Forced driver cleanup (called from main thread)"""
         import logging
         logger = logging.getLogger(__name__)
         
@@ -4592,11 +4862,11 @@ class CookieGenThread(QThread):
                 self._driver = None
     
     def set_user_confirmation(self, confirmed):
-        """Appelé depuis le thread principal quand l'utilisateur confirme/annule"""
+        """Called from main thread when user confirms/cancels"""
         self._user_confirmed = confirmed
     
     def run(self):
-        """Exécute la génération de cookies avec sécurité thread"""
+        """Execute cookie generation with thread safety"""
         import logging
         import time
         logger = logging.getLogger(__name__)
@@ -4606,13 +4876,13 @@ class CookieGenThread(QThread):
         cookie_manager = CookieManager()
         driver = None
         
-        # Variables pour résultat (émis APRÈS toutes les étapes)
+        # Variables for result (emitted AFTER all steps)
         result_success = False
         result_message = ""
         result_count = 0
         
         try:
-            # Étape 0 : Configuration du navigateur
+            # Step 0: Browser configuration
             self.step_started.emit(0)
             logger.info(f"Configuration navigateur: {self.preferred_browser}, download={self.allow_download}")
             time.sleep(0.5)  # Simuler configuration
@@ -4621,7 +4891,7 @@ class CookieGenThread(QThread):
             if self._stop_requested:
                 return
             
-            # Étape 1 : Ouverture de la page de connexion
+            # Step 1: Opening login page
             self.step_started.emit(1)
             logger.info("Initialisation navigateur pour génération cookies...")
             
@@ -4646,11 +4916,11 @@ class CookieGenThread(QThread):
             if self._stop_requested:
                 return
             
-            # Étape 2 : En attente de la connexion utilisateur (INTERACTIF)
+            # Step 2: Waiting for user connection (INTERACTIVE)
             self.step_started.emit(2)
             logger.info("Attente connexion utilisateur...")
             
-            # Émettre signal pour demander confirmation utilisateur
+            # Emit signal to request user confirmation
             self.user_action_required.emit(
                 browser_name,
                 lang.get("cookie_manager.browser_opened_message", browser=browser_name)
@@ -4682,12 +4952,12 @@ class CookieGenThread(QThread):
             if self._stop_requested:
                 return
             
-            # Étape 3 : Extraction des cookies
+            # Step 3: Cookie extraction
             self.step_started.emit(3)
             logger.info("Extraction des cookies depuis le navigateur...")
             
-            # Les cookies sont déjà dans le driver, on passe à la sauvegarde
-            time.sleep(0.5)  # Petit délai pour laisser les cookies se stabiliser
+            # Cookies are already in driver, move to save step
+            time.sleep(0.5)  # Small delay to let cookies stabilize
             
             logger.info("Cookies extraits")
             self.step_completed.emit(3)
@@ -4695,7 +4965,7 @@ class CookieGenThread(QThread):
             if self._stop_requested:
                 return
             
-            # Étape 4 : Sauvegarde des cookies
+            # Step 4: Cookie saving
             self.step_started.emit(4)
             logger.info("Sauvegarde des cookies...")
             
@@ -4714,17 +4984,17 @@ class CookieGenThread(QThread):
             if self._stop_requested:
                 return
             
-            # Étape 5 : Validation et vérification
+            # Step 5: Validation and verification
             self.step_started.emit(5)
             logger.info("Validation des cookies...")
             
-            # Vérifier que les cookies sont valides
+            # Verify that cookies are valid
             info = cookie_manager.get_cookie_info()
             if info and info.get('is_valid'):
                 logger.info("Cookies validés avec succès")
                 self.step_completed.emit(5)
                 
-                # Stocker le succès
+                # Store success
                 result_success = True
                 result_message = message
                 result_count = count
@@ -4739,7 +5009,7 @@ class CookieGenThread(QThread):
             result_message = f"Erreur: {str(e)}"
         
         finally:
-            # Fermeture du navigateur (pas d'étape dédiée dans COOKIE_GENERATION)
+            # Browser closing (no dedicated step in COOKIE_GENERATION)
             if driver:
                 try:
                     logger.info("Fermeture navigateur cookies...")
@@ -4748,7 +5018,7 @@ class CookieGenThread(QThread):
                 except Exception as e:
                     logger.warning(f"Erreur fermeture navigateur: {e}")
             
-            # Émettre le signal final
+            # Emit final signal
             logger.info(f"Émission signal generation_finished - success={result_success}, count={result_count}")
             self.generation_finished.emit(result_success, result_message, result_count)
 
@@ -4758,9 +5028,9 @@ class CookieGenThread(QThread):
 # ============================================================================
 
 class SearchThread(QThread):
-    """Thread pour effectuer la recherche Herald en arrière-plan"""
+    """Thread to perform Herald search in background"""
     search_finished = Signal(bool, str, str)  # (success, message, json_path)
-    progress_update = Signal(str)  # (status_message) - LEGACY pour compatibilité
+    progress_update = Signal(str)  # (status_message) - LEGACY for compatibility
     step_started = Signal(int)  # (step_index) - NOUVEAU pour ProgressStepsDialog
     step_completed = Signal(int)  # (step_index) - NOUVEAU pour ProgressStepsDialog
     step_error = Signal(int, str)  # (step_index, error_message) - NOUVEAU pour ProgressStepsDialog
@@ -4770,15 +5040,15 @@ class SearchThread(QThread):
         self.character_name = character_name
         self.realm_filter = realm_filter
         self.lang = lang
-        self._stop_requested = False  # Flag pour arrêt gracieux
-        self._scraper = None  # Référence au scraper pour cleanup externe
+        self._stop_requested = False  # Flag for graceful stop
+        self._scraper = None  # Reference to scraper for external cleanup
     
     def request_stop(self):
-        """Demande l'arrêt du thread (appelé depuis le thread principal)"""
+        """Request thread stop (called from main thread)"""
         self._stop_requested = True
     
     def cleanup_driver(self):
-        """Ferme le navigateur de manière sécurisée (appelé depuis thread principal)"""
+        """Close browser safely (called from main thread)"""
         import logging
         module_logger = logging.getLogger(__name__)
         
@@ -4793,16 +5063,16 @@ class SearchThread(QThread):
                 self._scraper = None
     
     def _emit_step_start(self, step_index, message):
-        """Émet les signaux de début d'étape (nouveau + legacy)"""
+        """Emit step start signals (new + legacy)"""
         self.step_started.emit(step_index)
-        self.progress_update.emit(message)  # Garde compatibilité
+        self.progress_update.emit(message)  # Keep compatibility
     
     def _emit_step_complete(self, step_index):
-        """Émet le signal de fin d'étape"""
+        """Emit step complete signal"""
         self.step_completed.emit(step_index)
     
     def run(self):
-        """Exécute la recherche avec des mises à jour de progression"""
+        """Execute search with progress updates"""
         from Functions.cookie_manager import CookieManager
         from Functions.eden_scraper import EdenScraper
         from bs4 import BeautifulSoup
@@ -4816,13 +5086,13 @@ class SearchThread(QThread):
         module_logger = logging.getLogger(__name__)
         scraper = None
         
-        # Variables pour résultat (signal émis APRÈS Step 8 dans finally)
+        # Variables for result (signal emitted AFTER Step 8 in finally)
         result_success = False
         result_message = ""
         result_json_path = ""
         
         try:
-            # Étape 0 : Vérification des cookies
+            # Step 0: Cookie verification
             self._emit_step_start(0, "🔐 Vérification des cookies d'authentification...")
             module_logger.info(f"Début de la recherche Herald pour: {self.character_name}", extra={"action": "SEARCH"})
             
@@ -4844,10 +5114,10 @@ class SearchThread(QThread):
             module_logger.info(f"Cookies valides - {info.get('cookie_count', 0)} cookies chargés", extra={"action": "SEARCH"})
             self._emit_step_complete(0)
             
-            # Étape 1 : Initialisation du navigateur
+            # Step 1: Browser initialization
             self._emit_step_start(1, "🌐 Initialisation du navigateur Chrome...")
             scraper = EdenScraper(cookie_manager)
-            self._scraper = scraper  # Stocke référence pour cleanup externe
+            self._scraper = scraper  # Store reference for external cleanup
             
             if not scraper.initialize_driver(headless=False):
                 module_logger.error("Impossible d'initialiser le navigateur", extra={"action": "SEARCH"})
@@ -4858,7 +5128,7 @@ class SearchThread(QThread):
             module_logger.info("Navigateur initialisé avec succès", extra={"action": "SEARCH"})
             self._emit_step_complete(1)
             
-            # Étape 2 : Chargement des cookies
+            # Step 2: Loading cookies
             self._emit_step_start(2, "🍪 Chargement des cookies dans le navigateur...")
             if not scraper.load_cookies():
                 module_logger.error("Impossible de charger les cookies dans le navigateur", extra={"action": "SEARCH"})
@@ -4869,12 +5139,12 @@ class SearchThread(QThread):
             module_logger.info("Cookies chargés dans le navigateur - Authentification complétée", extra={"action": "SEARCH"})
             self._emit_step_complete(2)
             
-            # Vérifier si arrêt demandé
+            # Check if stop requested
             if self._stop_requested:
                 module_logger.info("Arrêt demandé par l'utilisateur (après étape 2)", extra={"action": "SEARCH"})
                 return
             
-            # Étape 3 : Navigation vers la page de recherche
+            # Step 3: Navigation to search page
             if self.realm_filter:
                 search_url = f"https://eden-daoc.net/herald?n=search&r={self.realm_filter}&s={self.character_name}"
             else:
@@ -4886,16 +5156,16 @@ class SearchThread(QThread):
             scraper.driver.get(search_url)
             self._emit_step_complete(3)
             
-            # Vérifier si arrêt demandé
+            # Check if stop requested
             if self._stop_requested:
                 module_logger.info("Arrêt demandé par l'utilisateur (après étape 3)", extra={"action": "SEARCH"})
                 return
             
-            # Étape 4 : Attente du chargement de la page
+            # Step 4: Wait for page loading
             self._emit_step_start(4, "⏳ Chargement de la page de recherche...")
             module_logger.info("Attente du chargement de la page de recherche (5 secondes)...", extra={"action": "SEARCH"})
             
-            # Sleep interruptible (vérifier le flag toutes les 0.5 secondes)
+            # Interruptible sleep (check flag every 0.5 seconds)
             for i in range(10):  # 10 x 0.5s = 5s
                 if self._stop_requested:
                     module_logger.info("Arrêt demandé par l'utilisateur (pendant sleep)", extra={"action": "SEARCH"})
@@ -4904,13 +5174,13 @@ class SearchThread(QThread):
             
             self._emit_step_complete(4)
             
-            # Vérifier si arrêt demandé
+            # Check if stop requested
             if self._stop_requested:
                 module_logger.info("Arrêt demandé par l'utilisateur (après étape 4)", extra={"action": "SEARCH"})
                 return
             
-            # Étape 5 : Extraction des données
-            self._emit_step_start(5, "📊 Extraction des résultats de recherche...")
+            # Step 5: Data extraction
+            self._emit_step_start(5, "📊Sentence Extraction des résultats de recherche...")
             page_source = scraper.driver.page_source
             soup = BeautifulSoup(page_source, 'html.parser')
             
@@ -4928,7 +5198,7 @@ class SearchThread(QThread):
             tables = soup.find_all('table')
             for table in tables:
                 rows = table.find_all('tr')
-                if len(rows) > 1:  # Au moins un header et une ligne
+                if len(rows) > 1:  # At least header and one line
                     headers = [th.get_text(strip=True) for th in rows[0].find_all('th')]
                     
                     for row in rows[1:]:
@@ -4939,7 +5209,7 @@ class SearchThread(QThread):
                                 header = headers[idx] if idx < len(headers) else f"col_{idx}"
                                 result[header] = cell.get_text(strip=True)
                                 
-                                # Extraire les liens
+                                # Extract links
                                 links = cell.find_all('a')
                                 if links:
                                     result[f"{header}_links"] = [a.get('href', '') for a in links]
@@ -4949,7 +5219,7 @@ class SearchThread(QThread):
             
             self._emit_step_complete(5)
             
-            # Étape 6 : Sauvegarde des résultats
+            # Step 6: Saving results
             self._emit_step_start(6, "💾 Sauvegarde des résultats...")
             
             # Utiliser le dossier temporaire de l'OS
@@ -4982,7 +5252,7 @@ class SearchThread(QThread):
             
             self._emit_step_complete(6)
             
-            # Étape 7 : Formatage des personnages
+            # Step 7: Character formatting
             self._emit_step_start(7, "🎯 Formatage des personnages trouvés...")
             characters = []
             for result in search_data['results']:
@@ -5014,7 +5284,7 @@ class SearchThread(QThread):
                         else:
                             url = f"https://eden-daoc.net{href}"
                     else:
-                        # Fallback : construire l'URL à partir du nom si aucun lien trouvé
+                        # Fallback: build URL from name if no link found
                         clean_name = name.split()[0] if name else ""
                         if clean_name:
                             url = f"https://eden-daoc.net/herald?n=player&k={clean_name}"
@@ -5037,20 +5307,20 @@ class SearchThread(QThread):
                         'url': url
                     })
             
-            # Ajouter la liste formatée au JSON
+            # Add formatted list to JSON
             search_data['characters'] = characters
             search_data['search_query'] = self.character_name
             
-            # Re-sauvegarder avec les données formatées
+            # Re-save with formatted data
             with open(json_path, 'w', encoding='utf-8') as f:
                 json.dump(search_data, f, indent=2, ensure_ascii=False)
             
             module_logger.info(f"{len(characters)} personnage(s) trouvé(s) et sauvegardé(s) dans: {json_path}", extra={"action": "SEARCH"})
             self._emit_step_complete(7)
             
-            # Pas d'étape 8 ici (fermeture navigateur) - sera dans finally
+            # No step 8 here (browser closing) - will be in finally
             
-            # Stocker le succès (signal émis APRÈS Step 8 dans finally)
+            # Store success (signal emitted AFTER Step 8 in finally)
             result_success = True
             if self.lang:
                 result_message = self.lang.get("herald_search.search_complete", count=len(characters), default=f"{len(characters)} personnage(s) trouvé(s)")
@@ -5063,7 +5333,7 @@ class SearchThread(QThread):
             result_message = f"Erreur: {str(e)}"
             
         finally:
-            # Étape 8 : Fermer le navigateur proprement
+            # Step 8: Close browser cleanly
             if scraper and scraper.driver:
                 try:
                     self._emit_step_start(8, "🔄 Fermeture du navigateur...")
@@ -5074,7 +5344,7 @@ class SearchThread(QThread):
                     module_logger.warning(f"Erreur lors de la fermeture du navigateur: {e}", extra={"action": "SEARCH"})
                     self.step_error.emit(8, f"Erreur fermeture: {str(e)}")
             
-            # Émettre le signal APRÈS Step 8 (fermeture complète)
+            # Emit signal AFTER Step 8 (complete closing)
             module_logger.info(f"Émission signal search_finished - success={result_success}, message={result_message}")
             self.search_finished.emit(result_success, result_message, result_json_path)
 
@@ -5084,11 +5354,11 @@ class SearchThread(QThread):
 # ============================================================================
 
 class StatsUpdateThread(QThread):
-    """Thread pour mettre à jour les statistiques depuis le Herald"""
+    """Thread to update statistics from Herald"""
     
-    # Signaux
-    stats_updated = Signal(dict)  # (results_dict) - Émis quand mise à jour terminée avec succès
-    update_failed = Signal(str)  # (error_message) - Émis en cas d'échec complet
+    # Signals
+    stats_updated = Signal(dict)  # (results_dict) - Emitted when update completed successfully
+    update_failed = Signal(str)  # (error_message) - Emitted in case of complete failure
     step_started = Signal(int)  # (step_index) - NOUVEAU pour ProgressStepsDialog
     step_completed = Signal(int)  # (step_index) - NOUVEAU pour ProgressStepsDialog
     step_error = Signal(int, str)  # (step_index, error_message) - NOUVEAU pour ProgressStepsDialog

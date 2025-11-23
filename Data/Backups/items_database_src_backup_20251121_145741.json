@@ -1,7 +1,7 @@
 {
   "version": "2.0",
   "description": "DAOC Items Database - Multi-Realm Support (Minimal Data)",
-  "last_updated": "2025-11-21 15:18:53",
+  "last_updated": "2025-11-21 08:56:12",
   "item_count": 108,
   "notes": [
     "Composite keys format: 'item_name:realm' (lowercase)",
@@ -758,10 +758,8 @@
       "dps": null,
       "speed": null,
       "damage_type": null,
-      "usable_by": "ALL",
       "merchant_zone": "Epic",
       "merchant_price": "500",
-      "merchant_currency": "Souls/Roots/Ices",
       "source": "internal"
     },
     "jewel of the haughty warrior:hibernia": {
@@ -823,10 +821,10 @@
       "speed": null,
       "damage_type": null,
       "usable_by": "ALL",
+      "source": "internal",
       "merchant_zone": "Drake",
       "merchant_price": "150",
-      "merchant_currency": "Scales",
-      "source": "internal"
+      "merchant_currency": "Scales"
     },
     "bruadar speal:hibernia": {
       "id": "163404",
@@ -839,10 +837,10 @@
       "speed": "5.8",
       "damage_type": "Slash",
       "usable_by": "ALL",
+      "source": "internal",
       "merchant_zone": "Drake",
       "merchant_price": "150",
-      "merchant_currency": "Scales",
-      "source": "internal"
+      "merchant_currency": "Scales"
     },
     "searing fiend necklace:all": {
       "id": "115186",
@@ -855,10 +853,10 @@
       "speed": null,
       "damage_type": null,
       "usable_by": "ALL",
+      "source": "internal",
       "merchant_zone": "DF",
       "merchant_price": "600",
-      "merchant_currency": "Seals",
-      "source": "internal"
+      "merchant_currency": "Seals"
     },
     "myrddraxis remnant cloak:hibernia": {
       "id": "149072",
@@ -871,10 +869,10 @@
       "speed": null,
       "damage_type": null,
       "usable_by": "ALL",
+      "source": "internal",
       "merchant_zone": "Epic",
       "merchant_price": "600",
-      "merchant_currency": "Souls/Roots/Ices",
-      "source": "internal"
+      "merchant_currency": "Souls/Roots/Ices"
     },
     "warshadow bracer:hibernia": {
       "id": "112300",
@@ -887,10 +885,10 @@
       "speed": null,
       "damage_type": null,
       "usable_by": "ALL",
+      "source": "internal",
       "merchant_zone": "Drake",
       "merchant_price": "475",
-      "merchant_currency": "Scales",
-      "source": "internal"
+      "merchant_currency": "Scales"
     },
     "rigid razorback jerkin:hibernia": {
       "id": "153970",
@@ -903,10 +901,10 @@
       "speed": null,
       "damage_type": null,
       "usable_by": "ALL",
+      "source": "internal",
       "merchant_zone": "Epic",
       "merchant_price": "600",
-      "merchant_currency": "Souls/Roots/Ices",
-      "source": "internal"
+      "merchant_currency": "Souls/Roots/Ices"
     },
     "dirge of sheeroe hills:hibernia": {
       "id": "163426",
@@ -919,10 +917,10 @@
       "speed": "5.0",
       "damage_type": "Crush",
       "usable_by": "ALL",
+      "source": "internal",
       "merchant_zone": "Drake",
       "merchant_price": "250",
-      "merchant_currency": "Scales",
-      "source": "internal"
+      "merchant_currency": "Scales"
     },
     "sulphurous fiend gem:all": {
       "id": "115180",
@@ -935,10 +933,10 @@
       "speed": null,
       "damage_type": null,
       "usable_by": "ALL",
+      "source": "internal",
       "merchant_zone": "DF",
       "merchant_price": "600",
-      "merchant_currency": "Seals",
-      "source": "internal"
+      "merchant_currency": "Seals"
     },
     "dragon intellect mythirian:all": {
       "id": "63573",
@@ -967,10 +965,10 @@
       "speed": null,
       "damage_type": null,
       "usable_by": "ALL",
+      "source": "internal",
       "merchant_zone": "Drake",
       "merchant_price": "450",
-      "merchant_currency": "Scales",
-      "source": "internal"
+      "merchant_currency": "Scales"
     },
     "runed tuscarian vest:midgard": {
       "id": "153954",
@@ -999,10 +997,10 @@
       "speed": "3.2",
       "damage_type": "Crush",
       "usable_by": "ALL",
+      "source": "internal",
       "merchant_zone": "Drake",
       "merchant_price": "350",
-      "merchant_currency": "Scales",
-      "source": "internal"
+      "merchant_currency": "Scales"
     },
     "luminescent diamond necklace:midgard": {
       "id": "112514",
@@ -1015,10 +1013,10 @@
       "speed": null,
       "damage_type": null,
       "usable_by": "ALL",
+      "source": "internal",
       "merchant_zone": "Drake",
       "merchant_price": "475",
-      "merchant_currency": "Scales",
-      "source": "internal"
+      "merchant_currency": "Scales"
     },
     "band of eternity:albion": {
       "id": "139627",
@@ -1031,10 +1029,10 @@
       "speed": null,
       "damage_type": null,
       "usable_by": "ALL",
+      "source": "internal",
       "merchant_zone": "SH",
       "merchant_price": "500",
-      "merchant_currency": "Grimoires",
-      "source": "internal"
+      "merchant_currency": "Grimoires"
     },
     "band of eternity:midgard": {
       "id": "139633",
@@ -1047,10 +1045,10 @@
       "speed": null,
       "damage_type": null,
       "usable_by": "ALL",
+      "source": "internal",
       "merchant_zone": "SH",
       "merchant_price": "500",
-      "merchant_currency": "Grimoires",
-      "source": "internal"
+      "merchant_currency": "Grimoires"
     },
     "band of eternity:hibernia": {
       "id": "139639",
@@ -1063,10 +1061,10 @@
       "speed": null,
       "damage_type": null,
       "usable_by": "ALL",
+      "source": "internal",
       "merchant_zone": "SH",
       "merchant_price": "500",
-      "merchant_currency": "Grimoires",
-      "source": "internal"
+      "merchant_currency": "Grimoires"
     },
     "bracer of embodiment:midgard": {
       "id": "112492",
@@ -1079,10 +1077,10 @@
       "speed": null,
       "damage_type": null,
       "usable_by": "ALL",
+      "source": "internal",
       "merchant_zone": "Drake",
       "merchant_price": "250",
-      "merchant_currency": "Scales",
-      "source": "internal"
+      "merchant_currency": "Scales"
     },
     "astral robe of virulence:hibernia": {
       "id": "137472",
@@ -1095,10 +1093,10 @@
       "speed": null,
       "damage_type": null,
       "usable_by": "ALL",
+      "source": "internal",
       "merchant_zone": "ToA",
       "merchant_price": "900",
-      "merchant_currency": "Glasses",
-      "source": "internal"
+      "merchant_currency": "Glasses"
     },
     "astral robe of virulence:albion": {
       "id": "137418",
@@ -1111,26 +1109,27 @@
       "speed": null,
       "damage_type": null,
       "usable_by": "ALL",
+      "source": "internal",
       "merchant_zone": "ToA",
       "merchant_price": "900",
-      "merchant_currency": "Glasses",
-      "source": "internal"
+      "merchant_currency": "Glasses"
     },
     "astral staff of swarms:albion": {
-      "id": "137416",
+      "id": "137415",
       "name": "Astral Staff of Swarms",
       "realm": "Albion",
       "slot": "Two Handed",
       "type": "Staff",
-      "model": "1949",
+      "model": "1965",
       "dps": "16.5",
-      "speed": "4.3",
+      "speed": "3.0",
       "damage_type": "Crush",
       "usable_by": "ALL",
+      "source": "internal",
+      "bypass_filters": false,
       "merchant_zone": "ToA",
       "merchant_price": "900",
-      "merchant_currency": "Glasses",
-      "source": "internal"
+      "merchant_currency": "Glasses"
     },
     "astral staff of swarms:midgard": {
       "id": "137446",
@@ -1143,10 +1142,11 @@
       "speed": "3.0",
       "damage_type": "Crush",
       "usable_by": "ALL",
+      "source": "internal",
+      "bypass_filters": false,
       "merchant_zone": "ToA",
       "merchant_price": "900",
-      "merchant_currency": "Glasses",
-      "source": "internal"
+      "merchant_currency": "Glasses"
     },
     "astral staff of swarms:hibernia": {
       "id": "137471",
@@ -1159,10 +1159,11 @@
       "speed": "3.0",
       "damage_type": "Crush",
       "usable_by": "ALL",
+      "source": "internal",
+      "bypass_filters": false,
       "merchant_zone": "ToA",
       "merchant_price": "900",
-      "merchant_currency": "Glasses",
-      "source": "internal"
+      "merchant_currency": "Glasses"
     },
     "thorn:hibernia": {
       "id": "138384",
@@ -1512,10 +1513,11 @@
       "speed": null,
       "damage_type": null,
       "usable_by": "ALL",
+      "source": "internal",
+      "bypass_filters": false,
       "merchant_zone": "Epic",
       "merchant_price": "450",
-      "merchant_currency": "Souls/Roots/Ices",
-      "source": "internal"
+      "merchant_currency": "Souls/Roots/Ices"
     },
     "band of clandestinity:albion": {
       "id": "139660",
@@ -1528,10 +1530,11 @@
       "speed": null,
       "damage_type": null,
       "usable_by": "ALL",
+      "source": "internal",
+      "bypass_filters": false,
       "merchant_zone": "SH",
       "merchant_price": "600",
-      "merchant_currency": "Grimoires",
-      "source": "internal"
+      "merchant_currency": "Grimoires"
     },
     "band of clandestinity:midgard": {
       "id": "139667",
@@ -1544,10 +1547,11 @@
       "speed": null,
       "damage_type": null,
       "usable_by": "ALL",
+      "source": "internal",
+      "bypass_filters": false,
       "merchant_zone": "SH",
       "merchant_price": "600",
-      "merchant_currency": "Grimoires",
-      "source": "internal"
+      "merchant_currency": "Grimoires"
     },
     "band of clandestinity:hibernia": {
       "id": "139673",
@@ -1560,10 +1564,11 @@
       "speed": null,
       "damage_type": null,
       "usable_by": "ALL",
+      "source": "internal",
+      "bypass_filters": false,
       "merchant_zone": "SH",
       "merchant_price": "600",
-      "merchant_currency": "Grimoires",
-      "source": "internal"
+      "merchant_currency": "Grimoires"
     },
     "bracer of snow:midgard": {
       "id": "132222",
@@ -1610,10 +1615,11 @@
       "speed": null,
       "damage_type": null,
       "usable_by": "ALL",
+      "source": "internal",
+      "bypass_filters": false,
       "merchant_zone": "Drake",
       "merchant_price": "250",
-      "merchant_currency": "Scales",
-      "source": "internal"
+      "merchant_currency": "Scales"
     },
     "astral torporific leggings:albion": {
       "id": "137422",
@@ -1626,10 +1632,11 @@
       "speed": null,
       "damage_type": null,
       "usable_by": "ALL",
+      "source": "internal",
+      "bypass_filters": false,
       "merchant_zone": "ToA",
       "merchant_price": "800",
-      "merchant_currency": "Glasses",
-      "source": "internal"
+      "merchant_currency": "Glasses"
     },
     "astral torporific leggings:midgard": {
       "id": "137450",
@@ -1642,10 +1649,11 @@
       "speed": null,
       "damage_type": null,
       "usable_by": "ALL",
+      "source": "internal",
+      "bypass_filters": false,
       "merchant_zone": "ToA",
       "merchant_price": "800",
-      "merchant_currency": "Glasses",
-      "source": "internal"
+      "merchant_currency": "Glasses"
     },
     "astral torporific leggings:hibernia": {
       "id": "137475",
@@ -1658,10 +1666,11 @@
       "speed": null,
       "damage_type": null,
       "usable_by": "ALL",
+      "source": "internal",
+      "bypass_filters": false,
       "merchant_zone": "ToA",
       "merchant_price": "800",
-      "merchant_currency": "Glasses",
-      "source": "internal"
+      "merchant_currency": "Glasses"
     },
     "soul glimmer:hibernia": {
       "id": "163411",
@@ -1674,10 +1683,11 @@
       "speed": "4.2",
       "damage_type": "Thrust",
       "usable_by": "ALL",
+      "source": "internal",
+      "bypass_filters": false,
       "merchant_zone": "Drake",
       "merchant_price": "450",
-      "merchant_currency": "Scales",
-      "source": "internal"
+      "merchant_currency": "Scales"
     },
     "bracer of the fomor:hibernia": {
       "id": "149070",
@@ -1690,10 +1700,11 @@
       "speed": null,
       "damage_type": null,
       "usable_by": "ALL",
+      "source": "internal",
+      "bypass_filters": false,
       "merchant_zone": "Epic",
       "merchant_price": "625",
-      "merchant_currency": "Souls/Roots/Ices",
-      "source": "internal"
+      "merchant_currency": "Souls/Roots/Ices"
     },
     "director's ring of chaos:all": {
       "id": "110894",

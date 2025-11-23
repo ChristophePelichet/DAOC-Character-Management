@@ -1282,7 +1282,16 @@ class SettingsDialog(QDialog):
         refresh_items_button.clicked.connect(self._refresh_all_items)
         advanced_layout.addWidget(refresh_items_button)
         
-        advanced_layout.addStretch()  # Push button to top
+        # Database Editor button
+        db_editor_button = QPushButton(lang.get('superadmin.database_editor_button', 
+            default="🗄️ Database Editor"))
+        db_editor_button.setMinimumHeight(35)
+        db_editor_button.setToolTip(lang.get('superadmin.database_editor_tooltip', 
+            default="Ouvrir l'éditeur de base de données pour modifier directement items_database_src.json"))
+        db_editor_button.clicked.connect(self._open_database_editor)
+        advanced_layout.addWidget(db_editor_button)
+        
+        advanced_layout.addStretch()  # Push buttons to top
         
         advanced_group.setLayout(advanced_layout)
         stats_advanced_layout.addWidget(advanced_group, 1)  # 50% width
@@ -2792,5 +2801,25 @@ class SettingsDialog(QDialog):
                 lang.get("superadmin.refresh_error_message", 
                     default="Erreur lors du rafraîchissement:\n{error}").replace("{error}", str(e))
             )
+    
+    def _open_database_editor(self):
+        """Open Database Editor dialog for direct database editing"""
+        try:
+            from UI.database_editor_dialog import DatabaseEditorDialog
+            
+            dialog = DatabaseEditorDialog(self, self.path_manager)
+            
+            # Connect signal to refresh stats when database is modified
+            dialog.database_modified.connect(self._refresh_superadmin_stats)
+            
+            dialog.exec()
+            
+        except Exception as e:
+            logging.error(f"Error opening database editor: {e}", exc_info=True)
+            QMessageBox.critical(self, 
+                lang.get("error_title", default="Erreur"),
+                f"Erreur lors de l'ouverture de l'éditeur:\n{str(e)}"
+            )
+
 
 

@@ -2190,6 +2190,37 @@ dialog.template_imported.connect(lambda: (
 
 **Result:** Template list now refreshes immediately after import without requiring page close/reopen. The `update_index()` call before `refresh_list()` correctly scans all realm folders (Armory/Hibernia/Json/, Armory/Albion/Json/, Armory/Midgard/Json/).
 
+### 12. Template Import Dialog Theme Compatibility
+
+**Problem:** File path labels in template import dialog were unreadable with purple/dark themes - text appeared black/dark gray on dark purple background.
+
+**Root Cause:** Hardcoded color values (`#888`, `#333`, `#666`, `#f0f0f0`) didn't adapt to theme changes.
+
+**Affected Elements:**
+1. File label (Source File path) - `color: #888` (gray)
+2. Selected file label - `color: #333` (dark gray) 
+3. Context labels (Class/Realm) - `color: #666; background: #f0f0f0` (gray on light gray)
+
+**Solution:** Remove hardcoded colors, use theme palette colors with adaptive styling
+
+**Changes (UI/template_import_dialog.py):**
+
+```python
+# File label - line 69
+self.file_label.setStyleSheet("")  # Use default theme color
+
+# Selected file label - line 211
+self.file_label.setStyleSheet("font-weight: bold;")  # Bold only, theme color
+
+# Context labels - lines 86, 94
+self.class_label.setStyleSheet("padding: 5px; border-radius: 3px; opacity: 0.7;")
+self.realm_label.setStyleSheet("padding: 5px; border-radius: 3px; opacity: 0.7;")
+```
+
+**File Fixed:** `UI/template_import_dialog.py`
+
+**Result:** All labels now use theme-aware colors and adapt automatically to light/dark/purple themes. Read-only effect achieved with opacity instead of hardcoded gray colors.
+
 ---
 
 ## Implementation Progress
@@ -2356,14 +2387,15 @@ Uses existing `game` section in `config.json`:
 14. **11f4917 to f32dd51** - System foundations (DB, scraper, dual-mode)
 
 **Statistics:**
-- **22+ commits** total
+- **23+ commits** total
 - **108 items** in database (47 items normalized)
 - **6 translation sections** added
-- **11 critical bugs** fixed (including currency normalization, emoji alignment, and template refresh)
+- **12 critical bugs** fixed (including currency normalization, emoji alignment, template refresh, and theme compatibility)
 - **3 new UI dialogs**
 - **Thread-safe** complete architecture
 - **2-column optimized** template preview (~50% vertical space reduction)
 - **Unified currency** normalization system (3 sync points)
+- **Theme-aware** UI components (adapts to light/dark/purple themes)
 
 **Recent Additions (Nov 24, 2025):**
 - ✅ Currency normalization system (ZONE_CURRENCY) - Nov 21
@@ -2374,6 +2406,7 @@ Uses existing `game` section in `config.json`:
 - ✅ Color-coded stats/skills (cap indicators) - Nov 21
 - ✅ Template list auto-refresh after import - Nov 24
 - ✅ Fixed TemplateManager.update_index() glob pattern - Nov 24
+- ✅ Template import dialog theme compatibility - Nov 24
 
 ---
 

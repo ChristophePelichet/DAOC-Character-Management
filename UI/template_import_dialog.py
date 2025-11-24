@@ -65,7 +65,8 @@ class TemplateImportDialog(QDialog):
         # File selection row
         file_row = QHBoxLayout()
         self.file_label = QLabel(lang.get("template_import.no_file_selected", default="Aucun fichier sélectionné"))
-        self.file_label.setStyleSheet("color: #888;")
+        # Use default text color from palette (adapts to theme)
+        self.file_label.setStyleSheet("")
         file_row.addWidget(self.file_label, 1)
         
         self.browse_button = QPushButton(lang.get("template_import.browse_button", default="📁 Parcourir..."))
@@ -82,7 +83,8 @@ class TemplateImportDialog(QDialog):
         
         # Class (read-only)
         self.class_label = QLabel(f"<b>{self.character_class}</b>")
-        self.class_label.setStyleSheet("color: #666; background: #f0f0f0; padding: 5px; border-radius: 3px;")
+        # Use theme colors with slight transparency for read-only effect
+        self.class_label.setStyleSheet("padding: 5px; border-radius: 3px; opacity: 0.7;")
         context_layout.addRow(
             lang.get("template_import.class_label", default="Classe:"),
             self.class_label
@@ -90,7 +92,8 @@ class TemplateImportDialog(QDialog):
         
         # Realm (read-only)
         self.realm_label = QLabel(f"<b>{self.realm}</b>")
-        self.realm_label.setStyleSheet("color: #666; background: #f0f0f0; padding: 5px; border-radius: 3px;")
+        # Use theme colors with slight transparency for read-only effect
+        self.realm_label.setStyleSheet("padding: 5px; border-radius: 3px; opacity: 0.7;")
         context_layout.addRow(
             lang.get("template_import.realm_label", default="Royaume:"),
             self.realm_label
@@ -204,7 +207,8 @@ class TemplateImportDialog(QDialog):
         if file_path:
             self.selected_file = Path(file_path)
             self.file_label.setText(self.selected_file.name)
-            self.file_label.setStyleSheet("color: #333; font-weight: bold;")
+            # Use font-weight only, let theme define text color
+            self.file_label.setStyleSheet("font-weight: bold;")
             self._update_preview()
     
     def _update_preview(self):

@@ -1665,16 +1665,19 @@ class SettingsDialog(QDialog):
         eden_path = get_eden_data_dir()
         
         # Confirmation dialog
+        message = lang.get("clean_eden_confirm_message", 
+                          default="⚠️ Cette action va supprimer :\n\n"
+                                 "• Tous les cookies Eden\n"
+                                 "• Le profil Chrome complet (cache, historique, session)\n\n"
+                                 "📁 Dossier : {path}\n\n"
+                                 "Vous devrez régénérer vos cookies après cette opération.\n\n"
+                                 "Continuer ?")
+        message = message.replace("{path}", str(eden_path))
+        
         reply = QMessageBox.question(
             self,
             lang.get("clean_eden_confirm_title", default="Confirmer le nettoyage"),
-            lang.get("clean_eden_confirm_message", 
-                    default=f"⚠️ Cette action va supprimer :\n\n"
-                           f"• Tous les cookies Eden\n"
-                           f"• Le profil Chrome complet (cache, historique, session)\n\n"
-                           f"📁 Dossier : {eden_path}\n\n"
-                           f"Vous devrez régénérer vos cookies après cette opération.\n\n"
-                           f"Continuer ?"),
+            message,
             QMessageBox.Yes | QMessageBox.No,
             QMessageBox.No
         )

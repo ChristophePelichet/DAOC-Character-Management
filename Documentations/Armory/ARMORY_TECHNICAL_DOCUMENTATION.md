@@ -1,8 +1,8 @@
 # 🛡️ Armory System - Technical Documentation
 
-**Version**: 2.1  
+**Version**: 2.2  
 **Date**: November 2025  
-**Last Updated**: November 21, 2025  
+**Last Updated**: November 24, 2025  
 **Component**: `UI/armory_import_dialog.py`, `UI/mass_import_monitor.py`, `UI/template_import_dialog.py`, `UI/dialogs.py`  
 **Related**: `Functions/items_scraper.py`, `Functions/items_parser.py`, `Functions/import_worker.py`, `Functions/build_items_database.py`, `Functions/template_manager.py`, `Functions/template_metadata.py`, `Tools/fix_currency_mapping.py`  
 **Branch**: 108_Imp_Armo (21+ commits)
@@ -1171,12 +1171,16 @@ Zones: DF→Seals, Drake→Scales, Epic→Souls/Roots/Ices, SH→Grimoires, ToA�
 - ✅ `Grimoires` (Summoner's Hall)
 - ✅ `Glasses` (Trials of Atlantis)
 - ✅ `Scales` (Dragon Zone)
-- ✅ `Souls/Roots/Ices` (Epic dungeons)
+- ✅ `Roots` (Galladoria)
+- ✅ `Ices` (Tuscaran Glacier) ⭐ **NEW (Nov 2025)**
+- ✅ `Souls` (Epic dungeons) ⭐ **NEW (Nov 2025)**
+- ✅ `Souls/Roots/Ices` (Combined Epic currency display)
 
 **Deprecated Names (normalized automatically):**
 - ❌ `Grimoire Pages` → `Grimoires`
 - ❌ `Dragon Scales` → `Scales`
 - ❌ `Atlantean Glass` → `Glasses`
+- ❌ `Tuscaran Glacier Ices` → `Ices` (trimmed for display)
 
 ### Validation Process
 
@@ -2324,9 +2328,13 @@ Uses existing `game` section in `config.json`:
 
 **Developer:** GitHub Copilot  
 **Created:** November 19, 2025  
-**Last Updated:** November 21, 2025  
-**Version:** 2.1  
+**Last Updated:** November 24, 2025  
+**Version:** 2.2  
 **Branch:** 108_Imp_Armo
+
+**Change Summary (v2.2):**
+- Added Ices and Souls currency support in parse_price()
+- Updated currency normalization documentation
 
 **Change Summary (v2.1):**
 - Added Currency Normalization System section (comprehensive)

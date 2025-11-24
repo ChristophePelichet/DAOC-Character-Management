@@ -152,7 +152,30 @@ List of improvement ideas and features to develop later.
 
 *(Brainstorming ideas to refine later)*
 
-### 7. Owned Items Tracking System (Armory)
+### 7. Dropdown Menus in Database Editor
+**Objective**: Add dropdown menus in editable columns to limit input errors and standardize values
+
+**Features**:
+- **Realm column**: Dropdown with predefined values (Albion, Hibernia, Midgard, All)
+- **Slot column**: Dropdown with valid slots (Helmet, Hands, Torso, Arms, Feet, Legs, Right Hand, Left Hand, Two Handed, Ranged, Neck, Cloak, Jewelry, Waist, L Ring, R Ring, L Wrist, R Wrist, Mythical)
+- **Type column**: Dropdown with item types (Armor, Weapon, Jewelry, Mythical, etc.)
+- **Damage Type column**: Dropdown with damage types (Crush, Slash, Thrust, Body, Cold, Energy, Heat, Matter, Spirit)
+- **Source column**: Dropdown with sources (internal, user, scraped)
+- **Item Category column**: Dropdown with categories (quest_reward, event_reward, unknown)
+- Auto-completion for frequently used values
+
+**Benefits**:
+- Prevents typos and inconsistent data
+- Faster data entry
+- Improved database data quality
+- Better validation before saving
+
+**Current Status**: 
+- ❌ **To be implemented later** - Current free text input in all fields
+
+---
+
+### 8. Owned Items Tracking System (Armory)
 **Objective**: Allow checking items from a template that the player already owns to automatically calculate missing currencies
 
 **Features**:

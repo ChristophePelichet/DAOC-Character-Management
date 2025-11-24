@@ -1256,40 +1256,50 @@ class SettingsDialog(QDialog):
             default="⚙️ Opérations avancées"))
         advanced_layout = QVBoxLayout()
         
-        # Database Import button (first position)
-        database_import_button = QPushButton(lang.get('superadmin.database_import_button', 
-            default="🔧 Database Management Tools"))
-        database_import_button.setMinimumHeight(35)
-        database_import_button.setToolTip(lang.get('superadmin.database_import_tooltip', 
-            default="Ouvrir la fenêtre Database Management Tools pour sélectionner et importer des templates dans la base source"))
-        database_import_button.clicked.connect(self._open_mass_import_monitor)
-        advanced_layout.addWidget(database_import_button)
-        
-        clean_duplicates_button = QPushButton(lang.get('superadmin.clean_duplicates_button', 
-            default="🧹 Nettoyer les doublons"))
-        clean_duplicates_button.setMinimumHeight(35)
-        clean_duplicates_button.setToolTip(lang.get('superadmin.clean_duplicates_tooltip', 
-            default="Supprime les items en double (même nom + royaume) dans la base source"))
-        clean_duplicates_button.clicked.connect(self._clean_duplicates)
-        advanced_layout.addWidget(clean_duplicates_button)
-        
-        # Refresh All Items button
-        refresh_items_button = QPushButton(lang.get('superadmin.refresh_items_button', 
-            default="🔄 Rafraîchir tous les items"))
-        refresh_items_button.setMinimumHeight(35)
-        refresh_items_button.setToolTip(lang.get('superadmin.refresh_items_tooltip', 
-            default="Re-scrape tous les items depuis Eden pour mettre à jour les données (Model, DPS, Speed, etc.)"))
-        refresh_items_button.clicked.connect(self._refresh_all_items)
-        advanced_layout.addWidget(refresh_items_button)
-        
-        # Database Editor button
+        # 1. Database Editor button (first position)
         db_editor_button = QPushButton(lang.get('superadmin.database_editor_button', 
-            default="🗄️ Database Editor"))
+            default="🗄️ Database - Editor"))
         db_editor_button.setMinimumHeight(35)
         db_editor_button.setToolTip(lang.get('superadmin.database_editor_tooltip', 
             default="Ouvrir l'éditeur de base de données pour modifier directement items_database_src.json"))
         db_editor_button.clicked.connect(self._open_database_editor)
         advanced_layout.addWidget(db_editor_button)
+        
+        # 2. Database Template Import button
+        database_import_button = QPushButton(lang.get('superadmin.database_import_button', 
+            default="🔧 Database - Template Import"))
+        database_import_button.setMinimumHeight(35)
+        database_import_button.setToolTip(lang.get('superadmin.database_import_tooltip', 
+            default="Ouvrir la fenêtre Database Template Import pour sélectionner et importer des templates dans la base source"))
+        database_import_button.clicked.connect(self._open_mass_import_monitor)
+        advanced_layout.addWidget(database_import_button)
+        
+        # 3. Single Item Refresh button
+        single_refresh_button = QPushButton(lang.get('superadmin.single_refresh_button', 
+            default="🔍 Item(s) - Single Refresh"))
+        single_refresh_button.setMinimumHeight(35)
+        single_refresh_button.setToolTip(lang.get('superadmin.single_refresh_tooltip', 
+            default="Re-scrape specific items from Eden to update their data (Model, DPS, Speed, etc.)"))
+        single_refresh_button.clicked.connect(self._single_item_refresh)
+        advanced_layout.addWidget(single_refresh_button)
+        
+        # 4. All Items Refresh button
+        all_refresh_button = QPushButton(lang.get('superadmin.all_refresh_button', 
+            default="🔄 Item(s) - All Refresh"))
+        all_refresh_button.setMinimumHeight(35)
+        all_refresh_button.setToolTip(lang.get('superadmin.all_refresh_tooltip', 
+            default="Re-scrape all items from Eden to update their data (Model, DPS, Speed, etc.)"))
+        all_refresh_button.clicked.connect(self._all_items_refresh)
+        advanced_layout.addWidget(all_refresh_button)
+        
+        # 5. Clean Duplicates button (last position)
+        clean_duplicates_button = QPushButton(lang.get('superadmin.clean_duplicates_button', 
+            default="🧹 Item(s) - Clean Duplicates"))
+        clean_duplicates_button.setMinimumHeight(35)
+        clean_duplicates_button.setToolTip(lang.get('superadmin.clean_duplicates_tooltip', 
+            default="Supprime les items en double (même nom + royaume) dans la base source"))
+        clean_duplicates_button.clicked.connect(self._clean_duplicates)
+        advanced_layout.addWidget(clean_duplicates_button)
         
         advanced_layout.addStretch()  # Push buttons to top
         
@@ -2628,6 +2638,219 @@ class SettingsDialog(QDialog):
             logging.error(f"Error cleaning duplicates: {e}", exc_info=True)
             QMessageBox.critical(self, "Erreur", f"Erreur lors du nettoyage:\n{e}")
     
+    def _single_item_refresh(self):
+        """Refresh specific items from the source database"""
+        try:
+            from PySide6.QtWidgets import QInputDialog
+            
+            # Ask for item names
+            items_text, ok = QInputDialog.getText(
+                self,
+                lang.get('superadmin.single_refresh_input_title', default="🔍 Item(s) - Single Refresh"),
+                lang.get('superadmin.single_refresh_input_message',
+                    default="Enter item names to refresh (comma-separated):\n\n"
+                           "Examples:\n"
+                           "• Cloth Cap\n"
+                           "• Cudgel of the Undead, Soulbinder's Belt\n"
+                           "• Ring of the Azure\n\n"
+                           "⚠️ Exact case-sensitive names required")
+            )
+            
+            if not ok or not items_text.strip():
+                return
+            
+            # Parse item names
+            item_filter = [name.strip() for name in items_text.split(',') if name.strip()]
+            
+            if not item_filter:
+                QMessageBox.warning(self, 
+                    lang.get('error_title', default="Error"),
+                    lang.get('superadmin.single_refresh_no_items', default="No valid items entered."))
+                return
+            
+            # Ask about filter bypass
+            filter_reply = QMessageBox.question(
+                self,
+                lang.get('superadmin.filter_bypass_title', default="Filter Bypass"),
+                lang.get('superadmin.filter_bypass_message',
+                    default="Do you want to bypass utility/level filters?\n\n"
+                           "✅ YES = Skip filters (get all variants)\n"
+                           "❌ NO = Apply filters (utility ≥ 100, level ≥ 50)"),
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No
+            )
+            
+            skip_filters = (filter_reply == QMessageBox.Yes)
+            
+            # Confirmation with list
+            confirm_msg = lang.get('superadmin.single_refresh_confirm',
+                default="Items selected ({count}):\n\n").replace('{count}', str(len(item_filter)))
+            confirm_msg += "\n".join(f"• {name}" for name in item_filter)
+            confirm_msg += f"\n\n{lang.get('superadmin.filter_status', default='Filters:')} "
+            confirm_msg += lang.get('superadmin.filter_bypassed', default='BYPASSED') if skip_filters else lang.get('superadmin.filter_active', default='ACTIVE')
+            confirm_msg += f"\n\n{lang.get('superadmin.confirm_continue', default='Continue?')}"
+            
+            confirm_reply = QMessageBox.question(self, 
+                lang.get('superadmin.confirm_title', default="Confirm"),
+                confirm_msg)
+            if confirm_reply != QMessageBox.Yes:
+                return
+            
+            # Execute refresh
+            self._execute_refresh(item_filter, skip_filters)
+            
+        except Exception as e:
+            logging.error(f"Error in single item refresh: {e}", exc_info=True)
+            QMessageBox.critical(self, 
+                lang.get("error_title", default="Error"),
+                f"{lang.get('superadmin.refresh_error', default='Refresh error')}:\n{str(e)}")
+    
+    def _all_items_refresh(self):
+        """Refresh all items from the source database"""
+        try:
+            # Ask about filter bypass
+            filter_reply = QMessageBox.question(
+                self,
+                lang.get('superadmin.filter_bypass_title', default="Filter Bypass"),
+                lang.get('superadmin.all_refresh_filter_message',
+                    default="Do you want to bypass utility/level filters for ALL items?\n\n"
+                           "✅ YES = Skip filters (get all variants)\n"
+                           "❌ NO = Apply filters (utility ≥ 100, level ≥ 50)\n\n"
+                           "⚠️ This will affect ALL items in the database"),
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No
+            )
+            
+            skip_filters = (filter_reply == QMessageBox.Yes)
+            
+            # Confirmation
+            message = lang.get('superadmin.all_refresh_confirm_message',
+                default="Refresh ALL items from the source database?\n\n"
+                       "This will re-scrape all items from Eden Herald to update:\n"
+                       "• Model ID (for future 3D rendering)\n"
+                       "• DPS, Speed, Damage Type (weapons)\n"
+                       "• Type, Slot (equipment)\n"
+                       "• Merchant price and zone\n\n")
+            message += f"{lang.get('superadmin.filter_status', default='Filters:')} "
+            message += lang.get('superadmin.filter_bypassed', default='BYPASSED') if skip_filters else lang.get('superadmin.filter_active', default='ACTIVE')
+            message += f"\n\n⚠️ {lang.get('superadmin.all_refresh_warning', default='This operation may take several minutes.')}\n"
+            message += lang.get('superadmin.auto_backup', default='An automatic backup will be created.')
+            
+            reply = QMessageBox.question(self,
+                lang.get('superadmin.all_refresh_confirm_title', default="🔄 Confirm Item(s) - All Refresh"),
+                message,
+                QMessageBox.Yes | QMessageBox.No)
+            
+            if reply != QMessageBox.Yes:
+                return
+            
+            # Execute refresh with no filter (all items)
+            self._execute_refresh(None, skip_filters)
+            
+        except Exception as e:
+            logging.error(f"Error in all items refresh: {e}", exc_info=True)
+            QMessageBox.critical(self, 
+                lang.get("error_title", default="Error"),
+                f"{lang.get('superadmin.refresh_error', default='Refresh error')}:\n{str(e)}")
+    
+    def _execute_refresh(self, item_filter, skip_filters):
+        """Execute the refresh operation with progress dialog
+        
+        Args:
+            item_filter: List of item names to refresh, or None for all items
+            skip_filters: Boolean to bypass utility/level filters
+        """
+        from PySide6.QtWidgets import QProgressDialog
+        from PySide6.QtCore import Qt
+        
+        # Create progress dialog
+        progress = QProgressDialog(
+            lang.get('superadmin.refresh_progress_description', 
+                default="Refreshing items..."),
+            lang.get('superadmin.refresh_progress_cancel', default="Cancel"),
+            0, 100, self
+        )
+        progress.setWindowTitle(lang.get('superadmin.refresh_progress_title', 
+            default="Refresh in Progress"))
+        progress.setWindowModality(Qt.WindowModal)
+        progress.setMinimumDuration(0)
+        progress.show()
+        QApplication.processEvents()
+        
+        # Progress callback
+        def update_progress(current, total, item_name):
+            progress.setMaximum(total)
+            progress.setValue(current)
+            filter_status = lang.get('superadmin.filter_bypassed', default='BYPASSED') if skip_filters else lang.get('superadmin.filter_active', default='ACTIVE')
+            progress.setLabelText(
+                f"{lang.get('superadmin.refresh_progress_description', default='Refreshing items...')}\n\n"
+                f"Item {current}/{total}: {item_name}\n"
+                f"{lang.get('superadmin.filter_status', default='Filters:')} {filter_status}"
+            )
+            QApplication.processEvents()
+            
+            # Check for cancellation
+            if progress.wasCanceled():
+                raise InterruptedError("User cancelled refresh")
+        
+        # Import SuperAdminTools
+        logging.info("REFRESH: Importing SuperAdminTools...")
+        from Functions.superadmin_tools import SuperAdminTools
+        superadmin = SuperAdminTools(self.path_manager)
+        
+        # Execute refresh
+        try:
+            logging.info(f"REFRESH: Calling refresh_all_items with filter={item_filter}, skip_filters={skip_filters}")
+            success, message, stats = superadmin.refresh_all_items(
+                progress_callback=update_progress,
+                item_filter=item_filter,
+                skip_filters=skip_filters
+            )
+            logging.info(f"REFRESH: Result - success={success}, stats={stats}")
+        except InterruptedError:
+            progress.close()
+            QMessageBox.information(self,
+                lang.get('superadmin.refresh_cancelled_title', default="Refresh Cancelled"),
+                lang.get('superadmin.refresh_cancelled_message', 
+                    default="Refresh has been cancelled.\n\n"
+                           "Items processed before cancellation have been saved.")
+            )
+            self._refresh_superadmin_stats()
+            return
+        
+        progress.close()
+        
+        # Show result
+        if success:
+            stats_text = f"\n\n{lang.get('superadmin.stats_title', default='Statistics')}:\n"
+            stats_text += f"• {lang.get('superadmin.refresh_stats_total', default='Total items')}: {stats.get('total_items', 0)}\n"
+            stats_text += f"• {lang.get('superadmin.refresh_stats_updated', default='Updated')}: {stats.get('updated', 0)}\n"
+            stats_text += f"• {lang.get('superadmin.refresh_stats_skipped', default='Unchanged')}: {stats.get('skipped', 0)}\n"
+            stats_text += f"• {lang.get('superadmin.refresh_stats_failed', default='Failed')}: {stats.get('failed', 0)}\n\n"
+            
+            fields = stats.get('fields_updated', {})
+            stats_text += f"{lang.get('superadmin.refresh_fields_updated', default='Updated fields')}:\n"
+            stats_text += f"• Model: {fields.get('model', 0)}\n"
+            stats_text += f"• DPS: {fields.get('dps', 0)}\n"
+            stats_text += f"• Speed: {fields.get('speed', 0)}\n"
+            stats_text += f"• Damage Type: {fields.get('damage_type', 0)}\n"
+            stats_text += f"• Type: {fields.get('type', 0)}\n"
+            stats_text += f"• Slot: {fields.get('slot', 0)}"
+            
+            QMessageBox.information(self,
+                lang.get('superadmin.refresh_success_title', 
+                    default="Refresh Successful"),
+                message + stats_text
+            )
+            
+            self._refresh_superadmin_stats()
+        else:
+            QMessageBox.critical(self,
+                lang.get('superadmin.refresh_error_title', 
+                    default="Refresh Error"),
+                message
+            )
+    
     def _refresh_all_items(self):
         """Refresh all items in the source database from Eden"""
         try:
@@ -2803,16 +3026,23 @@ class SettingsDialog(QDialog):
             )
     
     def _open_database_editor(self):
-        """Open Database Editor dialog for direct database editing"""
+        """Open Database Editor window (non-modal, resizable)"""
         try:
             from UI.database_editor_dialog import DatabaseEditorDialog
             
+            # Create window (non-modal)
             dialog = DatabaseEditorDialog(self, self.path_manager)
             
             # Connect signal to refresh stats when database is modified
             dialog.database_modified.connect(self._refresh_superadmin_stats)
             
-            dialog.exec()
+            # Store reference to prevent garbage collection
+            if not hasattr(self, '_database_editors'):
+                self._database_editors = []
+            self._database_editors.append(dialog)
+            
+            # Show as non-modal window (allows multiple instances)
+            dialog.show()
             
         except Exception as e:
             logging.error(f"Error opening database editor: {e}", exc_info=True)

@@ -1166,6 +1166,52 @@ class ItemsScraper:
         """
 ```
 
+#### Supported Currencies
+
+The `parse_price()` method supports the following currencies:
+
+| Currency | Example | Zone | Notes |
+|----------|---------|------|-------|
+| **Atlantean Glass** | "50 Atlantean Glass" | ToA | Trials of Atlantis |
+| **Dragon Scales** | "100 Dragon Scales" | Drake | Dragon zones (normalized to "Scales") |
+| **Seals** | "300 Seals" | DF | Darkness Falls |
+| **Grimoire Pages** | "700 Grimoire Pages" | SH | Summoner's Hall (normalized to "Grimoires") |
+| **Roots** | "250 Roots" | Epic | Galladoria |
+| **Ices** | "600 Tuscaran Glacier Ices" | Epic | Tuscaran Glacier ⭐ **NEW** |
+| **Souls** | "400 Souls" | Epic | Epic dungeons ⭐ **NEW** |
+| **Aurulite** | "150 Aurulite" | - | Special currency |
+| **Orbs** | "75 Orbs" | - | Special currency |
+| **Bounty Points** | "100000 bounty points" | - | PvP currency |
+| **Gold/Platinum** | "5p 50g" | - | Standard currency |
+
+**Recent Additions (November 2025):**
+- ✅ **Ices** - Added support for Tuscaran Glacier currency
+- ✅ **Souls** - Added support for Epic dungeon currency
+
+**Parsing Logic:**
+```python
+# Ices (Tuscaran Glacier)
+if 'ice' in price_str:
+    amount = int(price_str.split()[0])
+    return {'currency': 'Ices', 'amount': amount, 'display': f"{amount} Ices"}
+
+# Souls (Epic dungeon currency)
+if 'soul' in price_str:
+    amount = int(price_str.split()[0])
+    return {'currency': 'Souls', 'amount': amount, 'display': f"{amount} Souls"}
+```
+
+**Example:**
+```python
+# Input: "600 Tuscaran Glacier Ices"
+result = parse_price("600 Tuscaran Glacier Ices")
+# Output: {'currency': 'Ices', 'amount': 600, 'display': '600 Ices'}
+
+# Input: "400 Souls"
+result = parse_price("400 Souls")
+# Output: {'currency': 'Souls', 'amount': 400, 'display': '400 Souls'}
+```
+
 ### 4.2 Filter Implementation Details
 
 **Location:** `Functions/items_scraper.py` lines 875-1030
@@ -3282,12 +3328,278 @@ def closeEvent(self, event):
 
 ---
 
+## 15. Database Editor Interface
+
+### 15.1 Overview
+
+The Database Editor provides a graphical interface for managing the items database with batch operations, search capabilities, and visual progress tracking.
+
+**File:** `UI/database_editor_dialog.py`
+
+**Key Features:**
+- ✅ View and search all database items
+- ✅ Batch refresh items by ID
+- ✅ Full scan with Eden scraping
+- ✅ Beautiful step-by-step progress dialogs
+- ✅ Dark theme support
+- ✅ Real-time status updates
+- ✅ Item categorization (Quest/Event rewards)
+
+### 15.2 ProgressStepsDialog Integration
+
+**Purpose:** Replace old QProgressDialog with beautiful step-by-step visualization.
+
+**File:** `UI/progress_dialog_base.py`
+
+**Features:**
+- Visual step indicators (⏳ → ✅)
+- Progress bar with percentage
+- Status messages with colored text
+- Cancellation support
+- Dark theme compatibility
+
+**Step Configurations:**
+
+```python
+# Batch Refresh by ID
+DB_EDITOR_BATCH_REFRESH = [
+    {"title": "Connect to Eden", "status": "Connecting to Eden Herald..."},
+    {"title": "Refresh Items", "status": "Refreshing items from database..."},
+    {"title": "Save Database", "status": "Saving database..."},
+    {"title": "Results", "status": "Processing results..."}
+]
+
+# Full Scan (All Items)
+DB_EDITOR_BATCH_SCAN = [
+    {"title": "Connect to Eden", "status": "Connecting to Eden Herald..."},
+    {"title": "Search Variants", "status": "Searching item variants..."},
+    {"title": "Process Variants", "status": "Processing variants..."},
+    {"title": "Save Database", "status": "Saving database..."},
+    {"title": "Results", "status": "Processing results..."}
+]
+```
+
+**API Methods:**
+
+```python
+progress = ProgressStepsDialog(steps_config, parent, title, width, height)
+
+# Step management
+progress.start_step(index)                    # Start step (⏳)
+progress.complete_step(index)                 # Complete step (✅)
+progress.skip_step(index, reason)             # Skip step (⏭️)
+progress.error_step(index, message)           # Error step (❌)
+
+# Progress updates
+progress.update_progress(percentage)          # Update progress bar (0-100)
+progress.set_status_message(message, color)   # Update status text
+
+# User interaction
+cancelled = progress.was_canceled()           # Check if user cancelled
+```
+
+### 15.3 Batch Operations
+
+#### Batch Refresh Items by ID
+
+**Function:** `_batch_refresh_items_by_id()`
+
+**Purpose:** Refresh selected items from Eden database.
+
+**Workflow:**
+```
+1. User selects items in table
+2. Clicks "Refresh Selected Items"
+3. Progress dialog shows:
+   ⏳ Connect to Eden
+   ⏳ Refresh Items (1/5, 2/5, ...)
+   ⏳ Save Database
+   ⏳ Results
+4. Table refreshes with updated data
+5. Results dialog shows statistics
+```
+
+**Implementation:**
+```python
+def _batch_refresh_items_by_id(self):
+    # Initialize progress dialog
+    progress = ProgressStepsDialog(DB_EDITOR_BATCH_REFRESH, self)
+    progress.show()
+    
+    # Force UI rendering (fix white window delay)
+    for _ in range(3):
+        QApplication.processEvents()
+    
+    # Step 0: Connect to Eden
+    progress.start_step(0)
+    progress.set_status_message("🔌 Connecting to Eden Herald...")
+    
+    scraper, error = _connect_to_eden_herald()
+    if not scraper:
+        progress.error_step(0, error)
+        return
+    
+    progress.complete_step(0)
+    
+    # Step 1: Refresh items
+    progress.start_step(1)
+    for idx, item_id in enumerate(selected_ids):
+        progress.update_progress(int((idx / total) * 100))
+        progress.set_status_message(f"Refreshing item {idx+1}/{total}...")
+        
+        # Scrape item details
+        details = scraper.get_item_details(item_id)
+        # Update database
+        save_item_to_db(details)
+    
+    progress.complete_step(1)
+    
+    # Deferred refresh to prevent UI blocking
+    QTimer.singleShot(100, self._refresh_display_after_scan)
+    QTimer.singleShot(500, progress.close)
+    QTimer.singleShot(600, lambda: self._show_results(stats))
+```
+
+#### Full Scan Items
+
+**Function:** `_batch_full_scan_items()`
+
+**Purpose:** Search all realm variants and update database.
+
+**Key Difference:** Uses `find_all_item_variants()` to discover multi-realm items.
+
+### 15.4 Bug Fixes and Improvements
+
+#### Bug Fix: False "Unsaved Changes" Warning
+
+**Problem:** Modified flag stayed True after successful save.
+
+**Root Cause:** `self.modified = True` called AFTER `_save_database()` which already reset it to False.
+
+**Solution:** Removed all 13 instances of `self.modified = True` following save operations.
+
+**Files Modified:**
+- `UI/database_editor_dialog.py` (lines 1234, 1456, 1678, etc.)
+
+**Impact:** Warning now only appears when there are actual unsaved changes.
+
+#### Bug Fix: Table Not Refreshing
+
+**Problem:** Item list didn't update after batch operations.
+
+**Root Cause:** Refresh call was missing in finally block.
+
+**Solution:** Added deferred refresh with QTimer.
+
+```python
+# Defer refresh to prevent UI blocking
+QTimer.singleShot(100, self._refresh_display_after_scan)
+```
+
+#### Bug Fix: White Window Delay
+
+**Problem:** Progress window appeared blank for several seconds before showing content.
+
+**Root Cause:** Single `processEvents()` insufficient during Eden connection.
+
+**Solution:** Multiple processEvents + immediate status message.
+
+```python
+progress.show()
+
+# Force multiple processEvents to ensure UI is fully rendered
+for _ in range(3):
+    QApplication.processEvents()
+
+# Immediate status message
+progress.set_status_message("🔌 Connecting to Eden Herald...")
+QApplication.processEvents()
+```
+
+#### Bug Fix: Poor Text Visibility on Dark Themes
+
+**Problem:** Status text barely visible on dark purple themes (black text on dark background).
+
+**Root Cause:** Default text color was #000000 (black).
+
+**Solution:** Changed to white (#FFFFFF) with bold 13pt font.
+
+```python
+def set_status_message(self, message: str, color: Optional[str] = None):
+    self._set_status_message_ui(message, color if color else "#FFFFFF")
+
+def _set_status_message_ui(self, message: str, color: str):
+    self.status_label.setStyleSheet(
+        f"padding: 10px; "
+        f"border: 1px solid #ccc; "
+        f"border-radius: 5px; "
+        f"background-color: transparent; "
+        f"color: {color}; "
+        f"font-size: 13pt; "
+        f"font-weight: bold;"
+    )
+```
+
+**Impact:** Text readable on all themes (light/dark).
+
+### 15.5 Currency Support Enhancement
+
+**Date:** November 24, 2025
+
+**Problem:** Items with "Tuscaran Glacier Ices" price showed "No Price" in database.
+
+**Investigation:** Debug script revealed `parse_price()` returned `None` for "Ices" and "Souls" currencies.
+
+**Solution:** Added support in `parse_price()` for Epic dungeon currencies.
+
+**Files Modified:**
+- `Functions/items_scraper.py` - Added Ices and Souls parsing
+
+**Example:**
+```python
+# Before fix
+parse_price("600 Tuscaran Glacier Ices")  # → None ❌
+
+# After fix
+parse_price("600 Tuscaran Glacier Ices")  # → {'currency': 'Ices', 'amount': 600, ...} ✅
+```
+
+**Impact:** All Epic dungeon items now properly store merchant prices.
+
+### 15.6 Translation Support
+
+All Database Editor UI elements are fully translated:
+
+**Languages:** FR (French), EN (English), DE (German)
+
+**Keys Added to Language/*.json:**
+```json
+{
+  "db_editor_connect": "Connect to Eden",
+  "db_editor_refresh_items": "Refresh Items",
+  "db_editor_save": "Save Database",
+  "db_editor_search_variants": "Search Variants",
+  "db_editor_process_variants": "Process Variants",
+  "db_editor_batch_refresh": "Batch Refresh",
+  "db_editor_batch_search": "Search All Variants",
+  "db_editor_batch_process": "Process All Variants",
+  "db_editor_results": "Results"
+}
+```
+
+---
+
 ## Document Information
 
 **Created:** 2025-11-19  
-**Version:** 2.1  
+**Version:** 2.2  
 **Author:** Technical Documentation Team  
-**Last Reviewed:** 2025-11-20
+**Last Reviewed:** 2025-11-24
+
+**Change Log:**
+- **2025-11-24 (v2.2):** Added Database Editor Interface documentation, Currency support for Ices/Souls
+- **2025-11-20 (v2.1):** Currency normalization and template system updates
+- **2025-11-19 (v2.0):** Initial comprehensive documentation
 
 **Related Documents:**
 - `Data/items_database_src.json` - Internal database file

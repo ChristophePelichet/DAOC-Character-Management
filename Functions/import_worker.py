@@ -10,7 +10,7 @@ from datetime import datetime
 from PySide6.QtCore import QThread, Signal
 
 from Functions.cookie_manager import CookieManager
-from Functions.eden_scraper import EdenScraper
+from Functions.eden_scraper import EdenScraper, _connect_to_eden_herald
 from Functions.items_scraper import ItemsScraper
 
 
@@ -109,25 +109,16 @@ class ImportWorker(QThread):
                 for error in parse_errors:
                     self.log_message.emit(error, "warning")
             
-            # Initialize scraper
+            # Initialize scraper using centralized connection
             self.log_message.emit("Initializing Eden scraper...", "info")
             
-            cookie_manager = CookieManager()
-            eden_scraper = EdenScraper(cookie_manager)
+            eden_scraper, error_message = _connect_to_eden_herald(headless=False)
+            if not eden_scraper:
+                self.log_message.emit(f"Failed to connect to Eden Herald: {error_message}", "error")
+                self.import_finished.emit(False, f"Failed to connect to Eden Herald: {error_message}", {})
+                return
+            
             self._eden_scraper = eden_scraper  # Store for external cleanup
-            
-            if not eden_scraper.initialize_driver(headless=False, minimize=True):
-                self.log_message.emit("Failed to initialize Eden driver", "error")
-                self.import_finished.emit(False, "Failed to initialize Eden scraper", {})
-                # eden_scraper will be closed in finally
-                return
-            
-            if not eden_scraper.load_cookies():
-                self.log_message.emit("Failed to load cookies", "error")
-                self.import_finished.emit(False, "Failed to load cookies", {})
-                # eden_scraper will be closed in finally
-                return
-            
             items_scraper = ItemsScraper(eden_scraper)
             self.log_message.emit("Eden scraper initialized successfully", "success")
             

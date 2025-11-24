@@ -24,7 +24,7 @@ import logging
 
 from Functions.path_manager import PathManager
 from Functions.items_parser import parse_template_file, search_item_for_database
-from Functions.eden_scraper import EdenScraper
+from Functions.eden_scraper import EdenScraper, _connect_to_eden_herald
 from Functions.cookie_manager import CookieManager
 from Functions.items_scraper import ItemsScraper
 
@@ -351,18 +351,11 @@ class SuperAdminTools:
             if not new_items_names:
                 return False, "No items parsed from template files", {}
             
-            # Initialize Eden scraper for fetching item details
+            # Initialize Eden scraper using centralized connection
             logging.info("Initializing Eden scraper for item details...")
-            cookie_manager = CookieManager()
-            eden_scraper = EdenScraper(cookie_manager)
-            
-            # Initialize driver (NOT headless for database building)
-            if not eden_scraper.initialize_driver(headless=False, minimize=True):
-                return False, "Failed to initialize Eden scraper", {}
-            
-            # Load cookies
-            if not eden_scraper.load_cookies():
-                return False, "Failed to load cookies. Please generate cookies first.", {}
+            eden_scraper, error_message = _connect_to_eden_herald(headless=False)
+            if not eden_scraper:
+                return False, f"Failed to connect to Eden Herald: {error_message}", {}
             
             items_scraper = ItemsScraper(eden_scraper)
             logging.info("Eden scraper initialized successfully")
@@ -613,7 +606,7 @@ class SuperAdminTools:
             logging.error(f"Error cleaning duplicates: {e}", extra={"action": "SUPERADMIN_CLEAN_ERROR"})
             return False, f"Error: {str(e)}", 0
     
-    def refresh_all_items(self, progress_callback=None, item_filter: List[str] = None) -> Tuple[bool, str, Dict]:
+    def refresh_all_items(self, progress_callback=None, item_filter: List[str] = None, skip_filters: bool = False) -> Tuple[bool, str, Dict]:
         """
         Refresh all items in the database by re-scraping them from Eden.
         
@@ -627,6 +620,7 @@ class SuperAdminTools:
             item_filter: Liste optionnelle de noms d'items à rafraîchir (pour debug)
                         Si None, rafraîchit TOUS les items
                         Exemple: ["Cloth Cap", "Cudgel of the Undead"]
+            skip_filters: If True, bypass utility/level filters to get ALL variants
             
         Returns:
             Tuple[bool, str, Dict]: (Success, Message, Stats dict)
@@ -659,25 +653,13 @@ class SuperAdminTools:
             logging.info("Creating backup before refresh...")
             self.backup_source_database()
             
-            # Initialize scraper with driver
+            # Initialize scraper with driver using centralized connection
             logging.info("Initializing web scraper...")
             start_init = time.time()
             
-            cookie_manager = CookieManager()
-            eden_scraper = EdenScraper(cookie_manager)
-            
-            # Initialize Selenium driver (NOT headless for visibility)
-            driver_start = time.time()
-            if not eden_scraper.initialize_driver(headless=False, minimize=True):
-                return False, "Failed to initialize web driver", {}
-            logging.info(f"⏱️  Driver initialized in {time.time() - driver_start:.2f}s")
-            
-            # Load cookies
-            cookies_start = time.time()
-            if not eden_scraper.load_cookies():
-                eden_scraper.close()
-                return False, "Failed to load cookies. Please generate cookies first.", {}
-            logging.info(f"⏱️  Cookies loaded in {time.time() - cookies_start:.2f}s")
+            eden_scraper, error_message = _connect_to_eden_herald(headless=False)
+            if not eden_scraper:
+                return False, f"Failed to connect to Eden Herald: {error_message}", {}
             
             logging.info(f"⏱️  Total initialization: {time.time() - start_init:.2f}s")
             
@@ -716,9 +698,9 @@ class SuperAdminTools:
                 item_start = time.time()
                 
                 try:
-                    # Find ALL item variants (all realms)
-                    logging.debug(f"Searching ALL variants for '{item_name}'")
-                    variants = items_scraper.find_all_item_variants(item_name)
+                    # Find ALL item variants (all realms) with optional filter bypass
+                    logging.debug(f"Searching ALL variants for '{item_name}' (skip_filters={skip_filters})")
+                    variants = items_scraper.find_all_item_variants(item_name, skip_filters=skip_filters)
                     
                     if not variants:
                         logging.warning(f"❌ No variants found for: {item_name}")

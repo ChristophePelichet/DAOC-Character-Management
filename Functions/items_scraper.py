@@ -456,6 +456,22 @@ class ItemsScraper:
             except:
                 pass
         
+        # Ices (Tuscaran Glacier)
+        if 'ice' in price_str:
+            try:
+                amount = int(price_str.split()[0])
+                return {'currency': 'Ices', 'amount': amount, 'display': f"{amount} Ices"}
+            except:
+                pass
+        
+        # Souls (Epic dungeon currency)
+        if 'soul' in price_str:
+            try:
+                amount = int(price_str.split()[0])
+                return {'currency': 'Souls', 'amount': amount, 'display': f"{amount} Souls"}
+            except:
+                pass
+        
         # Gold/Platinum (format: "5p 50g 25s 10c" or "500g")
         if 'p' in price_str or 'g' in price_str or 's' in price_str or 'c' in price_str or 'plat' in price_str or 'gold' in price_str:
             total_copper = 0

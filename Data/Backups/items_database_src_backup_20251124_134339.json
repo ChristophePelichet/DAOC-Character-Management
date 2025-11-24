@@ -1763,7 +1763,7 @@
       "damage_type": null,
       "usable_by": "ALL",
       "merchant_zone": "Epic",
-      "merchant_price": "600",
+      "merchant_price": "",
       "merchant_currency": "Souls/Roots/Ices",
       "item_category": "",
       "ignore_item": false,

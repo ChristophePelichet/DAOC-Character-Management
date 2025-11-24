@@ -11,7 +11,7 @@ import json
 import re
 from pathlib import Path
 from .items_scraper import ItemsScraper
-from .eden_scraper import EdenScraper
+from .eden_scraper import EdenScraper, _connect_to_eden_herald
 from .cookie_manager import CookieManager
 
 def parse_template_file(file_path):
@@ -189,20 +189,11 @@ def build_database_from_folder(folder_path, output_file=None, realm="All"):
     print(f"🔹 Uniques: {len(unique_items)} items")
     print(f"{'='*80}\n")
     
-    # Initialize scraper
+    # Initialize scraper using centralized connection
     print("🔧 Initialisation du scraper...")
-    cookie_manager = CookieManager()
-    eden_scraper = EdenScraper(cookie_manager)
-    
-    # Initialize driver (NOT headless for items database)
-    if not eden_scraper.initialize_driver(headless=False, minimize=True):
-        print("❌ Erreur initialisation driver")
-        return
-    
-    # Load cookies
-    if not eden_scraper.load_cookies():
-        print("❌ Erreur chargement cookies")
-        eden_scraper.close()
+    eden_scraper, error_message = _connect_to_eden_herald(headless=False)
+    if not eden_scraper:
+        print(f"❌ Erreur connexion Eden Herald: {error_message}")
         return
     
     items_scraper = ItemsScraper(eden_scraper)

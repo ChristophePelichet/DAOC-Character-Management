@@ -21,7 +21,7 @@ class MassImportMonitor(QMainWindow):
     
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle(lang.get("settings.pages.mass_import_monitor.window_title", default="🔧 Database Management Tools"))
+        self.setWindowTitle(lang.get("settings.pages.mass_import_monitor.window_title", default="🔧 Database - Template Import"))
         self.setGeometry(150, 100, 1200, 700)
         
         # Make window independent and always movable

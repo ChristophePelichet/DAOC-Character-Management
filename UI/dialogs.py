@@ -3107,9 +3107,14 @@ class ArmorManagementDialog(QDialog):
         }
         
         dialog = TemplateImportDialog(self, character_data)
-        if dialog.exec() == QDialog.Accepted:
-            # Template imported successfully, refresh list
+        # Connect signal to refresh list immediately when template is imported
+        # Must update index first to include new template
+        dialog.template_imported.connect(lambda: (
+            self.template_manager.update_index(),
             self.refresh_list()
+        ))
+        if dialog.exec() == QDialog.Accepted:
+            # Template imported successfully
             QMessageBox.information(
                 self,
                 "Succès",

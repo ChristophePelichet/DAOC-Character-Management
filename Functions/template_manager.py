@@ -351,10 +351,10 @@ class TemplateManager:
         """Rebuild index from existing template files"""
         print("[TEMPLATE_MANAGER] Rebuilding template index...")
         
-        # Find all .json metadata files
-        metadata_files = list(self.armory_path.glob("*.json"))
+        # Find all .json metadata files recursively in realm/Json folders
+        metadata_files = list(self.armory_path.glob("**/Json/*.json"))
         
-        # Exclude index file
+        # Exclude index file (though it shouldn't be in Json folders)
         metadata_files = [
             f for f in metadata_files
             if f.name != self.INDEX_FILE

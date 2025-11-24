@@ -1,6 +1,6 @@
 # 🛡️ Armory System - Technical Documentation
 
-**Version**: 2.2  
+**Version**: 2.3  
 **Date**: November 2025  
 **Last Updated**: November 24, 2025  
 **Component**: `UI/armory_import_dialog.py`, `UI/mass_import_monitor.py`, `UI/template_import_dialog.py`, `UI/dialogs.py`  
@@ -241,6 +241,8 @@ The Template System provides character-centric management of armor templates wit
 ```
 
 **Auto-Update:** Index rebuilt on template import/delete/modify
+
+**Critical Fix (Nov 24, 2025):** Index scanning now uses `**/Json/*.json` pattern instead of `*.json` to correctly find metadata files in realm-specific folders (Armory/Hibernia/Json/, Armory/Albion/Json/, etc.)
 
 ### Class-Based Filtering
 
@@ -2137,6 +2139,57 @@ def merge_two_columns(left_lines, right_lines):
 
 **See:** [Template Preview System](#template-preview-system) for complete implementation details.
 
+### 11. Template List Refresh After Import
+
+**Problem:** After importing a template from character sheet, the template list in ArmouryDialog didn't refresh until closing and reopening the page.
+
+**Root Cause:** `TemplateManager.update_index()` used incorrect glob pattern `*.json` which only searched at Armory root, not in realm-specific `Json/` folders.
+
+**Investigation Steps:**
+1. Connected `template_imported` signal to `refresh_list()` - no effect
+2. Verified signal emission sequence (emitted before dialog.accept()) - correct
+3. Discovered `refresh_list()` used `template_manager.search_templates()` which relied on cached index
+4. Found bug in `update_index()`: used `armory_path.glob("*.json")` instead of `armory_path.glob("**/Json/*.json")`
+
+**Solution:** Fixed glob pattern to recursively search realm folders
+
+**Changes (Functions/template_manager.py lines 350-360):**
+
+```python
+def update_index(self):
+    """Rebuild index from existing template files"""
+    print("[TEMPLATE_MANAGER] Rebuilding template index...")
+    
+    # Find all .json metadata files recursively in realm/Json folders
+    metadata_files = list(self.armory_path.glob("**/Json/*.json"))
+    
+    # Exclude index file (though it shouldn't be in Json folders)
+    metadata_files = [
+        f for f in metadata_files
+        if f.name != self.INDEX_FILE
+    ]
+```
+
+**Additional Fix:** Connected template_imported signal to update index before refreshing list
+
+**Changes (UI/dialogs.py lines 3103-3112):**
+
+```python
+dialog = TemplateImportDialog(self, character_data)
+# Connect signal to refresh list immediately when template is imported
+# Must update index first to include new template
+dialog.template_imported.connect(lambda: (
+    self.template_manager.update_index(),
+    self.refresh_list()
+))
+```
+
+**Files Fixed:** 
+- `Functions/template_manager.py` (glob pattern)
+- `UI/dialogs.py` (signal connection with index update)
+
+**Result:** Template list now refreshes immediately after import without requiring page close/reopen. The `update_index()` call before `refresh_list()` correctly scans all realm folders (Armory/Hibernia/Json/, Armory/Albion/Json/, Armory/Midgard/Json/).
+
 ---
 
 ## Implementation Progress
@@ -2303,22 +2356,24 @@ Uses existing `game` section in `config.json`:
 14. **11f4917 to f32dd51** - System foundations (DB, scraper, dual-mode)
 
 **Statistics:**
-- **21+ commits** total
+- **22+ commits** total
 - **108 items** in database (47 items normalized)
 - **6 translation sections** added
-- **10 critical bugs** fixed (including currency normalization and emoji alignment)
+- **11 critical bugs** fixed (including currency normalization, emoji alignment, and template refresh)
 - **3 new UI dialogs**
 - **Thread-safe** complete architecture
 - **2-column optimized** template preview (~50% vertical space reduction)
 - **Unified currency** normalization system (3 sync points)
 
-**Recent Additions (Nov 21, 2025):**
-- ✅ Currency normalization system (ZONE_CURRENCY)
-- ✅ Database repair tool (fix_currency_mapping.py)
-- ✅ Template preview 2-column layout
-- ✅ Emoji-aware alignment system
-- ✅ Adaptive section separators
-- ✅ Color-coded stats/skills (cap indicators)
+**Recent Additions (Nov 24, 2025):**
+- ✅ Currency normalization system (ZONE_CURRENCY) - Nov 21
+- ✅ Database repair tool (fix_currency_mapping.py) - Nov 21
+- ✅ Template preview 2-column layout - Nov 21
+- ✅ Emoji-aware alignment system - Nov 21
+- ✅ Adaptive section separators - Nov 21
+- ✅ Color-coded stats/skills (cap indicators) - Nov 21
+- ✅ Template list auto-refresh after import - Nov 24
+- ✅ Fixed TemplateManager.update_index() glob pattern - Nov 24
 
 ---
 
@@ -2329,8 +2384,13 @@ Uses existing `game` section in `config.json`:
 **Developer:** GitHub Copilot  
 **Created:** November 19, 2025  
 **Last Updated:** November 24, 2025  
-**Version:** 2.2  
+**Version:** 2.3  
 **Branch:** 108_Imp_Armo
+
+**Change Summary (v2.3):**
+- Fixed template list refresh after import (update_index glob pattern)
+- Added auto-refresh functionality with TemplateManager integration
+- Updated critical bug fixes section
 
 **Change Summary (v2.2):**
 - Added Ices and Souls currency support in parse_price()

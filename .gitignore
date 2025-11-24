@@ -138,6 +138,8 @@ Logs/
 #Tools/
 Configuration/
 Armures/
+Armory/
+!Documentations/Armory/
 main.spec
 #requirements.txt
 

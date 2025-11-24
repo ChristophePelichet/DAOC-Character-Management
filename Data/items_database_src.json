@@ -1,7 +1,7 @@
 {
   "version": "2.0",
   "description": "DAOC Items Database - Multi-Realm Support (Minimal Data)",
-  "last_updated": "2025-11-24 12:07:40",
+  "last_updated": "2025-11-24 14:55:02",
   "item_count": 112,
   "notes": [
     "Composite keys format: 'item_name:realm' (lowercase)",
@@ -1355,7 +1355,7 @@
       "merchant_currency": "Grimoires",
       "source": "internal"
     },
-    "Sleeves of Strife_Albion": {
+    "sleeves of strife:albion": {
       "id": "139628",
       "name": "Sleeves of Strife",
       "realm": "Albion",
@@ -1373,7 +1373,7 @@
       "ignore_item": false,
       "source": "scraped"
     },
-    "Sleeves of Strife_Midgard": {
+    "sleeves of strife:midgard": {
       "id": "139634",
       "name": "Sleeves of Strife",
       "realm": "Midgard",
@@ -1391,7 +1391,7 @@
       "ignore_item": false,
       "source": "scraped"
     },
-    "Sleeves of Strife_Hibernia": {
+    "sleeves of strife:hibernia": {
       "id": "139640",
       "name": "Sleeves of Strife",
       "realm": "Hibernia",
@@ -1409,7 +1409,7 @@
       "ignore_item": false,
       "source": "scraped"
     },
-    "Tenacious Spell Bender_Hibernia": {
+    "tenacious spell bender:hibernia": {
       "id": "164052",
       "name": "Tenacious Spell Bender",
       "realm": "Hibernia",
@@ -1427,7 +1427,7 @@
       "ignore_item": true,
       "source": "scraped"
     },
-    "Gatekeeper Bracer of Chaos_All": {
+    "gatekeeper bracer of chaos:all": {
       "id": "110900",
       "name": "Gatekeeper Bracer of Chaos",
       "realm": "All",
@@ -1445,7 +1445,7 @@
       "ignore_item": false,
       "source": "scraped"
     },
-    "Bracer of Snow_Albion": {
+    "bracer of snow:albion": {
       "id": "132192",
       "name": "Bracer of Snow",
       "realm": "Albion",
@@ -1463,7 +1463,7 @@
       "ignore_item": false,
       "source": "scraped"
     },
-    "Bracer of Snow_Midgard": {
+    "bracer of snow:midgard": {
       "id": "132222",
       "name": "Bracer of Snow",
       "realm": "Midgard",
@@ -1481,7 +1481,7 @@
       "ignore_item": false,
       "source": "scraped"
     },
-    "Bracer of Snow_Hibernia": {
+    "bracer of snow:hibernia": {
       "id": "132252",
       "name": "Bracer of Snow",
       "realm": "Hibernia",
@@ -1499,7 +1499,7 @@
       "ignore_item": false,
       "source": "scraped"
     },
-    "Deserter Arcane Mythirian_All": {
+    "deserter arcane mythirian:all": {
       "id": "66164",
       "name": "Deserter Arcane Mythirian",
       "realm": "All",
@@ -1517,7 +1517,7 @@
       "ignore_item": true,
       "source": "scraped"
     },
-    "Polished Granite Pin_Albion": {
+    "polished granite pin:albion": {
       "id": "112181",
       "name": "Polished Granite Pin",
       "realm": "Albion",
@@ -1535,7 +1535,7 @@
       "ignore_item": false,
       "source": "scraped"
     },
-    "Director's Ring of Bedlam_All": {
+    "director's ring of bedlam:all": {
       "id": "110896",
       "name": "Director's Ring of Bedlam",
       "realm": "All",
@@ -1553,7 +1553,7 @@
       "ignore_item": false,
       "source": "scraped"
     },
-    "Construct Forged Ring_All": {
+    "construct forged ring:all": {
       "id": "160232",
       "name": "Construct Forged Ring",
       "realm": "All",
@@ -1571,7 +1571,7 @@
       "ignore_item": false,
       "source": "scraped"
     },
-    "Defender of Scorched Dreams_Albion": {
+    "defender of scorched dreams:albion": {
       "id": "163467",
       "name": "Defender of Scorched Dreams",
       "realm": "Albion",
@@ -1589,7 +1589,7 @@
       "ignore_item": false,
       "source": "scraped"
     },
-    "Semi-ethereal Gloves_Hibernia": {
+    "semi-ethereal gloves:hibernia": {
       "id": "112121",
       "name": "Semi-ethereal Gloves",
       "realm": "Hibernia",
@@ -1607,7 +1607,7 @@
       "ignore_item": false,
       "source": "scraped"
     },
-    "Bruadar Speal_Hibernia": {
+    "bruadar speal:hibernia": {
       "id": "163404",
       "name": "Bruadar Speal",
       "realm": "Hibernia",
@@ -1625,7 +1625,7 @@
       "ignore_item": false,
       "source": "scraped"
     },
-    "Myrddraxis Remnant Cloak_Hibernia": {
+    "myrddraxis remnant cloak:hibernia": {
       "id": "149072",
       "name": "Myrddraxis Remnant Cloak",
       "realm": "Hibernia",
@@ -1643,7 +1643,7 @@
       "ignore_item": false,
       "source": "scraped"
     },
-    "Jewel of the Haughty Warrior_Hibernia": {
+    "jewel of the haughty warrior:hibernia": {
       "id": "118019",
       "name": "Jewel of the Haughty Warrior",
       "realm": "Hibernia",
@@ -1661,7 +1661,7 @@
       "ignore_item": false,
       "source": "scraped"
     },
-    "Jewel of the Haughty Warrior_Midgard": {
+    "jewel of the haughty warrior:midgard": {
       "id": "117558",
       "name": "Jewel of the Haughty Warrior",
       "realm": "Midgard",
@@ -1679,7 +1679,7 @@
       "ignore_item": false,
       "source": "scraped"
     },
-    "Jewel of the Haughty Warrior_Albion": {
+    "jewel of the haughty warrior:albion": {
       "id": "117482",
       "name": "Jewel of the Haughty Warrior",
       "realm": "Albion",
@@ -1697,7 +1697,7 @@
       "ignore_item": false,
       "source": "scraped"
     },
-    "Band of Clandestinity_Albion": {
+    "band of clandestinity:albion": {
       "id": "139660",
       "name": "Band of Clandestinity",
       "realm": "Albion",
@@ -1715,7 +1715,7 @@
       "ignore_item": false,
       "source": "scraped"
     },
-    "Band of Clandestinity_Midgard": {
+    "band of clandestinity:midgard": {
       "id": "139667",
       "name": "Band of Clandestinity",
       "realm": "Midgard",
@@ -1733,7 +1733,7 @@
       "ignore_item": false,
       "source": "scraped"
     },
-    "Band of Clandestinity_Hibernia": {
+    "band of clandestinity:hibernia": {
       "id": "139673",
       "name": "Band of Clandestinity",
       "realm": "Hibernia",
@@ -1751,7 +1751,7 @@
       "ignore_item": false,
       "source": "scraped"
     },
-    "Runed Tuscarian Vest_Midgard": {
+    "runed tuscarian vest:midgard": {
       "id": "153954",
       "name": "Runed Tuscarian Vest",
       "realm": "Midgard",

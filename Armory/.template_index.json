@@ -1,5 +1,26 @@
 {
   "version": "1.0",
-  "last_updated": "2025-11-24T14:15:11.345866",
-  "templates": []
+  "last_updated": "2025-11-24T14:56:09.718559",
+  "templates": [
+    {
+      "file": "Animist_S3_universel.txt",
+      "class": "Animist",
+      "realm": "Hibernia",
+      "season": "S3",
+      "tags": [],
+      "item_count": 287,
+      "import_date": "2025-11-24T14:47:13.620784"
+    },
+    {
+      "file": "Bard_S3_starter.txt",
+      "class": "Bard",
+      "realm": "Hibernia",
+      "season": "S3",
+      "tags": [
+        "low-cost"
+      ],
+      "item_count": 271,
+      "import_date": "2025-11-24T14:56:08.334933"
+    }
+  ]
 }

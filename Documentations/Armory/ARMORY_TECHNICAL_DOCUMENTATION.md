@@ -1,11 +1,11 @@
 # 🛡️ Armory System - Technical Documentation
 
-**Version**: 2.4  
+**Version**: 2.5  
 **Date**: November 2025  
-**Last Updated**: November 24, 2025  
+**Last Updated**: November 25, 2025  
 **Component**: `UI/armory_import_dialog.py`, `UI/mass_import_monitor.py`, `UI/template_import_dialog.py`, `UI/dialogs.py`  
 **Related**: `Functions/items_scraper.py`, `Functions/items_parser.py`, `Functions/import_worker.py`, `Functions/build_items_database.py`, `Functions/template_manager.py`, `Functions/template_metadata.py`, `Tools/fix_currency_mapping.py`  
-**Branch**: 108_Imp_Armo (21+ commits)
+**Branch**: 108_Imp_Armo (22+ commits)
 
 ---
 
@@ -1457,70 +1457,61 @@ output.append("═" * max_line_width)
 | Internal columns (bonuses) | `/` | Separates Power Pool/HP, Heal Bonus pairs |
 | Section divider | `═` | Adaptive-width separator between major sections |
 
-**Examples:**
+**Example:**
 ```
 📊 STATS                  🛡️ RESISTANCES          ← 5 spaces (title)
-Strength        45    │  Crush       25% / Slash     27%   ← │ separator + / internal
-Constitution    80    │  Thrust      26% / Body      26%   ← │ separator + / internal
+Strength        45    │  Crush       25% / Slash     27%   ← │ separator + / internal + colors
+Constitution    80    │  Thrust      26% / Body      26%   ← │ separator + / internal + colors
 ═══════════════════════════════════════════════════════════  ← Adaptive ═ line
 ```
 
+**Note:** Stats and resistances are now color-coded based on their values:
+- Stats: Red (below cap), Green (at cap), Orange (above cap)
+- Resistances: Red (< 25%), Orange (= 25%), Green (> 25%)
+
 ### Color Coding System
 
-**File:** `UI/dialogs.py` (lines 3200-3250)
+**File:** `UI/dialogs.py` (lines 3470-3520)
 
-**Purpose:** Visual indicators for stat/skill cap status
+**Purpose:** Visual indicators for stat/resistance cap status
 
+**Stats Color Logic:**
 ```python
-def _get_stat_color(self, stat_name, value, cap_info):
+def _get_stat_color(self, stat_name, value, cap):
     """Return HTML color code based on stat value vs cap"""
     
-    # Get cap for this stat
-    cap = cap_info.get('stats', {}).get(stat_name, 999)
-    
-    if value >= cap:
-        return '#4A9EFF'  # Blue (capped)
+    if value == cap:
+        return '#4CAF50'  # Green (at cap)
     elif value > cap:
-        return '#FF4444'  # Red (overcapped)
+        return '#FF9800'  # Orange (above cap)
     else:
-        return '#FFFFFF'  # White (standard)
-
-def _get_skill_color(self, skill_name, value, cap_info):
-    """Return HTML color code based on skill value vs cap"""
-    
-    # Get cap for this skill
-    cap = cap_info.get('skills', {}).get(skill_name, 999)
-    
-    if value >= cap:
-        return '#4A9EFF'  # Blue (capped)
-    elif value > cap:
-        return '#FF4444'  # Red (overcapped)
-    else:
-        return '#FFFFFF'  # White (standard)
+        return '#F44336'  # Red (below cap)
 ```
 
-**Cap Information Structure:**
+**Resistances Color Logic:**
 ```python
-cap_info = {
-    'stats': {
-        'Strength': 75,
-        'Constitution': 75,
-        'Dexterity': 75,
-        # ... all stat caps
-    },
-    'skills': {
-        'Blunt': 11,
-        'Parry': 11,
-        'Enhancement': 11,
-        # ... all skill caps
-    }
-}
+def _get_resistance_color(self, value):
+    """Return HTML color code based on resistance value"""
+    
+    if value < 25:
+        return '#F44336'  # Red (< 25%)
+    elif value == 25:
+        return '#FF9800'  # Orange (= 25%)
+    else:
+        return '#4CAF50'  # Green (> 25%)
 ```
 
 **Color Meanings:**
-- 🔵 **Blue (#4A9EFF)**: Value equals cap (optimal)
-- 🔴 **Red (#FF4444)**: Value exceeds cap (wasted points)
-- ⚪ **White (#FFFFFF)**: Value below cap (room for improvement)
+
+**Stats:**
+- 🔴 **Red (#F44336)**: Below cap (room for improvement)
+- 🟢 **Green (#4CAF50)**: At cap (optimal)
+- 🟠 **Orange (#FF9800)**: Above cap (wasted points)
+
+**Resistances:**
+- 🔴 **Red (#F44336)**: < 25% (weak resistance)
+- 🟠 **Orange (#FF9800)**: = 25% (at cap)
+- 🟢 **Green (#4CAF50)**: > 25% (overcapped)
 
 ### HTML Rendering
 

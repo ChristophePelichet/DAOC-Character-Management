@@ -3487,11 +3487,31 @@ class ArmorManagementDialog(QDialog):
             resist_list = list(resists.items())
             for i in range(0, len(resist_list), 2):
                 resist1_name, resist1_value = resist_list[i]
-                resist1 = f"{resist1_name:8} {resist1_value:>2}%"
+                resist1_val = int(resist1_value)
+                
+                # Determine color based on value
+                if resist1_val < 25:
+                    color1 = "#F44336"  # Red (< 25%)
+                elif resist1_val == 25:
+                    color1 = "#FF9800"  # Orange (= 25%)
+                else:
+                    color1 = "#4CAF50"  # Green (> 25%)
+                
+                resist1 = f"%%COLOR_START:{color1}%%{resist1_name:8} {resist1_value:>2}%%%COLOR_END%%"
                 
                 if i + 1 < len(resist_list):
                     resist2_name, resist2_value = resist_list[i + 1]
-                    resist2 = f"{resist2_name:8} {resist2_value:>2}%"
+                    resist2_val = int(resist2_value)
+                    
+                    # Determine color based on value
+                    if resist2_val < 25:
+                        color2 = "#F44336"  # Red (< 25%)
+                    elif resist2_val == 25:
+                        color2 = "#FF9800"  # Orange (= 25%)
+                    else:
+                        color2 = "#4CAF50"  # Green (> 25%)
+                    
+                    resist2 = f"%%COLOR_START:{color2}%%{resist2_name:8} {resist2_value:>2}%%%COLOR_END%%"
                 else:
                     resist2 = ""
                 

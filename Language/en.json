@@ -7,6 +7,17 @@
         "character_sheet_title": "Character Sheet - {name}"
     },
     "dialogs": {
+        "about_dialog": {
+            "tab_about": "About",
+            "tab_credits": "Credits",
+            "tab_license": "License",
+            "description_title": "Description",
+            "description_text": "Character management application for Dark Age of Camelot (DAOC), developed in Python with PySide6.",
+            "creator_title": "Creator",
+            "repository_title": "Repository",
+            "license_title": "License",
+            "license_text": "[LICENSE TO BE DETERMINED]"
+        },
         "new_character": {
             "existing_character_label": "Existing character:",
             "title": "New Character",

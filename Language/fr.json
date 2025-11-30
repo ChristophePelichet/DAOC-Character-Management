@@ -81,6 +81,17 @@
             "title": "À propos de {app_name}",
             "content": "Application : {app_name}\nVersion : {version}\nCréateur : Ewoline\n\nGestionnaire de personnages pour Dark Age of Camelot"
         },
+        "about_dialog": {
+            "tab_about": "À propos",
+            "tab_credits": "Crédits",
+            "tab_license": "Licence",
+            "description_title": "Description",
+            "description_text": "Application de gestion de personnages pour Dark Age of Camelot (DAOC), développée en Python avec PySide6.",
+            "creator_title": "Créateur",
+            "repository_title": "Dépôt",
+            "license_title": "Licence",
+            "license_text": "[LICENCE À DÉTERMINER]"
+        },
         "stats_info": {
             "title": "À propos des statistiques",
             "message": "ℹ️ Information importante\n\nLes statistiques affichées (RvR, PvP, PvE et Monnaie) sont cumulatives depuis la création du personnage.\n\n📊 Données globales :\n• Total depuis la création du personnage\n• Pas de réinitialisation par saison\n• Historique complet de toutes les actions\n\n🌐 Source des données :\nLe site Herald d'Eden ne fournit pas les statistiques par saison, uniquement le cumul total de toute l'existence du personnage.\n\nCela signifie que les valeurs affichées représentent l'ensemble de votre parcours sur ce personnage, toutes saisons confondues."

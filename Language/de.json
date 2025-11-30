@@ -7,6 +7,17 @@
         "character_sheet_title": "Charakterbogen - {name}"
     },
     "dialogs": {
+        "about_dialog": {
+            "tab_about": "Über",
+            "tab_credits": "Danksagungen",
+            "tab_license": "Lizenz",
+            "description_title": "Beschreibung",
+            "description_text": "Charakterverwaltungsanwendung für Dark Age of Camelot (DAOC), entwickelt in Python mit PySide6.",
+            "creator_title": "Entwickler",
+            "repository_title": "Repository",
+            "license_title": "Lizenz",
+            "license_text": "[LIZENZ NOCH ZU BESTIMMEN]"
+        },
         "new_character": {
             "existing_character_label": "Bestehender Charakter:",
             "title": "Neuer Charakter",

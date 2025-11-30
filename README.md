@@ -70,3 +70,20 @@ Consultez le [journal des modifications](CHANGELOG.md) pour l'historique complet
 - 💾 **Cookies** : Sauvegarde des cookies
 - 📊 **Rétention** : Système de rétention basé sur la taille
 - 🔧 **Compression** : Possibiliter de compresser les sauvegardes
+
+---
+
+## 🙏 Credits & Acknowledgments
+
+- **[DAOC Official Website](https://www.darkageofcamelot.com/)**
+- **[Eden DAOC](https://www.eden-daoc.net/)**
+- **[Eve-of-Darkness/DolModels](https://github.com/Eve-of-Darkness/DolModels)**
+
+## 🙏 Special Thanks
+
+- **Tester and friend who made this project possible**:
+
+- Morfuin / Leifur 
+- Laelly
+
+For complete credits and licensing information, see **[CREDITS.md](CREDITS.md)**.

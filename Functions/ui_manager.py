@@ -514,10 +514,11 @@ class UIManager:
             self.main_window.status_label.setText(message)
             
     def show_about_dialog(self, app_name, app_version):
-        """Affiche la boîte de dialogue 'À propos'"""
-        title = lang.get("about_dialog_title", app_name=app_name)
-        message = lang.get("about_dialog_content", app_name=app_name, version=app_version)
-        QMessageBox.about(self.main_window, title, message)
+        """Affiche la boîte de dialogue 'À propos' complète avec onglets"""
+        from UI.about_dialog import AboutDialog
+        
+        dialog = AboutDialog(self.main_window, app_name, app_version)
+        dialog.exec()
     
     def _open_wiki_documentation(self):
         """Ouvre le Wiki GitHub dans le navigateur"""

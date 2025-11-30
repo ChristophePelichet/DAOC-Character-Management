@@ -446,20 +446,13 @@ class UIManager:
     def _update_herald_buttons_state(self):
         """Désactive/active les boutons et actions Herald selon l'état de validation Eden"""
         from Functions.language_manager import lang
-        from Functions.logging_manager import log_with_action, get_logger, LOGGER_UI
-        
-        logger_ui = get_logger(LOGGER_UI)
         
         # Vérifier si validation en cours (basé sur le flag, pas sur isRunning())
         is_validation_running = getattr(self, 'eden_validation_in_progress', False)
-        is_validation_running = getattr(self, 'eden_validation_in_progress', False)
-        
-        log_with_action(logger_ui, "debug", f"_update_herald_buttons_state: validation_running={is_validation_running}", action="UI_STATE")
         
         # Action du menu contextuel
         if hasattr(self, 'update_from_herald_action'):
             self.update_from_herald_action.setEnabled(not is_validation_running)
-            log_with_action(logger_ui, "debug", f"Menu contextuel action enabled={not is_validation_running}", action="UI_STATE")
             if is_validation_running:
                 # QAction n'affiche pas les tooltips comme les boutons, on utilise statusTip
                 tooltip_text = lang.get("herald_buttons.validation_in_progress", default="⏳ Validation Eden en cours... Veuillez patienter")
@@ -468,20 +461,16 @@ class UIManager:
             else:
                 self.update_from_herald_action.setToolTip("")
                 self.update_from_herald_action.setStatusTip("")
-        else:
-            log_with_action(logger_ui, "warning", "update_from_herald_action n'existe pas encore!", action="UI_STATE")
         
         # Bouton de recherche Herald (dans ui_manager)
         if hasattr(self, 'search_button'):
             if is_validation_running:
                 self.search_button.setEnabled(False)
                 self.search_button.setToolTip(lang.get("herald_buttons.validation_in_progress", default="⏳ Validation Eden en cours... Veuillez patienter"))
-                log_with_action(logger_ui, "debug", "search_button désactivé", action="UI_STATE")
             else:
                 # Réactiver le bouton si la validation est terminée
                 self.search_button.setEnabled(True)
                 self.search_button.setToolTip(lang.get("buttons.eden_search", default="Rechercher un personnage sur Herald"))
-                log_with_action(logger_ui, "debug", "search_button réactivé", action="UI_STATE")
         
         
     def create_status_bar(self):

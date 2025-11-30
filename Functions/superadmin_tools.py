@@ -32,15 +32,29 @@ from Functions.items_scraper import ItemsScraper
 class SuperAdminTools:
     """Administrative tools for source database management"""
     
-    def __init__(self, path_manager: PathManager):
+    def __init__(self, path_manager: PathManager, config_manager=None):
         """
         Initialize SuperAdmin tools
         
         Args:
             path_manager: PathManager instance for resolving paths
+            config_manager: ConfigManager instance for backup configuration (optional)
         """
         self.path_manager = path_manager
+        self.config_manager = config_manager
         self.source_db_path = self.path_manager.get_app_root() / "Data" / "items_database_src.json"
+        
+        # Initialize backup directory from config or use default
+        if config_manager:
+            backup_path = config_manager.get("backup_path")
+            if backup_path:
+                self.backup_dir = Path(backup_path).parent / "Database"
+            else:
+                # Default: Backup/Database relative to base path
+                self.backup_dir = self.path_manager.get_app_root() / "Backup" / "Database"
+        else:
+            # Fallback if no config_manager provided
+            self.backup_dir = self.path_manager.get_app_root() / "Backup" / "Database"
         
         logging.info("SuperAdminTools initialized", extra={"action": "SUPERADMIN_INIT"})
     
@@ -106,7 +120,7 @@ class SuperAdminTools:
     def backup_source_database(self) -> Tuple[bool, str]:
         """
         Create a backup of the source database using centralized backup system.
-        Backups are stored in <backup_path>/Database/ folder.
+        Backups are stored in <backup_path>/Database/ folder as compressed ZIP.
         
         Returns:
             Tuple[bool, str]: (Success, Backup path or error message)
@@ -121,13 +135,15 @@ class SuperAdminTools:
             
             # Backup filename with timestamp
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            backup_path = backup_folder / f"items_database_src_backup_{timestamp}.json"
+            backup_zip_path = backup_folder / f"items_database_src_backup_{timestamp}.zip"
             
-            # Copy file
-            shutil.copy2(self.source_db_path, backup_path)
+            # Create ZIP archive
+            import zipfile
+            with zipfile.ZipFile(backup_zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                zipf.write(self.source_db_path, arcname=self.source_db_path.name)
             
-            logging.info(f"Source database backed up to {backup_path}", extra={"action": "SUPERADMIN_BACKUP"})
-            return True, str(backup_path)
+            logging.info(f"Source database backed up to {backup_zip_path}", extra={"action": "SUPERADMIN_BACKUP"})
+            return True, str(backup_zip_path)
             
         except Exception as e:
             logging.error(f"Error backing up source database: {e}", extra={"action": "SUPERADMIN_BACKUP_ERROR"})

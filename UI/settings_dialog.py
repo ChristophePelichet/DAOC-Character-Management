@@ -1292,7 +1292,7 @@ class SettingsDialog(QDialog):
         all_refresh_button.clicked.connect(self._all_items_refresh)
         advanced_layout.addWidget(all_refresh_button)
         
-        # 5. Clean Duplicates button (last position)
+        # 5. Clean Duplicates button
         clean_duplicates_button = QPushButton(lang.get('superadmin.clean_duplicates_button', 
             default="🧹 Item(s) - Clean Duplicates"))
         clean_duplicates_button.setMinimumHeight(35)
@@ -1300,6 +1300,15 @@ class SettingsDialog(QDialog):
             default="Supprime les items en double (même nom + royaume) dans la base source"))
         clean_duplicates_button.clicked.connect(self._clean_duplicates)
         advanced_layout.addWidget(clean_duplicates_button)
+        
+        # 6. Backup Database button (last position)
+        backup_db_button = QPushButton(lang.get('superadmin.backup_database_button', 
+            default="💾 Database - Backup"))
+        backup_db_button.setMinimumHeight(35)
+        backup_db_button.setToolTip(lang.get('superadmin.backup_database_tooltip', 
+            default="Créer une sauvegarde manuelle de items_database_src.json"))
+        backup_db_button.clicked.connect(self._backup_database)
+        advanced_layout.addWidget(backup_db_button)
         
         advanced_layout.addStretch()  # Push buttons to top
         
@@ -2594,6 +2603,37 @@ class SettingsDialog(QDialog):
             self.superadmin_stats_hibernia.setText("0")
             self.superadmin_stats_midgard.setText("0")
             self.superadmin_stats_all_realms.setText("0")
+    
+    def _backup_database(self):
+        """Create a manual backup of the embedded database"""
+        try:
+            from Functions.superadmin_tools import SuperAdminTools
+            
+            # Initialize SuperAdminTools with path_manager and config_manager
+            superadmin = SuperAdminTools(self.path_manager, self.config_manager)
+            
+            # Create backup
+            success, result = superadmin.backup_source_database()
+            
+            if success:
+                QMessageBox.information(
+                    self,
+                    lang.get('superadmin.backup_success_title', default="Sauvegarde réussie"),
+                    lang.get('superadmin.backup_success_message', default="Base de données sauvegardée avec succès :\n\n") + result
+                )
+            else:
+                QMessageBox.critical(
+                    self,
+                    lang.get('superadmin.backup_error_title', default="Erreur de sauvegarde"),
+                    lang.get('superadmin.backup_error_message', default="Erreur lors de la sauvegarde :\n\n") + result
+                )
+                
+        except Exception as e:
+            QMessageBox.critical(
+                self,
+                lang.get('superadmin.backup_error_title', default="Erreur de sauvegarde"),
+                lang.get('superadmin.backup_unexpected_error', default="Erreur inattendue :\n\n") + str(e)
+            )
     
     def _clean_duplicates(self):
         """Clean duplicate items from source database"""

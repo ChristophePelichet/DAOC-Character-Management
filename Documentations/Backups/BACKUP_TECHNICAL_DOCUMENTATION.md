@@ -1,11 +1,10 @@
 # 🔄 Backup System - Technical Documentation
 
-**Version**: 2.2  
+**Version**: 0.108  
 **Date**: November 2025  
 **Last Updated**: November 30, 2025  
 **Component**: `Functions/backup_manager.py`  
 **Related**: `UI/settings_dialog.py`, `Functions/config_manager.py`, `Functions/path_manager.py`, `Functions/superadmin_tools.py`, `UI/database_editor_dialog.py`, `main.py`  
-**Branch**: 108_Imp_Armo
 
 ---
 
@@ -18,10 +17,11 @@
 5. [Configuration Settings](#configuration-settings)
 6. [User Guide](#user-guide)
 7. [Smart Folder Creation](#smart-folder-creation)
-8. [Testing Infrastructure](#testing-infrastructure)
-9. [Error Handling](#error-handling)
-10. [Performance Considerations](#performance-considerations)
-11. [Security Considerations](#security-considerations)
+8. [Error Handling](#error-handling)
+9. [Performance Considerations](#performance-considerations)
+10. [Security Considerations](#security-considerations)
+11. [Version History](#version-history)
+12. [FAQ](#faq)
 
 ---
 
@@ -42,8 +42,8 @@ The system consists of three main subsystems:
 - ✅ **Daily automatic backup** on first startup
 - ✅ **Smart compression** (ZIP format optional)
 - ✅ **Automatic retention** with configurable limits
-- ✅ **Separate backups** for characters, cookies, and armor
-- ✅ **Smart folder creation** (v2.1+) - folders only created when needed
+- ✅ **Separate backups** for characters, cookies, armor, and database
+- ✅ **Smart folder creation** (v0.108+) - folders only created when needed
 - ✅ **Manual management** via Settings dialog
 - ✅ **Full translations** (FR/EN/DE)
 
@@ -298,7 +298,7 @@ backup_characters_YYYYMMDD_HHMMSS.zip     (compressed)
 backup_characters_YYYYMMDD_HHMMSS/        (uncompressed)
 backup_cookies_YYYYMMDD_HHMMSS.zip        (cookies)
 backup_armor_YYYYMMDD_HHMMSS.zip          (armor)
-items_database_src_backup_YYYYMMDD_HHMMSS.json  (database - v2.2)
+items_database_src_backup_YYYYMMDD_HHMMSS.zip  (database - v0.108 - compressed)
 ```
 
 ---
@@ -737,24 +737,20 @@ def _on_backup_limit_changed(self, text):
 - Browser credentials for Herald import
 - Separate backup from characters
 
-**Database Backup** (v2.2):
+**Database Backup** (v0.108):
 - Embedded items database (`items_database_src.json`)
 - Created automatically during SuperAdmin operations
 - Created when saving in Database Editor
-- Stored in centralized backup location
-- Location: `<backup_path>/Database/items_database_src_backup_YYYYMMDD_HHMMSS.json`
+- **Manual backup via SuperAdmin Settings button** (v0.108+)
+- Stored in centralized backup location as **compressed ZIP**
+- Location: `<backup_path>/Database/items_database_src_backup_YYYYMMDD_HHMMSS.zip`
 - Integration: Uses `BackupManager` configuration for path consistency
+- Compression: Uses `zipfile.ZIP_DEFLATED` for optimal size
 
-**Armor Backup** (v2.1):
+**Armor Backup** (v0.108):
 - Armor resistance data (armor_resists.json)
 - Custom armor configurations
 - Separate backup from characters
-
-**Database Backup** (v2.2):
-- Embedded items database (items_database_src.json)
-- SuperAdmin operations backups
-- Database editor save operations
-- Uses centralized backup path with Database/ subfolder
 
 ---
 
@@ -786,15 +782,15 @@ Backups use a standardized naming format:
 backup_characters_YYYYMMDD_HHMMSS.zip
 backup_cookies_YYYYMMDD_HHMMSS.zip
 backup_armor_YYYYMMDD_HHMMSS.zip
-items_database_src_backup_YYYYMMDD_HHMMSS.json
+items_database_src_backup_YYYYMMDD_HHMMSS.zip
 ```
 
 **Example**:
 - `backup_characters_20251115_143022.zip`
   - Date: 2025-11-15
   - Time: 14:30:22
-- `items_database_src_backup_20251130_170802.json`
-  - Database backup
+- `items_database_src_backup_20251130_170802.zip`
+  - Database backup (compressed ZIP)
   - Date: 2025-11-30
   - Time: 17:08:02
 
@@ -843,11 +839,11 @@ Storage limit: 20-50 MB
 
 ## Smart Folder Creation
 
-### Overview (v2.1)
+### Overview
 
-**NEW BEHAVIOR**: Backup folders are **NOT created on startup** anymore.
+**BEHAVIOR**: Backup folders are **NOT created on startup** anymore.
 
-**Old Behavior** (v0.108 and earlier):
+**Old Behavior** (earlier versions):
 ```
 Application Launch
     ↓
@@ -858,7 +854,7 @@ Backup/Armor/ folder created (even if empty)
 Result: Empty folders cluttering your directory
 ```
 
-**New Behavior** (v2.1+):
+**Current Behavior** (v0.108):
 ```
 Application Launch
     ↓
@@ -902,64 +898,6 @@ Day 3, 08:00 - Application startup
     → Characters/ exists → Backup/Characters/ already exists
     → eden_cookies.pkl exists → Backup/Cookies/ created
     → Two backups performed
-```
-
----
-
-## Testing Infrastructure
-
-### Test Script (`Tools/test_backup_system.py`)
-
-**Purpose**: Automated testing of all backup functionality
-
-**Test Suites**:
-
-1. **test_daily_backup()**
-   - First startup (no last_date) → should create
-   - Same day startup → should skip
-   - Next day startup → should create
-
-2. **test_compression()**
-   - Create ZIP backup → verify size
-   - Create folder backup → verify size
-
-3. **test_auto_delete_retention()**
-   - Enabled: Create 5 backups, 1MB limit → verify deletion
-   - Disabled: Create 5 backups, 1MB limit → verify all kept
-
-4. **test_storage_limits()**
-   - 2MB limit: Create 10 backups → verify under limit
-   - -1 unlimited: Create 15 backups → verify all kept
-
-5. **test_cookies_backup()**
-   - Create cookies backup → verify creation
-   - Apply retention → verify policy respected
-
-**Isolation**:
-- Uses `Test_Backup_System/` directory
-- Creates test config with isolated paths
-- Restores original config after tests
-- Auto-cleanup on completion
-
-**Execution**:
-```powershell
-.venv\Scripts\python.exe Tools/test_backup_system.py
-```
-
-**Output**:
-```
-═══════════════════════════════════════════════════
-     Tests du Système de Backup - v0.108
-═══════════════════════════════════════════════════
-
-► Test 1: Backup quotidien......................... ✓ RÉUSSI
-► Test 2: Compression.............................. ✓ RÉUSSI
-► Test 3: Auto-delete.............................. ✓ RÉUSSI
-► Test 4: Limites stockage......................... ✓ RÉUSSI
-► Test 5: Cookies backup........................... ✓ RÉUSSI
-
-Résultat final: 5/5 tests réussis
-✓ TOUS LES TESTS SONT RÉUSSIS !
 ```
 
 ---
@@ -1136,36 +1074,7 @@ log_with_action(logger, "error", f"Failed to create backup: {e}", action="BACKUP
 
 ## Version History
 
-### v2.2 (Current - November 2025)
-
-**New Features**:
-- Database backup integration with centralized backup system
-- SuperAdmin operations now use configured backup path
-- Database editor saves use centralized backup location
-- Database backups stored in `<backup_path>/Database/` subfolder
-
-**Changed**:
-- `SuperAdminTools` now accepts `config_manager` parameter
-- Database backups no longer hardcoded to `Data/Backups/`
-- All backup types now use same base directory (configurable)
-
----
-
-### v2.1
-
-**New Features**:
-- Smart folder creation (folders only created when needed)
-- Armor backup support
-- Improved logging
-- Documentation consolidation
-
-**Changed**:
-- Backup folder creation strategy
-- Documentation structure
-
----
-
-### v0.108
+### v0.108 (Current - November 2025)
 
 **New Features**:
 - Auto-delete old backups checkbox
@@ -1176,6 +1085,14 @@ log_with_action(logger, "error", f"Failed to create backup: {e}", action="BACKUP
 - Cookie Migration
 - Cookie Backup Strategy (cookies file only)
 - Clean Eden Button
+- **Database backup integration with centralized backup system**
+- **SuperAdmin operations now use configured backup path**
+- **Database editor saves use centralized backup location**
+- **Database backups stored in `<backup_path>/Database/` subfolder**
+- **Manual database backup button in SuperAdmin Settings**
+- **Database backups compressed as ZIP** (using `zipfile.ZIP_DEFLATED`)
+- **Smart folder creation** (folders only created when needed)
+- **Armor backup support**
 
 **Changed**:
 - Statistics reorganized with vertical separators
@@ -1183,6 +1100,11 @@ log_with_action(logger, "error", f"Failed to create backup: {e}", action="BACKUP
 - Checkbox layout: moved auto-delete to top section
 - Cookies Location: Moved to AppData
 - Cookies Backup Content: Eden folder → cookies file only
+- `SuperAdminTools` now accepts `config_manager` parameter (optional, backward compatible)
+- Database backups no longer hardcoded to `Data/Backups/`
+- All backup types now use same base directory (configurable)
+- Database backup format: `.json` → `.zip` (compressed)
+- Backup folder creation strategy
 
 **Fixed**:
 - Warning dialog state comparison (Qt enum → integer)
@@ -1217,7 +1139,7 @@ log_with_action(logger, "error", f"Failed to create backup: {e}", action="BACKUP
 **A**: System recreates it automatically on next backup. No data loss for future backups.
 
 ### Q: Can I force a backup manually?
-**A**: Currently no manual trigger button. Backups are automatic daily only.
+**A**: Yes! Database backups can be triggered manually via **File → Settings → SuperAdmin → Advanced Operations → 💾 Database - Backup** (requires `--admin` flag). Character backups are automatic daily only.
 
 ---
 

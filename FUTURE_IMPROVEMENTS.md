@@ -201,4 +201,72 @@ List of improvement ideas and features to develop later.
 
 ---
 
+---
+
+## 🎨 Model ID - Visual Features
+
+### 9. Item Preview System (Model-Based)
+**Objective**: Use model IDs to display visual previews of items from Eden database
+
+**Features**:
+- **3D Model Preview**: Display item appearance in a preview window
+- **Image Retrieval**: Scrape item images from Eden using model ID
+- **Template Preview**: Show complete armor set appearance before import
+- **Model Library**: Build local cache of model images for offline viewing
+
+**Benefits**:
+- Visual confirmation before importing items
+- Better template evaluation (aesthetics + stats)
+- Faster item identification by appearance
+- Enhanced user experience with visual feedback
+
+**Current Status**: 
+- ✅ Model ID stored in database (`"model": "4063"`)
+- ❌ **Visual preview system to be implemented later**
+
+---
+
+### 10. Model-Based Search & Analysis
+**Objective**: Use model IDs to find similar items and analyze model reuse patterns
+
+**Features**:
+- **Search by Model**: Find all items sharing same appearance (cross-realm)
+- **Model Statistics**: Analyze most used models in database
+- **Skin Variants**: Detect items with identical appearance but different stats
+- **Model Grouping**: Organize items by visual family (same base model)
+
+**Benefits**:
+- Discover alternative items with same appearance
+- Identify cosmetic duplicates across realms
+- Better understanding of item variety in game
+- Template optimization (mix stats + appearance)
+
+**Current Status**: 
+- ✅ Model ID stored in database
+- ❌ **Search and analysis features to be implemented later**
+
+---
+
+### 11. Complete Armor Set Visualization
+**Objective**: Preview entire character appearance with full template equipped
+
+**Features**:
+- **Full Set Preview**: Display all armor pieces together (head, chest, legs, etc.)
+- **Character Paperdoll**: Visual representation of equipped template
+- **Mix & Match**: Preview different item combinations before committing
+- **Export Preview**: Save set appearance as image for reference
+
+**Benefits**:
+- Visual planning of complete armor sets
+- Aesthetic coordination with stats optimization
+- Share template previews with guild/community
+- Better decision making (appearance + performance)
+
+**Current Status**: 
+- ✅ Model ID available for all items
+- ❌ **Set visualization system to be implemented later**
+
+---
+
 **Note**: This file serves as an informal backlog. Priority items will be turned into issues/development branches at the appropriate time.
+

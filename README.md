@@ -44,13 +44,6 @@ Consultez le [journal des modifications](CHANGELOG.md) pour l'historique complet
 - 🎨 **Titres colorés** selon le royaume (rouge pour Albion, vert pour Hibernia, bleu pour Midgard)
 - 📊 **Calcul automatique** basé sur les Realm Points
 
-### Armure & Résistances
-- 📊 **47 classes** avec leurs résistances par type d'armure
-- ⚔️ **9 types de résistances** : Thrust, Crush, Slash, Cold, Energy, Heat, Matter, Spirit, Body
-- 🌍 **Données traduites** en EN/FR/DE pour toutes les classes et résistances
-- 🏰 **Organisation par royaume** :
-- 🔄 **Données scrapées** automatiquement depuis le site officiel DAOC
-
 ### Gestion des Armures
 - 📁 **Upload de fichiers d'armure** de tous formats (PNG, JPG, PDF, TXT, etc.)
 - 🗂️ **Organisation automatique** par ID de personnage dans des sous-dossiers

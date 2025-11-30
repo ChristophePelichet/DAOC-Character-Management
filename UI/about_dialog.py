@@ -117,7 +117,7 @@ class AboutDialog(QDialog):
             <p><a href="https://github.com/ChristophePelichet/DAOC-Character-Management" style="color: {link_color};">GitHub - DAOC Character Management</a></p>
             
             <h2>{lang.get("about_dialog.license_title", default="License")}</h2>
-            <p>{lang.get("about_dialog.license_text", default="[LICENSE TO BE DETERMINED]")}</p>
+            <p>MIT License - Copyright &copy; 2025 Christophe Pelichet (Ewoline)</p>
         </div>
         """
     
@@ -256,18 +256,24 @@ class AboutDialog(QDialog):
             # Default license message - theme-aware
             license_html = """
             <div style="font-family: 'Segoe UI', Arial, sans-serif; padding: 20px;">
-                <h1>License Information</h1>
-                <p><strong>Status:</strong> LICENSE TO BE DETERMINED</p>
+                <h1>MIT License</h1>
+                <p><strong>Copyright &copy; 2025 Christophe Pelichet (Ewoline)</strong></p>
+                
+                <p>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:</p>
+                
+                <p>The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.</p>
+                
+                <p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
+                
+                <hr style="margin: 30px 0; border: none; border-top: 1px solid #ccc;">
                 
                 <h2>Third-Party Licenses</h2>
                 <p>This application uses various open-source components with different licenses:</p>
                 <ul>
                     <li><strong>Eve-of-Darkness/DolModels</strong> - GNU GPL v3.0</li>
                     <li><strong>PySide6</strong> - LGPL v3</li>
-                    <li><strong>Other dependencies</strong> - See CREDITS.md for details</li>
+                    <li><strong>Other dependencies</strong> - See CREDITS tab for details</li>
                 </ul>
-                
-                <p>For complete licensing information, please refer to the <strong>Credits</strong> tab.</p>
             </div>
             """
             license_browser.setHtml(license_html)

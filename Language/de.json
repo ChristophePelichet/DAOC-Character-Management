@@ -16,7 +16,7 @@
             "creator_title": "Entwickler",
             "repository_title": "Repository",
             "license_title": "Lizenz",
-            "license_text": "[LIZENZ NOCH ZU BESTIMMEN]"
+            "license_text": "MIT-Lizenz - Copyright © 2025 Christophe Pelichet (Ewoline)"
         },
         "new_character": {
             "existing_character_label": "Bestehender Charakter:",

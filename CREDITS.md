@@ -31,7 +31,7 @@ This project would not be possible without the contributions of various open-sou
 
 ## 📄 License Information
 
-This project is distributed under **[LICENSE TO BE DETERMINED]**.
+This project is distributed under the **MIT License**.
 
 Individual components retain their original licenses as noted above. When using or redistributing this software, please respect all third-party licenses.
 

@@ -87,3 +87,9 @@ Consultez le [journal des modifications](CHANGELOG.md) pour l'historique complet
 - Laelly
 
 For complete credits and licensing information, see **[CREDITS.md](CREDITS.md)**.
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.

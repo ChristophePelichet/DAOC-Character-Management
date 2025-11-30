@@ -1,10 +1,10 @@
 # 🔄 Backup System - Technical Documentation
 
-**Version**: 2.1  
+**Version**: 2.2  
 **Date**: November 2025  
-**Last Updated**: November 25, 2025  
+**Last Updated**: November 30, 2025  
 **Component**: `Functions/backup_manager.py`  
-**Related**: `UI/settings_dialog.py`, `Functions/config_manager.py`, `Functions/path_manager.py`, `main.py`  
+**Related**: `UI/settings_dialog.py`, `Functions/config_manager.py`, `Functions/path_manager.py`, `Functions/superadmin_tools.py`, `UI/database_editor_dialog.py`, `main.py`  
 **Branch**: 108_Imp_Armo
 
 ---
@@ -298,6 +298,7 @@ backup_characters_YYYYMMDD_HHMMSS.zip     (compressed)
 backup_characters_YYYYMMDD_HHMMSS/        (uncompressed)
 backup_cookies_YYYYMMDD_HHMMSS.zip        (cookies)
 backup_armor_YYYYMMDD_HHMMSS.zip          (armor)
+items_database_src_backup_YYYYMMDD_HHMMSS.json  (database - v2.2)
 ```
 
 ---
@@ -736,10 +737,24 @@ def _on_backup_limit_changed(self, text):
 - Browser credentials for Herald import
 - Separate backup from characters
 
+**Database Backup** (v2.2):
+- Embedded items database (`items_database_src.json`)
+- Created automatically during SuperAdmin operations
+- Created when saving in Database Editor
+- Stored in centralized backup location
+- Location: `<backup_path>/Database/items_database_src_backup_YYYYMMDD_HHMMSS.json`
+- Integration: Uses `BackupManager` configuration for path consistency
+
 **Armor Backup** (v2.1):
 - Armor resistance data (armor_resists.json)
 - Custom armor configurations
 - Separate backup from characters
+
+**Database Backup** (v2.2):
+- Embedded items database (items_database_src.json)
+- SuperAdmin operations backups
+- Database editor save operations
+- Uses centralized backup path with Database/ subfolder
 
 ---
 
@@ -771,12 +786,17 @@ Backups use a standardized naming format:
 backup_characters_YYYYMMDD_HHMMSS.zip
 backup_cookies_YYYYMMDD_HHMMSS.zip
 backup_armor_YYYYMMDD_HHMMSS.zip
+items_database_src_backup_YYYYMMDD_HHMMSS.json
 ```
 
 **Example**:
 - `backup_characters_20251115_143022.zip`
   - Date: 2025-11-15
   - Time: 14:30:22
+- `items_database_src_backup_20251130_170802.json`
+  - Database backup
+  - Date: 2025-11-30
+  - Time: 17:08:02
 
 ---
 
@@ -1116,7 +1136,22 @@ log_with_action(logger, "error", f"Failed to create backup: {e}", action="BACKUP
 
 ## Version History
 
-### v2.1 (Current)
+### v2.2 (Current - November 2025)
+
+**New Features**:
+- Database backup integration with centralized backup system
+- SuperAdmin operations now use configured backup path
+- Database editor saves use centralized backup location
+- Database backups stored in `<backup_path>/Database/` subfolder
+
+**Changed**:
+- `SuperAdminTools` now accepts `config_manager` parameter
+- Database backups no longer hardcoded to `Data/Backups/`
+- All backup types now use same base directory (configurable)
+
+---
+
+### v2.1
 
 **New Features**:
 - Smart folder creation (folders only created when needed)

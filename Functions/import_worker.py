@@ -134,7 +134,8 @@ class ImportWorker(QThread):
                 self.log_message.emit("Creating backup...", "info")
                 if self.path_manager:  # Check if path_manager exists
                     from Functions.superadmin_tools import SuperAdminTools
-                    superadmin = SuperAdminTools(self.path_manager)
+                    from Functions.config_manager import config
+                    superadmin = SuperAdminTools(self.path_manager, config)
                     success, backup_path = superadmin.backup_source_database()
                     if success:
                         self.log_message.emit(f"Backup created: {backup_path}", "success")

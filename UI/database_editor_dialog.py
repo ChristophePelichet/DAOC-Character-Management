@@ -725,11 +725,17 @@ class DatabaseEditorDialog(QMainWindow):
                 break
     
     def _save_database(self):
-        """Save the database to JSON file"""
+        """Save the database to JSON file using centralized backup system"""
         try:
-            # Create backup before saving
-            backup_path = self.db_path.parent / "Backups"
-            backup_path.mkdir(exist_ok=True)
+            # Use centralized backup directory (Database/ subfolder)
+            from Functions.config_manager import config
+            backup_base = config.get("backup_path")
+            if backup_base:
+                backup_path = Path(backup_base).parent / "Database"
+            else:
+                # Fallback to old location
+                backup_path = self.db_path.parent / "Backups"
+            backup_path.mkdir(parents=True, exist_ok=True)
             
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             backup_file = backup_path / f"items_database_src_backup_{timestamp}.json"

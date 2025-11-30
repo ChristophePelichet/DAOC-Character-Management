@@ -1,10 +1,10 @@
 # 🛡️ Armory System - Technical Documentation
 
-**Version**: 2.5  
+**Version**: 2.6  
 **Date**: November 2025  
-**Last Updated**: November 25, 2025  
+**Last Updated**: November 30, 2025  
 **Component**: `UI/armory_import_dialog.py`, `UI/mass_import_monitor.py`, `UI/template_import_dialog.py`, `UI/dialogs.py`  
-**Related**: `Functions/items_scraper.py`, `Functions/items_parser.py`, `Functions/import_worker.py`, `Functions/build_items_database.py`, `Functions/template_manager.py`, `Functions/template_metadata.py`, `Tools/fix_currency_mapping.py`  
+**Related**: `Functions/items_scraper.py`, `Functions/items_parser.py`, `Functions/import_worker.py`, `Functions/build_items_database.py`, `Functions/template_manager.py`, `Functions/template_metadata.py`, `Functions/superadmin_tools.py`, `Tools/fix_currency_mapping.py`  
 **Branch**: 108_Imp_Armo (22+ commits)
 
 ---
@@ -1128,6 +1128,12 @@ item_data['merchant_price'] = merchant_data['price_parsed']['amount']
 - Creates timestamped backup before modifications
 - Detailed statistics reporting
 
+**Backup Integration (v2.6):**
+- **OLD**: Backups saved to `Data/Backups/items_database_src_backup_*.json` (hardcoded)
+- **NEW**: Uses centralized backup system via `SuperAdminTools`
+- **Location**: `<backup_path>/Database/items_database_src_backup_*.json`
+- **Benefit**: All backups in one configurable location
+
 **Usage:**
 ```bash
 python .\Tools\fix_currency_mapping.py
@@ -1155,7 +1161,7 @@ Currencies found: Atlantean Glass, Glasses, Grimoire Pages, Grimoires,
 Zones: DF→Seals, Drake→Scales, Epic→Souls/Roots/Ices, SH→Grimoires, ToA→Glasses
 
 ✅ Database updated: 47 items fixed
-✅ Backup saved: items_database_src_backup_20251121_085612.json
+✅ Backup saved: <backup_path>/Database/items_database_src_backup_20251130_170802.json
 ```
 
 **Normalizations Applied:**
@@ -1663,6 +1669,124 @@ Shows full item information:
 - Resistances (Crush, Slash, Thrust, etc.)
 - Bonuses
 - **Merchants** (name, zone, location, price, currency)
+
+---
+
+## Database Backup System
+
+### Overview (v2.6)
+
+The Armory system integrates with the centralized backup system for automatic database protection during administrative operations.
+
+**Backup Triggers:**
+- SuperAdmin: Build database from templates
+- SuperAdmin: Clean duplicates
+- SuperAdmin: Refresh all items
+- Database Editor: Save operations
+- Mass Import: Auto-backup before modifications (if enabled)
+
+**Backup Location:**
+- **OLD (v2.5 and earlier)**: `Data/Backups/items_database_src_backup_*.json` (hardcoded)
+- **NEW (v2.6)**: `<backup_path>/Database/items_database_src_backup_*.json` (centralized)
+
+### SuperAdminTools Backup Integration
+
+**Constructor Changes:**
+```python
+# OLD
+def __init__(self, path_manager: PathManager):
+    self.backup_dir = path_manager.get_app_root() / "Data" / "Backups"
+
+# NEW (v2.6)
+def __init__(self, path_manager: PathManager, config_manager=None):
+    self.config_manager = config_manager
+    self.backup_dir = self._get_backup_dir()
+```
+
+**Backup Directory Logic:**
+```python
+def _get_backup_dir(self) -> Path:
+    \"\"\"Get backup directory from config or use default.\"\"\"
+    if self.config_manager:
+        backup_path = self.config_manager.get("backup_path")
+        if backup_path:
+            # Use Database/ subfolder in configured backup path
+            return Path(backup_path).parent / "Database"
+    
+    # Fallback to old location if no config
+    return self.path_manager.get_app_root() / "Data" / "Backups"
+```
+
+**Benefits:**
+- ✅ All backups in one configurable location
+- ✅ Consistent with character/cookies backup paths
+- ✅ User can move all backups together
+- ✅ Easier backup management and archiving
+- ✅ Respects user's backup configuration
+
+### Usage in Code
+
+**SuperAdmin Operations:**
+```python
+# Settings Dialog - SuperAdmin page
+from Functions.config_manager import config
+superadmin = SuperAdminTools(path_manager, config)
+
+# Auto-backup before database modifications
+success, backup_path = superadmin.backup_source_database()
+if success:
+    logging.info(f"Backup created: {backup_path}")
+```
+
+**Database Editor:**
+```python
+# UI/database_editor_dialog.py
+from Functions.config_manager import config
+
+backup_base = config.get("backup_path")
+if backup_base:
+    backup_path = Path(backup_base).parent / "Database"
+else:
+    backup_path = self.db_path.parent / "Backups"  # Fallback
+```
+
+**Mass Import Worker:**
+```python
+# Functions/import_worker.py
+from Functions.config_manager import config
+
+if self.auto_backup:
+    superadmin = SuperAdminTools(self.path_manager, config)
+    success, backup_path = superadmin.backup_source_database()
+```
+
+### Backup Structure
+
+```
+<backup_path_configured>/
+├── Characters/                              # Character backups
+│   ├── backup_characters_20251130_080000.zip
+│   └── backup_characters_20251129_080000.zip
+├── Cookies/                                 # Cookies backups
+│   ├── backup_cookies_20251130_080000.zip
+│   └── backup_cookies_20251129_080000.zip
+└── Database/                                # Database backups (NEW v2.6)
+    ├── items_database_src_backup_20251130_170802.json
+    ├── items_database_src_backup_20251130_145623.json
+    └── items_database_src_backup_20251129_120845.json
+```
+
+**Default Path**: `<app_folder>/Backups/`  
+**Configurable via**: Settings → Backups → Backup Path
+
+### Migration Notes
+
+**Upgrading from v2.5 to v2.6:**
+1. Old backups remain in `Data/Backups/` (not deleted)
+2. New backups use `<backup_path>/Database/` automatically
+3. No data loss - both locations coexist
+4. Users can manually move old backups if desired
+5. No breaking changes - fallback to old location if config unavailable
 
 ---
 

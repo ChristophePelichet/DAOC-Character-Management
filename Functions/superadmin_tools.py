@@ -105,7 +105,8 @@ class SuperAdminTools:
     
     def backup_source_database(self) -> Tuple[bool, str]:
         """
-        Create a backup of the source database
+        Create a backup of the source database using centralized backup system.
+        Backups are stored in <backup_path>/Database/ folder.
         
         Returns:
             Tuple[bool, str]: (Success, Backup path or error message)
@@ -114,8 +115,8 @@ class SuperAdminTools:
             if not self.source_db_path.exists():
                 return False, "Source database does not exist"
             
-            # Create backup folder if needed
-            backup_folder = self.path_manager.get_app_root() / "Data" / "Backups"
+            # Use centralized backup directory
+            backup_folder = self.backup_dir
             backup_folder.mkdir(parents=True, exist_ok=True)
             
             # Backup filename with timestamp

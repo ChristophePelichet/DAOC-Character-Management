@@ -2569,7 +2569,8 @@ class SettingsDialog(QDialog):
         """Refresh SuperAdmin statistics display"""
         try:
             from Functions.superadmin_tools import SuperAdminTools
-            superadmin = SuperAdminTools(self.path_manager)
+            from Functions.config_manager import config
+            superadmin = SuperAdminTools(self.path_manager, config)
             
             stats = superadmin.get_database_stats()
             
@@ -2613,7 +2614,8 @@ class SettingsDialog(QDialog):
             
             # Import SuperAdminTools
             from Functions.superadmin_tools import SuperAdminTools
-            superadmin = SuperAdminTools(self.path_manager)
+            from Functions.config_manager import config
+            superadmin = SuperAdminTools(self.path_manager, config)
             
             # Execute cleaning
             success, message, removed_count = superadmin.clean_duplicates()
@@ -2799,7 +2801,8 @@ class SettingsDialog(QDialog):
         # Import SuperAdminTools
         logging.info("REFRESH: Importing SuperAdminTools...")
         from Functions.superadmin_tools import SuperAdminTools
-        superadmin = SuperAdminTools(self.path_manager)
+        from Functions.config_manager import config
+        superadmin = SuperAdminTools(self.path_manager, config)
         
         # Execute refresh
         try:
@@ -2962,8 +2965,9 @@ class SettingsDialog(QDialog):
             # Import SuperAdminTools
             logging.info("REFRESH: Importing SuperAdminTools...")
             from Functions.superadmin_tools import SuperAdminTools
+            from Functions.config_manager import config
             logging.info("REFRESH: Creating SuperAdminTools instance...")
-            superadmin = SuperAdminTools(self.path_manager)
+            superadmin = SuperAdminTools(self.path_manager, config)
             logging.info(f"REFRESH: SuperAdminTools initialized with source_db_path={superadmin.source_db_path}")
             
             # Execute refresh

@@ -974,7 +974,13 @@
         "reload_title": "Recharger la base",
         "reload_confirm": "Recharger la base depuis le fichier ?\n\nToutes les modifications non sauvegardées seront perdues !",
         "save_error": "Échec de la sauvegarde:\n{error}",
-        "enter_field_placeholder": "Entrez {field}..."
+        "enter_field_placeholder": "Entrez {field}...",
+        "view_model_tooltip": "Visualiser l'image du modèle",
+        "no_model_id": "Aucun ID de modèle disponible pour cet item.",
+        "model_not_found": "Image du modèle introuvable :\n{path}",
+        "model_preview_title": "Aperçu du Modèle - ID: {id}",
+        "model_id_label": "ID du Modèle",
+        "view_model_error": "Échec de la visualisation du modèle"
     },
     "armoury_dialog": {
         "title": "Gestion de l'Armurerie - {name} ({realm} - {season})",

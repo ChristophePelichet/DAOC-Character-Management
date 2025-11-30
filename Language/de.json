@@ -974,7 +974,13 @@
         "reload_title": "Datenbank neu laden",
         "reload_confirm": "Datenbank aus Datei neu laden?\n\nAlle nicht gespeicherten Änderungen gehen verloren!",
         "save_error": "Fehler beim Speichern der Datenbank:\n{error}",
-        "enter_field_placeholder": "{field} eingeben..."
+        "enter_field_placeholder": "{field} eingeben...",
+        "view_model_tooltip": "Modellbild anzeigen",
+        "no_model_id": "Keine Modell-ID für dieses Item verfügbar.",
+        "model_not_found": "Modellbild nicht gefunden:\n{path}",
+        "model_preview_title": "Modellvorschau - ID: {id}",
+        "model_id_label": "Modell-ID",
+        "view_model_error": "Fehler beim Anzeigen des Modellbildes"
     },
     "armoury_dialog": {
         "title": "Waffenkammer-Verwaltung - {name} ({realm} - {season})",

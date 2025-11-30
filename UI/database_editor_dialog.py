@@ -261,6 +261,18 @@ class DatabaseEditorDialog(QMainWindow):
                 id_layout.addWidget(open_eden_btn)
                 
                 self.editor_form.addRow(label_text + ":", id_layout)
+            # Special handling for "model" field (Model ID) - add a button to view model image
+            elif field_name == "model":
+                model_layout = QHBoxLayout()
+                model_layout.addWidget(widget)
+                
+                view_model_btn = QPushButton("🖼️")
+                view_model_btn.setToolTip(lang.get('db_editor.view_model_tooltip', default="View model image"))
+                view_model_btn.setMaximumWidth(40)
+                view_model_btn.clicked.connect(self._view_model_image)
+                model_layout.addWidget(view_model_btn)
+                
+                self.editor_form.addRow(label_text + ":", model_layout)
             else:
                 self.editor_form.addRow(label_text + ":", widget)
         
@@ -1527,6 +1539,73 @@ class DatabaseEditorDialog(QMainWindow):
             QMessageBox.critical(self,
                 lang.get('error_title', default="Error"),
                 f"{lang.get('db_editor.open_eden_error', default='Failed to open Eden page')}:\n{str(e)}")
+    
+    def _view_model_image(self):
+        """View the model image in a preview dialog"""
+        try:
+            # Get model ID from the editor field
+            model_widget = self.field_widgets.get('model')
+            if not model_widget:
+                return
+            
+            model_id = model_widget.text().strip()
+            if not model_id:
+                QMessageBox.warning(self,
+                    lang.get('warning_title', default="Warning"),
+                    lang.get('db_editor.no_model_id', default="No Model ID available for this item."))
+                return
+            
+            # Construct path to model image
+            from pathlib import Path
+            model_path = Path(f"Img/Models/items/{model_id}.webp")
+            
+            if not model_path.exists():
+                QMessageBox.warning(self,
+                    lang.get('warning_title', default="Warning"),
+                    lang.get('db_editor.model_not_found', default="Model image not found:\n{path}").replace('{path}', str(model_path)))
+                return
+            
+            # Create preview dialog
+            from PySide6.QtGui import QPixmap
+            
+            preview_dialog = QDialog(self)
+            preview_dialog.setWindowTitle(lang.get('db_editor.model_preview_title', default="Model Preview - ID: {id}").replace('{id}', model_id))
+            preview_dialog.setModal(True)
+            
+            layout = QVBoxLayout(preview_dialog)
+            
+            # Model image label
+            image_label = QLabel()
+            pixmap = QPixmap(str(model_path))
+            
+            # Scale image if too large (max 512x512)
+            if pixmap.width() > 512 or pixmap.height() > 512:
+                pixmap = pixmap.scaled(512, 512, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            
+            image_label.setPixmap(pixmap)
+            image_label.setAlignment(Qt.AlignCenter)
+            layout.addWidget(image_label)
+            
+            # Model ID info
+            info_label = QLabel(f"<b>{lang.get('db_editor.model_id_label', default='Model ID')}:</b> {model_id}")
+            info_label.setAlignment(Qt.AlignCenter)
+            layout.addWidget(info_label)
+            
+            # Close button
+            button_box = QDialogButtonBox(QDialogButtonBox.Close)
+            button_box.rejected.connect(preview_dialog.reject)
+            layout.addWidget(button_box)
+            
+            preview_dialog.resize(550, 600)
+            preview_dialog.exec()
+            
+            logging.info(f"Viewed model image: {model_id}", extra={"action": "DBEDITOR"})
+            
+        except Exception as e:
+            logging.error(f"Error viewing model image: {e}", exc_info=True)
+            QMessageBox.critical(self,
+                lang.get('error_title', default="Error"),
+                f"{lang.get('db_editor.view_model_error', default='Failed to view model image')}:\n{str(e)}")
     
     def _batch_refresh_items_by_id(self, items_data: list):
         """Batch refresh multiple items by their IDs

@@ -974,7 +974,13 @@
         "reload_title": "Reload Database",
         "reload_confirm": "Reload database from file?\n\nAll unsaved changes will be lost!",
         "save_error": "Failed to save database:\n{error}",
-        "enter_field_placeholder": "Enter {field}..."
+        "enter_field_placeholder": "Enter {field}...",
+        "view_model_tooltip": "View model image",
+        "no_model_id": "No Model ID available for this item.",
+        "model_not_found": "Model image not found:\n{path}",
+        "model_preview_title": "Model Preview - ID: {id}",
+        "model_id_label": "Model ID",
+        "view_model_error": "Failed to view model image"
     },
     "armoury_dialog": {
         "title": "Armoury Management - {name} ({realm} - {season})",

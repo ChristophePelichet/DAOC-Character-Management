@@ -31,6 +31,32 @@ Historique complet des versions du gestionnaire de personnages pour Dark Age of 
   - 🌍 Traductions FR/EN/DE pour les labels et tooltips
   - 🎯 Impact : Fichiers de debug uniquement créés quand activé manuellement pour diagnostic
   - Fichiers : Functions/config_schema.py, eden_scraper.py, cookie_manager.py, UI/settings_dialog.py, main.py, Language/*.json
+- 🔍 **Système de Visualisation des Modèles d'Items** : Preview visuel complet pour les items d'armure
+  - 🖼️ **Bibliothèque complète** : 3444 modèles d'items téléchargés (IDs 1-5000, format WebP)
+    * 📦 Taille totale : 10.48 MB (vs 28.34 MB JPG original = 63% de réduction)
+    * 🎯 Couverture : Tous les items disponibles sur GitHub Eve-of-Darkness/DolModels
+    * ✅ ID 3908 inclus (Dirge of Sheeroe Hills) + tous les gaps comblés
+  - 🎨 **Interface utilisateur** :
+    * 🔍 Icône cliquable 🔍 dans le preview des templates (armure/arme/bijoux)
+    * 🪟 Fenêtre non-modale : visualisez plusieurs items sans fermer le template
+    * 🖼️ Affichage grande taille avec mise à l'échelle automatique
+    * 📋 Métadonnées : Nom, ID modèle, catégorie
+  - 🔧 **Support base de données** :
+    * 🔄 Champs supportés : 'model' (nouveau format) et 'model_id' (legacy)
+    * 🌍 Recherche intelligente : nom → realm:suffix → :all fallback
+    * 📂 Catégorie par défaut : 'items' au lieu de 'unknown'
+  - 🎯 **UX améliorée** :
+    * 🚫 Navigation désactivée : clic sur 🔍 garde le template visible (setOpenLinks(False))
+    * ✅ Fenêtre show() au lieu de exec() : pas de blocage des autres dialogs
+    * 📑 Navigation fluide entre items sans fermer les fenêtres
+  - 📚 **Documentation complète** :
+    * MODELS_VISUAL_SYSTEM_DOCUMENTATION.md (1465 lignes) : Architecture, intégration, scraping
+    * ARMORY_TECHNICAL_DOCUMENTATION.md : Section model viewer mise à jour
+  - 🔧 **Script de scraping unifié** : Tools/DataScraping/scrape_all_daoc_data.py
+    * ✅ 3 scrapers en un : armor resists, realm ranks, item models
+    * 🔄 Téléchargement parallèle avec conversion WebP automatique
+    * 📊 Statistiques complètes : 2444 nouveaux + 1000 existants = 3444 total
+  - Fichiers : UI/dialogs.py, UI/model_viewer_dialog.py, Img/Models/items/*.webp (3444 fichiers), Documentations/Models/MODELS_VISUAL_SYSTEM_DOCUMENTATION.md
 - 🎨 **Correction Thème Purple** : Amélioration de la visibilité du texte
   - 🔧 Problème : Carré blanc masquant le texte dans QLineEdit, placeholder invisible
   - ✅ Solution : Background transparent, styling QLineEdit pour placeholder visible
@@ -107,6 +133,39 @@ Historique complet des versions du gestionnaire de personnages pour Dark Age of 
   - 🌍 Traductions : Ajout clé `herald_buttons.validation_in_progress` (FR/EN/DE)
   - 📚 Documentation : HERALD_BUTTONS_STATE_MANAGEMENT_EN.md (700+ lignes)
   - Fichiers : Functions/ui_manager.py, main.py, UI/dialogs.py, Language/*.json
+- 🔍 **Erreur "No model information found"** : Correction recherche modèles d'items dans base de données
+  - 🔧 Problème : Message "No model information found for 'Dirge of Sheeroe Hills'" alors que l'item existe avec ID 3908
+  - 🔍 Cause Racine :
+    * Base de données utilise champ `"model": "3908"` mais code cherchait `"model_id"`
+    * Recherche directe par nom échouait (manquait suffix realm `:hibernia`)
+    * Catégorie par défaut `'unknown'` au lieu de `'items'`
+  - ✅ Solution Implémentée :
+    * Support double champ : `item_data.get('model_id') or item_data.get('model')`
+    * Recherche avec fallback : nom → nom:realm → nom:all
+    * Catégorie par défaut changée : `'unknown'` → `'items'`
+  - 🎯 Impact : Tous les items avec champ "model" maintenant visualisables (3444 items compatibles)
+  - Fichier : UI/dialogs.py (méthode `_show_item_model`)
+- 🪟 **Fenêtre Model Viewer Bloquait Autres Fenêtres** : Passage en mode non-modal
+  - 🔧 Problème : Impossible de naviguer dans la liste des templates après ouverture du viewer
+  - 🔍 Cause : `dialog.exec()` créait une fenêtre modale bloquant toute interaction
+  - ✅ Solution : Remplacement par `dialog.show()` pour fenêtre non-modale
+  - 🎯 Impact : Navigation fluide, plusieurs viewers peuvent être ouverts simultanément
+  - Fichier : UI/dialogs.py (méthode `_show_item_model`)
+- 🔗 **Navigation Template se Vidait après Clic sur 🔍** : Désactivation navigation par défaut
+  - 🔧 Problème : Clic sur icône 🔍 vidait le preview et affichait "Select a file to display its content..."
+  - 🔍 Cause : QTextBrowser naviguait vers le lien `model:item_name`, changeant le contenu affiché
+  - ✅ Solution : Ajout `setOpenLinks(False)` pour désactiver navigation automatique
+  - 🎯 Impact : Template reste visible pendant visualisation des modèles
+  - Fichier : UI/dialogs.py (configuration `preview_area`)
+- 🗑️ **Suppression Scripts Scraping Obsolètes** : Nettoyage après création scraper unifié
+  - Suppression de 5 scripts remplacés par `scrape_all_daoc_data.py` :
+    * `scrape_armor_resists.py` (294 lignes)
+    * `scrape_realm_ranks.py`
+    * `download_all_item_models.py`
+    * `download_missing_item_models.py`
+    * `download_complete_item_models.py`
+  - Commit : a29bf80 "chore: Remove obsolete scraping scripts"
+  - Fichiers : Tools/DataScraping/ (5 fichiers supprimés)
   - ✅ Solution : Backup uniquement de `eden_cookies.pkl` (~10 KB) avec ZIP ou copie directe
   - 🎯 Impact : Backups cookies persistent et respectent la limite de stockage
   - Fichier : Functions/backup_manager.py
@@ -139,6 +198,44 @@ Historique complet des versions du gestionnaire de personnages pour Dark Age of 
   - Türme Erobert, Festungen Erobert, Reliquien Erobert (DE)
   - Note : Le scraper continue de chercher les termes anglais dans Eden Herald HTML
   - Fichiers : Language/*.json
+
+### 🧰 Modification
+- 🔧 **Script de Scraping Unifié** : Consolidation de tous les scrapers DAOC
+  - 📝 Nouveau fichier : `Tools/DataScraping/scrape_all_daoc_data.py` (537 lignes)
+  - 🎯 3 scrapers en un seul outil :
+    * Armor Resists (darkageofcamelot.com)
+    * Realm Ranks (darkageofcamelot.com)
+    * Item Models (GitHub Eve-of-Darkness/DolModels, IDs 1-5000)
+  - 🔄 **Téléchargement Item Models** :
+    * Parallélisation avec ThreadPoolExecutor (20 workers)
+    * Conversion automatique JPG → WebP (qualité 80%, méthode 6)
+    * Statistiques complètes : 2444 téléchargés + 1000 existants = 3444 total
+    * Taille finale : 10.48 MB (vs 28.34 MB JPG = 63% réduction)
+    * Support SSL verify=False pour proxies corporatifs
+  - 🎚️ **Arguments CLI** :
+    * `--all` : Exécuter tous les scrapers
+    * `--armor-resists` : Scraper armor resists uniquement
+    * `--realm-ranks` : Scraper realm ranks uniquement
+    * `--item-models` : Télécharger modèles d'items uniquement
+    * `--max-id N` : Limite supérieure pour modèles (défaut 5000)
+    * `--max-workers N` : Nombre de threads parallèles (défaut 20)
+  - 📊 Statistiques détaillées par scraper (succès/échecs/taille)
+  - 🗑️ Remplace 5 scripts obsolètes (voir section Corrections)
+  - Commit : 4019483 "feat: Add unified data scraper for all DAOC sources"
+  - Fichiers : Tools/DataScraping/scrape_all_daoc_data.py, Tools/README.md
+- 📚 **Documentation Technique Complète** : Mise à jour système de modèles visuels
+  - MODELS_VISUAL_SYSTEM_DOCUMENTATION.md :
+    * Section "Model Viewer Dialog (NEW)" avec exemples d'intégration
+    * Support champs 'model' et 'model_id' documenté
+    * Statistiques mises à jour : 3444 items (vs 1000 précédemment)
+    * Taille totale : 15.52 MB (vs 9.65 MB précédemment)
+    * Utilisation fenêtre non-modale avec `dialog.show()`
+    * Désactivation navigation QTextBrowser avec `setOpenLinks(False)`
+  - ARMORY_TECHNICAL_DOCUMENTATION.md :
+    * Date mise à jour : December 1, 2025
+    * Nombre de commits : 25+ (au lieu de 22+)
+  - Commit : a8da04d "fix: Improve model viewer UX and database field support"
+  - Fichiers : Documentations/Models/MODELS_VISUAL_SYSTEM_DOCUMENTATION.md, Documentations/Armory/ARMORY_TECHNICAL_DOCUMENTATION.md
 - 🌍 **Labels Statistiques PvP/PvE** : Traduction complète des statistiques de combat
   - 🔧 PvP : Kills en Solo, Coups Fatals, Kills (FR) | Solo Kills, Deathblows, Kills (EN) | Solo-Kills, Todesstöße, Kills (DE)
   - PvE : Dragons Tués, Légions Tuées, Mini Dragons Tués, Rencontres Épiques, Donjons Épiques (FR)

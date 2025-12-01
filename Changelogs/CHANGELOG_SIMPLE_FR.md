@@ -16,10 +16,21 @@
 - 🌐 **Profil Chrome Dédié** : Navigateur Selenium isolé dans AppData avec migration automatique des cookies
 - 🗑️ **Bouton "Nettoyer Eden"** : Nouveau bouton dans Settings > Herald pour supprimer cookies et profil Chrome
 - 📂 **Création Auto Dossiers Backup** : Les boutons "Ouvrir le dossier" créent maintenant automatiquement les dossiers manquants
+- 🔍 **Visualisation des Modèles d'Items** : Nouveau système de preview visuel pour les items d'armure
+  - 🖼️ Bibliothèque complète : 3444 modèles d'items téléchargés (IDs 1-5000)
+  - 🎯 Icône cliquable 🔍 dans le preview des templates pour visualiser l'item
+  - 🪟 Fenêtre non-modale : visualisez plusieurs items sans fermer le template
+  - 🔄 Support champs 'model' et 'model_id' dans la base de données
+  - 📦 Format WebP optimisé : 10.48 MB pour 3444 images (63% de réduction vs JPG)
 
 ### Améliorations
 - 💾 **Optimisation Backup Cookies** : Backup uniquement du fichier cookies (~10 KB au lieu de 50+ MB), réduction de 99%
 - ⚙️ **Interface Settings Simplifiée** : Suppression des champs obsolètes pour les cookies (chemin géré automatiquement)
+- 🔧 **Script de Scraping Unifié** : Nouveau script scrape_all_daoc_data.py combinant 3 scrapers
+  - ⚡ Armor resists, Realm ranks, Item models dans un seul outil
+  - 🔄 Téléchargement parallèle avec conversion WebP automatique
+  - 📊 Arguments CLI : --all, --armor-resists, --realm-ranks, --item-models
+  - 🗑️ Suppression de 5 anciens scripts obsolètes (download_all_item_models.py, etc.)
 
 ### Corrections
 - 🎨 **Thème Purple** : Texte maintenant visible (background transparent, placeholder lisible)
@@ -31,6 +42,9 @@
 - 🔒 Protection contre conflits profil Chrome pendant validation Herald au démarrage
 - 🎨 Correction affichage texte avec thème Purple (carré blanc + placeholder invisible)
 - 📚 Documentation complète système de thèmes (700+ lignes)
+- 🔍 **Visualisation Modèles** : Support champ 'model' en plus de 'model_id' pour compatibilité base de données
+- 🪟 **Fenêtre Model Viewer** : Fenêtre non-modale (show au lieu de exec) pour navigation fluide
+- 🔗 **Navigation Template** : Désactivation navigation par défaut pour garder le template visible après clic sur 🔍
 
 ## v0.108
 

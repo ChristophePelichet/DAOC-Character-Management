@@ -51,6 +51,11 @@ Consultez le [journal des modifications](CHANGELOG.md) pour l'historique complet
 - 🔍 **Ouverture rapide** des fichiers avec l'application par défaut
 - 🗑️ **Suppression** de fichiers avec confirmation
 - 🔄 **Gestion des doublons** automatique (suffixes _1, _2, etc.)
+- 🖼️ **Visualisation des modèles d'items** : Preview visuel des équipements
+  - 3444 modèles d'items disponibles (armures, armes, bijoux)
+  - Icône 🔍 cliquable dans le preview des templates
+  - Fenêtre non-modale pour naviguer entre plusieurs items
+  - Format WebP optimisé (63% de réduction de taille)
 
 ### Configuration Avancée
 - 🌍 **Multi-langue** : Français, English, Deutsch

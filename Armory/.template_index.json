@@ -1,26 +1,36 @@
 {
   "version": "1.0",
-  "last_updated": "2025-11-24T14:56:09.718559",
+  "last_updated": "2025-12-01T18:18:04.341684",
   "templates": [
-    {
-      "file": "Animist_S3_universel.txt",
-      "class": "Animist",
-      "realm": "Hibernia",
-      "season": "S3",
-      "tags": [],
-      "item_count": 287,
-      "import_date": "2025-11-24T14:47:13.620784"
-    },
     {
       "file": "Bard_S3_starter.txt",
       "class": "Bard",
       "realm": "Hibernia",
       "season": "S3",
       "tags": [
-        "low-cost"
+        "low-cost",
+        "beginner"
       ],
-      "item_count": 271,
-      "import_date": "2025-11-24T14:56:08.334933"
+      "item_count": 335,
+      "import_date": "2025-11-30T20:54:08.840847"
+    },
+    {
+      "file": "Druid_S3_base.txt",
+      "class": "Druid",
+      "realm": "Hibernia",
+      "season": "S3",
+      "tags": [],
+      "item_count": 277,
+      "import_date": "2025-11-30T21:06:47.118766"
+    },
+    {
+      "file": "Valkyrie_S3_test.txt",
+      "class": "Valkyrie",
+      "realm": "Midgard",
+      "season": "S3",
+      "tags": [],
+      "item_count": 280,
+      "import_date": "2025-12-01T18:18:02.952426"
     }
   ]
 }

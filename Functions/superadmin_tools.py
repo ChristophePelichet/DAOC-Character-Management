@@ -654,17 +654,25 @@ class SuperAdminTools:
             
             items = data.get("items", {})
             
-            # Extraire les noms d'items uniques (ignorer les doublons de realm)
-            unique_items = {}
-            for key, item_data in items.items():
-                item_name = item_data.get("name", "")
-                if item_name and item_name not in unique_items:
-                    unique_items[item_name] = item_data
+            # LOGIC FIX: If item_filter provided (Single Item Refresh), use IT to build unique_items
+            # Otherwise, extract unique items from existing database (All Items Refresh)
+            if item_filter is not None:
+                # Single Item Refresh: Build unique_items from filter list
+                unique_items = {name: {"name": name} for name in item_filter}
+                logging.info(f"Single Item Refresh mode: {len(unique_items)} items from filter")
+            else:
+                # All Items Refresh: Extract unique items from database (ignore realm duplicates)
+                unique_items = {}
+                for key, item_data in items.items():
+                    item_name = item_data.get("name", "")
+                    if item_name and item_name not in unique_items:
+                        unique_items[item_name] = item_data
+                logging.info(f"All Items Refresh mode: {len(unique_items)} items from database")
             
             total_items = len(unique_items)
             
             if total_items == 0:
-                return False, "Database is empty", {}
+                return False, "No items to refresh", {}
             
             # Backup before modification
             logging.info("Creating backup before refresh...")
@@ -703,10 +711,7 @@ class SuperAdminTools:
             
             # Process each unique item
             for idx, item_name in enumerate(unique_items.keys(), 1):
-                # Appliquer le filtre si fourni
-                if item_filter is not None and item_name not in item_filter:
-                    logging.debug(f"⏭️  SKIP (not in filter): {item_name}")
-                    continue
+                # Filter already applied when building unique_items - no need to filter again here
                 
                 if progress_callback:
                     progress_callback(idx, total_items, item_name)

@@ -9,6 +9,7 @@ Parse les fichiers .txt template et extrait les noms d'items pour les chercher s
 import os
 import json
 import re
+import logging
 from pathlib import Path
 from .items_scraper import ItemsScraper
 from .eden_scraper import EdenScraper, _connect_to_eden_herald
@@ -17,15 +18,16 @@ from .cookie_manager import CookieManager
 def parse_template_file(file_path):
     """
     Parse un fichier .txt template et extrait tous les noms d'items de type Loot
-    Supporte 2 formats:
+    Supporte 3 formats:
     - Format standard: blocs séparés par double newline
     - Format Zenkcraft: sections d'équipement (Helmet, Hands, etc.)
+    - Format externe: "Slot (Item Name):" (templates from non-Zenkcraft software)
     
     Args:
         file_path: Chemin vers le fichier .txt (str ou Path)
         
     Returns:
-        list: Liste des noms d'items trouvés (uniquement Source Type: Loot)
+        list: Liste des noms d'items trouvés (uniquement Source Type: Loot pour formats standard/Zenkcraft)
     """
     items = []
     
@@ -36,6 +38,20 @@ def parse_template_file(file_path):
             
         with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
+        
+        # Detect external template format: "Slot (Item Name):"
+        external_pattern = r'^(Chest|Arms|Head|Legs|Hands|Feet|Right Hand|Left Hand|Neck|Cloak|Jewel|Belt|Left Ring|Right Ring|Left Wrist|Right Wrist|Mythirian) \((.+?)\):$'
+        external_matches = re.findall(external_pattern, content, re.MULTILINE)
+        
+        if external_matches:
+            # External template format detected
+            for slot, item_name in external_matches:
+                item_name = item_name.strip()
+                if item_name and len(item_name) > 2 and item_name not in items:
+                    items.append(item_name)
+            
+            logging.info(f"{file_path.name}: {len(items)} items found (External template format)")
+            return items
         
         # Detect Zenkcraft format (has equipment sections like "Helmet", "Hands", etc.)
         is_zenkcraft = bool(re.search(r'^(Helmet|Hands|Torso|Arms|Feet|Legs|Right Hand|Left Hand|Two Handed|Ranged|Neck|Cloak|Jewelry|Waist|L Ring|R Ring|L Wrist|R Wrist|Mythical)\s*$', content, re.MULTILINE))
@@ -69,10 +85,10 @@ def parse_template_file(file_path):
                         if item_name and len(item_name) > 2 and item_name not in items:
                             items.append(item_name)
         
-        print(f"  ✅ {file_path.name}: {len(items)} items Loot trouvés {'(Zenkcraft)' if is_zenkcraft else ''}")
+        logging.info(f"{file_path.name}: {len(items)} items Loot found {'(Zenkcraft)' if is_zenkcraft else '(Standard format)'}")
         
     except Exception as e:
-        print(f"  ❌ Erreur lecture {file_path.name if hasattr(file_path, 'name') else file_path}: {e}")
+        logging.error(f"Error reading {file_path.name if hasattr(file_path, 'name') else file_path}: {e}")
     
     return items
 
@@ -91,22 +107,22 @@ def search_item_for_database(item_name, items_scraper, realm="All", force_scrape
     Returns:
         dict: Données de l'item ou None si non trouvé
     """
-    print(f"    🔍 Recherche: {item_name} ({realm}) [force_scrape={force_scrape}, skip_filters={skip_filters}]")
+    logging.info(f"Searching: {item_name} ({realm}) [force_scrape={force_scrape}, skip_filters={skip_filters}]")
     
     # Find ID (force web scraping if requested, with optional filter bypass)
     item_id = items_scraper.find_item_id(item_name, realm, force_scrape=force_scrape, skip_filters=skip_filters)
     
     if not item_id:
-        print(f"      ❌ ID non trouvé")
+        logging.warning(f"ID not found: {item_name}")
         return None
     
-    print(f"      ✅ ID trouvé: {item_id}")
+    logging.info(f"ID found: {item_id} ({item_name})")
     
     # Get details
     details = items_scraper.get_item_details(item_id, realm, item_name)
     
     if not details:
-        print(f"      ❌ Détails non disponibles")
+        logging.warning(f"Details not available: {item_name}")
         return None
     
     # Format for database v2.0 (minimal data)
@@ -132,15 +148,15 @@ def search_item_for_database(item_name, items_scraper, realm="All", force_scrape
         item_data["merchant_price"] = str(price_parsed.get("amount")) if price_parsed else "Unknown"
         item_data["merchant_currency"] = price_parsed.get("currency") if price_parsed else ""
         
-        print(f"      ✅ Merchant: {item_data['merchant_zone']} - {item_data['merchant_price']} {item_data.get('merchant_currency', '')}")
+        logging.info(f"Merchant: {item_data['merchant_zone']} - {item_data['merchant_price']} {item_data.get('merchant_currency', '')}")
         
         # Log damage info if available
         if item_data.get("dps"):
-            print(f"      ⚔️  Damage: DPS {item_data['dps']}, Speed {item_data['speed']}, Type {item_data['damage_type']}")
+            logging.info(f"Damage: DPS {item_data['dps']}, Speed {item_data['speed']}, Type {item_data['damage_type']}")
         if item_data.get("model"):
-            print(f"      🎨 Model: {item_data['model']}")
+            logging.info(f"Model: {item_data['model']}")
     else:
-        print(f"      ⚠️  Pas d'info merchant")
+        logging.warning(f"No merchant info: {item_name}")
     
     return item_data
 
@@ -156,14 +172,14 @@ def build_database_from_folder(folder_path, output_file=None, realm="All"):
     folder = Path(folder_path)
     
     if not folder.exists() or not folder.is_dir():
-        print(f"❌ Dossier introuvable: {folder_path}")
+        logging.error(f"Folder not found: {folder_path}")
         return
     
     # Find all .txt files
     txt_files = list(folder.glob("*.txt"))
     
     if not txt_files:
-        print(f"❌ Aucun fichier .txt trouvé dans {folder_path}")
+        logging.error(f"No .txt files found in {folder_path}")
         return
     
     print(f"\n{'='*80}")
@@ -184,20 +200,18 @@ def build_database_from_folder(folder_path, output_file=None, realm="All"):
         if key not in unique_items:
             unique_items[key] = item
     
-    print(f"\n{'='*80}")
-    print(f"📦 Total: {len(all_items)} items trouvés")
-    print(f"🔹 Uniques: {len(unique_items)} items")
-    print(f"{'='*80}\n")
+    logging.info(f"Total: {len(all_items)} items found")
+    logging.info(f"Unique: {len(unique_items)} items")
     
     # Initialize scraper using centralized connection
-    print("🔧 Initialisation du scraper...")
+    logging.info("Initializing scraper...")
     eden_scraper, error_message = _connect_to_eden_herald(headless=False)
     if not eden_scraper:
-        print(f"❌ Erreur connexion Eden Herald: {error_message}")
+        logging.error(f"Eden Herald connection error: {error_message}")
         return
     
     items_scraper = ItemsScraper(eden_scraper)
-    print("✅ Scraper initialisé\n")
+    logging.info("Scraper initialized")
     
     # Search each item
     database_items = {}
@@ -206,7 +220,7 @@ def build_database_from_folder(folder_path, output_file=None, realm="All"):
     
     try:
         for idx, (key, item_name) in enumerate(unique_items.items(), 1):
-            print(f"\n[{idx}/{len(unique_items)}] {item_name}")
+            logging.info(f"[{idx}/{len(unique_items)}] {item_name}")
             
             item_data = search_item_for_database(item_name, items_scraper, realm)
             
@@ -218,7 +232,7 @@ def build_database_from_folder(folder_path, output_file=None, realm="All"):
     finally:
         # Close scraper
         eden_scraper.close()
-        print("\n🔒 Scraper fermé")
+        logging.info("Scraper closed")
     
     # Build final database structure
     database = {
@@ -247,13 +261,9 @@ def build_database_from_folder(folder_path, output_file=None, realm="All"):
         json.dump(database, f, indent=4, ensure_ascii=False)
     
     # Summary
-    print(f"\n{'='*80}")
-    print(f"RÉSUMÉ")
-    print(f"{'='*80}")
-    print(f"✅ Succès: {success_count} items")
-    print(f"❌ Échecs: {fail_count} items")
-    print(f"💾 Base sauvegardée: {output_file}")
-    print(f"{'='*80}\n")
+    logging.info(f"Success: {success_count} items")
+    logging.info(f"Failed: {fail_count} items")
+    logging.info(f"Database saved: {output_file}")
 
 if __name__ == "__main__":
     import sys

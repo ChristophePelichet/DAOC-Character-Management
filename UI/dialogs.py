@@ -2932,6 +2932,7 @@ class ArmorManagementDialog(QDialog):
         
         # Enable clickable links for model viewer
         self.preview_area.setOpenExternalLinks(False)  # Handle clicks internally
+        self.preview_area.setOpenLinks(False)  # Prevent default link navigation
         self.preview_area.anchorClicked.connect(self._on_model_link_clicked)
         
         # Force Courier New font
@@ -4000,7 +4001,10 @@ class ArmorManagementDialog(QDialog):
             # Check if this is a model link
             if url.scheme() == "model":
                 item_name = url.path()
+                # Open model viewer without changing current selection/preview
                 self._show_item_model(item_name)
+                # Prevent default link navigation that would clear the preview
+                return
         except Exception as e:
             logging.error(f"Error handling model link click: {e}")
     
@@ -4022,11 +4026,13 @@ class ArmorManagementDialog(QDialog):
                 search_key = f"{item_name.lower()}:all"
                 item_data = self.db_manager.search_item(search_key)
             
-            if item_data and 'model_id' in item_data and item_data['model_id']:
-                model_id = item_data['model_id']
-                model_category = item_data.get('model_category', 'unknown')
+            # Support both 'model_id' and 'model' fields
+            model_id = item_data.get('model_id') or item_data.get('model') if item_data else None
+            
+            if model_id:
+                model_category = item_data.get('model_category', 'items')
                 
-                # Show model viewer dialog with embedded image
+                # Show model viewer dialog with embedded image (non-modal)
                 from UI.model_viewer_dialog import ModelViewerDialog
                 dialog = ModelViewerDialog(
                     self,
@@ -4034,7 +4040,7 @@ class ArmorManagementDialog(QDialog):
                     item_name=item_name,
                     model_category=model_category
                 )
-                dialog.exec()
+                dialog.show()
             else:
                 QMessageBox.information(
                     self,

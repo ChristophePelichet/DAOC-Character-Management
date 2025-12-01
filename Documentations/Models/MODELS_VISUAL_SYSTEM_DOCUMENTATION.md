@@ -571,6 +571,8 @@ GRAND TOTAL: 838 models
 - ✅ Modern UI with dark theme
 - ✅ Multilingual support via `lang.get()`
 - ✅ Window resize support
+- ✅ Non-modal window (doesn't block other dialogs)
+- ✅ Supports both 'model_id' and 'model' database fields
 
 **Usage**:
 
@@ -582,7 +584,7 @@ dialog = ModelViewerDialog(
     parent=self,
     model_id="4063"
 )
-dialog.exec()
+dialog.show()  # Non-modal - doesn't block other windows
 
 # Full usage (with metadata)
 dialog = ModelViewerDialog(
@@ -591,7 +593,7 @@ dialog = ModelViewerDialog(
     item_name="Cloth Cap",
     model_category="Armor/Helm"
 )
-dialog.exec()
+dialog.show()  # Non-modal - doesn't block other windows
 ```
 
 **Integration in Armory Dialog**:
@@ -599,14 +601,26 @@ dialog.exec()
 ```python
 def _show_item_model(self, item_name):
     """Show model image for the specified item."""
-    # Get item data from database
+    # Search for item in database with realm fallback
     item_data = self.db_manager.search_item(item_name)
     
-    if item_data and 'model_id' in item_data and item_data['model_id']:
-        model_id = item_data['model_id']
-        model_category = item_data.get('model_category', 'unknown')
+    if not item_data:
+        # Try with realm suffix
+        search_key = f"{item_name.lower()}:{self.realm.lower()}"
+        item_data = self.db_manager.search_item(search_key)
+    
+    if not item_data:
+        # Try with :all suffix
+        search_key = f"{item_name.lower()}:all"
+        item_data = self.db_manager.search_item(search_key)
+    
+    # Support both 'model_id' and 'model' fields
+    model_id = item_data.get('model_id') or item_data.get('model') if item_data else None
+    
+    if model_id:
+        model_category = item_data.get('model_category', 'items')
         
-        # Show model viewer dialog
+        # Show model viewer dialog (non-modal)
         from UI.model_viewer_dialog import ModelViewerDialog
         dialog = ModelViewerDialog(
             self,
@@ -614,7 +628,7 @@ def _show_item_model(self, item_name):
             item_name=item_name,
             model_category=model_category
         )
-        dialog.exec()
+        dialog.show()  # Non-modal - doesn't block armory dialog
 ```
 
 **Clickable Model Icons in Template Preview**:
@@ -633,13 +647,18 @@ if item['slot'] in self.MODEL_SLOTS:
     item_text = f"{model_icon}{item['name']} ({item['slot']})"
 
 # Handle click event
+self.preview_area.setOpenExternalLinks(False)  # Handle clicks internally
+self.preview_area.setOpenLinks(False)  # Prevent default link navigation
 self.preview_area.anchorClicked.connect(self._on_model_link_clicked)
 
 def _on_model_link_clicked(self, url):
     """Handle click on model viewer link."""
     if url.scheme() == "model":
         item_name = url.path()
+        # Open model viewer without changing current selection/preview
         self._show_item_model(item_name)
+        # Prevent default link navigation that would clear the preview
+        return
 ```
 
 ### Basic Integration

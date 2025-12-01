@@ -2,10 +2,10 @@
 
 **Version**: 2.6  
 **Date**: November 2025  
-**Last Updated**: November 30, 2025  
+**Last Updated**: December 1, 2025  
 **Component**: `UI/armory_import_dialog.py`, `UI/mass_import_monitor.py`, `UI/template_import_dialog.py`, `UI/dialogs.py`  
 **Related**: `Functions/items_scraper.py`, `Functions/items_parser.py`, `Functions/import_worker.py`, `Functions/build_items_database.py`, `Functions/template_manager.py`, `Functions/template_metadata.py`, `Functions/superadmin_tools.py`, `Tools/fix_currency_mapping.py`  
-**Branch**: 108_Imp_Armo (22+ commits)
+**Branch**: 108_Imp_Armo (25+ commits)
 
 ---
 

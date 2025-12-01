@@ -529,11 +529,13 @@
             "font_scale": "Textgröße",
             "disable_disclaimer": "Startwarnmeldung deaktivieren",
             "debug_save_herald_html": "💾 Herald-HTML speichern (debug_herald_page.html)",
-            "debug_save_test_connection_html": "💾 Verbindungstest-HTML speichern (debug_test_connection.html)"
+            "debug_save_test_connection_html": "💾 Verbindungstest-HTML speichern (debug_test_connection.html)",
+            "debug_save_items_html": "💾 Gegenstände-Datenbank HTML speichern (items_details_debug/)"
         },
         "tooltips": {
             "debug_save_herald_html": "Speichert den HTML-Code der Herald-Seite im Logs/-Ordner zur Diagnose von Scraping-Problemen",
-            "debug_save_test_connection_html": "Speichert den HTML-Code des Herald-Verbindungstests im Logs/-Ordner zur Diagnose von Authentifizierungsproblemen"
+            "debug_save_test_connection_html": "Speichert den HTML-Code des Herald-Verbindungstests im Logs/-Ordner zur Diagnose von Authentifizierungsproblemen",
+            "debug_save_items_html": "Speichert den HTML-Code der Gegenstände-Seiten im Logs/items_details_debug/-Ordner zur Diagnose von Problemen beim Scraping der Gegenstände-Datenbank"
         },
         "dialog_titles": {
             "select_character_folder": "Charakterordner auswählen",

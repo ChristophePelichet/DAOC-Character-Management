@@ -58,7 +58,8 @@ DEFAULT_CONFIG = {
         "allow_browser_download": False,
         "debug": {
             "save_herald_html": False,
-            "save_test_connection_html": False
+            "save_test_connection_html": False,
+            "save_items_html": False
         }
     },
     "game": {

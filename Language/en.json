@@ -521,11 +521,13 @@
             "font_scale": "Text Size",
             "disable_disclaimer": "Disable startup warning message",
             "debug_save_herald_html": "💾 Save Herald HTML (debug_herald_page.html)",
-            "debug_save_test_connection_html": "💾 Save Connection Test HTML (debug_test_connection.html)"
+            "debug_save_test_connection_html": "💾 Save Connection Test HTML (debug_test_connection.html)",
+            "debug_save_items_html": "💾 Save Items Database HTML (items_details_debug/)"
         },
         "tooltips": {
             "debug_save_herald_html": "Save Herald page HTML code to Logs/ folder for scraping issue diagnosis",
-            "debug_save_test_connection_html": "Save Herald connection test HTML code to Logs/ folder for authentication issue diagnosis"
+            "debug_save_test_connection_html": "Save Herald connection test HTML code to Logs/ folder for authentication issue diagnosis",
+            "debug_save_items_html": "Save item page HTML code to Logs/items_details_debug/ folder for items database scraping issue diagnosis"
         },
         "dialog_titles": {
             "select_character_folder": "Select Characters Folder",

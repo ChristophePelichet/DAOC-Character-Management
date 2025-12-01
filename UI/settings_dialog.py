@@ -1415,6 +1415,13 @@ class SettingsDialog(QDialog):
                                                                  default="Sauvegarde le HTML du test de connexion dans Logs/ pour diagnostic"))
         debug_eden_layout.addWidget(self.debug_save_test_connection_html)
         
+        # Checkbox: Save Items Database HTML
+        self.debug_save_items_html = QCheckBox(lang.get("settings.labels.debug_save_items_html", 
+                                                         default="💾 Sauvegarder HTML Items Database (items_details_debug/)"))
+        self.debug_save_items_html.setToolTip(lang.get("settings.tooltips.debug_save_items_html",
+                                                       default="Sauvegarde le HTML des pages d'items dans Logs/items_details_debug/ pour diagnostic"))
+        debug_eden_layout.addWidget(self.debug_save_items_html)
+        
         debug_eden_group.setLayout(debug_eden_layout)
         layout.addWidget(debug_eden_group)
         
@@ -2100,6 +2107,7 @@ class SettingsDialog(QDialog):
         # Debug HTML options
         self.debug_save_herald_html.setChecked(config.get("system.debug.save_herald_html", False))
         self.debug_save_test_connection_html.setChecked(config.get("system.debug.save_test_connection_html", False))
+        self.debug_save_items_html.setChecked(config.get("system.debug.save_items_html", False))
         
         # Defaults
         self.default_server_combo.setCurrentText(config.get("game.default_server", ""))

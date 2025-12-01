@@ -529,11 +529,13 @@
             "font_scale": "Taille du texte",
             "disable_disclaimer": "Désactiver le message d'avertissement au démarrage",
             "debug_save_herald_html": "💾 Sauvegarder HTML Herald (debug_herald_page.html)",
-            "debug_save_test_connection_html": "💾 Sauvegarder HTML Test Connexion (debug_test_connection.html)"
+            "debug_save_test_connection_html": "💾 Sauvegarder HTML Test Connexion (debug_test_connection.html)",
+            "debug_save_items_html": "💾 Sauvegarder HTML Items Database (items_details_debug/)"
         },
         "tooltips": {
             "debug_save_herald_html": "Sauvegarde le code HTML de la page Herald dans le dossier Logs/ pour diagnostic des problèmes de scraping",
-            "debug_save_test_connection_html": "Sauvegarde le code HTML du test de connexion Herald dans le dossier Logs/ pour diagnostic des problèmes d'authentification"
+            "debug_save_test_connection_html": "Sauvegarde le code HTML du test de connexion Herald dans le dossier Logs/ pour diagnostic des problèmes d'authentification",
+            "debug_save_items_html": "Sauvegarde le code HTML des pages d'items dans le dossier Logs/items_details_debug/ pour diagnostic du scraping de la base de données d'items"
         },
         "dialog_titles": {
             "select_character_folder": "Sélectionner le dossier des personnages",

@@ -1219,14 +1219,17 @@ class ItemsScraper:
             # Additional wait for complete rendering
             time.sleep(2)
             
-            # DEBUG: Save HTML for inspection
+            # DEBUG: Save HTML for inspection (if enabled in config)
             from pathlib import Path
-            debug_folder = Path(__file__).parent.parent / 'Logs' / 'items_details_debug'
-            debug_folder.mkdir(parents=True, exist_ok=True)
-            debug_file = debug_folder / f"item_{item_id}_clicked.html"
-            with open(debug_file, 'w', encoding='utf-8') as f:
-                f.write(self.driver.page_source)
-            self.logger.debug(f"💾 HTML détails sauvegardé: {debug_file}", extra={"action": "ITEMDB"})
+            from Functions.config_manager import ConfigManager
+            config = ConfigManager()
+            if config.get('system.debug.save_items_html', False):
+                debug_folder = Path(__file__).parent.parent / 'Logs' / 'items_details_debug'
+                debug_folder.mkdir(parents=True, exist_ok=True)
+                debug_file = debug_folder / f"item_{item_id}_clicked.html"
+                with open(debug_file, 'w', encoding='utf-8') as f:
+                    f.write(self.driver.page_source)
+                self.logger.debug(f"💾 HTML détails sauvegardé: {debug_file}", extra={"action": "ITEMDB"})
             
             # Parse page
             soup = BeautifulSoup(self.driver.page_source, 'html.parser')

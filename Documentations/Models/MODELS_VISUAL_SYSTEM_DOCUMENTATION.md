@@ -27,19 +27,19 @@
 
 ## Overview
 
-The Model Visual System provides **offline access to 2370+ model images** across 3 categories for complete visual preview throughout the application. This comprehensive system includes items, mobs, and inventory icons with full metadata and categorization.
+The Model Visual System provides **offline access to 4814+ model images** across 3 categories for complete visual preview throughout the application. This comprehensive system includes items, mobs, and inventory icons with full metadata and categorization.
 
 ### Key Features
 
-- ✅ **2370 total model images** from DAOC game data
-  - **1000 Item models**: Weapons, armor, equipment
+- ✅ **3444 total item model images** from DAOC game data (IDs 1-5000)
+  - **3444 Item models**: Complete coverage of all available weapons, armor, equipment
   - **1000 Mob models**: NPCs, creatures, enemies
   - **370 Inventory icons**: Item icons for UI
 - ✅ **Complete metadata system**: 838 models with names and categories
-- ✅ **Professional scraper**: Automatic categorization from Los Ojos website
+- ✅ **Unified scraping tool**: `scrape_all_daoc_data.py` for all data sources
 - ✅ **Offline-first**: All images embedded in application
-- ✅ **Optimized format**: WebP compression (30.2% size reduction)
-- ✅ **Small footprint**: 9.65 MB total for all images
+- ✅ **Optimized format**: WebP compression (63% size reduction for items)
+- ✅ **Compact footprint**: ~15 MB total for all images
 - ✅ **PyInstaller compatible**: Works with `--onefile` and `--onedir`
 - ✅ **Smart categorization**: 25 item subcategories, 8 mob types
 - ✅ **Automatic updates**: Professional scraping tool for metadata refresh
@@ -92,10 +92,10 @@ The Model Visual System provides **offline access to 2370+ model images** across
                          ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │            IMAGE STORAGE (Img/Models/)                           │
-│  items/     : 1000 files | 4.60 MB                               │
+│  items/     : 3444 files | 10.48 MB                              │
 │  mobs/      : 1000 files | 4.86 MB                               │
 │  icons/items/ : 370 files | 0.18 MB                              │
-│  Total: 2370 files | 9.65 MB                                     │
+│  Total: 4814 files | 15.52 MB                                    │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -111,10 +111,11 @@ The Model Visual System provides **offline access to 2370+ model images** across
 
 | Component | Purpose | Location |
 |-----------|---------|----------|
-| **Image Library (Items)** | 1000 WebP item model images | `Img/Models/items/*.webp` |
+| **Image Library (Items)** | 3444 WebP item model images | `Img/Models/items/*.webp` |
 | **Image Library (Mobs)** | 1000 WebP mob model images | `Img/Models/mobs/*.webp` |
 | **Image Library (Icons)** | 370 WebP inventory icons | `Img/Models/icons/items/*.webp` |
 | **Metadata Database** | Model names and categories (838 models) | `Data/models_metadata.json` |
+| **Unified Scraper** | Complete data scraper (armor, ranks, models) | `Tools/DataScraping/scrape_all_daoc_data.py` |
 | **Download Script** | Download all 3 types from GitHub | `Tools/DataScraping/download_all_models.py` |
 | **Metadata Scraper** | Professional scraper with categorization | `Tools/DataScraping/scrape_models_metadata.py` |
 | **Item Database** | Item data with model IDs | `Data/items_database_src.json` |
@@ -134,8 +135,8 @@ The Model Visual System provides **offline access to 2370+ model images** across
   - Mobs: `src/mobs/`
   - Icons: `src/icons/items/`
 - **Format**: JPG images
-- **Total Files**: 2370+ images (1000 items, 1000 mobs, 370+ icons)
-- **Raw URL Pattern**: `https://github.com/Eve-of-Darkness/DolModels/raw/master/src/{type}/{ID}.jpg`
+- **Total Files**: 4814+ images (3444 items, 1000 mobs, 370+ icons)
+- **Raw URL Pattern**: `https://raw.githubusercontent.com/Eve-of-Darkness/DolModels/master/src/{type}/{ID}.jpg`
 
 **Example URLs**:
 ```
@@ -312,7 +313,7 @@ Overall reduction: 30.2%
 ```
 Img/
 └── Models/
-    └── items/              # Item model images (1000 files)
+    └── items/              # Item model images (3444 files)
         ├── 1.webp          # Briton dagger
         ├── 2.webp          # Briton hand axe
         ├── 3.webp          # Briton short sword
@@ -320,9 +321,11 @@ Img/
         ├── ...
         ├── 14.webp         # Flanged Mace (Cudgel of the Undead model)
         ├── ...
+        ├── 3908.webp       # Example mid-range model
+        ├── ...
         ├── 4063.webp       # Cloth Cap model
         ├── ...
-        └── 2238.webp       # Last model
+        └── 4257.webp       # Last available model
 ```
 
 ### File Naming Convention
@@ -989,12 +992,12 @@ python -c "import sys; sys._MEIPASS" # Get temp extraction path
 ```
 
 **Size Impact**:
-- **Items**: 4.60 MB (1000 files)
+- **Items**: 10.48 MB (3444 files)
 - **Mobs**: 4.86 MB (1000 files)
 - **Icons**: 0.18 MB (370 files)
 - **Metadata**: 0.18 MB (JSON file)
-- **Total**: +9.82 MB to executable
-- **Compressed** (UPX): ~5-6 MB (WebP already compressed)
+- **Total**: +15.70 MB to executable
+- **Compressed** (UPX): ~8-10 MB (WebP already compressed)
 
 ---
 
@@ -1192,10 +1195,10 @@ thumbnail = pixmap.scaled(32, 32, Qt.KeepAspectRatio, Qt.SmoothTransformation)
 
 ### Disk Space
 
-**Total Size**: 9.65 MB (2370 files across 3 types)
+**Total Size**: 15.52 MB (4814 files across 3 types)
 
 **Breakdown**:
-- Items: 4.60 MB (1000 files)
+- Items: 10.48 MB (3444 files)
 - Mobs: 4.86 MB (1000 files)
 - Icons: 0.18 MB (370 files)
 - Metadata: 0.18 MB (JSON file)

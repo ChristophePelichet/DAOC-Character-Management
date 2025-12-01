@@ -15,23 +15,72 @@ Tools/
 
 ## 🌐 DataScraping/
 
-Scripts for extracting game data from official DAOC website.
+Scripts for extracting game data from official DAOC website and GitHub repositories.
 
-### scrape_armor_resists.py
-Scrapes armor resistance tables from the official DAOC website.
-- **Purpose**: Extract armor type resistance values
-- **Output**: `Data/armor_resists.json`
-- **Source**: https://www.darkageofcamelot.com/armor-resist-tables/
-- **Usage**: `python DataScraping/scrape_armor_resists.py`
+### scrape_all_daoc_data.py ⭐ **UNIFIED SCRAPER**
+Complete unified scraper for all DAOC data sources (replaces multiple individual scripts).
+- **Purpose**: One-stop solution for all data scraping needs
+- **Features**:
+  - **Armor Resists**: Extract resistance tables from official website
+  - **Realm Ranks**: Scrape RR data for all 3 realms (Albion, Hibernia, Midgard)
+  - **Item Models**: Download all item model images from GitHub (3444 files, IDs 1-5000)
+- **Output**: 
+  - `Data/armor_resists.json`
+  - `Data/realm_ranks_*.json` (per realm)
+  - `Img/Models/items/*.webp` (WebP images, 80% quality, 63% size reduction)
+- **Sources**: 
+  - https://www.darkageofcamelot.com/armor-resist-tables/
+  - https://www.darkageofcamelot.com/realm-ranks/
+  - https://github.com/Eve-of-Darkness/DolModels
+- **Usage**:
+  ```bash
+  # Run all scrapers (default)
+  python DataScraping/scrape_all_daoc_data.py --all
+  
+  # Run specific scrapers
+  python DataScraping/scrape_all_daoc_data.py --armor-resists
+  python DataScraping/scrape_all_daoc_data.py --realm-ranks
+  python DataScraping/scrape_all_daoc_data.py --item-models
+  
+  # Combine multiple
+  python DataScraping/scrape_all_daoc_data.py --armor-resists --realm-ranks
+  
+  # Advanced options for item models
+  python DataScraping/scrape_all_daoc_data.py --item-models --max-id 10000 --workers 30
+  ```
+- **Features**: SSL handling for corporate proxies, parallel downloads (20 workers), progress tracking, complete statistics
 
-### scrape_realm_ranks.py
-Scrapes realm rank data for all three realms from the official DAOC website.
-- **Purpose**: Extract RR abilities and stats per realm (Albion, Hibernia, Midgard)
-- **Output**: `Data/realm_ranks_*.json` (one file per realm)
-- **Source**: https://www.darkageofcamelot.com/realm-ranks/
-- **Usage**: `python DataScraping/scrape_realm_ranks.py`
+### download_all_models.py
+Download model images for all types (items, mobs, icons) from GitHub.
+- **Purpose**: Batch download and convert model images to WebP format
+- **Types**: Items (3444), Mobs (1000), Icons (370)
+- **Output**: `Img/Models/{type}/*.webp`
+- **Source**: https://github.com/Eve-of-Darkness/DolModels
+- **Usage**: 
+  ```bash
+  # Download all types
+  python DataScraping/download_all_models.py
+  
+  # Download specific types
+  python DataScraping/download_all_models.py --types items mobs
+  ```
 
-**Note**: Requires internet connection. May need updates if website structure changes.
+### scrape_models_metadata.py
+Professional scraper for model metadata from Los Ojos website.
+- **Purpose**: Extract model names and categories (838 models)
+- **Output**: `Data/models_metadata.json`
+- **Source**: https://daoc.ndlp.info/losojos-001-site1.btempurl.com/ModelViewer/
+- **Features**: Cache system, pagination support, automatic categorization
+- **Usage**: 
+  ```bash
+  # Basic scrape
+  python DataScraping/scrape_models_metadata.py
+  
+  # With cache (faster)
+  python DataScraping/scrape_models_metadata.py --cache
+  ```
+
+**Note**: Requires internet connection. SSL verification disabled for corporate proxies.
 
 ---
 
@@ -93,8 +142,23 @@ Configuration file for log_source_editor.py.
 # Activate virtual environment
 .\.venv\Scripts\Activate.ps1
 
-# Update armor resistance data
-python Tools/DataScraping/scrape_armor_resists.py
+## 💡 Quick Start
+
+```bash
+# Activate virtual environment
+.\.venv\Scripts\Activate.ps1
+
+# Update ALL DAOC data (armor, ranks, models) - RECOMMENDED
+python Tools/DataScraping/scrape_all_daoc_data.py --all
+
+# Update only armor resistance data
+python Tools/DataScraping/scrape_all_daoc_data.py --armor-resists
+
+# Update only realm ranks
+python Tools/DataScraping/scrape_all_daoc_data.py --realm-ranks
+
+# Download missing item models
+python Tools/DataScraping/scrape_all_daoc_data.py --item-models
 
 # Fix currency mappings in database
 python Tools/DatabaseMaintenance/fix_currency_mapping.py
@@ -105,4 +169,4 @@ python Tools/Development/watch_logs.py
 
 ---
 
-**Last Updated**: November 21, 2025
+**Last Updated**: December 1, 2025

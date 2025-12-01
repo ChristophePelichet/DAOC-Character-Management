@@ -2802,6 +2802,13 @@ class ConfigurationDialog(QDialog):
 class ArmorManagementDialog(QDialog):
     """Dialog for managing armor templates for a specific character."""
     
+    # Slots that have visual models (armor, cloaks, weapons)
+    MODEL_SLOTS = {
+        'Torso', 'Arms', 'Legs', 'Hands', 'Feet', 'Helmet',  # Armor pieces
+        'Cloak',                                              # Cape
+        'Two Handed', 'Right Hand', 'Left Hand'              # Weapons
+    }
+    
     def __init__(self, parent, season, realm, character_name, character_data=None):
         super().__init__(parent)
         self.season = season
@@ -2916,11 +2923,16 @@ class ArmorManagementDialog(QDialog):
             }
         """)
         
-        # 1. Text preview area
-        self.preview_area = QTextEdit()
+        # 1. Text preview area - Use QTextBrowser for clickable links
+        from PySide6.QtWidgets import QTextBrowser
+        self.preview_area = QTextBrowser()
         self.preview_area.setReadOnly(True)
         self.preview_area.setPlaceholderText(lang.get("armoury_dialog.preview.no_selection"))
         self.preview_area.setMinimumWidth(350)
+        
+        # Enable clickable links for model viewer
+        self.preview_area.setOpenExternalLinks(False)  # Handle clicks internally
+        self.preview_area.anchorClicked.connect(self._on_model_link_clicked)
         
         # Force Courier New font
         preview_font = QFont("Courier New", 10)
@@ -3669,9 +3681,18 @@ class ArmorManagementDialog(QDialog):
             if armor_items:
                 output.append(f"    🛡️  {lang.get('armoury_dialog.preview.equipment_categories.armor_pieces')} :")
                 for item in armor_items:
-                    item_text = f"{item['name']} ({item['slot']})"
+                    # Add clickable model icon if item has visual model
+                    if item['slot'] in self.MODEL_SLOTS:
+                        # Create clickable link for model viewer
+                        model_icon = f'<a href="model:{item["name"]}" style="text-decoration:none; color:#4CAF50;">🔍</a> '
+                        item_text = f"{model_icon}{item['name']} ({item['slot']})"
+                    else:
+                        item_text = f"{item['name']} ({item['slot']})"
+                    
                     price_str, price_source, item_category = get_item_price(item['name'])
-                    padding = max_len - len(item_text)
+                    # Calculate padding based on clean text without HTML
+                    clean_item_text = f"{item['name']} ({item['slot']})"
+                    padding = max_len - len(clean_item_text)
                     
                     # Format display (price or category)
                     display = format_item_display(item['name'], price_str, price_source, item_category)
@@ -3745,11 +3766,22 @@ class ArmorManagementDialog(QDialog):
                     
                     # Build left column
                     if left_item:
-                        left_text = f"{left_item['name']} ({left_item['slot']})"
+                        # Add clickable model icon if item has visual model (only Cloak in jewelry)
+                        if left_item['slot'] in self.MODEL_SLOTS:
+                            model_icon = f'<a href="model:{left_item["name"]}" style="text-decoration:none; color:#4CAF50;">🔍</a> '
+                            left_text = f"{model_icon}{left_item['name']} ({left_item['slot']})"
+                            clean_left_text = f"{left_item['name']} ({left_item['slot']})"
+                        else:
+                            left_text = f"{left_item['name']} ({left_item['slot']})"
+                            clean_left_text = left_text
+                        
                         left_price_str, left_price_source, left_item_category = get_item_price(left_item['name'])
-                        left_name_padded = left_text.ljust(max_item_name_width)
+                        left_name_padded = clean_left_text.ljust(max_item_name_width)
+                        # Add padding to HTML version
+                        padding_needed = max_item_name_width - len(clean_left_text)
+                        left_text_padded = left_text + (' ' * padding_needed)
                         left_display = format_item_display(left_item['name'], left_price_str, left_price_source, left_item_category)
-                        left_output = f"• {left_name_padded}  {left_display}"
+                        left_output = f"• {left_text_padded}  {left_display}"
                         
                         # Accumulate currency totals
                         if left_price_str:
@@ -3776,11 +3808,22 @@ class ArmorManagementDialog(QDialog):
                     
                     # Build right column
                     if right_item:
-                        right_text = f"{right_item['name']} ({right_item['slot']})"
+                        # Add clickable model icon if item has visual model (only Cloak in jewelry)
+                        if right_item['slot'] in self.MODEL_SLOTS:
+                            model_icon = f'<a href="model:{right_item["name"]}" style="text-decoration:none; color:#4CAF50;">🔍</a> '
+                            right_text = f"{model_icon}{right_item['name']} ({right_item['slot']})"
+                            clean_right_text = f"{right_item['name']} ({right_item['slot']})"
+                        else:
+                            right_text = f"{right_item['name']} ({right_item['slot']})"
+                            clean_right_text = right_text
+                        
                         right_price_str, right_price_source, right_item_category = get_item_price(right_item['name'])
-                        right_name_padded = right_text.ljust(max_item_name_width)
+                        right_name_padded = clean_right_text.ljust(max_item_name_width)
+                        # Add padding to HTML version
+                        padding_needed = max_item_name_width - len(clean_right_text)
+                        right_text_padded = right_text + (' ' * padding_needed)
                         right_display = format_item_display(right_item['name'], right_price_str, right_price_source, right_item_category)
-                        right_output = f"• {right_name_padded}  {right_display}"
+                        right_output = f"• {right_text_padded}  {right_display}"
                         
                         # Accumulate currency totals
                         if right_price_str:
@@ -3813,9 +3856,17 @@ class ArmorManagementDialog(QDialog):
                 output.append("")
                 output.append(f"    ⚔️  {lang.get('armoury_dialog.preview.equipment_categories.weapons')} :")
                 for item in weapon_items:
-                    item_text = f"{item['name']} ({item['slot']})"
+                    # Add clickable model icon if item has visual model (all weapons have models)
+                    if item['slot'] in self.MODEL_SLOTS:
+                        model_icon = f'<a href="model:{item["name"]}" style="text-decoration:none; color:#4CAF50;">🔍</a> '
+                        item_text = f"{model_icon}{item['name']} ({item['slot']})"
+                    else:
+                        item_text = f"{item['name']} ({item['slot']})"
+                    
                     price_str, price_source, item_category = get_item_price(item['name'])
-                    padding = max_len - len(item_text)
+                    # Calculate padding based on clean text without HTML
+                    clean_item_text = f"{item['name']} ({item['slot']})"
+                    padding = max_len - len(clean_item_text)
                     
                     # Format display (price or category)
                     display = format_item_display(item['name'], price_str, price_source, item_category)
@@ -3940,6 +3991,67 @@ class ArmorManagementDialog(QDialog):
         except Exception as e:
             logging.error(f"Erreur lors de la prévisualisation : {e}")
             self.preview_area.setPlainText(lang.get("armoury_dialog.preview.error", error=str(e)))
+    
+    def _on_model_link_clicked(self, url):
+        """Handle click on model viewer link in preview."""
+        try:
+            from PySide6.QtCore import QUrl
+            
+            # Check if this is a model link
+            if url.scheme() == "model":
+                item_name = url.path()
+                self._show_item_model(item_name)
+        except Exception as e:
+            logging.error(f"Error handling model link click: {e}")
+    
+    def _show_item_model(self, item_name):
+        """Show model image for the specified item."""
+        try:
+            # Search for item in database
+            item_data = self.db_manager.search_item(item_name)
+            
+            if not item_data:
+                # Try with realm suffix
+                item_name_lower = item_name.lower()
+                realm_lower = self.realm.lower()
+                search_key = f"{item_name_lower}:{realm_lower}"
+                item_data = self.db_manager.search_item(search_key)
+            
+            if not item_data:
+                # Try with :all suffix
+                search_key = f"{item_name.lower()}:all"
+                item_data = self.db_manager.search_item(search_key)
+            
+            if item_data and 'model_id' in item_data and item_data['model_id']:
+                model_id = item_data['model_id']
+                model_category = item_data.get('model_category', 'unknown')
+                
+                # Show model viewer dialog with embedded image
+                from UI.model_viewer_dialog import ModelViewerDialog
+                dialog = ModelViewerDialog(
+                    self,
+                    model_id=model_id,
+                    item_name=item_name,
+                    model_category=model_category
+                )
+                dialog.exec()
+            else:
+                QMessageBox.information(
+                    self,
+                    lang.get("dialogs.titles.info", default="Information"),
+                    lang.get("armoury_dialog.messages.no_model_found", 
+                            default=f"No model information found for '{item_name}'.",
+                            item_name=item_name)
+                )
+        except Exception as e:
+            logging.error(f"Error showing item model for '{item_name}': {e}")
+            QMessageBox.critical(
+                self,
+                lang.get("dialogs.titles.error", default="Error"),
+                lang.get("armoury_dialog.messages.model_viewer_error",
+                        default=f"Error opening model viewer: {str(e)}",
+                        error=str(e))
+            )
     
     def open_armor(self, filename):
         """Opens an armor file with the default application."""

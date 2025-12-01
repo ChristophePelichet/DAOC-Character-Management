@@ -2,10 +2,10 @@
 
 **Version**: 108  
 **Date**: November 2025  
-**Last Updated**: November 30, 2025  
+**Last Updated**: December 1, 2025  
 **Component**: Complete model management system (3 types: Items, Mobs, Icons)  
-**Used by**: Armory, Database Editor, Character Sheet, Item Preview  
-**Related**: `Img/Models/`, `Tools/DataScraping/download_all_models.py`, `Tools/DataScraping/scrape_models_metadata.py`, `Data/models_metadata.json`  
+**Used by**: Armory, Database Editor, Character Sheet, Item Preview, Model Viewer Dialog  
+**Related**: `Img/Models/`, `Tools/DataScraping/download_all_models.py`, `Tools/DataScraping/scrape_models_metadata.py`, `Data/models_metadata.json`, `UI/model_viewer_dialog.py`  
 **Branch**: 108_Imp_Armo
 
 ---
@@ -118,6 +118,7 @@ The Model Visual System provides **offline access to 2370+ model images** across
 | **Download Script** | Download all 3 types from GitHub | `Tools/DataScraping/download_all_models.py` |
 | **Metadata Scraper** | Professional scraper with categorization | `Tools/DataScraping/scrape_models_metadata.py` |
 | **Item Database** | Item data with model IDs | `Data/items_database_src.json` |
+| **Model Viewer Dialog** | Reusable UI component for model display | `UI/model_viewer_dialog.py` |
 
 ---
 
@@ -552,6 +553,91 @@ GRAND TOTAL: 838 models
 ---
 
 ## Integration Guide
+
+### Model Viewer Dialog (NEW)
+
+**Component**: `UI/model_viewer_dialog.py`
+
+**Purpose**: Reusable dialog component for displaying item model images with metadata.
+
+**Features**:
+- ✅ Displays embedded WebP images from `Img/Models/items/`
+- ✅ Shows item name, model ID, and category
+- ✅ Auto-scales image to fit window with aspect ratio preservation
+- ✅ Handles missing images gracefully
+- ✅ Modern UI with dark theme
+- ✅ Multilingual support via `lang.get()`
+- ✅ Window resize support
+
+**Usage**:
+
+```python
+from UI.model_viewer_dialog import ModelViewerDialog
+
+# Basic usage (minimal parameters)
+dialog = ModelViewerDialog(
+    parent=self,
+    model_id="4063"
+)
+dialog.exec()
+
+# Full usage (with metadata)
+dialog = ModelViewerDialog(
+    parent=self,
+    model_id="4063",
+    item_name="Cloth Cap",
+    model_category="Armor/Helm"
+)
+dialog.exec()
+```
+
+**Integration in Armory Dialog**:
+
+```python
+def _show_item_model(self, item_name):
+    """Show model image for the specified item."""
+    # Get item data from database
+    item_data = self.db_manager.search_item(item_name)
+    
+    if item_data and 'model_id' in item_data and item_data['model_id']:
+        model_id = item_data['model_id']
+        model_category = item_data.get('model_category', 'unknown')
+        
+        # Show model viewer dialog
+        from UI.model_viewer_dialog import ModelViewerDialog
+        dialog = ModelViewerDialog(
+            self,
+            model_id=model_id,
+            item_name=item_name,
+            model_category=model_category
+        )
+        dialog.exec()
+```
+
+**Clickable Model Icons in Template Preview**:
+
+```python
+# In ArmorManagementDialog class
+MODEL_SLOTS = {
+    'Torso', 'Arms', 'Legs', 'Hands', 'Feet', 'Helmet',  # Armor
+    'Cloak',                                              # Cape
+    'Two Handed', 'Right Hand', 'Left Hand'              # Weapons
+}
+
+# Generate clickable model icon in HTML preview
+if item['slot'] in self.MODEL_SLOTS:
+    model_icon = f'<a href="model:{item["name"]}" style="text-decoration:none; color:#4CAF50;">🔍</a> '
+    item_text = f"{model_icon}{item['name']} ({item['slot']})"
+
+# Handle click event
+self.preview_area.anchorClicked.connect(self._on_model_link_clicked)
+
+def _on_model_link_clicked(self, url):
+    """Handle click on model viewer link."""
+    if url.scheme() == "model":
+        item_name = url.path()
+        self._show_item_model(item_name)
+```
 
 ### Basic Integration
 
@@ -1233,12 +1319,15 @@ thumbnail = pixmap.scaled(32, 32, Qt.KeepAspectRatio, Qt.SmoothTransformation)
 ### Planned Features
 
 1. **Rich Model Info Integration**
+   - ✅ **DONE**: ModelViewerDialog component (v2.1)
+   - ✅ **DONE**: Clickable model icons in Armory template preview (v2.1)
    - Use metadata for tooltips in Database Editor
    - Display model name + category in Armory dialogs
    - Filter by category in model browser
    - Search models by name or category
 
 2. **Model Viewer Component** (reusable widget)
+   - ✅ **DONE**: Basic ModelViewerDialog (v2.1)
    - Drag-drop support
    - Zoom/pan controls
    - Side-by-side comparison
@@ -1268,6 +1357,31 @@ thumbnail = pixmap.scaled(32, 32, Qt.KeepAspectRatio, Qt.SmoothTransformation)
 ---
 
 ## Version History
+
+### v2.1 (December 1, 2025)
+
+**Model Viewer Dialog Integration**:
+- ✅ **New Component**: `UI/model_viewer_dialog.py`
+  - Reusable dialog for displaying model images
+  - Shows item name, model ID, and category
+  - Auto-scaling with aspect ratio preservation
+  - Dark theme UI with modern styling
+  - Multilingual support
+- ✅ **Armory Integration**: Clickable 🔍 icons in template preview
+  - Shows model icons for armor, cloaks, and weapons
+  - Click to open ModelViewerDialog with embedded image
+  - No external web links - 100% offline
+- ✅ **Architecture**: Professional component design
+  - Handles missing images gracefully
+  - Uses `get_resource_path()` for PyInstaller compatibility
+  - Window resize support with image re-scaling
+  - Complete error handling and logging
+
+**Features**:
+- Clickable model links in Armory template equipment preview
+- Model viewer shows embedded WebP images (no web dependency)
+- Slots with visual models: Torso, Arms, Legs, Hands, Feet, Helmet, Cloak, Weapons
+- Jewelry slots excluded (no visual models)
 
 ### v2.0 (November 30, 2025)
 
@@ -1342,4 +1456,4 @@ thumbnail = pixmap.scaled(32, 32, Qt.KeepAspectRatio, Qt.SmoothTransformation)
 
 ---
 
-*Last Updated: November 30, 2025 (Version 108)*
+*Last Updated: December 1, 2025 (Version 108 - v2.1)*

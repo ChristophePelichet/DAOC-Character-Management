@@ -2347,15 +2347,28 @@ class SettingsDialog(QDialog):
     
     def _open_armory_import(self):
         """Ouvre le dialogue d'import d'items pour l'armurerie"""
-        from UI.armory_import_dialog import ArmoryImportDialog
+        from PySide6.QtWidgets import QApplication
+        from UI.mass_import_monitor import MassImportMonitor
         
-        dialog = ArmoryImportDialog(self)
-        dialog.exec()
+        # Create and show Mass Import Monitor for personal database
+        monitor = MassImportMonitor(self, target_db="personal")
         
-        # Update database status after import
-        # Initialize database manager
+        # Pass default settings to monitor
+        monitor.set_default_options(
+            realm=None,  # Auto-detection
+            merge=True,
+            remove_duplicates=True,
+            auto_backup=True,
+            path_manager=self.path_manager
+        )
+        
+        monitor.show()
+        QApplication.processEvents()
+        
+        # Update database status after import (when window closes)
+        # Note: Statistics will be updated when user returns to settings
         from Functions.items_database_manager import ItemsDatabaseManager
-        self.db_manager = ItemsDatabaseManager(self.config_manager, path_manager)
+        self.db_manager = ItemsDatabaseManager(self.config_manager, self.path_manager)
     
     def _update_armory_database_mode(self):
         """Update UI based on current database mode"""
@@ -2580,8 +2593,8 @@ class SettingsDialog(QDialog):
             from PySide6.QtWidgets import QApplication
             from UI.mass_import_monitor import MassImportMonitor
             
-            # Create and show Database Management Tools
-            monitor = MassImportMonitor(self)
+            # Create and show Database Management Tools for embedded database
+            monitor = MassImportMonitor(self, target_db="embedded")
             
             # Pass default settings to monitor (using default values since widgets were removed)
             monitor.set_default_options(

@@ -19,9 +19,17 @@ from Functions.language_manager import lang
 class MassImportMonitor(QMainWindow):
     """Monitoring window for mass import with detailed logs and statistics"""
     
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, target_db="embedded"):
         super().__init__(parent)
-        self.setWindowTitle(lang.get("settings.pages.mass_import_monitor.window_title", default="🔧 Database - Template Import"))
+        self.target_db = target_db  # "embedded" or "personal"
+        
+        # Set window title based on target
+        if target_db == "personal":
+            title = lang.get("settings.pages.mass_import_monitor.window_title_personal", default="🛡️ Armory - Template Import")
+        else:
+            title = lang.get("settings.pages.mass_import_monitor.window_title", default="🔧 Database - Template Import")
+        
+        self.setWindowTitle(title)
         self.setGeometry(150, 100, 1200, 700)
         
         # Make window independent and always movable
@@ -504,7 +512,19 @@ class MassImportMonitor(QMainWindow):
         
         # Store path_manager
         self.path_manager = path_manager
-        self.source_db_path = Path("Data/items_database_src.json")
+        
+        # Set database path based on target_db mode
+        if self.target_db == "personal":
+            # User's personal database in Armory folder
+            from Functions.config_manager import config
+            armor_path = config.get('folders.armor')
+            if armor_path:
+                self.source_db_path = Path(armor_path) / "items_database.json"
+            else:
+                self.source_db_path = path_manager.get_app_root() / "Armory" / "items_database.json"
+        else:
+            # SuperAdmin embedded database
+            self.source_db_path = Path("Data/items_database_src.json")
         
         # Set widget values from parameters
         realm_map = {None: 0, "Albion": 1, "Hibernia": 2, "Midgard": 3}
@@ -1068,8 +1088,8 @@ class MassImportMonitor(QMainWindow):
                     merge=True,
                     remove_duplicates=True,
                     auto_backup=False,
-                    source_db_path=Path("Data/items_database_src.json"),
-                    path_manager=None,
+                    source_db_path=self.source_db_path,  # Use configured path (embedded or personal)
+                    path_manager=self.path_manager,
                     skip_filters_mode=True  # NEW PARAMETER
                 )
                 
@@ -1174,7 +1194,8 @@ class MassImportMonitor(QMainWindow):
             from pathlib import Path
             import json
             
-            db_path = Path("Data/items_database_src.json")
+            # Use the appropriate database path (embedded or personal)
+            db_path = self.source_db_path
             if not db_path.exists():
                 self.log_message(f"⚠️ Database not found: {db_path}", "warning")
                 return

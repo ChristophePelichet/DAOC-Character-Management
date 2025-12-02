@@ -2160,6 +2160,10 @@ class SettingsDialog(QDialog):
         # Browser
         self.browser_combo.setCurrentText(config.get("system.preferred_browser", "Chrome"))
         self.allow_browser_download_check.setChecked(config.get("system.allow_browser_download", False))
+        
+        # Armory database mode
+        use_personal_db = config.get("armory.use_personal_database", False)
+        self.personal_db_check.setChecked(use_personal_db)
     
     def _on_backup_auto_delete_changed(self, state):
         """Handle Characters backup auto-delete checkbox state change"""

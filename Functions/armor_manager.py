@@ -1,35 +1,38 @@
 """
-Armor Manager - Gestion des fichiers d'armure uploadés
+Armor Manager - Gestion des templates d'armurerie
 """
 import os
 import shutil
 import logging
-from Functions.path_manager import ensure_armor_dir
+from Functions.path_manager import ensure_armory_dir
 
 logger = logging.getLogger(__name__)
 
 
 class ArmorManager:
-    """Gestionnaire des fichiers d'armure pour un personnage"""
+    """Gestionnaire des templates d'armurerie pour un personnage"""
     
-    def __init__(self, character_id):
+    def __init__(self, season, realm, character_name):
         """
         Initialize the armor manager for a specific character
         
         Args:
-            character_id: The unique identifier of the character
+            season: Season identifier (e.g., 'S3')
+            realm: Realm name (e.g., 'Hibernia', 'Albion', 'Midgard')
+            character_name: Name of the character
         """
-        self.character_id = character_id
-        self.armor_dir = ensure_armor_dir()
-        self.character_armor_dir = os.path.join(self.armor_dir, str(character_id))
-        os.makedirs(self.character_armor_dir, exist_ok=True)
+        self.season = season
+        self.realm = realm
+        self.character_name = character_name
+        self.armory_dir = ensure_armory_dir(season, realm, character_name)
     
-    def upload_armor(self, source_file_path):
+    def upload_armor(self, source_file_path, custom_filename=None):
         """
-        Upload an armor file to the character's armor directory
+        Upload an armor template file to the character's armory directory
         
         Args:
             source_file_path: Path to the source file to upload
+            custom_filename: Optional custom filename (if None, uses original filename)
             
         Returns:
             str: Path to the uploaded file, or None if failed
@@ -39,8 +42,17 @@ class ArmorManager:
                 logger.error(f"Source file does not exist: {source_file_path}", extra={"action": "FILE"})
                 return None
             
-            filename = os.path.basename(source_file_path)
-            destination = os.path.join(self.character_armor_dir, filename)
+            # Use custom filename if provided, otherwise use original
+            if custom_filename and custom_filename.strip():
+                filename = custom_filename.strip()
+                # Ensure the extension is preserved if not included in custom name
+                original_ext = os.path.splitext(source_file_path)[1]
+                if not os.path.splitext(filename)[1] and original_ext:
+                    filename += original_ext
+            else:
+                filename = os.path.basename(source_file_path)
+            
+            destination = os.path.join(self.armory_dir, filename)
             
             # Check if file already exists
             if os.path.exists(destination):
@@ -49,32 +61,32 @@ class ArmorManager:
                 counter = 1
                 while os.path.exists(destination):
                     filename = f"{base}_{counter}{ext}"
-                    destination = os.path.join(self.character_armor_dir, filename)
+                    destination = os.path.join(self.armory_dir, filename)
                     counter += 1
             
             # Copy the file
             shutil.copy2(source_file_path, destination)
-            logger.info(f"Armor file uploaded: {destination}", extra={"action": "FILE"})
+            logger.info(f"Armor template uploaded: {destination}", extra={"action": "FILE"})
             return destination
             
         except Exception as e:
-            logger.error(f"Error uploading armor file: {e}", extra={"action": "FILE"})
+            logger.error(f"Error uploading armor template: {e}", extra={"action": "FILE"})
             return None
     
     def list_armors(self):
         """
-        List all armor files for this character
+        List all armor template files for this character
         
         Returns:
-            list: List of tuples (filename, full_path, size_bytes, modified_time)
+            list: List of dictionaries with file info (filename, path, size, modified)
         """
         armors = []
         try:
-            if not os.path.exists(self.character_armor_dir):
+            if not os.path.exists(self.armory_dir):
                 return armors
             
-            for filename in os.listdir(self.character_armor_dir):
-                filepath = os.path.join(self.character_armor_dir, filename)
+            for filename in os.listdir(self.armory_dir):
+                filepath = os.path.join(self.armory_dir, filename)
                 if os.path.isfile(filepath):
                     stat = os.stat(filepath)
                     armors.append({
@@ -89,12 +101,12 @@ class ArmorManager:
             return armors
             
         except Exception as e:
-            logger.error(f"Error listing armor files: {e}", extra={"action": "FILE"})
+            logger.error(f"Error listing armor templates: {e}", extra={"action": "FILE"})
             return []
     
     def delete_armor(self, filename):
         """
-        Delete an armor file
+        Delete an armor template file
         
         Args:
             filename: Name of the file to delete
@@ -103,21 +115,21 @@ class ArmorManager:
             bool: True if deleted successfully, False otherwise
         """
         try:
-            filepath = os.path.join(self.character_armor_dir, filename)
+            filepath = os.path.join(self.armory_dir, filename)
             if os.path.exists(filepath):
                 os.remove(filepath)
-                logger.info(f"Armor file deleted: {filepath}", extra={"action": "DELETE"})
+                logger.info(f"Armor template deleted: {filepath}", extra={"action": "DELETE"})
                 return True
             else:
-                logger.warning(f"Armor file not found: {filepath}", extra={"action": "FILE"})
+                logger.warning(f"Armor template not found: {filepath}", extra={"action": "FILE"})
                 return False
         except Exception as e:
-            logger.error(f"Error deleting armor file: {e}", extra={"action": "FILE"})
+            logger.error(f"Error deleting armor template: {e}", extra={"action": "FILE"})
             return False
     
     def open_armor(self, filename):
         """
-        Open an armor file with the default system application
+        Open an armor template file with the default system application
         
         Args:
             filename: Name of the file to open
@@ -126,23 +138,23 @@ class ArmorManager:
             bool: True if opened successfully, False otherwise
         """
         try:
-            filepath = os.path.join(self.character_armor_dir, filename)
+            filepath = os.path.join(self.armory_dir, filename)
             if os.path.exists(filepath):
                 os.startfile(filepath)  # Windows
-                logger.info(f"Opened armor file: {filepath}", extra={"action": "FILE"})
+                logger.info(f"Opened armor template: {filepath}", extra={"action": "FILE"})
                 return True
             else:
-                logger.warning(f"Armor file not found: {filepath}", extra={"action": "FILE"})
+                logger.warning(f"Armor template not found: {filepath}", extra={"action": "FILE"})
                 return False
         except Exception as e:
-            logger.error(f"Error opening armor file: {e}", extra={"action": "FILE"})
+            logger.error(f"Error opening armor template: {e}", extra={"action": "FILE"})
             return False
     
     def get_armor_count(self):
         """
-        Get the number of armor files for this character
+        Get the number of armor template files for this character
         
         Returns:
-            int: Number of armor files
+            int: Number of armor template files
         """
         return len(self.list_armors())

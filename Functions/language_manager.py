@@ -24,10 +24,12 @@ class LanguageManager:
     def __init__(self, lang_code='fr'):
         self.strings = {}
         self.legacy_mapping = LANGUAGE_LEGACY_MAPPING
+        self.current_language = lang_code  # Track current language
         self.load_language(lang_code)
     
     def set_language(self, lang_code):
         """Changes the active language and reloads the text strings."""
+        self.current_language = lang_code  # Update current language
         self.load_language(lang_code)
 
     def load_language(self, lang_code):

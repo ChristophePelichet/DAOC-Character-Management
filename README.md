@@ -1,72 +1,85 @@
-# DAOC - Gestionnaire de Personnages v0.108
+# DAOC - Character Manager
 
-Application de gestion de personnages pour Dark Age of Camelot (DAOC), développée en Python avec PySide6.
+![Python](https://img.shields.io/badge/Python-3.13-blue?logo=python&logoColor=white) ![PySide6](https://img.shields.io/badge/PySide6-6.10.0-green?logo=qt&logoColor=white) ![License](https://img.shields.io/badge/License-MIT-yellow) ![Version](https://img.shields.io/badge/Version-0.108-orange) ![Platform](https://img.shields.io/badge/Platform-Windows-lightgrey?logo=windows&logoColor=white)
 
-## 📦 Téléchargement
+Character management application for Dark Age of Camelot (DAOC), developed in Python with PySide6.
 
-**Version actuelle : v0.108** 🎉
+**📥 [Download version v0.108](https://github.com/ChristophePelichet/DAOC-Character-Management/releases/tag/v0.108)**
 
-[![Télécharger l'exécutable](https://img.shields.io/badge/T%C3%A9l%C3%A9charger-EXE-blue?style=for-the-badge&logo=windows)](https://github.com/ChristophePelichet/DAOC-Character-Management/releases/latest)
+**📋 [View Changelog](CHANGELOG.md)**
 
-➡️ [Télécharger DAOC-Character-Manager.exe](https://github.com/ChristophePelichet/DAOC-Character-Management/releases/latest)
+---
 
-*Aucune installation requise - exécutable portable Windows*
+## 🎮 Features
 
-## 📝 Notes de Version
-
-Consultez le [journal des modifications](CHANGELOG.md) pour l'historique complet.  
-
-
-## 🎮 Fonctionnalités
-
-### Gestion des Personnages
-- ✅ **Créer** manuellement de nouveaux personnages avec race et classe
-- ✅ **Importer** directement depuis l'Herald de Eden de nouveaux personnages avec race et classe
-- ✅ **Sélection dynamique** des classes selon la race
-- ✅ **Validation automatique** des combinaisons race/classe
-- ✅ **Renommer** des personnages existants
-- ✅ **Dupliquer** des personnages
-- ✅ **Supprimer** des personnages (individuellement ou en masse)
-- ✅ **Afficher** les détails complets de chaque personnage
-- ✅ **Système** de sauvegarde avec séléction de la limitation de la taille
+### Character Management
+- ✅ **Create** manually new characters with race and class
+- ✅ **Import** directly from Eden Herald new characters with race and class
+- ✅ **Dynamic selection** of classes according to race
+- ✅ **Automatic validation** of race/class combinations
+- ✅ **Rename** existing characters
+- ✅ **Duplicate** characters
+- ✅ **Delete** characters (individually or in bulk)
+- ✅ **Display** complete details of each character
+- ✅ **Backup system** with size limit selection
 
 ### Races & Classes
-- 🎭 **44 classes** disponibles réparties sur 3 royaumes
-- 👤 **18 races** jouables (6 par royaume)
-- 📚 **188 spécialisations** traduites en FR/EN/DE
-- ✅ **Filtrage intelligent** : seules les classes compatibles avec la race sélectionnée sont affichées
-- 🌍 **Traductions complètes** : races, classes et spécialisations en 3 langues
+- 🎭 **44 classes** available across 3 realms
+- 👤 **18 playable races** (6 per realm)
+- 📚 **188 specializations** translated in FR/EN/DE
+- ✅ **Intelligent filtering**: only classes compatible with selected race are displayed
+- 🌍 **Complete translations**: races, classes and specializations in 3 languages
 
-### Realm Ranks (Rangs de Royaume)
-- 🏆 **Affichage** du rang et du titre de royaume
-- 📈 **Ajustement par menus déroulants** du rang (Rank 1-14, Levels 0-9/10)
-- 💾 **Sauvegarde automatique** des changements de rang/niveau
-- 🎨 **Titres colorés** selon le royaume (rouge pour Albion, vert pour Hibernia, bleu pour Midgard)
-- 📊 **Calcul automatique** basé sur les Realm Points
+### Realm Ranks
+- 🏆 **Display** realm rank and title
+- 📈 **Adjustment via dropdowns** of rank (Rank 1-14, Levels 0-9/10)
+- 💾 **Automatic saving** of rank/level changes
+- 🎨 **Colored titles** by realm (red for Albion, green for Hibernia, blue for Midgard)
+- 📊 **Automatic calculation** based on Realm Points
 
-### Armure & Résistances
-- 📊 **47 classes** avec leurs résistances par type d'armure
-- ⚔️ **9 types de résistances** : Thrust, Crush, Slash, Cold, Energy, Heat, Matter, Spirit, Body
-- 🌍 **Données traduites** en EN/FR/DE pour toutes les classes et résistances
-- 🏰 **Organisation par royaume** :
-- 🔄 **Données scrapées** automatiquement depuis le site officiel DAOC
+### Armor Management
+- 📁 **Upload armor files** Zenkcraft and Loki format supported
+- 🗂️ **Automatic organization** by character ID in subfolders
+- 📋 **Armor list** with metadata (name, size, modification date)
+- 🔍 **Quick opening** of files with default application
+- 🗑️ **File deletion** with confirmation
+- 🔄 **Automatic duplicate handling** (suffixes _1, _2, etc.)
+- 🖼️ **Item model visualization**: Visual preview of equipment with 3444 item images
+- 💰 **Automatic merchant prices**: Missing price lookup via Eden scraping
+- 🏷️ **Item categorization**: Category assignment (Quest/Event) for items without prices
+- 💽 **Item database**: Embedded or personal
 
-### Gestion des Armures
-- 📁 **Upload de fichiers d'armure** de tous formats (PNG, JPG, PDF, TXT, etc.)
-- 🗂️ **Organisation automatique** par ID de personnage dans des sous-dossiers
-- 📋 **Liste des armures** avec métadonnées (nom, taille, date de modification)
-- 🔍 **Ouverture rapide** des fichiers avec l'application par défaut
-- 🗑️ **Suppression** de fichiers avec confirmation
-- 🔄 **Gestion des doublons** automatique (suffixes _1, _2, etc.)
+### Backup System
+- 💾 **Characters**: Character backup (Modification, Deletion)
+- 💾 **Cookies**: Cookie backup
+- 📊 **Retention**: Size-based retention system
+- 🔧 **Compression**: Option to compress backups
 
-### Configuration Avancée
-- 🌍 **Multi-langue** : Français, English, Deutsch
-- 🎨 **Thèmes Configurable** : 2 thèmes disponibles : Clair (par défaut) et Sombre
-- 🔧 **Personnalisation** des chemins (personnages, logs, config, armures)
-- 📋 **Colonnes configurables** : Masquer/afficher les colonnes souhaitées
+### Advanced Configuration
+- 🌍 **Multi-language**: Français, English, Deutsch
+- 🎨 **Configurable Themes**: 3 available themes: Light (default), Dark and Purple
+- 🔧 **Path customization** (characters, logs, config, armors)
+- 📋 **Configurable columns**: Hide/show desired columns
 
-### Système de Sauvegarde
-- 💾 **Personnages** : Sauvegarde des personnages (Modification, Suppression)
-- 💾 **Cookies** : Sauvegarde des cookies
-- 📊 **Rétention** : Système de rétention basé sur la taille
-- 🔧 **Compression** : Possibiliter de compresser les sauvegardes
+---
+
+## 🙏 Credits and Thanks
+
+- **[DAOC Official Website](https://www.darkageofcamelot.com/)**
+- **[Eden DAOC](https://www.eden-daoc.net/)**
+- **[Eve-of-Darkness/DolModels](https://github.com/Eve-of-Darkness/DolModels)**
+
+## 🙏 Special Thanks
+
+**Testers and friends who made this project possible**:
+
+- Morfuin / Leifur 
+- Laelly
+
+For complete credits and licensing information, see **[CREDITS.md](CREDITS.md)**.
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.

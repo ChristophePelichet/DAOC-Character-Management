@@ -46,6 +46,9 @@ setup_logging()
 APP_NAME = "DAOC Character Manager"
 APP_VERSION = "0.108"
 
+# SuperAdmin mode detection (only in Python mode, not in .exe)
+ADMIN_MODE = '--admin' in sys.argv and not getattr(sys, 'frozen', False)
+
 
 def global_exception_handler(exc_type, exc_value, exc_traceback):
     """Gestionnaire global des exceptions non gérées"""
@@ -59,9 +62,20 @@ def global_exception_handler(exc_type, exc_value, exc_traceback):
 def signal_handler(signum, frame):
     """Gestionnaire des signaux système (SIGTERM, SIGINT, etc.)"""
     signal_name = signal.Signals(signum).name if hasattr(signal, 'Signals') else str(signum)
-    logging.critical(f"Application interrupted by signal: {signal_name}")
-    print(f"CRITICAL: Received signal {signal_name}", file=sys.stderr)
-    sys.exit(1)
+    logging.info(f"Application received signal: {signal_name}")
+    
+    # Try to close gracefully via QApplication if it exists
+    try:
+        app = QApplication.instance()
+        if app:
+            logging.info("Requesting application quit via QApplication")
+            app.quit()
+        else:
+            logging.warning("No QApplication instance found, exiting directly")
+            sys.exit(0)
+    except Exception as e:
+        logging.error(f"Error during signal handling: {e}")
+        sys.exit(0)
 
 
 def on_app_exit():
@@ -477,6 +491,16 @@ class CharacterApp(QMainWindow):
     def execute_bulk_action(self):
         """Exécute l'action de suppression groupée"""
         self.actions_manager.delete_checked_characters()
+    
+    def select_all_characters(self):
+        """Sélectionne tous les personnages dans la liste"""
+        self.tree_manager.select_all_characters()
+        self.update_selection_count()
+    
+    def deselect_all_characters(self):
+        """Désélectionne tous les personnages dans la liste"""
+        self.tree_manager.deselect_all_characters()
+        self.update_selection_count()
             
     def open_armor_management_global(self):
         """Ouvre la gestion des armures (appelé depuis menu contextuel)"""
@@ -576,7 +600,7 @@ class CharacterApp(QMainWindow):
         
         # Use new modern settings dialog
         from UI.settings_dialog import SettingsDialog
-        dialog = SettingsDialog(
+        self.settings_dialog = SettingsDialog(
             self, self.available_languages,
             available_seasons=seasons,
             available_servers=servers,
@@ -584,10 +608,13 @@ class CharacterApp(QMainWindow):
         )
         
         # Show non-modal (don't block)
-        dialog.show()
+        self.settings_dialog.show()
         
         # Connect accepted signal to save (but don't close dialog)
-        dialog.accepted.connect(lambda: self.save_configuration(dialog, close_dialog=False))
+        self.settings_dialog.accepted.connect(lambda: self.save_configuration(self.settings_dialog, close_dialog=False))
+        
+        # Connect destroyed signal to clear reference
+        self.settings_dialog.destroyed.connect(lambda: setattr(self, 'settings_dialog', None))
             
     def save_configuration(self, dialog, close_dialog=True):
         """Sauvegarde la configuration"""
@@ -612,6 +639,7 @@ class CharacterApp(QMainWindow):
         config.set("show_debug_window", dialog.show_debug_window_check.isChecked())
         config.set("system.debug.save_herald_html", dialog.debug_save_herald_html.isChecked())
         config.set("system.debug.save_test_connection_html", dialog.debug_save_test_connection_html.isChecked())
+        config.set("system.debug.save_items_html", dialog.debug_save_items_html.isChecked())
         config.set("disable_disclaimer", dialog.disable_disclaimer_check.isChecked())
         config.set("seasons", dialog.available_seasons)
         config.set("servers", dialog.available_servers)
@@ -809,7 +837,26 @@ class CharacterApp(QMainWindow):
         logging.info(f"Changing language to {lang_code}")
         config.set("ui.language", lang_code)
         lang.set_language(lang_code)
+        
+        # Check if settings dialog is open and remember it
+        settings_was_open = hasattr(self, 'settings_dialog') and self.settings_dialog and self.settings_dialog.isVisible()
+        
+        # Close Settings dialog to force full recreation with new language
+        # (Settings has too many widgets to retranslate individually)
+        if settings_was_open:
+            self.settings_dialog.close()
+            self.settings_dialog = None
+        
+        # Close all other open dialogs to force refresh on next open
+        for widget in QApplication.topLevelWidgets():
+            if isinstance(widget, QDialog) and widget != self and widget.isVisible():
+                widget.close()
+        
         self.retranslate_ui()
+        
+        # Reopen settings if it was open before language change
+        if settings_was_open:
+            self.open_configuration()
         
     def retranslate_ui(self):
         """Met à jour toutes les traductions de l'interface"""
@@ -1023,6 +1070,10 @@ def main():
     logging.info(f"Application started at {datetime.now().isoformat()}")
     logging.info(f"Python version: {sys.version}")
     logging.info(f"Process ID: {sys.argv}")
+    
+    # Log SuperAdmin mode if enabled
+    if ADMIN_MODE:
+        logging.info("🔧 SuperAdmin mode enabled (--admin flag detected)")
     
     # Configuration des gestionnaires
     sys.excepthook = global_exception_handler

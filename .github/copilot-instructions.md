@@ -1,26 +1,101 @@
-# Instructions Copilot - Workflow Complet de Fonctionnalité
+# Copilot Instructions - Base Rules
 
-Lorsque l'utilisateur demande de développer, modifier ou corriger une fonctionnalité, suivre **automatiquement** le workflow complet décrit dans `.prompts/feature_complete.prompt.md` :
+**⚠️ IMPORTANT: All additions to this document MUST be in both French AND English**
+**⚠️ IMPORTANT : Tous les ajouts à ce document DOIVENT être en français ET en anglais**
 
-## Workflow Automatique (7 étapes)
+## 🚫 NEVER DO AUTOMATICALLY
 
-1. **Implémentation** : Coder la fonctionnalité demandée
-2. **Traductions** : Ajouter/modifier automatiquement dans FR/EN/DE (Language/*.json)
-3. **Changelog** : Mettre à jour les 4-5 fichiers changelog obligatoires
-4. **Commit** : Message structuré en anglais (types conventionnels)
-5. **Push** : Vers la branche actuelle
-6. **Merge** : Sur main avec --no-ff (AUTOMATIQUE)
-7. **Confirmation** : Statistiques complètes
+**ONLY on explicit user request:**
+- ❌ Git commit
+- ❌ Git push
+- ❌ Git merge
+- ❌ Documentation modifications (README, CHANGELOG, etc.)
+- ❌ Translations (Language/*.json)
+- ❌ Generate documentation, comments, JSDoc blocks, or README files
+- ❌ Modify existing documentation, changelogs, or readme files
+- ❌ Change version numbers in documentation
 
-## Règles Strictes
+**UNIQUEMENT sur demande explicite de l'utilisateur :**
+- ❌ Git commit
+- ❌ Git push
+- ❌ Git merge
+- ❌ Modifications de documentation (README, CHANGELOG, etc.)
+- ❌ Traductions (Language/*.json)
+- ❌ Générer de la documentation, commentaires, blocs JSDoc, ou fichiers README
+- ❌ Modifier la documentation existante, changelogs, ou fichiers readme
+- ❌ Changer les numéros de version dans la documentation
 
-- ✅ **AUTOMATIQUE** : Aucune confirmation demandée
-- ✅ **Traductions** : TOUJOURS FR/EN/DE pour textes UI
-- ✅ **Changelog** : 4 fichiers minimum (Full FR/EN + Simple FR/EN)
-- ✅ **Commit** : Anglais uniquement, 9 sections structurées
-- ✅ **Merge** : Flag --no-ff OBLIGATOIRE
-- ⚠️ **Exception** : Arrêt uniquement si conflits
+## ✅ Standard Workflow
 
-## Référence Complète
+**When user requests a feature/fix:**
 
-Pour tous les détails, voir : `.prompts/feature_complete.prompt.md`
+1. **Implementation ONLY**: Write the requested code
+2. **STOP**: Wait for user instructions
+3. **Ask user** if they want: commit, translations, documentation, etc.
+
+**Lorsque l'utilisateur demande une fonctionnalité/correction :**
+
+1. **Implémentation UNIQUEMENT** : Écrire le code demandé
+2. **STOP** : Attendre les instructions de l'utilisateur
+3. **Demander à l'utilisateur** s'il veut : commit, traductions, documentation, etc.
+
+## 📝 Code Rules
+
+**English:**
+- **All code comments MUST be in English**
+- **Variable names in English**
+- **Function/class names in English**
+- **Only UI strings use lang.get() for translations**
+- **NEVER hardcode user-facing text in code** - Always use Language/*.json files with lang.get()
+- **Always implement retranslate_ui() for dialogs/windows** - UI must refresh when language changes
+- **Always think about refreshing UI items when language changes** - Update labels, buttons, menus, etc.
+
+**Français:**
+- **Tous les commentaires de code DOIVENT être en anglais**
+- **Noms de variables en anglais**
+- **Noms de fonctions/classes en anglais**
+- **Seules les chaînes UI utilisent lang.get() pour les traductions**
+- **JAMAIS de texte utilisateur hardcodé dans le code** - Toujours utiliser les fichiers Language/*.json avec lang.get()
+- **Toujours implémenter retranslate_ui() pour les dialogues/fenêtres** - L'UI doit se rafraîchir au changement de langue
+- **Toujours penser au refresh des items au changement de langue** - Mettre à jour labels, boutons, menus, etc.
+
+## 📁 Folder Structure Rules
+
+**English:**
+- **Technical documentation**: Must be created in `Documentation/` folder (not "Documentation")
+- **Changelogs**: Must be created in `Changelogs/` folder
+- **Utility scripts**: Must be created in `Tools/` folder with appropriate subdirectory:
+  - `Tools/DataScraping/` - Web scraping scripts (Eden, official DAOC website)
+  - `Tools/DatabaseMaintenance/` - Database repair, migration, consistency checks
+  - `Tools/Development/` - Development and debugging utilities
+- **Debug scripts cleanup**: When debug scripts are no longer needed, delete them. If keeping a debug script, update `Tools/README.md` to document it.
+
+**Français:**
+- **Documentation technique** : Doit être créée dans le dossier `Documentation/` (pas "Documentation")
+- **Changelogs** : Doivent être créés dans le dossier `Changelogs/`
+- **Scripts utilitaires** : Doivent être créés dans le dossier `Tools/` avec le sous-dossier approprié :
+  - `Tools/DataScraping/` - Scripts de web scraping (Eden, site officiel DAOC)
+  - `Tools/DatabaseMaintenance/` - Réparation de base de données, migration, vérifications de cohérence
+  - `Tools/Development/` - Utilitaires de développement et débogage
+- **Nettoyage des scripts de debug** : Quand les scripts de debug ne sont plus nécessaires, les supprimer. Si on garde un script de debug, mettre à jour `Tools/README.md` pour le documenter.
+
+## 🔬 Testing Rules
+
+**English:**
+- **Always run main.py from the virtual environment** - Use `python .\main.py` after activating `.venv`
+- **Never run tests outside .venv** - Dependencies are installed in virtual environment only
+
+**Français:**
+- **Toujours exécuter main.py depuis l'environnement virtuel** - Utiliser `python .\main.py` après activation de `.venv`
+- **Jamais de tests hors .venv** - Les dépendances sont installées uniquement dans l'environnement virtuel
+
+## 🔗 Complete Workflow (only if explicitly requested)
+
+If user says "use complete workflow" or "apply full process":
+See `.prompts/feature_complete.prompt.md` for the 7-step automated process
+
+Si l'utilisateur dit "utilise le workflow complet" ou "applique le processus complet" :
+Voir `.prompts/feature_complete.prompt.md` pour le processus automatisé en 7 étapes
+
+**Otherwise: Code only, then STOP and wait**
+**Sinon : Code uniquement, puis STOP et attendre**

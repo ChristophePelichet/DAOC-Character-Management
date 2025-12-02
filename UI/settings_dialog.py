@@ -6,20 +6,22 @@ Separated from dialogs.py for better maintainability
 import os
 import logging
 import shutil
+from pathlib import Path
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QFormLayout, QGroupBox, QLabel,
     QPushButton, QLineEdit, QComboBox, QCheckBox, QDialogButtonBox,
     QFileDialog, QListWidget, QStackedWidget, QWidget, QListWidgetItem,
-    QFrame, QMessageBox, QProgressDialog
+    QFrame, QMessageBox, QProgressDialog, QApplication
 )
 from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QIcon, QFont
 
 from Functions.language_manager import lang
-from Functions.config_manager import config, get_config_dir
+from Functions.config_manager import config, get_config_dir, ConfigManager
 from Functions.character_manager import get_character_dir
+from Functions.path_manager import PathManager
 from Functions.logging_manager import get_log_dir
-from Functions.path_manager import get_armor_dir
+from Functions.path_manager import get_armor_dir, path_manager
 from Functions.backup_manager import BackupManager
 
 
@@ -53,6 +55,15 @@ class SettingsDialog(QDialog):
         # Make window non-modal (don't block main application)
         self.setModal(False)
         
+        # Initialize managers for armory operations
+        self.config_manager = ConfigManager()
+        self.path_manager = PathManager()
+        from Functions.items_database_manager import ItemsDatabaseManager
+        self.db_manager = ItemsDatabaseManager(self.config_manager, self.path_manager)
+        
+        # Store widgets that need retranslation
+        self.translatable_widgets = {}
+        
         self._init_ui()
         self._load_settings()
         
@@ -78,7 +89,13 @@ class SettingsDialog(QDialog):
         self._create_columns_page()
         self._create_herald_page()
         self._create_backup_page()
+        self._create_armory_page()
         self._create_debug_page()
+        
+        # SuperAdmin page (only in --admin mode) - AFTER Debug to keep indexes consistent
+        from main import ADMIN_MODE
+        if ADMIN_MODE:
+            self._create_superadmin_page()
         
         # === LEFT SIDE: Navigation (create after pages) ===
         self.navigation = self._create_navigation()
@@ -122,14 +139,21 @@ class SettingsDialog(QDialog):
         
         # Navigation items with icons
         nav_items = [
-            ("📁", lang.get("settings_nav_general", default="Général")),
-            ("🎨", lang.get("settings_nav_themes", default="Thèmes")),
-            ("🚀", lang.get("settings_nav_startup", default="Démarrage")),
-            ("🏛️", lang.get("settings_nav_columns", default="Colonnes")),
-            ("🌐", lang.get("settings_nav_herald", default="Herald Eden")),
-            ("💾", lang.get("settings_nav_backup", default="Sauvegardes")),
-            ("🐛", lang.get("settings_nav_debug", default="Debug")),
+            ("📁", lang.get("settings.navigation.general", default="Général")),
+            ("🎨", lang.get("settings.navigation.themes", default="Thèmes")),
+            ("🚀", lang.get("settings.navigation.startup", default="Démarrage")),
+            ("🏛️", lang.get("settings.navigation.columns", default="Colonnes")),
+            ("🌐", lang.get("settings.navigation.herald", default="Eden")),
+            ("💾", lang.get("settings.navigation.backup", default="Sauvegardes")),
+            ("🛡️", lang.get("settings.navigation.armory", default="Armurerie")),
         ]
+        
+        nav_items.append(("🐛", lang.get("settings.navigation.debug", default="Debug")))
+        
+        # Add SuperAdmin page conditionally (at the bottom)
+        from main import ADMIN_MODE
+        if ADMIN_MODE:
+            nav_items.append(("🔧", lang.get("settings.navigation.superadmin", default="SuperAdmin")))
         
         for icon, text in nav_items:
             item = QListWidgetItem(f"{icon}  {text}")
@@ -191,22 +215,6 @@ class SettingsDialog(QDialog):
         
         # Note: Config folder path is NOT configurable - it must always be next to the executable
         # This avoids circular dependency issues with config.json location
-        
-        # Armor Path
-        self.armor_path_edit = QLineEdit()
-        browse_armor_button = QPushButton(lang.get("browse_button"))
-        browse_armor_button.clicked.connect(self._browse_armor_folder)
-        move_armor_button = QPushButton("📦 " + lang.get("move_folder_button", default="Déplacer"))
-        move_armor_button.clicked.connect(lambda: self._move_folder(self.armor_path_edit, "armor_folder", lang.get("config_armor_path_label")))
-        move_armor_button.setToolTip(lang.get("move_folder_tooltip", default="Déplacer le dossier et son contenu vers un nouvel emplacement"))
-        open_armor_folder_button = QPushButton("📂 " + lang.get("open_folder_button", default="Ouvrir le dossier"))
-        open_armor_folder_button.clicked.connect(self._open_armor_folder)
-        armor_path_layout = QHBoxLayout()
-        armor_path_layout.addWidget(self.armor_path_edit)
-        armor_path_layout.addWidget(browse_armor_button)
-        armor_path_layout.addWidget(move_armor_button)
-        armor_path_layout.addWidget(open_armor_folder_button)
-        paths_layout.addRow(lang.get("config_armor_path_label"), armor_path_layout)
         
         paths_group.setLayout(paths_layout)
         layout.addWidget(paths_group)
@@ -420,13 +428,13 @@ class SettingsDialog(QDialog):
         self.pages.addWidget(page)
         
     def _create_herald_page(self):
-        """Page 3: Herald Eden Settings"""
+        """Page 3: Eden Settings"""
         page = QWidget()
         layout = QVBoxLayout(page)
         layout.setAlignment(Qt.AlignTop)
         
         # Title
-        title = QLabel(lang.get("settings_herald_title", default="Herald Eden"))
+        title = QLabel(lang.get("settings_herald_title", default="Eden"))
         title_font = title.font()
         title_font.setPointSize(title_font.pointSize() + 4)
         title_font.setBold(True)
@@ -440,30 +448,35 @@ class SettingsDialog(QDialog):
         layout.addSpacing(20)
         
         # === Cookies Path (Eden AppData) ===
-        cookies_group = QGroupBox("🍪 " + lang.get("config_cookies_group_title", 
+        cookies_group = QGroupBox("🍪 " + lang.get("settings.herald.config_cookies_group_title", 
                                                     default="Chemin des cookies"))
+        self.translatable_widgets['cookies_group'] = cookies_group
         cookies_layout = QVBoxLayout()
         
         # Info label
         from Functions.path_manager import get_eden_data_dir
         eden_path = get_eden_data_dir()
-        cookies_info = QLabel(lang.get("eden_storage_info", default="Stockage automatique dans") + f": {eden_path}")
+        cookies_info = QLabel(lang.get("buttons.eden_storage_info", default="Stockage automatique dans") + f": {eden_path}")
         cookies_info.setWordWrap(True)
         cookies_info.setStyleSheet("color: gray; font-size: 9pt; padding: 5px;")
+        self.translatable_widgets['cookies_info'] = cookies_info
+        self.translatable_widgets['cookies_info_path'] = eden_path
         cookies_layout.addWidget(cookies_info)
         
         # Buttons layout (horizontal)
         buttons_layout = QHBoxLayout()
         
         # Open folder button
-        open_cookies_folder_button = QPushButton("📂 " + lang.get("open_folder_button", default="Ouvrir le dossier"))
+        open_cookies_folder_button = QPushButton("📂 " + lang.get("buttons.open_folder_button", default="Ouvrir le dossier"))
         open_cookies_folder_button.clicked.connect(self._open_cookies_folder)
+        self.translatable_widgets['open_cookies_folder_button'] = open_cookies_folder_button
         buttons_layout.addWidget(open_cookies_folder_button)
         
         # Clean Eden button
-        clean_eden_button = QPushButton("🗑️ " + lang.get("clean_eden_button", default="Nettoyer Eden"))
+        clean_eden_button = QPushButton("🗑️ " + lang.get("buttons.clean_eden_button", default="Nettoyer Eden"))
         clean_eden_button.clicked.connect(self._clean_eden_folder)
-        clean_eden_button.setToolTip(lang.get("clean_eden_tooltip", default="Supprime tous les cookies et fichiers temporaires du profil Chrome"))
+        clean_eden_button.setToolTip(lang.get("buttons.clean_eden_tooltip", default="Supprime tous les cookies et fichiers temporaires du profil Chrome"))
+        self.translatable_widgets['clean_eden_button'] = clean_eden_button
         clean_eden_button.setStyleSheet("""
             QPushButton {
                 background-color: #D83B01;
@@ -481,6 +494,60 @@ class SettingsDialog(QDialog):
         
         cookies_group.setLayout(cookies_layout)
         layout.addWidget(cookies_group)
+        
+        # === Item Cache Path ===
+        cache_group = QGroupBox("💾 " + lang.get("settings.herald.config_item_cache_group_title", 
+                                                    default="Chemin du cache des items"))
+        self.translatable_widgets['cache_group'] = cache_group
+        cache_layout = QVBoxLayout()
+        
+        # Info label
+        import os
+        user_profile = os.getenv('LOCALAPPDATA') or os.getenv('APPDATA')
+        if user_profile:
+            cache_path = os.path.join(user_profile, 'DAOC_Character_Manager', 'ItemCache')
+        else:
+            from pathlib import Path
+            cache_path = str(Path(__file__).parent.parent / 'Armory')
+        
+        cache_info = QLabel(lang.get("buttons.item_cache_storage_info", default="Stockage automatique dans") + f": {cache_path}")
+        cache_info.setWordWrap(True)
+        cache_info.setStyleSheet("color: gray; font-size: 9pt; padding: 5px;")
+        self.translatable_widgets['cache_info'] = cache_info
+        self.translatable_widgets['cache_info_path'] = cache_path
+        cache_layout.addWidget(cache_info)
+        
+        # Buttons layout (horizontal)
+        cache_buttons_layout = QHBoxLayout()
+        
+        # Open folder button
+        open_cache_folder_button = QPushButton("📂 " + lang.get("buttons.open_folder_button", default="Ouvrir le dossier"))
+        open_cache_folder_button.clicked.connect(self._open_item_cache_folder)
+        self.translatable_widgets['open_cache_folder_button'] = open_cache_folder_button
+        cache_buttons_layout.addWidget(open_cache_folder_button)
+        
+        # Clean cache button
+        clean_cache_button = QPushButton("🗑️ " + lang.get("buttons.clean_cache_button", default="Nettoyer le cache"))
+        clean_cache_button.clicked.connect(self._clean_item_cache)
+        clean_cache_button.setToolTip(lang.get("buttons.clean_cache_tooltip", default="Supprime le cache des items trouvés via recherche web"))
+        self.translatable_widgets['clean_cache_button'] = clean_cache_button
+        clean_cache_button.setStyleSheet("""
+            QPushButton {
+                background-color: #D83B01;
+                color: white;
+                font-weight: bold;
+                padding: 6px 12px;
+            }
+            QPushButton:hover {
+                background-color: #A52A00;
+            }
+        """)
+        cache_buttons_layout.addWidget(clean_cache_button)
+        
+        cache_layout.addLayout(cache_buttons_layout)
+        
+        cache_group.setLayout(cache_layout)
+        layout.addWidget(cache_group)
         
         # === Browser Settings ===
         browser_group = QGroupBox("🌐 " + lang.get("config_browser_group_title", 
@@ -517,16 +584,6 @@ class SettingsDialog(QDialog):
         
         browser_group.setLayout(browser_layout)
         layout.addWidget(browser_group)
-        
-        # Info box
-        info_label = QLabel(
-            "💡 " + lang.get("settings_herald_info",
-                           default="Pour gérer vos cookies Herald, utilisez le bouton 'Gérer...' "
-                                  "dans la section Herald Eden de la fenêtre principale.")
-        )
-        info_label.setWordWrap(True)
-        info_label.setStyleSheet("background-color: palette(alternate-base); padding: 10px; border-radius: 5px;")
-        layout.addWidget(info_label)
         
         layout.addStretch()
         self.pages.addWidget(page)
@@ -988,6 +1045,302 @@ class SettingsDialog(QDialog):
         layout.addStretch()
         self.pages.addWidget(page)
         
+    def _create_armory_page(self):
+        """Page 7: Armory Settings"""
+        page = QWidget()
+        layout = QVBoxLayout(page)
+        layout.setAlignment(Qt.AlignTop)
+        
+        # Title
+        title = QLabel(f"🛡️ {lang.get('settings.pages.armory.title', default='Armurerie')}")
+        title_font = title.font()
+        title_font.setPointSize(title_font.pointSize() + 4)
+        title_font.setBold(True)
+        title.setFont(title_font)
+        layout.addWidget(title)
+        
+        subtitle = QLabel(lang.get('settings.pages.armory.subtitle', default="Import et gestion de la base de données d'items"))
+        subtitle.setStyleSheet("color: gray;")
+        layout.addWidget(subtitle)
+        layout.addSpacing(20)
+        
+        # === FOLDER PATH (always visible) ===
+        folder_group = QGroupBox("📁 " + lang.get("config_folder_group_title", default="Dossiers"))
+        folder_layout = QFormLayout()
+        
+        # Armor Path
+        self.armor_path_edit = QLineEdit()
+        browse_armor_button = QPushButton(lang.get("browse_button"))
+        browse_armor_button.setMaximumWidth(80)
+        browse_armor_button.clicked.connect(self._browse_armor_folder)
+        
+        move_armor_button = QPushButton(lang.get("move_folder_button"))
+        move_armor_button.setMaximumWidth(120)
+        move_armor_button.clicked.connect(self._move_armor_folder)
+        
+        open_armor_folder_button = QPushButton(lang.get("open_folder_button"))
+        open_armor_folder_button.setMaximumWidth(100)
+        open_armor_folder_button.clicked.connect(self._open_armor_folder)
+        
+        armor_path_layout = QHBoxLayout()
+        armor_path_layout.addWidget(self.armor_path_edit)
+        armor_path_layout.addWidget(browse_armor_button)
+        armor_path_layout.addWidget(move_armor_button)
+        armor_path_layout.addWidget(open_armor_folder_button)
+        folder_layout.addRow(lang.get("config_armor_path_label"), armor_path_layout)
+        
+        folder_group.setLayout(folder_layout)
+        layout.addWidget(folder_group)
+        layout.addSpacing(10)
+        
+        # === DATABASE MODE (en haut de la page) ===
+        db_group = QGroupBox(lang.get('armory_settings.group_title', default="🗄️ Base de données d'items"))
+        db_layout = QVBoxLayout()
+        
+        # Enable personal database checkbox
+        self.personal_db_check = QCheckBox(lang.get('armory_settings.enable_personal_db', default="Activer la base de données personnelle"))
+        self.personal_db_check.setToolTip(lang.get('armory_settings.enable_personal_db_tooltip', 
+            default="Copie la base interne dans votre dossier Armory pour permettre les imports et modifications"))
+        self.personal_db_check.clicked.connect(self._on_personal_db_toggled)
+        db_layout.addWidget(self.personal_db_check)
+        
+        # Mode info label
+        self.mode_info_label = QLabel()
+        self.mode_info_label.setStyleSheet("color: #888; font-style: italic; padding: 5px;")
+        db_layout.addWidget(self.mode_info_label)
+        
+        db_layout.addSpacing(10)
+        
+        # Statistics group (hidden by default)
+        self.stats_group = QGroupBox(lang.get('armory_settings.stats_group_title', default="📊 Statistiques"))
+        stats_layout = QFormLayout()
+        
+        self.internal_count_label = QLabel(lang.get('armory_settings.stats_not_available', default="Non disponible"))
+        stats_layout.addRow(lang.get('armory_settings.stats_internal_count', default="Items dans la base interne:"), 
+                           self.internal_count_label)
+        
+        self.personal_count_label = QLabel(lang.get('armory_settings.stats_not_available', default="Non disponible"))
+        stats_layout.addRow(lang.get('armory_settings.stats_personal_count', default="Items dans votre base:"), 
+                           self.personal_count_label)
+        
+        self.user_added_label = QLabel(lang.get('armory_settings.stats_not_available', default="Non disponible"))
+        stats_layout.addRow(lang.get('armory_settings.stats_user_added_count', default="Items ajoutés par vous:"), 
+                           self.user_added_label)
+        
+        self.stats_group.setLayout(stats_layout)
+        self.stats_group.setVisible(False)
+        db_layout.addWidget(self.stats_group)
+        
+        db_group.setLayout(db_layout)
+        layout.addWidget(db_group)
+        layout.addSpacing(10)
+        
+        # === IMPORT SECTION ===
+        self.import_group = QGroupBox(lang.get('settings.pages.armory.import_group_title', default="📥 Import d'items"))
+        import_layout = QVBoxLayout()
+        
+        # Import button
+        self.armory_import_button = QPushButton(lang.get('settings.pages.armory.import_button', default="📥 Importer des items"))
+        self.armory_import_button.setMinimumHeight(40)
+        self.armory_import_button.setStyleSheet("""
+            QPushButton {
+                font-size: 13px;
+                font-weight: bold;
+                padding: 8px;
+            }
+            QPushButton:hover {
+                background-color: palette(highlight);
+            }
+        """)
+        self.armory_import_button.clicked.connect(self._open_armory_import)
+        import_layout.addWidget(self.armory_import_button)
+        
+        import_help = QLabel(lang.get('settings.pages.armory.import_help',
+            default="💡 Cliquez sur le bouton ci-dessus pour ouvrir l'interface d'import. "
+            "Vous pourrez sélectionner un fichier template (.txt), "
+            "choisir le royaume et lancer l'import automatique."
+        ))
+        import_help.setWordWrap(True)
+        import_help.setStyleSheet("color: #666; font-style: italic; padding: 10px;")
+        import_layout.addWidget(import_help)
+        
+        self.import_group.setLayout(import_layout)
+        self.import_group.setVisible(False)  # Hidden by default
+        layout.addWidget(self.import_group)
+        
+        # === RESET SECTION (at the end) ===
+        self.actions_group = QGroupBox(lang.get('armory_settings.actions_group_title', default="⚙️ Actions"))
+        actions_layout = QVBoxLayout()
+        
+        self.reset_db_button = QPushButton(lang.get('armory_settings.reset_db_button', default="🔄 Réinitialiser ma base"))
+        self.reset_db_button.setToolTip(lang.get('armory_settings.reset_db_tooltip',
+            default="Remplace votre base personnelle par une copie fraîche de la base interne (perte de vos ajouts personnels)"))
+        self.reset_db_button.clicked.connect(self._reset_personal_database)
+        actions_layout.addWidget(self.reset_db_button)
+        
+        self.actions_group.setLayout(actions_layout)
+        self.actions_group.setVisible(False)
+        layout.addWidget(self.actions_group)
+        
+        # Update database mode UI (after all groups are created)
+        self._update_armory_database_mode()
+        
+        layout.addStretch()
+        self.pages.addWidget(page)
+    
+    def _create_superadmin_page(self):
+        """Page 8: SuperAdmin Tools (only visible with --admin flag)"""
+        page = QWidget()
+        layout = QVBoxLayout(page)
+        layout.setAlignment(Qt.AlignTop)
+        
+        # Title
+        title = QLabel("🔧⚡ " + lang.get('superadmin.title', default='SuperAdmin'))
+        title_font = title.font()
+        title_font.setPointSize(title_font.pointSize() + 4)
+        title_font.setBold(True)
+        title.setFont(title_font)
+        layout.addWidget(title)
+        layout.addSpacing(20)
+        
+        # === ITEMS DATABASE SECTION ===
+        armory_section = QGroupBox("🗄️ " + lang.get('superadmin.items_database_section_title', default="Items Database"))
+        armory_layout = QVBoxLayout()
+        
+        # === WARNING (inside Items Database section) ===
+        warning_label = QLabel("⚠️ " + lang.get('superadmin.warning', default='Ces outils modifient la base de données source embarquée. Usage réservé aux développeurs.'))
+        warning_label.setStyleSheet("background-color: #fff3cd; color: #856404; padding: 10px; border-radius: 5px; font-weight: bold;")
+        warning_label.setWordWrap(True)
+        armory_layout.addWidget(warning_label)
+        armory_layout.addSpacing(10)
+        
+        # === STATISTICS AND ADVANCED OPERATIONS (side by side) ===
+        stats_advanced_layout = QHBoxLayout()
+        
+        # === STATISTICS GROUP (left side - 50%) ===
+        stats_group = QGroupBox(lang.get('superadmin.stats_group_title', 
+            default="📊 Items Database Statistics"))
+        stats_layout = QFormLayout()
+        
+        self.superadmin_stats_dbname = QLabel("items_database_src.json")
+        self.superadmin_stats_dbname.setStyleSheet("font-weight: bold; color: #2196f3;")
+        stats_layout.addRow(lang.get('superadmin.stats_database_name', default="Base de données:"), 
+                           self.superadmin_stats_dbname)
+        
+        self.superadmin_stats_total = QLabel("0")
+        stats_layout.addRow(lang.get('superadmin.stats_total', default="Total items:"), 
+                           self.superadmin_stats_total)
+        
+        self.superadmin_stats_albion = QLabel("0")
+        stats_layout.addRow(lang.get('superadmin.stats_albion', default="Albion:"), 
+                           self.superadmin_stats_albion)
+        
+        self.superadmin_stats_hibernia = QLabel("0")
+        stats_layout.addRow(lang.get('superadmin.stats_hibernia', default="Hibernia:"), 
+                           self.superadmin_stats_hibernia)
+        
+        self.superadmin_stats_midgard = QLabel("0")
+        stats_layout.addRow(lang.get('superadmin.stats_midgard', default="Midgard:"), 
+                           self.superadmin_stats_midgard)
+        
+        self.superadmin_stats_all_realms = QLabel("0")
+        stats_layout.addRow(lang.get('superadmin.stats_all_realms', default="Tous royaumes:"), 
+                           self.superadmin_stats_all_realms)
+        
+        self.superadmin_stats_file_size = QLabel("0 KB")
+        stats_layout.addRow(lang.get('superadmin.stats_file_size', default="Taille fichier:"), 
+                           self.superadmin_stats_file_size)
+        
+        self.superadmin_stats_last_updated = QLabel(lang.get('superadmin.stats_not_available', default="Non disponible"))
+        stats_layout.addRow(lang.get('superadmin.stats_last_updated', default="Dernière mise à jour:"), 
+                           self.superadmin_stats_last_updated)
+        
+        stats_refresh_button = QPushButton(lang.get('superadmin.stats_refresh_button', 
+            default="Actualiser"))
+        stats_refresh_button.setMinimumHeight(35)
+        stats_refresh_button.clicked.connect(self._refresh_superadmin_stats)
+        stats_layout.addRow("", stats_refresh_button)
+        
+        stats_group.setLayout(stats_layout)
+        stats_advanced_layout.addWidget(stats_group, 1)  # 50% width
+        
+        # === ADVANCED OPERATIONS GROUP (right side - 50%) ===
+        advanced_group = QGroupBox(lang.get('superadmin.advanced_group_title', 
+            default="⚙️ Opérations avancées"))
+        advanced_layout = QVBoxLayout()
+        
+        # 1. Database Editor button (first position)
+        db_editor_button = QPushButton(lang.get('superadmin.database_editor_button', 
+            default="🗄️ Database - Editor"))
+        db_editor_button.setMinimumHeight(35)
+        db_editor_button.setToolTip(lang.get('superadmin.database_editor_tooltip', 
+            default="Ouvrir l'éditeur de base de données pour modifier directement items_database_src.json"))
+        db_editor_button.clicked.connect(self._open_database_editor)
+        advanced_layout.addWidget(db_editor_button)
+        
+        # 2. Database Template Import button
+        database_import_button = QPushButton(lang.get('superadmin.database_import_button', 
+            default="🔧 Database - Template Import"))
+        database_import_button.setMinimumHeight(35)
+        database_import_button.setToolTip(lang.get('superadmin.database_import_tooltip', 
+            default="Ouvrir la fenêtre Database Template Import pour sélectionner et importer des templates dans la base source"))
+        database_import_button.clicked.connect(self._open_mass_import_monitor)
+        advanced_layout.addWidget(database_import_button)
+        
+        # 3. Single Item Refresh button
+        single_refresh_button = QPushButton(lang.get('superadmin.single_refresh_button', 
+            default="🔍 Item(s) - Single Refresh"))
+        single_refresh_button.setMinimumHeight(35)
+        single_refresh_button.setToolTip(lang.get('superadmin.single_refresh_tooltip', 
+            default="Re-scrape specific items from Eden to update their data (Model, DPS, Speed, etc.)"))
+        single_refresh_button.clicked.connect(self._single_item_refresh)
+        advanced_layout.addWidget(single_refresh_button)
+        
+        # 4. All Items Refresh button
+        all_refresh_button = QPushButton(lang.get('superadmin.all_refresh_button', 
+            default="🔄 Item(s) - All Refresh"))
+        all_refresh_button.setMinimumHeight(35)
+        all_refresh_button.setToolTip(lang.get('superadmin.all_refresh_tooltip', 
+            default="Re-scrape all items from Eden to update their data (Model, DPS, Speed, etc.)"))
+        all_refresh_button.clicked.connect(self._all_items_refresh)
+        advanced_layout.addWidget(all_refresh_button)
+        
+        # 5. Clean Duplicates button
+        clean_duplicates_button = QPushButton(lang.get('superadmin.clean_duplicates_button', 
+            default="🧹 Item(s) - Clean Duplicates"))
+        clean_duplicates_button.setMinimumHeight(35)
+        clean_duplicates_button.setToolTip(lang.get('superadmin.clean_duplicates_tooltip', 
+            default="Supprime les items en double (même nom + royaume) dans la base source"))
+        clean_duplicates_button.clicked.connect(self._clean_duplicates)
+        advanced_layout.addWidget(clean_duplicates_button)
+        
+        # 6. Backup Database button (last position)
+        backup_db_button = QPushButton(lang.get('superadmin.backup_database_button', 
+            default="💾 Database - Backup"))
+        backup_db_button.setMinimumHeight(35)
+        backup_db_button.setToolTip(lang.get('superadmin.backup_database_tooltip', 
+            default="Créer une sauvegarde manuelle de items_database_src.json"))
+        backup_db_button.clicked.connect(self._backup_database)
+        advanced_layout.addWidget(backup_db_button)
+        
+        advanced_layout.addStretch()  # Push buttons to top
+        
+        advanced_group.setLayout(advanced_layout)
+        stats_advanced_layout.addWidget(advanced_group, 1)  # 50% width
+        
+        # Add the horizontal layout to armory layout
+        armory_layout.addLayout(stats_advanced_layout)
+        
+        # Close Items Database section
+        armory_section.setLayout(armory_layout)
+        layout.addWidget(armory_section)
+        
+        # Initialize statistics on page creation
+        self._refresh_superadmin_stats()
+        
+        layout.addStretch()
+        self.pages.addWidget(page)
+        
     def _create_debug_page(self):
         """Page 7: Debug Settings"""
         page = QWidget()
@@ -1074,6 +1427,13 @@ class SettingsDialog(QDialog):
         self.debug_save_test_connection_html.setToolTip(lang.get("settings.tooltips.debug_save_test_connection_html",
                                                                  default="Sauvegarde le HTML du test de connexion dans Logs/ pour diagnostic"))
         debug_eden_layout.addWidget(self.debug_save_test_connection_html)
+        
+        # Checkbox: Save Items Database HTML
+        self.debug_save_items_html = QCheckBox(lang.get("settings.labels.debug_save_items_html", 
+                                                         default="💾 Sauvegarder HTML Items Database (items_details_debug/)"))
+        self.debug_save_items_html.setToolTip(lang.get("settings.tooltips.debug_save_items_html",
+                                                       default="Sauvegarde le HTML des pages d'items dans Logs/items_details_debug/ pour diagnostic"))
+        debug_eden_layout.addWidget(self.debug_save_items_html)
         
         debug_eden_group.setLayout(debug_eden_layout)
         layout.addWidget(debug_eden_group)
@@ -1246,6 +1606,70 @@ class SettingsDialog(QDialog):
         if os.path.exists(char_path):
             subprocess.Popen(f'explorer "{char_path}"')
     
+    def _move_armor_folder(self):
+        """Move armor folder to new location"""
+        from PySide6.QtWidgets import QMessageBox
+        import shutil
+        
+        # Browse for new location
+        new_location = QFileDialog.getExistingDirectory(
+            self, 
+            lang.get("select_new_armor_location", default="Sélectionner le nouvel emplacement pour Armory")
+        )
+        
+        if not new_location:
+            return
+        
+        old_path = self.armor_path_edit.text()
+        new_path = os.path.join(new_location, "Armory")
+        
+        if old_path == new_path:
+            return
+        
+        # Confirm move
+        reply = QMessageBox.question(
+            self,
+            lang.get("move_armor_confirm_title", default="Confirmer le déplacement"),
+            lang.get("move_armor_confirm_message", 
+                    default=f"Déplacer le dossier Armory ?\n\nDe : {old_path}\nVers : {new_path}"),
+            QMessageBox.Yes | QMessageBox.No
+        )
+        
+        if reply == QMessageBox.Yes:
+            try:
+                # Create new directory if it doesn't exist
+                os.makedirs(new_path, exist_ok=True)
+                
+                # Copy all files
+                if os.path.exists(old_path):
+                    for item in os.listdir(old_path):
+                        s = os.path.join(old_path, item)
+                        d = os.path.join(new_path, item)
+                        if os.path.isdir(s):
+                            shutil.copytree(s, d, dirs_exist_ok=True)
+                        else:
+                            shutil.copy2(s, d)
+                    
+                    # Remove old directory
+                    shutil.rmtree(old_path)
+                
+                # Update UI and config
+                self.armor_path_edit.setText(new_path)
+                config.set("folders.armor", new_path)
+                config.save_config()
+                
+                QMessageBox.information(
+                    self,
+                    lang.get("move_success_title", default="Succès"),
+                    lang.get("move_armor_success", default="Dossier Armory déplacé avec succès")
+                )
+            except Exception as e:
+                QMessageBox.critical(
+                    self,
+                    lang.get("error_title", default="Erreur"),
+                    lang.get("move_armor_error", default=f"Erreur lors du déplacement : {str(e)}")
+                )
+    
     def _open_armor_folder(self):
         """Open armor folder"""
         import subprocess
@@ -1270,16 +1694,19 @@ class SettingsDialog(QDialog):
         eden_path = get_eden_data_dir()
         
         # Confirmation dialog
+        message = lang.get("clean_eden_confirm_message", 
+                          default="⚠️ Cette action va supprimer :\n\n"
+                                 "• Tous les cookies Eden\n"
+                                 "• Le profil Chrome complet (cache, historique, session)\n\n"
+                                 "📁 Dossier : {path}\n\n"
+                                 "Vous devrez régénérer vos cookies après cette opération.\n\n"
+                                 "Continuer ?")
+        message = message.replace("{path}", str(eden_path))
+        
         reply = QMessageBox.question(
             self,
             lang.get("clean_eden_confirm_title", default="Confirmer le nettoyage"),
-            lang.get("clean_eden_confirm_message", 
-                    default=f"⚠️ Cette action va supprimer :\n\n"
-                           f"• Tous les cookies Eden\n"
-                           f"• Le profil Chrome complet (cache, historique, session)\n\n"
-                           f"📁 Dossier : {eden_path}\n\n"
-                           f"Vous devrez régénérer vos cookies après cette opération.\n\n"
-                           f"Continuer ?"),
+            message,
             QMessageBox.Yes | QMessageBox.No,
             QMessageBox.No
         )
@@ -1296,21 +1723,89 @@ class SettingsDialog(QDialog):
                         self,
                         lang.get("clean_eden_success_title", default="Nettoyage réussi"),
                         lang.get("clean_eden_success_message", 
-                                default="✅ Le dossier Eden a été nettoyé avec succès.\n\n"
-                                       "Tous les cookies et fichiers temporaires ont été supprimés.")
-                    )
-                else:
-                    QMessageBox.information(
-                        self,
-                        lang.get("clean_eden_empty_title", default="Dossier vide"),
-                        lang.get("clean_eden_empty_message", 
-                                default="ℹ️ Le dossier Eden est déjà vide ou n'existe pas.")
+                                default="✅ Le dossier Eden a été nettoyé.\n\n"
+                                       "Dossier supprimé.")
                     )
             except Exception as e:
                 QMessageBox.critical(
                     self,
                     lang.get("clean_eden_error_title", default="Erreur"),
                     lang.get("clean_eden_error_message", 
+                            default=f"❌ Erreur lors du nettoyage :\n\n{str(e)}")
+                )
+    
+    def _open_item_cache_folder(self):
+        """Open Item Cache folder (AppData)"""
+        import subprocess
+        import os
+        
+        user_profile = os.getenv('LOCALAPPDATA') or os.getenv('APPDATA')
+        if user_profile:
+            cache_path = os.path.join(user_profile, 'DAOC_Character_Manager', 'ItemCache')
+        else:
+            from pathlib import Path
+            cache_path = str(Path(__file__).parent.parent / 'Armory')
+        
+        # Create folder if doesn't exist
+        os.makedirs(cache_path, exist_ok=True)
+        
+        if os.path.exists(cache_path):
+            subprocess.Popen(f'explorer "{cache_path}"')
+    
+    def _clean_item_cache(self):
+        """Clean Item Cache folder"""
+        from PySide6.QtWidgets import QMessageBox
+        import shutil
+        import os
+        
+        user_profile = os.getenv('LOCALAPPDATA') or os.getenv('APPDATA')
+        if user_profile:
+            cache_path = os.path.join(user_profile, 'DAOC_Character_Manager', 'ItemCache')
+        else:
+            from pathlib import Path
+            cache_path = str(Path(__file__).parent.parent / 'Armory')
+        
+        # Confirmation dialog
+        reply = QMessageBox.question(
+            self,
+            lang.get("clean_cache_confirm_title", default="Confirmer le nettoyage"),
+            lang.get("clean_cache_confirm_message", 
+                    default=f"⚠️ Cette action va supprimer :\n\n"
+                           f"• Le cache des items trouvés via recherche web\n\n"
+                           f"📁 Dossier : {cache_path}\n\n"
+                           f"Les items de la base de données ne seront pas affectés.\n\n"
+                           f"Continuer ?"),
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+        
+        if reply == QMessageBox.Yes:
+            try:
+                if os.path.exists(cache_path):
+                    # Delete items_cache.json if exists
+                    cache_file = os.path.join(cache_path, 'items_cache.json')
+                    if os.path.exists(cache_file):
+                        os.remove(cache_file)
+                    
+                    QMessageBox.information(
+                        self,
+                        lang.get("clean_cache_success_title", default="Nettoyage réussi"),
+                        lang.get("clean_cache_success_message", 
+                                default="✅ Le cache des items a été nettoyé.\n\n"
+                                       "Cache supprimé.")
+                    )
+                else:
+                    QMessageBox.information(
+                        self,
+                        lang.get("clean_cache_empty_title", default="Dossier vide"),
+                        lang.get("clean_cache_empty_message", 
+                                default="ℹ️ Le cache est déjà vide ou n'existe pas.")
+                    )
+            except Exception as e:
+                QMessageBox.critical(
+                    self,
+                    lang.get("clean_cache_error_title", default="Erreur"),
+                    lang.get("clean_cache_error_message", 
                             default=f"❌ Erreur lors du nettoyage :\n\n{str(e)}")
                 )
     
@@ -1363,7 +1858,7 @@ class SettingsDialog(QDialog):
         # Fixed folder names based on config_key (no user input)
         folder_names = {
             "character_folder": "Characters",
-            "armor_folder": "Armor",
+            "armor_folder": "Armory",
             "log_folder": "Logs",
             "cookies_folder": "Cookies",
             "backup_path": "Backups",
@@ -1625,6 +2120,7 @@ class SettingsDialog(QDialog):
         # Debug HTML options
         self.debug_save_herald_html.setChecked(config.get("system.debug.save_herald_html", False))
         self.debug_save_test_connection_html.setChecked(config.get("system.debug.save_test_connection_html", False))
+        self.debug_save_items_html.setChecked(config.get("system.debug.save_items_html", False))
         
         # Defaults
         self.default_server_combo.setCurrentText(config.get("game.default_server", ""))
@@ -1844,4 +2340,838 @@ class SettingsDialog(QDialog):
         
         if reply == QMessageBox.Yes:
             self._load_settings()
+    
+    def _open_armory_import(self):
+        """Ouvre le dialogue d'import d'items pour l'armurerie"""
+        from UI.armory_import_dialog import ArmoryImportDialog
+        
+        dialog = ArmoryImportDialog(self)
+        dialog.exec()
+        
+        # Update database status after import
+        # Initialize database manager
+        from Functions.items_database_manager import ItemsDatabaseManager
+        self.db_manager = ItemsDatabaseManager(self.config_manager, path_manager)
+    
+    def _update_armory_database_mode(self):
+        """Update UI based on current database mode"""
+        try:
+            use_personal = self.config_manager.config.get('armory', {}).get('use_personal_database', False)
+            
+            # Update checkbox
+            self.personal_db_check.setChecked(use_personal)
+            
+            # Update mode info label
+            if use_personal:
+                mode_text = lang.get('armory_settings.mode_info_personal', default="Mode actuel : Base de données personnelle (modifiable)")
+                self.mode_info_label.setText(mode_text)
+                self.mode_info_label.setStyleSheet("color: #4CAF50; font-style: italic; padding: 5px;")
+                
+                # Show stats, actions and import groups (only if they exist)
+                if hasattr(self, 'stats_group'):
+                    self.stats_group.setVisible(True)
+                if hasattr(self, 'actions_group'):
+                    self.actions_group.setVisible(True)
+                if hasattr(self, 'import_group'):
+                    self.import_group.setVisible(True)
+                
+                # Update statistics
+                self._update_statistics()
+            else:
+                mode_text = lang.get('armory_settings.mode_info_internal', default="Mode actuel : Base de données interne (lecture seule)")
+                self.mode_info_label.setText(mode_text)
+                self.mode_info_label.setStyleSheet("color: #888; font-style: italic; padding: 5px;")
+                
+                # Hide stats, actions and import groups (only if they exist)
+                if hasattr(self, 'stats_group'):
+                    self.stats_group.setVisible(False)
+                if hasattr(self, 'actions_group'):
+                    self.actions_group.setVisible(False)
+                if hasattr(self, 'import_group'):
+                    self.import_group.setVisible(False)
+                
+        except Exception as e:
+            logging.error(f"Error updating database mode: {e}", exc_info=True)
+    
+    def _update_statistics(self):
+        """Update database statistics"""
+        try:
+            stats = self.db_manager.get_statistics()
+            
+            # Internal count
+            internal_count = stats.get("internal_count", 0)
+            self.internal_count_label.setText(str(internal_count))
+            self.internal_count_label.setStyleSheet("color: #4CAF50; font-weight: bold;")
+            
+            # Personal count
+            personal_count = stats.get("personal_count", -1)
+            if personal_count >= 0:
+                self.personal_count_label.setText(str(personal_count))
+                self.personal_count_label.setStyleSheet("color: #4CAF50; font-weight: bold;")
+            else:
+                not_available = lang.get('armory_settings.stats_not_available', default="Non disponible")
+                self.personal_count_label.setText(not_available)
+                self.personal_count_label.setStyleSheet("color: #888;")
+            
+            # User added count
+            user_added = stats.get("user_added_count", -1)
+            if user_added >= 0:
+                self.user_added_label.setText(str(user_added))
+                self.user_added_label.setStyleSheet("color: #2196F3; font-weight: bold;")
+            else:
+                not_available = lang.get('armory_settings.stats_not_available', default="Non disponible")
+                self.user_added_label.setText(not_available)
+                self.user_added_label.setStyleSheet("color: #888;")
+                
+        except Exception as e:
+            logging.error(f"Error updating statistics: {e}", exc_info=True)
+    
+    def _on_personal_db_toggled(self, checked: bool):
+        """Handle personal database checkbox toggle"""
+        try:
+            if checked:
+                # Check if personal database file exists
+                armor_path = self.config_manager.config.get("folders", {}).get("armor")
+                if not armor_path:
+                    armor_path = self.path_manager.get_app_root() / "Armory"
+                
+                personal_db_path = Path(armor_path) / "items_database.json"
+                
+                if not personal_db_path.exists():
+                    # Create personal database
+                    stats = self.db_manager.get_statistics()
+                    internal_count = stats.get("internal_count", 0)
+                    
+                    title = lang.get('armory_settings.create_db_title', default="Créer la base personnelle")
+                    message = lang.get('armory_settings.create_db_message', 
+                        default="Voulez-vous créer votre base de données personnelle ?\nCeci copiera la base interne ({internal_count} items) dans votre dossier Armory.")
+                    message = message.replace("{internal_count}", str(internal_count))
+                    
+                    reply = QMessageBox.question(self, title, message, 
+                                                QMessageBox.Yes | QMessageBox.No)
+                    
+                    if reply == QMessageBox.Yes:
+                        success, result = self.db_manager.create_personal_database()
+                        
+                        if success:
+                            # Reload config to reflect changes made by db_manager
+                            self.config_manager.load_config()
+                            
+                            success_title = lang.get('armory_settings.create_db_success_title', default="Base créée")
+                            success_message = lang.get('armory_settings.create_db_success_message',
+                                default="Base de données personnelle créée avec succès\nEmplacement : {path}")
+                            success_message = success_message.replace("{path}", result)
+                            
+                            QMessageBox.information(self, success_title, success_message)
+                            
+                            # Update UI to show stats/actions/import sections
+                            self._update_armory_database_mode()
+                        else:
+                            error_title = lang.get('armory_settings.create_db_error_title', default="Erreur de création")
+                            error_message = lang.get('armory_settings.create_db_error_message',
+                                default="Impossible de créer la base de données personnelle :\n{error}")
+                            error_message = error_message.replace("{error}", result)
+                            
+                            QMessageBox.critical(self, error_title, error_message)
+                            
+                            # Uncheck checkbox
+                            self.personal_db_check.setChecked(False)
+                    else:
+                        # User cancelled, uncheck checkbox
+                        self.personal_db_check.setChecked(False)
+                else:
+                    # Database file exists, just enable personal database mode
+                    self.config_manager.config.setdefault('armory', {})['use_personal_database'] = True
+                    self.config_manager.save_config()
+                    self._update_armory_database_mode()
+            else:
+                # Disable personal database mode (switch to internal)
+                self.config_manager.config.setdefault('armory', {})['use_personal_database'] = False
+                self.config_manager.save_config()
+                self._update_armory_database_mode()
+                
+        except Exception as e:
+            logging.error(f"Error toggling personal database: {e}", exc_info=True)
+            self.personal_db_check.setChecked(not checked)
+    
+    def _reset_personal_database(self):
+        """Reset personal database to internal copy"""
+        try:
+            stats = self.db_manager.get_statistics()
+            user_count = stats.get("user_added_count", 0)
+            internal_count = stats.get("internal_count", 0)
+            
+            title = lang.get('armory_settings.reset_confirm_title', default="Confirmer la réinitialisation")
+            message = lang.get('armory_settings.reset_confirm_message',
+                default="Êtes-vous sûr de vouloir réinitialiser votre base de données personnelle ?\n\n"
+                       "Ceci supprimera tous vos items ajoutés manuellement ({user_count} items) "
+                       "et restaurera la base interne ({internal_count} items).\n\n"
+                       "Cette action est irréversible.")
+            message = message.replace("{user_count}", str(user_count))
+            message = message.replace("{internal_count}", str(internal_count))
+            
+            reply = QMessageBox.warning(self, title, message,
+                                       QMessageBox.Yes | QMessageBox.No,
+                                       QMessageBox.No)
+            
+            if reply == QMessageBox.Yes:
+                success, result = self.db_manager.reset_personal_database()
+                
+                if success:
+                    success_title = lang.get('armory_settings.reset_success_title', default="Base réinitialisée")
+                    success_message = lang.get('armory_settings.reset_success_message',
+                        default="Base de données personnelle réinitialisée avec succès")
+                    
+                    QMessageBox.information(self, success_title, success_message)
+                    
+                    # Update statistics
+                    self._update_statistics()
+                else:
+                    error_title = lang.get('armory_settings.reset_error_title', default="Erreur de réinitialisation")
+                    error_message = lang.get('armory_settings.reset_error_message',
+                        default="Impossible de réinitialiser la base de données :\n{error}")
+                    error_message = error_message.replace("{error}", result)
+                    
+                    QMessageBox.critical(self, error_title, error_message)
+                    
+        except Exception as e:
+            logging.error(f"Error resetting personal database: {e}", exc_info=True)
+            if hasattr(self, 'armory_items_label'):
+                self.armory_items_label.setText("Erreur")
+                self.armory_items_label.setStyleSheet("color: #f44336;")
+    
+    # === SUPERADMIN METHODS ===
+    
+    def _select_template_files(self):
+        """Select multiple .txt template files"""
+        try:
+            title = lang.get('superadmin.select_files_title', 
+                default="Sélectionner les fichiers templates")
+            file_filter = "Template files (*.txt);;All files (*.*)"
+            
+            files, _ = QFileDialog.getOpenFileNames(self, title, "", file_filter)
+            
+            if files:
+                self.superadmin_selected_files = files
+                count = len(files)
+                files_text = lang.get('superadmin.files_selected', 
+                    default="{count} fichier(s) sélectionné(s)")
+                self.superadmin_files_label.setText(files_text.replace("{count}", str(count)))
+                self.superadmin_files_label.setStyleSheet("color: #4caf50; font-weight: bold;")
+            else:
+                self.superadmin_selected_files = []
+                self.superadmin_files_label.setText(
+                    lang.get('superadmin.no_files_selected', 
+                        default="Aucun fichier sélectionné")
+                )
+                self.superadmin_files_label.setStyleSheet("color: #888; font-style: italic;")
+                
+        except Exception as e:
+            logging.error(f"Error selecting template files: {e}", exc_info=True)
+            QMessageBox.critical(self, "Erreur", f"Impossible de sélectionner les fichiers:\n{e}")
+    
+    def _open_mass_import_monitor(self):
+        """Open Database Management Tools window"""
+        try:
+            from PySide6.QtWidgets import QApplication
+            from UI.mass_import_monitor import MassImportMonitor
+            
+            # Create and show Database Management Tools
+            monitor = MassImportMonitor(self)
+            
+            # Pass default settings to monitor (using default values since widgets were removed)
+            monitor.set_default_options(
+                realm=None,  # Auto-detection
+                merge=True,
+                remove_duplicates=True,
+                auto_backup=True,
+                path_manager=self.path_manager
+            )
+            
+            monitor.show()
+            QApplication.processEvents()
+            
+        except Exception as e:
+            logging.error(f"Error opening Database Management Tools: {e}", exc_info=True)
+            QMessageBox.critical(self, "Erreur", f"Erreur lors de l'ouverture de Database Management Tools:\n{e}")
+    
+    def _refresh_superadmin_stats(self):
+        """Refresh SuperAdmin statistics display"""
+        try:
+            from Functions.superadmin_tools import SuperAdminTools
+            superadmin = SuperAdminTools(self.path_manager, self.config_manager)
+            
+            stats = superadmin.get_database_stats()
+            
+            self.superadmin_stats_total.setText(str(stats.get("total_items", 0)))
+            self.superadmin_stats_albion.setText(str(stats.get("albion", 0)))
+            self.superadmin_stats_hibernia.setText(str(stats.get("hibernia", 0)))
+            self.superadmin_stats_midgard.setText(str(stats.get("midgard", 0)))
+            self.superadmin_stats_all_realms.setText(str(stats.get("all_realms", 0)))
+            
+            file_size_kb = stats.get("file_size", 0) / 1024
+            self.superadmin_stats_file_size.setText(f"{file_size_kb:.1f} KB")
+            
+            last_updated = stats.get("last_updated", 
+                lang.get('superadmin.stats_not_available', default="Non disponible"))
+            self.superadmin_stats_last_updated.setText(last_updated)
+            
+        except Exception as e:
+            logging.error(f"Error refreshing SuperAdmin stats: {e}", exc_info=True)
+            self.superadmin_stats_total.setText("0")
+            self.superadmin_stats_albion.setText("0")
+            self.superadmin_stats_hibernia.setText("0")
+            self.superadmin_stats_midgard.setText("0")
+            self.superadmin_stats_all_realms.setText("0")
+    
+    def _backup_database(self):
+        """Create a manual backup of the embedded database"""
+        try:
+            from Functions.superadmin_tools import SuperAdminTools
+            
+            # Initialize SuperAdminTools with path_manager and config_manager
+            superadmin = SuperAdminTools(self.path_manager, self.config_manager)
+            
+            # Create backup
+            success, result = superadmin.backup_source_database()
+            
+            if success:
+                QMessageBox.information(
+                    self,
+                    lang.get('superadmin.backup_success_title', default="Sauvegarde réussie"),
+                    lang.get('superadmin.backup_success_message', default="Base de données sauvegardée avec succès :\n\n") + result
+                )
+            else:
+                QMessageBox.critical(
+                    self,
+                    lang.get('superadmin.backup_error_title', default="Erreur de sauvegarde"),
+                    lang.get('superadmin.backup_error_message', default="Erreur lors de la sauvegarde :\n\n") + result
+                )
+                
+        except Exception as e:
+            QMessageBox.critical(
+                self,
+                lang.get('superadmin.backup_error_title', default="Erreur de sauvegarde"),
+                lang.get('superadmin.backup_unexpected_error', default="Erreur inattendue :\n\n") + str(e)
+            )
+    
+    def _clean_duplicates(self):
+        """Clean duplicate items from source database"""
+        try:
+            # Confirmation dialog
+            title = lang.get('superadmin.clean_confirm_title', 
+                default="Confirmer le nettoyage")
+            message = lang.get('superadmin.clean_confirm_message',
+                default="Voulez-vous nettoyer les doublons de la base source ?\n\n"
+                       "Ceci supprimera tous les items avec le même nom + royaume.\n"
+                       "Une sauvegarde sera créée automatiquement.")
+            
+            reply = QMessageBox.question(self, title, message,
+                                        QMessageBox.Yes | QMessageBox.No)
+            
+            if reply != QMessageBox.Yes:
+                return
+            
+            # Import SuperAdminTools
+            from Functions.superadmin_tools import SuperAdminTools
+            superadmin = SuperAdminTools(self.path_manager, self.config_manager)
+            
+            # Execute cleaning
+            success, message, removed_count = superadmin.clean_duplicates()
+            
+            # Show result
+            if success:
+                removed_label = lang.get('superadmin.clean_removed_count', default="Items supprimés")
+                result_message = message + f"\n\n{removed_label}: {removed_count}"
+                QMessageBox.information(self,
+                    lang.get('superadmin.clean_success_title', 
+                        default="Nettoyage réussi"),
+                    result_message
+                )
+                
+                # Refresh statistics
+                self._refresh_superadmin_stats()
+            else:
+                QMessageBox.critical(self,
+                    lang.get('superadmin.clean_error_title', 
+                        default="Erreur de nettoyage"),
+                    message
+                )
+                
+        except Exception as e:
+            logging.error(f"Error cleaning duplicates: {e}", exc_info=True)
+            QMessageBox.critical(self, "Erreur", f"Erreur lors du nettoyage:\n{e}")
+    
+    def _single_item_refresh(self):
+        """Refresh specific items from the source database"""
+        try:
+            from PySide6.QtWidgets import QInputDialog
+            
+            # Ask for item names
+            items_text, ok = QInputDialog.getText(
+                self,
+                lang.get('superadmin.single_refresh_input_title', default="🔍 Item(s) - Single Refresh"),
+                lang.get('superadmin.single_refresh_input_message',
+                    default="Enter item names to refresh (comma-separated):\n\n"
+                           "Examples:\n"
+                           "• Cloth Cap\n"
+                           "• Cudgel of the Undead, Soulbinder's Belt\n"
+                           "• Ring of the Azure\n\n"
+                           "⚠️ Exact case-sensitive names required")
+            )
+            
+            if not ok or not items_text.strip():
+                return
+            
+            # Parse item names
+            item_filter = [name.strip() for name in items_text.split(',') if name.strip()]
+            
+            if not item_filter:
+                QMessageBox.warning(self, 
+                    lang.get('error_title', default="Error"),
+                    lang.get('superadmin.single_refresh_no_items', default="No valid items entered."))
+                return
+            
+            # Ask about filter bypass
+            filter_reply = QMessageBox.question(
+                self,
+                lang.get('superadmin.filter_bypass_title', default="Filter Bypass"),
+                lang.get('superadmin.filter_bypass_message',
+                    default="Do you want to bypass utility/level filters?\n\n"
+                           "✅ YES = Skip filters (get all variants)\n"
+                           "❌ NO = Apply filters (utility ≥ 100, level ≥ 50)"),
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No
+            )
+            
+            skip_filters = (filter_reply == QMessageBox.Yes)
+            
+            # Confirmation with list
+            confirm_msg = lang.get('superadmin.single_refresh_confirm',
+                default="Items selected ({count}):\n\n").replace('{count}', str(len(item_filter)))
+            confirm_msg += "\n".join(f"• {name}" for name in item_filter)
+            confirm_msg += f"\n\n{lang.get('superadmin.filter_status', default='Filters:')} "
+            confirm_msg += lang.get('superadmin.filter_bypassed', default='BYPASSED') if skip_filters else lang.get('superadmin.filter_active', default='ACTIVE')
+            confirm_msg += f"\n\n{lang.get('superadmin.confirm_continue', default='Continue?')}"
+            
+            confirm_reply = QMessageBox.question(self, 
+                lang.get('superadmin.confirm_title', default="Confirm"),
+                confirm_msg)
+            if confirm_reply != QMessageBox.Yes:
+                return
+            
+            # Execute refresh
+            self._execute_refresh(item_filter, skip_filters)
+            
+        except Exception as e:
+            logging.error(f"Error in single item refresh: {e}", exc_info=True)
+            QMessageBox.critical(self, 
+                lang.get("error_title", default="Error"),
+                f"{lang.get('superadmin.refresh_error', default='Refresh error')}:\n{str(e)}")
+    
+    def _all_items_refresh(self):
+        """Refresh all items from the source database"""
+        try:
+            # Ask about filter bypass
+            filter_reply = QMessageBox.question(
+                self,
+                lang.get('superadmin.filter_bypass_title', default="Filter Bypass"),
+                lang.get('superadmin.all_refresh_filter_message',
+                    default="Do you want to bypass utility/level filters for ALL items?\n\n"
+                           "✅ YES = Skip filters (get all variants)\n"
+                           "❌ NO = Apply filters (utility ≥ 100, level ≥ 50)\n\n"
+                           "⚠️ This will affect ALL items in the database"),
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No
+            )
+            
+            skip_filters = (filter_reply == QMessageBox.Yes)
+            
+            # Confirmation
+            message = lang.get('superadmin.all_refresh_confirm_message',
+                default="Refresh ALL items from the source database?\n\n"
+                       "This will re-scrape all items from Eden Herald to update:\n"
+                       "• Model ID (for future 3D rendering)\n"
+                       "• DPS, Speed, Damage Type (weapons)\n"
+                       "• Type, Slot (equipment)\n"
+                       "• Merchant price and zone\n\n")
+            message += f"{lang.get('superadmin.filter_status', default='Filters:')} "
+            message += lang.get('superadmin.filter_bypassed', default='BYPASSED') if skip_filters else lang.get('superadmin.filter_active', default='ACTIVE')
+            message += f"\n\n⚠️ {lang.get('superadmin.all_refresh_warning', default='This operation may take several minutes.')}\n"
+            message += lang.get('superadmin.auto_backup', default='An automatic backup will be created.')
+            
+            reply = QMessageBox.question(self,
+                lang.get('superadmin.all_refresh_confirm_title', default="🔄 Confirm Item(s) - All Refresh"),
+                message,
+                QMessageBox.Yes | QMessageBox.No)
+            
+            if reply != QMessageBox.Yes:
+                return
+            
+            # Execute refresh with no filter (all items)
+            self._execute_refresh(None, skip_filters)
+            
+        except Exception as e:
+            logging.error(f"Error in all items refresh: {e}", exc_info=True)
+            QMessageBox.critical(self, 
+                lang.get("error_title", default="Error"),
+                f"{lang.get('superadmin.refresh_error', default='Refresh error')}:\n{str(e)}")
+    
+    def _execute_refresh(self, item_filter, skip_filters):
+        """Execute the refresh operation with progress dialog
+        
+        Args:
+            item_filter: List of item names to refresh, or None for all items
+            skip_filters: Boolean to bypass utility/level filters
+        """
+        from PySide6.QtWidgets import QProgressDialog
+        from PySide6.QtCore import Qt
+        
+        # Create progress dialog
+        progress = QProgressDialog(
+            lang.get('superadmin.refresh_progress_description', 
+                default="Refreshing items..."),
+            lang.get('superadmin.refresh_progress_cancel', default="Cancel"),
+            0, 100, self
+        )
+        progress.setWindowTitle(lang.get('superadmin.refresh_progress_title', 
+            default="Refresh in Progress"))
+        progress.setWindowModality(Qt.WindowModal)
+        progress.setMinimumDuration(0)
+        progress.show()
+        QApplication.processEvents()
+        
+        # Progress callback
+        def update_progress(current, total, item_name):
+            progress.setMaximum(total)
+            progress.setValue(current)
+            filter_status = lang.get('superadmin.filter_bypassed', default='BYPASSED') if skip_filters else lang.get('superadmin.filter_active', default='ACTIVE')
+            progress.setLabelText(
+                f"{lang.get('superadmin.refresh_progress_description', default='Refreshing items...')}\n\n"
+                f"Item {current}/{total}: {item_name}\n"
+                f"{lang.get('superadmin.filter_status', default='Filters:')} {filter_status}"
+            )
+            QApplication.processEvents()
+            
+            # Check for cancellation
+            if progress.wasCanceled():
+                raise InterruptedError("User cancelled refresh")
+        
+        # Import SuperAdminTools
+        logging.info("REFRESH: Importing SuperAdminTools...")
+        from Functions.superadmin_tools import SuperAdminTools
+        superadmin = SuperAdminTools(self.path_manager, self.config_manager)
+        
+        # Execute refresh
+        try:
+            logging.info(f"REFRESH: Calling refresh_all_items with filter={item_filter}, skip_filters={skip_filters}")
+            success, message, stats = superadmin.refresh_all_items(
+                progress_callback=update_progress,
+                item_filter=item_filter,
+                skip_filters=skip_filters
+            )
+            logging.info(f"REFRESH: Result - success={success}, stats={stats}")
+        except InterruptedError:
+            progress.close()
+            QMessageBox.information(self,
+                lang.get('superadmin.refresh_cancelled_title', default="Refresh Cancelled"),
+                lang.get('superadmin.refresh_cancelled_message', 
+                    default="Refresh has been cancelled.\n\n"
+                           "Items processed before cancellation have been saved.")
+            )
+            self._refresh_superadmin_stats()
+            return
+        
+        progress.close()
+        
+        # Show result
+        if success:
+            stats_text = f"\n\n{lang.get('superadmin.stats_title', default='Statistics')}:\n"
+            stats_text += f"• {lang.get('superadmin.refresh_stats_total', default='Total items')}: {stats.get('total_items', 0)}\n"
+            stats_text += f"• {lang.get('superadmin.refresh_stats_updated', default='Updated')}: {stats.get('updated', 0)}\n"
+            stats_text += f"• {lang.get('superadmin.refresh_stats_skipped', default='Unchanged')}: {stats.get('skipped', 0)}\n"
+            stats_text += f"• {lang.get('superadmin.refresh_stats_failed', default='Failed')}: {stats.get('failed', 0)}\n\n"
+            
+            fields = stats.get('fields_updated', {})
+            stats_text += f"{lang.get('superadmin.refresh_fields_updated', default='Updated fields')}:\n"
+            stats_text += f"• Model: {fields.get('model', 0)}\n"
+            stats_text += f"• DPS: {fields.get('dps', 0)}\n"
+            stats_text += f"• Speed: {fields.get('speed', 0)}\n"
+            stats_text += f"• Damage Type: {fields.get('damage_type', 0)}\n"
+            stats_text += f"• Type: {fields.get('type', 0)}\n"
+            stats_text += f"• Slot: {fields.get('slot', 0)}"
+            
+            QMessageBox.information(self,
+                lang.get('superadmin.refresh_success_title', 
+                    default="Refresh Successful"),
+                message + stats_text
+            )
+            
+            self._refresh_superadmin_stats()
+        else:
+            QMessageBox.critical(self,
+                lang.get('superadmin.refresh_error_title', 
+                    default="Refresh Error"),
+                message
+            )
+    
+    def _refresh_all_items(self):
+        """Refresh all items in the source database from Eden"""
+        try:
+            # 🔧 DEBUG MODE: Demander si on veut filtrer des items spécifiques
+            from PySide6.QtWidgets import QInputDialog
+            
+            filter_reply = QMessageBox.question(
+                self,
+                "🔧 Mode Debug",
+                "Voulez-vous rafraîchir UNIQUEMENT des items spécifiques ?\n\n"
+                "✅ OUI = Sélection manuelle d'items (pour debug)\n"
+                "❌ NON = Rafraîchir TOUS les items (30+ items, plusieurs minutes)",
+                QMessageBox.Yes | QMessageBox.No
+            )
+            
+            item_filter = None
+            if filter_reply == QMessageBox.Yes:
+                # Mode DEBUG: Demander les noms des items
+                items_text, ok = QInputDialog.getText(
+                    self,
+                    "🔧 Sélection d'items",
+                    "Entrez les noms des items à rafraîchir (séparés par des virgules) :\n\n"
+                    "Exemples :\n"
+                    "• Cloth Cap\n"
+                    "• Cudgel of the Undead, Soulbinder's Belt\n"
+                    "• Ring of the Azure\n\n"
+                    "⚠️ Respectez la casse exacte (majuscules/minuscules)"
+                )
+                
+                if not ok or not items_text.strip():
+                    QMessageBox.information(self, "Annulé", "Opération annulée.")
+                    return
+                
+                # Parser les noms d'items
+                item_filter = [name.strip() for name in items_text.split(',') if name.strip()]
+                
+                if not item_filter:
+                    QMessageBox.warning(self, "Erreur", "Aucun item valide saisi.")
+                    return
+                
+                # Confirmation avec liste des items
+                confirm_msg = f"Items sélectionnés ({len(item_filter)}) :\n\n"
+                confirm_msg += "\n".join(f"• {name}" for name in item_filter)
+                confirm_msg += "\n\nContinuer ?"
+                
+                confirm_reply = QMessageBox.question(self, "Confirmer", confirm_msg)
+                if confirm_reply != QMessageBox.Yes:
+                    return
+            
+            # Confirmation dialog
+            title = lang.get('superadmin.refresh_confirm_title', 
+                default="Confirmer le rafraîchissement")
+            
+            if item_filter:
+                message = f"Rafraîchissement de {len(item_filter)} item(s) sélectionné(s).\n\n"
+                message += "Items à traiter :\n" + "\n".join(f"• {name}" for name in item_filter)
+                message += "\n\n⚠️ Une sauvegarde sera créée automatiquement."
+            else:
+                message = lang.get('superadmin.refresh_confirm_message',
+                    default="Voulez-vous rafraîchir tous les items de la base source ?\n\n"
+                           "Ceci va re-scraper tous les items depuis Eden Herald pour mettre à jour:\n"
+                           "• Model ID (pour rendu 3D futur)\n"
+                           "• DPS, Speed, Damage Type (armes)\n"
+                           "• Type, Slot (équipement)\n"
+                           "• Prix et zone marchand\n\n"
+                           "⚠️ Cette opération peut prendre plusieurs minutes.\n"
+                           "Une sauvegarde sera créée automatiquement.")
+            
+            reply = QMessageBox.question(self, title, message,
+                                        QMessageBox.Yes | QMessageBox.No)
+            
+            if reply != QMessageBox.Yes:
+                return
+            
+            # Create progress dialog
+            from PySide6.QtWidgets import QProgressDialog
+            from PySide6.QtCore import Qt
+            
+            progress = QProgressDialog(
+                lang.get('superadmin.refresh_progress_description', 
+                    default="Rafraîchissement des items en cours..."),
+                lang.get('superadmin.refresh_progress_cancel', default="Annuler"),
+                0, 100, self
+            )
+            progress.setWindowTitle(lang.get('superadmin.refresh_progress_title', 
+                default="Rafraîchissement en cours"))
+            progress.setWindowModality(Qt.WindowModal)
+            progress.setMinimumDuration(0)
+            progress.show()
+            QApplication.processEvents()
+            
+            # Progress callback
+            def update_progress(current, total, item_name):
+                progress.setMaximum(total)
+                progress.setValue(current)
+                progress.setLabelText(
+                    f"{lang.get('superadmin.refresh_progress_description', default='Rafraîchissement des items en cours...')}\n\n"
+                    f"Item {current}/{total}: {item_name}"
+                )
+                QApplication.processEvents()
+                
+                # Check for cancellation
+                if progress.wasCanceled():
+                    raise InterruptedError("User cancelled refresh")
+            
+            # Import SuperAdminTools
+            logging.info("REFRESH: Importing SuperAdminTools...")
+            from Functions.superadmin_tools import SuperAdminTools
+            logging.info("REFRESH: Creating SuperAdminTools instance...")
+            superadmin = SuperAdminTools(self.path_manager, self.config_manager)
+            logging.info(f"REFRESH: SuperAdminTools initialized with source_db_path={superadmin.source_db_path}")
+            
+            # Execute refresh
+            try:
+                logging.info(f"REFRESH: Calling refresh_all_items with filter={item_filter}...")
+                success, message, stats = superadmin.refresh_all_items(
+                    progress_callback=update_progress,
+                    item_filter=item_filter  # None = tous les items, ou liste spécifique
+                )
+                logging.info(f"REFRESH: Result - success={success}, stats={stats}")
+            except InterruptedError:
+                progress.close()
+                QMessageBox.information(self,
+                    lang.get('superadmin.refresh_cancelled_title', default="Rafraîchissement annulé"),
+                    lang.get('superadmin.refresh_cancelled_message', 
+                        default="Le rafraîchissement a été annulé.\n\n"
+                               "Les items traités avant l'annulation ont été sauvegardés.")
+                )
+                # Refresh statistics anyway
+                self._refresh_superadmin_stats()
+                return
+            
+            progress.close()
+            
+            # Show result
+            if success:
+                stats_text = f"\n\n{lang.get('superadmin.stats_title', default='Statistiques')}:\n"
+                stats_text += f"• {lang.get('superadmin.refresh_stats_total', default='Total items')}: {stats.get('total_items', 0)}\n"
+                stats_text += f"• {lang.get('superadmin.refresh_stats_updated', default='Mis à jour')}: {stats.get('updated', 0)}\n"
+                stats_text += f"• {lang.get('superadmin.refresh_stats_skipped', default='Inchangés')}: {stats.get('skipped', 0)}\n"
+                stats_text += f"• {lang.get('superadmin.refresh_stats_failed', default='Échecs')}: {stats.get('failed', 0)}\n\n"
+                
+                fields = stats.get('fields_updated', {})
+                stats_text += f"{lang.get('superadmin.refresh_fields_updated', default='Champs mis à jour')}:\n"
+                stats_text += f"• Model: {fields.get('model', 0)}\n"
+                stats_text += f"• DPS: {fields.get('dps', 0)}\n"
+                stats_text += f"• Speed: {fields.get('speed', 0)}\n"
+                stats_text += f"• Damage Type: {fields.get('damage_type', 0)}\n"
+                stats_text += f"• Type: {fields.get('type', 0)}\n"
+                stats_text += f"• Slot: {fields.get('slot', 0)}"
+                
+                QMessageBox.information(self,
+                    lang.get('superadmin.refresh_success_title', 
+                        default="Rafraîchissement réussi"),
+                    message + stats_text
+                )
+                
+                # Refresh statistics
+                self._refresh_superadmin_stats()
+            else:
+                QMessageBox.critical(self,
+                    lang.get('superadmin.refresh_error_title', 
+                        default="Erreur de rafraîchissement"),
+                    message
+                )
+                
+        except Exception as e:
+            logging.error(f"Error refreshing items: {e}", exc_info=True)
+            QMessageBox.critical(self, 
+                lang.get("error_title", default="Erreur"), 
+                lang.get("superadmin.refresh_error_message", 
+                    default="Erreur lors du rafraîchissement:\n{error}").replace("{error}", str(e))
+            )
+    
+    def _open_database_editor(self):
+        """Open Database Editor window (non-modal, resizable)"""
+        try:
+            from UI.database_editor_dialog import DatabaseEditorDialog
+            
+            # Create window (non-modal)
+            dialog = DatabaseEditorDialog(self, self.path_manager)
+            
+            # Connect signal to refresh stats when database is modified
+            dialog.database_modified.connect(self._refresh_superadmin_stats)
+            
+            # Store reference to prevent garbage collection
+            if not hasattr(self, '_database_editors'):
+                self._database_editors = []
+            self._database_editors.append(dialog)
+            
+            # Show as non-modal window (allows multiple instances)
+            dialog.show()
+            
+        except Exception as e:
+            logging.error(f"Error opening database editor: {e}", exc_info=True)
+            QMessageBox.critical(self, 
+                lang.get("error_title", default="Erreur"),
+                f"Erreur lors de l'ouverture de l'éditeur:\n{str(e)}"
+            )
+
+    def retranslate_ui(self):
+        """Retranslate all UI elements when language changes"""
+        # Window title
+        self.setWindowTitle(lang.get("configuration_window_title"))
+        
+        # Eden section widgets
+        if 'cookies_group' in self.translatable_widgets:
+            self.translatable_widgets['cookies_group'].setTitle(
+                "🍪 " + lang.get("settings.herald.config_cookies_group_title", default="Chemin des cookies")
+            )
+        
+        if 'cookies_info' in self.translatable_widgets:
+            eden_path = self.translatable_widgets.get('cookies_info_path', '')
+            self.translatable_widgets['cookies_info'].setText(
+                lang.get("buttons.eden_storage_info", default="Stockage automatique dans") + f": {eden_path}"
+            )
+        
+        if 'open_cookies_folder_button' in self.translatable_widgets:
+            self.translatable_widgets['open_cookies_folder_button'].setText(
+                "📂 " + lang.get("buttons.open_folder_button", default="Ouvrir le dossier")
+            )
+        
+        if 'clean_eden_button' in self.translatable_widgets:
+            self.translatable_widgets['clean_eden_button'].setText(
+                "🗑️ " + lang.get("buttons.clean_eden_button", default="Nettoyer Eden")
+            )
+            self.translatable_widgets['clean_eden_button'].setToolTip(
+                lang.get("buttons.clean_eden_tooltip", default="Supprime tous les cookies et fichiers temporaires du profil Chrome")
+            )
+        
+        # Item Cache section widgets
+        if 'cache_group' in self.translatable_widgets:
+            self.translatable_widgets['cache_group'].setTitle(
+                "💾 " + lang.get("settings.herald.config_item_cache_group_title", default="Chemin du cache des items")
+            )
+        
+        if 'cache_info' in self.translatable_widgets:
+            cache_path = self.translatable_widgets.get('cache_info_path', '')
+            self.translatable_widgets['cache_info'].setText(
+                lang.get("buttons.item_cache_storage_info", default="Stockage automatique dans") + f": {cache_path}"
+            )
+        
+        if 'open_cache_folder_button' in self.translatable_widgets:
+            self.translatable_widgets['open_cache_folder_button'].setText(
+                "📂 " + lang.get("buttons.open_folder_button", default="Ouvrir le dossier")
+            )
+        
+        if 'clean_cache_button' in self.translatable_widgets:
+            self.translatable_widgets['clean_cache_button'].setText(
+                "🗑️ " + lang.get("buttons.clean_cache_button", default="Nettoyer le cache")
+            )
+            self.translatable_widgets['clean_cache_button'].setToolTip(
+                lang.get("buttons.clean_cache_tooltip", default="Supprime le cache des items trouvés via recherche web")
+            )
+
+
+
+
+
 

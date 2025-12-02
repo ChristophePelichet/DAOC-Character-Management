@@ -138,16 +138,33 @@ class UIManager:
         return self.context_menu
         
     def create_delete_button(self, parent_layout):
-        """Crée le bouton de suppression de la sélection en bas de la liste"""
-        delete_button_layout = QHBoxLayout()
+        """Crée les boutons d'action groupée en bas de la liste"""
+        action_button_layout = QHBoxLayout()
         
-        delete_button = QPushButton(lang.get("bulk_action_delete", default="Supprimer la sélection"))
-        delete_button.clicked.connect(self.main_window.execute_bulk_action)
-        delete_button_layout.addWidget(delete_button)
+        # Bouton "Tout sélectionner"
+        select_all_text = lang.get("menu.bulk_actions.select_all", default="✓ Select All")
+        logging.debug(f"Creating select_all_button with text: {select_all_text}")
+        self.select_all_button = QPushButton(select_all_text)
+        self.select_all_button.clicked.connect(self.main_window.select_all_characters)
+        action_button_layout.addWidget(self.select_all_button)
         
-        delete_button_layout.addStretch()  # Aligné à gauche
+        # Bouton "Tout désélectionner"
+        deselect_all_text = lang.get("menu.bulk_actions.deselect_all", default="✗ Deselect All")
+        logging.debug(f"Creating deselect_all_button with text: {deselect_all_text}")
+        self.deselect_all_button = QPushButton(deselect_all_text)
+        self.deselect_all_button.clicked.connect(self.main_window.deselect_all_characters)
+        action_button_layout.addWidget(self.deselect_all_button)
         
-        parent_layout.addLayout(delete_button_layout)
+        # Bouton "Supprimer la sélection"
+        delete_text = lang.get("menu.bulk_actions.delete", default="Delete Selection")
+        logging.debug(f"Creating delete_button with text: {delete_text}")
+        self.delete_button = QPushButton(delete_text)
+        self.delete_button.clicked.connect(self.main_window.execute_bulk_action)
+        action_button_layout.addWidget(self.delete_button)
+        
+        action_button_layout.addStretch()  # Aligné à gauche
+        
+        parent_layout.addLayout(action_button_layout)
     
     def create_eden_status_bar(self, parent_layout):
         """Crée la barre de statut de connexion Eden et la section Informations"""
@@ -429,20 +446,13 @@ class UIManager:
     def _update_herald_buttons_state(self):
         """Désactive/active les boutons et actions Herald selon l'état de validation Eden"""
         from Functions.language_manager import lang
-        from Functions.logging_manager import log_with_action, get_logger, LOGGER_UI
-        
-        logger_ui = get_logger(LOGGER_UI)
         
         # Vérifier si validation en cours (basé sur le flag, pas sur isRunning())
         is_validation_running = getattr(self, 'eden_validation_in_progress', False)
-        is_validation_running = getattr(self, 'eden_validation_in_progress', False)
-        
-        log_with_action(logger_ui, "debug", f"_update_herald_buttons_state: validation_running={is_validation_running}", action="UI_STATE")
         
         # Action du menu contextuel
         if hasattr(self, 'update_from_herald_action'):
             self.update_from_herald_action.setEnabled(not is_validation_running)
-            log_with_action(logger_ui, "debug", f"Menu contextuel action enabled={not is_validation_running}", action="UI_STATE")
             if is_validation_running:
                 # QAction n'affiche pas les tooltips comme les boutons, on utilise statusTip
                 tooltip_text = lang.get("herald_buttons.validation_in_progress", default="⏳ Validation Eden en cours... Veuillez patienter")
@@ -451,20 +461,16 @@ class UIManager:
             else:
                 self.update_from_herald_action.setToolTip("")
                 self.update_from_herald_action.setStatusTip("")
-        else:
-            log_with_action(logger_ui, "warning", "update_from_herald_action n'existe pas encore!", action="UI_STATE")
         
         # Bouton de recherche Herald (dans ui_manager)
         if hasattr(self, 'search_button'):
             if is_validation_running:
                 self.search_button.setEnabled(False)
                 self.search_button.setToolTip(lang.get("herald_buttons.validation_in_progress", default="⏳ Validation Eden en cours... Veuillez patienter"))
-                log_with_action(logger_ui, "debug", "search_button désactivé", action="UI_STATE")
             else:
                 # Réactiver le bouton si la validation est terminée
                 self.search_button.setEnabled(True)
                 self.search_button.setToolTip(lang.get("buttons.eden_search", default="Rechercher un personnage sur Herald"))
-                log_with_action(logger_ui, "debug", "search_button réactivé", action="UI_STATE")
         
         
     def create_status_bar(self):
@@ -497,10 +503,11 @@ class UIManager:
             self.main_window.status_label.setText(message)
             
     def show_about_dialog(self, app_name, app_version):
-        """Affiche la boîte de dialogue 'À propos'"""
-        title = lang.get("about_dialog_title", app_name=app_name)
-        message = lang.get("about_dialog_content", app_name=app_name, version=app_version)
-        QMessageBox.about(self.main_window, title, message)
+        """Affiche la boîte de dialogue 'À propos' complète avec onglets"""
+        from UI.about_dialog import AboutDialog
+        
+        dialog = AboutDialog(self.main_window, app_name, app_version)
+        dialog.exec()
     
     def _open_wiki_documentation(self):
         """Ouvre le Wiki GitHub dans le navigateur"""
@@ -517,6 +524,31 @@ class UIManager:
         self.main_window.setWindowTitle(lang.get("window_title"))
         self.create_menu_bar()
         self.create_context_menu()
+        
+        # Mettre à jour les boutons d'action groupée
+        if hasattr(self, 'select_all_button'):
+            new_text = lang.get("menu.bulk_actions.select_all", default="✓ Select All")
+            logging.debug(f"Updating select_all_button text to: {new_text}")
+            self.select_all_button.setText(new_text)
+            self.select_all_button.update()
+        else:
+            logging.warning("select_all_button attribute not found")
+            
+        if hasattr(self, 'deselect_all_button'):
+            new_text = lang.get("menu.bulk_actions.deselect_all", default="✗ Deselect All")
+            logging.debug(f"Updating deselect_all_button text to: {new_text}")
+            self.deselect_all_button.setText(new_text)
+            self.deselect_all_button.update()
+        else:
+            logging.warning("deselect_all_button attribute not found")
+            
+        if hasattr(self, 'delete_button'):
+            new_text = lang.get("menu.bulk_actions.delete", default="Delete Selection")
+            logging.debug(f"Updating delete_button text to: {new_text}")
+            self.delete_button.setText(new_text)
+            self.delete_button.update()
+        else:
+            logging.warning("delete_button attribute not found")
         
         # Mettre à jour les titres des groupes de la barre de statut Eden
         if hasattr(self, 'status_group'):

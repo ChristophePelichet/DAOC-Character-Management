@@ -411,9 +411,17 @@ class CookieManager:
             # Utiliser le profil Chrome dédié dans AppData
             profile_path = get_chrome_profile_path()
             chrome_options.add_argument(f"--user-data-dir={profile_path}")
-            chrome_options.add_argument("--profile-directory=Default")
+            chrome_options.add_argument("--profile-directory=EdenScraper")  # Profil dédié isolé
             
-            eden_logger.info(f"🔧 Chrome profil dédié: {profile_path}", extra={"action": "INIT"})
+            # Flags d'isolation supplémentaires
+            chrome_options.add_argument("--disable-extensions")  # Pas d'extensions
+            chrome_options.add_argument("--disable-plugins")
+            chrome_options.add_argument("--disable-sync")  # Pas de sync Google
+            chrome_options.add_argument("--no-first-run")
+            chrome_options.add_argument("--no-default-browser-check")
+            chrome_options.add_argument("--disable-default-apps")
+            
+            eden_logger.info(f"🔧 Chrome profil isolé: {profile_path}/EdenScraper", extra={"action": "INIT"})
             
             if headless:
                 chrome_options.add_argument('--headless=new')
@@ -439,7 +447,8 @@ class CookieManager:
                 eden_logger.info("✅ Chrome (Selenium Manager) avec profil dédié")
                 return driver
             except Exception as e:
-                eden_logger.debug(f"Chrome système: {e}")
+                # Silent fail - normal if system Chrome not available
+                pass
             
             # Chrome download (only if authorized)
             if allow_download:

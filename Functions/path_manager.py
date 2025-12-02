@@ -38,19 +38,59 @@ def get_resource_path(relative_path):
     
     return os.path.join(base_path, relative_path)
 
+def get_armory_base_dir():
+    """
+    Returns the Armory base directory.
+    Located at project root: Armory/
+    """
+    return os.path.join(get_base_path(), "Armory")
+
+def get_armory_dir(season, realm, character_name):
+    """
+    Returns the armory directory for a specific character.
+    Structure: Armory/Season/Realm/CharacterName/
+    
+    Args:
+        season: Season identifier (e.g., 'S3')
+        realm: Realm name (e.g., 'Hibernia', 'Albion', 'Midgard')
+        character_name: Name of the character
+    
+    Returns:
+        str: Full path to character's armory directory
+    """
+    base = get_armory_base_dir()
+    return os.path.join(base, season, realm, character_name)
+
+def ensure_armory_dir(season, realm, character_name):
+    """
+    Ensures the armory directory exists for a character, creating it if necessary.
+    
+    Args:
+        season: Season identifier
+        realm: Realm name
+        character_name: Character name
+        
+    Returns:
+        str: Path to the character's armory directory
+    """
+    armory_dir = get_armory_dir(season, realm, character_name)
+    os.makedirs(armory_dir, exist_ok=True)
+    return armory_dir
+
+# Legacy functions - kept for backward compatibility
 def get_armor_dir():
     """
-    Returns the configured armor directory.
-    Defaults to 'Armures' folder in the base path.
+    DEPRECATED: Returns the old armor directory.
+    Use get_armory_dir() instead.
     """
     from Functions.config_manager import config
-    default_path = os.path.join(get_base_path(), "Armures")
+    default_path = os.path.join(get_base_path(), "Armory")
     return config.get("armor_folder") or default_path
 
 def ensure_armor_dir():
     """
-    Ensures the armor directory exists, creating it if necessary.
-    Returns the path to the armor directory.
+    DEPRECATED: Ensures the old armor directory exists.
+    Use ensure_armory_dir() instead.
     """
     armor_dir = get_armor_dir()
     os.makedirs(armor_dir, exist_ok=True)
@@ -125,3 +165,19 @@ def get_eden_cookies_path():
         Path: Absolute path to cookies file (may not exist yet)
     """
     return get_eden_data_dir() / "eden_cookies.pkl"
+
+
+class PathManager:
+    """Centralized path management for the application"""
+    
+    def get_app_root(self):
+        """Get application root directory (where Data/ folder is located)"""
+        return Path(get_base_path())
+    
+    def get_resource_path(self, relative_path):
+        """Get absolute path to a resource file"""
+        return Path(get_resource_path(relative_path))
+
+
+# Global instance for easy access
+path_manager = PathManager()

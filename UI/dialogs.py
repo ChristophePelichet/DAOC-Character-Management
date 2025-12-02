@@ -16,7 +16,8 @@ from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QFormLayout, QGroupBox, QLabel, 
     QPushButton, QLineEdit, QComboBox, QCheckBox, QSlider, QMessageBox,
     QDialogButtonBox, QFileDialog, QTableWidget, QTableWidgetItem, QHeaderView,
-    QWidget, QTextEdit, QApplication, QProgressBar, QMenu, QGridLayout, QFrame, QScrollArea
+    QWidget, QTextEdit, QApplication, QProgressBar, QMenu, QGridLayout, QFrame, QScrollArea, QSplitter,
+    QListWidget, QButtonGroup, QRadioButton
 )
 from PySide6.QtCore import Qt, QThread, Signal, QTimer
 from PySide6.QtGui import QBrush, QColor, QIcon, QPixmap
@@ -26,6 +27,8 @@ from Functions.character_manager import get_character_dir
 from Functions.logging_manager import get_log_dir, get_logger, log_with_action, LOGGER_CHARACTER
 from Functions.data_manager import DataManager
 from Functions.theme_manager import get_scaled_size
+from Functions.items_database_manager import ItemsDatabaseManager
+from UI.template_import_dialog import TemplateImportDialog
 
 # Get CHARACTER logger
 logger_char = get_logger(LOGGER_CHARACTER)
@@ -40,7 +43,7 @@ class HeraldScraperWorker(QThread):
         self.url = url
         
     def run(self):
-        """Exécute le scraping en arrière-plan"""
+        """Execute scraping in background"""
         try:
             from Functions.eden_scraper import scrape_character_from_url
             from Functions.cookie_manager import CookieManager
@@ -64,7 +67,7 @@ class CharacterSheetWindow(QDialog):
         char_name = self.character_data.get('name', 'N/A')
         self.realm = self.character_data.get('realm', 'Albion')
         
-        # Flag pour savoir si un scraping Herald est en cours
+        # Flag to know if Herald scraping is in progress
         self.herald_scraping_in_progress = False
 
         self.setWindowTitle(lang.get("character_sheet_title", name=char_name))
@@ -74,13 +77,13 @@ class CharacterSheetWindow(QDialog):
         self.setWindowFlags(self.windowFlags() | Qt.WindowMaximizeButtonHint)
         self.setSizeGripEnabled(True)  # Add resize grip in bottom-right corner
         
-        # Connecter au signal de fin de validation Herald si disponible
+        # Connect to Herald validation end signal if available
         if hasattr(parent, 'ui_manager'):
             ui_manager = parent.ui_manager
-            # Connecter au signal finished du thread Eden pour réactiver les boutons
+            # Connect to Eden thread finished signal to reactivate buttons
             if hasattr(ui_manager, 'eden_status_thread') and ui_manager.eden_status_thread:
                 ui_manager.eden_status_thread.finished.connect(self._update_herald_buttons_state)
-            # Initialiser l'état des boutons après leur création (via QTimer pour s'assurer qu'ils existent)
+            # Initialize button states after creation (via QTimer to ensure they exist)
             from PySide6.QtCore import QTimer
             QTimer.singleShot(0, self._update_herald_buttons_state)
 
@@ -101,7 +104,7 @@ class CharacterSheetWindow(QDialog):
         # === RIGHT SIDE: All content ===
         layout = QVBoxLayout()
         
-        # Eden Herald Section - EN HAUT for FACILITER the MISE À JOUR
+        # Eden Herald Section - AT THE TOP to FACILITATE UPDATE
         eden_group = QGroupBox(lang.get("character_sheet.labels.eden_herald"))
         eden_layout = QVBoxLayout()
         
@@ -128,11 +131,11 @@ class CharacterSheetWindow(QDialog):
         self.update_herald_button.setToolTip(lang.get("character_sheet.labels.update_from_herald_tooltip"))
         self.update_herald_button.clicked.connect(self.update_from_herald)
         self.update_herald_button.setMinimumHeight(30)
-        # Mettre en évidence the bouton of mise à jour
+        # Highlight the update button
         self.update_herald_button.setStyleSheet("QPushButton { font-weight: bold; padding: 8px; }")
         herald_buttons_layout.addWidget(self.update_herald_button)
         
-        # Définir des stretch égaux for the deux boutons
+        # Set equal stretch for both buttons
         herald_buttons_layout.setStretch(0, 1)
         herald_buttons_layout.setStretch(1, 1)
         
@@ -140,7 +143,7 @@ class CharacterSheetWindow(QDialog):
         eden_group.setLayout(eden_layout)
         layout.addWidget(eden_group)
         
-        # Séparateur visuel
+        # Visual separator
         layout.addSpacing(10)
         
         # Basic Information Section
@@ -170,7 +173,7 @@ class CharacterSheetWindow(QDialog):
         self._populate_classes_sheet()
         current_class = self.character_data.get('class', '')
         if current_class:
-            # Utiliser findData for sélectionner par itemData (nom anglais) au lieu of the texte affiché
+            # Use findData to select by itemData (English name) instead of displayed text
             class_index = self.class_combo.findData(current_class)
             if class_index >= 0:
                 self.class_combo.setCurrentIndex(class_index)
@@ -182,7 +185,7 @@ class CharacterSheetWindow(QDialog):
         self._populate_races_sheet()
         current_race = self.character_data.get('race', '')
         if current_race:
-            # Utiliser findData for sélectionner par itemData (nom anglais) au lieu of the texte affiché
+            # Use findData to select by itemData (English name) instead of displayed text
             race_index = self.race_combo.findData(current_race)
             if race_index >= 0:
                 self.race_combo.setCurrentIndex(race_index)
@@ -537,7 +540,7 @@ class CharacterSheetWindow(QDialog):
         elif not herald_validation_done:
             self.update_rvr_button.setEnabled(False)
             self.update_rvr_button.setToolTip(lang.get("character_sheet.labels.herald_validation_pending"))
-            # S'abonner au signal de fin de validation pour réactiver le bouton
+            # Subscribe to validation end signal to reactivate the button
             if hasattr(self.parent_app, 'ui_manager') and hasattr(self.parent_app.ui_manager, 'eden_status_thread'):
                 thread = self.parent_app.ui_manager.eden_status_thread
                 if thread:
@@ -562,7 +565,7 @@ class CharacterSheetWindow(QDialog):
         realm_rank_layout = QVBoxLayout()
         
         realm_points = self.character_data.get('realm_points', 0)
-        # Convertir realm_points en entier s'il s'agit d'une chaîne
+        # Convert realm_points to integer if it's a string
         if isinstance(realm_points, str):
             realm_points = int(realm_points.replace(' ', '').replace('\xa0', '').replace(',', ''))
         
@@ -819,7 +822,7 @@ class CharacterSheetWindow(QDialog):
     
     def update_rank_display(self, realm_points):
         """Updates current rank and title display."""
-        # Convertir realm_points en entier s'il s'agit d'une chaîne
+        # Convert realm_points to integer if it's a string
         if isinstance(realm_points, str):
             realm_points = int(realm_points.replace(' ', '').replace('\xa0', '').replace(',', ''))
         
@@ -1055,13 +1058,16 @@ class CharacterSheetWindow(QDialog):
     def open_armor_manager(self):
         """Opens the armor management dialog."""
         try:
-            character_id = self.character_data.get('id', '')
-            if not character_id:
+            season = self.character_data.get('season', 'S3')
+            realm = self.character_data.get('realm', '')
+            character_name = self.character_data.get('name', '')
+            
+            if not realm or not character_name:
                 QMessageBox.warning(self, lang.get("dialogs.titles.error"), lang.get("character_sheet.messages.character_id_error"))
                 return
             
-            dialog = ArmorManagementDialog(self, character_id)
-            dialog.exec()
+            dialog = ArmorManagementDialog(self, season, realm, character_name, self.character_data)
+            dialog.show()  # Non-modal: permet d'utiliser le reste de l'application
         except Exception as e:
             import traceback
             error_msg = lang.get("character_sheet.messages.armor_manager_error", error=str(e), traceback=traceback.format_exc())
@@ -1069,8 +1075,8 @@ class CharacterSheetWindow(QDialog):
             QMessageBox.critical(self, lang.get("dialogs.titles.error"), error_msg)
     
     def on_herald_url_changed(self, text):
-        """Active/désactive le bouton de mise à jour des stats selon l'URL Herald"""
-        # Ne pas réactiver les boutons si un scraping Herald est en cours
+        """Enable/disable the stats update button based on the Herald URL"""
+        # Don't re-enable buttons if Herald scraping is in progress
         if self.herald_scraping_in_progress:
             return
             
@@ -1083,11 +1089,11 @@ class CharacterSheetWindow(QDialog):
             self.update_rvr_button.setToolTip("Veuillez d'abord configurer l'URL Herald")
     
     def _is_herald_validation_done(self):
-        """Vérifie si la validation Herald du démarrage est terminée"""
+        """Check if Herald startup validation is complete"""
         if not hasattr(self.parent_app, 'ui_manager'):
-            return True  # Si pas de ui_manager, considérer comme fait
+            return True  # If no ui_manager, consider as done
         
-        # Vérifier si le thread de validation est en cours
+        # Check if validation thread is running
         if hasattr(self.parent_app.ui_manager, 'eden_status_thread'):
             thread = self.parent_app.ui_manager.eden_status_thread
             if thread and thread.isRunning():
@@ -1096,15 +1102,15 @@ class CharacterSheetWindow(QDialog):
         return True
     
     def _on_herald_validation_finished(self, accessible, message):
-        """Appelé quand la validation Herald du démarrage se termine"""
-        # Réactiver le bouton si Herald accessible ET qu'une URL est configurée
+        """Called when Herald startup validation completes"""
+        # Re-enable button if Herald accessible AND a URL is configured
         herald_url = self.character_data.get('url', '').strip()
         if accessible and herald_url:
             self.update_rvr_button.setEnabled(True)
             self.update_rvr_button.setToolTip(lang.get("update_rvr_pvp_tooltip"))
     
     def show_stats_info(self):
-        """Affiche une fenêtre d'information sur les statistiques"""
+        """Display an information window about statistics"""
         QMessageBox.information(
             self,
             lang.get("stats_info_title"),
@@ -1244,7 +1250,7 @@ class CharacterSheetWindow(QDialog):
             self.herald_url_edit.setText(url)
         
         try:
-            # Ouvrir l'URL with the cookies in un thread séparé
+            # Open the URL with cookies in a separate thread
             import threading
             thread = threading.Thread(target=self._open_url_in_thread, args=(url,), daemon=True)
             thread.start()
@@ -1256,7 +1262,7 @@ class CharacterSheetWindow(QDialog):
             )
     
     def _open_url_in_thread(self, url):
-        """Ouvre l'URL avec les cookies dans un thread séparé."""
+        """Open URL with cookies in a separate thread."""
         try:
             from Functions.cookie_manager import CookieManager
             cookie_manager = CookieManager()
@@ -1270,7 +1276,7 @@ class CharacterSheetWindow(QDialog):
             logging.error(f"Erreur lors de l'ouverture de l'URL avec cookies: {e}")
     
     def update_rvr_stats(self):
-        """Met à jour les statistiques RvR depuis le Herald"""
+        """Update RvR statistics from Herald"""
         url = self.herald_url_edit.text().strip()
         
         if not url:
@@ -1294,13 +1300,13 @@ class CharacterSheetWindow(QDialog):
             url = 'https://' + url
             self.herald_url_edit.setText(url)
         
-        # Désactiver le bouton pendant la mise à jour
+        # Disable button during update
         self.update_rvr_button.setEnabled(False)
         
-        # Import des composants nécessaires
+        # Import required components
         from UI.progress_dialog_base import ProgressStepsDialog, StepConfiguration
         
-        # Construire les étapes (SCRAPER_INIT + STATS_SCRAPING + CLEANUP)
+        # Build steps (SCRAPER_INIT + STATS_SCRAPING + CLEANUP)
         steps = StepConfiguration.build_steps(
             StepConfiguration.SCRAPER_INIT,   # Step 0: Init scraper
             StepConfiguration.STATS_SCRAPING, # Steps 1-5: RvR, PvP, PvE, Wealth, Achievements
@@ -1318,7 +1324,7 @@ class CharacterSheetWindow(QDialog):
             allow_cancel=False
         )
         
-        # Créer le thread de mise à jour
+        # Create update thread
         self.stats_update_thread = StatsUpdateThread(url)
         
         # ✅ Pattern 1 : Connecter via wrappers thread-safe
@@ -1333,7 +1339,7 @@ class CharacterSheetWindow(QDialog):
         # ✅ Pattern 4 : Connecter rejected AVANT show()
         self.progress_dialog.rejected.connect(self._on_stats_progress_dialog_closed)
         
-        # Afficher le dialogue et démarrer le worker
+        # Show dialog and start worker
         self.progress_dialog.show()
         self.stats_update_thread.start()
     
@@ -1363,25 +1369,25 @@ class CharacterSheetWindow(QDialog):
                 pass
     
     def _on_stats_progress_dialog_closed(self):
-        """✅ Pattern 4 : Appelé quand utilisateur ferme le dialogue de stats"""
+        """✅ Pattern 4: Called when user closes stats dialog"""
         import logging
         logging.info("Dialogue stats fermé par utilisateur - Arrêt mise à jour")
         
-        # Arrêter le thread proprement
+        # Stop thread cleanly
         self._stop_stats_thread()
         
-        # Réactiver le bouton
+        # Re-enable button
         if not self.herald_scraping_in_progress:
             self.update_rvr_button.setEnabled(True)
     
     def _stop_stats_thread(self):
-        """✅ Pattern 2 + 3 : Arrête le thread stats avec cleanup complet"""
+        """✅ Pattern 2 + 3: Stop stats thread with complete cleanup"""
         if hasattr(self, 'stats_update_thread') and self.stats_update_thread:
             if self.stats_update_thread.isRunning():
-                # 1. Demander arrêt gracieux
+                # 1. Request graceful stop
                 self.stats_update_thread.request_stop()
                 
-                # 2. Déconnecter signaux
+                # 2. Disconnect signals
                 try:
                     self.stats_update_thread.step_started.disconnect()
                     self.stats_update_thread.step_completed.disconnect()
@@ -1420,7 +1426,7 @@ class CharacterSheetWindow(QDialog):
                 delattr(self, 'progress_dialog')
     
     def _on_stats_updated(self, results):
-        """Appelé quand les stats sont mises à jour (succès ou partiel)"""
+        """Called when stats are updated (success or partial)"""
         from PySide6.QtCore import QTimer
         
         # Fermer le dialogue de progression
@@ -1429,7 +1435,7 @@ class CharacterSheetWindow(QDialog):
             self.progress_dialog.complete_all(success_text)
             QTimer.singleShot(1500, self.progress_dialog.close)
         
-        # Extraire les résultats
+        # Extract results
         result_rvr = results.get('rvr', {})
         result_pvp = results.get('pvp', {})
         result_pve = results.get('pve', {})
@@ -1439,7 +1445,7 @@ class CharacterSheetWindow(QDialog):
         all_success = result_rvr.get('success') and result_pvp.get('success') and result_pve.get('success') and result_wealth.get('success')
         
         if all_success:
-            # Mise à jour complète réussie
+            # Complete successful update
             self._update_all_stats_ui(result_rvr, result_pvp, result_pve, result_wealth, result_achievements)
             
             # Sauvegarder dans le JSON
@@ -1447,7 +1453,7 @@ class CharacterSheetWindow(QDialog):
             success, msg = save_character(self.character_data, allow_overwrite=True)
             
             if success:
-                # Message de succès
+                # Success message
                 tower = result_rvr['tower_captures']
                 keep = result_rvr['keep_captures']
                 relic = result_rvr['relic_captures']
@@ -1505,7 +1511,7 @@ class CharacterSheetWindow(QDialog):
                 )
         
         elif result_rvr.get('success') and not result_pvp.get('success'):
-            # Mise à jour partielle : RvR OK, PvP KO
+            # Partial update: RvR OK, PvP KO
             self._update_partial_stats_ui(result_rvr, None, None, None, None)
             
             QMessageBox.warning(
@@ -1515,7 +1521,7 @@ class CharacterSheetWindow(QDialog):
             )
         
         elif not result_rvr.get('success') and result_pvp.get('success'):
-            # Mise à jour partielle : PvP OK, RvR KO
+            # Partial update: PvP OK, RvR KO
             self._update_partial_stats_ui(None, result_pvp, None, None, None)
             
             QMessageBox.warning(
@@ -1525,7 +1531,7 @@ class CharacterSheetWindow(QDialog):
             )
         
         else:
-            # Échec complet ou multiple
+            # Complete or multiple failure
             error_msg = f"{lang.get('character_sheet.messages.stats_fetch_failed')}\n\n"
             if not result_rvr.get('success'):
                 error_msg += f"❌ RvR Captures: {result_rvr.get('error', lang.get('character_sheet.messages.unknown_error'))}\n"
@@ -1543,7 +1549,7 @@ class CharacterSheetWindow(QDialog):
             self.update_rvr_button.setEnabled(True)
     
     def _on_stats_failed(self, error_message):
-        """Appelé en cas d'échec complet de la mise à jour"""
+        """Called in case of complete update failure"""
         from PySide6.QtCore import QTimer
         
         # Fermer le dialogue de progression
@@ -1559,17 +1565,17 @@ class CharacterSheetWindow(QDialog):
             f"{lang.get('character_sheet.messages.stats_fetch_failed')}\n{error_message}"
         )
         
-        # Réactiver le bouton
+        # Re-enable button
         if not self.herald_scraping_in_progress:
             self.update_rvr_button.setEnabled(True)
         
         log_with_action(logger_char, "error", f"Stats update error: {error_message}", action="ERROR")
     
     def _update_herald_buttons_state(self):
-        """Met à jour l'état des boutons Herald selon l'état de validation Eden"""
+        """Update Herald button states based on Eden validation status"""
         from Functions.language_manager import lang
         
-        # Vérifier si validation en cours
+        # Check if validation is in progress
         main_window = self.parent()
         is_validation_running = False
         
@@ -1581,7 +1587,7 @@ class CharacterSheetWindow(QDialog):
                 ui_manager.eden_status_thread.isRunning()
             )
         
-        # Mettre à jour le bouton "Update from Herald"
+        # Update "Update from Herald" button
         if hasattr(self, 'update_herald_button'):
             if is_validation_running:
                 self.update_herald_button.setEnabled(False)
@@ -1590,7 +1596,7 @@ class CharacterSheetWindow(QDialog):
                 self.update_herald_button.setEnabled(True)
                 self.update_herald_button.setToolTip(lang.get("character_sheet.labels.update_from_herald_tooltip"))
         
-        # Mettre à jour le bouton "Update RvR Stats"
+        # Update "Update RvR Stats" button
         if hasattr(self, 'update_rvr_button'):
             herald_url = self.herald_url_edit.text().strip() if hasattr(self, 'herald_url_edit') else ''
             
@@ -1598,14 +1604,14 @@ class CharacterSheetWindow(QDialog):
                 self.update_rvr_button.setEnabled(False)
                 self.update_rvr_button.setToolTip(lang.get("herald_buttons.validation_in_progress", default="⏳ Validation Eden en cours... Veuillez patienter"))
             elif not herald_url or self.herald_scraping_in_progress:
-                # Garder l'état désactivé si pas d'URL ou scraping en cours
+                # Keep disabled state if no URL or scraping in progress
                 pass
             else:
                 self.update_rvr_button.setEnabled(True)
                 self.update_rvr_button.setToolTip(lang.get("update_rvr_pvp_tooltip"))
     
     def _update_all_stats_ui(self, result_rvr, result_pvp, result_pve, result_wealth, result_achievements):
-        """Met à jour tous les labels UI avec les stats complètes"""
+        """Update all UI labels with complete stats"""
         # RvR Captures
         tower = result_rvr['tower_captures']
         keep = result_rvr['keep_captures']
@@ -1676,7 +1682,7 @@ class CharacterSheetWindow(QDialog):
             self._update_achievements_display(achievements)
             self.character_data['achievements'] = achievements
         
-        # Mettre à jour character_data
+        # Update character_data
         self.character_data['tower_captures'] = tower
         self.character_data['keep_captures'] = keep
         self.character_data['relic_captures'] = relic
@@ -1704,7 +1710,7 @@ class CharacterSheetWindow(QDialog):
         self.character_data['money'] = money
     
     def _update_partial_stats_ui(self, result_rvr, result_pvp, result_pve, result_wealth, result_achievements):
-        """Met à jour UI et character_data pour mise à jour partielle"""
+        """Update UI and character_data for partial update"""
         from Functions.character_manager import save_character
         
         if result_rvr and result_rvr.get('success'):
@@ -1774,7 +1780,7 @@ class CharacterSheetWindow(QDialog):
             save_character(self.character_data, allow_overwrite=True)
     
     def update_from_herald(self):
-        """Met à jour les données du personnage depuis Herald"""
+        """Update character data from Herald"""
         url = self.herald_url_edit.text().strip()
         
         if not url:
@@ -1801,20 +1807,20 @@ class CharacterSheetWindow(QDialog):
             url = 'https://' + url
             self.herald_url_edit.setText(url)
         
-        # Désactiver tous les boutons pendant la mise à jour
+        # Disable all buttons during update
         self.update_herald_button.setEnabled(False)
         self.open_herald_button.setEnabled(False)
         self.update_rvr_button.setEnabled(False)
         
-        # Import des composants nécessaires
+        # Import required components
         from UI.progress_dialog_base import ProgressStepsDialog, StepConfiguration
         
-        # Construire les étapes (CHARACTER_UPDATE)
+        # Build steps (CHARACTER_UPDATE)
         steps = StepConfiguration.build_steps(
             StepConfiguration.CHARACTER_UPDATE  # 8 steps: Extract name → Init → Load cookies → Navigate → Wait → Extract data → Format → Close
         )
         
-        # Créer le dialogue de progression
+        # Create progress dialog
         self.progress_dialog = ProgressStepsDialog(
             parent=self,
             title=lang.get("progress_character_update_title", default="🌐 Mise à jour depuis Herald..."),
@@ -1825,7 +1831,7 @@ class CharacterSheetWindow(QDialog):
             allow_cancel=False
         )
         
-        # Créer le thread de mise à jour
+        # Create update thread
         self.char_update_thread = CharacterUpdateThread(url)
         
         # ✅ Pattern 1 : Connecter via wrappers thread-safe
@@ -1839,7 +1845,7 @@ class CharacterSheetWindow(QDialog):
         # ✅ Pattern 4 : Connecter rejected AVANT show()
         self.progress_dialog.rejected.connect(self._on_char_update_progress_dialog_closed)
         
-        # Afficher le dialogue et démarrer le worker
+        # Show dialog and start worker
         self.progress_dialog.show()
         self.char_update_thread.start()
     
@@ -1869,14 +1875,14 @@ class CharacterSheetWindow(QDialog):
                 pass
     
     def _on_char_update_progress_dialog_closed(self):
-        """✅ Pattern 4 : Appelé quand utilisateur ferme le dialogue de character update"""
+        """✅ Pattern 4: Called when user closes character update dialog"""
         import logging
         logging.info("Dialogue character update fermé par utilisateur - Arrêt mise à jour")
         
-        # Arrêter le thread proprement
+        # Stop thread cleanly
         self._stop_char_update_thread()
         
-        # Réactiver les boutons
+        # Re-enable buttons
         self.herald_scraping_in_progress = False
         self.update_herald_button.setEnabled(True)
         self.open_herald_button.setEnabled(True)
@@ -1884,13 +1890,13 @@ class CharacterSheetWindow(QDialog):
             self.update_rvr_button.setEnabled(True)
     
     def _stop_char_update_thread(self):
-        """✅ Pattern 2 + 3 : Arrête le thread character update avec cleanup complet"""
+        """✅ Pattern 2 + 3: Stop character update thread with complete cleanup"""
         if hasattr(self, 'char_update_thread') and self.char_update_thread:
             if self.char_update_thread.isRunning():
-                # 1. Demander arrêt gracieux
+                # 1. Request graceful stop
                 self.char_update_thread.request_stop()
                 
-                # 2. Déconnecter signaux
+                # 2. Disconnect signals
                 try:
                     self.char_update_thread.step_started.disconnect()
                     self.char_update_thread.step_completed.disconnect()
@@ -1939,13 +1945,13 @@ class CharacterSheetWindow(QDialog):
         event.accept()
     
     def _on_herald_scraping_finished(self, success, new_data, error_msg):
-        """Callback appelé quand le scraping est terminé"""
+        """Callback called when scraping is complete"""
         from PySide6.QtCore import QTimer
         
-        # Marquer que le scraping Herald est terminé
+        # Mark that Herald scraping is complete
         self.herald_scraping_in_progress = False
         
-        # Fermer le dialogue de progression avec message de succès ou erreur
+        # Close progress dialog with success or error message
         if hasattr(self, 'progress_dialog'):
             if success:
                 success_text = lang.get("progress_character_complete", default="✅ Données récupérées")
@@ -1956,10 +1962,10 @@ class CharacterSheetWindow(QDialog):
                 self.progress_dialog.set_status_message(error_text, "#F44336")
                 QTimer.singleShot(2000, self.progress_dialog.close)
         
-        # Utiliser try/finally pour garantir la réactivation des boutons et le nettoyage du thread
+        # Use try/finally to guarantee button re-enabling and thread cleanup
         try:
             if not success:
-                # ✅ CRITICAL: Arrêter le thread AVANT d'afficher l'erreur
+                # ✅ CRITICAL: Stop thread BEFORE displaying error
                 self._stop_char_update_thread()
                 
                 QMessageBox.critical(
@@ -1969,12 +1975,12 @@ class CharacterSheetWindow(QDialog):
                 )
                 return
             
-            # Créer le dialogue pour détecter les changements
+            # Create dialog to detect changes
             dialog = CharacterUpdateDialog(self, self.character_data, new_data, self.character_data['name'])
             
-            # Vérifier s'il y a au moins un changement
+            # Check if there's at least one change
             if not dialog.has_changes():
-                # ✅ CRITICAL: Arrêter le thread AVANT d'afficher le message
+                # ✅ CRITICAL: Stop thread BEFORE displaying message
                 self._stop_char_update_thread()
                 
                 QMessageBox.information(
@@ -1996,12 +2002,12 @@ class CharacterSheetWindow(QDialog):
                     )
                     return
                 
-                # Appliquer the changements sélectionnés directement in character_data
+                # Apply selected changes directly to character_data
                 for field, value in selected_changes.items():
                     self.character_data[field] = value
                 
-                # Mettre à jour all the champs of l'interface for l'affichage immédiat
-                # (on reconstruit l'affichage complet plutôt that of mettre à jour champ par champ)
+                # Update all interface fields for immediate display
+                # (rebuild complete display rather than update field by field)
                 
                 # Level
                 if 'level' in selected_changes:
@@ -2033,10 +2039,10 @@ class CharacterSheetWindow(QDialog):
                     if isinstance(realm_points, str):
                         realm_points = int(realm_points.replace(' ', '').replace('\xa0', '').replace(',', ''))
                     
-                    # Mettre à jour l'affichage of the rang and of the titre
+                    # Update rank and title display
                     self.update_rank_display(realm_points)
                     
-                    # Mettre à jour the dropdowns of rang/niveau
+                    # Update rank/level dropdowns
                     if hasattr(self.parent_app, 'data_manager'):
                         rank_info = self.parent_app.data_manager.get_realm_rank_info(self.realm, realm_points)
                         if rank_info:
@@ -2046,15 +2052,15 @@ class CharacterSheetWindow(QDialog):
                             if level_match:
                                 current_level = int(level_match.group(1))
                                 
-                                # Mettre à jour the dropdown of rang
+                                # Update rank dropdown
                                 self.rank_combo.blockSignals(True)
                                 self.rank_combo.setCurrentIndex(current_rank - 1)
                                 self.rank_combo.blockSignals(False)
                                 
-                                # Mettre à jour the dropdown of niveau
+                                # Update level dropdown
                                 self.update_level_dropdown(current_rank, current_level)
                 
-                # Save directement character_data (not via save_basic_info qui récupère depuis l'interface)
+                # Save character_data directly (not via save_basic_info which retrieves from interface)
                 from Functions.character_manager import save_character
                 success, msg = save_character(self.character_data, allow_overwrite=True)
                 
@@ -2083,13 +2089,13 @@ class CharacterSheetWindow(QDialog):
                         sys.stderr.flush()
                         logging.warning(f"[BACKUP_TRIGGER] Backup after skills/armor modification failed: {e}")
                 
-                # Rafraîchir the liste des personnages in the fenêtre principale
+                # Refresh character list in main window
                 if hasattr(self.parent_app, 'tree_manager'):
                     self.parent_app.tree_manager.refresh_character_list()
                 elif hasattr(self.parent_app, 'refresh_character_list'):
                     self.parent_app.refresh_character_list()
                 
-                # Message of succès
+                # Success message
                 QMessageBox.information(
                     self,
                     lang.get("success_title", default="Succès"),
@@ -2103,18 +2109,18 @@ class CharacterSheetWindow(QDialog):
                 )
         
         finally:
-            # ✅ Nettoyage final si pas déjà fait (sécurité)
+            # ✅ Final cleanup if not already done (security)
             if hasattr(self, 'char_update_thread') and self.char_update_thread:
                 self._stop_char_update_thread()
             
-            # Réactiver tous les boutons TOUJOURS, même en cas d'erreur ou de return anticipé
+            # Always re-enable all buttons, even in case of error or early return
             herald_url = self.herald_url_edit.text().strip()
             
             self.update_herald_button.setEnabled(bool(herald_url))
             self.open_herald_button.setEnabled(bool(herald_url))
             self.update_rvr_button.setEnabled(bool(herald_url))
             
-            # Forcer la mise à jour visuelle
+            # Force visual update
             QApplication.processEvents()
     
     def rename_character(self):
@@ -2487,13 +2493,13 @@ class ConfigurationDialog(QDialog):
         from Functions.theme_manager import get_available_themes
         self.theme_combo = QComboBox()
         self.available_themes = get_available_themes()
-        # Trier les thèmes par nom (alphabétique)
+        # Sort themes alphabetically by name
         sorted_themes = sorted(self.available_themes.items(), key=lambda x: x[1])
         for theme_id, theme_name in sorted_themes:
             self.theme_combo.addItem(theme_name, theme_id)
         general_layout.addRow(lang.get("config_theme_label"), self.theme_combo)
         
-        # Font Scale ComboBox (100% à 200% par pas de 25%)
+        # Font Scale ComboBox (100% to 200% in steps of 25%)
         self.font_scale_combo = QComboBox()
         self.font_scale_values = [1.0, 1.25, 1.5, 1.75, 2.0]  # 100%, 125%, 150%, 175%, 200%
         for scale in self.font_scale_values:
@@ -2515,7 +2521,7 @@ class ConfigurationDialog(QDialog):
         all_browsers = ['Chrome', 'Edge', 'Firefox']
         self.browser_combo.addItems(all_browsers)
         
-        # Indiquer quels navigateurs sont détectés
+        # Indicate which browsers are detected
         if available_browsers:
             tooltip = f"Navigateurs détectés sur cette machine: {', '.join(available_browsers)}"
         else:
@@ -2566,7 +2572,43 @@ class ConfigurationDialog(QDialog):
         server_group.setLayout(server_layout)
         content_layout.addWidget(server_group)
 
-        # Debug Settings (Position 4 - Last)
+        # Armory Settings (Position 4)
+        logging.debug("Creating Armory settings group")
+        armory_group = QGroupBox("🛡️ Armurerie")
+        armory_layout = QVBoxLayout()
+        
+        # Description
+        armory_desc = QLabel(
+            "L'armurerie permet d'importer des items depuis des fichiers Zenkcraft\n"
+            "et de créer une base de données locale d'items."
+        )
+        armory_desc.setWordWrap(True)
+        armory_desc.setStyleSheet("color: #888; font-style: italic; padding: 5px;")
+        armory_layout.addWidget(armory_desc)
+        
+        # Import button
+        self.armory_import_button = QPushButton("📥 Importer des items depuis Zenkcraft")
+        self.armory_import_button.setMinimumHeight(40)
+        self.armory_import_button.setToolTip(
+            "Ouvre l'interface d'import pour ajouter des items\n"
+            "depuis des fichiers templates Zenkcraft (.txt)"
+        )
+        self.armory_import_button.clicked.connect(self.open_armory_import)
+        armory_layout.addWidget(self.armory_import_button)
+        
+        # Database info
+        armory_info_layout = QHBoxLayout()
+        armory_info_layout.addWidget(QLabel("📊 Base de données:"))
+        self.armory_db_info_label = QLabel("Aucune base chargée")
+        self.armory_db_info_label.setStyleSheet("color: #888;")
+        armory_info_layout.addWidget(self.armory_db_info_label, 1)
+        armory_layout.addLayout(armory_info_layout)
+        
+        armory_group.setLayout(armory_layout)
+        content_layout.addWidget(armory_group)
+        logging.debug("Armory settings group added to content_layout")
+
+        # Debug Settings (Position 5 - Last)
         debug_group = QGroupBox(lang.get("config_debug_group_title", 
                                          default="Debug"))
         debug_layout = QFormLayout()
@@ -2597,7 +2639,7 @@ class ConfigurationDialog(QDialog):
 
         content_layout.addStretch()
         
-        # Ajouter le widget de contenu à la zone scrollable
+        # Add content widget to scrollable area
         scroll_area.setWidget(content_widget)
         main_layout.addWidget(scroll_area)
 
@@ -2646,7 +2688,7 @@ class ConfigurationDialog(QDialog):
         
         # Font Scale
         current_font_scale = config.get("ui.font_scale", 1.0)
-        # Trouver l'index correspondant à la valeur dans le ComboBox
+        # Find index matching value in ComboBox
         scale_index = self.font_scale_combo.findData(current_font_scale)
         if scale_index == -1:  # Si la valeur exacte n'existe pas, trouver la plus proche
             closest_index = 0
@@ -2677,6 +2719,9 @@ class ConfigurationDialog(QDialog):
         
         allow_download = config.get("system.allow_browser_download", False)
         self.allow_browser_download_check.setChecked(allow_download)
+        
+        # Update armory database info
+        self.update_armory_db_info()
 
     def browse_folder(self, line_edit, title_key):
         """Generic folder browser."""
@@ -2700,54 +2745,252 @@ class ConfigurationDialog(QDialog):
     def browse_cookies_folder(self):
         """Browse for cookies folder."""
         self.browse_folder(self.cookies_path_edit, "select_folder_dialog_title")
+    
+    def open_armory_import(self):
+        """Open item import dialog for armory"""
+        from UI.armory_import_dialog import ArmoryImportDialog
+        
+        dialog = ArmoryImportDialog(self)
+        dialog.exec()
+        
+        # Update database info after import
+        self.update_armory_db_info()
+    
+    def update_armory_db_info(self):
+        """Update armory database information"""
+        # Check if the label exists (in case method is called before UI is fully created)
+        if not hasattr(self, 'armory_db_info_label'):
+            return
+            
+        try:
+            import json
+            from pathlib import Path
+            
+            armor_path = config.get('folders.armor')
+            if not armor_path:
+                self.armory_db_info_label.setText("Chemin non configuré")
+                self.armory_db_info_label.setStyleSheet("color: #f44336;")
+                return
+            
+            armor_path = Path(armor_path)
+            
+            # Count items in all databases
+            total_items = 0
+            realms = ['albion', 'hibernia', 'midgard']
+            
+            for realm in realms:
+                db_file = armor_path / f"items_database_{realm}.json"
+                if db_file.exists():
+                    with open(db_file, 'r', encoding='utf-8') as f:
+                        database = json.load(f)
+                        total_items += len(database.get('items', {}))
+            
+            if total_items > 0:
+                self.armory_db_info_label.setText(f"{total_items} items disponibles")
+                self.armory_db_info_label.setStyleSheet("color: #4CAF50;")
+            else:
+                self.armory_db_info_label.setText("Aucun item")
+                self.armory_db_info_label.setStyleSheet("color: #888;")
+                
+        except Exception as e:
+            logging.error(f"Erreur lecture database armory: {e}", exc_info=True)
+            if hasattr(self, 'armory_db_info_label'):
+                self.armory_db_info_label.setText("Erreur")
+                self.armory_db_info_label.setStyleSheet("color: #f44336;")
 
 
 class ArmorManagementDialog(QDialog):
-    """Dialog for managing armor files for a specific character."""
+    """Dialog for managing armor templates for a specific character."""
     
-    def __init__(self, parent, character_id):
+    # Slots that have visual models (armor, cloaks, weapons)
+    # Slots that have visual models (armor, cloaks, weapons)
+    MODEL_SLOTS = {
+        # Zenkcraft format slot names
+        'Torso', 'Arms', 'Legs', 'Hands', 'Feet', 'Helmet',  # Armor pieces
+        'Cloak',                                              # Cape
+        'Two Handed', 'Right Hand', 'Left Hand',             # Weapons
+        # Loki format slot names (additional)
+        'Chest', 'Head'                                       # Loki armor equivalents
+    }
+    
+    def __init__(self, parent, season, realm, character_name, character_data=None):
         super().__init__(parent)
-        self.character_id = character_id
+        self.season = season
+        self.realm = realm
+        self.character_name = character_name
+        self.character_data = character_data or {}
+        
+        # Initialize DataManager for class translations
+        from Functions.data_manager import DataManager
+        self.data_manager = DataManager()
         
         from Functions.armor_manager import ArmorManager
-        self.armor_manager = ArmorManager(character_id)
+        from Functions.template_manager import TemplateManager
+        from Functions.items_database_manager import ItemsDatabaseManager
+        from Functions.config_manager import ConfigManager
+        from Functions.path_manager import PathManager
         
-        self.setWindowTitle(f"Gestion des armures - Personnage {character_id}")
-        self.resize(700, 450)
+        self.armor_manager = ArmorManager(season, realm, character_name)
+        self.template_manager = TemplateManager()
+        
+        # Initialize ItemsDatabaseManager for price lookups
+        self.config_manager = ConfigManager()
+        self.path_manager = PathManager()
+        self.db_manager = ItemsDatabaseManager(self.config_manager, self.path_manager)
+        
+        # Track items without prices for search functionality
+        self.items_without_price = []
+        
+        self.setWindowTitle(lang.get("armoury_dialog.title", name=character_name, realm=realm, season=season))
+        self.resize(1400, 700)  # Larger window for better split visibility
+        
+        # Enable window buttons (minimize, maximize, close)
+        self.setWindowFlags(Qt.Window | Qt.WindowMinimizeButtonHint | Qt.WindowMaximizeButtonHint | Qt.WindowCloseButtonHint)
         
         layout = QVBoxLayout(self)
         
-        # Info label
-        info_label = QLabel("Gérez les fichiers d'armure créés avec des logiciels tiers (formats : .png, .jpg, .pdf, .txt, etc.)")
-        info_label.setWordWrap(True)
-        layout.addWidget(info_label)
+        # Create horizontal splitter for table and preview (no info label)
+        splitter = QSplitter(Qt.Horizontal)
+        splitter.setChildrenCollapsible(False)  # Prevent panels from collapsing
+        
+        # Left panel: Table
+        left_widget = QWidget()
+        left_layout = QVBoxLayout(left_widget)
+        left_layout.setContentsMargins(0, 0, 0, 0)
         
         # Armor files table
         self.table = QTableWidget()
-        self.table.setColumnCount(4)
-        self.table.setHorizontalHeaderLabels(["Nom du fichier", "Taille", "Date de modification", "Actions"])
+        self.table.setColumnCount(1)
+        self.table.setHorizontalHeaderLabels([
+            lang.get("armoury_dialog.table_headers.filename")
+        ])
         self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
-        self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
-        self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
-        self.table.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeToContents)
         self.table.setSelectionBehavior(QTableWidget.SelectRows)
         self.table.setEditTriggers(QTableWidget.NoEditTriggers)
-        layout.addWidget(self.table)
+        self.table.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.table.customContextMenuRequested.connect(self.show_context_menu)
+        self.table.itemSelectionChanged.connect(self.on_selection_changed)
+        left_layout.addWidget(self.table)
+        
+        splitter.addWidget(left_widget)
+        
+        # Right panel: Preview
+        right_widget = QWidget()
+        right_layout = QVBoxLayout(right_widget)
+        right_layout.setContentsMargins(0, 0, 0, 0)
+        
+        # Preview header
+        preview_header = QLabel(lang.get("armoury_dialog.preview.title"))
+        preview_header_font = preview_header.font()
+        preview_header_font.setBold(True)
+        preview_header_font.setPointSize(preview_header_font.pointSize() + 1)
+        preview_header.setFont(preview_header_font)
+        right_layout.addWidget(preview_header)
+        
+        # Preview content area - Container widget with dark theme
+        preview_container = QWidget()
+        preview_container_layout = QVBoxLayout(preview_container)
+        preview_container_layout.setContentsMargins(0, 0, 0, 0)
+        preview_container_layout.setSpacing(10)
+        
+        # Apply dark theme to entire preview container
+        from PySide6.QtGui import QFont
+        preview_container.setStyleSheet("""
+            QWidget {
+                background-color: #2b2b2b;
+                color: #e0e0e0;
+            }
+            QTextEdit {
+                background-color: #2b2b2b;
+                color: #e0e0e0;
+                border: none;
+            }
+            QLabel {
+                color: #e0e0e0;
+                background-color: transparent;
+            }
+            QTableWidget {
+                background-color: #2b2b2b;
+                color: #e0e0e0;
+                gridline-color: #404040;
+                border: none;
+            }
+            QTableWidget::item {
+                color: #e0e0e0;
+                background-color: #2b2b2b;
+            }
+            QHeaderView::section {
+                background-color: #1e1e1e;
+                color: #e0e0e0;
+                border: 1px solid #404040;
+                padding: 4px;
+            }
+        """)
+        
+        # 1. Text preview area - Use QTextBrowser for clickable links
+        from PySide6.QtWidgets import QTextBrowser
+        self.preview_area = QTextBrowser()
+        self.preview_area.setReadOnly(True)
+        self.preview_area.setPlaceholderText(lang.get("armoury_dialog.preview.no_selection"))
+        self.preview_area.setMinimumWidth(350)
+        
+        # Enable clickable links for model viewer
+        self.preview_area.setOpenExternalLinks(False)  # Handle clicks internally
+        self.preview_area.setOpenLinks(False)  # Prevent default link navigation
+        self.preview_area.anchorClicked.connect(self._on_model_link_clicked)
+        
+        # Force Courier New font
+        preview_font = QFont("Courier New", 10)
+        preview_font.setStyleHint(QFont.Monospace)
+        self.preview_area.setFont(preview_font)
+        
+        preview_container_layout.addWidget(self.preview_area, 1)  # Stretch factor 1
+        
+        # Add preview container to right layout
+        right_layout.addWidget(preview_container)
+        
+        # Button layout for preview actions
+        preview_buttons_layout = QHBoxLayout()
+        
+        # Download button in preview panel
+        self.preview_download_button = QPushButton(lang.get("armoury_dialog.context_menu.download", default="Download"))
+        self.preview_download_button.setEnabled(False)  # Disabled until file selected
+        self.preview_download_button.clicked.connect(self.download_selected_armor)
+        preview_buttons_layout.addWidget(self.preview_download_button)
+        
+        # Search missing prices button
+        self.search_prices_button = QPushButton("🔍 " + lang.get("armoury_dialog.buttons.search_missing_prices", default="Search Missing Prices"))
+        self.search_prices_button.setEnabled(False)  # Disabled until items_without_price is populated
+        self.search_prices_button.clicked.connect(self.search_missing_prices)
+        self.search_prices_button.setToolTip(lang.get("armoury_dialog.tooltips.search_missing_prices", default="Search online for items without price in database"))
+        preview_buttons_layout.addWidget(self.search_prices_button)
+        
+        right_layout.addLayout(preview_buttons_layout)
+        
+        splitter.addWidget(right_widget)
+        
+        # Set splitter proportions (30% table, 70% preview)
+        # Force initial sizes based on window width (1400 * 0.3 = 420, 1400 * 0.7 = 980)
+        splitter.setSizes([420, 980])
+        splitter.setStretchFactor(0, 3)  # Left panel gets less stretch
+        splitter.setStretchFactor(1, 7)  # Right panel gets more stretch
+        
+        layout.addWidget(splitter, 1)  # Stretch factor 1 = take all available space
         
         # Buttons
         button_layout = QHBoxLayout()
         
-        upload_button = QPushButton("📤 Uploader un fichier")
-        upload_button.clicked.connect(self.upload_armor)
-        button_layout.addWidget(upload_button)
+        import_template_button = QPushButton(lang.get("armoury_dialog.buttons.import_template"))
+        import_template_button.clicked.connect(self.import_template)
+        button_layout.addWidget(import_template_button)
         
-        refresh_button = QPushButton("🔄 Actualiser")
+        refresh_button = QPushButton(lang.get("armoury_dialog.buttons.refresh"))
         refresh_button.clicked.connect(self.refresh_list)
         button_layout.addWidget(refresh_button)
         
         button_layout.addStretch()
         
-        close_button = QPushButton("Fermer")
+        close_button = QPushButton(lang.get("armoury_dialog.buttons.close"))
         close_button.clicked.connect(self.close)
         button_layout.addWidget(close_button)
         
@@ -2757,112 +3000,2074 @@ class ArmorManagementDialog(QDialog):
         self.refresh_list()
     
     def refresh_list(self):
-        """Refreshes the armor files list."""
+        """Refreshes the armor files list using TemplateManager."""
         try:
-            armors = self.armor_manager.list_armors()
-            self.table.setRowCount(len(armors))
+            # Get character class from character_data
+            character_class = self.character_data.get('class', '')
             
-            for row, armor in enumerate(armors):
-                # Filename
-                filename_item = QTableWidgetItem(armor['filename'])
+            if not character_class:
+                logging.warning("No character class found, cannot filter templates")
+                self.table.setRowCount(0)
+                return
+            
+            # Use TemplateManager to get templates for this class and realm
+            templates = self.template_manager.search_templates(
+                character_class=character_class,
+                season=None  # Show all seasons for now
+            )
+            
+            # Filter by realm
+            realm_templates = [t for t in templates if t.get('metadata') and t['metadata'].realm == self.realm]
+            
+            self.table.setRowCount(len(realm_templates))
+            
+            for row, template in enumerate(realm_templates):
+                # Filename only (Season and Modified Date now shown in preview)
+                filename_item = QTableWidgetItem(template['file'])
                 self.table.setItem(row, 0, filename_item)
-                
-                # Size
-                size_mb = armor['size'] / (1024 * 1024)
-                size_text = f"{size_mb:.2f} MB" if size_mb >= 1 else f"{armor['size'] / 1024:.2f} KB"
-                size_item = QTableWidgetItem(size_text)
-                self.table.setItem(row, 1, size_item)
-                
-                # Modified date
-                modified_date = datetime.fromtimestamp(armor['modified']).strftime("%d/%m/%Y %H:%M")
-                date_item = QTableWidgetItem(modified_date)
-                self.table.setItem(row, 2, date_item)
-                
-                # Actions buttons
-                actions_widget = QWidget()
-                actions_layout = QHBoxLayout(actions_widget)
-                actions_layout.setContentsMargins(4, 2, 4, 2)
-                
-                open_button = QPushButton("🔍 Ouvrir")
-                open_button.setToolTip("Ouvrir le fichier avec l'application par défaut")
-                open_button.clicked.connect(lambda checked, f=armor['filename']: self.open_armor(f))
-                actions_layout.addWidget(open_button)
-                
-                delete_button = QPushButton("🗑️ Supprimer")
-                delete_button.setToolTip("Supprimer ce fichier d'armure")
-                delete_button.clicked.connect(lambda checked, f=armor['filename']: self.delete_armor(f))
-                actions_layout.addWidget(delete_button)
-                
-                self.table.setCellWidget(row, 3, actions_widget)
             
-            logging.info(f"Liste des armures actualisée : {len(armors)} fichier(s)")
+            logging.info(f"Liste des templates actualisée : {len(realm_templates)} fichier(s) pour classe {character_class}")
             
         except Exception as e:
-            logging.error(f"Erreur lors du rafraîchissement de la liste des armures : {e}")
-            QMessageBox.critical(self, "Erreur", f"Impossible de charger la liste des armures :\n{str(e)}")
+            logging.error(f"Erreur lors du rafraîchissement de la liste des templates : {e}")
+            QMessageBox.critical(self, lang.get("dialogs.titles.error"), lang.get("armoury_dialog.messages.refresh_error", error=str(e)))
     
     def upload_armor(self):
         """Opens file dialog to upload an armor file."""
         file_path, _ = QFileDialog.getOpenFileName(
             self,
-            "Sélectionner un fichier d'armure",
+            lang.get("armoury_dialog.dialogs.select_file"),
             "",
-            "Tous les fichiers (*.*)"
+            lang.get("armoury_dialog.dialogs.all_files")
         )
         
         if file_path:
+            # Open preview dialog before import
+            from Functions.config_manager import config
+            available_seasons = config.get("game.seasons", ["S3"])
+            
+            preview_dialog = ArmorUploadPreviewDialog(
+                self,
+                file_path,
+                self.season,
+                available_seasons,
+                self.realm,
+                self.character_name
+            )
+            
+            if preview_dialog.exec() == QDialog.Accepted:
+                try:
+                    # Get the chosen season and filename
+                    target_season = preview_dialog.season_combo.currentText()
+                    new_filename = preview_dialog.filename_edit.text().strip()
+                    
+                    # If season changed, create a new ArmorManager for that season
+                    if target_season != self.season:
+                        from Functions.armor_manager import ArmorManager
+                        target_armor_manager = ArmorManager(target_season, self.realm, self.character_name)
+                    else:
+                        target_armor_manager = self.armor_manager
+                    
+                    # Upload with optional rename
+                    result_path = target_armor_manager.upload_armor(file_path, new_filename)
+                    
+                    season_info = lang.get("armoury_dialog.messages.season_info", season=target_season) if target_season != self.season else ""
+                    QMessageBox.information(
+                        self, 
+                        lang.get("dialogs.titles.success"),
+                        lang.get("armoury_dialog.messages.upload_success", filename=os.path.basename(result_path), season_info=season_info)
+                    )
+                    
+                    # Refresh only if same season
+                    if target_season == self.season:
+                        self.refresh_list()
+                    
+                    logging.info(f"Fichier d'armure uploadé : {result_path} (Saison: {target_season})")
+                except Exception as e:
+                    logging.error(f"Erreur lors de l'upload du fichier d'armure : {e}")
+                    QMessageBox.critical(self, lang.get("dialogs.titles.error"), lang.get("armoury_dialog.messages.upload_error", error=str(e)))
+    
+    def import_template(self):
+        """Opens new template import dialog."""
+        # Get character class from character_data
+        character_class = self.character_data.get('class', '')
+        realm = self.character_data.get('realm', '')
+        name = self.character_data.get('name', '')
+        
+        if not character_class:
+            QMessageBox.warning(
+                self,
+                lang.get("template_import.error_title"),
+                lang.get("template_import.error_no_class")
+            )
+            return
+        
+        # Get class translations from data_manager
+        class_fr = character_class
+        class_de = character_class
+        
+        if hasattr(self, 'data_manager') and self.data_manager:
+            realm_classes = self.data_manager.get_classes(realm)
+            for cls in realm_classes:
+                if cls.get('name') == character_class:
+                    class_fr = cls.get('name_fr', character_class)
+                    class_de = cls.get('name_de', character_class)
+                    break
+        
+        # Prepare character data for dialog
+        character_data = {
+            'character_class': character_class,
+            'class_fr': class_fr,
+            'class_de': class_de,
+            'realm': realm,
+            'name': name
+        }
+        
+        dialog = TemplateImportDialog(self, character_data)
+        # Connect signal to refresh list immediately when template is imported
+        # Must update index first to include new template
+        dialog.template_imported.connect(lambda: (
+            self.template_manager.update_index(),
+            self.refresh_list()
+        ))
+        if dialog.exec() == QDialog.Accepted:
+            # Template imported successfully
+            QMessageBox.information(
+                self,
+                "Succès",
+                "Template importé avec succès !"
+            )
+    
+    def _sync_template_prices_with_db(self, metadata_path, metadata):
+        """
+        Sync template prices with database.
+        Check if items with prices in JSON now exist in DB.
+        If yes: remove from JSON (DB will be used instead).
+        If no: keep in JSON.
+        
+        Args:
+            metadata_path: Path to the metadata JSON file
+            metadata: Loaded metadata dict
+        """
+        if not metadata or 'prices' not in metadata:
+            return
+        
+        prices_dict = metadata.get('prices', {})
+        if not prices_dict:
+            return
+        
+        items_to_remove = []
+        realm_lower = self.realm.lower()
+        
+        try:
+            for item_name in prices_dict.keys():
+                # Check if item now exists in database
+                item_name_lower = item_name.lower()
+                
+                # Try realm-specific search
+                search_key_realm = f"{item_name_lower}:{realm_lower}"
+                item_data = self.db_manager.search_item(search_key_realm)
+                
+                # Try ":all" suffix
+                if not item_data:
+                    search_key_all = f"{item_name_lower}:all"
+                    item_data = self.db_manager.search_item(search_key_all)
+                
+                # Try without suffix
+                if not item_data:
+                    item_data = self.db_manager.search_item(item_name)
+                
+                # If item found in DB with a price, mark for removal from JSON
+                if item_data and 'merchant_price' in item_data:
+                    items_to_remove.append(item_name)
+                    logging.info(f"Item '{item_name}' now found in DB, will remove from template JSON")
+            
+            # Remove items from JSON if any found in DB
+            if items_to_remove:
+                for item_name in items_to_remove:
+                    del metadata['prices'][item_name]
+                
+                # Save updated metadata
+                import json
+                with open(metadata_path, 'w', encoding='utf-8') as f:
+                    json.dump(metadata, f, indent=2, ensure_ascii=False)
+                
+                logging.info(f"Synced {len(items_to_remove)} items from template JSON to DB")
+                
+        except Exception as e:
+            logging.error(f"Error syncing template prices with DB: {e}", exc_info=True)
+    
+    def parse_zenkcraft_template(self, content, season=""):
+        """
+        Main parser - detects template format and delegates to specific parser.
+        
+        Supports:
+        - Zenkcraft format (default)
+        - Loki format (Slot (Item):)
+        """
+        # Detect format type
+        format_type = self._detect_template_format(content)
+        
+        # Delegate to appropriate parser
+        if format_type == "loki":
+            return self._parse_loki_format(content, season)
+        else:
+            return self._parse_zenkcraft_format(content, season)
+    
+    def _detect_template_format(self, content):
+        """
+        Detect template format type.
+        
+        Returns:
+            str: "loki" or "zenkcraft"
+        """
+        # Check for Loki format patterns
+        loki_pattern = r'^(Chest|Arms|Head|Legs|Hands|Feet|Right Hand|Left Hand|Neck|Cloak|Jewel|Belt|Left Ring|Right Ring|Left Wrist|Right Wrist|Mythirian) \((.+?)\):$'
+        if re.search(loki_pattern, content, re.MULTILINE):
+            return "loki"
+        
+        # Default to Zenkcraft
+        return "zenkcraft"
+    
+    def _parse_loki_format(self, content, season=""):
+        """
+        Parse Loki template format (Slot (Item):).
+        
+        Loki format structure:
+        - Equipment: Slot (Item Name):
+        - Stats: Statistic section with "Stat: current/cap"
+        - Resists: Resistance section with "Resist: current/cap"
+        - Skills: Skill section with "Skill: level/cap"
+        - Bonuses: TOA Bonus section with "Bonus: value"
+        """
+        import json
+        
+        # Load metadata for prices
+        metadata = {}
+        try:
+            selected_items = self.table.selectedItems()
+            if selected_items:
+                filename = selected_items[0].text()
+                metadata_path = self.template_manager._get_metadata_path(self.realm, filename)
+                if metadata_path.exists():
+                    with open(metadata_path, 'r', encoding='utf-8') as f:
+                        metadata = json.load(f)
+                    self._sync_template_prices_with_db(metadata_path, metadata)
+        except Exception as e:
+            logging.debug(f"Could not load metadata for price lookup: {e}")
+        
+        lines = content.split('\n')
+        output = []
+        
+        # Loki format detection pattern
+        loki_pattern = r'^(Chest|Arms|Head|Legs|Hands|Feet|Right Hand|Left Hand|Neck|Cloak|Jewel|Belt|Left Ring|Right Ring|Left Wrist|Right Wrist|Mythirian) \((.+?)\):$'
+        
+        # Helper function for price lookup (same as Zenkcraft)
+        def get_item_price(item_name):
+            """Lookup item price from metadata or database."""
             try:
-                result_path = self.armor_manager.upload_armor(file_path)
-                QMessageBox.information(self, "Succès", f"Fichier uploadé avec succès :\n{os.path.basename(result_path)}")
-                self.refresh_list()
-                logging.info(f"Fichier d'armure uploadé : {result_path}")
+                if metadata and 'prices' in metadata:
+                    if item_name in metadata['prices']:
+                        return (metadata['prices'][item_name], 'json', None)
+                
+                item_name_lower = item_name.lower()
+                realm_lower = self.realm.lower()
+                
+                search_key_realm = f"{item_name_lower}:{realm_lower}"
+                item_data = self.db_manager.search_item(search_key_realm)
+                
+                if not item_data:
+                    search_key_all = f"{item_name_lower}:all"
+                    item_data = self.db_manager.search_item(search_key_all)
+                
+                if not item_data:
+                    item_data = self.db_manager.search_item(item_name)
+                
+                item_category = item_data.get('item_category') if item_data else None
+                
+                if item_data and 'merchant_price' in item_data:
+                    price = item_data['merchant_price']
+                    currency = item_data.get('merchant_currency', '')
+                    
+                    if not currency:
+                        merchant_zone = item_data.get('merchant_zone', '')
+                        currency_map = {
+                            "DF": "Seals", "SH": "Grimoires", "ToA": "Glasses",
+                            "Drake": "Scales", "Epic": "Souls/Roots/Ices", "Epik": "Souls/Roots/Ices"
+                        }
+                        currency = currency_map.get(merchant_zone, '')
+                    
+                    if currency:
+                        return (f"{price} {currency}", 'db', item_category)
+                    return (price, 'db', item_category)
+                
+                if item_category:
+                    return (None, None, item_category)
+                
             except Exception as e:
-                logging.error(f"Erreur lors de l'upload du fichier d'armure : {e}")
-                QMessageBox.critical(self, "Erreur", f"Impossible d'uploader le fichier :\n{str(e)}")
+                logging.debug(f"Failed to lookup price for '{item_name}': {e}")
+            
+            return (None, None, None)
+        
+        def format_item_display(item_name, price_str, price_source, item_category):
+            """Format item display with price or category."""
+            if price_str:
+                icon = "📝" if price_source == 'json' else "💰"
+                result = f"{icon} {price_str}"
+            elif item_category and item_category != "unknown":
+                from Functions.items_database_manager import ItemsDatabaseManager
+                icon = ItemsDatabaseManager.get_category_icon(item_category)
+                current_lang = lang.current_language if hasattr(lang, 'current_language') else 'en'
+                label = ItemsDatabaseManager.get_category_label(item_category, current_lang)
+                result = f"{icon} {label}"
+            else:
+                result = "❓"
+            
+            return f'<span style="display:inline-block; min-width:200px;">{result}</span>'
+        
+        # Parse sections
+        stats = {}
+        bonuses = {}
+        resists = {}
+        skills = {}
+        equipment = []
+        
+        current_section = None
+        for line in lines:
+            line_stripped = line.strip()
+            
+            # Detect sections
+            if line_stripped in ["Statistic"]:
+                current_section = "stats"
+                continue
+            elif line_stripped in ["TOA Bonus"]:
+                current_section = "bonuses"
+                continue
+            elif line_stripped == "Resistance":
+                current_section = "resists"
+                continue
+            elif line_stripped == "Skill":
+                current_section = "skills"
+                continue
+            elif line_stripped in ["", "Equipment"]:
+                if line_stripped == "Equipment":
+                    current_section = "equipment"
+                else:
+                    current_section = None
+                continue
+            
+            # Parse stats: "Constitution: 122/98"
+            if current_section == "stats" and "/" in line_stripped:
+                match = re.match(r'([^:]+):\s*(\d+)/(\d+)(?:\+\d+)?', line_stripped)
+                if match:
+                    stat_name = match.group(1).strip()
+                    current = int(match.group(2))
+                    cap = int(match.group(3))
+                    if current > 0:
+                        stats[stat_name] = (current, cap)
+            
+            # Parse bonuses: "Armour Factor: 42/50"
+            elif current_section == "bonuses" and ":" in line_stripped:
+                parts = line_stripped.split(":", 1)
+                if len(parts) == 2:
+                    bonus_name = parts[0].strip()
+                    bonus_value = parts[1].strip()
+                    bonuses[bonus_name] = bonus_value
+            
+            # Parse resists: "Body: 25/26"
+            elif current_section == "resists" and ":" in line_stripped:
+                match = re.match(r'([^:]+):\s*(\d+)/(\d+)(?:\+\d+)?', line_stripped)
+                if match:
+                    resist_name = match.group(1).strip()
+                    resist_value = match.group(2)
+                    resists[resist_name] = resist_value
+            
+            # Parse skills: "Mending: 7/11"
+            elif current_section == "skills" and ":" in line_stripped:
+                match = re.match(r'([^:]+):\s*(\d+)/(\d+)', line_stripped)
+                if match:
+                    skill_name = match.group(1).strip()
+                    skill_level = int(match.group(2))
+                    if skill_level > 0:
+                        skills[skill_name] = skill_level
+            
+            # Parse equipment: "Chest (Item Name):"
+            elif current_section == "equipment" or re.match(loki_pattern, line_stripped):
+                match = re.match(loki_pattern, line_stripped)
+                if match:
+                    slot = match.group(1)
+                    item_name = match.group(2).strip()
+                    if item_name and len(item_name) > 2:
+                        # Check if this is a crafted item by looking ahead in the content
+                        # Crafted items have "Quality:" in their Imbue line
+                        item_section_start = content.find(f"{slot} ({item_name}):")
+                        if item_section_start != -1:
+                            # Extract next 5 lines after this item header
+                            item_section = content[item_section_start:item_section_start + 200]
+                            # Skip if "Quality:" is found (crafted item)
+                            if "Quality:" not in item_section:
+                                equipment.append({
+                                    'slot': slot,
+                                    'name': item_name,
+                                    'source_type': 'Loot'
+                                })
+        
+        # Build output - similar to Zenkcraft but adapted for Loki
+        output.append(f"📋 {lang.get('armoury_management.preview.title')} - Format Loki")
+        output.append("")
+        
+        # Helper function to merge two columns (same as Zenkcraft)
+        def merge_two_columns(left_lines, right_lines):
+            """Merge two columns with proper alignment."""
+            result = []
+            
+            def remove_color_markers(text):
+                """Remove all color markers from text for accurate width calculation."""
+                text = text.replace("%%COLOR_START:#4CAF50%%", "")
+                text = text.replace("%%COLOR_START:#FF9800%%", "")
+                text = text.replace("%%COLOR_START:#F44336%%", "")
+                text = text.replace("%%COLOR_END%%", "")
+                return text
+            
+            # Calculate max width from NON-TITLE lines
+            max_left_width = 0
+            for line in left_lines:
+                if line.strip() and not any(emoji in line for emoji in ["📊", "📚", "🛡️", "✨"]):
+                    clean_line = remove_color_markers(line)
+                    max_left_width = max(max_left_width, len(clean_line))
+            
+            max_left_width = max(max_left_width, 30)  # Minimum width
+            
+            # Merge the two columns
+            max_lines = max(len(left_lines), len(right_lines))
+            
+            for i in range(max_lines):
+                left_line = left_lines[i] if i < len(left_lines) else ""
+                right_line = right_lines[i] if i < len(right_lines) else ""
+                
+                # Check if this is a title line
+                is_title_line = any(emoji in left_line for emoji in ["📊", "📚", "🛡️", "✨"]) or \
+                                any(emoji in right_line for emoji in ["📊", "📚", "🛡️", "✨"])
+                
+                if right_line and left_line.strip() and not is_title_line:
+                    # Data line with separator
+                    clean_left = remove_color_markers(left_line)
+                    padding = max_left_width - len(clean_left)
+                    result.append(f"{left_line}{' ' * padding}  │  {right_line}")
+                elif left_line and right_line and is_title_line:
+                    # Title line without separator
+                    clean_left = remove_color_markers(left_line)
+                    padding = max_left_width - len(clean_left)
+                    result.append(f"{left_line}{' ' * padding}     {right_line}")
+                elif left_line:
+                    result.append(left_line)
+                elif right_line:
+                    result.append(" " * (max_left_width + 2) + "│  " + right_line)
+            
+            return result
+        
+        # Stats section (if exists)
+        stats_lines = []
+        resist_lines = []
+        
+        if stats:
+            stats_lines.append("📊  STATS")
+            for stat_name, (current, cap) in stats.items():
+                if current < cap:
+                    color = "#F44336"  # Red
+                elif current == cap:
+                    color = "#FF9800"  # Orange
+                else:
+                    color = "#4CAF50"  # Green
+                
+                stat_line = f"%%COLOR_START:{color}%%{stat_name:15} {current:3}/{cap:<3}%%COLOR_END%%"
+                stats_lines.append(f"  {stat_line}")
+        
+        if resists:
+            resist_lines.append("🛡️  RESISTS")
+            resist_list = list(resists.items())
+            for i in range(0, len(resist_list), 2):
+                resist1_name, resist1_value = resist_list[i]
+                resist1_val = int(resist1_value)
+                
+                if resist1_val < 25:
+                    color1 = "#F44336"
+                elif resist1_val == 25:
+                    color1 = "#FF9800"
+                else:
+                    color1 = "#4CAF50"
+                
+                resist1 = f"%%COLOR_START:{color1}%%{resist1_name:8} {resist1_value:>2}%%%COLOR_END%%"
+                
+                if i + 1 < len(resist_list):
+                    resist2_name, resist2_value = resist_list[i + 1]
+                    resist2_val = int(resist2_value)
+                    
+                    if resist2_val < 25:
+                        color2 = "#F44336"
+                    elif resist2_val == 25:
+                        color2 = "#FF9800"
+                    else:
+                        color2 = "#4CAF50"
+                    
+                    resist2 = f"%%COLOR_START:{color2}%%{resist2_name:8} {resist2_value:>2}%%%COLOR_END%%"
+                else:
+                    resist2 = ""
+                
+                resist_lines.append(f"  {resist1}  /  {resist2}")
+        
+        # Merge BLOCK 1: STATS │ RESISTANCES
+        if stats_lines or resist_lines:
+            block1_output = merge_two_columns(stats_lines, resist_lines)
+            output.extend(block1_output)
+            output.append("")
+        
+        # Skills and Bonuses
+        skills_lines = []
+        bonuses_lines = []
+        
+        if skills:
+            skills_lines.append("📚  SKILLS")
+            for skill_name, skill_level in skills.items():
+                skills_lines.append(f"  {skill_name.ljust(20)} {skill_level}")
+        
+        if bonuses:
+            bonuses_lines.append("✨  BONUSES")
+            bonus_items = list(bonuses.items())
+            for i in range(0, len(bonus_items), 2):
+                left_name, left_value = bonus_items[i]
+                left = f"{left_name:25} {left_value:>8}"
+                
+                if i+1 < len(bonus_items):
+                    right_name, right_value = bonus_items[i+1]
+                    right = f"{right_name:25} {right_value:>8}"
+                else:
+                    right = ""
+                
+                if right:
+                    bonuses_lines.append(f"  {left}  │  {right}")
+                else:
+                    bonuses_lines.append(f"  {left}")
+        
+        # Merge BLOCK 2: SKILLS │ BONUSES
+        if skills_lines or bonuses_lines:
+            block2_output = merge_two_columns(skills_lines, bonuses_lines)
+            output.extend(block2_output)
+            output.append("")
+        
+        output.append("═" * 94)
+        output.append("")
+        
+        # Equipment section
+        equipment_count = len(equipment)
+        output.append(f"⚔️  ÉQUIPEMENT ({equipment_count}/18 slots)")
+        output.append("")
+        
+        if equipment:
+            # Categorize items (Loki slot names)
+            armor_slots = ['Chest', 'Arms', 'Head', 'Legs', 'Hands', 'Feet']
+            jewelry_slots = ['Left Ring', 'Right Ring', 'Left Wrist', 'Right Wrist', 'Jewel', 'Belt', 'Neck', 'Cloak', 'Mythirian']
+            weapon_slots = ['Left Hand', 'Right Hand']
+            
+            armor_items = [item for item in equipment if item['slot'] in armor_slots]
+            jewelry_items = [item for item in equipment if item['slot'] in jewelry_slots]
+            weapon_items = [item for item in equipment if item['slot'] in weapon_slots]
+            
+            # Calculate max item name width for alignment
+            all_loot = armor_items + jewelry_items + weapon_items
+            max_len = max(len(f"{item['name']} ({item['slot']})") for item in all_loot) if all_loot else 0
+            max_len = max(max_len, 35)  # Minimum width
+            
+            # Fixed width for item column (name + padding + price)
+            ITEM_DISPLAY_WIDTH = 70  # Fixed width to align all prices
+            
+            items_without_price = []
+            from collections import defaultdict
+            currency_totals_temp = defaultdict(int)
+            
+            # Armor
+            if armor_items:
+                output.append(f"    🛡️  {lang.get('armoury_dialog.preview.equipment_categories.armor_pieces')} :")
+                for item in armor_items:
+                    if item['slot'] in self.MODEL_SLOTS:
+                        model_icon = f'<a href="model:{item["name"]}" style="text-decoration:none; color:#4CAF50;">🔍</a> '
+                        item_text = f"{model_icon}{item['name']} ({item['slot']})"
+                        clean_item_text = f"{item['name']} ({item['slot']})"
+                    else:
+                        item_text = f"{item['name']} ({item['slot']})"
+                        clean_item_text = item_text
+                    
+                    price_str, price_source, item_category = get_item_price(item['name'])
+                    
+                    # Calculate padding based on clean text
+                    padding = max_len - len(clean_item_text)
+                    item_with_padding = f"• {item_text}{' ' * padding}"
+                    
+                    # Calculate clean width for alignment
+                    clean_full = f"• {clean_item_text.ljust(max_len)}"
+                    
+                    # Build price display
+                    if price_str:
+                        price_display = f"💰 {price_str}"
+                    elif item_category and item_category != "unknown":
+                        from Functions.items_database_manager import ItemsDatabaseManager
+                        icon = ItemsDatabaseManager.get_category_icon(item_category)
+                        current_lang = lang.current_language if hasattr(lang, 'current_language') else 'en'
+                        label = ItemsDatabaseManager.get_category_label(item_category, current_lang)
+                        price_display = f"{icon} {label}"
+                    else:
+                        price_display = "❓"
+                    
+                    clean_full_with_price = clean_full + "  " + price_display
+                    final_padding = max(ITEM_DISPLAY_WIDTH - len(clean_full_with_price), 0)
+                    
+                    display = format_item_display(item['name'], price_str, price_source, item_category)
+                    output.append(f"      {item_with_padding}  {display}{' ' * final_padding}")
+                    
+                    if price_str:
+                        try:
+                            if price_source == 'json' and isinstance(price_str, dict):
+                                price = int(price_str.get('price', 0))
+                                currency = price_str.get('currency', '?')
+                                currency_totals_temp[currency] += price
+                            else:
+                                parts = str(price_str).split()
+                                if len(parts) >= 2:
+                                    price = int(parts[0])
+                                    currency = ' '.join(parts[1:])
+                                    currency_totals_temp[currency] += price
+                        except:
+                            pass
+                    elif not item_category or item_category == "unknown":
+                        items_without_price.append(item['name'])
+            
+            # Jewelry
+            if jewelry_items:
+                output.append("")
+                output.append(f"    💍 {lang.get('armoury_dialog.preview.equipment_categories.jewelry')} :")
+                
+                jewelry_dict = {item['slot']: item for item in jewelry_items}
+                
+                # Loki format uses different slot names
+                pairs = [
+                    ('Mythirian', None),
+                    ('Neck', 'Cloak'),
+                    ('Jewel', 'Belt'),
+                    ('Left Ring', 'Right Ring'),
+                    ('Left Wrist', 'Right Wrist')
+                ]
+                
+                # Pre-calculate max item name width (without price) for alignment
+                max_item_name_width = 0
+                for left_slot, right_slot in pairs:
+                    if left_slot in jewelry_dict:
+                        left_text = f"{jewelry_dict[left_slot]['name']} ({jewelry_dict[left_slot]['slot']})"
+                        max_item_name_width = max(max_item_name_width, len(left_text))
+                    if right_slot and right_slot in jewelry_dict:
+                        right_text = f"{jewelry_dict[right_slot]['name']} ({jewelry_dict[right_slot]['slot']})"
+                        max_item_name_width = max(max_item_name_width, len(right_text))
+                
+                max_item_name_width = max(max_item_name_width, 35)  # Minimum width
+                
+                # Fixed total width for left column (item + price)
+                LEFT_COLUMN_WIDTH = 70  # Augmenté pour s'adapter aux noms longs + prix
+                
+                for left_slot, right_slot in pairs:
+                    left_item = jewelry_dict.get(left_slot)
+                    right_item = jewelry_dict.get(right_slot) if right_slot else None
+                    
+                    # Build left column
+                    left_output = ""
+                    clean_left_full_width = 0
+                    if left_item:
+                        # Add clickable model icon if item has visual model (only Cloak in jewelry)
+                        if left_item['slot'] in self.MODEL_SLOTS:
+                            model_icon = f'<a href="model:{left_item["name"]}" style="text-decoration:none; color:#4CAF50;">🔍</a> '
+                            left_text = f"{model_icon}{left_item['name']} ({left_item['slot']})"
+                            clean_left_text = f"{left_item['name']} ({left_item['slot']})"
+                        else:
+                            left_text = f"{left_item['name']} ({left_item['slot']})"
+                            clean_left_text = left_text
+                        
+                        left_price_str, left_price_source, left_item_category = get_item_price(left_item['name'])
+                        
+                        # Add padding to HTML version
+                        padding_needed = max_item_name_width - len(clean_left_text)
+                        left_text_padded = left_text + (' ' * padding_needed)
+                        left_display = format_item_display(left_item['name'], left_price_str, left_price_source, left_item_category)
+                        left_output = f"• {left_text_padded}  {left_display}"
+                        
+                        # Calculate CLEAN width (without HTML) for alignment
+                        clean_price_display = ""
+                        if left_price_str:
+                            clean_price_display = f"💰 {left_price_str}"
+                        elif left_item_category and left_item_category != "unknown":
+                            from Functions.items_database_manager import ItemsDatabaseManager
+                            icon = ItemsDatabaseManager.get_category_icon(left_item_category)
+                            current_lang = lang.current_language if hasattr(lang, 'current_language') else 'en'
+                            label = ItemsDatabaseManager.get_category_label(left_item_category, current_lang)
+                            clean_price_display = f"{icon} {label}"
+                        else:
+                            clean_price_display = "❓"
+                        
+                        clean_left_full = f"• {clean_left_text.ljust(max_item_name_width)}  {clean_price_display}"
+                        clean_left_full_width = len(clean_left_full)
+                        
+                        # Accumulate currency totals
+                        if left_price_str:
+                            try:
+                                if left_price_source == 'json' and isinstance(left_price_str, dict):
+                                    price = int(left_price_str.get('price', 0))
+                                    currency = left_price_str.get('currency', '?')
+                                    currency_totals_temp[currency] += price
+                                else:
+                                    parts = str(left_price_str).split()
+                                    if len(parts) >= 2:
+                                        price = int(parts[0])
+                                        currency = ' '.join(parts[1:])
+                                        currency_totals_temp[currency] += price
+                            except:
+                                pass
+                        elif not left_item_category or left_item_category == "unknown":
+                            items_without_price.append(left_item['name'])
+                    
+                    # Build right column
+                    right_output = ""
+                    if right_item:
+                        if right_item['slot'] in self.MODEL_SLOTS:
+                            model_icon = f'<a href="model:{right_item["name"]}" style="text-decoration:none; color:#4CAF50;">🔍</a> '
+                            right_text = f"{model_icon}{right_item['name']} ({right_item['slot']})"
+                            clean_right_text = f"{right_item['name']} ({right_item['slot']})"
+                        else:
+                            right_text = f"{right_item['name']} ({right_item['slot']})"
+                            clean_right_text = right_text
+                        
+                        right_price_str, right_price_source, right_item_category = get_item_price(right_item['name'])
+                        padding_needed = max_item_name_width - len(clean_right_text)
+                        right_text_padded = right_text + (' ' * padding_needed)
+                        right_display = format_item_display(right_item['name'], right_price_str, right_price_source, right_item_category)
+                        right_output = f"• {right_text_padded}  {right_display}"
+                        
+                        if right_price_str:
+                            try:
+                                if right_price_source == 'json' and isinstance(right_price_str, dict):
+                                    price = int(right_price_str.get('price', 0))
+                                    currency = right_price_str.get('currency', '?')
+                                    currency_totals_temp[currency] += price
+                                else:
+                                    parts = str(right_price_str).split()
+                                    if len(parts) >= 2:
+                                        price = int(parts[0])
+                                        currency = ' '.join(parts[1:])
+                                        currency_totals_temp[currency] += price
+                            except:
+                                pass
+                        elif not right_item_category or right_item_category == "unknown":
+                            items_without_price.append(right_item['name'])
+                    
+                    # Combine left and right columns with proper alignment
+                    if left_output and right_output:
+                        # Use clean width to calculate padding
+                        left_padding = max(LEFT_COLUMN_WIDTH - clean_left_full_width, 0)
+                        output.append(f"      {left_output}{' ' * left_padding}  │  {right_output}")
+                    elif left_output:
+                        output.append(f"      {left_output}")
+                    elif right_output:
+                        output.append(f"      {' ' * LEFT_COLUMN_WIDTH}  │  {right_output}")
+            
+            # Weapons
+            if weapon_items:
+                output.append("")
+                output.append(f"    ⚔️  {lang.get('armoury_dialog.preview.equipment_categories.weapons')} :")
+                for item in weapon_items:
+                    if item['slot'] in self.MODEL_SLOTS:
+                        model_icon = f'<a href="model:{item["name"]}" style="text-decoration:none; color:#4CAF50;">🔍</a> '
+                        item_text = f"{model_icon}{item['name']} ({item['slot']})"
+                        clean_item_text = f"{item['name']} ({item['slot']})"
+                    else:
+                        item_text = f"{item['name']} ({item['slot']})"
+                        clean_item_text = item_text
+                    
+                    price_str, price_source, item_category = get_item_price(item['name'])
+                    
+                    # Calculate padding based on clean text
+                    padding = max_len - len(clean_item_text)
+                    item_with_padding = f"• {item_text}{' ' * padding}"
+                    
+                    # Calculate clean width for alignment
+                    clean_full = f"• {clean_item_text.ljust(max_len)}"
+                    
+                    # Build price display
+                    if price_str:
+                        price_display = f"💰 {price_str}"
+                    elif item_category and item_category != "unknown":
+                        from Functions.items_database_manager import ItemsDatabaseManager
+                        icon = ItemsDatabaseManager.get_category_icon(item_category)
+                        current_lang = lang.current_language if hasattr(lang, 'current_language') else 'en'
+                        label = ItemsDatabaseManager.get_category_label(item_category, current_lang)
+                        price_display = f"{icon} {label}"
+                    else:
+                        price_display = "❓"
+                    
+                    clean_full_with_price = clean_full + "  " + price_display
+                    final_padding = max(ITEM_DISPLAY_WIDTH - len(clean_full_with_price), 0)
+                    
+                    display = format_item_display(item['name'], price_str, price_source, item_category)
+                    output.append(f"      {item_with_padding}  {display}{' ' * final_padding}")
+                    
+                    if price_str:
+                        try:
+                            if price_source == 'json' and isinstance(price_str, dict):
+                                price = int(price_str.get('price', 0))
+                                currency = price_str.get('currency', '?')
+                                currency_totals_temp[currency] += price
+                            else:
+                                parts = str(price_str).split()
+                                if len(parts) >= 2:
+                                    price = int(parts[0])
+                                    currency = ' '.join(parts[1:])
+                                    currency_totals_temp[currency] += price
+                        except:
+                            pass
+                    elif not item_category or item_category == "unknown":
+                        items_without_price.append(item['name'])
+            
+            # Category legend
+            if items_without_price:
+                output.append("")
+                output.append(f"    Légende des catégories :")
+                output.append(f"      ⚔️ = Quest Reward   🎉 = Event Reward")
+                
+                self.items_without_price = items_without_price
+            else:
+                self.items_without_price = []
+            
+            output.append("")
+            
+            # Currency summary
+            if currency_totals_temp:
+                output.append("═" * 94)
+                output.append("")
+                
+                missing_count = f" ({len(self.items_without_price)} item(s) without price)" if self.items_without_price else ""
+                output.append(f"💰 RÉSUMÉ DES DEVISES{missing_count}")
+                output.append("")
+                for currency, total in sorted(currency_totals_temp.items()):
+                    currency_str = currency[:25].ljust(25)
+                    total_str = str(total).rjust(6)
+                    output.append(f"  {currency_str} {total_str}")
+                output.append("")
+        
+        return "\n".join(output)
+    
+    def _parse_zenkcraft_format(self, content, season=""):
+        """Parse Zenkcraft template format and return formatted display."""
+        import json
+        
+        # Load metadata JSON for prices (if exists)
+        metadata = {}
+        try:
+            # Get current selected filename for metadata lookup
+            selected_items = self.table.selectedItems()
+            if selected_items:
+                filename = selected_items[0].text()
+                metadata_path = self.template_manager._get_metadata_path(self.realm, filename)
+                if metadata_path.exists():
+                    with open(metadata_path, 'r', encoding='utf-8') as f:
+                        metadata = json.load(f)
+                    
+                    # Sync prices: check if items in JSON now exist in DB
+                    self._sync_template_prices_with_db(metadata_path, metadata)
+        except Exception as e:
+            logging.debug(f"Could not load metadata for price lookup: {e}")
+        
+        lines = content.split('\n')
+        
+        # Extract character info
+        char_name = ""
+        char_level = ""
+        char_class = ""
+        last_saved = ""
+        version = ""
+        
+        for line in lines:
+            if line.startswith("Character Summary for"):
+                # Extract: "Eden - Hibernia - Bard(Level 50) - Bard"
+                match = re.search(r'for (.+?)\(Level (\d+)\) - (.+)', line)
+                if match:
+                    char_name = match.group(1).strip()
+                    char_level = match.group(2)
+                    char_class = match.group(3).strip()
+            elif line.startswith("Last Saved:"):
+                last_saved = line.replace("Last Saved:", "").strip()
+            elif line.startswith("Version:"):
+                version = line.replace("Version:", "").strip()
+        
+        # Helper function to get item price from template JSON or database
+        def get_item_price(item_name):
+            """
+            Lookup item price with priority chain:
+            1. Template metadata JSON (manually added prices via search)
+            2. Database (internal or personal) with realm-aware search
+            
+            Search strategy for database:
+            - Priority 1: Item specific to current realm (e.g., "item:hibernia")
+            - Priority 2: Item available to all realms (e.g., "item:all")
+            - Priority 3: Item without realm suffix (legacy format)
+            
+            Returns tuple: (formatted_price_string, source, item_category) or (None, None, None)
+            - source can be: 'json' (from template) or 'db' (from database)
+            - item_category: Category key if item is categorized (quest_reward, event_reward, unknown) or None
+            """
+            try:
+                # Step 1: Check template metadata JSON for stored price (highest priority)
+                if metadata and 'prices' in metadata:
+                    if item_name in metadata['prices']:
+                        return (metadata['prices'][item_name], 'json', None)
+                
+                # Step 2: Try database with realm-aware search
+                item_name_lower = item_name.lower()
+                realm_lower = self.realm.lower()
+                
+                # Priority 1: Try with specific realm suffix (e.g., "dirge of sheeroe hills:hibernia")
+                search_key_realm = f"{item_name_lower}:{realm_lower}"
+                item_data = self.db_manager.search_item(search_key_realm)
+                
+                # Priority 2: Try with ":all" suffix (e.g., "searing fiend necklace:all")
+                if not item_data:
+                    search_key_all = f"{item_name_lower}:all"
+                    item_data = self.db_manager.search_item(search_key_all)
+                
+                # Priority 3: Try without realm suffix (legacy items or direct search)
+                if not item_data:
+                    item_data = self.db_manager.search_item(item_name)
+                
+                # Check if item is categorized (quest_reward, event_reward, unknown)
+                item_category = item_data.get('item_category') if item_data else None
+                
+                # Format price if found in database
+                if item_data and 'merchant_price' in item_data:
+                    price = item_data['merchant_price']
+                    currency = item_data.get('merchant_currency', '')
+                    
+                    # Fallback: infer currency from merchant_zone if missing
+                    if not currency:
+                        merchant_zone = item_data.get('merchant_zone', '')
+                        currency_map = {
+                            "DF": "Seals",           # Darkness Falls
+                            "SH": "Grimoires",       # Shrouded Isles
+                            "ToA": "Glasses",        # Trials of Atlantis
+                            "Drake": "Scales",       
+                            "Epic": "Souls/Roots/Ices",
+                            "Epik": "Souls/Roots/Ices"  # Ancienne orthographe
+                        }
+                        currency = currency_map.get(merchant_zone, '')
+                    
+                    if currency:
+                        return (f"{price} {currency}", 'db', item_category)
+                    return (price, 'db', item_category)
+                
+                # Return category even if no price found
+                if item_category:
+                    return (None, None, item_category)
+                
+            except Exception as e:
+                logging.debug(f"Failed to lookup price for '{item_name}': {e}")
+            
+            return (None, None, None)
+        
+        # Helper function to format item display (price or category)
+        def format_item_display(item_name, price_str, price_source, item_category):
+            """
+            Format item display with price or category
+            
+            Args:
+                item_name: Name of the item
+                price_str: Price string if available (or None)
+                price_source: Source of price ('json', 'db', or None)
+                item_category: Category key ('quest_reward', 'event_reward', 'unknown', or None)
+            
+            Returns:
+                str: Formatted display string (icon + price/category) with FIXED WIDTH using HTML
+            """
+            if price_str:
+                # Has price: show icon + price
+                icon = "📝" if price_source == 'json' else "💰"
+                result = f"{icon} {price_str}"
+            elif item_category and item_category != "unknown":
+                # No price but has category: show category
+                from Functions.items_database_manager import ItemsDatabaseManager
+                icon = ItemsDatabaseManager.get_category_icon(item_category)
+                # Use current language from lang manager
+                current_lang = lang.current_language if hasattr(lang, 'current_language') else 'en'
+                label = ItemsDatabaseManager.get_category_label(item_category, current_lang)
+                result = f"{icon} {label}"
+            else:
+                # No price, no category: unknown
+                result = "❓"
+            
+            # SOLUTION: Use HTML with fixed-width span to force alignment
+            # Wrap in a span with min-width to ensure consistent spacing
+            # The HTML renderer in Qt will handle this properly
+            return f'<span style="display:inline-block; min-width:200px;">{result}</span>'
+        
+        # Parse Stats section
+        stats = {}
+        bonuses = {}
+        resists = {}
+        skills = {}
+        equipment_count = 0
+        
+        current_section = None
+        for line in lines:
+            line = line.strip()
+            
+            if line == "Stats":
+                current_section = "stats"
+                continue
+            elif line == "Bonuses":
+                current_section = "bonuses"
+                continue
+            elif line.startswith("Resists"):
+                current_section = "resists"
+                continue
+            elif line == "Skills":
+                current_section = "skills"
+                continue
+            elif line == "Items":
+                current_section = "items"
+                continue
+            elif line in ["Item Procs and Charges", ""]:
+                current_section = None
+                continue
+            
+            # Parse based on section
+            if current_section == "stats" and "/" in line:
+                # Format: "94 / 94  Constitution"
+                match = re.match(r'(\d+)\s*/\s*(\d+)\s+(.+)', line)
+                if match:
+                    current = int(match.group(1))
+                    cap = int(match.group(2))
+                    stat_name = match.group(3).strip()
+                    if current > 0:  # Only non-zero stats
+                        stats[stat_name] = (current, cap)
+            
+            elif current_section == "bonuses" and ":" in line:
+                # Format: "Healing: 23%"
+                parts = line.split(":")
+                if len(parts) == 2:
+                    bonus_name = parts[0].strip()
+                    bonus_value = parts[1].strip()
+                    # Skip unwanted entries
+                    if bonus_name not in ["Level", "Utility", "Source Type", "Name"]:
+                        bonuses[bonus_name] = bonus_value
+            
+            elif current_section == "resists" and "%" in line:
+                # Format: "25% Crush"
+                match = re.match(r'(\d+)%\s+(.+)', line)
+                if match:
+                    resist_value = match.group(1)
+                    resist_name = match.group(2).strip()
+                    resists[resist_name] = resist_value
+            
+            elif current_section == "skills":
+                # Format: "0 Blades" or "3 Regrowth"
+                match = re.match(r'(\d+)\s+(.+)', line)
+                if match:
+                    skill_level = int(match.group(1))
+                    skill_name = match.group(2).strip()
+                    if skill_level > 0:  # Only non-zero skills
+                        skills[skill_name] = skill_level
+        
+        # Parse equipment items (extract Slot, Name, Source Type)
+        equipment = []  # List of {slot, name, source_type}
+        current_slot = None
+        current_item = {}
+        
+        for line in lines:
+            stripped = line.strip()
+            
+            # Detect item slot
+            if stripped in ["Helmet", "Hands", "Torso", "Arms", "Feet", "Legs", 
+                           "Right Hand", "Left Hand", "Two Handed", "Ranged",
+                           "Neck", "Cloak", "Jewelry", "Waist", "L Ring", "R Ring",
+                           "L Wrist", "R Wrist", "Mythical"]:
+                # Save previous item if exists
+                if current_slot and current_item.get('name'):
+                    equipment.append({
+                        'slot': current_slot,
+                        'name': current_item['name'],
+                        'source_type': current_item.get('source_type', 'Unknown')
+                    })
+                
+                # Start new item
+                current_slot = stripped
+                current_item = {}
+                continue
+            
+            # Parse item properties
+            if current_slot:
+                if stripped.startswith("Name:"):
+                    name_value = stripped.split("Name:", 1)[1].strip()
+                    if name_value:
+                        current_item['name'] = name_value
+                elif stripped.startswith("Source Type:"):
+                    source_value = stripped.split("Source Type:", 1)[1].strip()
+                    current_item['source_type'] = source_value
+                elif stripped == "" or stripped == "Bonuses":
+                    # End of item section
+                    if current_slot and current_item.get('name'):
+                        equipment.append({
+                            'slot': current_slot,
+                            'name': current_item['name'],
+                            'source_type': current_item.get('source_type', 'Unknown')
+                        })
+                        current_slot = None
+                        current_item = {}
+        
+        # Save last item if exists
+        if current_slot and current_item.get('name'):
+            equipment.append({
+                'slot': current_slot,
+                'name': current_item['name'],
+                'source_type': current_item.get('source_type', 'Unknown')
+            })
+        
+        equipment_count = len(equipment)
+        
+        # Build formatted output with adaptive sections
+        output = []
+        
+        # ========== SECTIONS 1-4: TWO-COLUMN LAYOUT - TWO INDEPENDENT BLOCKS ==========
+        
+        # BLOCK 1: STATS │ RESISTANCES
+        stats_lines = []
+        resist_lines = []
+        
+        # Build STATS content
+        if stats:
+            stats_lines.append("📊  STATS")
+            stats_list = list(stats.items())
+            for stat_name, (current, cap) in stats_list:
+                if current == cap:
+                    color = "#4CAF50"  # Green
+                elif current > cap:
+                    color = "#FF9800"  # Orange
+                else:
+                    color = "#F44336"  # Red
+                
+                stat_label = stat_name.ljust(15)
+                current_str = str(current).rjust(3)
+                cap_str = str(cap).rjust(3)
+                stats_lines.append(f"  {stat_label} %%COLOR_START:{color}%%{current_str} / {cap_str}%%COLOR_END%%")
+        
+        # Build RESISTANCES content
+        if resists:
+            resist_lines.append("🛡️  RESISTANCES")
+            resist_list = list(resists.items())
+            for i in range(0, len(resist_list), 2):
+                resist1_name, resist1_value = resist_list[i]
+                resist1_val = int(resist1_value)
+                
+                # Determine color based on value
+                if resist1_val < 25:
+                    color1 = "#F44336"  # Red (< 25%)
+                elif resist1_val == 25:
+                    color1 = "#FF9800"  # Orange (= 25%)
+                else:
+                    color1 = "#4CAF50"  # Green (> 25%)
+                
+                resist1 = f"%%COLOR_START:{color1}%%{resist1_name:8} {resist1_value:>2}%%%COLOR_END%%"
+                
+                if i + 1 < len(resist_list):
+                    resist2_name, resist2_value = resist_list[i + 1]
+                    resist2_val = int(resist2_value)
+                    
+                    # Determine color based on value
+                    if resist2_val < 25:
+                        color2 = "#F44336"  # Red (< 25%)
+                    elif resist2_val == 25:
+                        color2 = "#FF9800"  # Orange (= 25%)
+                    else:
+                        color2 = "#4CAF50"  # Green (> 25%)
+                    
+                    resist2 = f"%%COLOR_START:{color2}%%{resist2_name:8} {resist2_value:>2}%%%COLOR_END%%"
+                else:
+                    resist2 = ""
+                
+                resist_lines.append(f"  {resist1}  /  {resist2}")
+        
+        # BLOCK 2: SKILLS │ BONUSES
+        skills_lines = []
+        bonuses_lines = []
+        
+        # Build SKILLS content
+        if skills:
+            skills_lines.append("📚  SKILLS")
+            skills_list = list(skills.items())
+            for skill_name, skill_level in skills_list:
+                skills_lines.append(f"  {skill_name.ljust(20)} {skill_level}")
+        
+        # Build BONUSES content
+        if bonuses:
+            bonuses_lines.append("✨  BONUSES")
+            bonus_items = list(bonuses.items())
+            for i in range(0, len(bonus_items), 2):
+                left_name, left_value = bonus_items[i]
+                left = f"{left_name:20} {left_value:>5}"
+                
+                if i+1 < len(bonus_items):
+                    right_name, right_value = bonus_items[i+1]
+                    right = f"{right_name:20} {right_value:>5}"
+                else:
+                    right = " " * 26  # Adjusted for new width (20 + 1 + 5)
+                
+                bonuses_lines.append(f"  {left}  /  {right}")
+        
+        # Helper function to merge two columns
+        def merge_two_columns(left_lines, right_lines):
+            """Merge two columns with proper alignment."""
+            result = []
+            
+            def remove_color_markers(text):
+                """Remove all color markers from text for accurate width calculation."""
+                text = text.replace("%%COLOR_START:#4CAF50%%", "")
+                text = text.replace("%%COLOR_START:#FF9800%%", "")
+                text = text.replace("%%COLOR_START:#F44336%%", "")
+                text = text.replace("%%COLOR_END%%", "")
+                return text
+            
+            # Calculate max width from NON-TITLE lines
+            max_left_width = 0
+            for line in left_lines:
+                if line.strip() and not any(emoji in line for emoji in ["📊", "📚", "🛡️", "✨"]):
+                    clean_line = remove_color_markers(line)
+                    max_left_width = max(max_left_width, len(clean_line))
+            
+            max_left_width = max(max_left_width, 30)  # Minimum width
+            
+            # Merge the two columns
+            max_lines = max(len(left_lines), len(right_lines))
+            
+            for i in range(max_lines):
+                left_line = left_lines[i] if i < len(left_lines) else ""
+                right_line = right_lines[i] if i < len(right_lines) else ""
+                
+                # Check if this is a title line
+                is_title_line = any(emoji in left_line for emoji in ["📊", "📚", "🛡️", "✨"]) or \
+                                any(emoji in right_line for emoji in ["📊", "📚", "🛡️", "✨"])
+                
+                if right_line and left_line.strip() and not is_title_line:
+                    # Data line with separator
+                    clean_left = remove_color_markers(left_line)
+                    padding = max_left_width - len(clean_left)
+                    result.append(f"{left_line}{' ' * padding}  │  {right_line}")
+                elif left_line and right_line and is_title_line:
+                    # Title line without separator
+                    clean_left = remove_color_markers(left_line)
+                    padding = max_left_width - len(clean_left)
+                    result.append(f"{left_line}{' ' * padding}     {right_line}")
+                elif left_line:
+                    result.append(left_line)
+                elif right_line:
+                    result.append(" " * (max_left_width + 2) + "│  " + right_line)
+            
+            return result
+        
+        # Merge BLOCK 1: STATS │ RESISTANCES
+        if stats_lines or resist_lines:
+            block1_output = merge_two_columns(stats_lines, resist_lines)
+            output.extend(block1_output)
+            output.append("")  # Spacing between blocks
+        
+        # Merge BLOCK 2: SKILLS │ BONUSES
+        if skills_lines or bonuses_lines:
+            block2_output = merge_two_columns(skills_lines, bonuses_lines)
+            output.extend(block2_output)
+            output.append("")  # Spacing after section
+        
+        # Calculate separator line width based on actual content width
+        def remove_color_markers_for_width(text):
+            """Remove color markers for accurate width calculation."""
+            text = text.replace("%%COLOR_START:#4CAF50%%", "")
+            text = text.replace("%%COLOR_START:#FF9800%%", "")
+            text = text.replace("%%COLOR_START:#F44336%%", "")
+            text = text.replace("%%COLOR_END%%", "")
+            return text
+        
+        max_line_width = 80  # Minimum width
+        for line in output:
+            clean_line = remove_color_markers_for_width(line)
+            max_line_width = max(max_line_width, len(clean_line))
+        
+        # Add separator line that matches the content width
+        output.append("═" * max_line_width)
+        output.append("")
+        
+        # ========== SECTION 5: EQUIPMENT SUMMARY ==========
+        # Separate Spellcraft and Loot items
+        spellcraft_items = [item for item in equipment if item['source_type'].lower() == 'spellcraft']
+        loot_items = [item for item in equipment if item['source_type'].lower() == 'loot']
+        
+        # Build equipment header with counts
+        equipment_header = "⚔️  ÉQUIPEMENT ("
+        if spellcraft_items and loot_items:
+            equipment_header += f"🔨 Spellcraft : {len(spellcraft_items)} │ 💎 Loot : {len(loot_items)}"
+        elif spellcraft_items:
+            equipment_header += f"🔨 Spellcraft : {len(spellcraft_items)}"
+        elif loot_items:
+            equipment_header += f"💎 Loot : {len(loot_items)}"
+        else:
+            equipment_header += f"{equipment_count}/18 slots"
+        equipment_header += ")"
+        
+        output.append(equipment_header)
+        output.append("")  # Add spacing after equipment header
+        
+        # ========== SECTION 6: LOOT ITEMS (if present) ==========
+        if loot_items:
+            
+            # Categorize items
+            armor_slots = ['Helmet', 'Hands', 'Torso', 'Arms', 'Feet', 'Legs']
+            jewelry_slots = ['L Ring', 'R Ring', 'L Wrist', 'R Wrist', 'Jewelry', 'Waist', 'Neck', 'Cloak', 'Mythical']
+            weapon_slots = ['Left Hand', 'Right Hand', 'Two Handed', 'Ranged']
+            
+            armor_items = [item for item in loot_items if item['slot'] in armor_slots]
+            jewelry_items = [item for item in loot_items if item['slot'] in jewelry_slots]
+            weapon_items = [item for item in loot_items if item['slot'] in weapon_slots]
+            
+            # Calculate GLOBAL max length for perfect alignment across ALL categories
+            all_loot = armor_items + jewelry_items + weapon_items
+            max_len = max(len(f"{item['name']} ({item['slot']})") for item in all_loot) if all_loot else 0
+            
+            # Track items without prices and currency totals
+            items_without_price = []
+            from collections import defaultdict
+            currency_totals_temp = defaultdict(int)
+            
+            # Display Armor pieces
+            if armor_items:
+                output.append(f"    🛡️  {lang.get('armoury_dialog.preview.equipment_categories.armor_pieces')} :")
+                for item in armor_items:
+                    # Add clickable model icon if item has visual model
+                    if item['slot'] in self.MODEL_SLOTS:
+                        # Create clickable link for model viewer
+                        model_icon = f'<a href="model:{item["name"]}" style="text-decoration:none; color:#4CAF50;">🔍</a> '
+                        item_text = f"{model_icon}{item['name']} ({item['slot']})"
+                    else:
+                        item_text = f"{item['name']} ({item['slot']})"
+                    
+                    price_str, price_source, item_category = get_item_price(item['name'])
+                    # Calculate padding based on clean text without HTML
+                    clean_item_text = f"{item['name']} ({item['slot']})"
+                    padding = max_len - len(clean_item_text)
+                    
+                    # Format display (price or category)
+                    display = format_item_display(item['name'], price_str, price_source, item_category)
+                    output.append(f"      • {item_text}{' ' * padding}  {display}")
+                    
+                    # Accumulate currency totals (only if price found)
+                    if price_str:
+                        try:
+                            if price_source == 'json' and isinstance(price_str, dict):
+                                price = int(price_str.get('price', 0))
+                                currency = price_str.get('currency', '?')
+                                currency_totals_temp[currency] += price
+                            else:
+                                parts = str(price_str).split()
+                                if len(parts) >= 2:
+                                    price = int(parts[0])
+                                    currency = ' '.join(parts[1:])
+                                    currency_totals_temp[currency] += price
+                        except:
+                            pass
+                    elif not item_category or item_category == "unknown":
+                        # No price and no category: track for search button
+                        items_without_price.append(item['name'])
+            
+            # Display Jewelry items (2 columns layout)
+            if jewelry_items:
+                output.append("")
+                output.append(f"    💍 {lang.get('armoury_dialog.preview.equipment_categories.jewelry')} :")
+                
+                # Organize jewelry in logical pairs
+                jewelry_dict = {item['slot']: item for item in jewelry_items}
+                
+                # Define pairs: (left_slot, right_slot) - NEW ORDER
+                pairs = [
+                    ('Mythical', None),
+                    ('Neck', 'Cloak'),
+                    ('Jewelry', 'Waist'),
+                    ('L Ring', 'R Ring'),
+                    ('L Wrist', 'R Wrist')
+                ]
+                
+                # Pre-calculate max item name width (without price) for alignment
+                max_item_name_width = 0
+                for left_slot, right_slot in pairs:
+                    if left_slot in jewelry_dict:
+                        left_text = f"{jewelry_dict[left_slot]['name']} ({jewelry_dict[left_slot]['slot']})"
+                        max_item_name_width = max(max_item_name_width, len(left_text))
+                    if right_slot and right_slot in jewelry_dict:
+                        right_text = f"{jewelry_dict[right_slot]['name']} ({jewelry_dict[right_slot]['slot']})"
+                        max_item_name_width = max(max_item_name_width, len(right_text))
+                
+                max_item_name_width = max(max_item_name_width, 35)  # Minimum width
+                
+                # Pre-calculate max total width including prices for left column alignment
+                max_left_total_width = 0
+                for left_slot, right_slot in pairs:
+                    if left_slot in jewelry_dict:
+                        left_item = jewelry_dict[left_slot]
+                        left_text = f"{left_item['name']} ({left_item['slot']})"
+                        left_price_str, left_price_source, left_item_category = get_item_price(left_item['name'])
+                        left_name_padded = left_text.ljust(max_item_name_width)
+                        left_display = format_item_display(left_item['name'], left_price_str, left_price_source, left_item_category)
+                        full_line = f"• {left_name_padded}  {left_display}"
+                        max_left_total_width = max(max_left_total_width, len(full_line))
+                
+                max_left_total_width = max(max_left_total_width, 50)  # Minimum total width
+                
+                for left_slot, right_slot in pairs:
+                    left_item = jewelry_dict.get(left_slot)
+                    right_item = jewelry_dict.get(right_slot) if right_slot else None
+                    
+                    # Build left column
+                    if left_item:
+                        # Add clickable model icon if item has visual model (only Cloak in jewelry)
+                        if left_item['slot'] in self.MODEL_SLOTS:
+                            model_icon = f'<a href="model:{left_item["name"]}" style="text-decoration:none; color:#4CAF50;">🔍</a> '
+                            left_text = f"{model_icon}{left_item['name']} ({left_item['slot']})"
+                            clean_left_text = f"{left_item['name']} ({left_item['slot']})"
+                        else:
+                            left_text = f"{left_item['name']} ({left_item['slot']})"
+                            clean_left_text = left_text
+                        
+                        left_price_str, left_price_source, left_item_category = get_item_price(left_item['name'])
+                        left_name_padded = clean_left_text.ljust(max_item_name_width)
+                        # Add padding to HTML version
+                        padding_needed = max_item_name_width - len(clean_left_text)
+                        left_text_padded = left_text + (' ' * padding_needed)
+                        left_display = format_item_display(left_item['name'], left_price_str, left_price_source, left_item_category)
+                        left_output = f"• {left_text_padded}  {left_display}"
+                        
+                        # Accumulate currency totals
+                        if left_price_str:
+                            try:
+                                if left_price_source == 'json' and isinstance(left_price_str, dict):
+                                    price = int(left_price_str.get('price', 0))
+                                    currency = left_price_str.get('currency', '?')
+                                    currency_totals_temp[currency] += price
+                                else:
+                                    parts = str(left_price_str).split()
+                                    if len(parts) >= 2:
+                                        price = int(parts[0])
+                                        currency = ' '.join(parts[1:])
+                                        currency_totals_temp[currency] += price
+                            except:
+                                pass
+                        elif not left_item_category or left_item_category == "unknown":
+                            items_without_price.append(left_item['name'])
+                        
+                        # Pad entire left line to max width
+                        left_output = left_output.ljust(max_left_total_width)
+                    else:
+                        left_output = " " * max_left_total_width
+                    
+                    # Build right column
+                    if right_item:
+                        # Add clickable model icon if item has visual model (only Cloak in jewelry)
+                        if right_item['slot'] in self.MODEL_SLOTS:
+                            model_icon = f'<a href="model:{right_item["name"]}" style="text-decoration:none; color:#4CAF50;">🔍</a> '
+                            right_text = f"{model_icon}{right_item['name']} ({right_item['slot']})"
+                            clean_right_text = f"{right_item['name']} ({right_item['slot']})"
+                        else:
+                            right_text = f"{right_item['name']} ({right_item['slot']})"
+                            clean_right_text = right_text
+                        
+                        right_price_str, right_price_source, right_item_category = get_item_price(right_item['name'])
+                        right_name_padded = clean_right_text.ljust(max_item_name_width)
+                        # Add padding to HTML version
+                        padding_needed = max_item_name_width - len(clean_right_text)
+                        right_text_padded = right_text + (' ' * padding_needed)
+                        right_display = format_item_display(right_item['name'], right_price_str, right_price_source, right_item_category)
+                        right_output = f"• {right_text_padded}  {right_display}"
+                        
+                        # Accumulate currency totals
+                        if right_price_str:
+                            try:
+                                if right_price_source == 'json' and isinstance(right_price_str, dict):
+                                    price = int(right_price_str.get('price', 0))
+                                    currency = right_price_str.get('currency', '?')
+                                    currency_totals_temp[currency] += price
+                                else:
+                                    parts = str(right_price_str).split()
+                                    if len(parts) >= 2:
+                                        price = int(parts[0])
+                                        currency = ' '.join(parts[1:])
+                                        currency_totals_temp[currency] += price
+                            except:
+                                pass
+                        elif not right_item_category or right_item_category == "unknown":
+                            items_without_price.append(right_item['name'])
+                    else:
+                        right_output = ""
+                    
+                    # Merge columns with separator
+                    if right_output:
+                        output.append(f"      {left_output}  │  {right_output}")
+                    elif left_item:
+                        output.append(f"      {left_output}")
+            
+            # Display Weapons
+            if weapon_items:
+                output.append("")
+                output.append(f"    ⚔️  {lang.get('armoury_dialog.preview.equipment_categories.weapons')} :")
+                for item in weapon_items:
+                    # Add clickable model icon if item has visual model (all weapons have models)
+                    if item['slot'] in self.MODEL_SLOTS:
+                        model_icon = f'<a href="model:{item["name"]}" style="text-decoration:none; color:#4CAF50;">🔍</a> '
+                        item_text = f"{model_icon}{item['name']} ({item['slot']})"
+                    else:
+                        item_text = f"{item['name']} ({item['slot']})"
+                    
+                    price_str, price_source, item_category = get_item_price(item['name'])
+                    # Calculate padding based on clean text without HTML
+                    clean_item_text = f"{item['name']} ({item['slot']})"
+                    padding = max_len - len(clean_item_text)
+                    
+                    # Format display (price or category)
+                    display = format_item_display(item['name'], price_str, price_source, item_category)
+                    output.append(f"      • {item_text}{' ' * padding}  {display}")
+                    
+                    # Accumulate currency totals (only if price found)
+                    if price_str:
+                        try:
+                            if price_source == 'json' and isinstance(price_str, dict):
+                                price = int(price_str.get('price', 0))
+                                currency = price_str.get('currency', '?')
+                                currency_totals_temp[currency] += price
+                            else:
+                                parts = str(price_str).split()
+                                if len(parts) >= 2:
+                                    price = int(parts[0])
+                                    currency = ' '.join(parts[1:])
+                                    currency_totals_temp[currency] += price
+                        except:
+                            pass
+                    elif not item_category or item_category == "unknown":
+                        # No price and no category: track for search button
+                        items_without_price.append(item['name'])
+            
+            # Add info about price indicators and categories
+            if items_without_price:
+                output.append("")
+                output.append(f"  ℹ️  Price indicators:")
+                output.append(f"      💰 = Database   📝 = Template   ❓ = Missing")
+                output.append(f"      ⚔️ = Quest Reward   🎉 = Event Reward")
+                
+                # Store items_without_price for search button
+                self.items_without_price = items_without_price
+            else:
+                self.items_without_price = []
+            
+            output.append("")
+            
+            # ========== SECTION 7: CURRENCY SUMMARY (only if prices found) ==========
+            if currency_totals_temp:
+                # Add fixed separator line before currency section (94 characters)
+                output.append("═" * 94)
+                output.append("")
+                
+                # Add missing items counter next to title
+                missing_count = f" ({len(self.items_without_price)} item(s) without price)" if self.items_without_price else ""
+                output.append(f"💰 CURRENCY SUMMARY{missing_count}")
+                output.append("")
+                for currency, total in sorted(currency_totals_temp.items()):
+                    currency_str = currency[:25].ljust(25)
+                    total_str = str(total).rjust(6)
+                    output.append(f"  {currency_str} {total_str}")
+                output.append("")
+        
+        return "\n".join(output)
+    
+
+    
+    def on_selection_changed(self):
+        """Updates the preview when a file is selected."""
+        selected_items = self.table.selectedItems()
+        if not selected_items:
+            self.preview_area.clear()
+            self.preview_area.setPlaceholderText(lang.get("armoury_dialog.preview.no_selection"))
+            self.preview_download_button.setEnabled(False)
+            self.search_prices_button.setEnabled(False)
+            return
+        
+        # Get filename from the first column of selected row
+        row = selected_items[0].row()
+        filename = self.table.item(row, 0).text()
+        
+        # Enable download button
+        self.preview_download_button.setEnabled(True)
+        
+        try:
+            # Get file path using TemplateManager
+            template_path = self.template_manager._get_template_path(self.realm, filename)
+            
+            if not template_path.exists():
+                self.preview_area.setPlainText(lang.get("armoury_dialog.preview.file_not_found", filename=filename))
+                return
+            
+            # Read file content
+            with open(template_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            # Parse and format Zenkcraft template
+            formatted_content = self.parse_zenkcraft_template(content, self.season)
+            
+            # Convert to HTML with color support
+            import re
+            
+            # Step 1: Replace color markers with HTML spans
+            color_pattern = r'%%COLOR_START:(.+?)%%(.*?)%%COLOR_END%%'
+            
+            def replace_color(match):
+                color = match.group(1)
+                text = match.group(2)
+                return f"<span style='color:{color}'>{text}</span>"
+            
+            formatted_content = re.sub(color_pattern, replace_color, formatted_content)
+            
+            # Step 2: Replace spaces OUTSIDE HTML tags (negative lookahead to avoid spaces inside <...>)
+            formatted_content = re.sub(r' (?![^<]*>)', '&nbsp;', formatted_content)
+            
+            # Step 3: Convert newlines to <br>
+            html_content = formatted_content.replace('\n', '<br>')
+            html_content = f"<div style='line-height: 1.1;'>{html_content}</div>"
+            
+            # Display formatted content
+            self.preview_area.setHtml(html_content)
+            
+            # Enable/disable search button based on items_without_price
+            if hasattr(self, 'items_without_price') and self.items_without_price:
+                self.search_prices_button.setEnabled(True)
+                self.search_prices_button.setText(f"🔍 Search Prices ({len(self.items_without_price)} items)")
+            else:
+                self.search_prices_button.setEnabled(False)
+                self.search_prices_button.setText("🔍 Search Missing Prices")
+                
+        except Exception as e:
+            logging.error(f"Erreur lors de la prévisualisation : {e}")
+            self.preview_area.setPlainText(lang.get("armoury_dialog.preview.error", error=str(e)))
+    
+    def _on_model_link_clicked(self, url):
+        """Handle click on model viewer link in preview."""
+        try:
+            from PySide6.QtCore import QUrl
+            
+            # Check if this is a model link
+            if url.scheme() == "model":
+                item_name = url.path()
+                # Open model viewer without changing current selection/preview
+                self._show_item_model(item_name)
+                # Prevent default link navigation that would clear the preview
+                return
+        except Exception as e:
+            logging.error(f"Error handling model link click: {e}")
+    
+    def _show_item_model(self, item_name):
+        """Show model image for the specified item."""
+        try:
+            # Search for item in database
+            item_data = self.db_manager.search_item(item_name)
+            
+            if not item_data:
+                # Try with realm suffix
+                item_name_lower = item_name.lower()
+                realm_lower = self.realm.lower()
+                search_key = f"{item_name_lower}:{realm_lower}"
+                item_data = self.db_manager.search_item(search_key)
+            
+            if not item_data:
+                # Try with :all suffix
+                search_key = f"{item_name.lower()}:all"
+                item_data = self.db_manager.search_item(search_key)
+            
+            # Support both 'model_id' and 'model' fields
+            model_id = item_data.get('model_id') or item_data.get('model') if item_data else None
+            
+            if model_id:
+                model_category = item_data.get('model_category', 'items')
+                
+                # Show model viewer dialog with embedded image (non-modal)
+                from UI.model_viewer_dialog import ModelViewerDialog
+                dialog = ModelViewerDialog(
+                    self,
+                    model_id=model_id,
+                    item_name=item_name,
+                    model_category=model_category
+                )
+                dialog.show()
+            else:
+                QMessageBox.information(
+                    self,
+                    lang.get("dialogs.titles.info", default="Information"),
+                    lang.get("armoury_dialog.messages.no_model_found", 
+                            default=f"No model information found for '{item_name}'.",
+                            item_name=item_name)
+                )
+        except Exception as e:
+            logging.error(f"Error showing item model for '{item_name}': {e}")
+            QMessageBox.critical(
+                self,
+                lang.get("dialogs.titles.error", default="Error"),
+                lang.get("armoury_dialog.messages.model_viewer_error",
+                        default=f"Error opening model viewer: {str(e)}",
+                        error=str(e))
+            )
     
     def open_armor(self, filename):
         """Opens an armor file with the default application."""
         try:
-            self.armor_manager.open_armor(filename)
+            import subprocess
+            import platform
+            
+            template_path = self.template_manager._get_template_path(self.realm, filename)
+            
+            if not template_path.exists():
+                QMessageBox.warning(self, lang.get("dialogs.titles.error"), 
+                    lang.get("armoury_dialog.messages.file_not_found", filename=filename))
+                return
+            
+            # Open file with default application
+            if platform.system() == 'Windows':
+                os.startfile(str(template_path))
+            elif platform.system() == 'Darwin':  # macOS
+                subprocess.run(['open', str(template_path)])
+            else:  # Linux
+                subprocess.run(['xdg-open', str(template_path)])
+            
             logging.info(f"Ouverture du fichier d'armure : {filename}")
         except Exception as e:
             logging.error(f"Erreur lors de l'ouverture du fichier d'armure : {e}")
-            QMessageBox.critical(self, "Erreur", f"Impossible d'ouvrir le fichier :\n{str(e)}")
+            QMessageBox.critical(self, lang.get("dialogs.titles.error"), lang.get("armoury_dialog.messages.open_error", error=str(e)))
     
     def delete_armor(self, filename):
         """Deletes an armor file after confirmation."""
         reply = QMessageBox.question(
             self,
-            "Confirmer la suppression",
-            f"Êtes-vous sûr de vouloir supprimer le fichier '{filename}' ?",
+            lang.get("armoury_dialog.dialogs.confirm_delete"),
+            lang.get("armoury_dialog.messages.delete_confirm", filename=filename),
             QMessageBox.Yes | QMessageBox.No,
             QMessageBox.No
         )
         
         if reply == QMessageBox.Yes:
             try:
-                self.armor_manager.delete_armor(filename)
-                QMessageBox.information(self, "Succès", f"Fichier '{filename}' supprimé avec succès.")
-                self.refresh_list()
-                logging.info(f"Fichier d'armure supprimé : {filename}")
+                # Use TemplateManager to delete template
+                success = self.template_manager.delete_template(filename, self.realm)
+                
+                if success:
+                    QMessageBox.information(
+                        self, 
+                        lang.get("dialogs.titles.success"),
+                        lang.get("armoury_dialog.messages.delete_success", filename=filename)
+                    )
+                    self.refresh_list()
+                    logging.info(f"Fichier d'armure supprimé : {filename}")
+                else:
+                    QMessageBox.warning(
+                        self,
+                        lang.get("dialogs.titles.error"),
+                        lang.get("armoury_dialog.messages.delete_error", error="Delete operation failed")
+                    )
             except Exception as e:
                 logging.error(f"Erreur lors de la suppression du fichier d'armure : {e}")
-                QMessageBox.critical(self, "Erreur", f"Impossible de supprimer le fichier :\n{str(e)}")
+                QMessageBox.critical(self, lang.get("dialogs.titles.error"), lang.get("armoury_dialog.messages.delete_error", error=str(e)))
+    
+    def download_selected_armor(self):
+        """Downloads the currently selected armor file (called from preview panel button)."""
+        selected_items = self.table.selectedItems()
+        if not selected_items:
+            return
+        
+        # Get filename from selected row
+        row = selected_items[0].row()
+        filename = self.table.item(row, 0).text()
+        
+        # Call existing download method
+        self.download_armor(filename)
+    
+    def show_context_menu(self, position):
+        """Shows context menu for armor files."""
+        # Get the selected row
+        item = self.table.itemAt(position)
+        if not item:
+            return
+        
+        row = item.row()
+        filename = self.table.item(row, 0).text()
+        
+        # Create context menu
+        menu = QMenu(self)
+        
+        # View action
+        view_action = menu.addAction(lang.get("armoury_dialog.context_menu.view"))
+        view_action.triggered.connect(lambda: self.view_armor(filename))
+        
+        # Download action
+        download_action = menu.addAction(lang.get("armoury_dialog.context_menu.download"))
+        download_action.triggered.connect(lambda: self.download_armor(filename))
+        
+        menu.addSeparator()
+        
+        # Open action
+        open_action = menu.addAction(lang.get("armoury_dialog.context_menu.open"))
+        open_action.triggered.connect(lambda: self.open_armor(filename))
+        
+        menu.addSeparator()
+        
+        # Delete action
+        delete_action = menu.addAction(lang.get("armoury_dialog.context_menu.delete"))
+        delete_action.triggered.connect(lambda: self.delete_armor(filename))
+        
+        # Show menu at cursor position
+        menu.exec_(self.table.viewport().mapToGlobal(position))
+    
+    def view_armor(self, filename):
+        """Opens armor viewer dialog."""
+        # Placeholder for future armor viewer implementation
+        QMessageBox.information(
+            self,
+            lang.get("armoury_dialog.messages.view_title"),
+            lang.get("armoury_dialog.messages.view_placeholder", filename=filename)
+        )
+    
+    def download_armor(self, filename):
+        """Downloads/exports the armor file to a user-selected location."""
+        try:
+            # Get source file path using TemplateManager
+            source_file = self.template_manager._get_template_path(self.realm, filename)
+            
+            if not source_file.exists():
+                QMessageBox.warning(
+                    self,
+                    lang.get("dialogs.titles.error"),
+                    lang.get("armoury_dialog.messages.file_not_found", filename=filename)
+                )
+                return
+            
+            # Ask user where to save the file
+            save_path, _ = QFileDialog.getSaveFileName(
+                self,
+                lang.get("armoury_dialog.dialogs.download_file"),
+                filename,
+                lang.get("armoury_dialog.dialogs.all_files")
+            )
+            
+            if save_path:
+                import shutil
+                shutil.copy2(str(source_file), save_path)
+                QMessageBox.information(
+                    self,
+                    lang.get("dialogs.titles.success"),
+                    lang.get("armoury_dialog.messages.download_success", filename=os.path.basename(save_path))
+                )
+                logging.info(f"Fichier d'armure téléchargé : {save_path}")
+        except Exception as e:
+            logging.error(f"Erreur lors du téléchargement du fichier d'armure : {e}")
+            QMessageBox.critical(self, lang.get("dialogs.titles.error"), lang.get("armoury_dialog.messages.download_error", error=str(e)))
+    
+    def search_missing_prices(self):
+        """Search for missing item prices online using Eden scraper."""
+        if not hasattr(self, 'items_without_price') or not self.items_without_price:
+            QMessageBox.information(
+                self,
+                lang.get("armoury_dialog.search_prices.title", default="Search Prices"),
+                lang.get("armoury_dialog.search_prices.no_items", default="No items without price to search.")
+            )
+            return
+        
+        # Get selected filename
+        selected_items = self.table.selectedItems()
+        if not selected_items:
+            QMessageBox.warning(
+                self,
+                lang.get("armoury_dialog.search_prices.title", default="Search Prices"),
+                lang.get("armoury_dialog.search_prices.no_selection", default="Please select an armor file first.")
+            )
+            return
+        
+        filename = selected_items[0].text()
+        
+        # Show search dialog
+        from Functions.cookie_manager import CookieManager
+        
+        dialog = SearchMissingPricesDialog(
+            self,
+            self.items_without_price,
+            self.realm,
+            self.template_manager,
+            filename,
+            CookieManager()
+        )
+        
+        if dialog.exec() == QDialog.Accepted:
+            # Refresh preview to show updated prices
+            self.on_selection_changed()
+
+
+class ArmorUploadPreviewDialog(QDialog):
+    """Dialog to preview and configure armor file upload before final import."""
+    
+    def __init__(self, parent, file_path, current_season, available_seasons, realm, character_name):
+        super().__init__(parent)
+        self.file_path = file_path
+        self.current_season = current_season
+        self.available_seasons = available_seasons
+        self.realm = realm
+        self.character_name = character_name
+        
+        self.setWindowTitle(lang.get("armoury_upload.title"))
+        self.setWindowFlags(Qt.Window | Qt.WindowCloseButtonHint)
+        self.resize(600, 400)
+        
+        layout = QVBoxLayout(self)
+        
+        # Title
+        title_label = QLabel(lang.get("armoury_upload.header"))
+        title_font = title_label.font()
+        title_font.setPointSize(title_font.pointSize() + 2)
+        title_font.setBold(True)
+        title_label.setFont(title_font)
+        layout.addWidget(title_label)
+        
+        layout.addSpacing(10)
+        
+        # File information group
+        file_group = QGroupBox(lang.get("armoury_upload.file_info.title"))
+        file_layout = QFormLayout()
+        
+        # Original filename
+        original_filename = os.path.basename(file_path)
+        file_layout.addRow(lang.get("armoury_upload.file_info.source"), QLabel(original_filename))
+        
+        # File size
+        file_size = os.path.getsize(file_path)
+        size_mb = file_size / (1024 * 1024)
+        size_text = f"{size_mb:.2f} MB" if size_mb >= 1 else f"{file_size / 1024:.2f} KB"
+        file_layout.addRow(lang.get("armoury_upload.file_info.size"), QLabel(size_text))
+        
+        # File type
+        file_ext = os.path.splitext(original_filename)[1]
+        file_layout.addRow(lang.get("armoury_upload.file_info.type"), QLabel(file_ext if file_ext else lang.get("armoury_upload.file_info.no_extension")))
+        
+        file_group.setLayout(file_layout)
+        layout.addWidget(file_group)
+        
+        layout.addSpacing(10)
+        
+        # Import configuration group
+        config_group = QGroupBox(lang.get("armoury_upload.config.title"))
+        config_layout = QFormLayout()
+        
+        # Filename editor
+        self.filename_edit = QLineEdit()
+        self.filename_edit.setText(original_filename)
+        self.filename_edit.setPlaceholderText(lang.get("armoury_upload.config.filename_placeholder"))
+        config_layout.addRow(lang.get("armoury_upload.config.filename"), self.filename_edit)
+        
+        # Season selector
+        self.season_combo = QComboBox()
+        self.season_combo.addItems(available_seasons)
+        
+        # Set current season as default
+        current_index = self.season_combo.findText(current_season)
+        if current_index >= 0:
+            self.season_combo.setCurrentIndex(current_index)
+        
+        season_help = QLabel(lang.get("armoury_upload.config.season_help"))
+        season_help.setStyleSheet("color: gray; font-style: italic;")
+        
+        config_layout.addRow(lang.get("armoury_upload.config.season"), self.season_combo)
+        config_layout.addRow("", season_help)
+        
+        config_group.setLayout(config_layout)
+        layout.addWidget(config_group)
+        
+        layout.addSpacing(10)
+        
+        # Destination preview
+        dest_group = QGroupBox(lang.get("armoury_upload.destination.title"))
+        dest_layout = QVBoxLayout()
+        
+        self.dest_label = QLabel()
+        self.dest_label.setWordWrap(True)
+        # Use semi-transparent background that adapts to theme, with border for visibility
+        self.dest_label.setStyleSheet("""
+            QLabel {
+                padding: 10px;
+                background-color: rgba(128, 128, 128, 0.15);
+                border: 1px solid rgba(128, 128, 128, 0.3);
+                border-radius: 5px;
+            }
+        """)
+        self._update_destination_preview()
+        dest_layout.addWidget(self.dest_label)
+        
+        dest_group.setLayout(dest_layout)
+        layout.addWidget(dest_group)
+        
+        # Connect signals to update preview
+        self.filename_edit.textChanged.connect(self._update_destination_preview)
+        self.season_combo.currentTextChanged.connect(self._update_destination_preview)
+        
+        layout.addStretch()
+        
+        # Buttons
+        button_layout = QHBoxLayout()
+        button_layout.addStretch()
+        
+        cancel_button = QPushButton(lang.get("armoury_upload.buttons.cancel"))
+        cancel_button.clicked.connect(self.reject)
+        button_layout.addWidget(cancel_button)
+        
+        import_button = QPushButton(lang.get("armoury_upload.buttons.import"))
+        import_button.setDefault(True)
+        import_button.clicked.connect(self.accept)
+        button_layout.addWidget(import_button)
+        
+        layout.addLayout(button_layout)
+    
+    def _update_destination_preview(self):
+        """Updates the destination path preview."""
+        from Functions.path_manager import get_armory_dir
+        
+        filename = self.filename_edit.text().strip() or os.path.basename(self.file_path)
+        season = self.season_combo.currentText()
+        
+        dest_dir = get_armory_dir(season, self.realm, self.character_name)
+        dest_path = os.path.join(dest_dir, filename)
+        
+        # Normalize path for display
+        dest_path = os.path.normpath(dest_path)
+        
+        self.dest_label.setText(f"📁 {dest_path}")
 
 
 class ConnectionTestThread(QThread):
-    """Thread pour tester la connexion Eden en arrière-plan"""
-    finished = Signal(dict)  # Signal émis with the résultat of the test
+    """Thread to test Eden connection in background"""
+    finished = Signal(dict)  # Signal emitted with test result
     
     def __init__(self, parent=None):
         super().__init__(parent)
-        # Ne pas stocker de référence à cookie_manager
-        # pour éviter les problèmes si la fenêtre est détruite
+        # Don't store reference to cookie_manager
+        # to avoid issues if window is destroyed
     
     def run(self):
-        """Exécute le test de connexion"""
-        # Créer une instance locale de CookieManager pour éviter les références
-        # à des objets détruits si la fenêtre est fermée pendant le test
+        """Execute connection test"""
+        # Create local CookieManager instance to avoid references
+        # to destroyed objects if window is closed during test
         from Functions.cookie_manager import CookieManager
         cookie_manager = CookieManager()
         result = cookie_manager.test_eden_connection()
@@ -2870,7 +5075,7 @@ class ConnectionTestThread(QThread):
 
 
 class CookieManagerDialog(QDialog):
-    """Dialog pour gérer les cookies Eden pour le scraping"""
+    """Dialog to manage Eden cookies for scraping"""
     
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -2908,7 +5113,7 @@ class CookieManagerDialog(QDialog):
         self.expiry_label.setTextFormat(Qt.RichText)
         info_layout.addWidget(self.expiry_label)
         
-        # Label for afficher the navigateur utilisé
+        # Label to display browser used
         self.browser_label = QLabel()
         self.browser_label.setWordWrap(True)
         self.browser_label.setTextFormat(Qt.RichText)
@@ -2968,7 +5173,7 @@ class CookieManagerDialog(QDialog):
         self.chrome_profile_size_label.setWordWrap(True)
         chrome_layout.addWidget(self.chrome_profile_size_label)
         
-        # Note: Bouton de purge supprimé - utilisez "Nettoyer Eden" dans les paramètres Herald
+        # Note: Purge button removed - use "Clean Eden" in Herald settings
         
         chrome_group.setLayout(chrome_layout)
         layout.addWidget(chrome_group)
@@ -2978,13 +5183,13 @@ class CookieManagerDialog(QDialog):
         close_button.clicked.connect(self.accept)
         layout.addWidget(close_button)
         
-        # Afficher l'état initial et la taille du profil
+        # Display initial state and profile size
         self.refresh_status()
         self.update_chrome_profile_size()
     
     def start_connection_test(self):
-        """Lance le test de connexion en arrière-plan"""
-        # Annuler un test en cours si existant
+        """Start connection test in background"""
+        # Cancel ongoing test if existing
         if self.connection_thread and self.connection_thread.isRunning():
             try:
                 self.connection_thread.finished.disconnect()
@@ -2993,16 +5198,16 @@ class CookieManagerDialog(QDialog):
             self.connection_thread.quit()
             self.connection_thread.wait()
         
-        # Créer un nouveau thread avec la fenêtre principale comme parent
-        # pour qu'il survive à la fermeture de cette fenêtre de dialog
+        # Create new thread with main window as parent
+        # so it survives closing this dialog window
         main_window = self.parent() if self.parent() else None
         self.connection_thread = ConnectionTestThread(parent=main_window)
         self.connection_thread.finished.connect(self.on_connection_test_finished)
         self.connection_thread.start()
     
     def on_connection_test_finished(self, result):
-        """Appelé quand le test de connexion est terminé"""
-        # Retrieve the infos actuelles for mettre à jour l'affichage
+        """Called when connection test is complete"""
+        # Retrieve current info to update display
         info = self.cookie_manager.get_cookie_info()
         if info and info['is_valid']:
             expiry_date = info['expiry_date']
@@ -3019,14 +5224,14 @@ class CookieManagerDialog(QDialog):
                 else:
                     connection_status = f"{lang.get('cookie_manager.eden_access')} <span style='color: orange;'>⚠️ {result['message']}</span>"
             
-            # Mettre à jour l'affichage
+            # Update display
             self.expiry_label.setText(
                 f"{lang.get('cookie_manager.expiry_date', date=expiry_date.strftime('%d/%m/%Y à %H:%M'))}<br/>"
                 f"{lang.get('cookie_manager.remaining_validity', days=days)}<br/>"
                 f"{connection_status}"
             )
             
-            # Afficher le navigateur utilisé pour le test (si disponible dans le résultat)
+            # Display browser used for test (if available in result)
             browser_used = result.get('browser_used')
             if browser_used:
                 browser_icon = {'Chrome': '🔵', 'Edge': '🔷', 'Firefox': '🦊'}.get(browser_used, '🌐')
@@ -3037,7 +5242,7 @@ class CookieManagerDialog(QDialog):
                 self.browser_label.setText("")
     
     def refresh_status(self):
-        """Actualise l'affichage de l'état des cookies"""
+        """Update cookie status display"""
         info = self.cookie_manager.get_cookie_info()
         
         if info is None:
@@ -3059,7 +5264,7 @@ class CookieManagerDialog(QDialog):
             self.delete_button.setEnabled(True)
             
         elif not info['is_valid']:
-            # Cookies expirés
+            # Expired cookies
             self.status_label.setText(lang.get("cookie_manager.status_expired"))
             self.status_label.setStyleSheet("color: orange;")
             self.expiry_label.setText("")
@@ -3092,14 +5297,14 @@ class CookieManagerDialog(QDialog):
             else:
                 self.expiry_label.setStyleSheet("color: green;")
             
-            # Afficher the infos of base immédiatement
+            # Display base info immediately
             self.expiry_label.setText(
                 f"{lang.get('cookie_manager.expiry_date', date=expiry_date.strftime('%d/%m/%Y à %H:%M'))}<br/>"
                 f"{lang.get('cookie_manager.remaining_validity', days=days)}<br/>"
                 f"{lang.get('cookie_manager.eden_access')} {lang.get('cookie_manager.eden_testing')}"
             )
             
-            # Lancer the test of connexion en arrière-plan
+            # Launch connection test in background
             self.start_connection_test()
             
             details = lang.get("cookie_manager.total_cookies_display", count=info['total_cookies']) + "<br/>"
@@ -3113,12 +5318,12 @@ class CookieManagerDialog(QDialog):
             self.details_label.setText(details)
             self.delete_button.setEnabled(True)
         
-        # Réinitialiser the label of the navigateur (sera mis à jour after test/génération)
+        # Reset browser label (will be updated after test/generation)
         if not (info and info.get('is_valid')):
             self.browser_label.setText("")
     
     def browse_cookie_file(self):
-        """Ouvre un dialog pour sélectionner un fichier de cookies"""
+        """Open dialog to select a cookie file"""
         file_path, _ = QFileDialog.getOpenFileName(
             self,
             lang.get("cookie_manager.browse_dialog_title"),
@@ -3128,7 +5333,7 @@ class CookieManagerDialog(QDialog):
         
         if file_path:
             self.cookie_path_edit.setText(file_path)
-            # Importer automatiquement after sélection
+            # Auto-import after selection
             self.import_from_path()
     
     def import_from_path(self):
@@ -3166,7 +5371,7 @@ class CookieManagerDialog(QDialog):
             self.cookie_path_edit.clear()
             self.refresh_status()
             
-            # Rafraîchir the statut Eden in the fenêtre principale
+            # Refresh Eden status in main window
             if self.parent() and hasattr(self.parent(), 'ui_manager'):
                 self.parent().ui_manager.check_eden_status()
         else:
@@ -3177,7 +5382,7 @@ class CookieManagerDialog(QDialog):
             )
     
     def delete_cookies(self):
-        """Supprime les cookies après confirmation"""
+        """Delete cookies after confirmation"""
         reply = QMessageBox.question(
             self,
             lang.get("cookie_manager.delete_confirm_title"),
@@ -3197,7 +5402,7 @@ class CookieManagerDialog(QDialog):
                 )
                 self.refresh_status()
                 
-                # Rafraîchir the statut Eden in the fenêtre principale
+                # Refresh Eden status in main window
                 if self.parent() and hasattr(self.parent(), 'ui_manager'):
                     self.parent().ui_manager.check_eden_status()
             else:
@@ -3208,7 +5413,7 @@ class CookieManagerDialog(QDialog):
                 )
     
     def update_chrome_profile_size(self):
-        """Met à jour l'affichage de la taille du profil Chrome"""
+        """Update Chrome profile size display"""
         size_bytes = self.cookie_manager.get_chrome_profile_size()
         
         if size_bytes == 0:
@@ -3225,22 +5430,22 @@ class CookieManagerDialog(QDialog):
         self.chrome_profile_size_label.setText(size_text)
     
     def generate_cookies(self):
-        """Génère de nouveaux cookies via authentification navigateur (VERSION MIGRÉE)"""
+        """Generate new cookies via browser authentication (MIGRATED VERSION)"""
         
-        # Lire la configuration
+        # Read configuration
         from Functions.config_manager import config
         preferred_browser = config.get('system.preferred_browser', 'Chrome')
         allow_download = config.get('system.allow_browser_download', False)
         
-        # Import des composants
+        # Import components
         from UI.progress_dialog_base import ProgressStepsDialog, StepConfiguration
         
-        # Construire les étapes (PAS de connexion Herald - génération cookies)
+        # Build steps (NO Herald connection - cookie generation)
         steps = StepConfiguration.build_steps(
-            StepConfiguration.COOKIE_GENERATION  # 6 étapes
+            StepConfiguration.COOKIE_GENERATION  # 6 steps
         )
         
-        # Créer le dialogue de progression
+        # Create progress dialog
         self.progress_dialog = ProgressStepsDialog(
             parent=self,
             title=lang.get("progress_cookie_gen_title", default="🍪 Génération des cookies..."),
@@ -3251,7 +5456,7 @@ class CookieManagerDialog(QDialog):
             allow_cancel=True  # Permet annulation
         )
         
-        # Créer le thread
+        # Create thread
         self.cookie_gen_thread = CookieGenThread(preferred_browser, allow_download)
         
         # ✅ Pattern 1: Connect via wrappers thread-safe
@@ -3264,7 +5469,7 @@ class CookieManagerDialog(QDialog):
         # ✅ Pattern 4: Connect rejected signal
         self.progress_dialog.rejected.connect(self._on_cookie_progress_dialog_closed)
         
-        # Désactiver boutons pendant génération
+        # Disable buttons during generation
         self.generate_button.setEnabled(False)
         self.cookie_path_edit.setEnabled(False)
         
@@ -3301,10 +5506,10 @@ class CookieManagerDialog(QDialog):
                 pass
     
     def _on_cookie_user_action_required(self, browser_name, message):
-        """Dialogue interactif pour confirmer connexion utilisateur (Étape 2)"""
+        """Interactive dialog to confirm user connection (Step 2)"""
         from PySide6.QtWidgets import QMessageBox
         
-        # Créer dialogue de confirmation
+        # Create confirmation dialog
         wait_msg = QMessageBox(self)
         wait_msg.setIcon(QMessageBox.Information)
         wait_msg.setWindowTitle(lang.get("cookie_manager.user_action_title"))
@@ -3315,7 +5520,7 @@ class CookieManagerDialog(QDialog):
         
         result = wait_msg.exec()
         
-        # Informer le thread de la décision utilisateur
+        # Inform thread of user decision
         if result == QMessageBox.Ok:
             self.cookie_gen_thread.set_user_confirmation(True)
         else:
@@ -3324,19 +5529,19 @@ class CookieManagerDialog(QDialog):
             self._stop_cookie_gen_thread()
     
     def _on_cookie_progress_dialog_closed(self):
-        """✅ Pattern 4: Arrêt propre quand dialog fermé par utilisateur"""
+        """✅ Pattern 4: Clean stop when dialog closed by user"""
         import logging
         logging.info("Dialogue cookie gen fermé par utilisateur - Arrêt génération")
         self._stop_cookie_gen_thread()
     
     def _stop_cookie_gen_thread(self):
-        """✅ Pattern 2+3: Arrêt propre du thread avec cleanup AVANT terminate"""
+        """✅ Pattern 2+3: Clean thread stop with cleanup BEFORE terminate"""
         if hasattr(self, 'cookie_gen_thread') and self.cookie_gen_thread:
             if self.cookie_gen_thread.isRunning():
-                # ✅ Pattern 3: Demander arrêt gracieux
+                # ✅ Pattern 3: Request graceful stop
                 self.cookie_gen_thread.request_stop()
                 
-                # Déconnecter les signaux
+                # Disconnect signals
                 try:
                     self.cookie_gen_thread.step_started.disconnect()
                     self.cookie_gen_thread.step_completed.disconnect()
@@ -3374,16 +5579,16 @@ class CookieManagerDialog(QDialog):
             if hasattr(self, 'progress_dialog'):
                 delattr(self, 'progress_dialog')
         
-        # Réactiver boutons
+        # Re-enable buttons
         self.generate_button.setEnabled(True)
         self.cookie_path_edit.setEnabled(True)
     
     def _on_cookie_generation_finished(self, success, message, cookie_count):
-        """Callback appelé quand la génération est terminée"""
+        """Callback called when generation is complete"""
         from PySide6.QtCore import QTimer
         from PySide6.QtWidgets import QMessageBox
         
-        # Afficher succès/erreur dans le dialogue
+        # Display success/error in dialog
         if hasattr(self, 'progress_dialog') and self.progress_dialog:
             try:
                 if success:
@@ -3396,17 +5601,17 @@ class CookieManagerDialog(QDialog):
                 # Attendre 1.5s puis fermer
                 QTimer.singleShot(1500, lambda: self._process_cookie_result(success, message, cookie_count))
             except RuntimeError:
-                # Dialog déjà supprimé
+                # Dialog already deleted
                 self._process_cookie_result(success, message, cookie_count)
         else:
             self._process_cookie_result(success, message, cookie_count)
     
     def _process_cookie_result(self, success, message, cookie_count):
-        """Traiter le résultat de la génération après affichage du status"""
-        # Fermer et nettoyer
+        """Process generation result after displaying status"""
+        # Close and cleanup
         self._stop_cookie_gen_thread()
         
-        # Afficher résultat final
+        # Display final result
         if success:
             from PySide6.QtWidgets import QMessageBox
             QMessageBox.information(
@@ -3415,7 +5620,7 @@ class CookieManagerDialog(QDialog):
                 f"{lang.get('cookie_manager.import_success_message')}\n\n{message}"
             )
         elif message and "Annulé" not in message:
-            # Afficher erreur seulement si pas annulé
+            # Display error only if not cancelled
             from PySide6.QtWidgets import QMessageBox
             QMessageBox.critical(
                 self,
@@ -3426,7 +5631,7 @@ class CookieManagerDialog(QDialog):
         # Actualiser le statut
         self.refresh_status()
         
-        # Rafraîchir le statut Eden dans la fenêtre principale si cookies générés
+        # Refresh Eden status in main window if cookies generated
         if success and self.parent() and hasattr(self.parent(), 'ui_manager'):
             self.parent().ui_manager.check_eden_status()
     
@@ -3435,14 +5640,14 @@ class CookieManagerDialog(QDialog):
         Gère la fermeture de la fenêtre.
         Le thread continue en arrière-plan (avec parent=main_window) jusqu'à sa fin naturelle.
         """
-        # Si un thread de connexion est en cours, déconnecter notre callback
-        # Le thread continuera avec son parent (main_window) et se terminera proprement
+        # If connection test thread is running, disconnect our callback
+        # Thread will continue with its parent (main_window) and terminate cleanly
         if self.connection_thread and self.connection_thread.isRunning():
             try:
                 self.connection_thread.finished.disconnect(self.on_connection_test_finished)
             except:
                 pass
-            # Ne plus garder de référence au thread
+            # No longer keep reference to thread
             self.connection_thread = None
         
         # Accepter la fermeture
@@ -3468,21 +5673,21 @@ class CookieGenThread(QThread):
         self.preferred_browser = preferred_browser or 'Chrome'
         self.allow_download = allow_download
         
-        # ✅ Pattern 3 : Flag d'interruption
+        # ✅ Pattern 3: Interruption flag
         self._stop_requested = False
         
-        # ✅ Pattern 2 : Référence ressource externe (driver Selenium)
+        # ✅ Pattern 2: External resource reference (Selenium driver)
         self._driver = None
         
-        # Variable pour stocker si l'utilisateur a confirmé la connexion
+        # Variable to store if user confirmed connection
         self._user_confirmed = False
     
     def request_stop(self):
-        """✅ Pattern 3 : Demande arrêt gracieux"""
+        """✅ Pattern 3: Request graceful stop"""
         self._stop_requested = True
     
     def cleanup_external_resources(self):
-        """✅ Pattern 2 : Cleanup forcé du driver (appelé depuis thread principal)"""
+        """✅ Pattern 2: Forced driver cleanup (called from main thread)"""
         import logging
         logger = logging.getLogger(__name__)
         
@@ -3497,11 +5702,11 @@ class CookieGenThread(QThread):
                 self._driver = None
     
     def set_user_confirmation(self, confirmed):
-        """Appelé depuis le thread principal quand l'utilisateur confirme/annule"""
+        """Called from main thread when user confirms/cancels"""
         self._user_confirmed = confirmed
     
     def run(self):
-        """Exécute la génération de cookies avec sécurité thread"""
+        """Execute cookie generation with thread safety"""
         import logging
         import time
         logger = logging.getLogger(__name__)
@@ -3511,13 +5716,13 @@ class CookieGenThread(QThread):
         cookie_manager = CookieManager()
         driver = None
         
-        # Variables pour résultat (émis APRÈS toutes les étapes)
+        # Variables for result (emitted AFTER all steps)
         result_success = False
         result_message = ""
         result_count = 0
         
         try:
-            # Étape 0 : Configuration du navigateur
+            # Step 0: Browser configuration
             self.step_started.emit(0)
             logger.info(f"Configuration navigateur: {self.preferred_browser}, download={self.allow_download}")
             time.sleep(0.5)  # Simuler configuration
@@ -3526,7 +5731,7 @@ class CookieGenThread(QThread):
             if self._stop_requested:
                 return
             
-            # Étape 1 : Ouverture de la page de connexion
+            # Step 1: Opening login page
             self.step_started.emit(1)
             logger.info("Initialisation navigateur pour génération cookies...")
             
@@ -3551,11 +5756,11 @@ class CookieGenThread(QThread):
             if self._stop_requested:
                 return
             
-            # Étape 2 : En attente de la connexion utilisateur (INTERACTIF)
+            # Step 2: Waiting for user connection (INTERACTIVE)
             self.step_started.emit(2)
             logger.info("Attente connexion utilisateur...")
             
-            # Émettre signal pour demander confirmation utilisateur
+            # Emit signal to request user confirmation
             self.user_action_required.emit(
                 browser_name,
                 lang.get("cookie_manager.browser_opened_message", browser=browser_name)
@@ -3587,12 +5792,12 @@ class CookieGenThread(QThread):
             if self._stop_requested:
                 return
             
-            # Étape 3 : Extraction des cookies
+            # Step 3: Cookie extraction
             self.step_started.emit(3)
             logger.info("Extraction des cookies depuis le navigateur...")
             
-            # Les cookies sont déjà dans le driver, on passe à la sauvegarde
-            time.sleep(0.5)  # Petit délai pour laisser les cookies se stabiliser
+            # Cookies are already in driver, move to save step
+            time.sleep(0.5)  # Small delay to let cookies stabilize
             
             logger.info("Cookies extraits")
             self.step_completed.emit(3)
@@ -3600,7 +5805,7 @@ class CookieGenThread(QThread):
             if self._stop_requested:
                 return
             
-            # Étape 4 : Sauvegarde des cookies
+            # Step 4: Cookie saving
             self.step_started.emit(4)
             logger.info("Sauvegarde des cookies...")
             
@@ -3619,17 +5824,17 @@ class CookieGenThread(QThread):
             if self._stop_requested:
                 return
             
-            # Étape 5 : Validation et vérification
+            # Step 5: Validation and verification
             self.step_started.emit(5)
             logger.info("Validation des cookies...")
             
-            # Vérifier que les cookies sont valides
+            # Verify that cookies are valid
             info = cookie_manager.get_cookie_info()
             if info and info.get('is_valid'):
                 logger.info("Cookies validés avec succès")
                 self.step_completed.emit(5)
                 
-                # Stocker le succès
+                # Store success
                 result_success = True
                 result_message = message
                 result_count = count
@@ -3644,7 +5849,7 @@ class CookieGenThread(QThread):
             result_message = f"Erreur: {str(e)}"
         
         finally:
-            # Fermeture du navigateur (pas d'étape dédiée dans COOKIE_GENERATION)
+            # Browser closing (no dedicated step in COOKIE_GENERATION)
             if driver:
                 try:
                     logger.info("Fermeture navigateur cookies...")
@@ -3653,7 +5858,7 @@ class CookieGenThread(QThread):
                 except Exception as e:
                     logger.warning(f"Erreur fermeture navigateur: {e}")
             
-            # Émettre le signal final
+            # Emit final signal
             logger.info(f"Émission signal generation_finished - success={result_success}, count={result_count}")
             self.generation_finished.emit(result_success, result_message, result_count)
 
@@ -3663,9 +5868,9 @@ class CookieGenThread(QThread):
 # ============================================================================
 
 class SearchThread(QThread):
-    """Thread pour effectuer la recherche Herald en arrière-plan"""
+    """Thread to perform Herald search in background"""
     search_finished = Signal(bool, str, str)  # (success, message, json_path)
-    progress_update = Signal(str)  # (status_message) - LEGACY pour compatibilité
+    progress_update = Signal(str)  # (status_message) - LEGACY for compatibility
     step_started = Signal(int)  # (step_index) - NOUVEAU pour ProgressStepsDialog
     step_completed = Signal(int)  # (step_index) - NOUVEAU pour ProgressStepsDialog
     step_error = Signal(int, str)  # (step_index, error_message) - NOUVEAU pour ProgressStepsDialog
@@ -3675,15 +5880,15 @@ class SearchThread(QThread):
         self.character_name = character_name
         self.realm_filter = realm_filter
         self.lang = lang
-        self._stop_requested = False  # Flag pour arrêt gracieux
-        self._scraper = None  # Référence au scraper pour cleanup externe
+        self._stop_requested = False  # Flag for graceful stop
+        self._scraper = None  # Reference to scraper for external cleanup
     
     def request_stop(self):
-        """Demande l'arrêt du thread (appelé depuis le thread principal)"""
+        """Request thread stop (called from main thread)"""
         self._stop_requested = True
     
     def cleanup_driver(self):
-        """Ferme le navigateur de manière sécurisée (appelé depuis thread principal)"""
+        """Close browser safely (called from main thread)"""
         import logging
         module_logger = logging.getLogger(__name__)
         
@@ -3698,16 +5903,16 @@ class SearchThread(QThread):
                 self._scraper = None
     
     def _emit_step_start(self, step_index, message):
-        """Émet les signaux de début d'étape (nouveau + legacy)"""
+        """Emit step start signals (new + legacy)"""
         self.step_started.emit(step_index)
-        self.progress_update.emit(message)  # Garde compatibilité
+        self.progress_update.emit(message)  # Keep compatibility
     
     def _emit_step_complete(self, step_index):
-        """Émet le signal de fin d'étape"""
+        """Emit step complete signal"""
         self.step_completed.emit(step_index)
     
     def run(self):
-        """Exécute la recherche avec des mises à jour de progression"""
+        """Execute search with progress updates"""
         from Functions.cookie_manager import CookieManager
         from Functions.eden_scraper import EdenScraper
         from bs4 import BeautifulSoup
@@ -3721,13 +5926,13 @@ class SearchThread(QThread):
         module_logger = logging.getLogger(__name__)
         scraper = None
         
-        # Variables pour résultat (signal émis APRÈS Step 8 dans finally)
+        # Variables for result (signal emitted AFTER Step 8 in finally)
         result_success = False
         result_message = ""
         result_json_path = ""
         
         try:
-            # Étape 0 : Vérification des cookies
+            # Step 0: Cookie verification
             self._emit_step_start(0, "🔐 Vérification des cookies d'authentification...")
             module_logger.info(f"Début de la recherche Herald pour: {self.character_name}", extra={"action": "SEARCH"})
             
@@ -3749,10 +5954,10 @@ class SearchThread(QThread):
             module_logger.info(f"Cookies valides - {info.get('cookie_count', 0)} cookies chargés", extra={"action": "SEARCH"})
             self._emit_step_complete(0)
             
-            # Étape 1 : Initialisation du navigateur
+            # Step 1: Browser initialization
             self._emit_step_start(1, "🌐 Initialisation du navigateur Chrome...")
             scraper = EdenScraper(cookie_manager)
-            self._scraper = scraper  # Stocke référence pour cleanup externe
+            self._scraper = scraper  # Store reference for external cleanup
             
             if not scraper.initialize_driver(headless=False):
                 module_logger.error("Impossible d'initialiser le navigateur", extra={"action": "SEARCH"})
@@ -3763,7 +5968,7 @@ class SearchThread(QThread):
             module_logger.info("Navigateur initialisé avec succès", extra={"action": "SEARCH"})
             self._emit_step_complete(1)
             
-            # Étape 2 : Chargement des cookies
+            # Step 2: Loading cookies
             self._emit_step_start(2, "🍪 Chargement des cookies dans le navigateur...")
             if not scraper.load_cookies():
                 module_logger.error("Impossible de charger les cookies dans le navigateur", extra={"action": "SEARCH"})
@@ -3774,12 +5979,12 @@ class SearchThread(QThread):
             module_logger.info("Cookies chargés dans le navigateur - Authentification complétée", extra={"action": "SEARCH"})
             self._emit_step_complete(2)
             
-            # Vérifier si arrêt demandé
+            # Check if stop requested
             if self._stop_requested:
                 module_logger.info("Arrêt demandé par l'utilisateur (après étape 2)", extra={"action": "SEARCH"})
                 return
             
-            # Étape 3 : Navigation vers la page de recherche
+            # Step 3: Navigation to search page
             if self.realm_filter:
                 search_url = f"https://eden-daoc.net/herald?n=search&r={self.realm_filter}&s={self.character_name}"
             else:
@@ -3791,16 +5996,16 @@ class SearchThread(QThread):
             scraper.driver.get(search_url)
             self._emit_step_complete(3)
             
-            # Vérifier si arrêt demandé
+            # Check if stop requested
             if self._stop_requested:
                 module_logger.info("Arrêt demandé par l'utilisateur (après étape 3)", extra={"action": "SEARCH"})
                 return
             
-            # Étape 4 : Attente du chargement de la page
+            # Step 4: Wait for page loading
             self._emit_step_start(4, "⏳ Chargement de la page de recherche...")
             module_logger.info("Attente du chargement de la page de recherche (5 secondes)...", extra={"action": "SEARCH"})
             
-            # Sleep interruptible (vérifier le flag toutes les 0.5 secondes)
+            # Interruptible sleep (check flag every 0.5 seconds)
             for i in range(10):  # 10 x 0.5s = 5s
                 if self._stop_requested:
                     module_logger.info("Arrêt demandé par l'utilisateur (pendant sleep)", extra={"action": "SEARCH"})
@@ -3809,13 +6014,13 @@ class SearchThread(QThread):
             
             self._emit_step_complete(4)
             
-            # Vérifier si arrêt demandé
+            # Check if stop requested
             if self._stop_requested:
                 module_logger.info("Arrêt demandé par l'utilisateur (après étape 4)", extra={"action": "SEARCH"})
                 return
             
-            # Étape 5 : Extraction des données
-            self._emit_step_start(5, "📊 Extraction des résultats de recherche...")
+            # Step 5: Data extraction
+            self._emit_step_start(5, "📊Sentence Extraction des résultats de recherche...")
             page_source = scraper.driver.page_source
             soup = BeautifulSoup(page_source, 'html.parser')
             
@@ -3833,7 +6038,7 @@ class SearchThread(QThread):
             tables = soup.find_all('table')
             for table in tables:
                 rows = table.find_all('tr')
-                if len(rows) > 1:  # Au moins un header et une ligne
+                if len(rows) > 1:  # At least header and one line
                     headers = [th.get_text(strip=True) for th in rows[0].find_all('th')]
                     
                     for row in rows[1:]:
@@ -3844,7 +6049,7 @@ class SearchThread(QThread):
                                 header = headers[idx] if idx < len(headers) else f"col_{idx}"
                                 result[header] = cell.get_text(strip=True)
                                 
-                                # Extraire les liens
+                                # Extract links
                                 links = cell.find_all('a')
                                 if links:
                                     result[f"{header}_links"] = [a.get('href', '') for a in links]
@@ -3854,7 +6059,7 @@ class SearchThread(QThread):
             
             self._emit_step_complete(5)
             
-            # Étape 6 : Sauvegarde des résultats
+            # Step 6: Saving results
             self._emit_step_start(6, "💾 Sauvegarde des résultats...")
             
             # Utiliser le dossier temporaire de l'OS
@@ -3887,7 +6092,7 @@ class SearchThread(QThread):
             
             self._emit_step_complete(6)
             
-            # Étape 7 : Formatage des personnages
+            # Step 7: Character formatting
             self._emit_step_start(7, "🎯 Formatage des personnages trouvés...")
             characters = []
             for result in search_data['results']:
@@ -3919,7 +6124,7 @@ class SearchThread(QThread):
                         else:
                             url = f"https://eden-daoc.net{href}"
                     else:
-                        # Fallback : construire l'URL à partir du nom si aucun lien trouvé
+                        # Fallback: build URL from name if no link found
                         clean_name = name.split()[0] if name else ""
                         if clean_name:
                             url = f"https://eden-daoc.net/herald?n=player&k={clean_name}"
@@ -3942,20 +6147,20 @@ class SearchThread(QThread):
                         'url': url
                     })
             
-            # Ajouter la liste formatée au JSON
+            # Add formatted list to JSON
             search_data['characters'] = characters
             search_data['search_query'] = self.character_name
             
-            # Re-sauvegarder avec les données formatées
+            # Re-save with formatted data
             with open(json_path, 'w', encoding='utf-8') as f:
                 json.dump(search_data, f, indent=2, ensure_ascii=False)
             
             module_logger.info(f"{len(characters)} personnage(s) trouvé(s) et sauvegardé(s) dans: {json_path}", extra={"action": "SEARCH"})
             self._emit_step_complete(7)
             
-            # Pas d'étape 8 ici (fermeture navigateur) - sera dans finally
+            # No step 8 here (browser closing) - will be in finally
             
-            # Stocker le succès (signal émis APRÈS Step 8 dans finally)
+            # Store success (signal emitted AFTER Step 8 in finally)
             result_success = True
             if self.lang:
                 result_message = self.lang.get("herald_search.search_complete", count=len(characters), default=f"{len(characters)} personnage(s) trouvé(s)")
@@ -3968,7 +6173,7 @@ class SearchThread(QThread):
             result_message = f"Erreur: {str(e)}"
             
         finally:
-            # Étape 8 : Fermer le navigateur proprement
+            # Step 8: Close browser cleanly
             if scraper and scraper.driver:
                 try:
                     self._emit_step_start(8, "🔄 Fermeture du navigateur...")
@@ -3979,7 +6184,7 @@ class SearchThread(QThread):
                     module_logger.warning(f"Erreur lors de la fermeture du navigateur: {e}", extra={"action": "SEARCH"})
                     self.step_error.emit(8, f"Erreur fermeture: {str(e)}")
             
-            # Émettre le signal APRÈS Step 8 (fermeture complète)
+            # Emit signal AFTER Step 8 (complete closing)
             module_logger.info(f"Émission signal search_finished - success={result_success}, message={result_message}")
             self.search_finished.emit(result_success, result_message, result_json_path)
 
@@ -3989,11 +6194,11 @@ class SearchThread(QThread):
 # ============================================================================
 
 class StatsUpdateThread(QThread):
-    """Thread pour mettre à jour les statistiques depuis le Herald"""
+    """Thread to update statistics from Herald"""
     
-    # Signaux
-    stats_updated = Signal(dict)  # (results_dict) - Émis quand mise à jour terminée avec succès
-    update_failed = Signal(str)  # (error_message) - Émis en cas d'échec complet
+    # Signals
+    stats_updated = Signal(dict)  # (results_dict) - Emitted when update completed successfully
+    update_failed = Signal(str)  # (error_message) - Emitted in case of complete failure
     step_started = Signal(int)  # (step_index) - NOUVEAU pour ProgressStepsDialog
     step_completed = Signal(int)  # (step_index) - NOUVEAU pour ProgressStepsDialog
     step_error = Signal(int, str)  # (step_index, error_message) - NOUVEAU pour ProgressStepsDialog
@@ -6238,3 +8443,416 @@ class BackupSettingsDialog(QDialog):
             logging.error(f"Error saving backup settings: {e}", exc_info=True)
             QMessageBox.critical(self, lang.get("error_title"),
                                f"{lang.get('backup_settings_error')} : {str(e)}")
+
+
+class SearchMissingPricesDialog(QDialog):
+    """Dialog to search for missing item prices online."""
+    
+    def __init__(self, parent, items_without_price, realm, template_manager, filename, cookie_manager):
+        super().__init__(parent)
+        self.items_without_price = items_without_price
+        self.realm = realm
+        self.template_manager = template_manager
+        self.filename = filename
+        self.cookie_manager = cookie_manager
+        self.active_scraper = None  # Track active scraper for cleanup
+        
+        self.setWindowTitle(lang.get("search_prices_dialog.title", default="Search Missing Prices"))
+        self.setWindowFlags(Qt.Window | Qt.WindowCloseButtonHint)
+        self.resize(700, 500)
+        
+        layout = QVBoxLayout(self)
+        
+        # Info label
+        info_text = lang.get(
+            "search_prices_dialog.info",
+            default=f"Found {len(items_without_price)} item(s) without price in database.\nClick 'Search All' to search online or select individual items."
+        )
+        info_label = QLabel(info_text)
+        info_label.setWordWrap(True)
+        layout.addWidget(info_label)
+        
+        # Progress bar
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setVisible(False)
+        layout.addWidget(self.progress_bar)
+        
+        # Items list
+        self.items_list = QListWidget()
+        self.items_list.addItems(items_without_price)
+        self.items_list.setSelectionMode(QListWidget.MultiSelection)
+        layout.addWidget(self.items_list)
+        
+        # Status label
+        self.status_label = QLabel("")
+        self.status_label.setWordWrap(True)
+        layout.addWidget(self.status_label)
+        
+        # Buttons
+        button_layout = QHBoxLayout()
+        
+        self.select_all_button = QPushButton(lang.get("search_prices_dialog.select_all", default="Select All"))
+        self.select_all_button.clicked.connect(self.select_all_items)
+        button_layout.addWidget(self.select_all_button)
+        
+        self.deselect_all_button = QPushButton(lang.get("search_prices_dialog.deselect_all", default="Deselect All"))
+        self.deselect_all_button.clicked.connect(self.deselect_all_items)
+        button_layout.addWidget(self.deselect_all_button)
+        
+        button_layout.addStretch()
+        
+        self.search_button = QPushButton(lang.get("search_prices_dialog.search_selected", default="Search Selected"))
+        self.search_button.clicked.connect(self.search_selected_items)
+        button_layout.addWidget(self.search_button)
+        
+        self.close_button = QPushButton(lang.get("search_prices_dialog.close", default="Close"))
+        self.close_button.clicked.connect(self.close)
+        button_layout.addWidget(self.close_button)
+        
+        layout.addLayout(button_layout)
+    
+    def select_all_items(self):
+        """Select all items in the list."""
+        for i in range(self.items_list.count()):
+            self.items_list.item(i).setSelected(True)
+    
+    def deselect_all_items(self):
+        """Deselect all items in the list."""
+        self.items_list.clearSelection()
+    
+    def _update_template_price(self, item_name, price):
+        """Update item price directly in template metadata JSON file.
+        
+        Args:
+            item_name: Name of the item to update
+            price: Price string to set (e.g., "1g 50s 25c")
+        
+        Returns:
+            bool: True if successful, False otherwise
+        """
+        try:
+            import json
+            
+            # Get metadata JSON path (not the template text file)
+            metadata_path = self.template_manager._get_metadata_path(self.realm, self.filename)
+            
+            # Load or create metadata
+            if metadata_path.exists():
+                with open(metadata_path, 'r', encoding='utf-8') as f:
+                    metadata = json.load(f)
+            else:
+                # Create new metadata structure
+                metadata = {
+                    "template_name": self.filename,
+                    "realm": self.realm,
+                    "prices": {}
+                }
+            
+            # Ensure prices dict exists
+            if 'prices' not in metadata:
+                metadata['prices'] = {}
+            
+            # Update price
+            metadata['prices'][item_name] = price
+            
+            # Create directory if needed
+            metadata_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            # Save metadata
+            with open(metadata_path, 'w', encoding='utf-8') as f:
+                json.dump(metadata, f, indent=2, ensure_ascii=False)
+            
+            logging.info(f"Updated {item_name} price to {price} in metadata: {metadata_path}")
+            return True
+            
+        except Exception as e:
+            logging.error(f"Error updating template price: {e}", exc_info=True)
+            return False
+    
+    def search_selected_items(self):
+        """Search for prices of selected items."""
+        selected_items = [item.text() for item in self.items_list.selectedItems()]
+        
+        if not selected_items:
+            QMessageBox.warning(
+                self,
+                lang.get("search_prices_dialog.no_selection_title", default="No Selection"),
+                lang.get("search_prices_dialog.no_selection_message", default="Please select items to search.")
+            )
+            return
+        
+        # Confirm action
+        reply = QMessageBox.question(
+            self,
+            lang.get("search_prices_dialog.confirm_title", default="Confirm Search"),
+            lang.get("search_prices_dialog.confirm_message", default=f"Search online for {len(selected_items)} item(s)?"),
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.Yes
+        )
+        
+        if reply != QMessageBox.Yes:
+            return
+        
+        # Disable buttons during search
+        self.search_button.setEnabled(False)
+        self.select_all_button.setEnabled(False)
+        self.deselect_all_button.setEnabled(False)
+        self.close_button.setEnabled(False)
+        
+        # Show progress
+        self.progress_bar.setVisible(True)
+        self.progress_bar.setMaximum(len(selected_items))
+        self.progress_bar.setValue(0)
+        
+        # Perform search
+        eden_scraper = None  # Track scraper for cleanup
+        try:
+            self.status_label.setText(lang.get("search_prices_dialog.status_connecting", default="Connecting to Eden Herald..."))
+            QApplication.processEvents()
+            
+            # Initialize scraper using centralized connection function (like CharacterProfileScraper.connect())
+            from Functions.cookie_manager import CookieManager
+            from Functions.eden_scraper import _connect_to_eden_herald
+            from Functions.items_scraper import ItemsScraper
+            
+            cookie_manager = CookieManager()
+            
+            # Use centralized connection function that handles everything
+            eden_scraper, error_message = _connect_to_eden_herald(
+                cookie_manager=cookie_manager,
+                headless=False  # Visible browser
+            )
+            
+            # Store in instance variable for cleanup on dialog close
+            self.active_scraper = eden_scraper
+            
+            if not eden_scraper:
+                QMessageBox.critical(
+                    self,
+                    lang.get("search_prices_dialog.error_title", default="Connection Error"),
+                    error_message or lang.get("search_prices_dialog.error_connection", default="Failed to connect to Eden Herald")
+                )
+                return
+            
+            # Create ItemsScraper with connected scraper
+            items_scraper = ItemsScraper(eden_scraper)
+            
+            # Search each item
+            found_count = 0
+            failed_items = []
+            
+            for idx, item_name in enumerate(selected_items):
+                self.status_label.setText(lang.get("search_prices_dialog.status_searching", default=f"Searching: {item_name}..."))
+                QApplication.processEvents()
+                
+                try:
+                    # Search item WITHOUT filters (user wants all results for missing prices)
+                    from Functions.items_parser import search_item_for_database
+                    item_data = search_item_for_database(item_name, items_scraper, self.realm, force_scrape=True, skip_filters=True)
+                    
+                    if item_data and item_data.get('merchant_price'):
+                        # Format price with currency
+                        price = item_data.get('merchant_price')
+                        currency = item_data.get('merchant_currency', '')
+                        price_with_currency = f"{price} {currency}" if currency else price
+                        
+                        # Update template JSON directly
+                        success = self._update_template_price(item_name, price_with_currency)
+                        if success:
+                            found_count += 1
+                            logging.info(f"Added price for {item_name}: {price_with_currency}")
+                        else:
+                            failed_items.append(f"{item_name} (save error)")
+                            logging.error(f"Failed to save {item_name} to template")
+                    else:
+                        # No price found - offer categorization
+                        logging.warning(f"No price found for {item_name}")
+                        
+                        # Show categorization dialog
+                        category_dialog = ItemCategoryDialog(item_name, parent=self)
+                        if category_dialog.exec() == QDialog.Accepted:
+                            selected_category = category_dialog.get_selected_category()
+                            
+                            # Save category to database
+                            ItemsDatabaseManager.set_item_category(item_name, selected_category)
+                            
+                            # Get category label for display
+                            category_label = ItemsDatabaseManager.get_category_label(selected_category, lang.current_language)
+                            category_icon = ItemsDatabaseManager.get_category_icon(selected_category)
+                            
+                            found_count += 1  # Count as handled
+                            logging.info(f"Categorized {item_name} as: {selected_category}")
+                        else:
+                            # User cancelled categorization
+                            failed_items.append(f"{item_name} (not categorized)")
+                            logging.warning(f"User cancelled categorization for {item_name}")
+                
+                except Exception as e:
+                    failed_items.append(f"{item_name} (error: {str(e)})")
+                    logging.error(f"Error searching {item_name}: {e}", exc_info=True)
+                
+                self.progress_bar.setValue(idx + 1)
+                QApplication.processEvents()
+            
+            # Show results
+            result_message = lang.get(
+                "search_prices_dialog.results",
+                default=f"Search completed:\n✅ Found: {found_count}/{len(selected_items)}\n❌ Failed: {len(failed_items)}"
+            )
+            
+            if failed_items:
+                result_message += f"\n\nFailed items:\n" + "\n".join(failed_items[:10])
+                if len(failed_items) > 10:
+                    result_message += f"\n... and {len(failed_items) - 10} more"
+            
+            QMessageBox.information(
+                self,
+                lang.get("search_prices_dialog.complete_title", default="Search Complete"),
+                result_message
+            )
+            
+            self.status_label.setText(lang.get("search_prices_dialog.status_complete", default=f"Complete: {found_count} prices added"))
+            
+            # Refresh parent preview to show updated prices
+            if found_count > 0 and hasattr(self.parent(), 'on_selection_changed'):
+                self.parent().on_selection_changed()
+                
+                # Refresh the items list in this dialog to remove found items
+                self._refresh_items_list()
+            
+        except Exception as e:
+            logging.error(f"Error during price search: {e}", exc_info=True)
+            QMessageBox.critical(
+                self,
+                lang.get("search_prices_dialog.error_title", default="Error"),
+                lang.get("search_prices_dialog.error_search", default=f"Search failed:\n{str(e)}")
+            )
+        
+        finally:
+            # CRITICAL: Always close browser to prevent zombie processes
+            if eden_scraper:
+                try:
+                    eden_scraper.close()
+                    logging.info("Eden scraper closed successfully")
+                except Exception as e:
+                    logging.error(f"Error closing scraper: {e}", exc_info=True)
+            
+            self.active_scraper = None  # Clear reference
+            self._reset_ui()
+    
+    def closeEvent(self, event):
+        """Clean up scraper when dialog is closed."""
+        if self.active_scraper:
+            try:
+                logging.info("Closing active scraper on dialog close")
+                self.active_scraper.close()
+                self.active_scraper = None
+            except Exception as e:
+                logging.error(f"Error closing scraper on dialog close: {e}", exc_info=True)
+        
+        super().closeEvent(event)
+    
+    def _reset_ui(self):
+        """Reset UI elements after search."""
+        self.search_button.setEnabled(True)
+        self.select_all_button.setEnabled(True)
+        self.deselect_all_button.setEnabled(True)
+        self.close_button.setEnabled(True)
+        self.progress_bar.setVisible(False)
+    
+    def _refresh_items_list(self):
+        """Refresh the items list from parent to remove items that now have prices."""
+        if hasattr(self.parent(), 'items_without_price'):
+            # Get updated list from parent
+            updated_items = self.parent().items_without_price
+            
+            # Update our internal list
+            self.items_without_price = updated_items
+            
+            # Clear and repopulate the list widget
+            self.items_list.clear()
+            self.items_list.addItems(updated_items)
+
+
+# ============================================================================
+# ITEM CATEGORY DIALOG
+# ============================================================================
+
+class ItemCategoryDialog(QDialog):
+    """Dialog to categorize an item without price (quest_reward, event_reward, unknown)"""
+    
+    def __init__(self, item_name, parent=None):
+        super().__init__(parent)
+        self.item_name = item_name
+        self.selected_category = None
+        
+        self.setWindowTitle(lang.get("item_category_dialog.title", default="Categorize Item"))
+        self.setWindowFlags(Qt.Dialog | Qt.WindowCloseButtonHint)
+        self.resize(500, 250)
+        
+        layout = QVBoxLayout(self)
+        
+        # Info label
+        info_text = lang.get(
+            "item_category_dialog.info",
+            default=f"Item '{item_name}' has no price in database.\nPlease categorize this item:"
+        )
+        info_label = QLabel(info_text.replace("{item_name}", item_name))
+        info_label.setWordWrap(True)
+        info_label.setStyleSheet("font-size: 11pt; padding: 10px;")
+        layout.addWidget(info_label)
+        
+        # Category selection
+        category_group = QGroupBox(lang.get("item_category_dialog.category_group", default="Category"))
+        category_layout = QVBoxLayout(category_group)
+        
+        from Functions.items_database_manager import ItemsDatabaseManager
+        categories = ItemsDatabaseManager.get_item_categories()
+        
+        self.category_buttons = QButtonGroup(self)
+        
+        # Create radio button for each category (except 'unknown')
+        for category_key, category_data in categories.items():
+            if category_key == "unknown":
+                continue  # Skip unknown, it's the default fallback
+            
+            icon = category_data["icon"]
+            # Get label in current language
+            from Functions.language_manager import lang
+            current_lang = lang.current_language if hasattr(lang, 'current_language') else 'en'
+            label = ItemsDatabaseManager.get_category_label(category_key, current_lang)
+            
+            radio = QRadioButton(f"{icon}  {label}")
+            radio.setProperty("category_key", category_key)
+            radio.setStyleSheet("font-size: 10pt; padding: 5px;")
+            self.category_buttons.addButton(radio)
+            category_layout.addWidget(radio)
+        
+        # Select first option by default
+        if self.category_buttons.buttons():
+            self.category_buttons.buttons()[0].setChecked(True)
+        
+        layout.addWidget(category_group)
+        
+        # Buttons
+        button_layout = QHBoxLayout()
+        button_layout.addStretch()
+        
+        cancel_btn = QPushButton(lang.get("item_category_dialog.cancel", default="Cancel"))
+        cancel_btn.clicked.connect(self.reject)
+        button_layout.addWidget(cancel_btn)
+        
+        ok_btn = QPushButton(lang.get("item_category_dialog.ok", default="OK"))
+        ok_btn.setStyleSheet("background-color: #0e639c; color: white; padding: 5px 15px;")
+        ok_btn.clicked.connect(self.accept)
+        ok_btn.setDefault(True)
+        button_layout.addWidget(ok_btn)
+        
+        layout.addLayout(button_layout)
+    
+    def get_selected_category(self):
+        """Get the selected category key"""
+        checked_button = self.category_buttons.checkedButton()
+        if checked_button:
+            return checked_button.property("category_key")
+        return "unknown"

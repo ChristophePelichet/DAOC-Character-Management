@@ -138,10 +138,18 @@ Logs/
 #Tools/
 Configuration/
 Armures/
+Armory/
+!Documentations/Armory/
 main.spec
 #requirements.txt
+
+# Database backups
+Data/Backups/items_database_src_backup_*.json
 
 # Debug files
 Scripts/debug_herald_page.html
 debug_wealth_page.html
 debug_herald_after_cookies.html
+
+# Templates 
+Templates/

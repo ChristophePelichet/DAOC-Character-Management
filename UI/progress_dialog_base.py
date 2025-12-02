@@ -243,6 +243,37 @@ class StepConfiguration:
         ProgressStep("🧹", "progress.steps.cleanup", category="cleanup"),
     ]
     
+    # Étapes pour Database Editor - Refresh by ID (simple)
+    DB_EDITOR_REFRESH_ID = [
+        ProgressStep("🔌", "progress.steps.db_editor_connect", category="connection"),
+        ProgressStep("🔄", "progress.steps.db_editor_refresh_items", category="scraping"),
+        ProgressStep("💾", "progress.steps.db_editor_save", category="processing"),
+    ]
+    
+    # Étapes pour Database Editor - Full Scan (complet)
+    DB_EDITOR_FULL_SCAN = [
+        ProgressStep("🔌", "progress.steps.db_editor_connect", category="connection"),
+        ProgressStep("🔍", "progress.steps.db_editor_search_variants", category="scraping"),
+        ProgressStep("📋", "progress.steps.db_editor_process_variants", category="processing"),
+        ProgressStep("💾", "progress.steps.db_editor_save", category="processing"),
+    ]
+    
+    # Étapes pour Database Editor - Batch Refresh ID
+    DB_EDITOR_BATCH_REFRESH = [
+        ProgressStep("🔌", "progress.steps.db_editor_connect", category="connection"),
+        ProgressStep("🔄", "progress.steps.db_editor_batch_refresh", category="scraping"),
+        ProgressStep("💾", "progress.steps.db_editor_save", category="processing"),
+    ]
+    
+    # Étapes pour Database Editor - Batch Full Scan
+    DB_EDITOR_BATCH_SCAN = [
+        ProgressStep("🔌", "progress.steps.db_editor_connect", category="connection"),
+        ProgressStep("🔍", "progress.steps.db_editor_batch_search", category="scraping"),
+        ProgressStep("📋", "progress.steps.db_editor_batch_process", category="processing"),
+        ProgressStep("💾", "progress.steps.db_editor_save", category="processing"),
+        ProgressStep("📊", "progress.steps.db_editor_results", category="display"),
+    ]
+    
     @classmethod
     def build_steps(cls, *step_groups: List[ProgressStep]) -> List[ProgressStep]:
         """
@@ -339,6 +370,7 @@ class ProgressStepsDialog(QDialog):
         self.show_progress_bar = show_progress_bar
         self.determinate_progress = determinate_progress
         self.allow_cancel = allow_cancel
+        self._cancelled = False  # Track cancellation state
         
         # Configuration de la fenêtre
         self.setWindowTitle(title)
@@ -446,6 +478,8 @@ class ProgressStepsDialog(QDialog):
     
     def _on_cancel_clicked(self):
         """Gestion du clic sur le bouton Annuler"""
+        self._cancelled = True  # Set cancellation flag
+        
         if self.cancel_button:
             self.cancel_button.setEnabled(False)
             from Functions.language_manager import lang
@@ -454,6 +488,10 @@ class ProgressStepsDialog(QDialog):
         from Functions.language_manager import lang
         self.set_status_message(lang.get("progress.cancellation_in_progress", default="⚠️ Annulation en cours..."), "#FF9800")
         self.canceled.emit()
+    
+    def was_canceled(self) -> bool:
+        """Check if the operation was cancelled"""
+        return self._cancelled
     
     def update_step(
         self, 
@@ -598,7 +636,8 @@ class ProgressStepsDialog(QDialog):
             message: Message à afficher
             color: Couleur du texte (optionnel)
         """
-        self._set_status_message_ui(message, color if color else "#000000")
+        # Use white color for better visibility on dark themes
+        self._set_status_message_ui(message, color if color else "#FFFFFF")
     
     def _set_status_message_ui(self, message: str, color: str):
         """Mise à jour du message de statut (thread principal)"""
@@ -608,7 +647,9 @@ class ProgressStepsDialog(QDialog):
             f"border: 1px solid #ccc; "
             f"border-radius: 5px; "
             f"background-color: transparent; "
-            f"color: {color};"
+            f"color: {color}; "
+            f"font-size: 13pt; "
+            f"font-weight: bold;"
         )
     
     def set_indeterminate(self):

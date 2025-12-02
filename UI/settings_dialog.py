@@ -59,7 +59,12 @@ class SettingsDialog(QDialog):
         self.config_manager = ConfigManager()
         self.path_manager = PathManager()
         from Functions.items_database_manager import ItemsDatabaseManager
+        from Functions.items_database_migration import migrate_personal_database
         self.db_manager = ItemsDatabaseManager(self.config_manager, self.path_manager)
+        self.migrate_items_db = migrate_personal_database
+        
+        # Auto-run items database migration if needed
+        self._check_items_database_migration()
         
         # Store widgets that need retranslation
         self.translatable_widgets = {}
@@ -3122,6 +3127,39 @@ class SettingsDialog(QDialog):
                 lang.get("error_title", default="Erreur"),
                 f"Erreur lors de l'ouverture de l'éditeur:\n{str(e)}"
             )
+
+    def _check_items_database_migration(self):
+        """Check and run items database migration if needed"""
+        try:
+            # Only migrate if personal database is enabled
+            use_personal = self.config_manager.config.get('armory', {}).get('use_personal_database', False)
+            
+            if not use_personal:
+                logging.debug("[ITEMS DB MIGRATION] Personal database not enabled, skipping migration check")
+                return
+            
+            # Run migration (silent mode)
+            success, message, stats = self.migrate_items_db(dry_run=False)
+            
+            if success and stats.get("migration_applied", False):
+                # Migration was applied successfully
+                logging.info(f"[ITEMS DB MIGRATION] {message}")
+                logging.info(f"[ITEMS DB MIGRATION] Custom items preserved: {stats.get('custom_items_preserved', 0)}")
+                logging.info(f"[ITEMS DB MIGRATION] Standard items updated: {stats.get('standard_items_updated', 0)}")
+                logging.info(f"[ITEMS DB MIGRATION] New items added: {stats.get('new_items_added', 0)}")
+                
+                # Optionally show notification to user (non-blocking)
+                # QMessageBox.information(self, 
+                #     lang.get("items_migration_success_title", default="Base mise à jour"),
+                #     lang.get("items_migration_success_message", 
+                #         default=f"Votre base personnelle a été mise à jour automatiquement.\n"
+                #                 f"Items personnels préservés: {stats.get('custom_items_preserved', 0)}\n"
+                #                 f"Items standards mis à jour: {stats.get('standard_items_updated', 0)}\n"
+                #                 f"Nouveaux items ajoutés: {stats.get('new_items_added', 0)}")
+                # )
+            
+        except Exception as e:
+            logging.error(f"[ITEMS DB MIGRATION] Error during auto-migration: {e}", exc_info=True)
 
     def retranslate_ui(self):
         """Retranslate all UI elements when language changes"""

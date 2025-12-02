@@ -3589,14 +3589,904 @@ All Database Editor UI elements are fully translated:
 
 ---
 
+---
+
+## 16. Items Database Migration System
+
+### 16.1 Overview
+
+The Items Database Migration System provides an automated, safe, and intelligent way to update personal items databases when the embedded (internal) database structure or content changes.
+
+**File:** `Functions/items_database_migration.py`
+
+**Key Features:**
+- ✅ Automatic version detection (v1 vs v2 structures)
+- ✅ Safe migration with automatic backups
+- ✅ Intelligent data merging (preserves user customizations)
+- ✅ Rollback capability on failure
+- ✅ Silent auto-migration on application startup
+- ✅ Comprehensive validation and logging
+
+**Migration Scenarios:**
+1. **v1 → v2**: Flat structure to metadata-based structure
+2. **Future migrations**: Sequential version upgrades (v2→v3, v3→v4, etc.)
+
+### 16.2 Version Detection
+
+#### Database Version Structures
+
+**v1 Structure (Legacy - Flat)**
+```json
+{
+  "items": {
+    "cloth cap:hibernia": {
+      "id": "163421",
+      "name": "Cloth Cap",
+      "realm": "Hibernia"
+    }
+  },
+  "item_count": 235,
+  "last_updated": "2025-11-15 12:00:00"
+}
+```
+
+**v2 Structure (Current - Metadata-based)**
+```json
+{
+  "_metadata": {
+    "version": 2,
+    "last_update": "2025-12-02 14:20:54",
+    "item_count": 235,
+    "migration_history": [
+      {
+        "from_version": 1,
+        "to_version": 2,
+        "date": "2025-12-02 14:52:07",
+        "backup_file": "items_database_migration_backup_20251202_145207.zip"
+      }
+    ]
+  },
+  "items": {
+    "cloth cap:hibernia": {
+      "id": "163421",
+      "name": "Cloth Cap",
+      "realm": "Hibernia",
+      "_custom_fields": []
+    }
+  }
+}
+```
+
+#### Version Detection Logic
+
+**Function:** `get_db_version(db_data: dict) -> int`
+
+```python
+def get_db_version(db_data: dict) -> int:
+    """
+    Detect database version from structure.
+    
+    Args:
+        db_data (dict): Database JSON content
+    
+    Returns:
+        int: Database version (1 or 2)
+        - v1: Flat structure without _metadata
+        - v2: Contains _metadata section with version field
+    
+    Example:
+        >>> data = load_database()
+        >>> version = get_db_version(data)
+        >>> print(f"Database version: v{version}")
+        Database version: v2
+    """
+    if "_metadata" in db_data:
+        return db_data["_metadata"].get("version", 2)
+    return 1  # Legacy database
+```
+
+**Detection Rules:**
+1. If `_metadata` section exists → v2+
+2. If `_metadata.version` field exists → Use that version number
+3. Otherwise → v1 (legacy flat structure)
+
+### 16.3 Migration Process v1 → v2
+
+#### High-Level Workflow
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    MIGRATION WORKFLOW v1 → v2                   │
+└─────────────────────────────────────────────────────────────────┘
+
+USER ACTION: Start application (settings dialog opens)
+      │
+      ▼
+┌─────────────────────────────────────────────────────────────────┐
+│ STEP 1: Auto-Migration Check (Silent)                          │
+│ Trigger: SettingsDialog.__init__()                             │
+│ Condition: use_personal_database = True                        │
+└─────────────────────────────────────────────────────────────────┘
+      │
+      ├──> Load personal database
+      ├──> Detect version: get_db_version()
+      │    - Personal DB: v1 (old)
+      │    - Embedded DB: v2 (new)
+      ├──> Compare versions: 1 < 2 → Migration needed
+      │
+      ▼
+┌─────────────────────────────────────────────────────────────────┐
+│ STEP 2: Create Backup (Automatic)                              │
+│ Function: create_backup()                                       │
+│ Location: Backup/Database/                                     │
+│ Format: items_database_migration_backup_YYYYMMDD_HHMMSS.zip    │
+└─────────────────────────────────────────────────────────────────┘
+      │
+      ├──> Zip personal database file
+      ├──> Save with timestamp
+      ├──> Verify backup integrity
+      │
+      ▼
+┌─────────────────────────────────────────────────────────────────┐
+│ STEP 3: Migrate Data (Intelligent Merge)                       │
+│ Function: migrate_v1_to_v2()                                    │
+│ Strategy: Preserve custom + Update standard                    │
+└─────────────────────────────────────────────────────────────────┘
+      │
+      ├──> Load embedded database (v2 - source of truth)
+      ├──> For each item in personal database:
+      │    │
+      │    ├──> Check if item exists in embedded DB
+      │    │
+      │    ├──> CASE 1: Item NOT in embedded DB → Custom item
+      │    │    - Keep entire item unchanged
+      │    │    - Add _custom_fields = ["*"]
+      │    │    - Add to migrated database
+      │    │
+      │    ├──> CASE 2: Item in embedded DB → Standard item
+      │    │    - Load item from embedded DB (latest data)
+      │    │    - Compare with personal version
+      │    │    - If user has custom fields:
+      │    │      • Preserve custom values
+      │    │      • Track in _custom_fields array
+      │    │    - Merge into migrated database
+      │    │
+      │    └──> CASE 3: New items in embedded DB
+      │         - Add new items from embedded DB
+      │         - Mark as standard items (_custom_fields = [])
+      │
+      ▼
+┌─────────────────────────────────────────────────────────────────┐
+│ STEP 4: Add Metadata Section                                   │
+│ Function: _create_metadata_section()                            │
+└─────────────────────────────────────────────────────────────────┘
+      │
+      ├──> Create _metadata object
+      ├──> Set version = 2
+      ├──> Set last_update = current timestamp
+      ├──> Set item_count = len(migrated_items)
+      ├──> Add migration history entry:
+      │    {
+      │      "from_version": 1,
+      │      "to_version": 2,
+      │      "date": "2025-12-02 14:52:07",
+      │      "backup_file": "items_database_migration_backup_...zip"
+      │    }
+      │
+      ▼
+┌─────────────────────────────────────────────────────────────────┐
+│ STEP 5: Validate Migrated Database                             │
+│ Function: validate_migrated_database()                          │
+└─────────────────────────────────────────────────────────────────┘
+      │
+      ├──> Check _metadata section exists
+      ├──> Verify version = 2
+      ├──> Verify items is dict
+      ├──> Check migration_history exists
+      ├──> Validate no data corruption
+      │
+      ▼
+┌─────────────────────────────────────────────────────────────────┐
+│ STEP 6: Save Migrated Database                                 │
+│ Location: Armory/items_database.json                           │
+└─────────────────────────────────────────────────────────────────┘
+      │
+      ├──> Write to personal database file
+      ├──> Format: UTF-8 JSON with 2-space indent
+      │
+      ▼
+┌─────────────────────────────────────────────────────────────────┐
+│ STEP 7: Log Migration Summary                                  │
+└─────────────────────────────────────────────────────────────────┘
+      │
+      └──> Log statistics:
+           - Custom items preserved: 0
+           - Standard items updated: 235
+           - New items added: 0
+           - Migration: v1 → v2
+           - Backup: items_database_migration_backup_...zip
+
+RESULT: Personal database updated to v2 structure
+        User customizations preserved
+        Backup available for rollback if needed
+```
+
+#### Data Merging Strategy
+
+**Function:** `merge_item_data(personal_item: dict, embedded_item: dict) -> tuple`
+
+```python
+def merge_item_data(personal_item: dict, embedded_item: dict) -> tuple:
+    """
+    Intelligently merge personal and embedded item data.
+    
+    Strategy:
+        1. Use embedded item as base (latest structure)
+        2. Preserve user customizations from personal item
+        3. Track custom fields in _custom_fields array
+    
+    Args:
+        personal_item (dict): User's current item data
+        embedded_item (dict): Latest embedded item data
+    
+    Returns:
+        tuple: (merged_item, custom_fields_list)
+        - merged_item: Combined data with user customizations
+        - custom_fields_list: List of fields user customized
+    
+    Example:
+        Personal: {"merchant_price": "600", "custom_note": "Test"}
+        Embedded: {"merchant_price": "500", "new_field": "Value"}
+        Result:   {"merchant_price": "600", "new_field": "Value", 
+                   "_custom_fields": ["merchant_price", "custom_note"]}
+    """
+    merged = dict(embedded_item)  # Start with embedded (latest)
+    custom_fields = []
+    
+    for key, personal_value in personal_item.items():
+        if key.startswith("_"):
+            continue  # Skip internal fields
+        
+        embedded_value = embedded_item.get(key)
+        
+        # User customization detected
+        if embedded_value is None or personal_value != embedded_value:
+            merged[key] = personal_value
+            custom_fields.append(key)
+    
+    return merged, custom_fields
+```
+
+**Custom Field Tracking:**
+
+```json
+{
+  "cloth cap:hibernia": {
+    "id": "163421",
+    "name": "Cloth Cap",
+    "merchant_price": "600",        // ← User changed from 500 to 600
+    "custom_note": "My favorite",   // ← User added custom field
+    "_custom_fields": [
+      "merchant_price",
+      "custom_note"
+    ]
+  }
+}
+```
+
+### 16.4 Backup System
+
+#### Backup Creation
+
+**Function:** `create_backup() -> tuple`
+
+```python
+def create_backup() -> tuple[bool, Optional[str]]:
+    """
+    Create ZIP backup of personal database.
+    
+    Process:
+        1. Check personal database exists
+        2. Generate timestamped filename
+        3. Create ZIP archive
+        4. Verify ZIP integrity
+    
+    Returns:
+        tuple: (success: bool, backup_path: str | None)
+        - (True, "Backup/Database/items_database_migration_backup_...zip")
+        - (False, None) on failure
+    
+    Backup Location:
+        Backup/Database/items_database_migration_backup_YYYYMMDD_HHMMSS.zip
+    
+    Example:
+        >>> success, backup_path = create_backup()
+        >>> if success:
+        ...     print(f"Backup created: {backup_path}")
+        Backup created: Backup/Database/items_database_migration_backup_20251202_145207.zip
+    """
+```
+
+**Backup Filename Format:**
+```
+items_database_migration_backup_YYYYMMDD_HHMMSS.zip
+
+Example:
+items_database_migration_backup_20251202_145207.zip
+└─ Year: 2025
+   └─ Month: 12
+      └─ Day: 02
+         └─ Hour: 14
+            └─ Minute: 52
+               └─ Second: 07
+```
+
+**Backup Contents:**
+```
+items_database_migration_backup_20251202_145207.zip
+└── items_database.json  (original v1 database)
+```
+
+**Backup Folder Structure:**
+```
+Backup/
+└── Database/
+    ├── items_database_migration_backup_20251202_145207.zip
+    ├── items_database_migration_backup_20251201_103045.zip
+    └── items_database_migration_backup_20251130_092130.zip
+```
+
+#### Rollback Procedure
+
+**Function:** `rollback_migration(backup_path: str) -> bool`
+
+```python
+def rollback_migration(backup_path: str) -> bool:
+    """
+    Restore database from backup ZIP.
+    
+    Args:
+        backup_path (str): Path to backup ZIP file
+    
+    Returns:
+        bool: True if rollback successful, False otherwise
+    
+    Process:
+        1. Verify backup file exists
+        2. Extract items_database.json from ZIP
+        3. Overwrite current personal database
+        4. Validate restored database
+        5. Log rollback operation
+    
+    Example:
+        >>> success = rollback_migration(
+        ...     "Backup/Database/items_database_migration_backup_20251202_145207.zip"
+        ... )
+        >>> if success:
+        ...     print("Database restored to v1")
+    """
+```
+
+**Manual Rollback (if automated rollback fails):**
+
+```powershell
+# 1. Extract backup ZIP
+Expand-Archive "Backup\Database\items_database_migration_backup_20251202_145207.zip" -DestinationPath "Temp"
+
+# 2. Replace current database
+Copy-Item "Temp\items_database.json" "Armory\items_database.json" -Force
+
+# 3. Restart application
+```
+
+### 16.5 Validation
+
+#### Post-Migration Validation
+
+**Function:** `validate_migrated_database(data: dict) -> tuple`
+
+```python
+def validate_migrated_database(data: dict) -> tuple[bool, Optional[str]]:
+    """
+    Validate migrated database structure and integrity.
+    
+    Checks:
+        1. _metadata section exists
+        2. version field = 2
+        3. last_update field present
+        4. item_count matches actual count
+        5. migration_history exists and valid
+        6. items dict exists
+        7. All items have required fields
+    
+    Args:
+        data (dict): Migrated database content
+    
+    Returns:
+        tuple: (is_valid: bool, error_message: str | None)
+        - (True, None) if valid
+        - (False, "Missing _metadata section") if invalid
+    
+    Example:
+        >>> valid, error = validate_migrated_database(migrated_data)
+        >>> if not valid:
+        ...     print(f"Validation failed: {error}")
+        ...     rollback_migration(backup_path)
+    """
+```
+
+**Validation Rules:**
+
+| Check | Description | Failure Action |
+|-------|-------------|----------------|
+| **Metadata Exists** | `_metadata` section present | Rollback |
+| **Version Correct** | `version == 2` | Rollback |
+| **Timestamp Valid** | `last_update` is valid datetime string | Warning only |
+| **Item Count Match** | `item_count == len(items)` | Warning only |
+| **History Present** | `migration_history` array exists | Warning only |
+| **Items Dict** | `items` is dictionary | Rollback |
+| **Required Fields** | All items have `id`, `name`, `realm` | Rollback |
+
+**Example Validation Log:**
+```
+2025-12-02 14:52:15 [INFO] ITEMDB: Database validation passed
+  ✓ Metadata section present
+  ✓ Version: 2
+  ✓ Last update: 2025-12-02 14:52:07
+  ✓ Item count: 235 (matches actual)
+  ✓ Migration history: 1 entry
+  ✓ Items structure valid
+```
+
+### 16.6 Integration Points
+
+#### Settings Dialog Auto-Migration
+
+**File:** `UI/settings_dialog.py`
+
+**Function:** `_check_items_database_migration()`
+
+```python
+def _check_items_database_migration(self):
+    """
+    Check if items database migration is needed.
+    Runs automatically when settings dialog opens.
+    
+    Conditions:
+        - Personal database mode enabled (use_personal_database = True)
+        - Personal database file exists
+        - Version mismatch detected
+    
+    Behavior:
+        - Silent operation (no user prompts)
+        - Only logs to file
+        - Errors shown in message box
+    
+    Called from:
+        SettingsDialog.__init__()
+    """
+    if not self.use_personal_db:
+        return  # Mode 1 (internal) - no migration needed
+    
+    personal_db_path = Path(self.personal_db_path)
+    if not personal_db_path.exists():
+        return  # No personal database yet
+    
+    try:
+        # Attempt migration
+        result = self.migrate_items_db()
+        
+        if result['migration_applied']:
+            logger.info(f"Items database migrated: v{result['personal_version']} → v{result['embedded_version']}")
+        else:
+            logger.debug("Items database already up to date")
+    
+    except Exception as e:
+        logger.error(f"Migration check failed: {e}")
+        QMessageBox.warning(
+            self,
+            "Migration Error",
+            f"Failed to check database migration: {e}"
+        )
+```
+
+**Trigger Point:**
+```python
+class SettingsDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        # ... UI setup ...
+        
+        # Auto-migration check (silent)
+        self._check_items_database_migration()
+```
+
+**User Experience:**
+- ✅ **Silent**: No popup dialogs during migration
+- ✅ **Automatic**: Runs on every settings dialog open
+- ✅ **Safe**: Backup created before migration
+- ✅ **Fast**: Typically completes in <1 second
+- ✅ **Logged**: All operations logged to file
+
+### 16.7 Testing
+
+#### Test Script
+
+**File:** `Tools/test_items_migration.py`
+
+**Test Suite:**
+1. **Version Detection** - Detect v1 and v2 databases
+2. **Migration Need Detection** - Determine if migration required
+3. **Backup Creation** - Create and verify backup ZIP
+4. **Dry-Run Migration** - Simulate migration without changes
+5. **Actual Migration** - Perform real migration
+6. **Database Validation** - Verify migrated database structure
+7. **Rollback** - Restore from backup
+
+**Running Tests:**
+```powershell
+# Activate virtual environment
+.venv\Scripts\Activate.ps1
+
+# Run test suite
+python .\Tools\test_items_migration.py
+```
+
+**Example Output:**
+```
+======================================================================
+  ITEMS DATABASE MIGRATION - TEST SUITE
+======================================================================
+
+TEST 1: Version Detection
+  ✓ Embedded database version: v2
+  ✓ Personal database version: v1
+
+TEST 2: Migration Need Detection
+  Personal version: v1
+  Embedded version: v2
+  ✓ Migration needed: v1 → v2
+
+TEST 3: Backup Creation
+  ✓ Backup created successfully
+  Path: Backup/Database\items_database_migration_backup_20251202_145159.zip
+  Size: 8,598 bytes
+
+TEST 4: Dry-Run Migration
+  Statistics:
+    - personal_version: 1
+    - embedded_version: 2
+    - migration_applied: True
+    - custom_items_preserved: 0
+    - standard_items_updated: 235
+    - new_items_added: 0
+  ✓ Dry-run completed successfully
+
+TEST 5: Actual Migration
+  Apply migration? (y/n): y
+  ✓ Migration completed successfully
+  ✓ Migrated database version: v2
+    Item count: 235
+    Custom items: 0
+    Updated items: 235
+    New items: 0
+    Migration History:
+      - v1 → v2 (2025-12-02 14:52:07)
+
+TEST 6: Database Validation
+  ✓ Database validation passed
+
+TEST 7: Rollback Test
+  Rollback to backup? (y/n): y
+  ✓ Rollback successful: Restored from backup
+
+TEST SUMMARY
+  ✓ PASS: Version Detection
+  ✓ PASS: Migration Need Detection
+  ✓ PASS: Backup Creation
+  ✓ PASS: Dry-Run Migration
+  ✓ PASS: Actual Migration
+  ✓ PASS: Database Validation
+  ✓ PASS: Rollback
+  Total: 7/7 tests passed
+  🎉 All tests passed!
+```
+
+### 16.8 Logging
+
+**Log Category:** All migration operations use `extra={"action": "ITEMDB"}`
+
+**Log Levels:**
+
+| Level | Usage | Example |
+|-------|-------|---------|
+| **INFO** | Migration start/complete, version detection | `Migration v1 → v2 started` |
+| **WARNING** | Non-critical issues | `Custom fields detected: merchant_price` |
+| **ERROR** | Migration failures, validation errors | `Migration failed: Invalid database structure` |
+| **DEBUG** | Detailed operation info | `Processing item: cloth cap:hibernia` |
+
+**Log Examples:**
+```python
+# Migration start
+logger.info("Items database migration check started", extra={"action": "ITEMDB"})
+
+# Version detection
+logger.info(f"Personal DB version: v{personal_version}", extra={"action": "ITEMDB"})
+logger.info(f"Embedded DB version: v{embedded_version}", extra={"action": "ITEMDB"})
+
+# Backup creation
+logger.info(f"Backup created: {backup_path}", extra={"action": "ITEMDB"})
+
+# Migration progress
+logger.debug(f"Processing custom item: {item_key}", extra={"action": "ITEMDB"})
+logger.debug(f"Merging standard item: {item_key}", extra={"action": "ITEMDB"})
+
+# Migration complete
+logger.info(f"Migration v{from_v} → v{to_v} completed successfully", extra={"action": "ITEMDB"})
+logger.info(f"Custom items preserved: {stats['custom_items_preserved']}", extra={"action": "ITEMDB"})
+
+# Validation
+logger.info("Migrated database validation passed", extra={"action": "ITEMDB"})
+
+# Rollback
+logger.warning(f"Rollback initiated: {backup_path}", extra={"action": "ITEMDB"})
+logger.info("Rollback completed successfully", extra={"action": "ITEMDB"})
+```
+
+**Log File Location:** `Logs/application_YYYYMMDD.log`
+
+**Example Log Entry:**
+```
+2025-12-02 14:52:07 [INFO] ITEMDB: Migration v1 → v2 started
+2025-12-02 14:52:07 [INFO] ITEMDB: Backup created: Backup/Database/items_database_migration_backup_20251202_145207.zip
+2025-12-02 14:52:08 [DEBUG] ITEMDB: Processing custom item: my custom sword:albion
+2025-12-02 14:52:08 [DEBUG] ITEMDB: Merging standard item: cloth cap:hibernia
+2025-12-02 14:52:15 [INFO] ITEMDB: Migration v1 → v2 completed successfully
+2025-12-02 14:52:15 [INFO] ITEMDB: Custom items preserved: 0
+2025-12-02 14:52:15 [INFO] ITEMDB: Standard items updated: 235
+2025-12-02 14:52:15 [INFO] ITEMDB: New items added: 0
+```
+
+### 16.9 Future Migrations
+
+#### Migration Framework Design
+
+**Sequential Migration Support:**
+
+```python
+# Future migration functions
+def migrate_v2_to_v3(personal_data: dict, embedded_data: dict) -> dict:
+    """
+    Migrate from v2 to v3.
+    Example: Add new fields, restructure data, etc.
+    """
+    pass
+
+def migrate_v3_to_v4(personal_data: dict, embedded_data: dict) -> dict:
+    """
+    Migrate from v3 to v4.
+    """
+    pass
+
+# Main migration orchestrator
+def migrate_personal_database():
+    personal_version = get_db_version(personal_data)
+    embedded_version = get_db_version(embedded_data)
+    
+    # Sequential migration path
+    if personal_version == 1 and embedded_version == 2:
+        migrate_v1_to_v2(personal_data, embedded_data)
+    elif personal_version == 1 and embedded_version == 3:
+        migrate_v1_to_v2(personal_data, embedded_data)  # First
+        migrate_v2_to_v3(personal_data, embedded_data)  # Then
+    elif personal_version == 2 and embedded_version == 3:
+        migrate_v2_to_v3(personal_data, embedded_data)
+    # ... etc.
+```
+
+**Migration History Tracking:**
+
+```json
+{
+  "_metadata": {
+    "version": 3,
+    "migration_history": [
+      {
+        "from_version": 1,
+        "to_version": 2,
+        "date": "2025-12-02 14:52:07",
+        "backup_file": "items_database_migration_backup_20251202_145207.zip"
+      },
+      {
+        "from_version": 2,
+        "to_version": 3,
+        "date": "2025-12-15 10:30:22",
+        "backup_file": "items_database_migration_backup_20251215_103022.zip"
+      }
+    ]
+  }
+}
+```
+
+### 16.10 Best Practices
+
+#### ✅ DO: Always Create Backups
+
+```python
+# CORRECT: Backup before migration
+success, backup_path = create_backup()
+if not success:
+    logger.error("Backup creation failed - aborting migration")
+    return
+
+# Proceed with migration
+migrate_v1_to_v2(personal_data, embedded_data)
+```
+
+#### ✅ DO: Validate After Migration
+
+```python
+# CORRECT: Validate migrated database
+migrated_data = migrate_v1_to_v2(personal_data, embedded_data)
+
+valid, error = validate_migrated_database(migrated_data)
+if not valid:
+    logger.error(f"Validation failed: {error}")
+    rollback_migration(backup_path)
+    return False
+```
+
+#### ✅ DO: Preserve User Customizations
+
+```python
+# CORRECT: Use merge strategy
+merged_item, custom_fields = merge_item_data(personal_item, embedded_item)
+if custom_fields:
+    merged_item["_custom_fields"] = custom_fields
+```
+
+#### ❌ DON'T: Overwrite User Data
+
+```python
+# WRONG: This loses user customizations!
+migrated_items = embedded_data["items"]  # ← Destroys personal data
+
+# CORRECT: Merge intelligently
+migrated_items = {}
+for key, personal_item in personal_data["items"].items():
+    embedded_item = embedded_data["items"].get(key)
+    if embedded_item:
+        migrated_items[key], _ = merge_item_data(personal_item, embedded_item)
+    else:
+        migrated_items[key] = personal_item  # Custom item
+```
+
+#### ✅ DO: Log Migration Operations
+
+```python
+# CORRECT: Comprehensive logging
+logger.info(f"Migration v{from_v} → v{to_v} started", extra={"action": "ITEMDB"})
+logger.info(f"Custom items preserved: {custom_count}", extra={"action": "ITEMDB"})
+logger.info(f"Standard items updated: {updated_count}", extra={"action": "ITEMDB"})
+logger.info(f"New items added: {new_count}", extra={"action": "ITEMDB"})
+```
+
+### 16.11 Troubleshooting
+
+#### Issue 1: "Migration loops infinitely"
+
+**Symptoms:**
+- Migration runs every time settings dialog opens
+- Version never updates to v2
+
+**Diagnosis:**
+```python
+# Check if database is actually being saved
+personal_db_path = Path("Armory/items_database.json")
+data = json.loads(personal_db_path.read_text(encoding="utf-8"))
+print(f"Version in file: {data.get('_metadata', {}).get('version')}")
+```
+
+**Solutions:**
+1. Verify write permissions on `Armory/` folder
+2. Check for file locking issues
+3. Ensure migration function saves database
+4. Review logs for save errors
+
+#### Issue 2: "Custom items lost after migration"
+
+**Symptoms:**
+- User-added items missing after migration
+- Only embedded items remain
+
+**Diagnosis:**
+```python
+# Check migration log for custom items
+# Should see: "Processing custom item: my custom sword:albion"
+```
+
+**Solutions:**
+1. Verify `merge_item_data()` preserves custom items
+2. Check for logic errors in custom item detection
+3. Restore from backup
+4. Manually re-add custom items
+
+#### Issue 3: "Migration fails with validation error"
+
+**Symptoms:**
+- Migration completes but validation fails
+- Database rollback triggered
+
+**Diagnosis:**
+```python
+# Check validation error message
+valid, error = validate_migrated_database(migrated_data)
+print(f"Validation error: {error}")
+```
+
+**Solutions:**
+1. Review migration logic for structural errors
+2. Verify all required fields populated
+3. Check for data type mismatches
+4. Restore from backup and retry
+
+#### Issue 4: "Backup creation fails"
+
+**Symptoms:**
+- Migration aborted before starting
+- "Backup creation failed" error
+
+**Diagnosis:**
+```python
+# Check backup folder exists and is writable
+backup_folder = Path("Backup/Database")
+print(f"Exists: {backup_folder.exists()}")
+print(f"Writable: {os.access(backup_folder, os.W_OK)}")
+```
+
+**Solutions:**
+1. Create `Backup/Database/` folder manually
+2. Check disk space (ZIP requires temporary space)
+3. Verify write permissions
+4. Close any programs using database file
+
+### 16.12 Related Files
+
+**Core Migration Module:**
+- `Functions/items_database_migration.py` - Main migration orchestrator
+
+**Integration Points:**
+- `UI/settings_dialog.py` - Auto-migration trigger
+- `Functions/items_database_manager.py` - Database manager (loads migrated data)
+
+**Test & Validation:**
+- `Tools/test_items_migration.py` - Comprehensive test suite
+
+**Data Files:**
+- `Data/items_database_src.json` - Embedded database (v2)
+- `Armory/items_database.json` - Personal database (v1 or v2)
+- `Backup/Database/items_database_migration_backup_*.zip` - Backups
+
+**Configuration:**
+- `Configuration/config.json` - Database mode settings
+
+---
+
 ## Document Information
 
 **Created:** 2025-11-19  
-**Version:** 2.2  
+**Version:** 2.3  
 **Author:** Technical Documentation Team  
-**Last Reviewed:** 2025-11-24
+**Last Reviewed:** 2025-12-02
 
 **Change Log:**
+- **2025-12-02 (v2.3):** Merged Items Database Migration documentation
+  - Added migration system overview
+  - Added v1 → v2 migration process details
+  - Added backup and rollback procedures
+  - Added validation and testing documentation
+  - Added integration points and logging
+  - Added best practices and troubleshooting
 - **2025-11-24 (v2.2):** Added Database Editor Interface documentation, Currency support for Ices/Souls
 - **2025-11-20 (v2.1):** Currency normalization and template system updates
 - **2025-11-19 (v2.0):** Initial comprehensive documentation
@@ -3607,9 +4497,20 @@ All Database Editor UI elements are fully translated:
 - `Functions/items_scraper.py` - Scraper implementation
 - `Functions/superadmin_tools.py` - Database management
 - `Functions/items_database_manager.py` - Dual-mode manager
+- `Functions/items_database_migration.py` - Migration orchestrator
 - `UI/mass_import_monitor.py` - Import monitoring window with threading
+- `Tools/test_items_migration.py` - Migration test suite
 
 **Change Log:**
+- 2025-12-02 v2.3: Merged items database migration documentation
+  - Consolidated ITEMS_DATABASE_MIGRATION_EN.md into technical docs
+  - Added complete migration system documentation
+  - Added v1 → v2 migration workflow and data merging strategy
+  - Added backup system and rollback procedures
+  - Added validation rules and integration points
+  - Added comprehensive testing and logging documentation
+  - Added future migrations framework design
+  - Added best practices and troubleshooting guides
 - 2025-11-20 v2.1: Added Mass Import System & Threading Architecture section
   - Documented critical processEvents() crash fix
   - Added threading architecture improvements

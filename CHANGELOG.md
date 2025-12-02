@@ -46,6 +46,9 @@
   - All buttons, labels and tooltips now follow language selection
   - Implemented retranslate_ui() for live language switching
   - Fixed v2 language keys (buttons.*, settings.herald.*)
+- 🔄 **Settings live language update**: Settings dialog now auto-closes and reopens on language change
+  - All navigation items, page titles, and widgets instantly translated
+  - No need to manually close/reopen Settings window
 
 ---
 

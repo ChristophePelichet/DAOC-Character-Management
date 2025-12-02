@@ -607,10 +607,6 @@ class CharacterApp(QMainWindow):
             available_realms=realms
         )
         
-        # Ensure UI is translated (in case language was changed before opening Settings)
-        if hasattr(self.settings_dialog, 'retranslate_ui'):
-            self.settings_dialog.retranslate_ui()
-        
         # Show non-modal (don't block)
         self.settings_dialog.show()
         
@@ -842,22 +838,25 @@ class CharacterApp(QMainWindow):
         config.set("ui.language", lang_code)
         lang.set_language(lang_code)
         
-        # Check if settings dialog is open
+        # Check if settings dialog is open and remember it
         settings_was_open = hasattr(self, 'settings_dialog') and self.settings_dialog and self.settings_dialog.isVisible()
         
-        # Retranslate settings dialog if it's open
-        if settings_was_open and hasattr(self.settings_dialog, 'retranslate_ui'):
-            self.settings_dialog.retranslate_ui()
+        # Close Settings dialog to force full recreation with new language
+        # (Settings has too many widgets to retranslate individually)
+        if settings_was_open:
+            self.settings_dialog.close()
+            self.settings_dialog = None
         
-        # Close all open dialogs to force refresh on next open (except settings)
+        # Close all other open dialogs to force refresh on next open
         for widget in QApplication.topLevelWidgets():
             if isinstance(widget, QDialog) and widget != self and widget.isVisible():
-                if widget != self.settings_dialog:  # Don't close settings dialog
-                    widget.close()
+                widget.close()
         
         self.retranslate_ui()
         
-        # Settings dialog stays open with updated translations (no need to reopen)
+        # Reopen settings if it was open before language change
+        if settings_was_open:
+            self.open_configuration()
         
     def retranslate_ui(self):
         """Met à jour toutes les traductions de l'interface"""

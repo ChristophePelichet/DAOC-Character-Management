@@ -23,12 +23,8 @@ class MassImportMonitor(QMainWindow):
         super().__init__(parent)
         self.target_db = target_db  # "embedded" or "personal"
         
-        # Set window title based on target
-        if target_db == "personal":
-            title = lang.get("settings.pages.mass_import_monitor.window_title_personal", default="🛡️ Armory - Template Import")
-        else:
-            title = lang.get("settings.pages.mass_import_monitor.window_title", default="🔧 Database - Template Import")
-        
+        # Set window title (same for both modes)
+        title = lang.get("settings.pages.mass_import_monitor.window_title", default="📦 Template Import Items Tools")
         self.setWindowTitle(title)
         self.setGeometry(150, 100, 1200, 700)
         
@@ -751,7 +747,7 @@ class MassImportMonitor(QMainWindow):
         
         if 'processed' in kwargs:
             self.items_processed = kwargs['processed']
-            self.processed_label.setText(f"{lang.get('mass_import_monitor.items_processed', default='⚙️ Items traités:')} {self.items_processed} / {self.items_total}")
+            self.processed_label.setText(f"{lang.get('settings.pages.mass_import_monitor.items_processed', default='⚙️ Items traités:')} {self.items_processed} / {self.items_total}")
             
             # Update progress bar
             if self.items_total > 0:
@@ -760,19 +756,19 @@ class MassImportMonitor(QMainWindow):
         
         if 'variants' in kwargs:
             self.variants_found = kwargs['variants']
-            self.variants_label.setText(f"{lang.get('mass_import_monitor.variants_found', default='🌐 Variantes trouvées:')} {self.variants_found}")
+            self.variants_label.setText(f"{lang.get('settings.pages.mass_import_monitor.variants_found', default='🌐 Variantes trouvées:')} {self.variants_found}")
         
         if 'added' in kwargs:
             self.items_added = kwargs['added']
-            self.added_label.setText(f"{lang.get('mass_import_monitor.added', default='✅ Ajoutés:')} {self.items_added}")
+            self.added_label.setText(f"{lang.get('settings.pages.mass_import_monitor.added', default='✅ Ajoutés:')} {self.items_added}")
         
         if 'failed' in kwargs:
             self.items_failed = kwargs['failed']
-            self.failed_label.setText(f"{lang.get('mass_import_monitor.failed', default='❌ Échecs:')} {self.items_failed}")
+            self.failed_label.setText(f"{lang.get('settings.pages.mass_import_monitor.failed', default='❌ Échecs:')} {self.items_failed}")
         
         if 'duplicates' in kwargs:
             self.duplicates_skipped = kwargs['duplicates']
-            self.duplicates_label.setText(f"{lang.get('mass_import_monitor.duplicates', default='⏭️ Doublons ignorés:')} {self.duplicates_skipped}")
+            self.duplicates_label.setText(f"{lang.get('settings.pages.mass_import_monitor.duplicates', default='⏭️ Doublons ignorés:')} {self.duplicates_skipped}")
         
         if 'current_item' in kwargs:
             self.current_item = kwargs['current_item']
@@ -782,7 +778,7 @@ class MassImportMonitor(QMainWindow):
                 self.current_item_label.setText(lang.get('mass_import_monitor.waiting', default='En attente...'))
         
         # Update unique items count
-        self.unique_items_label.setText(f"{lang.get('mass_import_monitor.unique_items', default='🔍 Items uniques:')} {self.items_total}")
+        self.unique_items_label.setText(f"{lang.get('settings.pages.mass_import_monitor.unique_items', default='🔍 Items uniques:')} {self.items_total}")
         
         # NO processEvents() - UI updates automatically via Qt's event loop
     

@@ -1155,15 +1155,6 @@ class SettingsDialog(QDialog):
         self.armory_import_button.clicked.connect(self._open_armory_import)
         import_layout.addWidget(self.armory_import_button)
         
-        import_help = QLabel(lang.get('settings.pages.armory.import_help',
-            default="💡 Cliquez sur le bouton ci-dessus pour ouvrir l'interface d'import. "
-            "Vous pourrez sélectionner un fichier template (.txt), "
-            "choisir le royaume et lancer l'import automatique."
-        ))
-        import_help.setWordWrap(True)
-        import_help.setStyleSheet("color: #666; font-style: italic; padding: 10px;")
-        import_layout.addWidget(import_help)
-        
         self.import_group.setLayout(import_layout)
         self.import_group.setVisible(False)  # Hidden by default
         layout.addWidget(self.import_group)

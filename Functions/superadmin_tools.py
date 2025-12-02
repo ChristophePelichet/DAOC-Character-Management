@@ -42,7 +42,8 @@ class SuperAdminTools:
         """
         self.path_manager = path_manager
         self.config_manager = config_manager
-        self.source_db_path = self.path_manager.get_app_root() / "Data" / "items_database_src.json"
+        # Use get_resource_path for PyInstaller compatibility (bundled resources in sys._MEIPASS)
+        self.source_db_path = Path(self.path_manager.get_resource_path("Data")) / "items_database_src.json"
         
         # Initialize backup directory from config or use default
         if config_manager:

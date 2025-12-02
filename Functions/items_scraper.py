@@ -20,6 +20,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 
 from .logging_manager import get_logger, LOGGER_EDEN
+from .path_manager import get_resource_path
 
 
 class ItemsScraper:
@@ -129,8 +130,8 @@ class ItemsScraper:
         self.logger = get_logger(LOGGER_EDEN)
         self.base_url = "https://eden-daoc.net/items"
         
-        # Database path (embedded)
-        self.database_file = Path(__file__).parent.parent / 'Data' / 'items_database_src.json'
+        # Database path (embedded) - Use get_resource_path for PyInstaller compatibility
+        self.database_file = Path(get_resource_path("Data")) / 'items_database_src.json'
         
         # Cache path (user profile)
         import os

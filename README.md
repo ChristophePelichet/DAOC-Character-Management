@@ -38,7 +38,7 @@ Character management application for Dark Age of Camelot (DAOC), developed in Py
 - 📊 **Automatic calculation** based on Realm Points
 
 ### Armor Management
-- 📁 **Upload armor files** Zenkcraft format only for the moment
+- 📁 **Upload armor files** Zenkcraft and Loki format supported
 - 🗂️ **Automatic organization** by character ID in subfolders
 - 📋 **Armor list** with metadata (name, size, modification date)
 - 🔍 **Quick opening** of files with default application

@@ -68,7 +68,8 @@ class ItemsDatabaseManager:
         self.path_manager = path_manager
         
         # Internal database path (embedded in Data/ folder, compiled in .exe)
-        self.internal_db_path = self.path_manager.get_app_root() / "Data" / "items_database_src.json"
+        # Use get_resource_path for PyInstaller compatibility (bundled resources in sys._MEIPASS)
+        self.internal_db_path = Path(self.path_manager.get_resource_path("Data")) / "items_database_src.json"
         
         logging.info("ItemsDatabaseManager initialized", extra={"action": "ITEMDB_INIT"})
 

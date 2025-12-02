@@ -42,6 +42,10 @@
 - 🎨 Purple theme: visible text, readable placeholder
 - 🌍 Herald/Stats/Buttons translations (FR/EN/DE)
 - 📝 Replace emoji prints with logging to avoid Windows encoding errors in items parser
+- 🌐 **Settings/Eden translations**: Fixed hardcoded French text in Eden settings section
+  - All buttons, labels and tooltips now follow language selection
+  - Implemented retranslate_ui() for live language switching
+  - Fixed v2 language keys (buttons.*, settings.herald.*)
 
 ---
 

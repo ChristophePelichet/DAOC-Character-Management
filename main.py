@@ -607,6 +607,10 @@ class CharacterApp(QMainWindow):
             available_realms=realms
         )
         
+        # Ensure UI is translated (in case language was changed before opening Settings)
+        if hasattr(self.settings_dialog, 'retranslate_ui'):
+            self.settings_dialog.retranslate_ui()
+        
         # Show non-modal (don't block)
         self.settings_dialog.show()
         
@@ -841,16 +845,19 @@ class CharacterApp(QMainWindow):
         # Check if settings dialog is open
         settings_was_open = hasattr(self, 'settings_dialog') and self.settings_dialog and self.settings_dialog.isVisible()
         
-        # Close all open dialogs to force refresh on next open
+        # Retranslate settings dialog if it's open
+        if settings_was_open and hasattr(self.settings_dialog, 'retranslate_ui'):
+            self.settings_dialog.retranslate_ui()
+        
+        # Close all open dialogs to force refresh on next open (except settings)
         for widget in QApplication.topLevelWidgets():
             if isinstance(widget, QDialog) and widget != self and widget.isVisible():
-                widget.close()
+                if widget != self.settings_dialog:  # Don't close settings dialog
+                    widget.close()
         
         self.retranslate_ui()
         
-        # Reopen settings dialog if it was open
-        if settings_was_open:
-            self.open_configuration()
+        # Settings dialog stays open with updated translations (no need to reopen)
         
     def retranslate_ui(self):
         """Met à jour toutes les traductions de l'interface"""

@@ -61,6 +61,9 @@ class SettingsDialog(QDialog):
         from Functions.items_database_manager import ItemsDatabaseManager
         self.db_manager = ItemsDatabaseManager(self.config_manager, self.path_manager)
         
+        # Store widgets that need retranslation
+        self.translatable_widgets = {}
+        
         self._init_ui()
         self._load_settings()
         
@@ -445,30 +448,35 @@ class SettingsDialog(QDialog):
         layout.addSpacing(20)
         
         # === Cookies Path (Eden AppData) ===
-        cookies_group = QGroupBox("🍪 " + lang.get("config_cookies_group_title", 
+        cookies_group = QGroupBox("🍪 " + lang.get("settings.herald.config_cookies_group_title", 
                                                     default="Chemin des cookies"))
+        self.translatable_widgets['cookies_group'] = cookies_group
         cookies_layout = QVBoxLayout()
         
         # Info label
         from Functions.path_manager import get_eden_data_dir
         eden_path = get_eden_data_dir()
-        cookies_info = QLabel(lang.get("eden_storage_info", default="Stockage automatique dans") + f": {eden_path}")
+        cookies_info = QLabel(lang.get("buttons.eden_storage_info", default="Stockage automatique dans") + f": {eden_path}")
         cookies_info.setWordWrap(True)
         cookies_info.setStyleSheet("color: gray; font-size: 9pt; padding: 5px;")
+        self.translatable_widgets['cookies_info'] = cookies_info
+        self.translatable_widgets['cookies_info_path'] = eden_path
         cookies_layout.addWidget(cookies_info)
         
         # Buttons layout (horizontal)
         buttons_layout = QHBoxLayout()
         
         # Open folder button
-        open_cookies_folder_button = QPushButton("📂 " + lang.get("open_folder_button", default="Ouvrir le dossier"))
+        open_cookies_folder_button = QPushButton("📂 " + lang.get("buttons.open_folder_button", default="Ouvrir le dossier"))
         open_cookies_folder_button.clicked.connect(self._open_cookies_folder)
+        self.translatable_widgets['open_cookies_folder_button'] = open_cookies_folder_button
         buttons_layout.addWidget(open_cookies_folder_button)
         
         # Clean Eden button
-        clean_eden_button = QPushButton("🗑️ " + lang.get("clean_eden_button", default="Nettoyer Eden"))
+        clean_eden_button = QPushButton("🗑️ " + lang.get("buttons.clean_eden_button", default="Nettoyer Eden"))
         clean_eden_button.clicked.connect(self._clean_eden_folder)
-        clean_eden_button.setToolTip(lang.get("clean_eden_tooltip", default="Supprime tous les cookies et fichiers temporaires du profil Chrome"))
+        clean_eden_button.setToolTip(lang.get("buttons.clean_eden_tooltip", default="Supprime tous les cookies et fichiers temporaires du profil Chrome"))
+        self.translatable_widgets['clean_eden_button'] = clean_eden_button
         clean_eden_button.setStyleSheet("""
             QPushButton {
                 background-color: #D83B01;
@@ -488,8 +496,9 @@ class SettingsDialog(QDialog):
         layout.addWidget(cookies_group)
         
         # === Item Cache Path ===
-        cache_group = QGroupBox("💾 " + lang.get("config_item_cache_group_title", 
+        cache_group = QGroupBox("💾 " + lang.get("settings.herald.config_item_cache_group_title", 
                                                     default="Chemin du cache des items"))
+        self.translatable_widgets['cache_group'] = cache_group
         cache_layout = QVBoxLayout()
         
         # Info label
@@ -501,23 +510,27 @@ class SettingsDialog(QDialog):
             from pathlib import Path
             cache_path = str(Path(__file__).parent.parent / 'Armory')
         
-        cache_info = QLabel(lang.get("item_cache_storage_info", default="Stockage automatique dans") + f": {cache_path}")
+        cache_info = QLabel(lang.get("buttons.item_cache_storage_info", default="Stockage automatique dans") + f": {cache_path}")
         cache_info.setWordWrap(True)
         cache_info.setStyleSheet("color: gray; font-size: 9pt; padding: 5px;")
+        self.translatable_widgets['cache_info'] = cache_info
+        self.translatable_widgets['cache_info_path'] = cache_path
         cache_layout.addWidget(cache_info)
         
         # Buttons layout (horizontal)
         cache_buttons_layout = QHBoxLayout()
         
         # Open folder button
-        open_cache_folder_button = QPushButton("📂 " + lang.get("open_folder_button", default="Ouvrir le dossier"))
+        open_cache_folder_button = QPushButton("📂 " + lang.get("buttons.open_folder_button", default="Ouvrir le dossier"))
         open_cache_folder_button.clicked.connect(self._open_item_cache_folder)
+        self.translatable_widgets['open_cache_folder_button'] = open_cache_folder_button
         cache_buttons_layout.addWidget(open_cache_folder_button)
         
         # Clean cache button
-        clean_cache_button = QPushButton("🗑️ " + lang.get("clean_cache_button", default="Nettoyer le cache"))
+        clean_cache_button = QPushButton("🗑️ " + lang.get("buttons.clean_cache_button", default="Nettoyer le cache"))
         clean_cache_button.clicked.connect(self._clean_item_cache)
-        clean_cache_button.setToolTip(lang.get("clean_cache_tooltip", default="Supprime le cache des items trouvés via recherche web"))
+        clean_cache_button.setToolTip(lang.get("buttons.clean_cache_tooltip", default="Supprime le cache des items trouvés via recherche web"))
+        self.translatable_widgets['clean_cache_button'] = clean_cache_button
         clean_cache_button.setStyleSheet("""
             QPushButton {
                 background-color: #D83B01;
@@ -3101,6 +3114,64 @@ class SettingsDialog(QDialog):
                 lang.get("error_title", default="Erreur"),
                 f"Erreur lors de l'ouverture de l'éditeur:\n{str(e)}"
             )
+
+    def retranslate_ui(self):
+        """Retranslate all UI elements when language changes"""
+        # Window title
+        self.setWindowTitle(lang.get("configuration_window_title"))
+        
+        # Eden section widgets
+        if 'cookies_group' in self.translatable_widgets:
+            self.translatable_widgets['cookies_group'].setTitle(
+                "🍪 " + lang.get("settings.herald.config_cookies_group_title", default="Chemin des cookies")
+            )
+        
+        if 'cookies_info' in self.translatable_widgets:
+            eden_path = self.translatable_widgets.get('cookies_info_path', '')
+            self.translatable_widgets['cookies_info'].setText(
+                lang.get("buttons.eden_storage_info", default="Stockage automatique dans") + f": {eden_path}"
+            )
+        
+        if 'open_cookies_folder_button' in self.translatable_widgets:
+            self.translatable_widgets['open_cookies_folder_button'].setText(
+                "📂 " + lang.get("buttons.open_folder_button", default="Ouvrir le dossier")
+            )
+        
+        if 'clean_eden_button' in self.translatable_widgets:
+            self.translatable_widgets['clean_eden_button'].setText(
+                "🗑️ " + lang.get("buttons.clean_eden_button", default="Nettoyer Eden")
+            )
+            self.translatable_widgets['clean_eden_button'].setToolTip(
+                lang.get("buttons.clean_eden_tooltip", default="Supprime tous les cookies et fichiers temporaires du profil Chrome")
+            )
+        
+        # Item Cache section widgets
+        if 'cache_group' in self.translatable_widgets:
+            self.translatable_widgets['cache_group'].setTitle(
+                "💾 " + lang.get("settings.herald.config_item_cache_group_title", default="Chemin du cache des items")
+            )
+        
+        if 'cache_info' in self.translatable_widgets:
+            cache_path = self.translatable_widgets.get('cache_info_path', '')
+            self.translatable_widgets['cache_info'].setText(
+                lang.get("buttons.item_cache_storage_info", default="Stockage automatique dans") + f": {cache_path}"
+            )
+        
+        if 'open_cache_folder_button' in self.translatable_widgets:
+            self.translatable_widgets['open_cache_folder_button'].setText(
+                "📂 " + lang.get("buttons.open_folder_button", default="Ouvrir le dossier")
+            )
+        
+        if 'clean_cache_button' in self.translatable_widgets:
+            self.translatable_widgets['clean_cache_button'].setText(
+                "🗑️ " + lang.get("buttons.clean_cache_button", default="Nettoyer le cache")
+            )
+            self.translatable_widgets['clean_cache_button'].setToolTip(
+                lang.get("buttons.clean_cache_tooltip", default="Supprime le cache des items trouvés via recherche web")
+            )
+
+
+
 
 
 

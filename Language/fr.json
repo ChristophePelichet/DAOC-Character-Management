@@ -310,6 +310,7 @@
             "clean_cache_empty_message": "ℹ️ Le cache est déjà vide ou n'existe pas.",
             "clean_cache_error_title": "Erreur",
             "clean_cache_error_message": "❌ Erreur lors du nettoyage :\n\n{error}",
+            "config_cookies_group_title": "Chemin des cookies",
             "config_item_cache_group_title": "Chemin du cache des items"
         }
     },

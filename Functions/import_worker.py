@@ -133,14 +133,26 @@ class ImportWorker(QThread):
             if self.auto_backup and self.source_db_path.exists():
                 self.log_message.emit("Creating backup...", "info")
                 if self.path_manager:  # Check if path_manager exists
-                    from Functions.superadmin_tools import SuperAdminTools
-                    from Functions.config_manager import config
-                    superadmin = SuperAdminTools(self.path_manager, config)
-                    success, backup_path = superadmin.backup_source_database()
-                    if success:
-                        self.log_message.emit(f"Backup created: {backup_path}", "success")
-                    else:
-                        self.log_message.emit(f"Warning: backup failed - {backup_path}", "warning")
+                    import zipfile
+                    
+                    # All database backups go to Backup/Database folder
+                    backup_folder = self.path_manager.get_app_root() / "Backup" / "Database"
+                    backup_folder.mkdir(parents=True, exist_ok=True)
+                    
+                    # Create backup with timestamp
+                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                    db_filename = self.source_db_path.stem  # e.g., "items_database_src" or "items_database"
+                    backup_zip_path = backup_folder / f"{db_filename}_backup_{timestamp}.zip"
+                    
+                    try:
+                        with zipfile.ZipFile(backup_zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                            zipf.write(self.source_db_path, arcname=self.source_db_path.name)
+                        
+                        logging.info(f"Database backed up to {backup_zip_path}")
+                        self.log_message.emit(f"✅ Backup created: {backup_zip_path}", "success")
+                    except Exception as e:
+                        logging.error(f"Backup error: {e}")
+                        self.log_message.emit(f"⚠️ Warning: backup failed - {e}", "warning")
                 else:
                     self.log_message.emit("Backup skipped (no path_manager)", "info")
             

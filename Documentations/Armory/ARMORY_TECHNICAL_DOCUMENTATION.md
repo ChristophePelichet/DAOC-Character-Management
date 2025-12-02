@@ -1,11 +1,10 @@
 # 🛡️ Armory System - Technical Documentation
 
-**Version**: 2.6  
+**Version**: 2.7  
 **Date**: November 2025  
-**Last Updated**: December 1, 2025  
-**Component**: `UI/armory_import_dialog.py`, `UI/mass_import_monitor.py`, `UI/template_import_dialog.py`, `UI/dialogs.py`  
-**Related**: `Functions/items_scraper.py`, `Functions/items_parser.py`, `Functions/import_worker.py`, `Functions/build_items_database.py`, `Functions/template_manager.py`, `Functions/template_metadata.py`, `Functions/superadmin_tools.py`, `Tools/fix_currency_mapping.py`  
-**Branch**: 108_Imp_Armo (25+ commits)
+**Last Updated**: December 2, 2025  
+**Component**: `UI/mass_import_monitor.py`, `UI/template_import_dialog.py`, `UI/dialogs.py`  
+**Related**: `Functions/items_scraper.py`, `Functions/items_parser.py`, `Functions/import_worker.py`, `Functions/build_items_database.py`, `Functions/template_manager.py`, `Functions/template_metadata.py`, `Functions/superadmin_tools.py`, `Tools/fix_currency_mapping.py`
 
 ---
 
@@ -36,6 +35,8 @@
 The Armory Import System is a comprehensive solution for managing armor templates and importing items from Eden-DAOC database. The system provides:
 
 - **Template Management**: Character-centric template system with metadata, tags, and seasons
+- **Unified Import Interface**: Same powerful import tools (MassImportMonitor) for both SuperAdmin and User modes
+- **Personal Database**: User-managed database with persistent storage and auto-add scraped items
 - **Mass Import**: Batch import of items from template files with real-time monitoring
 - **Price Search**: Automated search for missing merchant prices via Eden scraping
 - **Multi-Realm Support**: Automatic detection of item variants across all realms
@@ -460,9 +461,16 @@ for key, existing_item in database['items'].items():
 
 ### Overview
 
-The Mass Import System allows importing multiple items from template files with real-time monitoring and manual control.
+The Mass Import System provides a unified, powerful import interface used by both SuperAdmin (embedded database) and User (personal database) modes.
 
 **Key Features:**
+- **Unified Interface**: Same window title "Template Import Items Tools" for both modes
+- **Automatic Target Detection**: `target_db` parameter determines which database to write to
+  - `target_db="embedded"`: SuperAdmin mode → `Data/items_database_src.json`
+  - `target_db="personal"`: User mode → `Armory/items_database.json`
+- **Smart Backup System**: Backups saved to `Backup/Database/` with appropriate filename
+  - `items_database_src_backup_*.zip`: Embedded database backups
+  - `items_database_backup_*.zip`: Personal database backups
 - **Manual Start Button**: User controls when import begins (no auto-start)
 - **Real-time Monitoring**: Live progress with item count and status updates
 - **QThread Worker**: Background processing without UI freeze

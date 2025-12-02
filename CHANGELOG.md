@@ -3,6 +3,17 @@
 ## v0.108
 
 ### 🎉 Armory Features
+- 📦 **Items Database System**: Dual-mode architecture with 227 items
+  - **Read-Only Internal Database** : Pre-populated database with 227 items for all users
+  - **User-Managed Personal Database** : Optional personal database with full write access
+    - Toggle between internal and personal database in Settings/Armory
+    - Auto-add scraped items option (configurable)
+    - Import items from templates directly to personal database
+    - Statistics tracking (internal vs. personal vs. user-added items)
+    - Reset to internal database with automatic backup
+  - Multi-realm support with automatic item detection
+  - External template format support (non-Zenkcraft software)
+  - 16 equipment slots parsing capability
 - 🛡️ **Armor Management**: Complete armor template management system
 - 📋 **Template Preview**: Full visualization with stats, resists, equipment
 - 🔍 **Visual Models**: 3444 item images (weapons/armor/jewelry) with clickable 🔍 icon
@@ -13,10 +24,6 @@
   - Parse stats, resists, skills, and bonuses sections
   - Filter out crafted items (with Quality:)
   - Support for all 16 equipment slots including Chest/Head
-- 📦 **Items Database**: Expanded from 153 to 227 items (+74 new items)
-  - Multi-realm support with automatic item detection
-  - External template format support (non-Zenkcraft software)
-  - 16 equipment slots parsing capability
 
 ### 🚀 Performance
 - ⚡ **Eden Connection Test**: 50%+ faster (7-8s → 3-4s, 10s cache)

@@ -19,9 +19,13 @@ from Functions.language_manager import lang
 class MassImportMonitor(QMainWindow):
     """Monitoring window for mass import with detailed logs and statistics"""
     
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, target_db="embedded"):
         super().__init__(parent)
-        self.setWindowTitle(lang.get("settings.pages.mass_import_monitor.window_title", default="🔧 Database - Template Import"))
+        self.target_db = target_db  # "embedded" or "personal"
+        
+        # Set window title (same for both modes)
+        title = lang.get("settings.pages.mass_import_monitor.window_title", default="📦 Template Import Items Tools")
+        self.setWindowTitle(title)
         self.setGeometry(150, 100, 1200, 700)
         
         # Make window independent and always movable
@@ -504,7 +508,19 @@ class MassImportMonitor(QMainWindow):
         
         # Store path_manager
         self.path_manager = path_manager
-        self.source_db_path = Path("Data/items_database_src.json")
+        
+        # Set database path based on target_db mode
+        if self.target_db == "personal":
+            # User's personal database in Armory folder
+            from Functions.config_manager import config
+            armor_path = config.get('folders.armor')
+            if armor_path:
+                self.source_db_path = Path(armor_path) / "items_database.json"
+            else:
+                self.source_db_path = path_manager.get_app_root() / "Armory" / "items_database.json"
+        else:
+            # SuperAdmin embedded database
+            self.source_db_path = Path("Data/items_database_src.json")
         
         # Set widget values from parameters
         realm_map = {None: 0, "Albion": 1, "Hibernia": 2, "Midgard": 3}
@@ -731,7 +747,7 @@ class MassImportMonitor(QMainWindow):
         
         if 'processed' in kwargs:
             self.items_processed = kwargs['processed']
-            self.processed_label.setText(f"{lang.get('mass_import_monitor.items_processed', default='⚙️ Items traités:')} {self.items_processed} / {self.items_total}")
+            self.processed_label.setText(f"{lang.get('settings.pages.mass_import_monitor.items_processed', default='⚙️ Items traités:')} {self.items_processed} / {self.items_total}")
             
             # Update progress bar
             if self.items_total > 0:
@@ -740,19 +756,19 @@ class MassImportMonitor(QMainWindow):
         
         if 'variants' in kwargs:
             self.variants_found = kwargs['variants']
-            self.variants_label.setText(f"{lang.get('mass_import_monitor.variants_found', default='🌐 Variantes trouvées:')} {self.variants_found}")
+            self.variants_label.setText(f"{lang.get('settings.pages.mass_import_monitor.variants_found', default='🌐 Variantes trouvées:')} {self.variants_found}")
         
         if 'added' in kwargs:
             self.items_added = kwargs['added']
-            self.added_label.setText(f"{lang.get('mass_import_monitor.added', default='✅ Ajoutés:')} {self.items_added}")
+            self.added_label.setText(f"{lang.get('settings.pages.mass_import_monitor.added', default='✅ Ajoutés:')} {self.items_added}")
         
         if 'failed' in kwargs:
             self.items_failed = kwargs['failed']
-            self.failed_label.setText(f"{lang.get('mass_import_monitor.failed', default='❌ Échecs:')} {self.items_failed}")
+            self.failed_label.setText(f"{lang.get('settings.pages.mass_import_monitor.failed', default='❌ Échecs:')} {self.items_failed}")
         
         if 'duplicates' in kwargs:
             self.duplicates_skipped = kwargs['duplicates']
-            self.duplicates_label.setText(f"{lang.get('mass_import_monitor.duplicates', default='⏭️ Doublons ignorés:')} {self.duplicates_skipped}")
+            self.duplicates_label.setText(f"{lang.get('settings.pages.mass_import_monitor.duplicates', default='⏭️ Doublons ignorés:')} {self.duplicates_skipped}")
         
         if 'current_item' in kwargs:
             self.current_item = kwargs['current_item']
@@ -762,7 +778,7 @@ class MassImportMonitor(QMainWindow):
                 self.current_item_label.setText(lang.get('mass_import_monitor.waiting', default='En attente...'))
         
         # Update unique items count
-        self.unique_items_label.setText(f"{lang.get('mass_import_monitor.unique_items', default='🔍 Items uniques:')} {self.items_total}")
+        self.unique_items_label.setText(f"{lang.get('settings.pages.mass_import_monitor.unique_items', default='🔍 Items uniques:')} {self.items_total}")
         
         # NO processEvents() - UI updates automatically via Qt's event loop
     
@@ -1068,8 +1084,8 @@ class MassImportMonitor(QMainWindow):
                     merge=True,
                     remove_duplicates=True,
                     auto_backup=False,
-                    source_db_path=Path("Data/items_database_src.json"),
-                    path_manager=None,
+                    source_db_path=self.source_db_path,  # Use configured path (embedded or personal)
+                    path_manager=self.path_manager,
                     skip_filters_mode=True  # NEW PARAMETER
                 )
                 
@@ -1174,7 +1190,8 @@ class MassImportMonitor(QMainWindow):
             from pathlib import Path
             import json
             
-            db_path = Path("Data/items_database_src.json")
+            # Use the appropriate database path (embedded or personal)
+            db_path = self.source_db_path
             if not db_path.exists():
                 self.log_message(f"⚠️ Database not found: {db_path}", "warning")
                 return

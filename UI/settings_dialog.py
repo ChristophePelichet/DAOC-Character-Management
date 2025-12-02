@@ -1155,15 +1155,6 @@ class SettingsDialog(QDialog):
         self.armory_import_button.clicked.connect(self._open_armory_import)
         import_layout.addWidget(self.armory_import_button)
         
-        import_help = QLabel(lang.get('settings.pages.armory.import_help',
-            default="💡 Cliquez sur le bouton ci-dessus pour ouvrir l'interface d'import. "
-            "Vous pourrez sélectionner un fichier template (.txt), "
-            "choisir le royaume et lancer l'import automatique."
-        ))
-        import_help.setWordWrap(True)
-        import_help.setStyleSheet("color: #666; font-style: italic; padding: 10px;")
-        import_layout.addWidget(import_help)
-        
         self.import_group.setLayout(import_layout)
         self.import_group.setVisible(False)  # Hidden by default
         layout.addWidget(self.import_group)
@@ -2160,6 +2151,10 @@ class SettingsDialog(QDialog):
         # Browser
         self.browser_combo.setCurrentText(config.get("system.preferred_browser", "Chrome"))
         self.allow_browser_download_check.setChecked(config.get("system.allow_browser_download", False))
+        
+        # Armory database mode
+        use_personal_db = config.get("armory.use_personal_database", False)
+        self.personal_db_check.setChecked(use_personal_db)
     
     def _on_backup_auto_delete_changed(self, state):
         """Handle Characters backup auto-delete checkbox state change"""
@@ -2343,15 +2338,28 @@ class SettingsDialog(QDialog):
     
     def _open_armory_import(self):
         """Ouvre le dialogue d'import d'items pour l'armurerie"""
-        from UI.armory_import_dialog import ArmoryImportDialog
+        from PySide6.QtWidgets import QApplication
+        from UI.mass_import_monitor import MassImportMonitor
         
-        dialog = ArmoryImportDialog(self)
-        dialog.exec()
+        # Create and show Mass Import Monitor for personal database
+        monitor = MassImportMonitor(self, target_db="personal")
         
-        # Update database status after import
-        # Initialize database manager
+        # Pass default settings to monitor
+        monitor.set_default_options(
+            realm=None,  # Auto-detection
+            merge=True,
+            remove_duplicates=True,
+            auto_backup=True,
+            path_manager=self.path_manager
+        )
+        
+        monitor.show()
+        QApplication.processEvents()
+        
+        # Update database status after import (when window closes)
+        # Note: Statistics will be updated when user returns to settings
         from Functions.items_database_manager import ItemsDatabaseManager
-        self.db_manager = ItemsDatabaseManager(self.config_manager, path_manager)
+        self.db_manager = ItemsDatabaseManager(self.config_manager, self.path_manager)
     
     def _update_armory_database_mode(self):
         """Update UI based on current database mode"""
@@ -2576,8 +2584,8 @@ class SettingsDialog(QDialog):
             from PySide6.QtWidgets import QApplication
             from UI.mass_import_monitor import MassImportMonitor
             
-            # Create and show Database Management Tools
-            monitor = MassImportMonitor(self)
+            # Create and show Database Management Tools for embedded database
+            monitor = MassImportMonitor(self, target_db="embedded")
             
             # Pass default settings to monitor (using default values since widgets were removed)
             monitor.set_default_options(

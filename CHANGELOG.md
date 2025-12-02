@@ -8,6 +8,15 @@
 - 🔍 **Visual Models**: 3444 item images (weapons/armor/jewelry) with clickable 🔍 icon
 - 💰 **Merchant Prices**: Automatic missing price lookup via Eden scraping
 - 🏷️ **Categorization**: Category assignment (Quest/Event) for items without prices
+- 📂 **Loki Template Support**: Full support for Loki template format
+  - Automatic format detection (Loki vs Zenkcraft)
+  - Parse stats, resists, skills, and bonuses sections
+  - Filter out crafted items (with Quality:)
+  - Support for all 16 equipment slots including Chest/Head
+- 📦 **Items Database**: Expanded from 153 to 227 items (+74 new items)
+  - Multi-realm support with automatic item detection
+  - External template format support (non-Zenkcraft software)
+  - 16 equipment slots parsing capability
 
 ### 🚀 Performance
 - ⚡ **Eden Connection Test**: 50%+ faster (7-8s → 3-4s, 10s cache)
@@ -22,6 +31,17 @@
 - 💾 **Optimized Backup**: Cookies 10 KB instead of 50+ MB (99% reduction)
 - 🔄 **Config v2**: Hierarchical structure with automatic migration
 - 🎨 **Instant Theme**: Change without restart
+- 📊 **Template Parser**: Refactored into 3 separate parsers with format auto-detection
+- 🔍 **Items Refresh**: Single item refresh now searches new items instead of filtering existing DB
+- 🐛 **Debug Options**: Config option to enable/disable Items Database HTML debug saving
+
+### 🐛 Fixes
+- 🔍 Support for 'model' + 'model_id' fields for DB compatibility
+- 🪟 Non-modal model viewer window (smooth navigation)
+- 🔗 Template stays visible after clicking 🔍
+- 🎨 Purple theme: visible text, readable placeholder
+- 🌍 Herald/Stats/Buttons translations (FR/EN/DE)
+- 📝 Replace emoji prints with logging to avoid Windows encoding errors in items parser
 
 ---
 

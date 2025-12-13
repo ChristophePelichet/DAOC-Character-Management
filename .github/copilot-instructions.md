@@ -52,6 +52,23 @@
 - **Whitespace**: Follow PEP 8 rules (spaces around operators, after commas, etc.)
 - **Docstrings**: Use triple double-quotes `"""` for all public modules, functions, classes, methods
 
+### Function Naming Convention (Domain-Driven Prefixes)
+- **Pattern**: `{domain}_{action}_{object}` - Use domain prefix for related functions
+- **Purpose**: Group functions by functionality for better discoverability and maintainability
+- **Examples by domain**:
+  - **Template parsing**: `template_parse()`, `template_detect_format()`, `template_parse_loki()`, `template_strip_color_markers()`
+  - **Item prices**: `price_sync_template()`, `price_find_missing_items()`, `price_calculate_total()`
+  - **Character validation**: `character_get_classes_for_realm()`, `character_validate_race()`, `character_handle_class_change()`
+  - **Realm ranks**: `realm_rank_calculate_from_points()`, `realm_rank_get_valid_levels()`, `realm_rank_format_display()`
+  - **Herald integration**: `herald_update_character()`, `herald_scrape_stats()`, `herald_apply_scraped_data()`
+  - **Armor handling**: `armor_upload_to_s3()`, `armor_validate_structure()`, `armor_build_payload()`
+  - **Image processing**: `image_capture_sheet()`, `image_save_to_armory()`, `image_resize_for_upload()`
+- **Benefits**:
+  - ✅ Autocomplete groups related functions (type `template_` to see all template functions)
+  - ✅ Immediate clarity on function domain (`realm_rank_` = realm rank functions)
+  - ✅ Easy maintenance and searching (`grep "^def herald_"`)
+  - ✅ Logical grouping in imports and documentation
+
 ### Translation & UI Rules
 - **NEVER hardcode user-facing text in code** - Always use Language/*.json files with lang.get()
 - **Always implement retranslate_ui() for dialogs/windows** - UI must refresh when language changes

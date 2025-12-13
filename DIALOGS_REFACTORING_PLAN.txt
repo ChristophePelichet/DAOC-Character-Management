@@ -1,0 +1,472 @@
+================================================================================
+DIALOGS.PY REFACTORING PLAN
+================================================================================
+File: UI/dialogs.py (8765 lines)
+Date: 13 December 2025
+Purpose: Extract functions to dedicated modules for better maintainability
+================================================================================
+
+ANALYSIS SUMMARY
+================================================================================
+Current file contains:
+- 18 dialog classes
+- 6 worker thread classes
+- Multiple utility functions embedded in classes
+- Template parsing logic (Zenkcraft, Loki formats)
+- Character data validation
+- Item price lookup and formatting
+- Herald scraping logic
+
+Total estimated functions to extract: 40+
+
+================================================================================
+EXTRACTION PLAN - GROUPED BY FUNCTIONALITY
+================================================================================
+
+GROUP 1: TEMPLATE PARSING (High Priority)
+================================================================================
+Current Location: ArmorManagementDialog class (lines ~3200-4600)
+Target File: Functions/template_parser.py
+Naming Convention: template_{action}_{object}
+
+1. Function: parse_zenkcraft_template()
+   Purpose: Main template parser with format detection
+   Lines: ~3200-3215
+   New Name: template_parse()
+   Notes: Entry point for template parsing
+
+2. Function: _detect_template_format()
+   Purpose: Detect if template is Loki or Zenkcraft format
+   Lines: ~3217-3230
+   New Name: template_detect_format()
+   Notes: Uses regex to identify format
+
+3. Function: _parse_loki_format()
+   Purpose: Parse Loki format templates
+   Lines: ~3232-3860
+   New Name: template_parse_loki()
+   Notes: ~600 lines, parses stats, resists, skills, bonuses, equipment
+
+4. Function: _parse_zenkcraft_format()
+   Purpose: Parse Zenkcraft format templates
+   Lines: ~3863-4595
+   New Name: template_parse_zenkcraft()
+   Notes: ~730 lines, similar to Loki but different structure
+
+5. Function: get_item_price() [nested in _parse_loki_format]
+   Purpose: Lookup item price from database
+   Lines: ~3266-3310
+   New Name: template_get_item_price()
+   Notes: DB lookup with fallback to "N/A"
+
+6. Function: format_item_display() [nested in _parse_loki_format]
+   Purpose: Format item name with price and source
+   Lines: ~3312-3418
+   New Name: template_format_item_with_price()
+   Notes: Adds price, category, visual slot icon
+
+7. Function: merge_two_columns() [nested in _parse_loki_format]
+   Purpose: Merge two text columns side-by-side
+   Lines: ~3420-3520
+   New Name: template_merge_columns()
+   Notes: Used for Stats|Resists, Skills|Bonuses layout
+
+8. Function: remove_color_markers() [nested in merge_two_columns]
+   Purpose: Strip color markers for width calculation
+   Lines: ~3424-3450
+   New Name: template_strip_color_markers()
+   Notes: Removes <COLOR:...> tags for text measurement
+
+
+GROUP 2: ITEM PRICE MANAGEMENT (High Priority)
+================================================================================
+Current Location: ArmorManagementDialog class
+Target File: Functions/item_price_manager.py
+Naming Convention: price_{action}_{object}
+
+9. Function: _sync_template_prices_with_db()
+   Purpose: Update item prices in template metadata from DB
+   Lines: ~3141-3198
+   New Name: price_sync_template()
+   Notes: Updates .metadata.json with latest prices
+
+10. Function: search_missing_prices()
+    Purpose: Find items without prices in templates
+    Lines: ~4881-4918
+    New Name: price_find_missing_items()
+    Notes: Opens SearchMissingPricesDialog
+
+
+GROUP 3: CHARACTER DATA VALIDATION (Medium Priority)
+================================================================================
+Current Location: CharacterSheetWindow class
+Target File: Functions/character_validator.py
+Naming Convention: character_{action}_{object}
+Target File: Functions/character_validator.py
+
+11. Function: _populate_classes_sheet()
+    Purpose: Populate class dropdown based on realm
+    Lines: ~697-716
+    New Name: character_get_classes_for_realm()
+    Notes: Returns list of classes for given realm
+
+12. Function: _populate_races_sheet()
+    Purpose: Populate race dropdown based on class
+    Lines: ~718-748
+    New Name: character_get_races_for_class()
+    Notes: Returns list of compatible races
+
+13. Function: _on_realm_changed_sheet()
+    Purpose: Update class/race dropdowns when realm changes
+    Lines: ~750-756
+    New Name: character_handle_realm_change()
+    Notes: Cascade update logic
+
+14. Function: _on_class_changed_sheet()
+    Purpose: Update race dropdown when class changes
+    Lines: ~758-765
+    New Name: character_handle_class_change()
+    Notes: Filter races by class compatibility
+
+15. Function: _on_race_changed_sheet()
+    Purpose: Update banner when race changes
+    Lines: ~767-769
+    New Name: character_handle_race_change()
+    Notes: Triggers banner update
+
+
+GROUP 4: REALM RANK CALCULATIONS (Medium Priority)
+================================================================================
+Current Location: CharacterSheetWindow class
+Target File: Functions/realm_rank_calculator.py
+Naming Convention: realm_rank_{action}_{object}
+
+16. Function: update_rank_display()
+    Purpose: Calculate and display RR from realm points
+    Lines: ~823-839
+    New Name: realm_rank_calculate_from_points()
+    Notes: Uses realm_ranks.json data
+
+17. Function: update_rp_info()
+    Purpose: Update RP info labels (current, needed for next)
+    Lines: ~807-821
+    New Name: realm_rank_calculate_points_info()
+    Notes: Calculates progression to next rank
+
+18. Function: update_level_dropdown()
+    Purpose: Filter level dropdown based on rank restrictions
+    Lines: ~789-805
+    New Name: realm_rank_get_valid_levels()
+    Notes: Enforces min level requirements per rank
+
+
+GROUP 5: HERALD SCRAPING LOGIC (High Priority)
+================================================================================
+Current Location: CharacterSheetWindow, HeraldSearchDialog
+Target File: Functions/herald_integration.py
+Naming Convention: herald_{action}_{object}
+
+19. Function: update_from_herald()
+    Purpose: Main function to scrape and update character from Herald
+    Lines: ~1782-1851
+    New Name: herald_update_character()
+    Notes: Launches CharacterUpdateThread
+
+20. Function: update_rvr_stats()
+    Purpose: Update only RvR stats from Herald
+    Lines: ~1278-1345
+    New Name: herald_update_rvr_stats()
+    Notes: Launches StatsUpdateThread
+
+21. Function: _update_all_stats_ui()
+    Purpose: Update all stat fields in UI after scraping
+    Lines: ~1613-1710
+    New Name: herald_apply_scraped_stats()
+    Notes: Maps scraped data to UI fields
+
+22. Function: _update_partial_stats_ui()
+    Purpose: Update only some stat fields in UI
+    Lines: ~1712-1780
+    New Name: herald_apply_partial_stats()
+    Notes: Selective update for RvR stats only
+
+
+GROUP 6: CHARACTER BANNER MANAGEMENT (Low Priority)
+================================================================================
+Current Location: CharacterSheetWindow class
+Target File: Functions/character_banner.py
+Naming Convention: banner_{action}_{object}
+
+23. Function: _update_class_banner()
+    Purpose: Load and display class banner image
+    Lines: ~643-688
+    New Name: banner_load_class_image()
+    Notes: Loads from Img/Banner/{realm}_{class}.png
+
+24. Function: _set_banner_placeholder()
+    Purpose: Display placeholder when banner not found
+    Lines: ~690-695
+    New Name: banner_set_placeholder()
+    Notes: Shows colored placeholder with text
+
+
+GROUP 7: HERALD URL VALIDATION (Medium Priority)
+================================================================================
+Current Location: CharacterSheetWindow class
+Target File: Functions/herald_url_validator.py
+Naming Convention: herald_url_{action}_{object}
+
+25. Function: on_herald_url_changed()
+    Purpose: Validate Herald URL format and update button states
+    Lines: ~1077-1089
+    New Name: herald_url_validate_format()
+    Notes: Checks URL pattern, enables/disables buttons
+
+26. Function: _update_herald_buttons_state()
+    Purpose: Enable/disable Herald buttons based on connection state
+    Lines: ~1574-1611
+    New Name: herald_url_update_button_states()
+    Notes: Checks Eden validation status
+
+27. Function: open_herald_url()
+    Purpose: Open Herald URL in browser
+    Lines: ~1235-1262
+    New Name: herald_url_open_in_browser()
+    Notes: Launches browser with Herald URL
+
+
+GROUP 8: ARMOR UPLOAD & PREVIEW (Medium Priority)
+================================================================================
+Current Location: ArmorManagementDialog class
+Target File: Functions/armor_upload_handler.py
+Naming Convention: armor_{action}_{object}
+
+28. Function: upload_armor()
+    Purpose: Show upload dialog and save armor configuration
+    Lines: ~3035-3088
+    New Name: armor_show_upload_dialog()
+    Notes: Creates ArmorUploadPreviewDialog
+
+29. Function: import_template()
+    Purpose: Import armor template from file
+    Lines: ~3090-3139
+    New Name: armor_import_template()
+    Notes: Opens TemplateImportDialog
+
+30. Function: open_armor()
+    Purpose: Open armor file in preview
+    Lines: ~4729-4753
+    New Name: armor_preview_file()
+    Notes: Displays template content
+
+31. Function: delete_armor()
+    Purpose: Delete armor file with confirmation
+    Lines: ~4755-4786
+    New Name: armor_delete_file()
+    Notes: Confirms and deletes .template file
+
+
+GROUP 9: ITEM MODEL VIEWER (Low Priority)
+================================================================================
+Current Location: ArmorManagementDialog class
+Target File: Functions/item_model_viewer.py
+Naming Convention: item_model_{action}_{object}
+
+32. Function: _on_model_link_clicked()
+    Purpose: Handle click on 🔍 icon to show item model
+    Lines: ~4663-4676
+    New Name: item_model_handle_icon_click()
+    Notes: Extracts item name from URL
+
+33. Function: _show_item_model()
+    Purpose: Display 3D item model in dialog
+    Lines: ~4678-4727
+    New Name: item_model_show_3d_viewer()
+    Notes: Opens ItemModelDialog with image
+
+
+GROUP 10: ACHIEVEMENTS DISPLAY (Low Priority)
+================================================================================
+Current Location: CharacterSheetWindow class
+Target File: Functions/achievement_formatter.py
+Naming Convention: achievement_{action}_{object}
+
+34. Function: _update_achievements_display()
+    Purpose: Format and display achievements list
+    Lines: ~1120-1233
+    New Name: achievement_format_html_display()
+    Notes: Generates HTML table with icons and descriptions
+
+
+GROUP 11: CHARACTER RENAMING (Low Priority)
+================================================================================
+Current Location: CharacterSheetWindow class
+Target File: Functions/character_rename_handler.py
+Naming Convention: character_{action}_{object}
+
+35. Function: rename_character()
+    Purpose: Rename character with validation
+    Lines: ~2126-2174
+    New Name: character_rename_with_validation()
+    Notes: Validates name, updates JSON file
+
+
+GROUP 12: WORKER THREAD MANAGEMENT (Medium Priority)
+================================================================================
+Current Location: Various classes
+Target File: Functions/herald_workers.py
+Naming Convention: Keep PascalCase for classes (QThread subclasses)
+
+36. Class: HeraldScraperWorker
+    Purpose: Background thread for Herald scraping
+    Lines: ~37-58
+    New Name: Keep as HeraldScraperWorker
+    Notes: QThread subclass
+
+37. Class: ConnectionTestThread
+    Purpose: Test Eden Herald connection
+    Lines: ~5058-5075
+    New Name: Keep as ConnectionTestThread
+    Notes: QThread subclass
+
+38. Class: StatsUpdateThread
+    Purpose: Update character stats from Herald
+    Lines: ~6196-6423
+    New Name: Keep as StatsUpdateThread
+    Notes: QThread subclass with step progress
+
+39. Class: CharacterUpdateThread
+    Purpose: Full character update from Herald
+    Lines: ~6425-6732
+    New Name: Keep as CharacterUpdateThread
+    Notes: QThread subclass with step progress
+
+
+GROUP 13: COOKIE MANAGEMENT (Keep in dialogs.py)
+================================================================================
+Note: CookieManagerDialog is complex UI, keep in dialogs.py
+Lines: ~5077-5659
+
+
+GROUP 14: SEARCH FUNCTIONALITY (Keep in dialogs.py)
+================================================================================
+Note: SearchThread and HeraldSearchDialog are tightly coupled to UI
+Lines: ~5870-6194, ~6734-7590
+
+
+GROUP 15: BACKUP SETTINGS (Keep in dialogs.py)
+================================================================================
+Note: BackupSettingsDialog is UI-heavy, keep in dialogs.py
+Lines: ~7858-8446
+
+
+GROUP 16: SIMPLE UTILITY FUNCTIONS (Low Priority)
+================================================================================
+Target File: Functions/ui_utils.py
+Naming Convention: ui_{action}_{object}
+
+40. Function: show_context_menu()
+    Purpose: Show context menu for armor list
+    Lines: ~4801-4835
+    New Name: ui_create_armor_context_menu()
+    Notes: Creates QMenu with actions
+
+
+================================================================================
+IMPLEMENTATION STRATEGY
+================================================================================
+
+PHASE 1 - Template Parsing (PRIORITY 1)
+  → Create Functions/template_parser.py
+  → Extract functions 1-8 (template parsing logic)
+  → All functions use template_* prefix
+  → Test with existing templates
+  → Update ArmorManagementDialog to use new module
+
+PHASE 2 - Item Price Management (PRIORITY 2)
+  → Create Functions/item_price_manager.py
+  → Extract functions 9-10
+  → All functions use price_* prefix
+  → Test price sync and search
+
+PHASE 3 - Herald Integration (PRIORITY 3)
+  → Create Functions/herald_integration.py
+  → Extract functions 19-22
+  → All functions use herald_* prefix
+  → Move worker threads to Functions/herald_workers.py (36-39)
+  → Test Herald scraping and updates
+
+PHASE 4 - Character Validation (PRIORITY 4)
+  → Create Functions/character_validator.py
+  → Extract functions 11-15
+  → All functions use character_* prefix
+  → Test realm/class/race cascading
+
+PHASE 5 - Realm Rank & Achievements (PRIORITY 5)
+  → Create Functions/realm_rank_calculator.py
+  → Extract functions 16-18
+  → All functions use realm_rank_* prefix
+  → Create Functions/achievement_formatter.py
+  → Extract function 34
+  → Use achievement_* prefix
+
+PHASE 6 - Armor & Model Viewer (PRIORITY 6)
+  → Create Functions/armor_upload_handler.py
+  → Extract functions 28-31
+  → All functions use armor_* prefix
+  → Create Functions/item_model_viewer.py
+  → Extract functions 32-33
+  → Use item_model_* prefix
+
+PHASE 7 - Misc Utilities (PRIORITY 7)
+  → Create Functions/character_banner.py (23-24) - banner_* prefix
+  → Create Functions/herald_url_validator.py (25-27) - herald_url_* prefix
+  → Create Functions/character_rename_handler.py (35) - character_* prefix
+  → Create Functions/ui_utils.py (40) - ui_* prefix
+
+
+================================================================================
+EXPECTED BENEFITS
+================================================================================
+
+1. Maintainability
+   - Smaller, focused files (dialogs.py: 8765 → ~4000 lines)
+   - Clear separation of concerns
+   - Easier to test individual functions
+
+2. Reusability
+   - Template parsing can be used by CLI tools
+   - Herald integration reusable in automation scripts
+   - Validation logic shared across dialogs
+
+3. Performance
+   - No performance impact (imports are cached)
+   - Easier to profile specific functions
+   - Better memory management
+
+4. Testing
+   - Each module can have dedicated unit tests
+   - Mock external dependencies (DB, scraping)
+   - Test edge cases in isolation
+
+5. Documentation
+   - Each module has focused docstrings
+   - Technical documentation per feature
+   - Examples in module docstrings
+
+
+================================================================================
+NOTES
+================================================================================
+
+- Keep all QDialog classes in dialogs.py (UI components)
+- Move only business logic and utility functions
+- Maintain backward compatibility (imports)
+- Add proper docstrings to extracted functions
+- Follow PEP 8 naming conventions
+- Update tests after each phase
+- Document each extraction in commit messages
+
+================================================================================
+END OF REFACTORING PLAN
+================================================================================

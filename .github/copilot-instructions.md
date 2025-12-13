@@ -22,6 +22,24 @@
   - Example: `git merge feature-branch --no-ff`
   - This creates a merge commit even for fast-forward merges
 
+### Git Branch Naming Convention
+- **Format**: `{prefix}/v{version}-{description}`
+- **Prefix**: Use `feature/`, `fix/`, `refactor/`, `docs/`, `chore/`, `hotfix/`, or `test/`
+- **Version**: Prepend the target version number (e.g., v0.108, v1.5.0)
+- **Description**: Use kebab-case (lowercase with hyphens), be descriptive
+- **Examples**:
+  - `feature/v0.108-dialogs-refactoring-preparation`
+  - `feature/v0.108-template-parser-extraction`
+  - `fix/v0.108-character-validation-bug`
+  - `refactor/v0.108-extract-business-logic`
+  - `docs/v0.108-update-refactoring-guide`
+  - `chore/v0.108-update-dependencies`
+- **Rules**:
+  - ✅ All lowercase
+  - ✅ Use hyphens to separate words
+  - ✅ Keep under 60 characters if possible
+  - ✅ Be descriptive about what the branch does
+
 ## ✅ Standard Workflow
 
 **When user requests a feature/fix:**

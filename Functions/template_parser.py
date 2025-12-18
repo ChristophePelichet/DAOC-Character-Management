@@ -27,7 +27,7 @@ import json
 import logging
 from pathlib import Path
 from collections import defaultdict
-from typing import Tuple, Dict, List, Optional, Any
+from typing import Tuple, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -569,7 +569,7 @@ def template_parse_loki(
                             price = int(parts[0])
                             currency = ' '.join(parts[1:])
                             currency_totals_temp[currency] += price
-                    except:
+                    except Exception:
                         pass
                 elif not item_category or item_category == "unknown":
                     items_without_price.append(item['name'])
@@ -656,7 +656,7 @@ def template_parse_loki(
                                     price = int(parts[0])
                                     currency = ' '.join(parts[1:])
                                     currency_totals_temp[currency] += price
-                            except:
+                            except Exception:
                                 pass
                         elif not left_item_category or left_item_category == "unknown":
                             items_without_price.append(left_item['name'])
@@ -698,7 +698,7 @@ def template_parse_loki(
                                     price = int(parts[0])
                                     currency = ' '.join(parts[1:])
                                     currency_totals_temp[currency] += price
-                            except:
+                            except Exception:
                                 pass
                         elif not right_item_category or right_item_category == "unknown":
                             items_without_price.append(right_item['name'])
@@ -744,7 +744,7 @@ def template_parse_loki(
                             price = int(parts[0])
                             currency = ' '.join(parts[1:])
                             currency_totals_temp[currency] += price
-                    except:
+                    except Exception:
                         pass
                 elif not item_category or item_category == "unknown":
                     items_without_price.append(item['name'])
@@ -1170,7 +1170,7 @@ def template_parse_zenkcraft(
 
                         if item_data:
                             model_id = item_data.get('model') or item_data.get('model_id')
-                    except:
+                    except Exception:
                         pass
 
                 # Add model icon if model exists
@@ -1190,7 +1190,7 @@ def template_parse_zenkcraft(
                             price = int(parts[0])
                             currency = ' '.join(parts[1:])
                             currency_totals_temp[currency] += price
-                    except:
+                    except Exception:
                         pass
                 elif not item_category or item_category == "unknown":
                     items_without_price.append(item_name)
@@ -1268,7 +1268,7 @@ def template_parse_zenkcraft(
                                 price = int(parts[0])
                                 currency = ' '.join(parts[1:])
                                 currency_totals_temp[currency] += price
-                        except:
+                        except Exception:
                             pass
                     elif not left_item_category or left_item_category == "unknown":
                         items_without_price.append(left_item['name'])
@@ -1304,7 +1304,7 @@ def template_parse_zenkcraft(
                                 price = int(parts[0])
                                 currency = ' '.join(parts[1:])
                                 currency_totals_temp[currency] += price
-                        except:
+                        except Exception:
                             pass
                     elif not right_item_category or right_item_category == "unknown":
                         items_without_price.append(right_item['name'])
@@ -1340,7 +1340,7 @@ def template_parse_zenkcraft(
                             item_data = db_manager.search_item(item_name)
                         if item_data:
                             model_id = item_data.get('model') or item_data.get('model_id')
-                    except:
+                    except Exception:
                         pass
 
                 # Add model icon if model exists
@@ -1360,7 +1360,7 @@ def template_parse_zenkcraft(
                             price = int(parts[0])
                             currency = ' '.join(parts[1:])
                             currency_totals_temp[currency] += price
-                    except:
+                    except Exception:
                         pass
                 elif not item_category or item_category == "unknown":
                     items_without_price.append(item['name'])

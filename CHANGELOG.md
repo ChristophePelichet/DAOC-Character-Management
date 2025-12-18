@@ -1,5 +1,17 @@
 # 📋 Changelog - DAOC Character Management
 
+## v0.109
+
+### �️ Code Refactoring
+- ♻️ **Template Parser Refactoring**: Equipment parsing extracted to independent `Functions/template_parser.py`
+  - New `template_parse_zenkcraft()` function (PEP 8 compliant)
+  - All code previously in `UI/dialogs.py` now in dedicated module
+  - English-only comments and docstrings
+  - All user-facing strings use `lang.get()` for translations
+  - Comprehensive technical documentation added to ARMORY_TECHNICAL_DOCUMENTATION.md
+
+---
+
 ## v0.108
 
 ### 🎉 Armory Features

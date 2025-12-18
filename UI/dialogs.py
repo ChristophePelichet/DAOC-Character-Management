@@ -14,7 +14,7 @@ if sys.stderr is None:
 
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QFormLayout, QGroupBox, QLabel, 
-    QPushButton, QLineEdit, QComboBox, QCheckBox, QSlider, QMessageBox,
+    QPushButton, QLineEdit, QComboBox, QCheckBox, QMessageBox,
     QDialogButtonBox, QFileDialog, QTableWidget, QTableWidgetItem, QHeaderView,
     QWidget, QTextEdit, QApplication, QProgressBar, QMenu, QGridLayout, QFrame, QScrollArea, QSplitter,
     QListWidget, QButtonGroup, QRadioButton
@@ -28,7 +28,12 @@ from Functions.logging_manager import get_log_dir, get_logger, log_with_action, 
 from Functions.data_manager import DataManager
 from Functions.theme_manager import get_scaled_size
 from Functions.items_database_manager import ItemsDatabaseManager
-from Functions.items_price_manager import items_price_sync_template, items_price_find_missing
+from Functions.items_price_manager import items_price_sync_template
+from Functions.character_validator import (
+    character_populate_classes_combo, character_populate_races_combo,
+    character_handle_realm_change, character_handle_class_change,
+    character_handle_race_change
+)
 from UI.template_import_dialog import TemplateImportDialog
 
 # Get CHARACTER logger
@@ -697,77 +702,37 @@ class CharacterSheetWindow(QDialog):
     
     def _populate_classes_sheet(self):
         """Populates class dropdown based on selected realm."""
-        self.class_combo.clear()
-        realm = self.realm_combo.currentText()
-        
-        # Get all classes for the realm
-        classes = self.data_manager.get_classes(realm)
-        current_language = config.get("ui.language", "en")
-        
-        for cls in classes:
-            # Get translated name
-            if current_language == "fr" and "name_fr" in cls:
-                display_name = cls["name_fr"]
-            elif current_language == "de" and "name_de" in cls:
-                display_name = cls["name_de"]
-            else:
-                display_name = cls["name"]
-            
-            # Store actual name as item data
-            self.class_combo.addItem(display_name, cls["name"])
-    
+        character_populate_classes_combo(self.class_combo, self.data_manager, self.realm_combo.currentText())
+
     def _populate_races_sheet(self):
         """Populates race dropdown based on selected class and realm."""
-        self.race_combo.clear()
         realm = self.realm_combo.currentText()
-        
-        # Get selected class (actual name from item data)
         class_index = self.class_combo.currentIndex()
-        if class_index < 0:
-            # If no class selected, show all races
-            races = self.data_manager.get_races(realm)
-        else:
-            class_name = self.class_combo.itemData(class_index)
-            if not class_name:
-                races = self.data_manager.get_races(realm)
-            else:
-                # Filter races that can be this class
-                races = self.data_manager.get_available_races_for_class(realm, class_name)
-        
-        current_language = config.get("ui.language", "en")
-        
-        for race in races:
-            # Get translated name
-            if current_language == "fr" and "name_fr" in race:
-                display_name = race["name_fr"]
-            elif current_language == "de" and "name_de" in race:
-                display_name = race["name_de"]
-            else:
-                display_name = race["name"]
-            
-            # Store actual name as item data
-            self.race_combo.addItem(display_name, race["name"])
+        class_name = self.class_combo.itemData(class_index) if class_index >= 0 else None
+        character_populate_races_combo(self.race_combo, self.data_manager, realm, class_name)
     
     def _on_realm_changed_sheet(self):
         """Called when realm is changed in character sheet."""
-        self._populate_classes_sheet()
-        self._populate_races_sheet()
-        # Update character_data and banner
-        self.character_data['realm'] = self.realm_combo.currentText()
+        character_handle_realm_change(
+            self.realm_combo, self.class_combo, self.race_combo,
+            self.data_manager, self.character_data
+        )
+        # Update banner after realm change
         self._update_class_banner()
     
     def _on_class_changed_sheet(self):
         """Called when class is changed in character sheet."""
-        self._populate_races_sheet()
-        # Update character_data and banner
-        class_data = self.class_combo.currentData()
-        if class_data:
-            self.character_data['class'] = class_data
-            self._update_class_banner()
+        character_handle_class_change(
+            self.class_combo, self.race_combo,
+            self.data_manager, self.realm_combo.currentText(),
+            self.character_data
+        )
+        # Update banner after class change
+        self._update_class_banner()
     
     def _on_race_changed_sheet(self):
-        """Called when race is changed in character sheet (no action needed)."""
-        pass
+        """Called when race is changed in character sheet."""
+        character_handle_race_change(self.race_combo, self.character_data)
     
     def on_rank_changed(self, value):
         """Called when rank dropdown changes."""
@@ -834,7 +799,7 @@ class CharacterSheetWindow(QDialog):
                     f"Rank {rank_info['rank']} - {rank_info['title']} ({rank_info['level']} - {realm_points:,} RP)"
                 )
             else:
-                self.rank_title_label.setText(f"Rank 1 - Guardian (1L1 - 0 RP)")
+                self.rank_title_label.setText("Rank 1 - Guardian (1L1 - 0 RP)")
         else:
             realm_rank = self.character_data.get('realm_rank', '1L1')
             self.rank_title_label.setText(f"{realm_rank} - {realm_points:,} RP")
@@ -1395,7 +1360,7 @@ class CharacterSheetWindow(QDialog):
                     self.stats_update_thread.step_error.disconnect()
                     self.stats_update_thread.stats_updated.disconnect()
                     self.stats_update_thread.update_failed.disconnect()
-                except:
+                except Exception:
                     pass
                 
                 # 3. Attendre 3s
@@ -1419,7 +1384,7 @@ class CharacterSheetWindow(QDialog):
             try:
                 self.progress_dialog.close()
                 self.progress_dialog.deleteLater()
-            except:
+            except Exception:
                 pass
             
             # Supprimer l'attribut seulement s'il existe encore
@@ -1903,7 +1868,7 @@ class CharacterSheetWindow(QDialog):
                     self.char_update_thread.step_completed.disconnect()
                     self.char_update_thread.step_error.disconnect()
                     self.char_update_thread.update_finished.disconnect()
-                except:
+                except Exception:
                     pass
                 
                 # 3. Attendre 3s
@@ -1927,7 +1892,7 @@ class CharacterSheetWindow(QDialog):
             try:
                 self.progress_dialog.close()
                 self.progress_dialog.deleteLater()
-            except:
+            except Exception:
                 pass
             
             # Supprimer l'attribut seulement s'il existe encore
@@ -3228,7 +3193,6 @@ class ArmorManagementDialog(QDialog):
     def _on_model_link_clicked(self, url):
         """Handle click on model viewer link in preview."""
         try:
-            from PySide6.QtCore import QUrl
             
             # Check if this is a model link
             if url.scheme() == "model":
@@ -3759,7 +3723,7 @@ class CookieManagerDialog(QDialog):
         if self.connection_thread and self.connection_thread.isRunning():
             try:
                 self.connection_thread.finished.disconnect()
-            except:
+            except Exception:
                 pass
             self.connection_thread.quit()
             self.connection_thread.wait()
@@ -3915,7 +3879,6 @@ class CookieManagerDialog(QDialog):
             return
         
         # Check that the File existe before d'essayer d'importer
-        from pathlib import Path
         import os
         
         if not os.path.exists(file_path):
@@ -4114,7 +4077,7 @@ class CookieManagerDialog(QDialog):
                     self.cookie_gen_thread.step_error.disconnect()
                     self.cookie_gen_thread.generation_finished.disconnect()
                     self.cookie_gen_thread.user_action_required.disconnect()
-                except:
+                except Exception:
                     pass
                 
                 # Attendre 3 secondes
@@ -4138,7 +4101,7 @@ class CookieManagerDialog(QDialog):
             try:
                 self.progress_dialog.close()
                 self.progress_dialog.deleteLater()
-            except:
+            except Exception:
                 pass
             
             # Supprimer l'attribut seulement s'il existe encore
@@ -4152,7 +4115,6 @@ class CookieManagerDialog(QDialog):
     def _on_cookie_generation_finished(self, success, message, cookie_count):
         """Callback called when generation is complete"""
         from PySide6.QtCore import QTimer
-        from PySide6.QtWidgets import QMessageBox
         
         # Display success/error in dialog
         if hasattr(self, 'progress_dialog') and self.progress_dialog:
@@ -4211,7 +4173,7 @@ class CookieManagerDialog(QDialog):
         if self.connection_thread and self.connection_thread.isRunning():
             try:
                 self.connection_thread.finished.disconnect(self.on_connection_test_finished)
-            except:
+            except Exception:
                 pass
             # No longer keep reference to thread
             self.connection_thread = None
@@ -5030,7 +4992,6 @@ class CharacterUpdateThread(QThread):
         """Exécute la mise à jour du personnage avec sécurité thread"""
         import logging
         import time
-        import traceback
         from datetime import datetime
         from urllib.parse import urlparse, parse_qs
         from bs4 import BeautifulSoup
@@ -5527,7 +5488,7 @@ class HeraldSearchDialog(QDialog):
                     self.search_thread.step_started.disconnect()
                     self.search_thread.step_completed.disconnect()
                     self.search_thread.step_error.disconnect()
-                except:
+                except Exception:
                     pass
                 
                 # Attendre que le thread se termine (avec timeout de 3 secondes)
@@ -5550,7 +5511,7 @@ class HeraldSearchDialog(QDialog):
             try:
                 self.progress_dialog.close()
                 self.progress_dialog.deleteLater()
-            except:
+            except Exception:
                 pass
             
             # Supprimer l'attribut seulement s'il existe encore
@@ -5573,7 +5534,7 @@ class HeraldSearchDialog(QDialog):
                     thread_ref.step_started.disconnect()
                     thread_ref.step_completed.disconnect()
                     thread_ref.step_error.disconnect()
-                except:
+                except Exception:
                     pass
                 
                 # Cleanup asynchrone avec QTimer pour ne pas bloquer la fermeture
@@ -5589,7 +5550,7 @@ class HeraldSearchDialog(QDialog):
                                     thread_ref.cleanup_driver()
                                     thread_ref.terminate()
                                     thread_ref.wait()
-                                except:
+                                except Exception:
                                     pass
                             
                             logging.info("Thread de recherche Herald arrêté (async)")
@@ -5607,14 +5568,14 @@ class HeraldSearchDialog(QDialog):
             try:
                 self.progress_dialog.close()
                 self.progress_dialog.deleteLater()
-            except:
+            except Exception:
                 pass
             
             # Supprimer l'attribut seulement s'il existe encore
             if hasattr(self, 'progress_dialog'):
                 try:
                     delattr(self, 'progress_dialog')
-                except:
+                except Exception:
                     pass
     
     def _cleanup_temp_files(self):
@@ -5762,7 +5723,7 @@ class HeraldSearchDialog(QDialog):
         try:
             from Functions.theme_manager import get_scaled_size
             return get_scaled_size(base_size)
-        except:
+        except Exception:
             return base_size
     
     def on_search_finished(self, success, message, json_path):
@@ -5779,7 +5740,6 @@ class HeraldSearchDialog(QDialog):
             # Le dialogue se fermera automatiquement après complete_all()
             # Mais on le ferme manuellement si erreur
             if not success:
-                import time
                 QTimer.singleShot(2000, self.progress_dialog.close)
         
         # Réactiver the contrôles
@@ -6256,13 +6216,13 @@ class CharacterUpdateDialog(QDialog):
                     new_value = new_value.replace(' ', '').replace(',', '')
                     try:
                         new_value = int(new_value)
-                    except:
+                    except Exception:
                         pass
                 if isinstance(current_value, str):
                     current_value = current_value.replace(' ', '').replace(',', '')
                     try:
                         current_value = int(current_value)
-                    except:
+                    except Exception:
                         pass
             
             # Cas spécial pour realm_rank : s'assurer qu'on compare les codes (XLY) et pas les titres
@@ -6514,7 +6474,7 @@ class BackupSettingsDialog(QDialog):
                 from datetime import datetime
                 dt = datetime.fromisoformat(last_backup_date)
                 last_backup_str = dt.strftime("%Y-%m-%d %H:%M:%S")
-            except:
+            except Exception:
                 last_backup_str = "N/A"
         else:
             last_backup_str = "Aucune sauvegarde"
@@ -6626,7 +6586,7 @@ class BackupSettingsDialog(QDialog):
                 from datetime import datetime
                 dt = datetime.fromisoformat(cookies_last_backup_date)
                 cookies_last_backup_str = dt.strftime("%Y-%m-%d %H:%M:%S")
-            except:
+            except Exception:
                 cookies_last_backup_str = "N/A"
         else:
             cookies_last_backup_str = "Aucune sauvegarde"
@@ -6822,7 +6782,7 @@ class BackupSettingsDialog(QDialog):
                 from datetime import datetime
                 dt = datetime.fromisoformat(cookies_last_backup_date)
                 cookies_last_backup_str = dt.strftime("%Y-%m-%d %H:%M:%S")
-            except:
+            except Exception:
                 cookies_last_backup_str = "N/A"
         else:
             cookies_last_backup_str = "Aucune sauvegarde"
@@ -6868,7 +6828,7 @@ class BackupSettingsDialog(QDialog):
                 from datetime import datetime
                 dt = datetime.fromisoformat(last_backup_date)
                 last_backup_str = dt.strftime("%Y-%m-%d %H:%M:%S")
-            except:
+            except Exception:
                 last_backup_str = "N/A"
         else:
             last_backup_str = "Aucune sauvegarde"
@@ -7243,8 +7203,8 @@ class SearchMissingPricesDialog(QDialog):
                             ItemsDatabaseManager.set_item_category(item_name, selected_category)
                             
                             # Get category label for display
-                            category_label = ItemsDatabaseManager.get_category_label(selected_category, lang.current_language)
-                            category_icon = ItemsDatabaseManager.get_category_icon(selected_category)
+                            ItemsDatabaseManager.get_category_label(selected_category, lang.current_language)
+                            ItemsDatabaseManager.get_category_icon(selected_category)
                             
                             found_count += 1  # Count as handled
                             logging.info(f"Categorized {item_name} as: {selected_category}")
@@ -7267,7 +7227,7 @@ class SearchMissingPricesDialog(QDialog):
             )
             
             if failed_items:
-                result_message += f"\n\nFailed items:\n" + "\n".join(failed_items[:10])
+                result_message += "\n\nFailed items:\n" + "\n".join(failed_items[:10])
                 if len(failed_items) > 10:
                     result_message += f"\n... and {len(failed_items) - 10} more"
             
@@ -7348,6 +7308,7 @@ class ItemCategoryDialog(QDialog):
     """Dialog to categorize an item without price (quest_reward, event_reward, unknown)"""
     
     def __init__(self, item_name, parent=None):
+        from Functions.language_manager import lang
         super().__init__(parent)
         self.item_name = item_name
         self.selected_category = None

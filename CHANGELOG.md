@@ -2,8 +2,12 @@
 
 ## v0.109
 
-### ♻️ Code Refactoring
-- **Template Parser Module Extraction** (`Functions/template_parser.py` - 1392 lines)
+### ♻️ Code Refactoring - dialogs.py Module Extraction
+
+**Overall Scope**: Extract business logic from `UI/dialogs.py` into dedicated domain-specific modules for improved maintainability, testability, and code reuse.
+
+#### Phase 1 & 2: Template & Item Price Management
+- **Template Parser Module** (`Functions/template_parser.py` - 1392 lines)
   - Extracted 8 core functions from `UI/dialogs.py` equipment parsing logic
     - `template_parse()` - Main entry point for template parsing
     - `template_detect_format()` - Loki/Zenkcraft format detection
@@ -13,14 +17,22 @@
     - `template_format_item_with_price()` - Item display formatting with icons
     - `template_merge_columns()` - 2-column layout with proper alignment
     - `template_strip_color_markers()` - Remove color markers for width calculation
-  - Domain-driven function naming convention: `template_*` prefix for logical grouping
-  - Complete PEP 8 compliance (line length <88 chars, type hints, docstrings)
+
+- **Item Price Management Module** (`Functions/items_price_manager.py` - 205 lines)
+  - Extracted 2 core functions from `UI/dialogs.py` item price handling
+    - `items_price_sync_template()` - Synchronize template prices with database
+    - `items_price_find_missing()` - Find items without prices in template
+
+- **Quality Standards Applied to All Extracted Modules**:
+  - Domain-driven function naming convention: `template_*` and `items_price_*` prefixes
+  - Complete PEP 8 compliance (ruff validation, line length <88 chars, type hints, docstrings)
   - No hardcoded strings (all UI text uses `lang.get()` for translations)
-  - No French comments (English only in code)
-  - Removed 1381 lines from `dialogs.py` (1st refactor phase)
-  - Added comprehensive technical documentation (850+ lines in ARMORY_TECHNICAL_DOCUMENTATION.md)
+  - No French comments (English only in code and documentation)
+  - Removed ~1600 lines from `dialogs.py` (business logic consolidated in dedicated modules)
+  - Comprehensive technical documentation (ARMORY_TECHNICAL_DOCUMENTATION.md)
   - Proper error handling with graceful degradation
   - Full support for multi-realm item lookup and price synchronization
+  - Backward compatibility maintained with minimal UI wrappers in dialogs.py
 
 ---
 

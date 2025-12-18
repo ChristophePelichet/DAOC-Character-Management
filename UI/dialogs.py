@@ -28,6 +28,7 @@ from Functions.logging_manager import get_log_dir, get_logger, log_with_action, 
 from Functions.data_manager import DataManager
 from Functions.theme_manager import get_scaled_size
 from Functions.items_database_manager import ItemsDatabaseManager
+from Functions.items_price_manager import items_price_sync_template, items_price_find_missing
 from UI.template_import_dialog import TemplateImportDialog
 
 # Get CHARACTER logger
@@ -3130,61 +3131,18 @@ class ArmorManagementDialog(QDialog):
     def _sync_template_prices_with_db(self, metadata_path, metadata):
         """
         Sync template prices with database.
-        Check if items with prices in JSON now exist in DB.
-        If yes: remove from JSON (DB will be used instead).
-        If no: keep in JSON.
+        Wrapper around items_price_sync_template() for backward compatibility.
         
         Args:
             metadata_path: Path to the metadata JSON file
             metadata: Loaded metadata dict
         """
-        if not metadata or 'prices' not in metadata:
-            return
-        
-        prices_dict = metadata.get('prices', {})
-        if not prices_dict:
-            return
-        
-        items_to_remove = []
-        realm_lower = self.realm.lower()
-        
-        try:
-            for item_name in prices_dict.keys():
-                # Check if item now exists in database
-                item_name_lower = item_name.lower()
-                
-                # Try realm-specific search
-                search_key_realm = f"{item_name_lower}:{realm_lower}"
-                item_data = self.db_manager.search_item(search_key_realm)
-                
-                # Try ":all" suffix
-                if not item_data:
-                    search_key_all = f"{item_name_lower}:all"
-                    item_data = self.db_manager.search_item(search_key_all)
-                
-                # Try without suffix
-                if not item_data:
-                    item_data = self.db_manager.search_item(item_name)
-                
-                # If item found in DB with a price, mark for removal from JSON
-                if item_data and 'merchant_price' in item_data:
-                    items_to_remove.append(item_name)
-                    logging.info(f"Item '{item_name}' now found in DB, will remove from template JSON")
-            
-            # Remove items from JSON if any found in DB
-            if items_to_remove:
-                for item_name in items_to_remove:
-                    del metadata['prices'][item_name]
-                
-                # Save updated metadata
-                import json
-                with open(metadata_path, 'w', encoding='utf-8') as f:
-                    json.dump(metadata, f, indent=2, ensure_ascii=False)
-                
-                logging.info(f"Synced {len(items_to_remove)} items from template JSON to DB")
-                
-        except Exception as e:
-            logging.error(f"Error syncing template prices with DB: {e}", exc_info=True)
+        items_price_sync_template(
+            metadata_path=metadata_path,
+            metadata=metadata,
+            db_manager=self.db_manager,
+            realm=self.realm
+        )
     
     def parse_zenkcraft_template(self, content, season=""):
         """
@@ -3486,7 +3444,8 @@ class ArmorManagementDialog(QDialog):
             QMessageBox.critical(self, lang.get("dialogs.titles.error"), lang.get("armoury_dialog.messages.download_error", error=str(e)))
     
     def search_missing_prices(self):
-        """Search for missing item prices online using Eden scraper."""
+        """Search for missing item prices online using Eden scraper.
+        Wrapper around items_price_find_missing() for backward compatibility."""
         if not hasattr(self, 'items_without_price') or not self.items_without_price:
             QMessageBox.information(
                 self,

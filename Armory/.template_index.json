@@ -1,15 +1,24 @@
 {
   "version": "1.0",
-  "last_updated": "2025-12-18T14:49:23.547303",
+  "last_updated": "2025-12-18T15:48:20.731087",
   "templates": [
     {
-      "file": "Bard_S3_hjhgjg.txt",
+      "file": "Bard_S3_asassa.txt",
       "class": "Bard",
       "realm": "Hibernia",
       "season": "S3",
       "tags": [],
       "item_count": 335,
-      "import_date": "2025-12-18T14:49:22.419532"
+      "import_date": "2025-12-18T15:46:13.705403"
+    },
+    {
+      "file": "Berserker_S3_asdas.txt",
+      "class": "Berserker",
+      "realm": "Midgard",
+      "season": "S3",
+      "tags": [],
+      "item_count": 304,
+      "import_date": "2025-12-18T15:48:19.655511"
     }
   ]
 }

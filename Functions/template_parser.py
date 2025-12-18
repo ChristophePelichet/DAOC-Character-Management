@@ -31,6 +31,16 @@ from typing import Tuple, Dict, List, Optional, Any
 
 logger = logging.getLogger(__name__)
 
+# Model viewer slots - items that have visual models available
+MODEL_SLOTS = {
+    # Zenkcraft format slot names
+    'Torso', 'Arms', 'Legs', 'Hands', 'Feet', 'Helmet',  # Armor pieces
+    'Cloak',                                              # Cape
+    'Two Handed', 'Right Hand', 'Left Hand',             # Weapons
+    # Loki format slot names (additional)
+    'Chest', 'Head'                                       # Loki armor equivalents
+}
+
 
 def template_detect_format(content: str) -> str:
     """
@@ -95,7 +105,7 @@ def template_merge_columns(
 
     max_left_width = 0
     for line in left_lines:
-        if line.strip() and not any(emoji in line for emoji in ["📊", "📚", "🛡️", "✨"]):
+        if line.strip() and not any(emoji in line for emoji in ["📊", "📚", "🛡️", "✨", "🎯", "⭐"]):
             clean_line = template_strip_color_markers(line)
             max_left_width = max(max_left_width, len(clean_line))
 
@@ -107,8 +117,8 @@ def template_merge_columns(
         left_line = left_lines[i] if i < len(left_lines) else ""
         right_line = right_lines[i] if i < len(right_lines) else ""
 
-        is_title_line = any(emoji in left_line for emoji in ["📊", "📚", "🛡️", "✨"]) or \
-                        any(emoji in right_line for emoji in ["📊", "📚", "🛡️", "✨"])
+        is_title_line = any(emoji in left_line for emoji in ["📊", "📚", "🛡️", "✨", "🎯", "⭐"]) or \
+                        any(emoji in right_line for emoji in ["📊", "📚", "🛡️", "✨", "🎯", "⭐"])
 
         if right_line and left_line.strip() and not is_title_line:
             clean_left = template_strip_color_markers(left_line)
@@ -241,7 +251,7 @@ def template_format_item_with_price(
     else:
         result = "❓"
 
-    return f'<span style="display:inline-block; min-width:200px;">{result}</span>'
+    return result
 
 
 def template_parse(
@@ -323,7 +333,11 @@ def template_parse_loki(
     lines = content.split('\n')
     output = []
 
-    loki_pattern = r'^(Chest|Arms|Head|Legs|Hands|Feet|Right Hand|Left Hand|Neck|Cloak|Jewel|Belt|Left Ring|Right Ring|Left Wrist|Right Wrist|Mythirian) \((.+?)\):$'
+    loki_pattern = (
+        r'^(Chest|Arms|Head|Legs|Hands|Feet|Right Hand|Left Hand|Neck|'
+        r'Cloak|Jewel|Belt|Left Ring|Right Ring|Left Wrist|Right Wrist|Mythirian) '
+        r'\((.+?)\):$'
+    )
 
     stats = {}
     bonuses = {}
@@ -458,6 +472,39 @@ def template_parse_loki(
         output.extend(block1_output)
         output.append("")
 
+    # Skills and Bonuses
+    skills_lines = []
+    bonuses_lines = []
+
+    if skills:
+        skills_lines.append("🎯  SKILLS")
+        for skill_name, skill_level in skills.items():
+            skills_lines.append(f"  {skill_name.ljust(20)} {skill_level}")
+
+    if bonuses:
+        bonuses_lines.append("⭐  BONUSES")
+        bonus_items = list(bonuses.items())
+        for i in range(0, len(bonus_items), 2):
+            left_name, left_value = bonus_items[i]
+            left = f"{left_name:25} {left_value:>8}"
+
+            if i + 1 < len(bonus_items):
+                right_name, right_value = bonus_items[i + 1]
+                right = f"{right_name:25} {right_value:>8}"
+            else:
+                right = ""
+
+            if right:
+                bonuses_lines.append(f"  {left}  │  {right}")
+            else:
+                bonuses_lines.append(f"  {left}")
+
+    # Merge BLOCK 2: SKILLS │ BONUSES
+    if skills_lines or bonuses_lines:
+        block2_output = template_merge_columns(skills_lines, bonuses_lines)
+        output.extend(block2_output)
+        output.append("")
+
     output.append("═" * 94)
     output.append("")
 
@@ -469,7 +516,10 @@ def template_parse_loki(
 
     if equipment:
         armor_slots = ['Chest', 'Arms', 'Head', 'Legs', 'Hands', 'Feet']
-        jewelry_slots = ['Left Ring', 'Right Ring', 'Left Wrist', 'Right Wrist', 'Jewel', 'Belt', 'Neck', 'Cloak', 'Mythirian']
+        jewelry_slots = [
+            'Left Ring', 'Right Ring', 'Left Wrist', 'Right Wrist',
+            'Jewel', 'Belt', 'Neck', 'Cloak', 'Mythirian'
+        ]
         weapon_slots = ['Left Hand', 'Right Hand']
 
         armor_items = [item for item in equipment if item['slot'] in armor_slots]
@@ -477,7 +527,11 @@ def template_parse_loki(
         weapon_items = [item for item in equipment if item['slot'] in weapon_slots]
 
         all_loot = armor_items + jewelry_items + weapon_items
-        max_len = max(len(f"{item['name']} ({item['slot']})") for item in all_loot) if all_loot else 0
+        max_len = (
+            max(len(f"{item['name']} ({item['slot']})") for item in all_loot)
+            if all_loot
+            else 0
+        )
         max_len = max(max_len, 35)
 
         ITEM_DISPLAY_WIDTH = 70
@@ -489,12 +543,20 @@ def template_parse_loki(
             output.append(f"    🛡️  {lang.get('armoury_dialog.preview.equipment_categories.armor_pieces')} :")
             for item in armor_items:
                 clean_item_text = f"{item['name']} ({item['slot']})"
+                
                 price_str, price_source, item_category = template_get_item_price(
                     item['name'], realm, db_manager, metadata
                 )
+                
+                # Add clickable model icon ONLY if item exists in DB and has visual model
+                if item['slot'] in MODEL_SLOTS and (price_str or (item_category and item_category != "unknown")):
+                    model_icon = f'<a href="model:{item["name"]}" style="text-decoration:none; color:#4CAF50;">🔍</a> '
+                    item_text = f"{model_icon}{clean_item_text}"
+                else:
+                    item_text = clean_item_text
 
                 padding = max_len - len(clean_item_text)
-                item_with_padding = f"• {clean_item_text}{' ' * padding}"
+                item_with_padding = f"• {item_text}{' ' * padding}"
 
                 display = template_format_item_with_price(
                     item['name'], price_str, price_source, item_category,
@@ -528,6 +590,20 @@ def template_parse_loki(
                 ('Left Wrist', 'Right Wrist')
             ]
 
+            # Pre-calculate max item name width (without price) for jewelry alignment
+            max_item_name_width = 0
+            for left_slot, right_slot in pairs:
+                if left_slot in jewelry_dict:
+                    left_text = f"{jewelry_dict[left_slot]['name']} ({jewelry_dict[left_slot]['slot']})"
+                    max_item_name_width = max(max_item_name_width, len(left_text))
+                if right_slot and right_slot in jewelry_dict:
+                    right_text = f"{jewelry_dict[right_slot]['name']} ({jewelry_dict[right_slot]['slot']})"
+                    max_item_name_width = max(max_item_name_width, len(right_text))
+
+            max_item_name_width = max(max_item_name_width, 35)  # Minimum width
+
+            # Pre-calculate max total width including prices for left column alignment
+            max_left_total_width = 0
             for left_slot, right_slot in pairs:
                 if left_slot in jewelry_dict:
                     left_item = jewelry_dict[left_slot]
@@ -535,36 +611,88 @@ def template_parse_loki(
                     left_price_str, left_price_source, left_item_category = template_get_item_price(
                         left_item['name'], realm, db_manager, metadata
                     )
-                    left_output = f"• {left_text}  " + template_format_item_with_price(
+                    left_name_padded = left_text.ljust(max_item_name_width)
+                    left_display = template_format_item_with_price(
                         left_item['name'], left_price_str, left_price_source, left_item_category,
                         ItemsDatabaseManager, lang
                     )
+                    full_line = f"• {left_name_padded}  {left_display}"
+                    max_left_total_width = max(max_left_total_width, len(full_line))
 
-                    if left_price_str:
-                        try:
-                            parts = str(left_price_str).split()
-                            if len(parts) >= 2:
-                                price = int(parts[0])
-                                currency = ' '.join(parts[1:])
-                                currency_totals_temp[currency] += price
-                        except:
-                            pass
-                    elif not left_item_category or left_item_category == "unknown":
-                        items_without_price.append(left_item['name'])
+            max_left_total_width = max(max_left_total_width, 50)  # Minimum total width
 
-                    if right_slot and right_slot in jewelry_dict:
-                        right_item = jewelry_dict[right_slot]
-                        right_text = f"{right_item['name']} ({right_item['slot']})"
+            for left_slot, right_slot in pairs:
+                if left_slot in jewelry_dict:
+                    left_item = jewelry_dict[left_slot]
+                    right_item = jewelry_dict.get(right_slot) if right_slot else None
+
+                    # Build left column
+                    if left_item:
+                        clean_left_text = f"{left_item['name']} ({left_item['slot']})"
+                        
+                        left_price_str, left_price_source, left_item_category = template_get_item_price(
+                            left_item['name'], realm, db_manager, metadata
+                        )
+                        
+                        # Add clickable model icon ONLY if item exists in DB and has visual model
+                        if left_item['slot'] in MODEL_SLOTS and (left_price_str or (left_item_category and left_item_category != "unknown")):
+                            model_icon = f'<a href="model:{left_item["name"]}" style="text-decoration:none; color:#4CAF50;">🔍</a> '
+                            left_text = f"{model_icon}{clean_left_text}"
+                        else:
+                            left_text = clean_left_text
+
+                        # Add padding to HTML version
+                        padding_needed = max_item_name_width - len(clean_left_text)
+                        left_text_padded = left_text + (' ' * padding_needed)
+                        left_display = template_format_item_with_price(
+                            left_item['name'], left_price_str, left_price_source, left_item_category,
+                            ItemsDatabaseManager, lang
+                        )
+                        left_output = f"• {left_text_padded}  {left_display}"
+
+                        # Accumulate currency totals
+                        if left_price_str:
+                            try:
+                                parts = str(left_price_str).split()
+                                if len(parts) >= 2:
+                                    price = int(parts[0])
+                                    currency = ' '.join(parts[1:])
+                                    currency_totals_temp[currency] += price
+                            except:
+                                pass
+                        elif not left_item_category or left_item_category == "unknown":
+                            items_without_price.append(left_item['name'])
+
+                        # Pad entire left line to max width
+                        left_output = left_output.ljust(max_left_total_width)
+                    else:
+                        left_output = " " * max_left_total_width
+
+                    # Build right column
+                    if right_item:
+                        clean_right_text = f"{right_item['name']} ({right_item['slot']})"
+                        
                         right_price_str, right_price_source, right_item_category = template_get_item_price(
                             right_item['name'], realm, db_manager, metadata
                         )
-                        right_output = f"• {right_text}  " + template_format_item_with_price(
+                        
+                        # Add clickable model icon ONLY if item exists in DB and has visual model
+                        if right_item['slot'] in MODEL_SLOTS and (right_price_str or (right_item_category and right_item_category != "unknown")):
+                            model_icon = f'<a href="model:{right_item["name"]}" style="text-decoration:none; color:#4CAF50;">🔍</a> '
+                            right_text = f"{model_icon}{clean_right_text}"
+                        else:
+                            right_text = clean_right_text
+
+                        # Add padding to HTML version
+                        padding_needed = max_item_name_width - len(clean_right_text)
+                        right_text_padded = right_text + (' ' * padding_needed)
+                        right_display = template_format_item_with_price(
                             right_item['name'], right_price_str, right_price_source, right_item_category,
                             ItemsDatabaseManager, lang
                         )
+                        right_output = f"• {right_text_padded}  {right_display}"
 
-                        output.append(f"      {left_output}  │  {right_output}")
-
+                        # Accumulate currency totals
                         if right_price_str:
                             try:
                                 parts = str(right_price_str).split()
@@ -577,6 +705,12 @@ def template_parse_loki(
                         elif not right_item_category or right_item_category == "unknown":
                             items_without_price.append(right_item['name'])
                     else:
+                        right_output = ""
+
+                    # Merge columns with separator
+                    if right_output:
+                        output.append(f"      {left_output}  │  {right_output}")
+                    elif left_item:
                         output.append(f"      {left_output}")
 
         if weapon_items:
@@ -584,12 +718,20 @@ def template_parse_loki(
             output.append(f"    ⚔️  {lang.get('armoury_dialog.preview.equipment_categories.weapons')} :")
             for item in weapon_items:
                 clean_item_text = f"{item['name']} ({item['slot']})"
+                
                 price_str, price_source, item_category = template_get_item_price(
                     item['name'], realm, db_manager, metadata
                 )
+                
+                # Add clickable model icon ONLY if item exists in DB and has visual model
+                if item['slot'] in MODEL_SLOTS and (price_str or (item_category and item_category != "unknown")):
+                    model_icon = f'<a href="model:{item["name"]}" style="text-decoration:none; color:#4CAF50;">🔍</a> '
+                    item_text = f"{model_icon}{clean_item_text}"
+                else:
+                    item_text = clean_item_text
 
                 padding = max_len - len(clean_item_text)
-                item_with_padding = f"• {clean_item_text}{' ' * padding}"
+                item_with_padding = f"• {item_text}{' ' * padding}"
 
                 display = template_format_item_with_price(
                     item['name'], price_str, price_source, item_category,
@@ -1102,35 +1244,24 @@ def template_parse_zenkcraft(
 
                 # Build left column
                 if left_item:
-                    left_item_name = left_item['name']
-                    left_text = f"{left_item_name} ({left_item['slot']})"
+                    clean_left_text = f"{left_item['name']} ({left_item['slot']})"
                     
-                    # Try to get model ID from database
-                    model_id = None
-                    if db_manager:
-                        try:
-                            item_name_lower = left_item_name.lower()
-                            realm_lower = realm.lower() if realm else "all"
-                            search_key = f"{item_name_lower}:{realm_lower}"
-                            item_data = db_manager.search_item(search_key)
-                            if not item_data:
-                                search_key = f"{item_name_lower}:all"
-                                item_data = db_manager.search_item(search_key)
-                            if not item_data:
-                                item_data = db_manager.search_item(left_item_name)
-                            if item_data:
-                                model_id = item_data.get('model') or item_data.get('model_id')
-                        except:
-                            pass
+                    left_price_str, left_price_source, left_item_category = template_get_item_price(
+                        left_item['name'], realm, db_manager, metadata
+                    )
                     
-                    # Add model icon if model exists
-                    if model_id:
-                        left_text = f'<a href="model:{left_item_name}" style="text-decoration:none; color:#4CAF50;">🔍</a> {left_text}'
+                    # Add clickable model icon ONLY if item is Cloak and exists in DB
+                    if left_item['slot'] in MODEL_SLOTS and (left_price_str or (left_item_category and left_item_category != "unknown")):
+                        model_icon = f'<a href="model:{left_item["name"]}" style="text-decoration:none; color:#4CAF50;">🔍</a> '
+                        left_text = f"{model_icon}{clean_left_text}"
+                    else:
+                        left_text = clean_left_text
                     
-                    left_price_str, left_price_source, left_item_category = get_item_price(left_item_name)
-                    left_name_padded = f"{left_item_name} ({left_item['slot']})".ljust(max_item_name_width)
-                    left_display = format_item_display(left_item_name, left_price_str, left_price_source, left_item_category)
-                    left_output = f"• {left_name_padded}  {left_display}"
+                    # Calculate padding based on clean text, apply to padded text
+                    padding_needed = max_item_name_width - len(clean_left_text)
+                    left_text_padded = left_text + (' ' * padding_needed)
+                    left_display = format_item_display(left_item['name'], left_price_str, left_price_source, left_item_category)
+                    left_output = f"• {left_text_padded}  {left_display}"
 
                     if left_price_str:
                         try:
@@ -1149,35 +1280,24 @@ def template_parse_zenkcraft(
 
                 # Build right column
                 if right_item:
-                    right_item_name = right_item['name']
-                    right_text = f"{right_item_name} ({right_item['slot']})"
+                    clean_right_text = f"{right_item['name']} ({right_item['slot']})"
                     
-                    # Try to get model ID from database
-                    model_id = None
-                    if db_manager:
-                        try:
-                            item_name_lower = right_item_name.lower()
-                            realm_lower = realm.lower() if realm else "all"
-                            search_key = f"{item_name_lower}:{realm_lower}"
-                            item_data = db_manager.search_item(search_key)
-                            if not item_data:
-                                search_key = f"{item_name_lower}:all"
-                                item_data = db_manager.search_item(search_key)
-                            if not item_data:
-                                item_data = db_manager.search_item(right_item_name)
-                            if item_data:
-                                model_id = item_data.get('model') or item_data.get('model_id')
-                        except:
-                            pass
+                    right_price_str, right_price_source, right_item_category = template_get_item_price(
+                        right_item['name'], realm, db_manager, metadata
+                    )
                     
-                    # Add model icon if model exists
-                    if model_id:
-                        right_text = f'<a href="model:{right_item_name}" style="text-decoration:none; color:#4CAF50;">🔍</a> {right_text}'
+                    # Add clickable model icon ONLY if item is Cloak and exists in DB
+                    if right_item['slot'] in MODEL_SLOTS and (right_price_str or (right_item_category and right_item_category != "unknown")):
+                        model_icon = f'<a href="model:{right_item["name"]}" style="text-decoration:none; color:#4CAF50;">🔍</a> '
+                        right_text = f"{model_icon}{clean_right_text}"
+                    else:
+                        right_text = clean_right_text
                     
-                    right_price_str, right_price_source, right_item_category = get_item_price(right_item_name)
-                    right_name_padded = f"{right_item_name} ({right_item['slot']})".ljust(max_item_name_width)
-                    right_display = format_item_display(right_item_name, right_price_str, right_price_source, right_item_category)
-                    right_output = f"• {right_name_padded}  {right_display}"
+                    # Calculate padding based on clean text, apply to padded text
+                    padding_needed = max_item_name_width - len(clean_right_text)
+                    right_text_padded = right_text + (' ' * padding_needed)
+                    right_display = format_item_display(right_item['name'], right_price_str, right_price_source, right_item_category)
+                    right_output = f"• {right_text_padded}  {right_display}"
 
                     if right_price_str:
                         try:
@@ -1195,7 +1315,7 @@ def template_parse_zenkcraft(
 
                 # Merge columns
                 if right_output:
-                    output.append(f"      {left_output}  |  {right_output}")
+                    output.append(f"      {left_output}  │  {right_output}")
                 elif left_item:
                     output.append(f"      {left_output}")
 

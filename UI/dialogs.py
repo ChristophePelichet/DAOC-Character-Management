@@ -2802,17 +2802,6 @@ class ConfigurationDialog(QDialog):
 class ArmorManagementDialog(QDialog):
     """Dialog for managing armor templates for a specific character."""
     
-    # Slots that have visual models (armor, cloaks, weapons)
-    # Slots that have visual models (armor, cloaks, weapons)
-    MODEL_SLOTS = {
-        # Zenkcraft format slot names
-        'Torso', 'Arms', 'Legs', 'Hands', 'Feet', 'Helmet',  # Armor pieces
-        'Cloak',                                              # Cape
-        'Two Handed', 'Right Hand', 'Left Hand',             # Weapons
-        # Loki format slot names (additional)
-        'Chest', 'Head'                                       # Loki armor equivalents
-    }
-    
     def __init__(self, parent, season, realm, character_name, character_data=None):
         super().__init__(parent)
         self.season = season

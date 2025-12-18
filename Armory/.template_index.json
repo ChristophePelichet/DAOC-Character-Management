@@ -1,45 +1,24 @@
 {
   "version": "1.0",
-  "last_updated": "2025-12-01T20:56:19.725905",
+  "last_updated": "2025-12-18T15:48:20.731087",
   "templates": [
     {
-      "file": "Bard_S3_starter.txt",
+      "file": "Bard_S3_asassa.txt",
       "class": "Bard",
       "realm": "Hibernia",
       "season": "S3",
-      "tags": [
-        "low-cost",
-        "beginner"
-      ],
-      "item_count": 335,
-      "import_date": "2025-11-30T20:54:08.840847"
-    },
-    {
-      "file": "Druid_S3_base.txt",
-      "class": "Druid",
-      "realm": "Hibernia",
-      "season": "S3",
       "tags": [],
-      "item_count": 277,
-      "import_date": "2025-11-30T21:06:47.118766"
+      "item_count": 335,
+      "import_date": "2025-12-18T15:46:13.705403"
     },
     {
-      "file": "Berserker_S3_base.txt",
+      "file": "Berserker_S3_asdas.txt",
       "class": "Berserker",
       "realm": "Midgard",
       "season": "S3",
       "tags": [],
       "item_count": 304,
-      "import_date": "2025-12-01T20:56:18.663027"
-    },
-    {
-      "file": "Valkyrie_S3_test.txt",
-      "class": "Valkyrie",
-      "realm": "Midgard",
-      "season": "S3",
-      "tags": [],
-      "item_count": 280,
-      "import_date": "2025-12-01T18:18:02.952426"
+      "import_date": "2025-12-18T15:48:19.655511"
     }
   ]
 }

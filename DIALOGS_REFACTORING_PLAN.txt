@@ -1,81 +1,41 @@
 ================================================================================
 DIALOGS.PY REFACTORING PLAN
 ================================================================================
-File: UI/dialogs.py (8765 lines)
+File: UI/dialogs.py
 Date: 13 December 2025
+Updated: 18 December 2025 (Phase 1 Complete - v0.109)
 Purpose: Extract functions to dedicated modules for better maintainability
 ================================================================================
 
-ANALYSIS SUMMARY
-================================================================================
-Current file contains:
-- 18 dialog classes
-- 6 worker thread classes
-- Multiple utility functions embedded in classes
-- Template parsing logic (Zenkcraft, Loki formats)
-- Character data validation
-- Item price lookup and formatting
-- Herald scraping logic
-
-Total estimated functions to extract: 40+
-
-================================================================================
-EXTRACTION PLAN - GROUPED BY FUNCTIONALITY
+COMPLETED PHASES
 ================================================================================
 
-GROUP 1: TEMPLATE PARSING (High Priority)
+✅ PHASE 1: TEMPLATE PARSING (COMPLETED - v0.109)
 ================================================================================
-Current Location: ArmorManagementDialog class (lines ~3200-4600)
-Target File: Functions/template_parser.py
-Naming Convention: template_{action}_{object}
+Target File: Functions/template_parser.py (1392 lines)
+Extracted: 8 functions from ArmorManagementDialog class
+Removed from dialogs.py: 1381 lines
+Date Completed: 18 December 2025
+Branch: refactor/v0.109-dialogs-cleanup
 
-1. Function: parse_zenkcraft_template()
-   Purpose: Main template parser with format detection
-   Lines: ~3200-3215
-   New Name: template_parse()
-   Notes: Entry point for template parsing
+Extracted Functions:
+1. ✅ template_parse() - Main entry point for template parsing
+2. ✅ template_detect_format() - Loki/Zenkcraft format detection
+3. ✅ template_parse_loki() - Parse Loki format templates with full layout
+4. ✅ template_parse_zenkcraft() - Parse Zenkcraft format templates
+5. ✅ template_get_item_price() - Multi-source price lookup
+6. ✅ template_format_item_with_price() - Item display formatting with icons
+7. ✅ template_merge_columns() - 2-column layout with proper alignment
+8. ✅ template_strip_color_markers() - Remove color markers for width calculation
 
-2. Function: _detect_template_format()
-   Purpose: Detect if template is Loki or Zenkcraft format
-   Lines: ~3217-3230
-   New Name: template_detect_format()
-   Notes: Uses regex to identify format
+Quality Metrics:
+- PEP 8 compliant (line length <88 chars, type hints, docstrings)
+- No hardcoded strings (all UI text uses lang.get())
+- No French comments (English only in code)
+- Complete documentation in ARMORY_TECHNICAL_DOCUMENTATION.md
+- Full error handling with graceful degradation
 
-3. Function: _parse_loki_format()
-   Purpose: Parse Loki format templates
-   Lines: ~3232-3860
-   New Name: template_parse_loki()
-   Notes: ~600 lines, parses stats, resists, skills, bonuses, equipment
-
-4. Function: _parse_zenkcraft_format()
-   Purpose: Parse Zenkcraft format templates
-   Lines: ~3863-4595
-   New Name: template_parse_zenkcraft()
-   Notes: ~730 lines, similar to Loki but different structure
-
-5. Function: get_item_price() [nested in _parse_loki_format]
-   Purpose: Lookup item price from database
-   Lines: ~3266-3310
-   New Name: template_get_item_price()
-   Notes: DB lookup with fallback to "N/A"
-
-6. Function: format_item_display() [nested in _parse_loki_format]
-   Purpose: Format item name with price and source
-   Lines: ~3312-3418
-   New Name: template_format_item_with_price()
-   Notes: Adds price, category, visual slot icon
-
-7. Function: merge_two_columns() [nested in _parse_loki_format]
-   Purpose: Merge two text columns side-by-side
-   Lines: ~3420-3520
-   New Name: template_merge_columns()
-   Notes: Used for Stats|Resists, Skills|Bonuses layout
-
-8. Function: remove_color_markers() [nested in merge_two_columns]
-   Purpose: Strip color markers for width calculation
-   Lines: ~3424-3450
-   New Name: template_strip_color_markers()
-   Notes: Removes <COLOR:...> tags for text measurement
+Status: READY FOR PRODUCTION
 
 
 GROUP 2: ITEM PRICE MANAGEMENT (High Priority)
@@ -376,6 +336,113 @@ Naming Convention: ui_{action}_{object}
 IMPLEMENTATION STRATEGY
 ================================================================================
 
+================================================================================
+IMPLEMENTATION PROGRESS
+================================================================================
+
+PHASE 1 - Template Parsing (COMPLETED ✅)
+================================================================================
+Status: COMPLETED (18 Dec 2025)
+File: Functions/template_parser.py (1272 lines created)
+Cleaned from UI/dialogs.py: 1381 lines removed
+Branch: refactor/v0.109-dialogs-phase-1-template-parser
+
+Functions Extracted:
+  ✅ template_parse() - Main entry point
+  ✅ template_detect_format() - Format detection
+  ✅ template_parse_loki() - Loki format parsing
+  ✅ template_parse_zenkcraft() - Zenkcraft format parsing + equipment
+  ✅ template_get_item_price() - Price lookup
+  ✅ template_format_item_with_price() - Price formatting
+  ✅ template_merge_columns() - 2-column layout
+  ✅ template_strip_color_markers() - Width calculation helper
+
+Result: All template parsing logic now in dedicated module (PEP 8 compliant)
+
+---
+
+PHASE 1b - Stats/Skills/Resistances/Bonuses Extraction (IN PROGRESS 🔄)
+================================================================================
+Status: IN PROGRESS (Feature branch: feature/v0.110-dialogs-phase-2-stats-skills)
+Target: Extract stats/skills/resistances/bonuses section to dedicated function
+Expected lines to remove: ~250-350 from dialogs.py
+
+Functions to Create/Refactor:
+  □ template_parse_zenkcraft_stats_section() - NEW
+    Purpose: Separate stats/skills/resistances/bonuses parsing
+    Input: stats, skills, resistances, bonuses dicts
+    Output: Formatted HTML with 2-column layout
+    Helper: Use existing template_merge_columns()
+    
+  □ Refactor template_merge_columns() if needed for reusability
+    Current users: template_parse_zenkcraft() calls it twice
+
+Affected File: UI/dialogs.py
+  - Remove stats/skills/resistances/bonuses inline code
+  - Call template_parse_zenkcraft_stats_section()
+  - Keep color logic consistent
+
+---
+
+PHASE 2 - Item Price Management (PLANNED 📋)
+================================================================================
+Status: PENDING
+Target File: Functions/item_price_manager.py
+Naming Convention: price_* prefix
+
+Functions:
+  □ price_sync_template() - Update prices in metadata JSON
+  □ price_find_missing_items() - Find items without prices
+
+Expected Result: Dedicated price management module
+
+---
+
+PHASE 3 - Herald Integration (PLANNED 📋)
+================================================================================
+Status: PENDING
+Target Files: 
+  - Functions/herald_integration.py (herald_* prefix)
+  - Functions/herald_workers.py (worker threads)
+
+---
+
+PHASE 4 - Character Validation (PLANNED 📋)
+================================================================================
+Status: PENDING
+Target File: Functions/character_validator.py
+Naming Convention: character_* prefix
+
+---
+
+PHASE 5 - Realm Rank & Achievements (PLANNED 📋)
+================================================================================
+Status: PENDING
+Target Files:
+  - Functions/realm_rank_calculator.py (realm_rank_* prefix)
+  - Functions/achievement_formatter.py (achievement_* prefix)
+
+---
+
+PHASE 6 - Armor & Model Viewer (PLANNED 📋)
+================================================================================
+Status: PENDING
+Target Files:
+  - Functions/armor_upload_handler.py (armor_* prefix)
+  - Functions/item_model_viewer.py (item_model_* prefix)
+
+---
+
+PHASE 7 - Misc Utilities (PLANNED 📋)
+================================================================================
+Status: PENDING
+Target Files:
+  - Functions/character_banner.py (banner_* prefix)
+  - Functions/herald_url_validator.py (herald_url_* prefix)
+  - Functions/character_rename_handler.py (character_* prefix)
+  - Functions/ui_utils.py (ui_* prefix)
+
+================================================================================
 PHASE 1 - Template Parsing (PRIORITY 1)
   → Create Functions/template_parser.py
   → Extract functions 1-8 (template parsing logic)

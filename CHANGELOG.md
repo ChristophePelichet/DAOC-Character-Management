@@ -1,5 +1,29 @@
 # 📋 Changelog - DAOC Character Management
 
+## v0.109
+
+### ♻️ Code Refactoring
+- **Template Parser Module Extraction** (`Functions/template_parser.py` - 1392 lines)
+  - Extracted 8 core functions from `UI/dialogs.py` equipment parsing logic
+    - `template_parse()` - Main entry point for template parsing
+    - `template_detect_format()` - Loki/Zenkcraft format detection
+    - `template_parse_loki()` - Parse Loki format templates with full layout
+    - `template_parse_zenkcraft()` - Parse Zenkcraft format templates
+    - `template_get_item_price()` - Multi-source price lookup (database, metadata, categories)
+    - `template_format_item_with_price()` - Item display formatting with icons
+    - `template_merge_columns()` - 2-column layout with proper alignment
+    - `template_strip_color_markers()` - Remove color markers for width calculation
+  - Domain-driven function naming convention: `template_*` prefix for logical grouping
+  - Complete PEP 8 compliance (line length <88 chars, type hints, docstrings)
+  - No hardcoded strings (all UI text uses `lang.get()` for translations)
+  - No French comments (English only in code)
+  - Removed 1381 lines from `dialogs.py` (1st refactor phase)
+  - Added comprehensive technical documentation (850+ lines in ARMORY_TECHNICAL_DOCUMENTATION.md)
+  - Proper error handling with graceful degradation
+  - Full support for multi-realm item lookup and price synchronization
+
+---
+
 ## v0.108
 
 ### 🎉 Armory Features

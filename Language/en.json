@@ -1002,7 +1002,18 @@
                 "armor_pieces": "Armor Pieces",
                 "jewelry": "Jewelry",
                 "weapons": "Weapons"
-            }
+            },
+            "format_loki": "Format Loki",
+            "format_zenkcraft": "Zenkcraft Format",
+            "stats_title": "STATS",
+            "resists_title": "RESISTANCES",
+            "skills_title": "SKILLS",
+            "bonuses_title": "BONUSES",
+            "equipment_title": "EQUIPMENT",
+            "equipment_count": "{count}/18 slots",
+            "currency_summary_title": "CURRENCY SUMMARY",
+            "currency_summary_missing": "{count} item(s) without price",
+            "item_without_price": "item(s) without price"
         },
         "buttons": {
             "import_template": "📥 Import Template",

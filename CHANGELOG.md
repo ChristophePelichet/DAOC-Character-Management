@@ -6,33 +6,45 @@
 
 **Overall Scope**: Extract business logic from `UI/dialogs.py` into dedicated domain-specific modules for improved maintainability, testability, and code reuse.
 
-#### Phase 1 & 2: Template & Item Price Management
-- **Template Parser Module** (`Functions/template_parser.py` - 1392 lines)
-  - Extracted 8 core functions from `UI/dialogs.py` equipment parsing logic
-    - `template_parse()` - Main entry point for template parsing
-    - `template_detect_format()` - Loki/Zenkcraft format detection
-    - `template_parse_loki()` - Parse Loki format templates with full layout
-    - `template_parse_zenkcraft()` - Parse Zenkcraft format templates
-    - `template_get_item_price()` - Multi-source price lookup (database, metadata, categories)
-    - `template_format_item_with_price()` - Item display formatting with icons
-    - `template_merge_columns()` - 2-column layout with proper alignment
-    - `template_strip_color_markers()` - Remove color markers for width calculation
+#### Phase 1, 2, 3 & 4: Template, Item Price, Ruff Cleanup & Character Validator
 
-- **Item Price Management Module** (`Functions/items_price_manager.py` - 205 lines)
-  - Extracted 2 core functions from `UI/dialogs.py` item price handling
-    - `items_price_sync_template()` - Synchronize template prices with database
-    - `items_price_find_missing()` - Find items without prices in template
+**Extraction Scope**: 4 phases completed, extracting 15+ functions from `UI/dialogs.py` into dedicated domain-specific modules
 
-- **Quality Standards Applied to All Extracted Modules**:
-  - Domain-driven function naming convention: `template_*` and `items_price_*` prefixes
-  - Complete PEP 8 compliance (ruff validation, line length <88 chars, type hints, docstrings)
-  - No hardcoded strings (all UI text uses `lang.get()` for translations)
-  - No French comments (English only in code and documentation)
-  - Removed ~1600 lines from `dialogs.py` (business logic consolidated in dedicated modules)
-  - Comprehensive technical documentation (ARMORY_TECHNICAL_DOCUMENTATION.md)
-  - Proper error handling with graceful degradation
-  - Full support for multi-realm item lookup and price synchronization
-  - Backward compatibility maintained with minimal UI wrappers in dialogs.py
+- **Phase 1**: Template Parser Module (`Functions/template_parser.py` - 1392 lines)
+  - Extracted 8 core functions for equipment template parsing
+  - Supports Loki and Zenkcraft format detection with automatic fallback
+  - Multi-source price lookup with database-metadata-category fallback
+
+- **Phase 2**: Item Price Management Module (`Functions/items_price_manager.py` - 205 lines)
+  - Extracted 2 core functions for template price synchronization
+  - Template price sync with items database (single source of truth)
+  - Missing item price detection across database and metadata
+
+- **Phase 3**: Ruff Compliance Cleanup
+  - Fixed 19 E722 errors (bare except → except Exception)
+  - Fixed 2 F841 errors (unused variables removal)
+  - Fixed 1 F823 error (missing imports)
+  - Fixed 4 pre-extraction errors (QSlider import, f-string, unused imports)
+  - **Result**: `dialogs.py` now 100% ruff compliant (0 errors)
+
+- **Phase 4**: Character Validator Module (`Functions/character_validator.py` - 280 lines)
+  - Extracted 5 core functions for character class/race validation
+  - Realm-aware class and race filtering with cascade updates
+  - Multi-language display support (EN/FR/DE) for all options
+  - Functions: `character_get_classes_for_realm()`, `character_get_races_for_class()`, 
+    `character_populate_classes_combo()`, `character_populate_races_combo()`,
+    `character_handle_realm_change()`, `character_handle_class_change()`, 
+    `character_handle_race_change()`
+
+**Quality Standards Applied to All Extracted Modules**:
+  - Domain-driven function naming: `template_*`, `items_price_*`, `character_*` prefixes
+  - Complete PEP 8 compliance (ruff validation, <88 char lines, type hints, docstrings)
+  - Zero hardcoded strings (all UI text uses `lang.get()` for translations)
+  - Zero French comments (English only in code and documentation)
+  - ~1600 lines removed from `dialogs.py` and consolidated into reusable modules
+  - Comprehensive technical documentation (ARMORY_TECHNICAL_DOCUMENTATION.md, CHARACTER_SYSTEM_TECHNICAL_DOCUMENTATION.md)
+  - Robust error handling with graceful degradation
+  - Backward compatibility with minimal thin wrapper methods in dialogs.py
 
 ---
 

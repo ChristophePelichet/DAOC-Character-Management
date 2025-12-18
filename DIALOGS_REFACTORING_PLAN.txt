@@ -3,7 +3,7 @@ DIALOGS.PY REFACTORING PLAN
 ================================================================================
 File: UI/dialogs.py
 Date: 13 December 2025
-Updated: 18 December 2025 (Phase 1 & 2 In Progress - v0.109)
+Updated: 18 December 2025 (Phase 1, 2, 3 & 4 Complete - v0.109)
 Purpose: Extract functions to dedicated modules for better maintainability
 ================================================================================
 
@@ -39,11 +39,11 @@ Status: READY FOR PRODUCTION
 
 ---
 
-✅ PHASE 2: ITEM PRICE MANAGEMENT (IN PROGRESS - v0.109)
+✅ PHASE 2: ITEM PRICE MANAGEMENT (COMPLETED - v0.109)
 ================================================================================
 Target File: Functions/items_price_manager.py (205 lines)
 Extracted: 2 functions from ArmorManagementDialog class
-Date Started: 18 December 2025
+Date Completed: 18 December 2025
 Branch: feature/v0.109-dialogs-phase-2-item-prices
 
 Extracted Functions:
@@ -71,7 +71,95 @@ UI Integration:
 - _sync_template_prices_with_db() calls items_price_sync_template()
 - search_missing_prices() UI logic remains in dialogs.py (UI concern)
 
-Status: INTEGRATION COMPLETE - READY FOR TESTING
+Status: INTEGRATION COMPLETE - MERGED AND INTEGRATED
+
+---
+
+✅ PHASE 3: RUFF COMPLIANCE CLEANUP (COMPLETED - v0.109)
+================================================================================
+Target File: UI/dialogs.py
+Date Completed: 18 December 2025
+Branch: refactor/v0.109-fix-template-parser-ruff
+
+Issues Fixed:
+1. ✅ 19 E722 errors (bare except) → except Exception:
+2. ✅ 2 F841 errors (unused variables) → removed
+3. ✅ 1 F823 error (missing import) → added import
+4. ✅ 4 pre-extraction errors:
+   - QSlider import (F401) - removed unused
+   - items_price_find_missing import (F401) - removed unused  
+   - f-string without placeholder (F541) - removed f prefix
+   - bare except clauses - converted to except Exception:
+
+Quality Metrics:
+- Ruff checks: 0 errors (ignoring E501)
+- Syntax validation: PASSED
+- All HTML F-strings preserved (ignored per requirements)
+
+Status: INTEGRATION COMPLETE - MERGED AND INTEGRATED
+
+---
+
+✅ PHASE 4: CHARACTER VALIDATOR EXTRACTION (COMPLETED - v0.109)
+================================================================================
+Target File: Functions/character_validator.py (280 lines)
+Extracted: 7 functions from CharacterSheetWindow class
+Date Completed: 18 December 2025
+Branch: refactor/v0.109-character-validator-extraction
+
+Extracted Functions:
+1. ✅ character_get_classes_for_realm(data_manager, realm)
+   - Retrieves classes available for specified realm
+   - Returns list of class dictionaries with translations
+
+2. ✅ character_get_races_for_class(data_manager, realm, class_name=None)
+   - Retrieves races for realm, optionally filtered by class
+   - Supports realm-class combination validation
+
+3. ✅ character_populate_classes_combo(combo_widget, data_manager, realm)
+   - Populates QComboBox with translated class names
+   - Stores actual class name as item data
+
+4. ✅ character_populate_races_combo(combo_widget, data_manager, realm, class_name=None)
+   - Populates QComboBox with translated race names
+   - Filters by class if specified
+
+5. ✅ character_handle_realm_change(combo_realm, combo_class, combo_race, data_manager, character_data)
+   - Handles realm dropdown changes with cascade updates
+   - Updates both class and race dropdowns automatically
+   - Updates character_data
+
+6. ✅ character_handle_class_change(combo_class, combo_race, data_manager, realm, character_data)
+   - Handles class dropdown changes
+   - Filters race dropdown to valid combinations
+   - Updates character_data
+
+7. ✅ character_handle_race_change(combo_race, character_data)
+   - Handles race dropdown changes
+   - Updates character_data with new race
+
+Quality Metrics:
+- PEP 8 compliant (ruff validation: 0 errors, ignoring E501)
+- No hardcoded strings (uses config.get("ui.language") for all UI text)
+- No French comments (100% English docstrings and comments)
+- Complete type hints and comprehensive docstrings
+- Proper error handling with logging
+- Syntax validation: PASSED
+- Multi-language support (EN/FR/DE) for display names
+
+UI Integration:
+- Thin wrapper methods in CharacterSheetWindow (minimal logic)
+- _populate_classes_sheet() → character_populate_classes_combo()
+- _populate_races_sheet() → character_populate_races_combo()
+- _on_realm_changed_sheet() → character_handle_realm_change()
+- _on_class_changed_sheet() → character_handle_class_change()
+- _on_race_changed_sheet() → character_handle_race_change()
+- Banner updates kept in dialogs.py (UI concern)
+
+Removed from dialogs.py: ~80 lines of business logic
+Code added to character_validator.py: ~280 lines
+
+Status: INTEGRATION COMPLETE - READY FOR COMMIT
 
 ---
 
@@ -111,7 +199,7 @@ Naming Convention: character_{action}_{object}
     Notes: Triggers banner update
 
 
-GROUP 4: REALM RANK CALCULATIONS (Medium Priority)
+GROUP 5: REALM RANK CALCULATIONS (Medium Priority - Phase 5)
 ================================================================================
 Current Location: CharacterSheetWindow class
 Target File: Functions/realm_rank_calculator.py
@@ -136,7 +224,7 @@ Naming Convention: realm_rank_{action}_{object}
     Notes: Enforces min level requirements per rank
 
 
-GROUP 5: HERALD SCRAPING LOGIC (High Priority)
+GROUP 6: HERALD SCRAPING LOGIC (High Priority - Phase 6)
 ================================================================================
 Current Location: CharacterSheetWindow, HeraldSearchDialog
 Target File: Functions/herald_integration.py
@@ -167,7 +255,7 @@ Naming Convention: herald_{action}_{object}
     Notes: Selective update for RvR stats only
 
 
-GROUP 6: CHARACTER BANNER MANAGEMENT (Low Priority)
+GROUP 7: CHARACTER BANNER MANAGEMENT (Low Priority - Phase 7)
 ================================================================================
 Current Location: CharacterSheetWindow class
 Target File: Functions/character_banner.py
@@ -186,7 +274,7 @@ Naming Convention: banner_{action}_{object}
     Notes: Shows colored placeholder with text
 
 
-GROUP 7: HERALD URL VALIDATION (Medium Priority)
+GROUP 8: HERALD URL VALIDATION (Medium Priority - Phase 8)
 ================================================================================
 Current Location: CharacterSheetWindow class
 Target File: Functions/herald_url_validator.py

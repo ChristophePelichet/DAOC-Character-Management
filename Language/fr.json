@@ -1002,7 +1002,18 @@
                 "armor_pieces": "Pièces d'armure",
                 "jewelry": "Bijoux",
                 "weapons": "Armes"
-            }
+            },
+            "format_loki": "Format Loki",
+            "format_zenkcraft": "Format Zenkcraft",
+            "stats_title": "STATS",
+            "resists_title": "RÉSISTANCES",
+            "skills_title": "COMPÉTENCES",
+            "bonuses_title": "BONUS",
+            "equipment_title": "ÉQUIPEMENT",
+            "equipment_count": "{count}/18 emplacements",
+            "currency_summary_title": "RÉSUMÉ DES DEVISES",
+            "currency_summary_missing": "{count} article(s) sans prix",
+            "item_without_price": "article(s) sans prix"
         },
         "buttons": {
             "import_template": "📥 Importer un template",

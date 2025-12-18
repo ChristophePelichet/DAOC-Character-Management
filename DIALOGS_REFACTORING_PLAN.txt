@@ -3,7 +3,7 @@ DIALOGS.PY REFACTORING PLAN
 ================================================================================
 File: UI/dialogs.py
 Date: 13 December 2025
-Updated: 18 December 2025 (Phase 1 Complete - v0.109)
+Updated: 18 December 2025 (Phase 1 & 2 In Progress - v0.109)
 Purpose: Extract functions to dedicated modules for better maintainability
 ================================================================================
 
@@ -37,45 +37,61 @@ Quality Metrics:
 
 Status: READY FOR PRODUCTION
 
+---
 
-GROUP 2: ITEM PRICE MANAGEMENT (High Priority)
+✅ PHASE 2: ITEM PRICE MANAGEMENT (IN PROGRESS - v0.109)
 ================================================================================
-Current Location: ArmorManagementDialog class
-Target File: Functions/item_price_manager.py
-Naming Convention: price_{action}_{object}
+Target File: Functions/items_price_manager.py (205 lines)
+Extracted: 2 functions from ArmorManagementDialog class
+Date Started: 18 December 2025
+Branch: feature/v0.109-dialogs-phase-2-item-prices
 
-9. Function: _sync_template_prices_with_db()
-   Purpose: Update item prices in template metadata from DB
-   Lines: ~3141-3198
-   New Name: price_sync_template()
-   Notes: Updates .metadata.json with latest prices
+Extracted Functions:
+1. ✅ items_price_sync_template() - Sync template prices with database
+   - Removes duplicate prices from JSON when found in DB
+   - Ensures database is single source of truth
+   - Returns count of items synced
+   
+2. ✅ items_price_find_missing() - Find items without prices in template
+   - Searches both database and metadata for prices
+   - Returns list of items missing prices
+   - Includes detailed status for each item
 
-10. Function: search_missing_prices()
-    Purpose: Find items without prices in templates
-    Lines: ~4881-4918
-    New Name: price_find_missing_items()
-    Notes: Opens SearchMissingPricesDialog
+Quality Metrics:
+- PEP 8 compliant (line length <88 chars, all lines verified)
+- No hardcoded strings (no user-facing text in module)
+- No French comments (English-only docstrings and comments)
+- Complete type hints and documentation
+- Proper error handling with logging
+- Syntax validation: PASSED
+- Integration testing: PASSED
 
+UI Integration:
+- dialogs.py methods kept as thin wrappers for backward compatibility
+- _sync_template_prices_with_db() calls items_price_sync_template()
+- search_missing_prices() UI logic remains in dialogs.py (UI concern)
+
+Status: INTEGRATION COMPLETE - READY FOR TESTING
+
+---
+
+FUTURE PHASES (NOT STARTED)
+================================================================================
 
 GROUP 3: CHARACTER DATA VALIDATION (Medium Priority)
 ================================================================================
 Current Location: CharacterSheetWindow class
 Target File: Functions/character_validator.py
 Naming Convention: character_{action}_{object}
-Target File: Functions/character_validator.py
 
 11. Function: _populate_classes_sheet()
     Purpose: Populate class dropdown based on realm
-    Lines: ~697-716
     New Name: character_get_classes_for_realm()
-    Notes: Returns list of classes for given realm
-
+    
 12. Function: _populate_races_sheet()
     Purpose: Populate race dropdown based on class
-    Lines: ~718-748
     New Name: character_get_races_for_class()
-    Notes: Returns list of compatible races
-
+    
 13. Function: _on_realm_changed_sheet()
     Purpose: Update class/race dropdowns when realm changes
     Lines: ~750-756

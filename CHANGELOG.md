@@ -6,9 +6,9 @@
 
 **Overall Scope**: Extract business logic from `UI/dialogs.py` into dedicated domain-specific modules for improved maintainability, testability, and code reuse.
 
-#### Phase 1, 2, 3 & 4: Template, Item Price, Ruff Cleanup & Character Validator
+#### Phase 1, 2, 3, 4 & 5: Template, Item Price, Ruff Cleanup, Character Validator & Realm Rank
 
-**Extraction Scope**: 4 phases completed, extracting 15+ functions from `UI/dialogs.py` into dedicated domain-specific modules
+**Extraction Scope**: 5 phases completed, extracting 18+ functions from `UI/dialogs.py` into dedicated domain-specific modules
 
 - **Phase 1**: Template Parser Module (`Functions/template_parser.py` - 1392 lines)
   - Extracted 8 core functions for equipment template parsing
@@ -36,12 +36,20 @@
     `character_handle_realm_change()`, `character_handle_class_change()`, 
     `character_handle_race_change()`
 
+- **Phase 5**: Character Realm Rank Calculator Module (`Functions/character_rr_calculator.py` - 209 lines)
+  - Extracted 3 core functions for realm rank calculations
+  - Rank determination from realm points with multi-realm support
+  - Level filtering based on rank restrictions (Rank 1: 0-10, Others: 0-9)
+  - Progression information calculation to next rank level
+  - Functions: `character_rr_get_valid_levels()`, `character_rr_calculate_points_info()`,
+    `character_rr_calculate_from_points()`
+
 **Quality Standards Applied to All Extracted Modules**:
-  - Domain-driven function naming: `template_*`, `items_price_*`, `character_*` prefixes
+  - Domain-driven function naming: `template_*`, `items_price_*`, `character_*`, `character_rr_*` prefixes
   - Complete PEP 8 compliance (ruff validation, <88 char lines, type hints, docstrings)
   - Zero hardcoded strings (all UI text uses `lang.get()` for translations)
   - Zero French comments (English only in code and documentation)
-  - ~1600 lines removed from `dialogs.py` and consolidated into reusable modules
+  - ~1700 lines removed from `dialogs.py` and consolidated into reusable modules
   - Comprehensive technical documentation (ARMORY_TECHNICAL_DOCUMENTATION.md, CHARACTER_SYSTEM_TECHNICAL_DOCUMENTATION.md)
   - Robust error handling with graceful degradation
   - Backward compatibility with minimal thin wrapper methods in dialogs.py

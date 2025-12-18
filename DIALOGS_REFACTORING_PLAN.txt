@@ -163,10 +163,51 @@ Status: INTEGRATION COMPLETE - READY FOR COMMIT
 
 ---
 
+✅ PHASE 5: CHARACTER REALM RANK CALCULATOR EXTRACTION (COMPLETED - v0.109)
+================================================================================
+Target File: Functions/character_rr_calculator.py (209 lines)
+Extracted: 3 functions from CharacterSheetWindow class
+Date Completed: 18 December 2025
+Branch: refactor/v0.109-realm-rank-extraction
+
+Extracted Functions:
+1. ✅ character_rr_get_valid_levels(rank)
+   - Get valid level range for a given realm rank
+   - Rank 1: levels 0-10, Ranks 2-14: levels 0-9
+   - Returns list of valid level numbers
+
+2. ✅ character_rr_calculate_points_info(data_manager, realm, rank, level)
+   - Get progression information to next rank level
+   - Returns: current_points, next_points, percentage, level_str
+
+3. ✅ character_rr_calculate_from_points(data_manager, realm, realm_points)
+   - Calculate rank/level from realm points
+   - Normalizes string input and handles fallback
+
+Quality Metrics:
+- PEP 8 compliant (ruff: 0 errors)
+- No hardcoded strings
+- No French comments (100% English)
+- Complete type hints and docstrings
+- Syntax validation: PASSED
+
+UI Integration:
+- Thin wrappers in CharacterSheetWindow
+- update_level_dropdown() → character_rr_get_valid_levels()
+- update_rp_info() → character_rr_calculate_points_info()
+- update_rank_display() → character_rr_calculate_from_points()
+
+Removed from dialogs.py: ~50 lines
+Code added to character_rr_calculator.py: ~209 lines
+
+Status: INTEGRATION COMPLETE - READY FOR COMMIT
+
+---
+
 FUTURE PHASES (NOT STARTED)
 ================================================================================
 
-GROUP 3: CHARACTER DATA VALIDATION (Medium Priority)
+GROUP 6: HERALD SCRAPING LOGIC (High Priority - Phase 6)
 ================================================================================
 Current Location: CharacterSheetWindow class
 Target File: Functions/character_validator.py

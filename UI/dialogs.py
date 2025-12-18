@@ -34,6 +34,10 @@ from Functions.character_validator import (
     character_handle_realm_change, character_handle_class_change,
     character_handle_race_change
 )
+from Functions.character_rr_calculator import (
+    character_rr_get_valid_levels, character_rr_calculate_points_info,
+    character_rr_calculate_from_points
+)
 from UI.template_import_dialog import TemplateImportDialog
 
 # Get CHARACTER logger
@@ -754,55 +758,56 @@ class CharacterSheetWindow(QDialog):
     
     def update_level_dropdown(self, rank, current_level=1):
         """Updates level dropdown based on selected rank."""
-        self.level_combo_rank.blockSignals(True)  # Prevent triggering change event
+        self.level_combo_rank.blockSignals(True)
         self.level_combo_rank.clear()
-        
-        # Rank 1 has levels 0-10, others have 0-9
-        max_level = 10 if rank == 1 else 9
-        for i in range(0, max_level + 1):
-            self.level_combo_rank.addItem(f"L{i}", i)
-        
+
+        valid_levels = character_rr_get_valid_levels(rank)
+        for level in valid_levels:
+            self.level_combo_rank.addItem(f"L{level}", level)
+
         # Set current level
-        if current_level <= max_level:
+        if current_level <= valid_levels[-1]:
             self.level_combo_rank.setCurrentIndex(current_level)
         else:
             self.level_combo_rank.setCurrentIndex(0)
-        
+
         self.level_combo_rank.blockSignals(False)
     
     def update_rp_info(self):
         """Updates RP display for the selected rank/level."""
         if not hasattr(self.parent_app, 'data_manager'):
             return
-        
+
         rank = self.rank_combo.currentData()
         level = self.level_combo_rank.currentData()
-        level_str = f"{rank}L{level}"
-        
-        # Find RP for this level and update the main display
-        rank_info = self.parent_app.data_manager.get_rank_by_level(self.realm, level_str)
-        if rank_info:
-            self.rank_title_label.setText(
-                f"Rank {rank_info['rank']} - {rank_info['title']} ({rank_info['level']} - {rank_info['realm_points']:,} RP)"
-            )
+
+        info = character_rr_calculate_points_info(
+            self.parent_app.data_manager, self.realm, rank, level
+        )
+
+        if info:
+            level_str = info.get('current_level_str', f"{rank}L{level}")
+            rank_data = self.parent_app.data_manager.get_rank_by_level(self.realm, level_str)
+            if rank_data:
+                self.rank_title_label.setText(
+                    f"Rank {rank_data['rank']} - {rank_data['title']} "
+                    f"({rank_data['level']} - {rank_data['realm_points']:,} RP)"
+                )
     
     def update_rank_display(self, realm_points):
         """Updates current rank and title display."""
-        # Convert realm_points to integer if it's a string
-        if isinstance(realm_points, str):
-            realm_points = int(realm_points.replace(' ', '').replace('\xa0', '').replace(',', ''))
-        
-        if hasattr(self.parent_app, 'data_manager'):
-            rank_info = self.parent_app.data_manager.get_realm_rank_info(self.realm, realm_points)
-            if rank_info:
-                self.rank_title_label.setText(
-                    f"Rank {rank_info['rank']} - {rank_info['title']} ({rank_info['level']} - {realm_points:,} RP)"
-                )
-            else:
-                self.rank_title_label.setText("Rank 1 - Guardian (1L1 - 0 RP)")
-        else:
-            realm_rank = self.character_data.get('realm_rank', '1L1')
-            self.rank_title_label.setText(f"{realm_rank} - {realm_points:,} RP")
+        if not hasattr(self.parent_app, 'data_manager'):
+            return
+
+        rank_info = character_rr_calculate_from_points(
+            self.parent_app.data_manager, self.realm, realm_points
+        )
+
+        if rank_info:
+            self.rank_title_label.setText(
+                f"Rank {rank_info['rank']} - {rank_info['title']} "
+                f"({rank_info['level']} - {rank_info['realm_points']:,} RP)"
+            )
     
     def auto_apply_rank(self):
         """Automatically applies the selected rank to the character (no confirmation)."""

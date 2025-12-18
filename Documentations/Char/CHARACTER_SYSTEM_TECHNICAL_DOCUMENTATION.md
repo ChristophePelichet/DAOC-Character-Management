@@ -1,9 +1,9 @@
 # 👤 Character System - Technical Documentation
 
-**Version**: 2.0  
+**Version**: 2.1  
 **Date**: December 2025  
-**Last Updated**: December 18, 2025 (Character Validator module added - Phase 4)  
-**Component**: `UI/dialogs.py` (CharacterSheetWindow), `Functions/character_validator.py`  
+**Last Updated**: December 18, 2025 (Character RR Calculator module added - Phase 5)  
+**Components**: `UI/dialogs.py` (CharacterSheetWindow), `Functions/character_validator.py`, `Functions/character_rr_calculator.py`  
 **Related**: `Functions/character_manager.py`, `Functions/character_schema.py`, `Functions/character_migration.py`
 
 ---
@@ -12,12 +12,13 @@
 
 1. [Overview](#overview)
 2. [Character Validator Module (Phase 4)](#character-validator-module-phase-4)
-3. [Character Schema](#character-schema)
-4. [Migration System](#migration-system)
-5. [Integration](#integration)
-6. [Error Handling](#error-handling)
-7. [Usage Guide](#usage-guide)
-8. [Implementation Progress](#implementation-progress)
+3. [Character RR Calculator Module (Phase 5)](#character-rr-calculator-module-phase-5)
+4. [Character Schema](#character-schema)
+5. [Migration System](#migration-system)
+6. [Integration](#integration)
+7. [Error Handling](#error-handling)
+8. [Usage Guide](#usage-guide)
+9. [Implementation Progress](#implementation-progress)
 
 ---
 
@@ -26,6 +27,7 @@
 The Character System provides comprehensive character management including:
 
 - **Character Data Validation**: Class/race validation and dropdown population with multi-language support
+- **Character Realm Rank**: RR calculations, level filtering, and progression tracking
 - **Character Schema**: Strict validation of character JSON structure
 - **Character Migration**: Automatic migration from old flat structure to season-based hierarchy
 - **Character UI**: Character sheet with real-time data updates
@@ -34,6 +36,8 @@ The Character System provides comprehensive character management including:
 
 - ✅ **Multi-language support** (EN/FR/DE) for class and race names
 - ✅ **Realm-aware class/race filtering** for valid game combinations
+- ✅ **Realm Rank calculations** from realm points with progression info
+- ✅ **Level filtering** based on rank restrictions
 - ✅ **Automatic data persistence** with character_data updates
 - ✅ **Cascade updates** when realm or class changes
 - ✅ **Schema validation** with strict requirements
@@ -43,9 +47,10 @@ The Character System provides comprehensive character management including:
 ### System Components
 
 1. **Character Validator** - Class/race management and validation (Phase 4)
-2. **Character Schema** - Data structure definition and validation
-3. **Character Migration** - Automatic old→new structure migration
-4. **Character Manager** - Main integration and lifecycle management
+2. **Character RR Calculator** - Realm rank calculations and level management (Phase 5)
+3. **Character Schema** - Data structure definition and validation
+4. **Character Migration** - Automatic old→new structure migration
+5. **Character Manager** - Main integration and lifecycle management
 
 ---
 
@@ -290,6 +295,192 @@ def character_handle_race_change(combo_race, character_data: dict) -> str
 3. Returns new race name
 
 **Note**: Currently a placeholder. Future enhancements could include banner updates or race-specific logic.
+
+---
+
+## Character RR Calculator Module (Phase 5)
+
+### Overview
+
+The Character RR Calculator module (`Functions/character_rr_calculator.py`) provides functions for character realm rank calculations, including rank determination from realm points, level filtering based on rank restrictions, and progression information to the next rank level.
+
+**Extracted from**: `UI/dialogs.py` CharacterSheetWindow class  
+**Date Completed**: December 18, 2025  
+**Lines Removed from dialogs.py**: ~50  
+**Lines in new module**: ~200  
+**Functions Extracted**: 3
+
+### Architecture
+
+#### Core Functions
+
+The module provides 3 main functions for realm rank management:
+
+```python
+# Level management
+character_rr_get_valid_levels(rank) -> list
+
+# Progression information
+character_rr_calculate_points_info(data_manager, realm, rank, level) -> dict
+
+# Rank calculation from points
+character_rr_calculate_from_points(data_manager, realm, realm_points) -> dict
+```
+
+#### Realm Rank System
+
+- **14 Ranks** (1-14) with multiple levels per rank
+- **Rank 1**: levels 0-10 (11 levels)
+- **Ranks 2-14**: levels 0-9 (10 levels each)
+- **Data Source**: `realm_ranks.json` (loaded via DataManager)
+- **Level String Format**: `{rank}L{level}` (e.g., "5L3" for Rank 5 Level 3)
+
+### Function Reference
+
+#### 1. character_rr_get_valid_levels()
+
+**Purpose**: Get valid level range for a given realm rank
+
+**Signature**:
+```python
+def character_rr_get_valid_levels(rank: int) -> list
+```
+
+**Parameters**:
+- `rank` (int): Realm rank number (1-14)
+
+**Returns**:
+- List of valid level numbers for this rank
+- Rank 1: [0, 1, 2, ..., 10]
+- Other ranks: [0, 1, 2, ..., 9]
+
+**Example**:
+```python
+levels = character_rr_get_valid_levels(1)
+# Returns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+levels = character_rr_get_valid_levels(5)
+# Returns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+```
+
+#### 2. character_rr_calculate_points_info()
+
+**Purpose**: Get progression information from current rank/level to next level
+
+**Signature**:
+```python
+def character_rr_calculate_points_info(data_manager, realm: str, rank: int, level: int) -> dict
+```
+
+**Parameters**:
+- `data_manager`: DataManager instance for accessing rank data
+- `realm` (str): Realm name (e.g., 'Albion', 'Midgard', 'Hibernia')
+- `rank` (int): Current realm rank (1-14)
+- `level` (int): Current level within rank (0-10 for rank 1, 0-9 for others)
+
+**Returns**:
+```python
+{
+    'current_points': int,        # RP at current level
+    'next_points': int,           # RP at next level
+    'percentage': float,          # Completion % (0-100)
+    'current_level_str': str     # e.g., "1L5"
+}
+```
+
+**Behavior**:
+1. Constructs level string from rank and level
+2. Looks up current rank info from data_manager
+3. Determines next level (or next rank if at max level)
+4. Calculates progression percentage
+5. Returns dict with all progression info
+
+**Example**:
+```python
+info = character_rr_calculate_points_info(
+    data_manager, 'Albion', 1, 5
+)
+# Returns:
+# {
+#     'current_points': 12345,
+#     'next_points': 15000,
+#     'percentage': 23.5,
+#     'current_level_str': '1L5'
+# }
+```
+
+#### 3. character_rr_calculate_from_points()
+
+**Purpose**: Calculate realm rank and level from total realm points
+
+**Signature**:
+```python
+def character_rr_calculate_from_points(data_manager, realm: str, realm_points) -> dict
+```
+
+**Parameters**:
+- `data_manager`: DataManager instance for accessing rank data
+- `realm` (str): Realm name (e.g., 'Albion', 'Midgard', 'Hibernia')
+- `realm_points` (int or str): Total realm points (handles string with commas/spaces)
+
+**Returns**:
+```python
+{
+    'rank': int,              # Rank number (1-14)
+    'level': int,             # Level within rank (0-10 or 0-9)
+    'title': str,             # Rank title (e.g., "Guardian", "Hero")
+    'level_str': str,         # e.g., "1L5"
+    'realm_points': int      # Total realm points
+}
+```
+
+**Behavior**:
+1. Normalizes realm_points (removes commas, spaces, non-breaking spaces)
+2. Calls `data_manager.get_realm_rank_info()` for lookup
+3. Returns rank info or falls back to Rank 1 Guardian if lookup fails
+4. Graceful error handling with logging
+
+**Example**:
+```python
+info = character_rr_calculate_from_points(
+    data_manager, 'Albion', 1500000
+)
+# Returns:
+# {
+#     'rank': 5,
+#     'level': 3,
+#     'title': 'Hero',
+#     'level_str': '5L3',
+#     'realm_points': 1500000
+# }
+
+# Also handles string input with formatting
+info = character_rr_calculate_from_points(
+    data_manager, 'Albion', "1,500,000"
+)
+# Works the same way - normalizes the string
+```
+
+### Integration with dialogs.py
+
+The CharacterSheetWindow class uses thin wrapper methods that call the calculator functions:
+
+```python
+# Update level dropdown with valid levels for rank
+valid_levels = character_rr_get_valid_levels(rank)
+for level in valid_levels:
+    self.level_combo_rank.addItem(f"L{level}", level)
+
+# Get progression info for display
+info = character_rr_calculate_points_info(
+    self.parent_app.data_manager, self.realm, rank, level
+)
+
+# Calculate rank from realm points
+rank_info = character_rr_calculate_from_points(
+    self.parent_app.data_manager, self.realm, realm_points
+)
+```
 
 ### Integration with dialogs.py
 
@@ -569,18 +760,50 @@ Characters/
 - ✅ Ruff checks: 0 errors (ignoring E501)
 - ✅ Syntax validation: ✅ PASSED
 
+### Phase 5: Character RR Calculator Extraction (In Progress - Dec 18, 2025)
+
+**Status**: 🔄 IN PROGRESS
+
+**What Is Being Done**:
+1. ✅ Created `Functions/character_rr_calculator.py` (200 lines)
+2. ✅ Extracted 3 functions from CharacterSheetWindow
+3. ✅ Updated dialogs.py with thin wrapper methods
+4. ✅ Implemented realm rank calculations
+5. ✅ Added level filtering based on rank restrictions
+6. ✅ Added progression information calculation
+7. ✅ Ruff validation: All checks passed
+8. ✅ Syntax validation: All checks passed
+
+**Functions Extracted**:
+- `character_rr_get_valid_levels()` - Get valid level range for rank
+- `character_rr_calculate_points_info()` - Get progression to next level
+- `character_rr_calculate_from_points()` - Calculate rank from realm points
+
+**Code Removed from dialogs.py**: ~50 lines  
+**Code Added to character_rr_calculator.py**: ~200 lines  
+**Net Impact**: Realm rank calculations isolated and reusable
+
+**Quality Metrics**:
+- ✅ PEP 8 compliant
+- ✅ Type hints complete
+- ✅ Docstrings comprehensive
+- ✅ Error handling robust
+- ✅ Ruff checks: 0 errors (ignoring E501)
+- ✅ Syntax validation: ✅ PASSED
+
 ---
 
 ## Commit Information
 
-**Branch**: `refactor/v0.109-character-validator-extraction`  
+**Branch**: `refactor/v0.109-realm-rank-extraction`  
 **Related Phases**:
-- Phase 1: Template Parser extraction (refactor/v0.109-dialogs-cleanup) ✅
-- Phase 2: Item Price Manager extraction (refactor/v0.109-dialogs-cleanup) ✅
-- Phase 3: Ruff cleanup (refactor/v0.109-fix-template-parser-ruff) ✅
-- Phase 4: Character Validator extraction (current branch) ✅
+- Phase 1: Template Parser extraction ✅
+- Phase 2: Item Price Manager extraction ✅
+- Phase 3: Ruff cleanup ✅
+- Phase 4: Character Validator extraction ✅
+- Phase 5: Character RR Calculator extraction (in progress)
 
 ---
 
 **Documentation Last Updated**: December 18, 2025
-**Next Phase**: Realm Rank Calculations extraction
+**Next Phase**: Herald Scraping Logic extraction (Phase 6)

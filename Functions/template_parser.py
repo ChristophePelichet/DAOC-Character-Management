@@ -534,8 +534,6 @@ def template_parse_loki(
         )
         max_len = max(max_len, 35)
 
-        ITEM_DISPLAY_WIDTH = 70
-
         items_without_price = []
         currency_totals_temp = defaultdict(int)
 
@@ -543,11 +541,11 @@ def template_parse_loki(
             output.append(f"    🛡️  {lang.get('armoury_dialog.preview.equipment_categories.armor_pieces')} :")
             for item in armor_items:
                 clean_item_text = f"{item['name']} ({item['slot']})"
-                
+
                 price_str, price_source, item_category = template_get_item_price(
                     item['name'], realm, db_manager, metadata
                 )
-                
+
                 # Add clickable model icon ONLY if item exists in DB and has visual model
                 if item['slot'] in MODEL_SLOTS and (price_str or (item_category and item_category != "unknown")):
                     model_icon = f'<a href="model:{item["name"]}" style="text-decoration:none; color:#4CAF50;">🔍</a> '
@@ -629,11 +627,11 @@ def template_parse_loki(
                     # Build left column
                     if left_item:
                         clean_left_text = f"{left_item['name']} ({left_item['slot']})"
-                        
+
                         left_price_str, left_price_source, left_item_category = template_get_item_price(
                             left_item['name'], realm, db_manager, metadata
                         )
-                        
+
                         # Add clickable model icon ONLY if item exists in DB and has visual model
                         if left_item['slot'] in MODEL_SLOTS and (left_price_str or (left_item_category and left_item_category != "unknown")):
                             model_icon = f'<a href="model:{left_item["name"]}" style="text-decoration:none; color:#4CAF50;">🔍</a> '
@@ -671,11 +669,11 @@ def template_parse_loki(
                     # Build right column
                     if right_item:
                         clean_right_text = f"{right_item['name']} ({right_item['slot']})"
-                        
+
                         right_price_str, right_price_source, right_item_category = template_get_item_price(
                             right_item['name'], realm, db_manager, metadata
                         )
-                        
+
                         # Add clickable model icon ONLY if item exists in DB and has visual model
                         if right_item['slot'] in MODEL_SLOTS and (right_price_str or (right_item_category and right_item_category != "unknown")):
                             model_icon = f'<a href="model:{right_item["name"]}" style="text-decoration:none; color:#4CAF50;">🔍</a> '
@@ -718,11 +716,11 @@ def template_parse_loki(
             output.append(f"    ⚔️  {lang.get('armoury_dialog.preview.equipment_categories.weapons')} :")
             for item in weapon_items:
                 clean_item_text = f"{item['name']} ({item['slot']})"
-                
+
                 price_str, price_source, item_category = template_get_item_price(
                     item['name'], realm, db_manager, metadata
                 )
-                
+
                 # Add clickable model icon ONLY if item exists in DB and has visual model
                 if item['slot'] in MODEL_SLOTS and (price_str or (item_category and item_category != "unknown")):
                     model_icon = f'<a href="model:{item["name"]}" style="text-decoration:none; color:#4CAF50;">🔍</a> '
@@ -1153,14 +1151,14 @@ def template_parse_zenkcraft(
             for item in armor_items:
                 item_name = item['name']
                 item_text = f"{item_name} ({item['slot']})"
-                
+
                 # Try to get model ID from database
                 model_id = None
                 if db_manager:
                     try:
                         item_name_lower = item_name.lower()
                         realm_lower = realm.lower() if realm else "all"
-                        
+
                         # Search for item in DB
                         search_key = f"{item_name_lower}:{realm_lower}"
                         item_data = db_manager.search_item(search_key)
@@ -1169,16 +1167,16 @@ def template_parse_zenkcraft(
                             item_data = db_manager.search_item(search_key)
                         if not item_data:
                             item_data = db_manager.search_item(item_name)
-                        
+
                         if item_data:
                             model_id = item_data.get('model') or item_data.get('model_id')
                     except:
                         pass
-                
+
                 # Add model icon if model exists
                 if model_id:
                     item_text = f'<a href="model:{item_name}" style="text-decoration:none; color:#4CAF50;">🔍</a> {item_text}'
-                
+
                 price_str, price_source, item_category = get_item_price(item_name)
                 padding = max_len - len(f"{item_name} ({item['slot']})")
                 display = format_item_display(item_name, price_str, price_source, item_category)
@@ -1245,18 +1243,18 @@ def template_parse_zenkcraft(
                 # Build left column
                 if left_item:
                     clean_left_text = f"{left_item['name']} ({left_item['slot']})"
-                    
+
                     left_price_str, left_price_source, left_item_category = template_get_item_price(
                         left_item['name'], realm, db_manager, metadata
                     )
-                    
+
                     # Add clickable model icon ONLY if item is Cloak and exists in DB
                     if left_item['slot'] in MODEL_SLOTS and (left_price_str or (left_item_category and left_item_category != "unknown")):
                         model_icon = f'<a href="model:{left_item["name"]}" style="text-decoration:none; color:#4CAF50;">🔍</a> '
                         left_text = f"{model_icon}{clean_left_text}"
                     else:
                         left_text = clean_left_text
-                    
+
                     # Calculate padding based on clean text, apply to padded text
                     padding_needed = max_item_name_width - len(clean_left_text)
                     left_text_padded = left_text + (' ' * padding_needed)
@@ -1281,18 +1279,18 @@ def template_parse_zenkcraft(
                 # Build right column
                 if right_item:
                     clean_right_text = f"{right_item['name']} ({right_item['slot']})"
-                    
+
                     right_price_str, right_price_source, right_item_category = template_get_item_price(
                         right_item['name'], realm, db_manager, metadata
                     )
-                    
+
                     # Add clickable model icon ONLY if item is Cloak and exists in DB
                     if right_item['slot'] in MODEL_SLOTS and (right_price_str or (right_item_category and right_item_category != "unknown")):
                         model_icon = f'<a href="model:{right_item["name"]}" style="text-decoration:none; color:#4CAF50;">🔍</a> '
                         right_text = f"{model_icon}{clean_right_text}"
                     else:
                         right_text = clean_right_text
-                    
+
                     # Calculate padding based on clean text, apply to padded text
                     padding_needed = max_item_name_width - len(clean_right_text)
                     right_text_padded = right_text + (' ' * padding_needed)
@@ -1326,7 +1324,7 @@ def template_parse_zenkcraft(
             for item in weapon_items:
                 item_name = item['name']
                 item_text = f"{item_name} ({item['slot']})"
-                
+
                 # Try to get model ID from database
                 model_id = None
                 if db_manager:
@@ -1344,11 +1342,11 @@ def template_parse_zenkcraft(
                             model_id = item_data.get('model') or item_data.get('model_id')
                     except:
                         pass
-                
+
                 # Add model icon if model exists
                 if model_id:
                     item_text = f'<a href="model:{item_name}" style="text-decoration:none; color:#4CAF50;">🔍</a> {item_text}'
-                
+
                 price_str, price_source, item_category = get_item_price(item_name)
                 padding = max_len - len(f"{item_name} ({item['slot']})")
                 display = format_item_display(item_name, price_str, price_source, item_category)

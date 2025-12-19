@@ -5,13 +5,17 @@ Debug window and logging utilities for the DAOC Character Manager.
 import logging
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QGroupBox, 
-    QTextEdit, QPushButton, QLineEdit, QSplitter, QFileDialog, QLabel,
+    QTextEdit, QPushButton, QLineEdit, QSplitter, QLabel,
     QComboBox
 )
-from PySide6.QtCore import QThread, QObject, Signal, Slot, Qt
+from PySide6.QtCore import QThread, Signal, Slot, Qt
 from PySide6.QtGui import QAction, QActionGroup
 from Functions.language_manager import lang
 from Functions.logging_manager import ALL_LOGGERS
+from UI.ui_file_dialogs import (
+    dialog_open_file,
+    dialog_save_file
+)
 
 
 class QTextEditHandler(logging.Handler):
@@ -299,12 +303,7 @@ class DebugWindow(QMainWindow):
 
     def browse_log_file(self):
         """Open a file dialog to select a log file to monitor."""
-        filepath, _ = QFileDialog.getOpenFileName(
-            self, 
-            lang.get("debug_log_reader_pane_title"), 
-            "", 
-            "Log files (*.log);;All files (*.*)"
-        )
+        filepath = dialog_open_file(self, "debug_log_reader_pane_title")
         if filepath:
             self.log_file_path_edit.setText(filepath)
             self.start_log_monitoring(filepath)
@@ -453,15 +452,7 @@ class EdenDebugWindow(QMainWindow):
     
     def export_logs(self):
         """Exporte les logs dans un fichier"""
-        from datetime import datetime
-        filename = f"eden_debug_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
-        
-        file_path, _ = QFileDialog.getSaveFileName(
-            self,
-            "Exporter les logs Eden",
-            filename,
-            "Fichiers texte (*.txt);;Tous les fichiers (*.*)"
-        )
+        file_path = dialog_save_file(self, "debug_export_logs_title")
         
         if file_path:
             try:

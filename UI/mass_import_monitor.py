@@ -7,13 +7,17 @@ import logging
 from datetime import datetime
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QGroupBox,
-    QTextEdit, QPushButton, QLabel, QProgressBar, QFileDialog,
-    QGridLayout, QFrame, QComboBox, QCheckBox
+    QTextEdit, QPushButton, QLabel, QProgressBar,
+    QGridLayout, QComboBox, QCheckBox
 )
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QTextCursor
 
 from Functions.language_manager import lang
+from UI.ui_file_dialogs import (
+    dialog_select_multiple_files,
+    dialog_save_file
+)
 
 
 class MassImportMonitor(QMainWindow):
@@ -548,11 +552,11 @@ class MassImportMonitor(QMainWindow):
     def select_template_files(self):
         """Open file dialog to select template files"""
         try:
-            title = lang.get('superadmin.select_files_title', 
-                default="Sélectionner les fichiers templates")
-            file_filter = "Template files (*.txt);;All files (*.*)"
-            
-            files, _ = QFileDialog.getOpenFileNames(self, title, "", file_filter)
+            files = dialog_select_multiple_files(
+                self,
+                title_key='superadmin.select_files_title',
+                filter_key="superadmin.files_filter"
+            )
             
             if files:
                 # Files selected - prepare import
@@ -682,7 +686,7 @@ class MassImportMonitor(QMainWindow):
                         self.main_worker.log_message.disconnect()
                         self.main_worker.import_finished.disconnect()
                         self.main_worker.finished.disconnect()
-                    except:
+                    except Exception:
                         pass
                     
                     # Schedule deletion
@@ -739,7 +743,6 @@ class MassImportMonitor(QMainWindow):
             duplicates: Number of duplicates skipped
             current_item: Name of item being processed
         """
-        from PySide6.QtWidgets import QApplication
         
         if 'total' in kwargs:
             self.items_total = kwargs['total']
@@ -751,7 +754,6 @@ class MassImportMonitor(QMainWindow):
             
             # Update progress bar
             if self.items_total > 0:
-                progress = int((self.items_processed / self.items_total) * 100)
                 self.progress_bar.setValue(self.items_processed)
         
         if 'variants' in kwargs:
@@ -887,14 +889,7 @@ class MassImportMonitor(QMainWindow):
                                    lang.get('mass_import_monitor.no_errors', default='Aucune erreur à exporter'))
             return
         
-        filename = f"mass_import_errors_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
-        
-        file_path, _ = QFileDialog.getSaveFileName(
-            self,
-            lang.get("settings.pages.mass_import_monitor.export_errors_title", default="Exporter les erreurs d'import"),
-            filename,
-            "Fichiers texte (*.txt);;Tous les fichiers (*.*)"
-        )
+        file_path = dialog_save_file(self, "mass_import_monitor.export_errors_title")
         
         if file_path:
             try:
@@ -925,14 +920,7 @@ class MassImportMonitor(QMainWindow):
     
     def export_logs(self):
         """Export logs to file"""
-        filename = f"mass_import_log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
-        
-        file_path, _ = QFileDialog.getSaveFileName(
-            self,
-            lang.get("settings.pages.mass_import_monitor.export_logs_title", default="Exporter les logs d'import"),
-            filename,
-            "Fichiers texte (*.txt);;Tous les fichiers (*.*)"
-        )
+        file_path = dialog_save_file(self, "mass_import_monitor.export_logs_title")
         
         if file_path:
             try:
@@ -972,7 +960,6 @@ class MassImportMonitor(QMainWindow):
     def set_filtered_items(self, filtered_items):
         """Store filtered items and show review button if items exist"""
         import logging
-        from PySide6.QtWidgets import QApplication
         
         logging.info(f"set_filtered_items called with {len(filtered_items) if filtered_items else 0} items")
         
@@ -1097,7 +1084,7 @@ class MassImportMonitor(QMainWindow):
                 for tf in temp_files:
                     try:
                         Path(tf).unlink()
-                    except:
+                    except Exception:
                         pass
                 return
             
@@ -1122,7 +1109,7 @@ class MassImportMonitor(QMainWindow):
                     for tf in temp_files:
                         try:
                             Path(tf).unlink()
-                        except:
+                        except Exception:
                             pass
                         
                 except Exception as e:
@@ -1146,7 +1133,7 @@ class MassImportMonitor(QMainWindow):
                             self.retry_worker.log_message.disconnect()
                             self.retry_worker.import_finished.disconnect()
                             self.retry_worker.finished.disconnect()
-                        except:
+                        except Exception:
                             pass
                         
                         # Schedule deletion
@@ -1181,13 +1168,12 @@ class MassImportMonitor(QMainWindow):
             for tf in temp_files:
                 try:
                     Path(tf).unlink()
-                except:
+                except Exception:
                     pass
     
     def mark_items_as_ignored(self, items_to_ignore):
         """Mark items as permanently ignored in the database"""
         try:
-            from pathlib import Path
             import json
             
             # Use the appropriate database path (embedded or personal)

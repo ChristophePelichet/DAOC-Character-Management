@@ -4,55 +4,41 @@
 
 ### ♻️ Code Refactoring - dialogs.py Module Extraction
 
-**Overall Scope**: Extract business logic from `UI/dialogs.py` into dedicated domain-specific modules for improved maintainability, testability, and code reuse.
+**Extraction Scope**: Extract business logic from `UI/dialogs.py` into dedicated domain-specific modules for improved maintainability, testability, and code reuse.
 
-#### Phase 1, 2, 3, 4 & 5: Template, Item Price, Ruff Cleanup, Character Validator & Realm Rank
+**6 Phases Completed** - Extracted 22+ functions into 5 new modules:
 
-**Extraction Scope**: 5 phases completed, extracting 18+ functions from `UI/dialogs.py` into dedicated domain-specific modules
+1. **Phase 1**: Template Parser (`Functions/template_parser.py` - 1392 lines)
+   - 8 functions: Template format detection, parsing (Loki/Zenkcraft), color stripping, price lookup, item formatting
+   - Multi-source price lookup with fallback chain (database → metadata → category)
 
-- **Phase 1**: Template Parser Module (`Functions/template_parser.py` - 1392 lines)
-  - Extracted 8 core functions for equipment template parsing
-  - Supports Loki and Zenkcraft format detection with automatic fallback
-  - Multi-source price lookup with database-metadata-category fallback
+2. **Phase 2**: Item Price Manager (`Functions/items_price_manager.py` - 205 lines)
+   - 2 functions: Template price sync with database, missing price detection
 
-- **Phase 2**: Item Price Management Module (`Functions/items_price_manager.py` - 205 lines)
-  - Extracted 2 core functions for template price synchronization
-  - Template price sync with items database (single source of truth)
-  - Missing item price detection across database and metadata
+3. **Phase 3**: Ruff Compliance Cleanup
+   - Fixed 19 E722 errors, 2 F841 errors, 1 F823 error, 4 pre-extraction errors
+   - Result: `dialogs.py` 100% ruff compliant (0 errors)
 
-- **Phase 3**: Ruff Compliance Cleanup
-  - Fixed 19 E722 errors (bare except → except Exception)
-  - Fixed 2 F841 errors (unused variables removal)
-  - Fixed 1 F823 error (missing imports)
-  - Fixed 4 pre-extraction errors (QSlider import, f-string, unused imports)
-  - **Result**: `dialogs.py` now 100% ruff compliant (0 errors)
+4. **Phase 4**: Character Validator (`Functions/character_validator.py` - 280 lines)
+   - 5 functions: Class/race retrieval, combo population, realm/class/race change handlers
+   - Multi-language support (EN/FR/DE), cascade updates, realm-aware filtering
 
-- **Phase 4**: Character Validator Module (`Functions/character_validator.py` - 280 lines)
-  - Extracted 5 core functions for character class/race validation
-  - Realm-aware class and race filtering with cascade updates
-  - Multi-language display support (EN/FR/DE) for all options
-  - Functions: `character_get_classes_for_realm()`, `character_get_races_for_class()`, 
-    `character_populate_classes_combo()`, `character_populate_races_combo()`,
-    `character_handle_realm_change()`, `character_handle_class_change()`, 
-    `character_handle_race_change()`
+5. **Phase 5**: Character Realm Rank Calculator (`Functions/character_rr_calculator.py` - 209 lines)
+   - 3 functions: Valid level retrieval, points progression info, rank from points calculation
+   - Multi-realm support with rank restrictions (Rank 1: 0-10, Others: 0-9)
 
-- **Phase 5**: Character Realm Rank Calculator Module (`Functions/character_rr_calculator.py` - 209 lines)
-  - Extracted 3 core functions for realm rank calculations
-  - Rank determination from realm points with multi-realm support
-  - Level filtering based on rank restrictions (Rank 1: 0-10, Others: 0-9)
-  - Progression information calculation to next rank level
-  - Functions: `character_rr_get_valid_levels()`, `character_rr_calculate_points_info()`,
-    `character_rr_calculate_from_points()`
+6. **Phase 6**: Character Herald Scrapper (`Functions/character_herald_scrapper.py` - 422 lines)
+   - 4 functions: Complete character update, RvR-only update, stats UI update (complete/partial)
+   - URL validation, progress dialog integration, selective stat updates with saves
 
-**Quality Standards Applied to All Extracted Modules**:
-  - Domain-driven function naming: `template_*`, `items_price_*`, `character_*`, `character_rr_*` prefixes
-  - Complete PEP 8 compliance (ruff validation, <88 char lines, type hints, docstrings)
-  - Zero hardcoded strings (all UI text uses `lang.get()` for translations)
-  - Zero French comments (English only in code and documentation)
-  - ~1700 lines removed from `dialogs.py` and consolidated into reusable modules
-  - Comprehensive technical documentation (ARMORY_TECHNICAL_DOCUMENTATION.md, CHARACTER_SYSTEM_TECHNICAL_DOCUMENTATION.md)
-  - Robust error handling with graceful degradation
-  - Backward compatibility with minimal thin wrapper methods in dialogs.py
+**Quality Standards Applied**:
+- ✅ Domain-driven naming: `template_*`, `items_price_*`, `character_*`, `character_rr_*`, `character_herald_*`
+- ✅ PEP 8 compliant with ruff validation (0 errors)
+- ✅ Type hints and comprehensive docstrings
+- ✅ Zero hardcoded UI strings (all use `lang.get()`)
+- ✅ English-only code and comments (no French)
+- ✅ ~1750 lines extracted, ~130 thin wrappers in dialogs.py
+- ✅ Complete documentation updates
 
 ---
 

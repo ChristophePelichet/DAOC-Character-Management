@@ -38,6 +38,10 @@ from Functions.character_rr_calculator import (
     character_rr_get_valid_levels, character_rr_calculate_points_info,
     character_rr_calculate_from_points
 )
+from Functions.character_herald_scrapper import (
+    character_herald_update, character_herald_update_rvr_stats,
+    character_herald_apply_scraped_stats, character_herald_apply_partial_stats
+)
 from UI.template_import_dialog import TemplateImportDialog
 
 # Get CHARACTER logger
@@ -1249,70 +1253,7 @@ class CharacterSheetWindow(QDialog):
     def update_rvr_stats(self):
         """Update RvR statistics from Herald"""
         url = self.herald_url_edit.text().strip()
-        
-        if not url:
-            QMessageBox.warning(
-                self,
-                "URL manquante",
-                "Veuillez entrer une URL Herald valide pour récupérer les statistiques."
-            )
-            return
-        
-        # CRITICAL: Check if Eden validation is running - button should be disabled
-        # If user somehow triggered this while validation running, return silently
-        main_window = self.parent()
-        if main_window and hasattr(main_window, 'ui_manager'):
-            if hasattr(main_window.ui_manager, 'eden_status_thread') and main_window.ui_manager.eden_status_thread:
-                if main_window.ui_manager.eden_status_thread.isRunning():
-                    return  # Silent return - button is disabled with tooltip
-        
-        # Check URL format
-        if not url.startswith(('http://', 'https://')):
-            url = 'https://' + url
-            self.herald_url_edit.setText(url)
-        
-        # Disable button during update
-        self.update_rvr_button.setEnabled(False)
-        
-        # Import required components
-        from UI.progress_dialog_base import ProgressStepsDialog, StepConfiguration
-        
-        # Build steps (SCRAPER_INIT + STATS_SCRAPING + CLEANUP)
-        steps = StepConfiguration.build_steps(
-            StepConfiguration.SCRAPER_INIT,   # Step 0: Init scraper
-            StepConfiguration.STATS_SCRAPING, # Steps 1-5: RvR, PvP, PvE, Wealth, Achievements
-            StepConfiguration.CLEANUP         # Step 6: Close browser
-        )
-        
-        # Créer le dialogue de progression
-        self.progress_dialog = ProgressStepsDialog(
-            parent=self,
-            title=lang.get("progress_stats_update_title", default="📊 Mise à jour des statistiques..."),
-            steps=steps,
-            description=lang.get("progress_stats_update_desc", default="Récupération des statistiques RvR, PvP, PvE et Wealth depuis le Herald Eden"),
-            show_progress_bar=True,
-            determinate_progress=True,  # Mode avec pourcentage
-            allow_cancel=False
-        )
-        
-        # Create update thread
-        self.stats_update_thread = StatsUpdateThread(url)
-        
-        # ✅ Pattern 1 : Connecter via wrappers thread-safe
-        self.stats_update_thread.step_started.connect(self._on_stats_step_started)
-        self.stats_update_thread.step_completed.connect(self._on_stats_step_completed)
-        self.stats_update_thread.step_error.connect(self._on_stats_step_error)
-        
-        # Connecter les signaux de fin
-        self.stats_update_thread.stats_updated.connect(self._on_stats_updated)
-        self.stats_update_thread.update_failed.connect(self._on_stats_failed)
-        
-        # ✅ Pattern 4 : Connecter rejected AVANT show()
-        self.progress_dialog.rejected.connect(self._on_stats_progress_dialog_closed)
-        
-        # Show dialog and start worker
-        self.progress_dialog.show()
-        self.stats_update_thread.start()
+        character_herald_update_rvr_stats(self, url)
     
     # ✅ Pattern 1 : Wrappers thread-safe pour stats update
     def _on_stats_step_started(self, step_index):
@@ -1583,242 +1524,20 @@ class CharacterSheetWindow(QDialog):
     
     def _update_all_stats_ui(self, result_rvr, result_pvp, result_pve, result_wealth, result_achievements):
         """Update all UI labels with complete stats"""
-        # RvR Captures
-        tower = result_rvr['tower_captures']
-        keep = result_rvr['keep_captures']
-        relic = result_rvr['relic_captures']
-        
-        self.tower_captures_label.setText(f"{tower:,}")
-        self.keep_captures_label.setText(f"{keep:,}")
-        self.relic_captures_label.setText(f"{relic:,}")
-        
-        # PvP Stats
-        solo_kills = result_pvp['solo_kills']
-        solo_kills_alb = result_pvp['solo_kills_alb']
-        solo_kills_hib = result_pvp['solo_kills_hib']
-        solo_kills_mid = result_pvp['solo_kills_mid']
-        
-        deathblows = result_pvp['deathblows']
-        deathblows_alb = result_pvp['deathblows_alb']
-        deathblows_hib = result_pvp['deathblows_hib']
-        deathblows_mid = result_pvp['deathblows_mid']
-        
-        kills = result_pvp['kills']
-        kills_alb = result_pvp['kills_alb']
-        kills_hib = result_pvp['kills_hib']
-        kills_mid = result_pvp['kills_mid']
-        
-        self.solo_kills_label.setText(f"{solo_kills:,}")
-        self.deathblows_label.setText(f"{deathblows:,}")
-        self.kills_label.setText(f"{kills:,}")
-        
-        self.solo_kills_detail_label.setText(
-            f'→ <span style="color: #C41E3A;">Alb</span>: {solo_kills_alb:,}  |  '
-            f'<span style="color: #228B22;">Hib</span>: {solo_kills_hib:,}  |  '
-            f'<span style="color: #4169E1;">Mid</span>: {solo_kills_mid:,}'
+        character_herald_apply_scraped_stats(
+            self, result_rvr, result_pvp, result_pve, result_wealth, result_achievements
         )
-        self.deathblows_detail_label.setText(
-            f'→ <span style="color: #C41E3A;">Alb</span>: {deathblows_alb:,}  |  '
-            f'<span style="color: #228B22;">Hib</span>: {deathblows_hib:,}  |  '
-            f'<span style="color: #4169E1;">Mid</span>: {deathblows_mid:,}'
-        )
-        self.kills_detail_label.setText(
-            f'→ <span style="color: #C41E3A;">Alb</span>: {kills_alb:,}  |  '
-            f'<span style="color: #228B22;">Hib</span>: {kills_hib:,}  |  '
-            f'<span style="color: #4169E1;">Mid</span>: {kills_mid:,}'
-        )
-        
-        # PvE Stats
-        dragon_kills = result_pve['dragon_kills']
-        legion_kills = result_pve['legion_kills']
-        mini_dragon_kills = result_pve['mini_dragon_kills']
-        epic_encounters = result_pve['epic_encounters']
-        epic_dungeons = result_pve['epic_dungeons']
-        sobekite = result_pve['sobekite']
-        
-        self.dragon_kills_value.setText(f"{dragon_kills:,}")
-        self.legion_kills_value.setText(f"{legion_kills:,}")
-        self.mini_dragon_kills_value.setText(f"{mini_dragon_kills:,}")
-        self.epic_encounters_value.setText(f"{epic_encounters:,}")
-        self.epic_dungeons_value.setText(f"{epic_dungeons:,}")
-        self.sobekite_value.setText(f"{sobekite:,}")
-        
-        # Wealth
-        money = result_wealth['money']
-        self.money_label.setText(str(money))
-        
-        # Achievements (optionnel)
-        if result_achievements.get('success'):
-            achievements = result_achievements['achievements']
-            self._update_achievements_display(achievements)
-            self.character_data['achievements'] = achievements
-        
-        # Update character_data
-        self.character_data['tower_captures'] = tower
-        self.character_data['keep_captures'] = keep
-        self.character_data['relic_captures'] = relic
-        
-        self.character_data['solo_kills'] = solo_kills
-        self.character_data['deathblows'] = deathblows
-        self.character_data['kills'] = kills
-        self.character_data['solo_kills_alb'] = solo_kills_alb
-        self.character_data['solo_kills_hib'] = solo_kills_hib
-        self.character_data['solo_kills_mid'] = solo_kills_mid
-        self.character_data['deathblows_alb'] = deathblows_alb
-        self.character_data['deathblows_hib'] = deathblows_hib
-        self.character_data['deathblows_mid'] = deathblows_mid
-        self.character_data['kills_alb'] = kills_alb
-        self.character_data['kills_hib'] = kills_hib
-        self.character_data['kills_mid'] = kills_mid
-        
-        self.character_data['dragon_kills'] = dragon_kills
-        self.character_data['legion_kills'] = legion_kills
-        self.character_data['mini_dragon_kills'] = mini_dragon_kills
-        self.character_data['epic_encounters'] = epic_encounters
-        self.character_data['epic_dungeons'] = epic_dungeons
-        self.character_data['sobekite'] = sobekite
-        
-        self.character_data['money'] = money
     
     def _update_partial_stats_ui(self, result_rvr, result_pvp, result_pve, result_wealth, result_achievements):
         """Update UI and character_data for partial update"""
-        from Functions.character_manager import save_character
-        
-        if result_rvr and result_rvr.get('success'):
-            tower = result_rvr['tower_captures']
-            keep = result_rvr['keep_captures']
-            relic = result_rvr['relic_captures']
-            
-            self.tower_captures_label.setText(f"{tower:,}")
-            self.keep_captures_label.setText(f"{keep:,}")
-            self.relic_captures_label.setText(f"{relic:,}")
-            
-            self.character_data['tower_captures'] = tower
-            self.character_data['keep_captures'] = keep
-            self.character_data['relic_captures'] = relic
-            
-            save_character(self.character_data, allow_overwrite=True)
-        
-        if result_pvp and result_pvp.get('success'):
-            solo_kills = result_pvp['solo_kills']
-            solo_kills_alb = result_pvp['solo_kills_alb']
-            solo_kills_hib = result_pvp['solo_kills_hib']
-            solo_kills_mid = result_pvp['solo_kills_mid']
-            
-            deathblows = result_pvp['deathblows']
-            deathblows_alb = result_pvp['deathblows_alb']
-            deathblows_hib = result_pvp['deathblows_hib']
-            deathblows_mid = result_pvp['deathblows_mid']
-            
-            kills = result_pvp['kills']
-            kills_alb = result_pvp['kills_alb']
-            kills_hib = result_pvp['kills_hib']
-            kills_mid = result_pvp['kills_mid']
-            
-            self.solo_kills_label.setText(f"{solo_kills:,}")
-            self.deathblows_label.setText(f"{deathblows:,}")
-            self.kills_label.setText(f"{kills:,}")
-            
-            self.solo_kills_detail_label.setText(
-                f'→ <span style="color: #C41E3A;">Alb</span>: {solo_kills_alb:,}  |  '
-                f'<span style="color: #228B22;">Hib</span>: {solo_kills_hib:,}  |  '
-                f'<span style="color: #4169E1;">Mid</span>: {solo_kills_mid:,}'
-            )
-            self.deathblows_detail_label.setText(
-                f'→ <span style="color: #C41E3A;">Alb</span>: {deathblows_alb:,}  |  '
-                f'<span style="color: #228B22;">Hib</span>: {deathblows_hib:,}  |  '
-                f'<span style="color: #4169E1;">Mid</span>: {deathblows_mid:,}'
-            )
-            self.kills_detail_label.setText(
-                f'→ <span style="color: #C41E3A;">Alb</span>: {kills_alb:,}  |  '
-                f'<span style="color: #228B22;">Hib</span>: {kills_hib:,}  |  '
-                f'<span style="color: #4169E1;">Mid</span>: {kills_mid:,}'
-            )
-            
-            self.character_data['solo_kills'] = solo_kills
-            self.character_data['deathblows'] = deathblows
-            self.character_data['kills'] = kills
-            self.character_data['solo_kills_alb'] = solo_kills_alb
-            self.character_data['solo_kills_hib'] = solo_kills_hib
-            self.character_data['solo_kills_mid'] = solo_kills_mid
-            self.character_data['deathblows_alb'] = deathblows_alb
-            self.character_data['deathblows_hib'] = deathblows_hib
-            self.character_data['deathblows_mid'] = deathblows_mid
-            self.character_data['kills_alb'] = kills_alb
-            self.character_data['kills_hib'] = kills_hib
-            self.character_data['kills_mid'] = kills_mid
-            
-            save_character(self.character_data, allow_overwrite=True)
+        character_herald_apply_partial_stats(
+            self, result_rvr, result_pvp, result_pve, result_wealth, result_achievements
+        )
     
     def update_from_herald(self):
         """Update character data from Herald"""
         url = self.herald_url_edit.text().strip()
-        
-        if not url:
-            QMessageBox.warning(
-                self,
-                lang.get("update_char_error"),
-                lang.get("update_char_no_url")
-            )
-            return
-        
-        # CRITICAL: Check if Eden validation is running - button should be disabled
-        # If user somehow triggered this while validation running, return silently
-        main_window = self.parent()
-        if main_window and hasattr(main_window, 'ui_manager'):
-            if hasattr(main_window.ui_manager, 'eden_status_thread') and main_window.ui_manager.eden_status_thread:
-                if main_window.ui_manager.eden_status_thread.isRunning():
-                    return  # Silent return - button is disabled with tooltip
-        
-        # Marquer qu'un scraping Herald est en cours AVANT toute modification d'URL
-        self.herald_scraping_in_progress = True
-        
-        # Check URL format
-        if not url.startswith(('http://', 'https://')):
-            url = 'https://' + url
-            self.herald_url_edit.setText(url)
-        
-        # Disable all buttons during update
-        self.update_herald_button.setEnabled(False)
-        self.open_herald_button.setEnabled(False)
-        self.update_rvr_button.setEnabled(False)
-        
-        # Import required components
-        from UI.progress_dialog_base import ProgressStepsDialog, StepConfiguration
-        
-        # Build steps (CHARACTER_UPDATE)
-        steps = StepConfiguration.build_steps(
-            StepConfiguration.CHARACTER_UPDATE  # 8 steps: Extract name → Init → Load cookies → Navigate → Wait → Extract data → Format → Close
-        )
-        
-        # Create progress dialog
-        self.progress_dialog = ProgressStepsDialog(
-            parent=self,
-            title=lang.get("progress_character_update_title", default="🌐 Mise à jour depuis Herald..."),
-            steps=steps,
-            description=lang.get("progress_character_update_desc", default="Récupération des informations du personnage depuis Eden Herald"),
-            show_progress_bar=True,
-            determinate_progress=True,
-            allow_cancel=False
-        )
-        
-        # Create update thread
-        self.char_update_thread = CharacterUpdateThread(url)
-        
-        # ✅ Pattern 1 : Connecter via wrappers thread-safe
-        self.char_update_thread.step_started.connect(self._on_char_update_step_started)
-        self.char_update_thread.step_completed.connect(self._on_char_update_step_completed)
-        self.char_update_thread.step_error.connect(self._on_char_update_step_error)
-        
-        # Connecter signal de fin
-        self.char_update_thread.update_finished.connect(self._on_herald_scraping_finished)
-        
-        # ✅ Pattern 4 : Connecter rejected AVANT show()
-        self.progress_dialog.rejected.connect(self._on_char_update_progress_dialog_closed)
-        
-        # Show dialog and start worker
-        self.progress_dialog.show()
-        self.char_update_thread.start()
+        character_herald_update(self, url)
     
     # ✅ Pattern 1 : Wrappers thread-safe pour character update
     def _on_char_update_step_started(self, step_index):

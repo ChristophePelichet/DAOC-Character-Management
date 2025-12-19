@@ -2,11 +2,11 @@
 
 ## v0.109
 
-### ♻️ Code Refactoring - dialogs.py Module Extraction & UI Validation Helper (Complete)
+### ♻️ Code Refactoring - dialogs.py Module Extraction & UI Helper Systems (Complete)
 
-**Extraction Scope**: Extract business logic from `UI/dialogs.py` into dedicated domain-specific modules for improved maintainability, testability, and code reuse. Consolidate all input field validation into centralized UI Validation Helper module.
+**Extraction Scope**: Extract business logic from `UI/dialogs.py` into dedicated domain-specific modules for improved maintainability, testability, and code reuse. Consolidate input validation and file dialogs into centralized helper modules.
 
-**14 Phases Completed** - Extracted 45+ functions into 14 new modules, removed ~3000 lines from dialogs.py:
+**15 Phases Completed** - Extracted 60+ functions into 15 new modules, removed ~3100 lines from dialogs.py:
 
 1. **Phase 1**: Template Parser (`Functions/template_parser.py` - 1392 lines)
    - Template format detection, parsing (Loki/Zenkcraft), price lookup, item formatting
@@ -62,12 +62,19 @@
     - Returns consistent dict format with 'valid', 'message', and value fields
     - Zero inline validation code in dialogs.py
 
+15. **Phase 15**: UI File Dialog Wrapper (`UI/ui_file_dialogs.py` - 140 lines)
+    - Centralized QFileDialog usage for consistent file selection behavior
+    - 5 wrapper functions: open file, save file, select directory, open armor file, select backup path
+    - Automatic translation support via lang.get()
+    - Eliminates scattered QFileDialog calls and repeated setup code
+    - Zero direct QFileDialog usage in dialogs.py
+
 **Refactoring Statistics**:
 - Total functions extracted: 60+
-- Total lines extracted: ~3600 lines
+- Total lines extracted: ~3700 lines
 - Thin wrappers in dialogs.py: ~180 lines
-- Net code reduction: ~3420 lines
-- Modules created: 14 dedicated domain-specific modules
+- Net code reduction: ~3520 lines
+- Modules created: 15 dedicated domain-specific modules
 
 **Quality Standards Applied**:
 - ✅ Domain-driven naming conventions for all modules and functions

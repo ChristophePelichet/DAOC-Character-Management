@@ -1,9 +1,9 @@
 # 💬 Dialog System - Technical Documentation
 
-**Version**: 2.1  
+**Version**: 2.2  
 **Date**: November 2025  
 **Last Updated**: December 19, 2025  
-**Component**: `UI/progress_dialog_base.py`, `UI/dialogs.py`, `UI/ui_message_helper.py`  
+**Component**: `UI/progress_dialog_base.py`, `UI/dialogs.py`, `UI/ui_message_helper.py`, `UI/ui_file_dialogs.py`  
 **Related**: `UI/settings_dialog.py`, `UI/armory_import_dialog.py`, `UI/failed_items_review_dialog.py`, `UI/template_import_dialog.py`, `Functions/character_actions_manager.py`  
 
 ---
@@ -14,15 +14,16 @@
 2. [Message Helper System](#message-helper-system)
 3. [State Management System](#state-management-system)
 4. [Validation Helper System](#validation-helper-system)
-5. [Progress Dialog System](#progress-dialog-system)
-6. [ProgressStep Class](#progressstep-class)
-7. [StepConfiguration Class](#stepconfiguration-class)
-8. [ProgressStepsDialog Class](#progressstepsdialog-class)
-9. [Worker Thread Pattern](#worker-thread-pattern)
-10. [Thread Safety Patterns](#thread-safety-patterns)
-11. [Implemented Dialogs](#implemented-dialogs)
-12. [Multilingual Support](#multilingual-support)
-13. [Performance Considerations](#performance-considerations)
+5. [File Dialog Wrapper System](#file-dialog-wrapper-system)
+6. [Progress Dialog System](#progress-dialog-system)
+7. [ProgressStep Class](#progressstep-class)
+8. [StepConfiguration Class](#stepconfiguration-class)
+9. [ProgressStepsDialog Class](#progressstepsdialog-class)
+10. [Worker Thread Pattern](#worker-thread-pattern)
+11. [Thread Safety Patterns](#thread-safety-patterns)
+12. [Implemented Dialogs](#implemented-dialogs)
+13. [Multilingual Support](#multilingual-support)
+14. [Performance Considerations](#performance-considerations)
 
 ---
 
@@ -795,6 +796,171 @@ Three wrapper functions encapsulate validation for specific dialog use cases:
   ```
 
 **Architecture**: dialogs.py contains ONLY UI calls to validation functions. All validation logic is in Functions/ui_validation_helper.py.
+
+---
+
+## File Dialog Wrapper System
+
+### Phase 15: UI File Dialog Wrapper Extraction
+
+**Module**: `UI/ui_file_dialogs.py` (v0.109 Phase 15)  
+**Purpose**: Centralize QFileDialog usage for consistent file selection behavior  
+**Status**: ✅ COMPLETE - 5 file dialog wrapper functions extracted
+
+### Design Philosophy
+
+**Problem**: 5 scattered `QFileDialog` calls in dialogs.py with repeated setup code
+
+**Solution**: Extract common patterns into reusable wrappers with automatic translation
+
+**Benefit**: Single source of truth for file dialogs, consistency, reduced code duplication
+
+### Functions Provided
+
+#### 1. `dialog_open_file(parent, title_key, filter_key="", initial_dir="")`
+
+Opens file selection dialog.
+
+```python
+file_path = dialog_open_file(
+    self,
+    title_key="cookie_manager.browse_dialog_title",
+    filter_key="cookie_manager.browse_dialog_filter",
+    initial_dir=""
+)
+```
+
+**Parameters**:
+- `parent`: Parent widget
+- `title_key`: Translation key for dialog title
+- `filter_key`: Translation key for file filter (optional)
+- `initial_dir`: Initial directory path (optional)
+
+**Returns**: Selected file path, empty string if cancelled
+
+**Used in**: `CookieManagerDialog.browse_cookie_file()`
+
+---
+
+#### 2. `dialog_save_file(parent, title_key, default_filename="", filter_key="")`
+
+Opens save file dialog.
+
+```python
+save_path = dialog_save_file(
+    self,
+    title_key="armoury_dialog.dialogs.download_file",
+    default_filename=filename,
+    filter_key="armoury_dialog.dialogs.all_files"
+)
+```
+
+**Parameters**:
+- `parent`: Parent widget
+- `title_key`: Translation key for dialog title
+- `default_filename`: Default filename (suggestion)
+- `filter_key`: Translation key for file filter (optional)
+
+**Returns**: Selected save path, empty string if cancelled
+
+**Used in**: `ArmorManagementDialog.download_file()`
+
+---
+
+#### 3. `dialog_select_directory(parent, title_key, initial_dir="")`
+
+Opens directory selection dialog.
+
+```python
+directory = dialog_select_directory(
+    self,
+    title_key="select_folder_dialog_title",
+    initial_dir=""
+)
+```
+
+**Parameters**:
+- `parent`: Parent widget
+- `title_key`: Translation key for dialog title
+- `initial_dir`: Initial directory path (optional)
+
+**Returns**: Selected directory path, empty string if cancelled
+
+**Used in**: `SettingsDialog.browse_folder()` (generic for character/config folders)
+
+---
+
+#### 4. `dialog_open_armor_file(parent)`
+
+Opens armor file selection dialog (wrapper).
+
+```python
+file_path = dialog_open_armor_file(self)
+if file_path:
+    # Process armor file
+```
+
+**Parameters**:
+- `parent`: Parent widget
+
+**Returns**: Selected file path, empty string if cancelled
+
+**Used in**: Armor template file selection workflows
+
+---
+
+#### 5. `dialog_select_backup_path(parent, current_path="")`
+
+Opens backup directory selection dialog (wrapper).
+
+```python
+backup_path = dialog_select_backup_path(self, current_path)
+if backup_path:
+    # Use backup path
+```
+
+**Parameters**:
+- `parent`: Parent widget
+- `current_path`: Current path (used as initial directory)
+
+**Returns**: Selected directory path, empty string if cancelled
+
+**Used in**: 
+- `BackupSettingsDialog.browse_backup_path()`
+- `BackupSettingsDialog.browse_cookies_backup_path()`
+
+### Integration Points (dialogs.py - 5 locations)
+
+| Location | Method | Wrapper Used |
+|----------|--------|--------------|
+| Line ~2251 | `browse_folder()` | `dialog_select_directory()` |
+| Line ~2771 | `download_file()` | `dialog_save_file()` |
+| Line ~3238 | `browse_cookie_file()` | `dialog_open_file()` |
+| Line ~6059 | `browse_backup_path()` | `dialog_select_backup_path()` |
+| Line ~6071 | `browse_cookies_backup_path()` | `dialog_select_backup_path()` |
+
+### Benefits
+
+✅ **Consistency**: All file dialogs follow same pattern  
+✅ **Translation**: Automatic via `lang.get()`  
+✅ **Maintainability**: Single place to modify dialog behavior  
+✅ **Code Reduction**: ~20 lines eliminated from dialogs.py  
+✅ **Reusability**: Easy to add new file dialog patterns  
+
+### Quality Standards
+
+✅ **PEP 8 Compliant**
+- Proper indentation and spacing
+- Type hints on all parameters
+- Comprehensive docstrings
+
+✅ **No Hardcoded Text**
+- All titles/filters use translation keys
+- Automatic `lang.get()` integration
+
+✅ **100% English Documentation**
+- All docstrings in English
+- All comments in English
 
 ---
 

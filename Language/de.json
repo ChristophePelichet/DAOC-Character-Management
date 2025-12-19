@@ -1262,6 +1262,31 @@
             "armor": "Waffenkammer-Datensicherungen"
         }
     },
+    "validation": {
+        "empty_field": "Dieses Feld darf nicht leer sein",
+        "text_too_long": "Der Text darf {0} Zeichen nicht überschreiten",
+        "character_name_empty": "Der Charaktername darf nicht leer sein",
+        "character_name_too_long": "Der Charaktername darf 30 Zeichen nicht überschreiten",
+        "character_name_invalid_chars": "Der Name enthält ungültige Zeichen",
+        "guild_name_too_long": "Der Gildennamen darf 50 Zeichen nicht überschreiten",
+        "guild_name_invalid_chars": "Der Gildennamen enthält ungültige Zeichen",
+        "herald_url_empty": "Herald-URL darf nicht leer sein",
+        "herald_url_missing_herald": "URL muss 'herald' enthalten",
+        "herald_url_invalid_protocol": "URL muss mit http:// oder https:// beginnen",
+        "numeric_required": "Der Wert muss eine Zahl sein",
+        "numeric_too_low": "Der Wert muss mindestens {0} sein",
+        "numeric_too_high": "Der Wert darf höchstens {0} sein",
+        "filepath_empty": "Dateipfad darf nicht leer sein",
+        "filepath_not_found": "Datei nicht gefunden: {0}",
+        "dirpath_empty": "Verzeichnispfad darf nicht leer sein",
+        "dirpath_not_found": "Verzeichnis nicht gefunden: {0}",
+        "email_empty": "E-Mail-Adresse darf nicht leer sein",
+        "email_invalid": "Ungültiges E-Mail-Format",
+        "select_option": "Bitte wählen Sie eine Option",
+        "select_realm": "Bitte wählen Sie ein Königreich",
+        "select_class": "Bitte wählen Sie eine Klasse",
+        "select_race": "Bitte wählen Sie eine Rasse"
+    },
     "version_check": {
         "current": "Aktuelle Version:",
         "latest": "Neueste Version:",

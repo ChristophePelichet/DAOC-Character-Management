@@ -1273,6 +1273,31 @@
             "armor": "Armoury Data Backups"
         }
     },
+    "validation": {
+        "empty_field": "This field cannot be empty",
+        "text_too_long": "The text cannot exceed {0} characters",
+        "character_name_empty": "Character name cannot be empty",
+        "character_name_too_long": "Character name cannot exceed 30 characters",
+        "character_name_invalid_chars": "The name contains invalid characters",
+        "guild_name_too_long": "Guild name cannot exceed 50 characters",
+        "guild_name_invalid_chars": "The guild name contains invalid characters",
+        "herald_url_empty": "Herald URL cannot be empty",
+        "herald_url_missing_herald": "URL must contain 'herald'",
+        "herald_url_invalid_protocol": "URL must start with http:// or https://",
+        "numeric_required": "The value must be a number",
+        "numeric_too_low": "The value must be at least {0}",
+        "numeric_too_high": "The value must be at most {0}",
+        "filepath_empty": "File path cannot be empty",
+        "filepath_not_found": "File not found: {0}",
+        "dirpath_empty": "Directory path cannot be empty",
+        "dirpath_not_found": "Directory not found: {0}",
+        "email_empty": "Email address cannot be empty",
+        "email_invalid": "Invalid email format",
+        "select_option": "Please select an option",
+        "select_realm": "Please select a realm",
+        "select_class": "Please select a class",
+        "select_race": "Please select a race"
+    },
     "version_check": {
         "current": "Current version:",
         "latest": "Latest version:",

@@ -1273,6 +1273,31 @@
             "armor": "Sauvegardes de l'armurerie"
         }
     },
+    "validation": {
+        "empty_field": "Ce champ ne peut pas être vide",
+        "text_too_long": "Le texte ne peut pas dépasser {0} caractères",
+        "character_name_empty": "Le nom du personnage ne peut pas être vide",
+        "character_name_too_long": "Le nom du personnage ne peut pas dépasser 30 caractères",
+        "character_name_invalid_chars": "Le nom contient des caractères non autorisés",
+        "guild_name_too_long": "Le nom de guilde ne peut pas dépasser 50 caractères",
+        "guild_name_invalid_chars": "Le nom de guilde contient des caractères non autorisés",
+        "herald_url_empty": "L'URL Herald ne peut pas être vide",
+        "herald_url_missing_herald": "L'URL doit contenir 'herald'",
+        "herald_url_invalid_protocol": "L'URL doit commencer par http:// ou https://",
+        "numeric_required": "La valeur doit être un nombre",
+        "numeric_too_low": "La valeur doit être au minimum {0}",
+        "numeric_too_high": "La valeur doit être au maximum {0}",
+        "filepath_empty": "Le chemin de fichier ne peut pas être vide",
+        "filepath_not_found": "Le fichier n'existe pas : {0}",
+        "dirpath_empty": "Le chemin de répertoire ne peut pas être vide",
+        "dirpath_not_found": "Le répertoire n'existe pas : {0}",
+        "email_empty": "L'adresse email ne peut pas être vide",
+        "email_invalid": "Format email invalide",
+        "select_option": "Veuillez sélectionner une option",
+        "select_realm": "Veuillez sélectionner un royaume",
+        "select_class": "Veuillez sélectionner une classe",
+        "select_race": "Veuillez sélectionner une race"
+    },
     "version_check": {
         "current": "Version actuelle:",
         "latest": "Dernière version:",

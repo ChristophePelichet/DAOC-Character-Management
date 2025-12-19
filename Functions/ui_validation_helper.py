@@ -18,6 +18,8 @@ import logging
 import re
 from pathlib import Path
 
+from Functions.language_manager import lang
+
 
 def validate_non_empty_text(text: str) -> dict:
     """
@@ -37,7 +39,7 @@ def validate_non_empty_text(text: str) -> dict:
     if not stripped:
         return {
             'valid': False,
-            'message': "Ce champ ne peut pas être vide",
+            'message': lang.get("validation.empty_field", default="Ce champ ne peut pas être vide"),
             'value': ""
         }
     return {
@@ -70,7 +72,7 @@ def validate_text_field(text: str, allow_empty: bool = False,
     if not stripped and not allow_empty:
         return {
             'valid': False,
-            'message': "Ce champ ne peut pas être vide",
+            'message': lang.get("validation.empty_field", default="Ce champ ne peut pas être vide"),
             'value': ""
         }
     
@@ -78,7 +80,7 @@ def validate_text_field(text: str, allow_empty: bool = False,
     if max_length and len(stripped) > max_length:
         return {
             'valid': False,
-            'message': f"Le texte ne peut pas dépasser {max_length} caractères",
+            'message': lang.get("validation.text_too_long", default=f"Le texte ne peut pas dépasser {max_length} caractères"),
             'value': ""
         }
     
@@ -113,21 +115,21 @@ def validate_url_field(url: str) -> dict:
     if not stripped:
         return {
             'valid': False,
-            'message': "L'URL Herald ne peut pas être vide",
+            'message': lang.get("validation.herald_url_empty", default="L'URL Herald ne peut pas être vide"),
             'value': ""
         }
     
     if 'herald' not in stripped.lower():
         return {
             'valid': False,
-            'message': "L'URL doit contenir 'herald'",
+            'message': lang.get("validation.herald_url_missing_herald", default="L'URL doit contenir 'herald'"),
             'value': ""
         }
     
     if not (stripped.startswith('http://') or stripped.startswith('https://')):
         return {
             'valid': False,
-            'message': "L'URL doit commencer par http:// ou https://",
+            'message': lang.get("validation.herald_url_invalid_protocol", default="L'URL doit commencer par http:// ou https://"),
             'value': ""
         }
     
@@ -160,21 +162,21 @@ def validate_numeric_field(value: str, min_val: int = None,
     except (ValueError, AttributeError):
         return {
             'valid': False,
-            'message': "La valeur doit être un nombre",
+            'message': lang.get("validation.numeric_required", default="La valeur doit être un nombre"),
             'value': 0
         }
     
     if min_val is not None and num < min_val:
         return {
             'valid': False,
-            'message': f"La valeur doit être au minimum {min_val}",
+            'message': lang.get("validation.numeric_too_low", default=f"La valeur doit être au minimum {min_val}"),
             'value': 0
         }
     
     if max_val is not None and num > max_val:
         return {
             'valid': False,
-            'message': f"La valeur doit être au maximum {max_val}",
+            'message': lang.get("validation.numeric_too_high", default=f"La valeur doit être au maximum {max_val}"),
             'value': 0
         }
     
@@ -202,7 +204,7 @@ def validate_filepath_exists(filepath: str) -> dict:
     if not filepath or not filepath.strip():
         return {
             'valid': False,
-            'message': "Le chemin de fichier ne peut pas être vide",
+            'message': lang.get("validation.filepath_empty", default="Le chemin de fichier ne peut pas être vide"),
             'value': ""
         }
     
@@ -211,7 +213,7 @@ def validate_filepath_exists(filepath: str) -> dict:
         if not path.exists():
             return {
                 'valid': False,
-                'message': f"Le fichier n'existe pas : {filepath}",
+                'message': lang.get("validation.filepath_not_found", default=f"Le fichier n'existe pas : {filepath}"),
                 'value': ""
             }
         return {
@@ -245,7 +247,7 @@ def validate_directory_exists(dirpath: str) -> dict:
     if not dirpath or not dirpath.strip():
         return {
             'valid': False,
-            'message': "Le chemin de répertoire ne peut pas être vide",
+            'message': lang.get("validation.dirpath_empty", default="Le chemin de répertoire ne peut pas être vide"),
             'value': ""
         }
     
@@ -254,7 +256,7 @@ def validate_directory_exists(dirpath: str) -> dict:
         if not path.is_dir():
             return {
                 'valid': False,
-                'message': f"Le répertoire n'existe pas : {dirpath}",
+                'message': lang.get("validation.dirpath_not_found", default=f"Le répertoire n'existe pas : {dirpath}"),
                 'value': ""
             }
         return {
@@ -290,7 +292,7 @@ def validate_email_field(email: str) -> dict:
     if not stripped:
         return {
             'valid': False,
-            'message': "L'adresse email ne peut pas être vide",
+            'message': lang.get("validation.email_empty", default="L'adresse email ne peut pas être vide"),
             'value': ""
         }
     
@@ -299,7 +301,7 @@ def validate_email_field(email: str) -> dict:
     if not re.match(pattern, stripped):
         return {
             'valid': False,
-            'message': "Format email invalide",
+            'message': lang.get("validation.email_invalid", default="Format email invalide"),
             'value': ""
         }
     
@@ -330,7 +332,7 @@ def validate_not_selected(combo_text: str, placeholder: str = "") -> dict:
     if not text or text == placeholder:
         return {
             'valid': False,
-            'message': "Veuillez sélectionner une option",
+            'message': lang.get("validation.select_option", default="Veuillez sélectionner une option"),
             'value': ""
         }
     
@@ -394,14 +396,14 @@ def validate_character_name(name: str) -> dict:
     if not stripped:
         return {
             'valid': False,
-            'message': "Le nom du personnage ne peut pas être vide",
+            'message': lang.get("validation.character_name_empty", default="Le nom du personnage ne peut pas être vide"),
             'value': ""
         }
     
     if len(stripped) > 30:
         return {
             'valid': False,
-            'message': "Le nom du personnage ne peut pas dépasser 30 caractères",
+            'message': lang.get("validation.character_name_too_long", default="Le nom du personnage ne peut pas dépasser 30 caractères"),
             'value': ""
         }
     
@@ -409,7 +411,7 @@ def validate_character_name(name: str) -> dict:
     if not re.match(r"^[a-zA-Z0-9\-\' ]+$", stripped):
         return {
             'valid': False,
-            'message': "Le nom contient des caractères non autorisés",
+            'message': lang.get("validation.character_name_invalid_chars", default="Le nom contient des caractères non autorisés"),
             'value': ""
         }
     
@@ -452,7 +454,7 @@ def validate_guild_name(guild: str) -> dict:
     if len(stripped) > 50:
         return {
             'valid': False,
-            'message': "Le nom de guilde ne peut pas dépasser 50 caractères",
+            'message': lang.get("validation.guild_name_too_long", default="Le nom de guilde ne peut pas dépasser 50 caractères"),
             'value': ""
         }
     
@@ -460,7 +462,7 @@ def validate_guild_name(guild: str) -> dict:
     if not re.match(r"^[a-zA-Z0-9\-\'\\ &()]+$", stripped):
         return {
             'valid': False,
-            'message': "Le nom de guilde contient des caractères non autorisés",
+            'message': lang.get("validation.guild_name_invalid_chars", default="Le nom de guilde contient des caractères non autorisés"),
             'value': ""
         }
     
@@ -488,7 +490,7 @@ def validate_realm_selection(realm: str) -> dict:
     if not realm or not realm.strip():
         return {
             'valid': False,
-            'message': "Veuillez sélectionner un royaume",
+            'message': lang.get("validation.select_realm", default="Veuillez sélectionner un royaume"),
             'value': ""
         }
     
@@ -516,7 +518,7 @@ def validate_class_selection(class_name: str) -> dict:
     if not class_name or not class_name.strip():
         return {
             'valid': False,
-            'message': "Veuillez sélectionner une classe",
+            'message': lang.get("validation.select_class", default="Veuillez sélectionner une classe"),
             'value': ""
         }
     
@@ -544,7 +546,7 @@ def validate_race_selection(race: str) -> dict:
     if not race or not race.strip():
         return {
             'valid': False,
-            'message': "Veuillez sélectionner une race",
+            'message': lang.get("validation.select_race", default="Veuillez sélectionner une race"),
             'value': ""
         }
     

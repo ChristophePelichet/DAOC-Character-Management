@@ -1686,18 +1686,11 @@ class SettingsDialog(QDialog):
         eden_path = get_eden_data_dir()
         
         # Confirmation dialog
-        message = lang.get("clean_eden_confirm_message", 
-                          default="⚠️ Cette action va supprimer :\n\n"
-                                 "• Tous les cookies Eden\n"
-                                 "• Le profil Chrome complet (cache, historique, session)\n\n"
-                                 "📁 Dossier : {path}\n\n"
-                                 "Vous devrez régénérer vos cookies après cette opération.\n\n"
-                                 "Continuer ?")
-        message = message.replace("{path}", str(eden_path))
+        message = lang.get("settings.herald.clean_eden_confirm_message").replace("{path}", str(eden_path))
         
         reply = QMessageBox.question(
             self,
-            lang.get("clean_eden_confirm_title", default="Confirmer le nettoyage"),
+            lang.get("settings.herald.clean_eden_confirm_title"),
             message,
             QMessageBox.Yes | QMessageBox.No,
             QMessageBox.No
@@ -1757,15 +1750,12 @@ class SettingsDialog(QDialog):
             cache_path = str(Path(__file__).parent.parent / 'Armory')
         
         # Confirmation dialog
+        message = lang.get("settings.herald.clean_cache_confirm_message").replace("{path}", cache_path)
+        
         reply = QMessageBox.question(
             self,
-            lang.get("clean_cache_confirm_title", default="Confirmer le nettoyage"),
-            lang.get("clean_cache_confirm_message", 
-                    default=f"⚠️ Cette action va supprimer :\n\n"
-                           f"• Le cache des items trouvés via recherche web\n\n"
-                           f"📁 Dossier : {cache_path}\n\n"
-                           f"Les items de la base de données ne seront pas affectés.\n\n"
-                           f"Continuer ?"),
+            lang.get("settings.herald.clean_cache_confirm_title"),
+            message,
             QMessageBox.Yes | QMessageBox.No,
             QMessageBox.No
         )

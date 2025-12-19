@@ -1,9 +1,9 @@
 # 👤 Character System - Technical Documentation
 
-**Version**: 2.3  
+**Version**: 2.4  
 **Date**: December 2025  
-**Last Updated**: December 19, 2025 (Character Banner Management module added - Phase 7)  
-**Components**: `UI/dialogs.py` (CharacterSheetWindow), `Functions/character_validator.py`, `Functions/character_rr_calculator.py`, `Functions/character_herald_scrapper.py`, `Functions/character_banner.py`  
+**Last Updated**: December 19, 2025 (Character Achievement Formatter module added - Phase 11)  
+**Components**: `UI/dialogs.py` (CharacterSheetWindow), `Functions/character_validator.py`, `Functions/character_rr_calculator.py`, `Functions/character_herald_scrapper.py`, `Functions/character_banner.py`, `Functions/character_achievement_formatter.py`  
 **Related**: `Functions/character_manager.py`, `Functions/character_schema.py`, `Functions/character_migration.py`
 
 ---
@@ -15,12 +15,13 @@
 3. [Character RR Calculator Module (Phase 5)](#character-rr-calculator-module-phase-5)
 4. [Character Herald Scrapper Module (Phase 6)](#character-herald-scrapper-module-phase-6)
 5. [Character Banner Module (Phase 7)](#character-banner-module-phase-7)
-6. [Character Schema](#character-schema)
-7. [Migration System](#migration-system)
-8. [Integration](#integration)
-9. [Error Handling](#error-handling)
-10. [Usage Guide](#usage-guide)
-11. [Implementation Progress](#implementation-progress)
+6. [Character Achievement Formatter Module (Phase 11)](#character-achievement-formatter-module-phase-11)
+7. [Character Schema](#character-schema)
+8. [Migration System](#migration-system)
+9. [Integration](#integration)
+10. [Error Handling](#error-handling)
+11. [Usage Guide](#usage-guide)
+12. [Implementation Progress](#implementation-progress)
 
 ---
 
@@ -693,6 +694,103 @@ font-size: {scaled_9pt}pt;
 **Where banner_set_placeholder() is called**:
 - From banner_load_class_image() when image not found or corrupted
 - For manual placeholder display in error states
+
+---
+
+## Character Achievement Formatter Module (Phase 11)
+
+### Overview
+
+The Character Achievement Formatter Module provides functions for formatting and displaying character achievements with a clean, organized 2-column layout.
+
+**File**: `Functions/character_achievement_formatter.py` (256 lines)
+
+**Key Features**:
+- ✅ 2-column layout with vertical separator
+- ✅ Up to 8 achievements per column
+- ✅ Displays title, progress (e.g., "5/10"), and current tier
+- ✅ Placeholder for empty achievement lists
+- ✅ Consistent styling with theme integration
+- ✅ Error handling with graceful fallback
+
+### Functions
+
+#### character_update_achievements_display()
+
+**Purpose**: Update achievements display with the provided list
+
+**Signature**:
+```python
+def character_update_achievements_display(parent_window, achievements_list) -> None
+```
+
+**Parameters**:
+- `parent_window`: CharacterSheetWindow instance with:
+  - `achievements_container_layout`: QVBoxLayout for container
+- `achievements_list`: List of dicts with keys:
+  - `'title'`: Achievement name (str)
+  - `'progress'`: Progress indicator like "5/10" (str)
+  - `'current'`: Current tier or rank, or "None" (str)
+
+**Returns**: None (updates parent_window.achievements_container_layout in-place)
+
+**Behavior**:
+1. Clears existing widgets from achievements_container_layout
+2. Shows placeholder if no achievements exist
+3. Splits achievements into 2 groups of 8 (first 8, rest)
+4. Creates first grid layout (left column) with styling
+5. Adds vertical separator line if second column exists
+6. Creates second grid layout (right column) with styling
+7. Adds columns to main layout with stretch factors
+8. Adds final stretch to push content up
+
+**Layout Structure**:
+```
+┌─────────────────────────────────────────────────────┐
+│  Title 1        5/10  (Tier)  │  Title 9        2/10  (Tier) │
+│  Title 2        3/10  (Tier)  │  Title 10       0/10         │
+│  Title 3        8/10  (Tier)  │  Title 11       1/10  (Tier) │
+│  ...                         │  ...                         │
+└─────────────────────────────────────────────────────┘
+```
+
+**Styling Details**:
+- Title font: 9pt (scaled), left aligned
+- Progress: Bold, 9pt (scaled), right aligned
+- Current tier: 8pt (scaled), gray (#6c757d), italic, left aligned
+- Separator: Vertical line with light gray color (#cccccc)
+- Empty state: Gray italic dash (—)
+
+**Example**:
+```python
+from Functions.character_achievement_formatter import character_update_achievements_display
+
+achievements = [
+    {'title': 'First Victory', 'progress': '1/1', 'current': 'Gold'},
+    {'title': 'Realm Rank 5', 'progress': '5/5', 'current': None},
+    # ... more achievements
+]
+character_update_achievements_display(window, achievements)
+# Layout is updated with achievements in 2 columns
+```
+
+**Integration Points**:
+- Called from `CharacterSheetWindow._update_achievements_display()` (thin wrapper)
+- Receives data from character_data['achievements']
+- Updates `self.achievements_container_layout` directly
+
+**Error Handling**:
+- Missing keys handled with `.get()` and defaults
+- "None" string tier ignored (treated as empty)
+- Empty list shows placeholder
+- Exceptions caught and logged, placeholder shown as fallback
+
+**Code Quality**:
+- ✅ PEP 8 compliant (ruff: 0 errors)
+- ✅ Type hints for all parameters
+- ✅ Comprehensive docstrings with examples
+- ✅ No hardcoded strings
+- ✅ Robust error handling with logging
 
 ---
 

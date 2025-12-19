@@ -1,9 +1,9 @@
 # 👤 Character System - Technical Documentation
 
-**Version**: 2.2  
+**Version**: 2.3  
 **Date**: December 2025  
-**Last Updated**: December 18, 2025 (Character Herald Scrapper module added - Phase 6)  
-**Components**: `UI/dialogs.py` (CharacterSheetWindow), `Functions/character_validator.py`, `Functions/character_rr_calculator.py`, `Functions/character_herald_scrapper.py`  
+**Last Updated**: December 19, 2025 (Character Banner Management module added - Phase 7)  
+**Components**: `UI/dialogs.py` (CharacterSheetWindow), `Functions/character_validator.py`, `Functions/character_rr_calculator.py`, `Functions/character_herald_scrapper.py`, `Functions/character_banner.py`  
 **Related**: `Functions/character_manager.py`, `Functions/character_schema.py`, `Functions/character_migration.py`
 
 ---
@@ -14,12 +14,13 @@
 2. [Character Validator Module (Phase 4)](#character-validator-module-phase-4)
 3. [Character RR Calculator Module (Phase 5)](#character-rr-calculator-module-phase-5)
 4. [Character Herald Scrapper Module (Phase 6)](#character-herald-scrapper-module-phase-6)
-5. [Character Schema](#character-schema)
-6. [Migration System](#migration-system)
-7. [Integration](#integration)
-8. [Error Handling](#error-handling)
-9. [Usage Guide](#usage-guide)
-10. [Implementation Progress](#implementation-progress)
+5. [Character Banner Module (Phase 7)](#character-banner-module-phase-7)
+6. [Character Schema](#character-schema)
+7. [Migration System](#migration-system)
+8. [Integration](#integration)
+9. [Error Handling](#error-handling)
+10. [Usage Guide](#usage-guide)
+11. [Implementation Progress](#implementation-progress)
 
 ---
 
@@ -50,9 +51,10 @@ The Character System provides comprehensive character management including:
 1. **Character Validator** - Class/race management and validation (Phase 4)
 2. **Character RR Calculator** - Realm rank calculations and level management (Phase 5)
 3. **Character Herald Scrapper** - Herald data scraping and stats UI updates (Phase 6)
-4. **Character Schema** - Data structure definition and validation
-5. **Character Migration** - Automatic old→new structure migration
-6. **Character Manager** - Main integration and lifecycle management
+4. **Character Banner** - Class banner image management and display (Phase 7)
+5. **Character Schema** - Data structure definition and validation
+6. **Character Migration** - Automatic old→new structure migration
+7. **Character Manager** - Main integration and lifecycle management
 
 ---
 
@@ -570,7 +572,132 @@ except Exception as e:
 
 ---
 
+## Character Banner Module (Phase 7)
+
+### Overview
+
+The Character Banner module (`Functions/character_banner.py`) provides functions for loading and displaying character class banner images with fallback placeholder support.
+
+**Extracted from**: `UI/dialogs.py` CharacterSheetWindow class  
+**Date Completed**: December 19, 2025  
+**Lines Removed from dialogs.py**: ~54  
+**Lines in new module**: ~141  
+**Functions Extracted**: 2
+
+### Architecture
+
+#### Core Functions
+
+The module provides 2 main functions for banner management:
+
+```python
+banner_load_class_image(parent_window, realm, class_name)
+banner_set_placeholder(parent_window, text)
+```
+
+#### Function Details
+
+##### banner_load_class_image()
+
+**Signature**:
+```python
+def banner_load_class_image(parent_window, realm: str, class_name: str) -> None:
+    """Load and display character class banner image."""
+```
+
+**Purpose**: Load class banner from file system and display in UI with fallback to placeholder
+
+**Parameters**:
+- `parent_window`: CharacterSheetWindow instance with banner_label attribute (QLabel)
+- `realm`: Realm name ('Albion', 'Hibernia', or 'Midgard')
+- `class_name`: Character class name (e.g., 'Armsman', 'Ranger')
+
+**Process**:
+1. Validates class_name is provided
+2. Maps realm to folder abbreviation (Albion→Alb, Hibernia→Hib, Midgard→Mid)
+3. Normalizes class name for filename (lowercase, spaces → underscores)
+4. Attempts to load image from Img/Banner/{realm}/{class}.jpg
+5. Falls back to .png extension if .jpg not found
+6. Loads and displays QPixmap with top-center alignment
+7. Calls banner_set_placeholder() if image invalid or missing
+8. Logs debug/warning messages for troubleshooting
+
+**Example**:
+```python
+realm = self.character_data.get('realm', 'Albion')
+class_name = self.character_data.get('class', '')
+banner_load_class_image(self, realm, class_name)
+```
+
+**Error Handling**:
+- Empty class name → Shows placeholder with translation key
+- Missing image file → Shows placeholder with "Banner not found: {realm}/{class}"
+- Corrupted image file → Shows placeholder with "Invalid image: {class}"
+- Logs detailed messages for debugging
+
+##### banner_set_placeholder()
+
+**Signature**:
+```python
+def banner_set_placeholder(parent_window, text: str) -> None:
+    """Display placeholder text when banner image is not available."""
+```
+
+**Purpose**: Show styled text placeholder when banner image unavailable
+
+**Parameters**:
+- `parent_window`: CharacterSheetWindow instance with banner_label attribute (QLabel)
+- `text`: Placeholder text to display (supports multi-line with \n)
+
+**Process**:
+1. Clears any existing pixmap from label
+2. Sets text with centered alignment
+3. Applies gray italic styling with scaled 9pt font size
+
+**Styling Applied**:
+```css
+color: gray;
+font-style: italic;
+font-size: {scaled_9pt}pt;
+```
+
+### Dependencies
+
+**Internal Dependencies**:
+- `Functions.language_manager.lang` - For translation keys
+- `Functions.path_manager.get_resource_path()` - PyInstaller compatibility
+- `Functions.theme_manager.get_scaled_size()` - UI scaling support
+- `Functions.logging_manager` - Debug/error logging
+
+**External Dependencies**:
+- `PySide6.QtGui.QPixmap` - Image loading
+- `PySide6.QtCore.Qt` - Alignment flags
+- `os` - File path operations
+
+### Quality Metrics
+
+- ✅ PEP 8 Compliant (ruff: 0 errors)
+- ✅ Type Hints: Complete for all parameters and returns
+- ✅ Docstrings: Comprehensive with examples and process flows
+- ✅ Logging: Debug and warning messages for troubleshooting
+- ✅ No Hardcoded Strings: Uses lang.get() for UI text
+- ✅ No French Comments: 100% English documentation
+
+### Integration Points
+
+**Where banner_load_class_image() is called**:
+- When character realm changes in dropdown
+- When character class changes in dropdown
+- When character data is updated from external sources
+
+**Where banner_set_placeholder() is called**:
+- From banner_load_class_image() when image not found or corrupted
+- For manual placeholder display in error states
+
+---
+
 ## Character Schema
+
 
 ### character_schema.py
 
@@ -1099,11 +1226,11 @@ result_achievements = {
 - ✅ Ruff checks: 0 errors (ignoring E501)
 - ✅ Syntax validation: ✅ PASSED
 
-### Phase 6: Character Herald Scrapper Extraction (In Progress - Dec 18, 2025)
+### Phase 6: Character Herald Scrapper Extraction (Completed - Dec 18, 2025)
 
-**Status**: 🔄 IN PROGRESS
+**Status**: ✅ COMPLETED
 
-**What Is Being Done**:
+**What Was Done**:
 1. ✅ Created `Functions/character_herald_scrapper.py` (422 lines)
 2. ✅ Extracted 4 functions from CharacterSheetWindow
 3. ✅ Updated dialogs.py with imports for new module
@@ -1120,7 +1247,7 @@ result_achievements = {
 
 **Code Structure**:
 - `character_herald_scrapper.py`: ~422 lines (new module)
-- dialogs.py: Updated with imports only (no wrappers needed, direct calls)
+- dialogs.py: Updated with imports and thin wrappers
 
 **Quality Metrics**:
 - ✅ PEP 8 compliant
@@ -1131,20 +1258,52 @@ result_achievements = {
 - ✅ No French comments (100% English)
 - ✅ Syntax validation: ✅ PASSED
 
+### Phase 7: Character Banner Management Extraction (Completed - Dec 19, 2025)
+
+**Status**: ✅ COMPLETED
+
+**What Was Done**:
+1. ✅ Created `Functions/character_banner.py` (141 lines)
+2. ✅ Extracted 2 functions from CharacterSheetWindow
+3. ✅ Updated dialogs.py with imports and thin wrapper methods
+4. ✅ Implemented banner image loading with .jpg/.png fallback
+5. ✅ Implemented placeholder display with scaled font support
+6. ✅ Added comprehensive docstrings with examples
+7. ✅ Ruff validation: All checks passed
+8. ✅ Syntax validation: All checks passed
+
+**Functions Extracted**:
+- `banner_load_class_image()` - Load and display class banner with error handling
+- `banner_set_placeholder()` - Display styled placeholder text when banner unavailable
+
+**Code Removed from dialogs.py**: ~54 lines  
+**Code Added to character_banner.py**: ~141 lines  
+**Net Impact**: Better separation of concerns, reusable module
+
+**Quality Metrics**:
+- ✅ PEP 8 compliant (ruff: 0 errors)
+- ✅ Type hints complete
+- ✅ Docstrings comprehensive with examples
+- ✅ Error handling robust (file validation, logging)
+- ✅ No hardcoded strings (uses lang.get())
+- ✅ Ruff checks: 0 errors
+- ✅ Syntax validation: ✅ PASSED
+
 ---
 
 ## Commit Information
 
-**Branch**: `refactor/v0.109-herald-scraping-extraction`  
+**Branch**: `refactor/v0.109-dialogs-cleanup`  
 **Related Phases**:
 - Phase 1: Template Parser extraction ✅
 - Phase 2: Item Price Manager extraction ✅
 - Phase 3: Ruff cleanup ✅
 - Phase 4: Character Validator extraction ✅
 - Phase 5: Character RR Calculator extraction ✅
-- Phase 6: Character Herald Scrapper extraction (in progress)
+- Phase 6: Character Herald Scrapper extraction ✅
+- Phase 7: Character Banner Management extraction ✅
 
 ---
 
-**Documentation Last Updated**: December 18, 2025
-**Next Phase**: Character Banner Management extraction (Phase 7)
+**Documentation Last Updated**: December 19, 2025  
+**Next Phase**: Herald URL Validation extraction (Phase 8)

@@ -42,6 +42,9 @@ from Functions.character_herald_scrapper import (
     character_herald_update, character_herald_update_rvr_stats,
     character_herald_apply_scraped_stats, character_herald_apply_partial_stats
 )
+from Functions.character_banner import (
+    banner_load_class_image, banner_set_placeholder
+)
 from UI.template_import_dialog import TemplateImportDialog
 
 # Get CHARACTER logger
@@ -656,57 +659,13 @@ class CharacterSheetWindow(QDialog):
     
     def _update_class_banner(self):
         """Update the class banner image based on current class and realm"""
-        from Functions.path_manager import get_resource_path
-        
         realm = self.character_data.get('realm', 'Albion')
         class_name = self.character_data.get('class', '')
-        
-        if not class_name:
-            # No class selected, show placeholder or hide
-            self.banner_label.clear()
-            self.banner_label.setText(lang.get("character_sheet.labels.no_class_selected"))
-            self.banner_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            self.banner_label.setStyleSheet("color: gray; font-style: italic;")
-            return
-        
-        # Build banner path: Img/Banner/{realm}/{class}.jpg
-        # Normalize realm and class names (handle abbreviations)
-        realm_map = {
-            "Albion": "Alb",
-            "Hibernia": "Hib",
-            "Midgard": "Mid"
-        }
-        realm_folder = realm_map.get(realm, realm)
-        
-        # Class name should be lowercase for filename
-        class_filename = class_name.lower().replace(" ", "_")
-        
-        # Use get_resource_path for PyInstaller compatibility
-        banner_path = get_resource_path(os.path.join("Img", "Banner", realm_folder, f"{class_filename}.jpg"))
-        
-        # Try with .png if .jpg doesn't exist
-        if not os.path.exists(banner_path):
-            banner_path = get_resource_path(os.path.join("Img", "Banner", realm_folder, f"{class_filename}.png"))
-        
-        if os.path.exists(banner_path):
-            pixmap = QPixmap(banner_path)
-            if not pixmap.isNull():
-                # Set pixmap without scaling - Qt will handle scaling with setScaledContents(True)
-                self.banner_label.setPixmap(pixmap)
-                self.banner_label.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignHCenter)
-                self.banner_label.setStyleSheet("")
-            else:
-                self._set_banner_placeholder(f"Invalid\nimage:\n{class_name}")
-        else:
-            # Banner not found
-            self._set_banner_placeholder(f"Banner\nnot found:\n{realm}\n{class_name}")
+        banner_load_class_image(self, realm, class_name)
     
     def _set_banner_placeholder(self, text):
         """Set placeholder text for banner"""
-        self.banner_label.clear()
-        self.banner_label.setText(text)
-        self.banner_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.banner_label.setStyleSheet(f"color: gray; font-style: italic; font-size: {get_scaled_size(9):.1f}pt;")
+        banner_set_placeholder(self, text)
     
     def _populate_classes_sheet(self):
         """Populates class dropdown based on selected realm."""

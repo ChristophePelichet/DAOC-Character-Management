@@ -6,7 +6,7 @@
 
 **Extraction Scope**: Extract business logic from `UI/dialogs.py` into dedicated domain-specific modules for improved maintainability, testability, and code reuse.
 
-**6 Phases Completed** - Extracted 22+ functions into 5 new modules:
+**7 Phases Completed** - Extracted 24+ functions into 6 new modules:
 
 1. **Phase 1**: Template Parser (`Functions/template_parser.py` - 1392 lines)
    - 8 functions: Template format detection, parsing (Loki/Zenkcraft), color stripping, price lookup, item formatting
@@ -31,13 +31,17 @@
    - 4 functions: Complete character update, RvR-only update, stats UI update (complete/partial)
    - URL validation, progress dialog integration, selective stat updates with saves
 
+7. **Phase 7**: Character Banner Management (`Functions/character_banner.py` - 141 lines)
+   - 2 functions: Class banner image loading with realm/class mapping, placeholder display
+   - .jpg/.png fallback support, scaled font sizing, comprehensive error logging
+
 **Quality Standards Applied**:
-- ✅ Domain-driven naming: `template_*`, `items_price_*`, `character_*`, `character_rr_*`, `character_herald_*`
+- ✅ Domain-driven naming: `template_*`, `items_price_*`, `character_*`, `character_rr_*`, `character_herald_*`, `banner_*`
 - ✅ PEP 8 compliant with ruff validation (0 errors)
 - ✅ Type hints and comprehensive docstrings
 - ✅ Zero hardcoded UI strings (all use `lang.get()`)
 - ✅ English-only code and comments (no French)
-- ✅ ~1750 lines extracted, ~130 thin wrappers in dialogs.py
+- ✅ ~1891 lines extracted, ~141 thin wrappers in dialogs.py
 - ✅ Complete documentation updates
 
 ---

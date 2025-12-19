@@ -254,22 +254,51 @@ Status: READY FOR PRODUCTION - MERGE TO DIALOGS-CLEANUP
 
 ---
 
-FUTURE PHASES (NOT STARTED)
+✅ PHASE 7: CHARACTER BANNER MANAGEMENT EXTRACTION (COMPLETED - v0.109)
 ================================================================================
+Target File: Functions/character_banner.py (141 lines)
+Extracted: 2 functions from CharacterSheetWindow class
+Date Completed: 19 December 2025
+Branch: refactor/v0.109-banner-management
 
-GROUP 7: CHARACTER BANNER MANAGEMENT (Low Priority - Phase 7)
-================================================================================
-Current Location: CharacterSheetWindow class
-Target File: Functions/character_banner.py
-Naming Convention: banner_{action}_{object}
+Extracted Functions:
+1. ✅ banner_load_class_image(parent_window, realm, class_name)
+   - Load and display class banner image from Img/Banner/{realm}/{class}.jpg
+   - Falls back to .png if .jpg not found
+   - Shows placeholder if image invalid or missing
+   - Supports realm name mapping (Albion→Alb, Hibernia→Hib, Midgard→Mid)
+   - Thin wrapper: 3 lines in dialogs.py
 
-Functions to Extract:
-1. _update_class_banner() - Load and display class banner image
-2. _set_banner_placeholder() - Display placeholder when banner not found
+2. ✅ banner_set_placeholder(parent_window, text)
+   - Display styled placeholder text when banner unavailable
+   - Uses scaled font size based on UI theme
+   - Applies gray italic styling
+   - Thin wrapper: 1 line in dialogs.py
+
+Quality Metrics:
+- ✅ PEP 8 compliant (ruff checks: 0 errors)
+- ✅ Type hints complete
+- ✅ Docstrings comprehensive with examples
+- ✅ Error handling robust (file validation, logging)
+- ✅ No hardcoded strings (uses lang.get())
+- ✅ No French comments (100% English)
+- ✅ Syntax validation: PASSED
+
+Code Structure:
+- Created character_banner.py: ~141 lines
+- Updated dialogs.py: ~4 lines of thin wrappers
+- Removed from dialogs.py: ~54 lines of business logic
+- Net result: ~50 lines saved, improved modularity
+
+Status: READY FOR PRODUCTION - MERGE TO DIALOGS-CLEANUP
 
 ---
 
-GROUP 8: HERALD URL VALIDATION (Medium Priority - Phase 8)
+FUTURE PHASES (NOT STARTED)
+================================================================================
+
+PHASE 8: HERALD URL VALIDATION (Medium Priority)
+================================================================================
 ================================================================================
 Current Location: CharacterSheetWindow class
 Target File: Functions/herald_url_validator.py
@@ -283,7 +312,6 @@ Functions to Extract:
 ---
 
 GROUP 9: ARMOR UPLOAD & PREVIEW (Medium Priority)
-================================================================================
 Current Location: ArmorManagementDialog class
 Target File: Functions/armor_upload_handler.py
 Naming Convention: armor_{action}_{object}
@@ -297,7 +325,6 @@ Functions to Extract:
 ---
 
 GROUP 10: ITEM MODEL VIEWER (Low Priority)
-================================================================================
 Current Location: ArmorManagementDialog class
 Target File: Functions/item_model_viewer.py
 Naming Convention: item_model_{action}_{object}
@@ -309,7 +336,6 @@ Functions to Extract:
 ---
 
 GROUP 11: ACHIEVEMENTS DISPLAY (Low Priority)
-================================================================================
 Current Location: CharacterSheetWindow class
 Target File: Functions/achievement_formatter.py
 Naming Convention: achievement_{action}_{object}
@@ -322,28 +348,25 @@ Functions to Extract:
 EXTRACTION SUMMARY
 ================================================================================
 
-Total Phases: 11 (6 started, 5 future)
-Started Phases: 6
+Total Phases: 11 (7 started, 4 future)
+Started Phases: 7
 - Phase 1: ✅ COMPLETE (Template Parser - 1392 lines)
 - Phase 2: ✅ COMPLETE (Item Price Manager - 205 lines)
 - Phase 3: ✅ COMPLETE (Ruff Cleanup - 22 errors fixed)
 - Phase 4: ✅ COMPLETE (Character Validator - 280 lines)
 - Phase 5: ✅ COMPLETE (Character RR Calculator - 209 lines)
-- Phase 6: 🔄 IN PROGRESS (Character Herald Scrapper - 422 lines)
+- Phase 6: ✅ COMPLETE (Character Herald Scrapper - 422 lines)
+- Phase 7: ✅ COMPLETE (Character Banner Management - 141 lines)
 
-Future Phases: 5
-- Phase 7: Character Banner Management (Low Priority)
+Future Phases: 4
 - Phase 8: Herald URL Validation (Medium Priority)
 - Phase 9: Armor Upload & Preview (Medium Priority)
 - Phase 10: Item Model Viewer (Low Priority)
 - Phase 11: Achievements Display (Low Priority)
 
-Estimated Removed from dialogs.py: ~1750 lines
-Estimated Moved to Dedicated Modules: ~2500 lines
-Net Result: Better separation of concerns, improved code reusability
-    Lines: ~1120-1233
-    New Name: achievement_format_html_display()
-    Notes: Generates HTML table with icons and descriptions
+Estimated Removed from dialogs.py: ~1804 lines (1750 + 54 from Phase 7)
+Estimated Moved to Dedicated Modules: ~2647 lines (2500 + 141 from Phase 7 + 6 missing)
+Net Result: Better separation of concerns, improved code reusability, consistent naming patterns
 
 
 GROUP 11: CHARACTER RENAMING (Low Priority)

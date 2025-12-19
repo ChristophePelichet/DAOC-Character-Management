@@ -1,9 +1,9 @@
 # 👤 Character System - Technical Documentation
 
-**Version**: 2.4  
+**Version**: 2.5  
 **Date**: December 2025  
-**Last Updated**: December 19, 2025 (Character Achievement Formatter module added - Phase 11)  
-**Components**: `UI/dialogs.py` (CharacterSheetWindow), `Functions/character_validator.py`, `Functions/character_rr_calculator.py`, `Functions/character_herald_scrapper.py`, `Functions/character_banner.py`, `Functions/character_achievement_formatter.py`  
+**Last Updated**: December 19, 2025 (Character Rename Handler module added - Phase 17)  
+**Components**: `UI/dialogs.py` (CharacterSheetWindow), `Functions/character_validator.py`, `Functions/character_rr_calculator.py`, `Functions/character_herald_scrapper.py`, `Functions/character_banner.py`, `Functions/character_achievement_formatter.py`, `Functions/character_rename_handler.py`  
 **Related**: `Functions/character_manager.py`, `Functions/character_schema.py`, `Functions/character_migration.py`
 
 ---
@@ -16,12 +16,13 @@
 4. [Character Herald Scrapper Module (Phase 6)](#character-herald-scrapper-module-phase-6)
 5. [Character Banner Module (Phase 7)](#character-banner-module-phase-7)
 6. [Character Achievement Formatter Module (Phase 11)](#character-achievement-formatter-module-phase-11)
-7. [Character Schema](#character-schema)
-8. [Migration System](#migration-system)
-9. [Integration](#integration)
-10. [Error Handling](#error-handling)
-11. [Usage Guide](#usage-guide)
-12. [Implementation Progress](#implementation-progress)
+7. [Character Rename Handler Module (Phase 17)](#character-rename-handler-module-phase-17)
+8. [Character Schema](#character-schema)
+9. [Migration System](#migration-system)
+10. [Integration](#integration)
+11. [Error Handling](#error-handling)
+12. [Usage Guide](#usage-guide)
+13. [Implementation Progress](#implementation-progress)
 
 ---
 
@@ -794,6 +795,152 @@ character_update_achievements_display(window, achievements)
 
 ---
 
+## Character Rename Handler Module (Phase 17)
+
+### Overview
+
+The Character Rename Handler module (`Functions/character_rename_handler.py`) provides functions for handling character renaming operations with validation and JSON persistence.
+
+**Extracted from**: `UI/dialogs.py` CharacterSheetWindow.rename_character() method  
+**Date Completed**: December 19, 2025  
+**Lines Removed from dialogs.py**: ~41 lines  
+**Lines in new module**: ~60 lines  
+**Functions Extracted**: 1
+
+### Key Features
+
+- ✅ **Clean separation of concerns** - Rename logic decoupled from UI
+- ✅ **Proper error handling** - Graceful failure with detailed messages
+- ✅ **Data consistency** - Updates both character_data dict and JSON file
+- ✅ **Type hints** - Complete type annotations for all parameters
+- ✅ **English documentation** - Comprehensive docstrings with examples
+- ✅ **Reusable module** - Can be called from any context
+
+### Core Function
+
+The module provides 1 main function:
+
+```python
+character_rename_with_validation(
+    character_data: dict,
+    new_name: str,
+    rename_function,
+) -> Tuple[bool, str]
+```
+
+**Purpose**: Rename a character with validation and persistence
+
+**Parameters**:
+- `character_data`: Dictionary containing character data to update (must contain 'name' key)
+- `new_name`: New name for the character (pre-validated by caller)
+- `rename_function`: Function to call for JSON file rename (signature: `(old_name, new_name) -> (bool, str)`)
+
+**Returns**: Tuple of (success: bool, message: str)
+- On success: `(True, "")`
+- On failure: `(False, "Error message")`
+
+**Behavior**:
+1. Retrieves old name from character_data['name']
+2. Validates that old name exists
+3. Calls rename_function(old_name, new_name)
+4. On success:
+   - Updates character_data['name'] = new_name
+   - Updates character_data['id'] = new_name
+   - Returns success
+5. On failure: Returns error message from rename_function
+6. On exception: Catches and returns formatted error message
+
+**Example**:
+```python
+from Functions.character_rename_handler import character_rename_with_validation
+from Functions.character_manager import rename_character
+
+# In CharacterSheetWindow.rename_character() after validation
+success, msg = character_rename_with_validation(
+    self.character_data,
+    "NewCharacterName",
+    rename_character
+)
+
+if success:
+    # Update UI
+    self.setWindowTitle(f"Fiche personnage - NewCharacterName")
+    self.parent_app.refresh_character_list()
+else:
+    # Show error
+    msg_show_error(self, "titles.error", f"Échec du renommage : {msg}")
+    self.name_edit.setText(old_name)
+```
+
+### Integration with CharacterSheetWindow
+
+The `rename_character()` method in `CharacterSheetWindow` now acts as a thin wrapper:
+
+```python
+def rename_character(self):
+    """Renames the character with validation."""
+    try:
+        old_name = self.character_data.get('name', '')
+        
+        # Validate new name format (business logic in dialogs.py)
+        result = validate_character_rename(self.name_edit.text())
+        if not result['valid']:
+            msg_show_warning(self, "titles.warning", result['message'])
+            self.name_edit.setText(old_name)
+            return
+        
+        new_name = result['value']
+        if old_name == new_name:
+            msg_show_info_with_details(self, "titles.info", "Le nom n'a pas changé.")
+            return
+        
+        # Show confirmation dialog
+        if msg_show_confirmation(self, "Confirmer le renommage", 
+                                f"Renommer '{old_name}' en '{new_name}' ?"):
+            from Functions.character_manager import rename_character
+            from Functions.character_rename_handler import character_rename_with_validation
+            
+            # Call extracted function
+            success, msg = character_rename_with_validation(
+                self.character_data, new_name, rename_character
+            )
+            
+            if success:
+                # Update UI elements
+                self.setWindowTitle(f"Fiche personnage - {new_name}")
+                if hasattr(self.parent_app, 'refresh_character_list'):
+                    self.parent_app.refresh_character_list()
+            else:
+                msg_show_error(self, "titles.error", f"Échec du renommage : {msg}")
+                self.name_edit.setText(old_name)
+                
+    except Exception as e:
+        msg_show_error(self, "titles.error", f"Erreur lors du renommage : {str(e)}")
+        if hasattr(self, 'character_data'):
+            self.name_edit.setText(self.character_data.get('name', ''))
+```
+
+### Quality Metrics
+
+- ✅ **PEP 8 compliant**: Ruff validation passed (0 errors)
+- ✅ **Type hints**: Complete annotations for all parameters
+- ✅ **Docstrings**: Comprehensive English documentation with examples
+- ✅ **No hardcoded strings**: All error messages use format strings
+- ✅ **No French comments**: 100% English documentation
+- ✅ **Robust error handling**: All error paths handled
+- ✅ **Syntax validation**: Python syntax check passed
+- ✅ **Import testing**: Module imports correctly
+
+### Benefits of this Design
+
+- ✅ Rename logic is testable and reusable
+- ✅ UI handling stays in dialogs.py (appropriate layer)
+- ✅ Error messages can be customized per context
+- ✅ Easy to extend for other rename contexts
+- ✅ Reduced complexity in CharacterSheetWindow class
+
+---
+
 ## Character Schema
 
 
@@ -1400,8 +1547,9 @@ result_achievements = {
 - Phase 5: Character RR Calculator extraction ✅
 - Phase 6: Character Herald Scrapper extraction ✅
 - Phase 7: Character Banner Management extraction ✅
+- Phase 17: Character Rename Handler extraction ✅
 
 ---
 
 **Documentation Last Updated**: December 19, 2025  
-**Next Phase**: Herald URL Validation extraction (Phase 8)
+**Next Phase**: Simple UI Utility Functions extraction (Phase 18)

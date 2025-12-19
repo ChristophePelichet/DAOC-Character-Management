@@ -39,7 +39,7 @@ from Functions.character_rr_calculator import (
     character_rr_calculate_from_points
 )
 from Functions.character_herald_scrapper import (
-    character_herald_update,
+    character_herald_update, character_herald_update_rvr_stats,
     character_herald_apply_scraped_stats, character_herald_apply_partial_stats
 )
 from Functions.character_banner import (
@@ -50,8 +50,12 @@ from Functions.herald_url_validator import (
     herald_url_update_button_states
 )
 from Functions.ui_validation_helper import (
-    validate_basic_character_info,
-    validate_character_rename, validate_new_character_dialog_data
+    validate_non_empty_text, validate_text_field, validate_url_field,
+    validate_character_name, validate_guild_name, validate_realm_selection,
+    validate_class_selection, validate_race_selection, validate_numeric_field,
+    validate_filepath_exists, validate_basic_character_info,
+    validate_character_rename, validate_new_character_creation,
+    validate_new_character_dialog_data
 )
 from Functions.armor_upload_handler import (
     armor_upload_file, armor_import_template, armor_open_file,
@@ -73,11 +77,14 @@ from UI.ui_state_manager import (
 )
 from UI.ui_file_dialogs import (
     dialog_open_file, dialog_save_file, dialog_select_directory,
-    dialog_select_backup_path
+    dialog_open_armor_file, dialog_select_backup_path
 )
 from UI.ui_getters import (
     ui_get_visibility_config, ui_get_selected_category, ui_get_selected_changes
 )
+from UI.ui_context_menus import ui_show_armor_context_menu
+from Functions.herald_ui_wrappers import herald_ui_update_rvr_stats
+from Functions.character_rename_handler import character_rename_with_validation
 
 # Get CHARACTER logger
 logger_char = get_logger(LOGGER_CHARACTER)
@@ -1097,7 +1104,6 @@ class CharacterSheetWindow(QDialog):
     
     def update_rvr_stats(self):
         """Update RvR statistics from Herald"""
-        from Functions.herald_ui_wrappers import herald_ui_update_rvr_stats
         herald_ui_update_rvr_stats(self, self.herald_url_edit)
     
     # ✅ Pattern 1 : Wrappers thread-safe pour stats update

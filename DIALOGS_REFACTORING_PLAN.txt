@@ -3,7 +3,7 @@ DIALOGS.PY REFACTORING PLAN
 ================================================================================
 File: UI/dialogs.py
 Date: 13 December 2025
-Updated: 18 December 2025 (Phase 1, 2, 3 & 4 Complete - v0.109)
+Updated: 19 December 2025 (Phase 1-6 Complete - v0.109 Refactoring Merge)
 Purpose: Extract functions to dedicated modules for better maintainability
 ================================================================================
 
@@ -204,97 +204,58 @@ Status: INTEGRATION COMPLETE - READY FOR COMMIT
 
 ---
 
+✅ PHASE 6: CHARACTER HERALD SCRAPPER EXTRACTION (COMPLETED - v0.109)
+================================================================================
+Target File: Functions/character_herald_scrapper.py (422 lines)
+Extracted: 4 functions from CharacterSheetWindow class
+Date Completed: 19 December 2025
+Branch: refactor/v0.109-herald-scraping-extraction
+
+Extracted Functions:
+1. ✅ character_herald_update(parent_window, url)
+   - Main entry point for complete character update from Herald
+   - Validates Herald URL, launches CharacterUpdateThread
+   - Shows progress dialog with CHARACTER_UPDATE steps
+   - Thin wrapper: 4 lines in dialogs.py
+
+2. ✅ character_herald_update_rvr_stats(parent_window, url)
+   - Fast update for RvR statistics only
+   - Launches lighter StatsUpdateThread
+   - Shows progress dialog with STATS_SCRAPING steps
+   - Thin wrapper: 4 lines in dialogs.py
+
+3. ✅ character_herald_apply_scraped_stats(parent_window, result_rvr, result_pvp, result_pve, result_wealth, result_achievements)
+   - Apply all scraped stats to UI and character_data
+   - Updates RvR, PvP, PvE, wealth, and achievements fields
+   - Thin wrapper: 3 lines in dialogs.py
+
+4. ✅ character_herald_apply_partial_stats(parent_window, result_rvr, result_pvp, result_pve, result_wealth, result_achievements)
+   - Apply selective stats to UI and character_data
+   - Only updates if result_*['success'] is True
+   - Saves character data after each update
+   - Thin wrapper: 3 lines in dialogs.py
+
+Quality Metrics:
+- ✅ PEP 8 compliant
+- ✅ Type hints present
+- ✅ Docstrings comprehensive with examples
+- ✅ Error handling robust (URL validation, thread-safe)
+- ✅ No hardcoded strings (uses lang.get())
+- ✅ No French comments (100% English)
+- ✅ Syntax validation: PASSED
+
+Code Structure:
+- Created character_herald_scrapper.py: ~422 lines
+- Updated dialogs.py: ~14 lines of thin wrappers
+- Removed from dialogs.py: ~130 lines of business logic
+- Net result: ~116 lines saved, improved modularity
+
+Status: READY FOR PRODUCTION - MERGE TO DIALOGS-CLEANUP
+
+---
+
 FUTURE PHASES (NOT STARTED)
 ================================================================================
-
-GROUP 6: HERALD SCRAPING LOGIC (High Priority - Phase 6)
-================================================================================
-Current Location: CharacterSheetWindow class
-Target File: Functions/character_validator.py
-Naming Convention: character_{action}_{object}
-
-11. Function: _populate_classes_sheet()
-    Purpose: Populate class dropdown based on realm
-    New Name: character_get_classes_for_realm()
-    
-12. Function: _populate_races_sheet()
-    Purpose: Populate race dropdown based on class
-    New Name: character_get_races_for_class()
-    
-13. Function: _on_realm_changed_sheet()
-    Purpose: Update class/race dropdowns when realm changes
-    Lines: ~750-756
-    New Name: character_handle_realm_change()
-    Notes: Cascade update logic
-
-14. Function: _on_class_changed_sheet()
-    Purpose: Update race dropdown when class changes
-    Lines: ~758-765
-    New Name: character_handle_class_change()
-    Notes: Filter races by class compatibility
-
-15. Function: _on_race_changed_sheet()
-    Purpose: Update banner when race changes
-    Lines: ~767-769
-    New Name: character_handle_race_change()
-    Notes: Triggers banner update
-
-
-GROUP 5: REALM RANK CALCULATIONS (Medium Priority - Phase 5)
-================================================================================
-Current Location: CharacterSheetWindow class
-Target File: Functions/realm_rank_calculator.py
-Naming Convention: realm_rank_{action}_{object}
-
-16. Function: update_rank_display()
-    Purpose: Calculate and display RR from realm points
-    Lines: ~823-839
-    New Name: realm_rank_calculate_from_points()
-    Notes: Uses realm_ranks.json data
-
-17. Function: update_rp_info()
-    Purpose: Update RP info labels (current, needed for next)
-    Lines: ~807-821
-    New Name: realm_rank_calculate_points_info()
-    Notes: Calculates progression to next rank
-
-18. Function: update_level_dropdown()
-    Purpose: Filter level dropdown based on rank restrictions
-    Lines: ~789-805
-    New Name: realm_rank_get_valid_levels()
-    Notes: Enforces min level requirements per rank
-
-
-GROUP 6: HERALD SCRAPING LOGIC (High Priority - Phase 6)
-================================================================================
-Current Location: CharacterSheetWindow, HeraldSearchDialog
-Target File: Functions/herald_integration.py
-Naming Convention: herald_{action}_{object}
-
-19. Function: update_from_herald()
-    Purpose: Main function to scrape and update character from Herald
-    Lines: ~1782-1851
-    New Name: herald_update_character()
-    Notes: Launches CharacterUpdateThread
-
-20. Function: update_rvr_stats()
-    Purpose: Update only RvR stats from Herald
-    Lines: ~1278-1345
-    New Name: herald_update_rvr_stats()
-    Notes: Launches StatsUpdateThread
-
-21. Function: _update_all_stats_ui()
-    Purpose: Update all stat fields in UI after scraping
-    Lines: ~1613-1710
-    New Name: herald_apply_scraped_stats()
-    Notes: Maps scraped data to UI fields
-
-22. Function: _update_partial_stats_ui()
-    Purpose: Update only some stat fields in UI
-    Lines: ~1712-1780
-    New Name: herald_apply_partial_stats()
-    Notes: Selective update for RvR stats only
-
 
 GROUP 7: CHARACTER BANNER MANAGEMENT (Low Priority - Phase 7)
 ================================================================================
@@ -302,18 +263,11 @@ Current Location: CharacterSheetWindow class
 Target File: Functions/character_banner.py
 Naming Convention: banner_{action}_{object}
 
-23. Function: _update_class_banner()
-    Purpose: Load and display class banner image
-    Lines: ~643-688
-    New Name: banner_load_class_image()
-    Notes: Loads from Img/Banner/{realm}_{class}.png
+Functions to Extract:
+1. _update_class_banner() - Load and display class banner image
+2. _set_banner_placeholder() - Display placeholder when banner not found
 
-24. Function: _set_banner_placeholder()
-    Purpose: Display placeholder when banner not found
-    Lines: ~690-695
-    New Name: banner_set_placeholder()
-    Notes: Shows colored placeholder with text
-
+---
 
 GROUP 8: HERALD URL VALIDATION (Medium Priority - Phase 8)
 ================================================================================
@@ -321,83 +275,72 @@ Current Location: CharacterSheetWindow class
 Target File: Functions/herald_url_validator.py
 Naming Convention: herald_url_{action}_{object}
 
-25. Function: on_herald_url_changed()
-    Purpose: Validate Herald URL format and update button states
-    Lines: ~1077-1089
-    New Name: herald_url_validate_format()
-    Notes: Checks URL pattern, enables/disables buttons
+Functions to Extract:
+1. on_herald_url_changed() - Validate Herald URL format and update button states
+2. _update_herald_buttons_state() - Enable/disable Herald buttons based on connection state
+3. open_herald_url() - Open Herald URL in browser
 
-26. Function: _update_herald_buttons_state()
-    Purpose: Enable/disable Herald buttons based on connection state
-    Lines: ~1574-1611
-    New Name: herald_url_update_button_states()
-    Notes: Checks Eden validation status
+---
 
-27. Function: open_herald_url()
-    Purpose: Open Herald URL in browser
-    Lines: ~1235-1262
-    New Name: herald_url_open_in_browser()
-    Notes: Launches browser with Herald URL
-
-
-GROUP 8: ARMOR UPLOAD & PREVIEW (Medium Priority)
+GROUP 9: ARMOR UPLOAD & PREVIEW (Medium Priority)
 ================================================================================
 Current Location: ArmorManagementDialog class
 Target File: Functions/armor_upload_handler.py
 Naming Convention: armor_{action}_{object}
 
-28. Function: upload_armor()
-    Purpose: Show upload dialog and save armor configuration
-    Lines: ~3035-3088
-    New Name: armor_show_upload_dialog()
-    Notes: Creates ArmorUploadPreviewDialog
+Functions to Extract:
+1. upload_armor() - Show upload dialog and save armor configuration
+2. import_template() - Import armor template from file
+3. open_armor() - Open armor file in preview
+4. delete_armor() - Delete armor file with confirmation
 
-29. Function: import_template()
-    Purpose: Import armor template from file
-    Lines: ~3090-3139
-    New Name: armor_import_template()
-    Notes: Opens TemplateImportDialog
+---
 
-30. Function: open_armor()
-    Purpose: Open armor file in preview
-    Lines: ~4729-4753
-    New Name: armor_preview_file()
-    Notes: Displays template content
-
-31. Function: delete_armor()
-    Purpose: Delete armor file with confirmation
-    Lines: ~4755-4786
-    New Name: armor_delete_file()
-    Notes: Confirms and deletes .template file
-
-
-GROUP 9: ITEM MODEL VIEWER (Low Priority)
+GROUP 10: ITEM MODEL VIEWER (Low Priority)
 ================================================================================
 Current Location: ArmorManagementDialog class
 Target File: Functions/item_model_viewer.py
 Naming Convention: item_model_{action}_{object}
 
-32. Function: _on_model_link_clicked()
-    Purpose: Handle click on 🔍 icon to show item model
-    Lines: ~4663-4676
-    New Name: item_model_handle_icon_click()
-    Notes: Extracts item name from URL
+Functions to Extract:
+1. _on_model_link_clicked() - Handle click on 🔍 icon to show item model
+2. _show_item_model() - Display 3D item model in dialog
 
-33. Function: _show_item_model()
-    Purpose: Display 3D item model in dialog
-    Lines: ~4678-4727
-    New Name: item_model_show_3d_viewer()
-    Notes: Opens ItemModelDialog with image
+---
 
-
-GROUP 10: ACHIEVEMENTS DISPLAY (Low Priority)
+GROUP 11: ACHIEVEMENTS DISPLAY (Low Priority)
 ================================================================================
 Current Location: CharacterSheetWindow class
 Target File: Functions/achievement_formatter.py
 Naming Convention: achievement_{action}_{object}
 
-34. Function: _update_achievements_display()
-    Purpose: Format and display achievements list
+Functions to Extract:
+1. _update_achievements_display() - Format and display achievements list
+
+---
+
+EXTRACTION SUMMARY
+================================================================================
+
+Total Phases: 11 (6 started, 5 future)
+Started Phases: 6
+- Phase 1: ✅ COMPLETE (Template Parser - 1392 lines)
+- Phase 2: ✅ COMPLETE (Item Price Manager - 205 lines)
+- Phase 3: ✅ COMPLETE (Ruff Cleanup - 22 errors fixed)
+- Phase 4: ✅ COMPLETE (Character Validator - 280 lines)
+- Phase 5: ✅ COMPLETE (Character RR Calculator - 209 lines)
+- Phase 6: 🔄 IN PROGRESS (Character Herald Scrapper - 422 lines)
+
+Future Phases: 5
+- Phase 7: Character Banner Management (Low Priority)
+- Phase 8: Herald URL Validation (Medium Priority)
+- Phase 9: Armor Upload & Preview (Medium Priority)
+- Phase 10: Item Model Viewer (Low Priority)
+- Phase 11: Achievements Display (Low Priority)
+
+Estimated Removed from dialogs.py: ~1750 lines
+Estimated Moved to Dedicated Modules: ~2500 lines
+Net Result: Better separation of concerns, improved code reusability
     Lines: ~1120-1233
     New Name: achievement_format_html_display()
     Notes: Generates HTML table with icons and descriptions

@@ -1,9 +1,9 @@
 # 👤 Character System - Technical Documentation
 
-**Version**: 2.1  
+**Version**: 2.2  
 **Date**: December 2025  
-**Last Updated**: December 18, 2025 (Character RR Calculator module added - Phase 5)  
-**Components**: `UI/dialogs.py` (CharacterSheetWindow), `Functions/character_validator.py`, `Functions/character_rr_calculator.py`  
+**Last Updated**: December 18, 2025 (Character Herald Scrapper module added - Phase 6)  
+**Components**: `UI/dialogs.py` (CharacterSheetWindow), `Functions/character_validator.py`, `Functions/character_rr_calculator.py`, `Functions/character_herald_scrapper.py`  
 **Related**: `Functions/character_manager.py`, `Functions/character_schema.py`, `Functions/character_migration.py`
 
 ---
@@ -13,12 +13,13 @@
 1. [Overview](#overview)
 2. [Character Validator Module (Phase 4)](#character-validator-module-phase-4)
 3. [Character RR Calculator Module (Phase 5)](#character-rr-calculator-module-phase-5)
-4. [Character Schema](#character-schema)
-5. [Migration System](#migration-system)
-6. [Integration](#integration)
-7. [Error Handling](#error-handling)
-8. [Usage Guide](#usage-guide)
-9. [Implementation Progress](#implementation-progress)
+4. [Character Herald Scrapper Module (Phase 6)](#character-herald-scrapper-module-phase-6)
+5. [Character Schema](#character-schema)
+6. [Migration System](#migration-system)
+7. [Integration](#integration)
+8. [Error Handling](#error-handling)
+9. [Usage Guide](#usage-guide)
+10. [Implementation Progress](#implementation-progress)
 
 ---
 
@@ -48,9 +49,10 @@ The Character System provides comprehensive character management including:
 
 1. **Character Validator** - Class/race management and validation (Phase 4)
 2. **Character RR Calculator** - Realm rank calculations and level management (Phase 5)
-3. **Character Schema** - Data structure definition and validation
-4. **Character Migration** - Automatic old→new structure migration
-5. **Character Manager** - Main integration and lifecycle management
+3. **Character Herald Scrapper** - Herald data scraping and stats UI updates (Phase 6)
+4. **Character Schema** - Data structure definition and validation
+5. **Character Migration** - Automatic old→new structure migration
+6. **Character Manager** - Main integration and lifecycle management
 
 ---
 
@@ -701,6 +703,312 @@ Characters/
 
 ---
 
+## Character Herald Scrapper Module (Phase 6)
+
+### Overview
+
+The Character Herald Scrapper module (`Functions/character_herald_scrapper.py`) provides functions for scraping character data from Herald and applying scraped statistics to the UI and character data structure. It supports both complete character updates and partial RvR-only updates.
+
+**Extracted from**: `UI/dialogs.py` CharacterSheetWindow class  
+**Date**: December 18, 2025 (Phase 6)  
+**Lines in new module**: ~422  
+**Functions Extracted**: 4
+
+### Architecture
+
+#### Core Functions
+
+The module provides 4 main functions for Herald scraping and data updates:
+
+```python
+# Scraping orchestration functions
+character_herald_update(parent_window, url)
+character_herald_update_rvr_stats(parent_window, url)
+
+# UI update functions
+character_herald_apply_scraped_stats(parent_window, result_rvr, result_pvp, result_pve, result_wealth, result_achievements)
+character_herald_apply_partial_stats(parent_window, result_rvr, result_pvp, result_pve, result_wealth, result_achievements)
+```
+
+#### Data Flow
+
+```
+┌─────────────────────────────────────────────────────┐
+│       Character Sheet Window (dialogs.py)           │
+│    User clicks "Scrape Herald" or "Update RvR"      │
+└──────────────────────┬────────────────────────────┘
+                       │
+                       ▼
+        ┌──────────────────────────────────┐
+        │  character_herald_scrapper.py    │
+        │  character_herald_update() or    │
+        │  character_herald_update_rvr()   │
+        └──────────────┬───────────────────┘
+                       │
+        ┌──────────────┴──────────────┐
+        │                             │
+        ▼                             ▼
+    ┌─────────────┐          ┌──────────────┐
+    │ URL Check & │          │ Thread Setup │
+    │ Formatting  │          │ (Browser)    │
+    └────┬────────┘          └────┬─────────┘
+         │                         │
+         └────────────┬────────────┘
+                      │
+                      ▼
+          ┌──────────────────────────┐
+          │  HeraldScraperWorker or  │
+          │  CharacterUpdateThread   │
+          │  (Scrapes from Herald)   │
+          └──────────────┬───────────┘
+                         │
+                         ▼
+          ┌──────────────────────────────┐
+          │ Scraped Data Dict with:      │
+          │ - result_rvr                 │
+          │ - result_pvp                 │
+          │ - result_pve                 │
+          │ - result_wealth              │
+          │ - result_achievements        │
+          └──────────────┬───────────────┘
+                         │
+         ┌───────────────┴───────────────┐
+         │                               │
+         ▼                               ▼
+   Complete Update              Partial Update
+   character_herald_            character_herald_
+   apply_scraped_stats()        apply_partial_stats()
+         │                               │
+         ▼                               ▼
+   UI Labels Updated            Selected Labels Updated
+   character_data updated       character_data updated
+                                Save triggered
+```
+
+### Functions Reference
+
+#### 1. character_herald_update()
+
+**Purpose**: Main entry point for complete character update from Herald
+
+**Signature**:
+```python
+def character_herald_update(parent_window, url: str) -> None
+```
+
+**Parameters**:
+- `parent_window`: CharacterSheetWindow instance with UI elements
+- `url`: Herald URL to scrape (with or without protocol)
+
+**Returns**: None (operates via signals)
+
+**Process**:
+1. Validates Herald URL format
+2. Adds https:// if protocol missing
+3. Disables Herald buttons during update
+4. Launches CharacterUpdateThread
+5. Shows ProgressStepsDialog with CHARACTER_UPDATE steps
+6. Receives update_finished signal when complete
+
+**Example**:
+```python
+# Called from CharacterSheetWindow
+character_herald_update(self, "daoc.gamerlaunch.com/heroes/merlin")
+# Opens browser, scrapes full character data, updates all UI fields
+```
+
+#### 2. character_herald_update_rvr_stats()
+
+**Purpose**: Fast update for RvR statistics only
+
+**Signature**:
+```python
+def character_herald_update_rvr_stats(parent_window, url: str) -> None
+```
+
+**Parameters**:
+- `parent_window`: CharacterSheetWindow instance
+- `url`: Herald URL
+
+**Returns**: None (operates via signals)
+
+**Process**:
+1. Validates URL format
+2. Launches lighter StatsUpdateThread (not full CharacterUpdateThread)
+3. Shows ProgressStepsDialog with STATS_SCRAPING steps
+4. Receives stats_updated signal when complete
+5. Faster than full character update
+
+**Example**:
+```python
+# Called when user wants quick RvR refresh
+character_herald_update_rvr_stats(self, "daoc.gamerlaunch.com/heroes/merlin")
+# Scrapes only tower/keep/relic captures
+```
+
+#### 3. character_herald_apply_scraped_stats()
+
+**Purpose**: Apply all scraped statistics to UI and character data
+
+**Signature**:
+```python
+def character_herald_apply_scraped_stats(
+    parent_window,
+    result_rvr: dict,
+    result_pvp: dict,
+    result_pve: dict,
+    result_wealth: dict,
+    result_achievements: dict
+) -> None
+```
+
+**Parameters**:
+- `parent_window`: CharacterSheetWindow instance
+- `result_rvr`: Dict with tower/keep/relic capture counts
+- `result_pvp`: Dict with solo_kills, deathblows, kills (by realm)
+- `result_pve`: Dict with dragon/legion/mini-dragon kills, epic encounters
+- `result_wealth`: Dict with money amount
+- `result_achievements`: Dict with achievements list
+
+**Returns**: None (updates UI and character_data)
+
+**Updates**:
+- Tower, Keep, Relic captures labels
+- PvP stats (Solo Kills, Deathblows, Kills) with per-realm breakdown
+- PvE stats (Dragon, Legion, Mini-Dragon kills, Epic encounters/dungeons, Sobekite)
+- Money label
+- Achievements display (if provided)
+
+**Example**:
+```python
+# Called after successful full character scrape
+character_herald_apply_scraped_stats(
+    self,
+    result_rvr={'tower_captures': 42, 'keep_captures': 10, 'relic_captures': 2},
+    result_pvp={'solo_kills': 156, 'deathblows': 89, 'kills': 245, ...},
+    result_pve={'dragon_kills': 12, 'legion_kills': 5, ...},
+    result_wealth={'money': 1500000},
+    result_achievements={'success': True, 'achievements': [...]}
+)
+# All UI labels updated with formatted numbers
+```
+
+#### 4. character_herald_apply_partial_stats()
+
+**Purpose**: Apply selective statistics to UI and character data
+
+**Signature**:
+```python
+def character_herald_apply_partial_stats(
+    parent_window,
+    result_rvr: dict,
+    result_pvp: dict,
+    result_pve: dict,
+    result_wealth: dict,
+    result_achievements: dict
+) -> None
+```
+
+**Parameters**: Same as apply_scraped_stats()
+
+**Returns**: None (updates UI and character_data, saves when needed)
+
+**Behavior**:
+- Only updates fields if result_*['success'] is True
+- Saves character data after each successful update
+- Calls save_character() immediately after updating each stat type
+- Supports selective updates (only update what was successfully scraped)
+
+**Example**:
+```python
+# Called after RvR-only scrape
+character_herald_apply_partial_stats(
+    self,
+    result_rvr={'success': True, 'tower_captures': 42, ...},
+    result_pvp={},  # Empty, skip PvP
+    result_pve={},  # Empty, skip PvE
+    result_wealth={},  # Empty, skip wealth
+    result_achievements={}  # Empty, skip achievements
+)
+# Only RvR labels updated, character saved
+```
+
+### Data Structures
+
+#### RvR Result Dictionary
+```python
+result_rvr = {
+    'success': True,
+    'tower_captures': 42,
+    'keep_captures': 10,
+    'relic_captures': 2
+}
+```
+
+#### PvP Result Dictionary
+```python
+result_pvp = {
+    'success': True,
+    'solo_kills': 156,
+    'solo_kills_alb': 52,
+    'solo_kills_hib': 48,
+    'solo_kills_mid': 56,
+    'deathblows': 89,
+    'deathblows_alb': 30,
+    'deathblows_hib': 28,
+    'deathblows_mid': 31,
+    'kills': 245,
+    'kills_alb': 82,
+    'kills_hib': 81,
+    'kills_mid': 82
+}
+```
+
+#### PvE Result Dictionary
+```python
+result_pve = {
+    'success': True,
+    'dragon_kills': 12,
+    'legion_kills': 5,
+    'mini_dragon_kills': 28,
+    'epic_encounters': 7,
+    'epic_dungeons': 3,
+    'sobekite': 145
+}
+```
+
+#### Wealth Result Dictionary
+```python
+result_wealth = {
+    'success': True,
+    'money': 1500000
+}
+```
+
+#### Achievements Result Dictionary
+```python
+result_achievements = {
+    'success': True,
+    'achievements': [
+        'First Kill',
+        'Leveled up',
+        ...
+    ]
+}
+```
+
+### Quality Metrics
+
+- ✅ PEP 8 compliant
+- ✅ Type hints complete (for parameters and process flow)
+- ✅ Docstrings comprehensive with examples
+- ✅ Error handling robust (URL validation, thread safety)
+- ✅ No hardcoded strings (all use lang.get())
+- ✅ No French comments (100% English)
+- ✅ Syntax validation: ✅ PASSED
+
+---
+
 ## Error Handling
 
 ### Character Validator
@@ -760,12 +1068,12 @@ Characters/
 - ✅ Ruff checks: 0 errors (ignoring E501)
 - ✅ Syntax validation: ✅ PASSED
 
-### Phase 5: Character RR Calculator Extraction (In Progress - Dec 18, 2025)
+### Phase 5: Character RR Calculator Extraction (Completed - Dec 18, 2025)
 
-**Status**: 🔄 IN PROGRESS
+**Status**: ✅ COMPLETED
 
-**What Is Being Done**:
-1. ✅ Created `Functions/character_rr_calculator.py` (200 lines)
+**What Was Done**:
+1. ✅ Created `Functions/character_rr_calculator.py` (209 lines)
 2. ✅ Extracted 3 functions from CharacterSheetWindow
 3. ✅ Updated dialogs.py with thin wrapper methods
 4. ✅ Implemented realm rank calculations
@@ -780,7 +1088,7 @@ Characters/
 - `character_rr_calculate_from_points()` - Calculate rank from realm points
 
 **Code Removed from dialogs.py**: ~50 lines  
-**Code Added to character_rr_calculator.py**: ~200 lines  
+**Code Added to character_rr_calculator.py**: ~209 lines  
 **Net Impact**: Realm rank calculations isolated and reusable
 
 **Quality Metrics**:
@@ -791,19 +1099,52 @@ Characters/
 - ✅ Ruff checks: 0 errors (ignoring E501)
 - ✅ Syntax validation: ✅ PASSED
 
+### Phase 6: Character Herald Scrapper Extraction (In Progress - Dec 18, 2025)
+
+**Status**: 🔄 IN PROGRESS
+
+**What Is Being Done**:
+1. ✅ Created `Functions/character_herald_scrapper.py` (422 lines)
+2. ✅ Extracted 4 functions from CharacterSheetWindow
+3. ✅ Updated dialogs.py with imports for new module
+4. ✅ Implemented Herald URL validation and scraping orchestration
+5. ✅ Implemented complete and partial stats UI updates
+6. ✅ Added comprehensive docstrings with examples
+7. ✅ Syntax validation: All checks passed
+
+**Functions Extracted**:
+- `character_herald_update()` - Main entry point for complete character update
+- `character_herald_update_rvr_stats()` - Fast RvR-only update
+- `character_herald_apply_scraped_stats()` - Apply all scraped stats to UI
+- `character_herald_apply_partial_stats()` - Apply selective stats to UI
+
+**Code Structure**:
+- `character_herald_scrapper.py`: ~422 lines (new module)
+- dialogs.py: Updated with imports only (no wrappers needed, direct calls)
+
+**Quality Metrics**:
+- ✅ PEP 8 compliant
+- ✅ Type hints present (for parameters)
+- ✅ Docstrings comprehensive with examples
+- ✅ Error handling robust (URL validation, thread-safe)
+- ✅ No hardcoded strings (uses lang.get())
+- ✅ No French comments (100% English)
+- ✅ Syntax validation: ✅ PASSED
+
 ---
 
 ## Commit Information
 
-**Branch**: `refactor/v0.109-realm-rank-extraction`  
+**Branch**: `refactor/v0.109-herald-scraping-extraction`  
 **Related Phases**:
 - Phase 1: Template Parser extraction ✅
 - Phase 2: Item Price Manager extraction ✅
 - Phase 3: Ruff cleanup ✅
 - Phase 4: Character Validator extraction ✅
-- Phase 5: Character RR Calculator extraction (in progress)
+- Phase 5: Character RR Calculator extraction ✅
+- Phase 6: Character Herald Scrapper extraction (in progress)
 
 ---
 
 **Documentation Last Updated**: December 18, 2025
-**Next Phase**: Herald Scraping Logic extraction (Phase 6)
+**Next Phase**: Character Banner Management extraction (Phase 7)

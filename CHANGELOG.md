@@ -6,7 +6,7 @@
 
 **Extraction Scope**: Extract business logic from `UI/dialogs.py` into dedicated domain-specific modules for improved maintainability, testability, and code reuse.
 
-**7 Phases Completed** - Extracted 24+ functions into 6 new modules:
+**8 Phases Completed** - Extracted 26+ functions into 7 new modules:
 
 1. **Phase 1**: Template Parser (`Functions/template_parser.py` - 1392 lines)
    - 8 functions: Template format detection, parsing (Loki/Zenkcraft), color stripping, price lookup, item formatting
@@ -35,14 +35,18 @@
    - 2 functions: Class banner image loading with realm/class mapping, placeholder display
    - .jpg/.png fallback support, scaled font sizing, comprehensive error logging
 
+8. **Phase 8**: Herald URL Validation (`Functions/herald_url_validator.py` - 236 lines)
+   - 4 functions: URL validation on text change, button state management, URL opening in browser with cookies
+   - Real-time validation, thread-safe UI updates, authentication integration
+
 **Quality Standards Applied**:
-- ✅ Domain-driven naming: `template_*`, `items_price_*`, `character_*`, `character_rr_*`, `character_herald_*`, `banner_*`
+- ✅ Domain-driven naming: `template_*`, `items_price_*`, `character_*`, `character_rr_*`, `character_herald_*`, `banner_*`, `herald_url_*`
 - ✅ PEP 8 compliant with ruff validation (0 errors)
 - ✅ Type hints and comprehensive docstrings
 - ✅ Zero hardcoded UI strings (all use `lang.get()`)
 - ✅ English-only code and comments (no French)
-- ✅ ~1891 lines extracted, ~141 thin wrappers in dialogs.py
-- ✅ Complete documentation updates
+- ✅ ~2127 lines extracted (~1891 from Phases 1-7 + ~236 from Phase 8), ~149 thin wrappers in dialogs.py
+- ✅ Complete documentation updates (EDEN_TECHNICAL_DOCUMENTATION.md, CHARACTER_SYSTEM_TECHNICAL_DOCUMENTATION.md)
 
 ---
 

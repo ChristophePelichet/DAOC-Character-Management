@@ -45,6 +45,10 @@ from Functions.character_herald_scrapper import (
 from Functions.character_banner import (
     banner_load_class_image, banner_set_placeholder
 )
+from Functions.herald_url_validator import (
+    herald_url_on_text_changed, herald_url_open_url,
+    herald_url_update_button_states
+)
 from UI.template_import_dialog import TemplateImportDialog
 
 # Get CHARACTER logger
@@ -1010,17 +1014,7 @@ class CharacterSheetWindow(QDialog):
     
     def on_herald_url_changed(self, text):
         """Enable/disable the stats update button based on the Herald URL"""
-        # Don't re-enable buttons if Herald scraping is in progress
-        if self.herald_scraping_in_progress:
-            return
-            
-        is_url_valid = bool(text.strip())
-        self.update_rvr_button.setEnabled(is_url_valid)
-        
-        if is_url_valid:
-            self.update_rvr_button.setToolTip(lang.get("update_rvr_pvp_tooltip"))
-        else:
-            self.update_rvr_button.setToolTip("Veuillez d'abord configurer l'URL Herald")
+        herald_url_on_text_changed(self, text)
     
     def _is_herald_validation_done(self):
         """Check if Herald startup validation is complete"""
@@ -1168,46 +1162,7 @@ class CharacterSheetWindow(QDialog):
     
     def open_herald_url(self):
         """Ouvre l'URL du Herald dans le navigateur avec les cookies"""
-        url = self.herald_url_edit.text().strip()
-        
-        if not url:
-            QMessageBox.warning(
-                self,
-                "URL manquante",
-                "Veuillez entrer une URL Herald valide."
-            )
-            return
-        
-        # Check that l'URL commence par http:// or https://
-        if not url.startswith(('http://', 'https://')):
-            url = 'https://' + url
-            self.herald_url_edit.setText(url)
-        
-        try:
-            # Open the URL with cookies in a separate thread
-            import threading
-            thread = threading.Thread(target=self._open_url_in_thread, args=(url,), daemon=True)
-            thread.start()
-        except Exception as e:
-            QMessageBox.critical(
-                self,
-                "Erreur",
-                f"Impossible d'ouvrir l'URL : {str(e)}"
-            )
-    
-    def _open_url_in_thread(self, url):
-        """Open URL with cookies in a separate thread."""
-        try:
-            from Functions.cookie_manager import CookieManager
-            cookie_manager = CookieManager()
-            result = cookie_manager.open_url_with_cookies_subprocess(url)
-            
-            if not result.get('success', False):
-                import logging
-                logging.warning(f"Erreur lors de l'ouverture de l'URL: {result.get('message', 'Erreur inconnue')}")
-        except Exception as e:
-            import logging
-            logging.error(f"Erreur lors de l'ouverture de l'URL avec cookies: {e}")
+        herald_url_open_url(self)
     
     def update_rvr_stats(self):
         """Update RvR statistics from Herald"""
@@ -1444,42 +1399,7 @@ class CharacterSheetWindow(QDialog):
     
     def _update_herald_buttons_state(self):
         """Update Herald button states based on Eden validation status"""
-        from Functions.language_manager import lang
-        
-        # Check if validation is in progress
-        main_window = self.parent()
-        is_validation_running = False
-        
-        if main_window and hasattr(main_window, 'ui_manager'):
-            ui_manager = main_window.ui_manager
-            is_validation_running = (
-                hasattr(ui_manager, 'eden_status_thread') and 
-                ui_manager.eden_status_thread and 
-                ui_manager.eden_status_thread.isRunning()
-            )
-        
-        # Update "Update from Herald" button
-        if hasattr(self, 'update_herald_button'):
-            if is_validation_running:
-                self.update_herald_button.setEnabled(False)
-                self.update_herald_button.setToolTip(lang.get("herald_buttons.validation_in_progress", default="⏳ Validation Eden en cours... Veuillez patienter"))
-            else:
-                self.update_herald_button.setEnabled(True)
-                self.update_herald_button.setToolTip(lang.get("character_sheet.labels.update_from_herald_tooltip"))
-        
-        # Update "Update RvR Stats" button
-        if hasattr(self, 'update_rvr_button'):
-            herald_url = self.herald_url_edit.text().strip() if hasattr(self, 'herald_url_edit') else ''
-            
-            if is_validation_running:
-                self.update_rvr_button.setEnabled(False)
-                self.update_rvr_button.setToolTip(lang.get("herald_buttons.validation_in_progress", default="⏳ Validation Eden en cours... Veuillez patienter"))
-            elif not herald_url or self.herald_scraping_in_progress:
-                # Keep disabled state if no URL or scraping in progress
-                pass
-            else:
-                self.update_rvr_button.setEnabled(True)
-                self.update_rvr_button.setToolTip(lang.get("update_rvr_pvp_tooltip"))
+        herald_url_update_button_states(self)
     
     def _update_all_stats_ui(self, result_rvr, result_pvp, result_pve, result_wealth, result_achievements):
         """Update all UI labels with complete stats"""

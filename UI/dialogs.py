@@ -56,6 +56,9 @@ from Functions.armor_upload_handler import (
 from Functions.item_model_viewer import (
     item_model_on_link_clicked, item_model_show
 )
+from Functions.character_achievement_formatter import (
+    character_update_achievements_display
+)
 
 # Get CHARACTER logger
 logger_char = get_logger(LOGGER_CHARACTER)
@@ -1052,119 +1055,8 @@ class CharacterSheetWindow(QDialog):
         )
     
     def _update_achievements_display(self, achievements_list):
-        """
-        Update achievements display with the provided list.
-        Uses QGridLayout in 2 columns of 8 achievements with vertical separator.
-        
-        Args:
-            achievements_list: List of dicts with 'title', 'progress', and 'current' keys
-        """
-        # Clear existing widgets
-        while self.achievements_container_layout.count():
-            item = self.achievements_container_layout.takeAt(0)
-            if item.widget():
-                item.widget().deleteLater()
-            elif item.layout():
-                # Clear nested layouts
-                while item.layout().count():
-                    nested_item = item.layout().takeAt(0)
-                    if nested_item.widget():
-                        nested_item.widget().deleteLater()
-        
-        if not achievements_list or len(achievements_list) == 0:
-            # Show placeholder
-            placeholder = QLabel("—")
-            placeholder.setStyleSheet("color: gray; font-style: italic;")
-            placeholder.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            self.achievements_container_layout.addWidget(placeholder)
-            self.achievements_container_layout.addStretch()
-            return
-        
-        # Create horizontal layout for 2 columns
-        columns_layout = QHBoxLayout()
-        columns_layout.setSpacing(15)
-        
-        # Split achievements into 2 groups of 8 (or less)
-        mid_point = 8
-        first_column = achievements_list[:mid_point]
-        second_column = achievements_list[mid_point:]
-        
-        # === First column (left) ===
-        first_grid = QGridLayout()
-        first_grid.setHorizontalSpacing(10)
-        first_grid.setVerticalSpacing(2)
-        first_grid.setColumnStretch(0, 3)  # Title column
-        first_grid.setColumnStretch(1, 0)  # Progress column (fixed)
-        first_grid.setColumnStretch(2, 2)  # Current tier column
-        
-        for row, achievement in enumerate(first_column):
-            title = achievement.get('title', 'Unknown')
-            progress = achievement.get('progress', '0/0')
-            current_tier = achievement.get('current', None)
-            
-            # Title
-            title_label = QLabel(title)
-            title_label.setStyleSheet(f"font-size: {get_scaled_size(9):.1f}pt;")
-            first_grid.addWidget(title_label, row, 0, Qt.AlignmentFlag.AlignLeft)
-            
-            # Progress
-            progress_label = QLabel(progress)
-            progress_label.setStyleSheet(f"font-weight: bold; font-size: {get_scaled_size(9):.1f}pt;")
-            first_grid.addWidget(progress_label, row, 1, Qt.AlignmentFlag.AlignRight)
-            
-            # Current tier
-            if current_tier and current_tier != "None":
-                current_label = QLabel(f"({current_tier})")
-                current_label.setStyleSheet(f"font-size: {get_scaled_size(8):.1f}pt; color: #6c757d; font-style: italic;")
-                first_grid.addWidget(current_label, row, 2, Qt.AlignmentFlag.AlignLeft)
-        
-        columns_layout.addLayout(first_grid, 1)  # Stretch factor 1
-        
-        # === Vertical separator ===
-        if second_column:  # Only add separator if there's a second column
-            separator = QFrame()
-            separator.setFrameShape(QFrame.Shape.VLine)
-            separator.setFrameShadow(QFrame.Shadow.Sunken)
-            separator.setStyleSheet("color: #cccccc;")
-            columns_layout.addWidget(separator)
-        
-        # === Second column (right) ===
-        if second_column:
-            second_grid = QGridLayout()
-            second_grid.setHorizontalSpacing(10)
-            second_grid.setVerticalSpacing(2)
-            second_grid.setColumnStretch(0, 3)  # Title column
-            second_grid.setColumnStretch(1, 0)  # Progress column (fixed)
-            second_grid.setColumnStretch(2, 2)  # Current tier column
-            
-            for row, achievement in enumerate(second_column):
-                title = achievement.get('title', 'Unknown')
-                progress = achievement.get('progress', '0/0')
-                current_tier = achievement.get('current', None)
-                
-                # Title
-                title_label = QLabel(title)
-                title_label.setStyleSheet(f"font-size: {get_scaled_size(9):.1f}pt;")
-                second_grid.addWidget(title_label, row, 0, Qt.AlignmentFlag.AlignLeft)
-                
-                # Progress
-                progress_label = QLabel(progress)
-                progress_label.setStyleSheet(f"font-weight: bold; font-size: {get_scaled_size(9):.1f}pt;")
-                second_grid.addWidget(progress_label, row, 1, Qt.AlignmentFlag.AlignRight)
-                
-                # Current tier
-                if current_tier and current_tier != "None":
-                    current_label = QLabel(f"({current_tier})")
-                    current_label.setStyleSheet(f"font-size: {get_scaled_size(8):.1f}pt; color: #6c757d; font-style: italic;")
-                    second_grid.addWidget(current_label, row, 2, Qt.AlignmentFlag.AlignLeft)
-            
-            columns_layout.addLayout(second_grid, 1)  # Stretch factor 1
-        
-        # Add columns layout to container
-        self.achievements_container_layout.addLayout(columns_layout)
-        
-        # Add stretch at the end
-        self.achievements_container_layout.addStretch()
+        """Update achievements display with the provided list."""
+        character_update_achievements_display(self, achievements_list)
     
     def open_herald_url(self):
         """Ouvre l'URL du Herald dans le navigateur avec les cookies"""

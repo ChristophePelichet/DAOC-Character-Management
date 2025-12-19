@@ -3,7 +3,7 @@ DIALOGS.PY REFACTORING PLAN
 ================================================================================
 File: UI/dialogs.py
 Date: 13 December 2025
-Updated: 19 December 2025 (Phase 1-8 Complete - v0.109 Refactoring Merge)
+Updated: 19 December 2025 (Phase 13 Complete - UI State Manager Extraction)
 Purpose: Extract functions to dedicated modules for better maintainability
 ================================================================================
 
@@ -589,30 +589,77 @@ Status: READY FOR PRODUCTION - MERGE TO DIALOGS-CLEANUP
 
 ---
 
-📋 PHASE 13: UI STATE MANAGER EXTRACTION (FUTURE - v0.109)
+✅ PHASE 13: UI STATE MANAGER EXTRACTION (COMPLETED - v0.109)
 ================================================================================
-Target File: UI/ui_state_manager.py
-Naming Convention: ui_state_{component}_{action}
-Priority: MEDIUM (10+ button state patterns)
+Target File: UI/ui_state_manager.py (285 lines)
+Extracted: 5 functions for centralized state management + 1 method in ItemsDatabaseManager
+Date Completed: 19 December 2025
+Branch: refactor/v0.109-ui-state-manager
 
-Objective:
-- Centralize button enable/disable state management
-- Reduce scattered .setEnabled() calls
-- Support complex state dependencies
+Extracted Functions:
+1. ✅ ui_state_set_herald_buttons(parent, character_selected, herald_url, scraping_active, validation_active)
+   - Manage Herald update button states
+   - Controls: update_herald_button, open_herald_button, update_rvr_button
+   - Thin wrappers: 3 locations in dialogs.py
 
-Extracted Functions (Planned):
-1. ui_state_set_herald_buttons() - Enable/disable Herald update buttons
-2. ui_state_set_armor_buttons() - Enable/disable armor preview buttons
-3. ui_state_set_stats_buttons() - Enable/disable stats update buttons
-4. ui_state_set_dialog_buttons() - Generic button state controller
-5. ui_state_on_selection_changed() - Unified selection state handler
+2. ✅ ui_state_set_armor_buttons(parent, character_selected, file_selected, items_without_price, db_manager)
+   - Manage armor preview and search button states with database mode validation
+   - Controls: preview_download_button, search_prices_button
+   - Validates personal vs. embedded database mode for button activation
+   - Provides contextual tooltips for disabled buttons
+   - Thin wrappers: 3 locations in dialogs.py
 
-Current Impact:
-- 30+ .setEnabled() calls found in dialogs.py
-- ~15 lines of repeated button state management
-- Multiple locations controlling same buttons
+3. ✅ ui_state_set_stats_buttons(parent, character_selected, has_stats, scraping_active)
+   - Manage character stats update button states
+   - Flexible for different dialog implementations
+   - Thin wrapper: 1 location in dialogs.py
 
-Status: PLANNED - NOT STARTED
+4. ✅ ui_state_set_dialog_buttons(parent, button_states)
+   - Generic button state controller
+   - Accepts dictionary of button_name: enabled_state pairs
+   - Thin wrappers: 3 locations in dialogs.py (cookies)
+
+5. ✅ ui_state_on_selection_changed(parent, selection_count, is_valid, enable_delete, enable_edit, enable_export)
+   - Unified handler for selection change state
+   - Controls: delete_button, edit_button, export_button
+   - Thin wrappers: Used by state controller
+
+Additional Changes in ItemsDatabaseManager:
+- ✅ is_personal_database() - Check if personal database is active (True/False)
+  - Returns True if personal database configured, False if using embedded (read-only)
+  - Used by ui_state_set_armor_buttons() for button state validation
+
+Quality Metrics:
+- ✅ PEP 8 compliant (ruff validation: 0 errors, ignoring F401/E501)
+- ✅ Type hints complete on all parameters
+- ✅ Docstrings comprehensive with examples and parameter descriptions
+- ✅ Logging integration for all state changes (DEBUG level)
+- ✅ Safe attribute access using hasattr()
+- ✅ Graceful handling of missing buttons
+- ✅ All UI strings via lang.get() with translation fallbacks
+- ✅ Syntax validation: PASSED
+- ✅ No hardcoded text or French comments
+
+Code Structure:
+- Created ui_state_manager.py: ~285 lines (5 functions)
+- Updated dialogs.py: 9 locations with thin wrappers
+- Enhanced items_database_manager.py: 1 method added (~10 lines)
+- Updated template_parser.py: Returns tuple (content, items_without_price)
+- Removed from dialogs.py: ~70 lines of .setEnabled() calls
+- Net result: ~55 lines saved, improved clarity and maintainability
+
+Integration Points:
+- UI/dialogs.py: CharacterSheetWindow (3 Herald), ArmorManagementDialog (3 Armor), CookieManagerDialog (3 Cookie)
+- Functions/items_database_manager.py: Database mode detection
+- State transitions: Validation start/end, scraping active/complete, file selection, list selection, items available
+
+Documentation:
+- DIALOG_TECHNICAL_DOCUMENTATION.md: Updated function signatures with db_manager parameter
+- ARMORY_TECHNICAL_DOCUMENTATION.md: New "Search Button State Management" section with behavior table
+- CHANGELOG.md: Consolidated all 13 phases of refactoring under v0.109
+- Docstrings: Complete with type hints and usage examples
+
+Status: READY FOR PRODUCTION - ALL PHASES COMPLETEStatus: READY FOR PRODUCTION - READY FOR COMMIT
 
 ---
 

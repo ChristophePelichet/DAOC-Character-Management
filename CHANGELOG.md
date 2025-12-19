@@ -2,14 +2,15 @@
 
 ## v0.109
 
-### ♻️ Code Refactoring - dialogs.py Module Extraction (Complete)
+### ♻️ Code Refactoring - dialogs.py Module Extraction & UI State Management (Complete)
 
-**Extraction Scope**: Extract business logic from `UI/dialogs.py` into dedicated domain-specific modules for improved maintainability, testability, and code reuse.
+**Extraction Scope**: Extract business logic from `UI/dialogs.py` into dedicated domain-specific modules for improved maintainability, testability, and code reuse. Add centralized UI state management for consistent button state handling across dialogs.
 
-**12 Phases Completed** - Extracted 40+ functions into 11 new modules, removed ~2700 lines from dialogs.py:
+**13 Phases Completed** - Extracted 45+ functions into 13 new modules, removed ~2950 lines from dialogs.py:
 
 1. **Phase 1**: Template Parser (`Functions/template_parser.py` - 1392 lines)
    - Template format detection, parsing (Loki/Zenkcraft), price lookup, item formatting
+   - Returns tuple: (formatted_content, items_without_price) for complete workflow integration
    
 2. **Phase 2**: Item Price Manager (`Functions/items_price_manager.py` - 205 lines)
    - Template price sync with database, missing price detection
@@ -46,20 +47,34 @@
     - 5 functions: success, error, warning, confirmation, info_with_details
     - Support for dynamic parameters and plain text messages
 
+13. **Phase 13**: UI State Manager (`UI/ui_state_manager.py` - 285 lines)
+    - Centralized button state management for all dialogs
+    - 5 functions: herald buttons, armor buttons, stats buttons, generic multi-button, selection handler
+    - State validation with database mode checks (embedded vs. personal)
+    - Intelligent tooltip management for user guidance
+    - Added `is_personal_database()` method to `ItemsDatabaseManager` for database mode detection
+
 **Refactoring Statistics**:
-- Total functions extracted: 40+
-- Total lines extracted: ~3100 lines
+- Total functions extracted: 45+
+- Total lines extracted: ~3350 lines
 - Thin wrappers in dialogs.py: ~180 lines
-- Net code reduction: ~2920 lines
-- Modules created: 11 dedicated domain-specific modules
+- Net code reduction: ~3170 lines
+- Modules created: 13 dedicated domain-specific modules
 
 **Quality Standards Applied**:
 - ✅ Domain-driven naming conventions for all modules and functions
-- ✅ PEP 8 compliant (ruff validation: 0 errors across all modules)
+- ✅ PEP 8 compliant (ruff validation: 0 errors across all modules, ignoring F401/E501)
 - ✅ Type hints and comprehensive docstrings (English only)
-- ✅ Zero hardcoded UI strings (all use `lang.get()`)
+- ✅ Zero hardcoded UI strings (all use `lang.get()` with translation fallbacks)
 - ✅ English-only code and comments
-- ✅ Complete documentation updates (DIALOG_TECHNICAL_DOCUMENTATION.md, EDEN_TECHNICAL_DOCUMENTATION.md, CHARACTER_SYSTEM_TECHNICAL_DOCUMENTATION.md, ARMORY_TECHNICAL_DOCUMENTATION.md, MODELS_VISUAL_SYSTEM_DOCUMENTATION.md)
+- ✅ Complete documentation updates (DIALOG_TECHNICAL_DOCUMENTATION.md, DIALOG_STATE_TECHNICAL_DOCUMENTATION.md, ARMORY_TECHNICAL_DOCUMENTATION.md, etc.)
+
+**Key Improvements**:
+- Centralized button state management reduces scattered `.setEnabled()` calls
+- Template parser returns items_without_price for accurate button state
+- Database mode validation ensures buttons reflect actual capabilities
+- Intelligent tooltips guide users when features are unavailable
+- Complete separation of concerns: business logic extracted from UI layer
 
 ---
 

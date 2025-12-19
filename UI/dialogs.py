@@ -1671,13 +1671,13 @@ class CharacterSheetWindow(QDialog):
             # Confirm rename
             if msg_show_confirmation(self, "Confirmer le renommage", f"Renommer '{old_name}' en '{new_name}' ?"):
                 from Functions.character_manager import rename_character
-                success, msg = rename_character(old_name, new_name)
+                from Functions.character_rename_handler import character_rename_with_validation
+                
+                success, msg = character_rename_with_validation(
+                    self.character_data, new_name, rename_character
+                )
                 
                 if success:
-                    # Update character data
-                    self.character_data['name'] = new_name
-                    self.character_data['id'] = new_name
-                    
                     # Update window title
                     self.setWindowTitle(f"Fiche personnage - {new_name}")
                     
@@ -1685,8 +1685,7 @@ class CharacterSheetWindow(QDialog):
                     if hasattr(self.parent_app, 'refresh_character_list'):
                         self.parent_app.refresh_character_list()
                 else:
-                    error_msg = "Un personnage avec ce nom existe déjà." if msg == "char_exists_error" else msg
-                    msg_show_error(self, "titles.error", f"Échec du renommage : {error_msg}")
+                    msg_show_error(self, "titles.error", f"Échec du renommage : {msg}")
                     self.name_edit.setText(old_name)  # Reset to original name
                     
         except Exception as e:

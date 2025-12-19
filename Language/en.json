@@ -174,7 +174,16 @@
         "clean_eden_button": "Clean Eden",
         "clean_eden_tooltip": "Delete all cookies and Chrome profile temporary files",
         "clean_cache_button": "Clean cache",
-        "clean_cache_tooltip": "Delete items cache from web searches"
+        "clean_cache_tooltip": "Delete items cache from web searches",
+        "open_folder_button": "Open folder",
+        "eden_storage_info": "Automatic storage in",
+        "item_cache_storage_info": "Automatic storage in"
+    },
+    "settings": {
+        "herald": {
+            "config_cookies_group_title": "Cookies path",
+            "config_item_cache_group_title": "Items cache path"
+        }
     },
     "herald_buttons": {
         "validation_in_progress": "⏳ Eden validation in progress... Please wait"

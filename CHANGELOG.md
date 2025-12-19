@@ -118,6 +118,15 @@
 - Consistent error messages and validation rules across all dialogs
 - Complete separation of concerns: business logic extracted from UI layer
 
+### 🐛 Bug Fixes & UI Improvements
+- **Dialog Validation Flow**: NewCharacterDialog stays open on validation errors, allowing users to correct input without losing context
+  - Override dialog's `accept()` method to validate before closing
+  - Invalid name/guild shows error message but keeps dialog open
+  - Invalid race/class combination also keeps dialog open for correction
+- **Window Controls**: Enable minimize button on CharacterSheetWindow
+  - Minimize button no longer greyed out when viewing character details
+  - All three window controls now functional: minimize, maximize, close
+
 ---
 
 ## v0.108

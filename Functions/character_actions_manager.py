@@ -45,12 +45,12 @@ class CharacterActionsManager:
             default_season=default_season
         )
         
-        result = dialog.get_data() if dialog.exec() == QDialog.Accepted else None
-        
-        if not result:
+        # Dialog stays open until validation passes or user cancels
+        if dialog.exec() != QDialog.Accepted:
             log_with_action(logger, "info", "Character creation cancelled by user", action="CREATE")
             return
-            
+        
+        result = dialog.get_data()
         character_name, realm, season, level, page, guild, race, class_name = result
         
         character_data = create_character_data(

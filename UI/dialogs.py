@@ -122,8 +122,8 @@ class CharacterSheetWindow(QDialog):
         self.setWindowTitle(lang.get("character_sheet_title", name=char_name))
         self.resize(500, 400)
         
-        # Enable window resizing
-        self.setWindowFlags(self.windowFlags() | Qt.WindowMaximizeButtonHint)
+        # Enable window resizing and minimize button
+        self.setWindowFlags(self.windowFlags() | Qt.WindowMinimizeButtonHint | Qt.WindowMaximizeButtonHint)
         self.setSizeGripEnabled(True)  # Add resize grip in bottom-right corner
         
         # Connect to Herald validation end signal if available
@@ -1889,15 +1889,40 @@ class NewCharacterDialog(QDialog):
             if not self.data_manager.is_race_class_compatible(realm, race_name, class_name):
                 logging.warning(f"Invalid combination: {race_name} cannot be {class_name}")
 
-    def get_data(self):
-        """Returns the entered data if valid."""
+    def accept(self):
+        """Override accept to validate before closing the dialog."""
+        # Validate character name and guild
         validation_result = validate_new_character_dialog_data(
             self.name_edit.text(),
             self.guild_edit.text()
         )
         if not validation_result['valid']:
             QMessageBox.warning(self, lang.get("error_title"), validation_result['message'])
-            return None
+            return  # Don't close dialog, stay open for correction
+        
+        # Validate race/class combination
+        realm = self.realm_combo.currentText()
+        race = self.race_combo.currentData()
+        class_name = self.class_combo.currentData()
+        
+        if race and class_name:
+            if not self.data_manager.is_race_class_compatible(realm, race, class_name):
+                QMessageBox.warning(
+                    self,
+                    lang.get("error_title"),
+                    lang.get("invalid_race_class_combo", default=f"La race {race} ne peut pas jouer la classe {class_name}")
+                )
+                return  # Don't close dialog, stay open for correction
+        
+        # All validations passed, close the dialog
+        super().accept()
+
+    def get_data(self):
+        """Returns the entered data (validation already done in accept())."""
+        validation_result = validate_new_character_dialog_data(
+            self.name_edit.text(),
+            self.guild_edit.text()
+        )
         name = validation_result['name']
         guild = validation_result['guild']
         
@@ -1907,16 +1932,6 @@ class NewCharacterDialog(QDialog):
         season = self.season_combo.currentText()
         level = int(self.level_combo.currentText())
         page = int(self.page_combo.currentText())
-        
-        # Validate race/class combination
-        if race and class_name:
-            if not self.data_manager.is_race_class_compatible(realm, race, class_name):
-                QMessageBox.warning(
-                    self,
-                    lang.get("error_title"),
-                    lang.get("invalid_race_class_combo", default=f"La race {race} ne peut pas jouer la classe {class_name}")
-                )
-                return None
         
         return name, realm, season, level, page, guild, race, class_name
     

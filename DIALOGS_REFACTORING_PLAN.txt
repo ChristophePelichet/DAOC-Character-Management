@@ -3,7 +3,7 @@ DIALOGS.PY REFACTORING PLAN
 ================================================================================
 File: UI/dialogs.py
 Date: 13 December 2025
-Updated: 19 December 2025 (Phase 17 Complete - Character Rename Handler)
+Updated: 19 December 2025 (Phase 18 Complete - Armor Context Menu Builder)
 Purpose: Extract functions to dedicated modules for better maintainability
 ================================================================================
 
@@ -1076,40 +1076,56 @@ Status: COMPLETED - READY FOR MERGE
 
 ---
 
-📋 PHASE 18: SIMPLE UI UTILITY FUNCTIONS (PLANNED - v0.109)
+📋 PHASE 18: SIMPLE UI UTILITY FUNCTIONS (COMPLETED - v0.109)
 ================================================================================
-Target File: Functions/ui_utils.py
+Target File: UI/ui_context_menus.py (88 lines)
 Priority: LOW
 Date Planned: December 2025
+Date Completed: 19 December 2025
 Branch: refactor/v0.109-phase-18-ui-utilities
 
 Objective:
-- Extract simple UI utility functions from dialogs.py
-- Create dedicated module for UI helper functions
-- Improve code organization for small utility functions
+✅ COMPLETED - Extract context menu building logic from dialogs.py
+✅ COMPLETED - Create dedicated UI context menu module
+✅ COMPLETED - Improve code organization for UI menu components
 
 Extracted Functions (1 total):
-1. ui_create_armor_context_menu(parent_window, selected_items)
-   - Create context menu for armor list
-   - Handles right-click actions on armor items
-   - Returns: QMenu with configured actions
-   - Used in: ArmorManagementDialog context menu handling
-   - Thin wrapper: 1 line in dialogs.py
+1. ✅ ui_show_armor_context_menu(parent, table, position, filename, callbacks)
+   - Build and display context menu for armor files
+   - Handles view, download, open, delete actions with callbacks
+   - Returns: None (displays menu directly)
+   - Used in: ArmorManagementDialog.show_context_menu()
+   - Thin wrapper: 9 lines in dialogs.py (was ~36 lines of menu construction)
 
-Location in dialogs.py: Lines ~4801-4835 (~35 lines)
+Location in dialogs.py: Original lines ~2714-2750 (~36 lines refactored)
 
-Expected Code Reduction: ~35 lines from dialogs.py
-Expected Module Size: ~60 lines
+Code Reduction: ~36 lines from dialogs.py
+Module Size: 88 lines
 
-Quality Standards:
-- PEP 8 compliant (ruff validation)
-- Type hints: Complete
-- Docstrings: English only
-- No hardcoded strings (lang.get())
-- No French comments
-- Proper error handling
+Quality Standards - ALL MET:
+✅ PEP 8 compliant (ruff validation: 0 errors)
+✅ Type hints: Complete (parent, table, position, filename, callbacks parameters)
+✅ Docstrings: 100% English with comprehensive examples
+✅ No hardcoded strings (all use lang.get() for translations)
+✅ No French comments (all English)
+✅ Proper error handling with try-except and logging
+✅ Syntax validation: PASSED
+✅ Import testing: PASSED
+✅ Removed unused QFileDialog import (pre-existing issue fixed)
 
-Status: PLANNED - NOT STARTED
+Git Status:
+✅ Commit 1: "refactor(Phase 18): Extract armor context menu builder into dedicated module"
+✅ Commit 2: "fix: Remove unused QFileDialog import from dialogs.py (pre-existing error)"
+✅ Branch: refactor/v0.109-phase-18-ui-utilities (created Dec 19, 2025)
+✅ Ready for merge to refactor/v0.109-dialogs-cleanup
+
+Architecture:
+- New module: UI/ui_context_menus.py (context menu builders)
+- Callback pattern: Pass handler functions as dict
+- Translation: All action labels use lang.get()
+- Separation of concerns: Menu building decoupled from dialog
+
+Status: COMPLETED - READY FOR MERGE
 
 ---
 

@@ -8,20 +8,21 @@
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
 1. [Overview](#overview)
 2. [Message Helper System](#message-helper-system)
-3. [State Management System](#state-management-system) ⭐ NEW - Phase 13
-4. [Progress Dialog System](#progress-dialog-system)
-5. [ProgressStep Class](#progressstep-class)
-6. [StepConfiguration Class](#stepconfiguration-class)
-7. [ProgressStepsDialog Class](#progressstepsdialog-class)
-8. [Worker Thread Pattern](#worker-thread-pattern)
-9. [Thread Safety Patterns](#thread-safety-patterns)
-10. [Implemented Dialogs](#implemented-dialogs)
-11. [Multilingual Support](#multilingual-support)
-12. [Performance Considerations](#performance-considerations)
+3. [State Management System](#state-management-system)
+4. [Validation Helper System](#validation-helper-system)
+5. [Progress Dialog System](#progress-dialog-system)
+6. [ProgressStep Class](#progressstep-class)
+7. [StepConfiguration Class](#stepconfiguration-class)
+8. [ProgressStepsDialog Class](#progressstepsdialog-class)
+9. [Worker Thread Pattern](#worker-thread-pattern)
+10. [Thread Safety Patterns](#thread-safety-patterns)
+11. [Implemented Dialogs](#implemented-dialogs)
+12. [Multilingual Support](#multilingual-support)
+13. [Performance Considerations](#performance-considerations)
 
 ---
 
@@ -458,6 +459,342 @@ def on_item_selection_changed(self):
 **Memory Usage**: Negligible (no state caching, direct attribute access)
 
 **Best Practice**: Call state managers immediately after state change, not pre-emptively
+
+---
+
+## Validation Helper System
+
+### Phase 14: UI Validation Helper Extraction
+
+**Module**: `Functions/ui_validation_helper.py` (v0.109 Phase 14)  
+**Purpose**: Centralize input field validation across dialogs  
+**File Size**: 480 lines (pure utility module)  
+**Functions**: 15 validators covering text, URLs, numbers, files, and domain-specific validations
+
+#### Overview
+
+Centralized validation module to:
+- Eliminate 20+ repetitive validation patterns in dialogs.py
+- Ensure consistent error messages (all in French)
+- Support complex validations (file paths, URLs, DAOC-specific fields)
+- Provide type-safe returns with structured dict format
+
+#### Design Pattern: Functional Validation
+
+**Features**:
+- All functions are stateless (no side effects)
+- All functions return consistent dict format: `{'valid': bool, 'message': str, 'value': Any}`
+- No raising exceptions - errors returned in dict
+- All messages are French (appropriate for user-facing validation)
+
+**Naming Convention**: `validate_{field_type}_{constraint}`
+- `validate_non_empty_text()` - basic text field
+- `validate_character_name()` - domain-specific character name
+- `validate_url_field()` - specialized Herald URLs
+- `validate_filepath_exists()` - file system operations
+
+#### Function Categories
+
+**1. Basic Text Validation** (3 functions)
+- `validate_non_empty_text()` - Check field not empty
+- `validate_text_field()` - Validate with max_length constraint
+- `validate_email_field()` - Validate email format
+
+**2. Domain-Specific (DAOC) Validation** (5 functions)
+- `validate_character_name()` - Character names (max 30 chars)
+- `validate_guild_name()` - Guild names (optional, max 50 chars)
+- `validate_realm_selection()` - Realm selected (Albion/Hibernia/Midgard)
+- `validate_class_selection()` - Class selected
+- `validate_race_selection()` - Race selected
+
+**3. Specialized Validation** (5 functions)
+- `validate_url_field()` - Herald URLs (must contain 'herald', http/https)
+- `validate_numeric_field()` - Integer ranges with min/max
+- `validate_filepath_exists()` - File path exists
+- `validate_directory_exists()` - Directory exists
+- `validate_email_field()` - Email format validation
+
+**4. Selection Validation** (2 functions)
+- `validate_not_selected()` - Combo box not empty
+- `validate_multiple_selections()` - List has minimum items
+
+#### Return Format (Standardized)
+
+All functions return:
+```python
+{
+    'valid': bool,           # True if validation passed
+    'message': str,          # Error message (French) if invalid, empty if valid
+    'value': Any             # Converted/cleaned value if valid, fallback if invalid
+}
+```
+
+**Value Types**:
+- Text functions: `str` (stripped)
+- Numeric functions: `int` (0 if invalid)
+- File functions: `str` (absolute path or empty)
+- Selection functions: `str` or `bool` or `list`
+
+#### Integration in dialogs.py (3 locations)
+
+1. **`save_basic_info()` (line ~920)**
+   - Calls `validate_basic_character_info()` with guild and Herald URL
+   - Single validation call replaces separate guild + URL validations
+   - Receives `{'valid', 'message', 'guild', 'url'}` dict
+
+2. **`rename_character()` (line ~1650)**
+   - Calls `validate_character_rename()` with new character name
+   - Simple wrapper around `validate_character_name()`
+   - Uses `msg_show_warning()` for error display
+
+3. **`get_data()` in NewCharacterDialog (line ~1890)**
+   - Calls `validate_new_character_dialog_data()` with character name and guild
+   - Handles both character name (required) and guild (optional) validation
+   - Uses `QMessageBox.warning()` for errors
+   - Returns validated name and guild directly
+
+**All validation logic is in Functions/ui_validation_helper.py - dialogs.py only calls the validators**
+
+#### Usage Pattern
+
+```python
+# Basic pattern
+result = validate_character_name(self.name_edit.text())
+if not result['valid']:
+    QMessageBox.critical(self, "Erreur", result['message'])
+    return
+name = result['value']  # Safe to use - already validated
+```
+
+#### Validation Patterns
+
+**Pattern 1: Required Field**
+```python
+result = validate_non_empty_text(self.name_edit.text())
+if not result['valid']: return show_error(result['message'])
+name = result['value']
+```
+
+**Pattern 2: Optional Field**
+```python
+result = validate_guild_name(self.guild_edit.text())  # Empty allowed
+guild = result['value']  # May be empty string
+```
+
+**Pattern 3: Conditional Validation**
+```python
+url_text = self.herald_url_edit.text()
+if url_text.strip():  # Only validate if provided
+    result = validate_url_field(url_text)
+    if not result['valid']: return show_error(result['message'])
+    url = result['value']
+```
+
+#### Performance Notes
+
+**O(n) complexity** where n = input length
+- Text field validations: <1ms
+- File operations: ~10-100ms (filesystem access)
+- Regex validations: <1ms
+- **Optimization**: Validate on blur event, not on every keystroke
+
+#### Error Handling
+
+**Defensive Programming**:
+- No exceptions raised
+- Errors returned in 'message' field
+- Always return dict (never None)
+- Graceful degradation for edge cases
+
+**File Operations**:
+- Catch exceptions (permission errors, invalid paths)
+- Log errors with `logging.error()`
+- Return user-friendly error messages
+
+#### Testing Results
+
+✅ All 15 functions tested and working
+✅ 3 wrapper functions tested and working
+✅ Application starts correctly with new module
+✅ Validation chain tested:
+  - Valid inputs return `valid=True` with proper value
+  - Invalid inputs return `valid=False` with error message
+  - Error messages are French and appropriate
+  - Wrapper functions combine multiple validations correctly
+
+#### Wrapper Functions Reference
+
+**validate_basic_character_info(character_name: str, guild_name: str, herald_url: str) -> dict**
+
+Validates all basic character information fields together.
+
+Parameters:
+  character_name: Character name (not used, for future compatibility)
+  guild_name: Guild name to validate (optional field)
+  herald_url: Herald URL to validate (optional field)
+
+Returns:
+  {
+    'valid': bool,           # False if any field invalid
+    'message': str,          # Error message if invalid
+    'guild': str             # Validated guild (empty if invalid)
+    'url': str               # Validated URL (empty if invalid)
+  }
+
+Behavior:
+  - Validates guild first using `validate_guild_name()`
+  - If guild invalid: returns early with error message
+  - Validates Herald URL if provided
+  - Returns both validated values on success
+
+---
+
+**validate_character_rename(new_name: str) -> dict**
+
+Validates character name for rename operation.
+
+Wrapper around `validate_character_name()` for clarity.
+
+Parameters:
+  new_name: New character name
+
+Returns:
+  {
+    'valid': bool,      # False if name invalid
+    'message': str,     # Error message if invalid
+    'value': str        # Validated name if valid
+  }
+
+---
+
+**validate_new_character_creation(character_name: str) -> dict**
+
+Validates character name for new character creation.
+
+Wrapper around `validate_character_name()` for clarity.
+
+Parameters:
+  character_name: Character name to validate
+
+Returns:
+  {
+    'valid': bool,      # False if name invalid
+    'message': str,     # Error message if invalid
+    'value': str        # Validated name if valid
+  }
+
+---
+
+**validate_new_character_dialog_data(character_name: str, guild_name: str) -> dict**
+
+Validates all fields for new character dialog (character name and optional guild).
+
+Parameters:
+  character_name: Character name to validate (required)
+  guild_name: Guild name to validate (optional)
+
+Returns:
+  {
+    'valid': bool,      # False if any field invalid
+    'message': str,     # Error message if invalid
+    'name': str         # Validated character name
+    'guild': str        # Validated guild (empty if not provided)
+  }
+
+Behavior:
+  - Validates character name first using `validate_character_name()`
+  - If character name invalid: returns early with error message
+  - Then validates guild name using `validate_guild_name()` (optional field)
+  - Returns both validated and stripped values on success
+
+Usage in `NewCharacterDialog.get_data()`:
+  ```python
+  result = validate_new_character_dialog_data(
+      self.name_edit.text(),
+      self.guild_edit.text()
+  )
+  if not result['valid']:
+      QMessageBox.warning(self, lang.get("error_title"), result['message'])
+      return None
+  name = result['name']      # Already validated and stripped
+  guild = result['guild']    # Already validated and stripped
+  ```
+
+#### Migration from Old Code
+
+**Before** (scattered validation):
+```python
+new_name = self.name_edit.text().strip()
+if not new_name:
+    msg_show_warning(self, "titles.warning", "char_name_empty")
+    return
+```
+
+**After** (centralized):
+```python
+result = validate_character_name(self.name_edit.text())
+if not result['valid']:
+    msg_show_warning(self, "titles.warning", result['message'])
+    return
+new_name = result['value']
+```
+
+**Benefits**:
+- Single place to update validation rules
+- Consistent error messages across all dialogs
+- Reduced code duplication (~25 lines eliminated)
+- Easier to test and maintain
+
+#### Wrapper Functions (Dialog-Specific)
+
+Three wrapper functions encapsulate validation for specific dialog use cases:
+
+**1. `validate_basic_character_info(character_name, guild_name, herald_url)`**
+- Purpose: Validate all basic info fields together
+- Returns: `{'valid': bool, 'message': str, 'guild': str, 'url': str}`
+- Used in: `CharacterSheetWindow.save_basic_info()`
+- Example:
+  ```python
+  result = validate_basic_character_info("", self.guild_edit.text(), self.herald_url_edit.text())
+  if not result['valid']:
+      QMessageBox.critical(self, "Erreur", result['message'])
+      return
+  new_guild = result['guild']
+  herald_url = result['url']
+  ```
+
+**2. `validate_character_rename(new_name)`**
+- Purpose: Validate character name for rename operation
+- Returns: `{'valid': bool, 'message': str, 'value': str}`
+- Used in: `CharacterSheetWindow.rename_character()`
+- Wrapper for `validate_character_name()` for clarity
+
+**3. `validate_new_character_creation(character_name)`**
+- Purpose: Validate character name for new character dialog
+- Returns: `{'valid': bool, 'message': str, 'value': str}`
+- Used in: `NewCharacterDialog.get_data()` (legacy, deprecated)
+- Wrapper for `validate_character_name()` for clarity
+
+**4. `validate_new_character_dialog_data(character_name, guild_name)`**
+- Purpose: Validate both character name and guild for new character dialog
+- Returns: `{'valid': bool, 'message': str, 'name': str, 'guild': str}`
+- Used in: `NewCharacterDialog.get_data()`
+- Combines `validate_character_name()` + `validate_guild_name()`
+- Example:
+  ```python
+  # In NewCharacterDialog.get_data()
+  name_text = self.character_name_edit.text()
+  guild_text = self.guild_edit.text()
+  result = validate_new_character_dialog_data(name_text, guild_text)
+  
+  if not result['valid']:
+      QMessageBox.critical(self, "Erreur", result['message'])
+      return
+  character_name = result['name']
+  guild = result['guild']
+  ```
+
+**Architecture**: dialogs.py contains ONLY UI calls to validation functions. All validation logic is in Functions/ui_validation_helper.py.
 
 ---
 

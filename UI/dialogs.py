@@ -49,6 +49,14 @@ from Functions.herald_url_validator import (
     herald_url_on_text_changed, herald_url_open_url,
     herald_url_update_button_states
 )
+from Functions.ui_validation_helper import (
+    validate_non_empty_text, validate_text_field, validate_url_field,
+    validate_character_name, validate_guild_name, validate_realm_selection,
+    validate_class_selection, validate_race_selection, validate_numeric_field,
+    validate_filepath_exists, validate_basic_character_info,
+    validate_character_rename, validate_new_character_creation,
+    validate_new_character_dialog_data
+)
 from Functions.armor_upload_handler import (
     armor_upload_file, armor_import_template, armor_open_file,
     armor_delete_file
@@ -920,7 +928,19 @@ class CharacterSheetWindow(QDialog):
             new_season = self.season_combo.currentText()
             new_server = self.server_combo.currentText()
             new_page = int(self.page_combo.currentText())
-            new_guild = self.guild_edit.text().strip()
+            
+            # Validate all basic character info fields using centralized validation
+            validation_result = validate_basic_character_info(
+                "",  # character_name not used in this context
+                self.guild_edit.text(),
+                self.herald_url_edit.text()
+            )
+            if not validation_result['valid']:
+                QMessageBox.critical(self, "Erreur", validation_result['message'])
+                return
+            
+            new_guild = validation_result['guild']
+            herald_url = validation_result['url']
             
             # Get race and class (actual names from item data)
             race_index = self.race_combo.currentIndex()
@@ -970,11 +990,7 @@ class CharacterSheetWindow(QDialog):
             self.character_data['guild'] = new_guild
             self.character_data['race'] = new_race
             self.character_data['class'] = new_class
-            
-            # Save Eden Herald URL
-            herald_url = self.herald_url_edit.text().strip()
-            if herald_url:
-                self.character_data['url'] = herald_url
+            self.character_data['url'] = herald_url
             
             # Save character (it's already moved if realm changed)
             if old_realm == new_realm:
@@ -1635,12 +1651,15 @@ class CharacterSheetWindow(QDialog):
         """Renames the character with validation."""
         try:
             old_name = self.character_data.get('name', '')
-            new_name = self.name_edit.text().strip()
-            if not new_name:
-                msg_show_warning(self, "titles.warning", "char_name_empty")
-                self.name_edit.setText(old_name)  # Reset to original name
+            
+            # Validate new name using centralized validation
+            result = validate_character_rename(self.name_edit.text())
+            if not result['valid']:
+                msg_show_warning(self, "titles.warning", result['message'])
+                self.name_edit.setText(old_name)
                 return
             
+            new_name = result['value']
             if old_name == new_name:
                 msg_show_info_with_details(self, "titles.info", "Le nom n'a pas changé.")
                 return
@@ -1870,17 +1889,22 @@ class NewCharacterDialog(QDialog):
 
     def get_data(self):
         """Returns the entered data if valid."""
-        name = self.name_edit.text().strip()
-        if not name:
-            QMessageBox.warning(self, lang.get("error_title"), lang.get("char_name_empty_error"))
+        validation_result = validate_new_character_dialog_data(
+            self.name_edit.text(),
+            self.guild_edit.text()
+        )
+        if not validation_result['valid']:
+            QMessageBox.warning(self, lang.get("error_title"), validation_result['message'])
             return None
+        name = validation_result['name']
+        guild = validation_result['guild']
+        
         realm = self.realm_combo.currentText()
-        race = self.race_combo.currentData()  # Get actual race name
-        class_name = self.class_combo.currentData()  # Get actual class name
+        race = self.race_combo.currentData()
+        class_name = self.class_combo.currentData()
         season = self.season_combo.currentText()
         level = int(self.level_combo.currentText())
         page = int(self.page_combo.currentText())
-        guild = self.guild_edit.text().strip()
         
         # Validate race/class combination
         if race and class_name:

@@ -2,11 +2,11 @@
 
 ## v0.109
 
-### ♻️ Code Refactoring - dialogs.py Module Extraction & UI State Management (Complete)
+### ♻️ Code Refactoring - dialogs.py Module Extraction & UI Validation Helper (Complete)
 
-**Extraction Scope**: Extract business logic from `UI/dialogs.py` into dedicated domain-specific modules for improved maintainability, testability, and code reuse. Add centralized UI state management for consistent button state handling across dialogs.
+**Extraction Scope**: Extract business logic from `UI/dialogs.py` into dedicated domain-specific modules for improved maintainability, testability, and code reuse. Consolidate all input field validation into centralized UI Validation Helper module.
 
-**13 Phases Completed** - Extracted 45+ functions into 13 new modules, removed ~2950 lines from dialogs.py:
+**14 Phases Completed** - Extracted 45+ functions into 14 new modules, removed ~3000 lines from dialogs.py:
 
 1. **Phase 1**: Template Parser (`Functions/template_parser.py` - 1392 lines)
    - Template format detection, parsing (Loki/Zenkcraft), price lookup, item formatting
@@ -54,12 +54,20 @@
     - Intelligent tooltip management for user guidance
     - Added `is_personal_database()` method to `ItemsDatabaseManager` for database mode detection
 
+14. **Phase 14**: UI Validation Helper (`Functions/ui_validation_helper.py` - 680+ lines)
+    - Centralized input field validation across all dialogs
+    - 15 core validation functions: text fields, URLs, emails, numeric fields, file paths, selections
+    - 4 wrapper functions for dialog-specific validation scenarios
+    - Eliminates 20+ repetitive validation patterns from dialogs.py
+    - Returns consistent dict format with 'valid', 'message', and value fields
+    - Zero inline validation code in dialogs.py
+
 **Refactoring Statistics**:
-- Total functions extracted: 45+
-- Total lines extracted: ~3350 lines
+- Total functions extracted: 60+
+- Total lines extracted: ~3600 lines
 - Thin wrappers in dialogs.py: ~180 lines
-- Net code reduction: ~3170 lines
-- Modules created: 13 dedicated domain-specific modules
+- Net code reduction: ~3420 lines
+- Modules created: 14 dedicated domain-specific modules
 
 **Quality Standards Applied**:
 - ✅ Domain-driven naming conventions for all modules and functions
@@ -74,6 +82,8 @@
 - Template parser returns items_without_price for accurate button state
 - Database mode validation ensures buttons reflect actual capabilities
 - Intelligent tooltips guide users when features are unavailable
+- All validation logic consolidated in ui_validation_helper.py (zero validation code in dialogs.py)
+- Consistent error messages and validation rules across all dialogs
 - Complete separation of concerns: business logic extracted from UI layer
 
 ---

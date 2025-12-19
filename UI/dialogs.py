@@ -13,11 +13,11 @@ if sys.stderr is None:
     sys.stderr = open('nul', 'w') if sys.platform == 'win32' else open('/dev/null', 'w')
 
 from PySide6.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QFormLayout, QGroupBox, QLabel, 
+    QDialog, QVBoxLayout, QHBoxLayout, QFormLayout, QGroupBox, QLabel,
     QPushButton, QLineEdit, QComboBox, QCheckBox, QMessageBox,
-    QDialogButtonBox, QFileDialog, QTableWidget, QTableWidgetItem, QHeaderView,
-    QWidget, QTextEdit, QApplication, QProgressBar, QMenu, QGridLayout, QFrame, QScrollArea, QSplitter,
-    QListWidget, QButtonGroup, QRadioButton
+    QDialogButtonBox, QTableWidget, QTableWidgetItem, QHeaderView,
+    QWidget, QTextEdit, QApplication, QProgressBar, QMenu, QGridLayout,
+    QFrame, QScrollArea, QSplitter, QListWidget, QButtonGroup, QRadioButton
 )
 from PySide6.QtCore import Qt, QThread, Signal, QTimer
 from PySide6.QtGui import QBrush, QColor, QIcon, QPixmap

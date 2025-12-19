@@ -122,8 +122,8 @@ class CharacterSheetWindow(QDialog):
         self.setWindowTitle(lang.get("character_sheet_title", name=char_name))
         self.resize(500, 400)
         
-        # Enable window resizing
-        self.setWindowFlags(self.windowFlags() | Qt.WindowMaximizeButtonHint)
+        # Enable window resizing and minimize button
+        self.setWindowFlags(self.windowFlags() | Qt.WindowMinimizeButtonHint | Qt.WindowMaximizeButtonHint)
         self.setSizeGripEnabled(True)  # Add resize grip in bottom-right corner
         
         # Connect to Herald validation end signal if available

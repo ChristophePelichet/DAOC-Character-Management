@@ -8,7 +8,7 @@ Functions:
     herald_ui_update_rvr_stats() - Trigger RvR stats update from Herald URL
 """
 
-from Functions.character_actions_manager import character_herald_update_rvr_stats
+from Functions.character_herald_scrapper import character_herald_update_rvr_stats
 
 
 def herald_ui_update_rvr_stats(dialog, herald_url_edit) -> None:
@@ -17,7 +17,7 @@ def herald_ui_update_rvr_stats(dialog, herald_url_edit) -> None:
 
     This function is a simple wrapper that extracts the Herald URL from the
     UI text field and triggers the RvR stats update operation. It serves as
-    a bridge between UI components and the business logic in character_actions_manager.
+    a bridge between UI components and the business logic in character_herald_scrapper.
 
     Args:
         dialog: The parent dialog window (CharacterSheetWindow instance).

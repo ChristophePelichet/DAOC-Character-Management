@@ -122,6 +122,8 @@ class UIManager:
         # Mettre à jour depuis Herald - stocker comme attribut pour pouvoir désactiver
         self.update_from_herald_action = self.context_menu.addAction(lang.get("context_menu_update_from_herald", default="🔄 Mettre à jour depuis Herald"))
         self.update_from_herald_action.triggered.connect(self.main_window.update_character_from_herald)
+        # Store the original text for later restoration
+        self.update_from_herald_action_text = lang.get("context_menu_update_from_herald", default="🔄 Mettre à jour depuis Herald")
 
         self.context_menu.addSeparator()
 
@@ -384,6 +386,21 @@ class UIManager:
     
     def check_eden_status(self):
         """Vérifie le statut de connexion Eden en arrière-plan"""
+        # Vérifier s'il y a au moins un character avec une URL Herald configurée
+        has_character_with_url = False
+        if hasattr(self, 'main_window') and hasattr(self.main_window, 'tree_manager'):
+            for char_id, char_data in self.main_window.tree_manager.characters_by_id.items():
+                if char_data.get('url', '').strip():
+                    has_character_with_url = True
+                    break
+        
+        # Si pas de character avec URL, ne pas déclencher la vérification Eden
+        if not has_character_with_url:
+            self.eden_status_label.setText("ℹ️ Aucun URL Herald configurée")
+            self.eden_status_label.setStyleSheet("padding: 5px; color: gray;")
+            self.refresh_button.setEnabled(False)
+            return
+        
         # Arrêter un thread en cours if existant
         if self.eden_status_thread and self.eden_status_thread.isRunning():
             self.eden_status_thread.quit()
@@ -444,21 +461,43 @@ class UIManager:
         self._update_herald_buttons_state()
     
     def _update_herald_buttons_state(self):
-        """Désactive/active les boutons et actions Herald selon l'état de validation Eden"""
+        """Désactive/active les boutons et actions Herald selon l'état de validation Eden et la présence d'URL"""
         from Functions.language_manager import lang
         
         # Vérifier si validation en cours (basé sur le flag, pas sur isRunning())
         is_validation_running = getattr(self, 'eden_validation_in_progress', False)
         
+        # Vérifier si le character sélectionné a une URL Herald
+        selected_character_data = self._get_selected_character_data()
+        has_herald_url = False
+        if selected_character_data:
+            has_herald_url = bool(selected_character_data.get('url', '').strip())
+        
         # Action du menu contextuel
         if hasattr(self, 'update_from_herald_action'):
-            self.update_from_herald_action.setEnabled(not is_validation_running)
+            # Désactiver si: validation en cours OU pas d'URL
+            should_disable = is_validation_running or not has_herald_url
+            self.update_from_herald_action.setEnabled(not should_disable)
+            
+            # Mettre à jour le texte et le style selon l'état
             if is_validation_running:
-                # QAction n'affiche pas les tooltips comme les boutons, on utilise statusTip
+                text = lang.get("context_menu_update_from_herald", default="🔄 Mettre à jour depuis Herald")
+                self.update_from_herald_action.setText(text)
                 tooltip_text = lang.get("herald_buttons.validation_in_progress", default="⏳ Validation Eden en cours... Veuillez patienter")
                 self.update_from_herald_action.setToolTip(tooltip_text)
                 self.update_from_herald_action.setStatusTip(tooltip_text)
+            elif not has_herald_url:
+                # Afficher un texte et une icône ⚠️ quand pas d'URL
+                # Récupérer le texte sans l'icône 🔄
+                base_text = lang.get("context_menu_update_from_herald", default="Mettre à jour depuis Herald").replace("🔄 ", "")
+                text = "⚠️ " + base_text
+                self.update_from_herald_action.setText(text)
+                tooltip_text = lang.get("herald_buttons.no_url", default="ℹ️ Aucune URL Herald configurée pour ce personnage")
+                self.update_from_herald_action.setToolTip(tooltip_text)
+                self.update_from_herald_action.setStatusTip(tooltip_text)
             else:
+                text = lang.get("context_menu_update_from_herald", default="🔄 Mettre à jour depuis Herald")
+                self.update_from_herald_action.setText(text)
                 self.update_from_herald_action.setToolTip("")
                 self.update_from_herald_action.setStatusTip("")
         
@@ -471,6 +510,33 @@ class UIManager:
                 # Réactiver le bouton si la validation est terminée
                 self.search_button.setEnabled(True)
                 self.search_button.setToolTip(lang.get("buttons.eden_search", default="Rechercher un personnage sur Herald"))
+    
+    def _get_selected_character_data(self):
+        """Get the data of the currently selected character"""
+        try:
+            selected_indices = self.main_window.character_tree.selectedIndexes()
+            if not selected_indices:
+                return None
+            
+            # Map proxy index to source index
+            proxy_index = selected_indices[0]
+            source_index = self.main_window.tree_manager.proxy_model.mapToSource(proxy_index)
+            row = source_index.row()
+            
+            # Get char_id from realm column (column 1) using Qt.UserRole
+            realm_index = self.main_window.tree_manager.model.index(row, 1)
+            char_id = realm_index.data(Qt.UserRole)
+            
+            if not char_id:
+                return None
+            
+            # Get character data from tree_manager's internal dict
+            return self.main_window.tree_manager.characters_by_id.get(char_id)
+        except Exception:
+            pass
+        
+        return None
+        
         
         
     def create_status_bar(self):
@@ -490,11 +556,15 @@ class UIManager:
         """Affiche le menu contextuel à la position spécifiée"""
         index = self.main_window.character_tree.indexAt(position)
         if index.isValid():
-            # Mettre à jour l'état du menu contextuel juste avant de l'afficher
-            self._update_herald_buttons_state()
-            
-            # Sélectionner the ligne cliquée before d'afficher the menu
+            # Sélectionner la ligne cliquée AVANT de mettre à jour l'état du menu
             self.main_window.character_tree.setCurrentIndex(index)
+            
+            # Utiliser un délai très court pour laisser la sélection se finir
+            # puis mettre à jour l'état du menu contextuel IMMÉDIATEMENT
+            from PySide6.QtCore import QTimer
+            QTimer.singleShot(50, self._update_herald_buttons_state)
+            
+            # Afficher le menu
             self.context_menu.exec(self.main_window.character_tree.viewport().mapToGlobal(position))
             
     def update_status_bar(self, message):

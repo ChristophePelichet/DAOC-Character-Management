@@ -6,7 +6,7 @@
 
 **Extraction Scope**: Extract business logic from `UI/dialogs.py` into dedicated domain-specific modules for improved maintainability, testability, and code reuse. Consolidate input validation and file dialogs into centralized helper modules.
 
-**17 Phases Completed** - Extracted 60+ functions into 16 new modules, removed ~3100+ lines from dialogs.py:
+**17 Phases Completed** - Extracted 60+ functions into 17 new modules, removed ~3100+ lines from dialogs.py:
 
 1. **Phase 1**: Template Parser (`Functions/template_parser.py` - 1392 lines)
    - Template format detection, parsing (Loki/Zenkcraft), price lookup, item formatting
@@ -82,12 +82,18 @@
     - 1 function: character_rename_with_validation() for complete rename workflow
     - Decoupled rename logic from UI layer, reusable across contexts
 
+18. **Phase 18**: Armor Context Menu Builder (`UI/ui_context_menus.py` - 88 lines)
+    - Context menu construction for armor files with standard actions
+    - 1 function: ui_show_armor_context_menu() handles view, download, open, delete actions
+    - Consistent menu styling and action callback pattern
+    - Complete UI component extraction with thin wrapper in dialogs.py
+
 **Refactoring Statistics**:
 - Total functions extracted: 60+
-- Total lines extracted: ~3900+ lines
-- Thin wrappers in dialogs.py: ~220 lines
-- Net code reduction: ~3680 lines
-- Modules created: 16 dedicated domain-specific modules
+- Total lines extracted: ~3950+ lines
+- Thin wrappers in dialogs.py: ~260 lines
+- Net code reduction: ~3690 lines
+- Modules created: 17 dedicated domain-specific modules
 - QFileDialog calls centralized: 18 (5 in dialogs.py + 13 in other UI files)
 
 **Quality Standards Applied**:

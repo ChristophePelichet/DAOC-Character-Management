@@ -1,26 +1,26 @@
 # 💬 Dialog System - Technical Documentation
 
-**Version**: 2.0  
+**Version**: 2.1  
 **Date**: November 2025  
-**Last Updated**: November 26, 2025  
-**Component**: `UI/progress_dialog_base.py`, `UI/dialogs.py`  
-**Related**: `UI/settings_dialog.py`, `UI/armory_import_dialog.py`, `UI/failed_items_review_dialog.py`, `UI/template_import_dialog.py`  
-**Branch**: 108_Imp_Armo
+**Last Updated**: December 19, 2025  
+**Component**: `UI/progress_dialog_base.py`, `UI/dialogs.py`, `UI/ui_message_helper.py`  
+**Related**: `UI/settings_dialog.py`, `UI/armory_import_dialog.py`, `UI/failed_items_review_dialog.py`, `UI/template_import_dialog.py`, `Functions/character_actions_manager.py`  
 
 ---
 
 ## 📋 Table of Contents
 
 1. [Overview](#overview)
-2. [Progress Dialog System](#progress-dialog-system)
-3. [ProgressStep Class](#progressstep-class)
-4. [StepConfiguration Class](#stepconfiguration-class)
-5. [ProgressStepsDialog Class](#progressstepsdialog-class)
-6. [Worker Thread Pattern](#worker-thread-pattern)
-7. [Thread Safety Patterns](#thread-safety-patterns)
-8. [Implemented Dialogs](#implemented-dialogs)
-9. [Multilingual Support](#multilingual-support)
-10. [Performance Considerations](#performance-considerations)
+2. [Message Helper System](#message-helper-system)
+3. [Progress Dialog System](#progress-dialog-system)
+4. [ProgressStep Class](#progressstep-class)
+5. [StepConfiguration Class](#stepconfiguration-class)
+6. [ProgressStepsDialog Class](#progressstepsdialog-class)
+7. [Worker Thread Pattern](#worker-thread-pattern)
+8. [Thread Safety Patterns](#thread-safety-patterns)
+9. [Implemented Dialogs](#implemented-dialogs)
+10. [Multilingual Support](#multilingual-support)
+11. [Performance Considerations](#performance-considerations)
 
 ---
 
@@ -39,6 +39,204 @@ The Dialog System provides a unified, thread-safe, translatable framework for al
 - ✅ **Reusable configurations** for common operations
 - ✅ **Guaranteed resource cleanup**
 - ✅ **User-friendly progress tracking**
+
+---
+
+## Message Helper System
+
+### Phase 12: UI Message Helper Extraction
+
+**Module**: `UI/ui_message_helper.py` (v0.109 Phase 12)  
+**Purpose**: Centralize and standardize all QMessageBox calls across the application  
+**Status**: ✅ COMPLETE - 5 helper functions extracted
+
+### Design Philosophy
+
+**Problem**: 40+ repetitive `QMessageBox` calls scattered throughout `dialogs.py` and `character_actions_manager.py`  
+**Solution**: Extract common patterns into reusable helpers with automatic translation and logging  
+**Benefit**: Single source of truth for message display, consistency, easier maintenance
+
+### Functions Provided
+
+#### 1. `msg_show_success(parent, title_key, message_key, **kwargs)`
+Displays a success message with `QMessageBox.information()`
+
+```python
+msg_show_success(
+    self,
+    "titles.success",
+    "character_sheet.messages.info_update_success"
+)
+```
+
+- Automatically translates title and message via `lang.get()`
+- Supports dynamic parameters: `msg_show_success(..., level="10", rp=5000)`
+- Logs success event
+
+#### 2. `msg_show_error(parent, title_key, message_key, **kwargs)`
+Displays an error message with `QMessageBox.critical()`
+
+```python
+msg_show_error(
+    self,
+    "titles.error",
+    "character_sheet.messages.save_error",
+    error="File not found"
+)
+```
+
+- Supports plain text errors with "!" prefix: `msg_show_error(..., "!Plain text error")`
+- Automatically logs ERROR action
+- Uses default: "An error occurred"
+
+#### 3. `msg_show_warning(parent, title_key, message_key, **kwargs)`
+Displays a warning message with `QMessageBox.warning()`
+
+```python
+msg_show_warning(
+    self,
+    "titles.warning",
+    "messages.errors.char_name_empty"
+)
+```
+
+- Supports plain text warnings with "!" prefix: `msg_show_warning(..., "!Name cannot be empty")`
+- Automatically logs WARNING action
+- Uses default: "Warning"
+
+#### 4. `msg_show_confirmation(parent, title, message) -> bool`
+Displays a yes/no dialog and returns user's choice
+
+```python
+if msg_show_confirmation(self, "Delete Character?", "Are you sure?"):
+    # User clicked Yes
+    delete_character()
+```
+
+- Returns `True` if user clicked Yes, `False` otherwise
+- Default button is "No" for safety
+- Both parameters are plain text (not translated)
+
+#### 5. `msg_show_info_with_details(parent, title_key, details_text)`
+Displays informational message with formatted multi-line text
+
+```python
+msg_show_info_with_details(
+    self,
+    "stats_update_title",
+    "Tower Captures: 100\nKeep Captures: 50\nRelic Captures: 25"
+)
+```
+
+- Useful for displaying complex results with multiple stats
+- `details_text` is plain text with newlines
+- Supports HTML formatting if needed
+
+### Translation Support
+
+All functions use `lang.get()` for automatic translation:
+
+| Key Pattern | Type | Example |
+|---|---|---|
+| `titles.success` | System title | ✅ Success |
+| `titles.error` | System title | ❌ Error |
+| `titles.warning` | System title | ⚠️ Warning |
+| `messages.errors.*` | Messages | "Character name cannot be empty" |
+| `!Plain text` | Plain text (no translation) | Direct text bypass |
+
+### Plain Text Mode
+
+When you need to pass dynamic or non-translated text, use the "!" prefix:
+
+```python
+# Translated key
+msg_show_error(self, "titles.error", "messages.errors.char_name_empty")
+
+# Plain text (for dynamic content)
+msg_show_error(self, "titles.error", f"!Failed to save: {error_msg}")
+```
+
+### Logging Integration
+
+All helpers automatically log their messages:
+
+```python
+msg_show_success(...)     # Logs: logger_ui.info(...)
+msg_show_error(...)       # Logs: log_with_action(..., "error", ..., action="ERROR")
+msg_show_warning(...)     # Logs: log_with_action(..., "warning", ..., action="WARNING")
+msg_show_confirmation(...) # No logging (user choice)
+msg_show_info_with_details(...) # Logs: logger_ui.info(...)
+```
+
+### Usage Examples
+
+#### Example 1: Rename Character Validation
+```python
+# In character_actions_manager.py
+if not new_name:
+    msg_show_warning(
+        self.main_window,
+        "titles.warning",
+        "messages.errors.char_name_empty"
+    )
+    return
+```
+
+#### Example 2: Save Error with Context
+```python
+from Functions.character_manager import save_character
+success, msg = save_character(data)
+
+if not success:
+    msg_show_error(
+        self,
+        "titles.error",
+        f"!Failed to save character: {msg}"
+    )
+```
+
+#### Example 3: Destructive Action Confirmation
+```python
+if msg_show_confirmation(
+    self,
+    "Delete Armor File?",
+    f"Are you sure you want to delete '{filename}'?\nThis cannot be undone."
+):
+    delete_armor_file(filename)
+```
+
+### Quality Standards
+
+✅ **PEP 8 Compliant**
+- Proper indentation, spacing, line length
+- Type hints on all functions
+- Comprehensive docstrings
+
+✅ **No Hardcoded Text**
+- All UI strings use `lang.get()`
+- Supports dynamic parameters via `**kwargs`
+- Plain text mode with "!" prefix for special cases
+
+✅ **100% English Documentation**
+- All docstrings in English
+- All comments in English
+- Module docstring with usage examples
+
+✅ **Complete Error Handling**
+- Graceful fallback with defaults
+- Logging on all message displays
+- Safe defaults (No button by default in confirmations)
+
+### Integration Points
+
+**Files Using Message Helper**:
+- `UI/dialogs.py` - CharacterSheetWindow (3 replacements)
+- `Functions/character_actions_manager.py` - rename_selected_character() (2 replacements)
+
+**Future Expansions**:
+- Phase 13: UI State Manager
+- Phase 14: UI Validation Helper
+- Phase 15: UI File Dialog Wrapper
 
 ---
 

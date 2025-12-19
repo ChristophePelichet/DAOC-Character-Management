@@ -59,6 +59,10 @@ from Functions.item_model_viewer import (
 from Functions.character_achievement_formatter import (
     character_update_achievements_display
 )
+from UI.ui_message_helper import (
+    msg_show_success, msg_show_error, msg_show_warning, 
+    msg_show_confirmation, msg_show_info_with_details
+)
 
 # Get CHARACTER logger
 logger_char = get_logger(LOGGER_CHARACTER)
@@ -993,14 +997,14 @@ class CharacterSheetWindow(QDialog):
                         sys.stderr.flush()
                         logging.warning(f"[BACKUP_TRIGGER] Backup after basic info modification failed: {e}")
             
-            QMessageBox.information(self, lang.get("dialogs.titles.success"), lang.get("character_sheet.messages.info_update_success"))
+            msg_show_success(self, "titles.success", "character_sheet.messages.info_update_success")
             # Refresh list in parent
             if hasattr(self.parent_app, 'refresh_character_list'):
                 self.parent_app.refresh_character_list()
                 
         except Exception as e:
             log_with_action(logger_char, "error", f"Error saving basic info: {str(e)}", action="ERROR")
-            QMessageBox.critical(self, lang.get("dialogs.titles.error"), lang.get("character_sheet.messages.save_error", error=str(e)))
+            msg_show_error(self, "titles.error", "character_sheet.messages.save_error", error=str(e))
 
     def open_armor_manager(self):
         """Opens the armor management dialog."""
@@ -1048,9 +1052,9 @@ class CharacterSheetWindow(QDialog):
     
     def show_stats_info(self):
         """Display an information window about statistics"""
-        QMessageBox.information(
+        msg_show_info_with_details(
             self,
-            lang.get("stats_info_title"),
+            "stats_info_title",
             lang.get("stats_info_message")
         )
     
@@ -1595,26 +1599,17 @@ class CharacterSheetWindow(QDialog):
         try:
             old_name = self.character_data.get('name', '')
             new_name = self.name_edit.text().strip()
-            
             if not new_name:
-                QMessageBox.warning(self, "Erreur", "Le nom du personnage ne peut pas être vide.")
+                msg_show_warning(self, "titles.warning", "char_name_empty")
                 self.name_edit.setText(old_name)  # Reset to original name
                 return
             
             if old_name == new_name:
-                QMessageBox.information(self, "Information", "Le nom n'a pas changé.")
+                msg_show_info_with_details(self, "titles.info", "Le nom n'a pas changé.")
                 return
             
             # Confirm rename
-            reply = QMessageBox.question(
-                self,
-                "Confirmer le renommage",
-                f"Renommer '{old_name}' en '{new_name}' ?",
-                QMessageBox.Yes | QMessageBox.No,
-                QMessageBox.Yes
-            )
-            
-            if reply == QMessageBox.Yes:
+            if msg_show_confirmation(self, "Confirmer le renommage", f"Renommer '{old_name}' en '{new_name}' ?"):
                 from Functions.character_manager import rename_character
                 success, msg = rename_character(old_name, new_name)
                 
@@ -1631,11 +1626,11 @@ class CharacterSheetWindow(QDialog):
                         self.parent_app.refresh_character_list()
                 else:
                     error_msg = "Un personnage avec ce nom existe déjà." if msg == "char_exists_error" else msg
-                    QMessageBox.critical(self, "Erreur", f"Échec du renommage : {error_msg}")
+                    msg_show_error(self, "titles.error", f"Échec du renommage : {error_msg}")
                     self.name_edit.setText(old_name)  # Reset to original name
                     
         except Exception as e:
-            QMessageBox.critical(self, "Erreur", f"Erreur lors du renommage : {str(e)}")
+            msg_show_error(self, "titles.error", f"Erreur lors du renommage : {str(e)}")
             # Reset to original name in case of error
             if hasattr(self, 'character_data'):
                 self.name_edit.setText(self.character_data.get('name', ''))

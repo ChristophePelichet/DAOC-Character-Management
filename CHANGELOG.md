@@ -6,7 +6,7 @@
 
 **Extraction Scope**: Extract business logic from `UI/dialogs.py` into dedicated domain-specific modules for improved maintainability, testability, and code reuse.
 
-**11 Phases Completed** - Extracted 35+ functions into 10 new modules, removed ~2514 lines from dialogs.py:
+**12 Phases Completed** - Extracted 40+ functions into 11 new modules, removed ~2700 lines from dialogs.py:
 
 1. **Phase 1**: Template Parser (`Functions/template_parser.py` - 1392 lines)
    - Template format detection, parsing (Loki/Zenkcraft), price lookup, item formatting
@@ -41,12 +41,17 @@
 11. **Phase 11**: Character Achievement Formatter (`Functions/character_achievement_formatter.py` - 256 lines)
     - Achievements display formatting with 2-column layout, progress tracking, tier display
 
+12. **Phase 12**: UI Message Helper (`UI/ui_message_helper.py` - 195 lines)
+    - Centralized QMessageBox handling with automatic translation and logging
+    - 5 functions: success, error, warning, confirmation, info_with_details
+    - Support for dynamic parameters and plain text messages
+
 **Refactoring Statistics**:
-- Total functions extracted: 35+
-- Total lines extracted: ~2821 lines
-- Thin wrappers in dialogs.py: ~157 lines
-- Net code reduction: ~2664 lines
-- Modules created: 10 dedicated domain-specific modules
+- Total functions extracted: 40+
+- Total lines extracted: ~3100 lines
+- Thin wrappers in dialogs.py: ~180 lines
+- Net code reduction: ~2920 lines
+- Modules created: 11 dedicated domain-specific modules
 
 **Quality Standards Applied**:
 - ✅ Domain-driven naming conventions for all modules and functions
@@ -54,7 +59,7 @@
 - ✅ Type hints and comprehensive docstrings (English only)
 - ✅ Zero hardcoded UI strings (all use `lang.get()`)
 - ✅ English-only code and comments
-- ✅ Complete documentation updates (EDEN_TECHNICAL_DOCUMENTATION.md, CHARACTER_SYSTEM_TECHNICAL_DOCUMENTATION.md, ARMORY_TECHNICAL_DOCUMENTATION.md, MODELS_VISUAL_SYSTEM_DOCUMENTATION.md)
+- ✅ Complete documentation updates (DIALOG_TECHNICAL_DOCUMENTATION.md, EDEN_TECHNICAL_DOCUMENTATION.md, CHARACTER_SYSTEM_TECHNICAL_DOCUMENTATION.md, ARMORY_TECHNICAL_DOCUMENTATION.md, MODELS_VISUAL_SYSTEM_DOCUMENTATION.md)
 
 ---
 

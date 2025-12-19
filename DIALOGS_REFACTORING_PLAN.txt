@@ -3,7 +3,7 @@ DIALOGS.PY REFACTORING PLAN
 ================================================================================
 File: UI/dialogs.py
 Date: 13 December 2025
-Updated: 19 December 2025 (Phase 16 Complete - Extended UI File Dialogs Wrapper)
+Updated: 19 December 2025 (Phase 17 Complete - Character Rename Handler)
 Purpose: Extract functions to dedicated modules for better maintainability
 ================================================================================
 
@@ -993,8 +993,9 @@ COMPLETED PHASES (16):
 ✅ Phase 15: UI File Dialog Wrapper - 140 lines (centralized file dialogs for dialogs.py)
 ✅ Phase 16: Extended UI File Dialogs - 280+ lines (centralized file dialogs for all UI files)
 
-PLANNED FUTURE PHASES (0):
-📋 No planned phases at this time
+PLANNED FUTURE PHASES (2):
+📋 Phase 17: Character Renaming Handler (LOW PRIORITY - v0.109 - ~48 lines)
+📋 Phase 18: Simple UI Utility Functions (LOW PRIORITY - v0.109 - ~35 lines)
 
 EXTRACTION METRICS (v0.109):
 - Total lines extracted: 4,865 lines
@@ -1014,6 +1015,105 @@ v0.109 REFACTORING STATUS:
 ✅ Phase 16 extended UI file dialogs (in progress, not yet committed)
 
 📋 Phase 15 (File Dialogs) remains: LOW priority, can be deferred
+
+v0.110 PLANNING:
+- Enhanced error handling patterns
+- Additional UI helper modules (if needed)
+- Advanced validation chains
+- Context-aware validation messages
+
+================================================================================
+
+📋 PHASE 17: CHARACTER RENAMING HANDLER (COMPLETED - v0.109)
+================================================================================
+Target File: Functions/character_rename_handler.py (60 lines)
+Priority: LOW
+Date Planned: December 2025
+Date Completed: 19 December 2025
+Branch: refactor/v0.109-phase-17-character-renaming
+
+Objective:
+✅ COMPLETED - Extract character renaming logic from CharacterSheetWindow class
+✅ COMPLETED - Create dedicated module for character rename handling
+✅ COMPLETED - Validate character name and update JSON file
+
+Extracted Functions (1 total):
+1. ✅ character_rename_with_validation(character_data, new_name, rename_function)
+   - Rename character with validation and persistence
+   - Updates character_data dict with new name and id
+   - Calls rename_function for JSON file persistence
+   - Returns: Tuple[bool, str] (success, message)
+   - Used in: CharacterSheetWindow.rename_character()
+   - Thin wrapper: 5 lines in dialogs.py
+
+Location in dialogs.py: Original lines ~1654-1700 (~41 lines refactored)
+
+Code Reduction: ~41 lines from dialogs.py
+Module Size: 60 lines
+
+Quality Standards - ALL MET:
+✅ PEP 8 compliant (ruff validation: 0 errors)
+✅ Type hints: Complete (character_data: dict, new_name: str, rename_function, return type)
+✅ Docstrings: 100% English with comprehensive examples
+✅ No hardcoded strings (no user text in module)
+✅ No French comments (all English)
+✅ Proper error handling with try-except and detailed error messages
+✅ Syntax validation: PASSED
+✅ Import testing: PASSED
+
+Git Status:
+✅ Commit: "refactor(Phase 17): Extract character renaming logic into dedicated module"
+✅ Branch: refactor/v0.109-phase-17-character-renaming (created Dec 19, 2025)
+✅ Ready for merge to refactor/v0.109-dialogs-cleanup
+
+Documentation:
+✅ CHARACTER_SYSTEM_TECHNICAL_DOCUMENTATION.md updated with full Phase 17 section
+✅ Function reference with examples and integration points
+✅ Architecture diagrams showing data flow
+✅ Integration explanation with thin wrapper pattern
+
+Status: COMPLETED - READY FOR MERGE
+
+---
+
+📋 PHASE 18: SIMPLE UI UTILITY FUNCTIONS (PLANNED - v0.109)
+================================================================================
+Target File: Functions/ui_utils.py
+Priority: LOW
+Date Planned: December 2025
+Branch: refactor/v0.109-phase-18-ui-utilities
+
+Objective:
+- Extract simple UI utility functions from dialogs.py
+- Create dedicated module for UI helper functions
+- Improve code organization for small utility functions
+
+Extracted Functions (1 total):
+1. ui_create_armor_context_menu(parent_window, selected_items)
+   - Create context menu for armor list
+   - Handles right-click actions on armor items
+   - Returns: QMenu with configured actions
+   - Used in: ArmorManagementDialog context menu handling
+   - Thin wrapper: 1 line in dialogs.py
+
+Location in dialogs.py: Lines ~4801-4835 (~35 lines)
+
+Expected Code Reduction: ~35 lines from dialogs.py
+Expected Module Size: ~60 lines
+
+Quality Standards:
+- PEP 8 compliant (ruff validation)
+- Type hints: Complete
+- Docstrings: English only
+- No hardcoded strings (lang.get())
+- No French comments
+- Proper error handling
+
+Status: PLANNED - NOT STARTED
+
+---
+
+================================================================================
 
 v0.110 PLANNING:
 - Enhanced error handling patterns

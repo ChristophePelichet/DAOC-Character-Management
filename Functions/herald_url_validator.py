@@ -31,24 +31,34 @@ def herald_url_on_text_changed(parent_window, text: str) -> None:
     Process:
         1. Check if Herald scraping is in progress (return if true)
         2. Validate URL is not empty
-        3. Enable/disable update_rvr_button accordingly
-        4. Set appropriate tooltip
+        3. Enable/disable update buttons using state manager
+        4. Update button tooltips accordingly
 
     Examples:
         >>> herald_url_on_text_changed(window, "https://eden-daoc.net/herald?n=player&k=PlayerName")
-        # Button enabled, tooltip set to normal
+        # Buttons enabled, tooltip set to normal
         
         >>> herald_url_on_text_changed(window, "")
-        # Button disabled, tooltip set to prompt for URL
+        # Buttons disabled, tooltip set to prompt for URL
     """
+    from UI.ui_state_manager import ui_state_set_herald_buttons
+    
     if parent_window.herald_scraping_in_progress:
         return
 
     is_url_valid = bool(text.strip())
-
+    
+    # Update state using state manager
+    ui_state_set_herald_buttons(
+        parent_window,
+        character_selected=True,
+        herald_url=text.strip(),
+        scraping_active=False,
+        validation_active=False
+    )
+    
+    # Update tooltips
     if hasattr(parent_window, 'update_rvr_button'):
-        parent_window.update_rvr_button.setEnabled(is_url_valid)
-
         if is_url_valid:
             parent_window.update_rvr_button.setToolTip(
                 lang.get("update_rvr_pvp_tooltip")
@@ -61,95 +71,66 @@ def herald_url_on_text_changed(parent_window, text: str) -> None:
 
 def herald_url_open_url(parent_window) -> None:
     """
-    Open Herald URL in browser with authentication cookies.
+    Open Herald URL in default browser.
 
-    Validates the Herald URL from the text field, ensures proper protocol
-    (https://), and opens it in the browser using authenticated cookies.
-    Runs in separate thread to avoid blocking UI.
+    Simple function to open the Herald URL in the user's default browser.
+    No cookies, no Selenium - just open the URL.
 
     Args:
-        parent_window: CharacterSheetWindow instance with herald_url_edit
+        parent_window: CharacterSheetWindow instance with character_data
 
     Returns:
         None (opens URL in browser)
 
-    Process:
-        1. Extract URL from herald_url_edit field
-        2. Validate URL is not empty
-        3. Ensure protocol (http:// or https://)
-        4. Launch browser in separate thread
-        5. Load cookies and navigate to URL
-        6. Show error dialog if operation fails
-
     Examples:
         >>> herald_url_open_url(window)
-        # Opens URL from herald_url_edit in browser with cookies
+        # Opens Herald URL in default browser
     """
-    url = parent_window.herald_url_edit.text().strip()
+    import webbrowser
+    
+    # Get URL from character data (source of truth)
+    url = parent_window.character_data.get('url', '').strip()
 
     if not url:
-        QMessageBox.warning(
+        msg_show_warning(
             parent_window,
-            lang.get("herald_url.error.missing_title", default="Missing URL"),
-            lang.get(
-                "herald_url.error.missing_message",
-                default="Please enter a valid Herald URL."
-            )
+            "titles.warning",
+            "herald_url.error.missing_message"
         )
         return
 
     if not url.startswith(('http://', 'https://')):
         url = 'https://' + url
-        parent_window.herald_url_edit.setText(url)
 
     try:
-        thread = threading.Thread(
-            target=_herald_url_open_in_thread,
-            args=(url,),
-            daemon=True
-        )
-        thread.start()
+        # Simply open the URL in the default browser
+        webbrowser.open(url)
     except Exception as e:
-        logger.error(f"Error starting URL thread: {e}")
-        QMessageBox.critical(
+        msg_show_error(
             parent_window,
-            lang.get("herald_url.error.open_title", default="Error"),
-            lang.get(
-                "herald_url.error.open_message",
-                default=f"Unable to open URL: {str(e)}"
-            )
+            "titles.error",
+            f"!Failed to open browser: {str(e)}"
         )
 
 
 def _herald_url_open_in_thread(url: str) -> None:
     """
-    Internal: Open Herald URL with cookies in separate thread.
+    Internal: Open Herald URL in browser in separate thread.
 
-    Opens the URL in the browser using Selenium with authenticated cookies.
-    Handles errors gracefully without blocking UI.
+    Simply opens the URL in the default browser without blocking UI.
 
     Args:
         url: Herald URL to open
 
     Returns:
         None (opens URL in browser)
-
-    Error Handling:
-        - Log warnings/errors for debugging
-        - Never raise exceptions (thread-safe)
     """
     try:
-        from Functions.cookie_manager import CookieManager
-
-        cookie_manager = CookieManager()
-        result = cookie_manager.open_url_with_cookies_subprocess(url)
-
-        if not result.get('success', False):
-            logger.warning(
-                f"Error opening URL: {result.get('message', 'Unknown error')}"
-            )
+        import webbrowser
+        webbrowser.open(url)
+        logger.info(f"Opened Herald URL in browser: {url}")
     except Exception as e:
-        logger.error(f"Error opening URL with cookies: {e}")
+        logger.error(f"Error opening URL in browser: {e}")
 
 
 def herald_url_update_button_states(parent_window) -> None:
@@ -171,18 +152,20 @@ def herald_url_update_button_states(parent_window) -> None:
         1. Check if Eden validation is in progress
         2. Check if Herald URL is configured
         3. Check if Herald scraping is active
-        4. Update button enabled states
+        4. Update button enabled states using state manager
         5. Set appropriate tooltips
 
     Button States:
-        - Disabled if: Validation running, scraping active, no URL (for RvR)
-        - Enabled if: Validation done, no scraping, URL present (for RvR)
+        - Disabled if: Validation running, scraping active, no URL
+        - Enabled if: Validation done, no scraping, URL present
 
     Examples:
         >>> herald_url_update_button_states(window)
-        # Disables Update Herald button during validation
-        # Disables Update RvR button if no URL or scraping active
+        # Disables Herald buttons during validation
+        # Disables buttons if no URL configured
     """
+    from UI.ui_state_manager import ui_state_set_herald_buttons
+    
     main_window = parent_window.parent()
     is_validation_running = False
 
@@ -194,6 +177,19 @@ def herald_url_update_button_states(parent_window) -> None:
             and ui_manager.eden_status_thread.isRunning()
         )
 
+    # Get herald URL from character data
+    herald_url = parent_window.character_data.get('url', '').strip()
+    
+    # Update button states using state manager
+    ui_state_set_herald_buttons(
+        parent_window,
+        character_selected=True,
+        herald_url=herald_url,
+        scraping_active=parent_window.herald_scraping_in_progress,
+        validation_active=is_validation_running
+    )
+    
+    # Update tooltips
     validation_tooltip = lang.get(
         "herald_buttons.validation_in_progress",
         default="⏳ Eden validation in progress... Please wait"
@@ -201,35 +197,24 @@ def herald_url_update_button_states(parent_window) -> None:
 
     if hasattr(parent_window, 'update_herald_button'):
         if is_validation_running:
-            parent_window.update_herald_button.setEnabled(False)
             parent_window.update_herald_button.setToolTip(validation_tooltip)
         else:
-            parent_window.update_herald_button.setEnabled(True)
             parent_window.update_herald_button.setToolTip(
                 lang.get("character_sheet.labels.update_from_herald_tooltip")
             )
 
     if hasattr(parent_window, 'update_rvr_button'):
-        herald_url = (
-            parent_window.herald_url_edit.text().strip()
-            if hasattr(parent_window, 'herald_url_edit')
-            else ''
-        )
-
+        # Update tooltips for RvR button based on state
         if is_validation_running:
-            parent_window.update_rvr_button.setEnabled(False)
             parent_window.update_rvr_button.setToolTip(validation_tooltip)
-        elif not herald_url or parent_window.herald_scraping_in_progress:
-            parent_window.update_rvr_button.setEnabled(False)
-            if not herald_url:
-                parent_window.update_rvr_button.setToolTip(
-                    lang.get(
-                        "herald_url.tooltip_please_configure",
-                        default="Please configure Herald URL first"
-                    )
+        elif not herald_url:
+            parent_window.update_rvr_button.setToolTip(
+                lang.get(
+                    "herald_url.tooltip_please_configure",
+                    default="Please configure Herald URL first"
                 )
+            )
         else:
-            parent_window.update_rvr_button.setEnabled(True)
             parent_window.update_rvr_button.setToolTip(
                 lang.get("update_rvr_pvp_tooltip")
             )

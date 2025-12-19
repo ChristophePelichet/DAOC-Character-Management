@@ -63,6 +63,10 @@ from UI.ui_message_helper import (
     msg_show_success, msg_show_error, msg_show_warning, 
     msg_show_confirmation, msg_show_info_with_details
 )
+from UI.ui_state_manager import (
+    ui_state_set_herald_buttons, ui_state_set_armor_buttons,
+    ui_state_on_selection_changed
+)
 
 # Get CHARACTER logger
 logger_char = get_logger(LOGGER_CHARACTER)
@@ -568,16 +572,18 @@ class CharacterSheetWindow(QDialog):
         herald_url = self.character_data.get('url', '').strip()
         herald_validation_done = self._is_herald_validation_done()
         
-        if not herald_url:
-            self.update_rvr_button.setEnabled(False)
-            self.update_rvr_button.setToolTip(lang.get("character_sheet.labels.no_herald_url"))
-        elif not herald_validation_done:
-            self.update_rvr_button.setEnabled(False)
-            self.update_rvr_button.setToolTip(lang.get("character_sheet.labels.herald_validation_pending"))
-            # Subscribe to validation end signal to reactivate the button
-            if hasattr(self.parent_app, 'ui_manager') and hasattr(self.parent_app.ui_manager, 'eden_status_thread'):
-                thread = self.parent_app.ui_manager.eden_status_thread
-                if thread:
+        ui_state_set_herald_buttons(
+            self,
+            character_selected=True,
+            herald_url=herald_url,
+            scraping_active=False,
+            validation_active=not herald_validation_done
+        )
+        
+        # Subscribe to validation end signal to reactivate the button
+        if hasattr(self.parent_app, 'ui_manager') and hasattr(self.parent_app.ui_manager, 'eden_status_thread'):
+            thread = self.parent_app.ui_manager.eden_status_thread
+            if thread:
                     thread.status_updated.connect(self._on_herald_validation_finished)
         
         buttons_layout.addWidget(self.update_rvr_button)
@@ -1046,9 +1052,13 @@ class CharacterSheetWindow(QDialog):
         """Called when Herald startup validation completes"""
         # Re-enable button if Herald accessible AND a URL is configured
         herald_url = self.character_data.get('url', '').strip()
-        if accessible and herald_url:
-            self.update_rvr_button.setEnabled(True)
-            self.update_rvr_button.setToolTip(lang.get("update_rvr_pvp_tooltip"))
+        ui_state_set_herald_buttons(
+            self,
+            character_selected=True,
+            herald_url=herald_url,
+            scraping_active=False,
+            validation_active=False
+        )
     
     def show_stats_info(self):
         """Display an information window about statistics"""
@@ -1104,9 +1114,15 @@ class CharacterSheetWindow(QDialog):
         # Stop thread cleanly
         self._stop_stats_thread()
         
-        # Re-enable button
-        if not self.herald_scraping_in_progress:
-            self.update_rvr_button.setEnabled(True)
+        # Re-enable button using state manager
+        herald_url = self.character_data.get('url', '').strip()
+        ui_state_set_herald_buttons(
+            self,
+            character_selected=True,
+            herald_url=herald_url,
+            scraping_active=False,
+            validation_active=False
+        )
     
     def _stop_stats_thread(self):
         """✅ Pattern 2 + 3: Stop stats thread with complete cleanup"""
@@ -1272,9 +1288,16 @@ class CharacterSheetWindow(QDialog):
             
             QMessageBox.critical(self, lang.get("character_sheet.messages.stats_fetch_error_title"), error_msg)
         
-        # Réactiver le bouton
+        # Réactiver le bouton avec state manager
         if not self.herald_scraping_in_progress:
-            self.update_rvr_button.setEnabled(True)
+            herald_url = self.character_data.get('url', '').strip()
+            ui_state_set_herald_buttons(
+                self,
+                character_selected=True,
+                herald_url=herald_url,
+                scraping_active=False,
+                validation_active=False
+            )
     
     def _on_stats_failed(self, error_message):
         """Called in case of complete update failure"""
@@ -1293,9 +1316,16 @@ class CharacterSheetWindow(QDialog):
             f"{lang.get('character_sheet.messages.stats_fetch_failed')}\n{error_message}"
         )
         
-        # Re-enable button
+        # Re-enable buttons with state manager
         if not self.herald_scraping_in_progress:
-            self.update_rvr_button.setEnabled(True)
+            herald_url = self.character_data.get('url', '').strip()
+            ui_state_set_herald_buttons(
+                self,
+                character_selected=True,
+                herald_url=herald_url,
+                scraping_active=False,
+                validation_active=False
+            )
         
         log_with_action(logger_char, "error", f"Stats update error: {error_message}", action="ERROR")
     
@@ -1353,12 +1383,16 @@ class CharacterSheetWindow(QDialog):
         # Stop thread cleanly
         self._stop_char_update_thread()
         
-        # Re-enable buttons
+        # Re-enable buttons using state manager
         self.herald_scraping_in_progress = False
-        self.update_herald_button.setEnabled(True)
-        self.open_herald_button.setEnabled(True)
-        if not self.herald_scraping_in_progress:
-            self.update_rvr_button.setEnabled(True)
+        herald_url = self.character_data.get('url', '').strip()
+        ui_state_set_herald_buttons(
+            self,
+            character_selected=True,
+            herald_url=herald_url,
+            scraping_active=False,
+            validation_active=False
+        )
     
     def _stop_char_update_thread(self):
         """✅ Pattern 2 + 3: Stop character update thread with complete cleanup"""
@@ -1585,11 +1619,14 @@ class CharacterSheetWindow(QDialog):
                 self._stop_char_update_thread()
             
             # Always re-enable all buttons, even in case of error or early return
-            herald_url = self.herald_url_edit.text().strip()
-            
-            self.update_herald_button.setEnabled(bool(herald_url))
-            self.open_herald_button.setEnabled(bool(herald_url))
-            self.update_rvr_button.setEnabled(bool(herald_url))
+            herald_url = self.character_data.get('url', '').strip()
+            ui_state_set_herald_buttons(
+                self,
+                character_selected=True,
+                herald_url=herald_url,
+                scraping_active=False,
+                validation_active=False
+            )
             
             # Force visual update
             QApplication.processEvents()
@@ -2518,6 +2555,9 @@ class ArmorManagementDialog(QDialog):
         Supports:
         - Zenkcraft format (default)
         - Loki format (Slot (Item):)
+        
+        Returns:
+            tuple: (formatted_content: str, items_without_price: list)
         """
         from Functions.template_parser import template_parse
         return template_parse(content, self.realm, self.template_manager, self.db_manager)
@@ -2529,16 +2569,27 @@ class ArmorManagementDialog(QDialog):
         if not selected_items:
             self.preview_area.clear()
             self.preview_area.setPlaceholderText(lang.get("armoury_dialog.preview.no_selection"))
-            self.preview_download_button.setEnabled(False)
-            self.search_prices_button.setEnabled(False)
+            ui_state_set_armor_buttons(
+                self,
+                character_selected=False,
+                file_selected=False,
+                items_without_price=False,
+                db_manager=self.db_manager
+            )
             return
         
         # Get filename from the first column of selected row
         row = selected_items[0].row()
         filename = self.table.item(row, 0).text()
         
-        # Enable download button
-        self.preview_download_button.setEnabled(True)
+        # Update button states
+        ui_state_set_armor_buttons(
+            self,
+            character_selected=True,
+            file_selected=True,
+            items_without_price=False,
+            db_manager=self.db_manager
+        )
         
         try:
             # Get file path using TemplateManager
@@ -2553,7 +2604,12 @@ class ArmorManagementDialog(QDialog):
                 content = f.read()
             
             # Parse and format Zenkcraft template
-            formatted_content = self.parse_zenkcraft_template(content, self.season)
+            # Returns tuple: (formatted_content, items_without_price)
+            parse_result = self.parse_zenkcraft_template(content, self.season)
+            formatted_content, items_without_price = parse_result
+            
+            # Store items_without_price for search button state
+            self.items_without_price = items_without_price
             
             # Convert to HTML with color support
             import re
@@ -2578,13 +2634,22 @@ class ArmorManagementDialog(QDialog):
             # Display formatted content
             self.preview_area.setHtml(html_content)
             
-            # Enable/disable search button based on items_without_price
-            if hasattr(self, 'items_without_price') and self.items_without_price:
-                self.search_prices_button.setEnabled(True)
-                self.search_prices_button.setText(f"🔍 Search Prices ({len(self.items_without_price)} items)")
+            # Update search button based on items_without_price
+            has_items_without_price = bool(self.items_without_price)
+            ui_state_set_armor_buttons(
+                self,
+                character_selected=True,
+                file_selected=True,
+                items_without_price=has_items_without_price,
+                db_manager=self.db_manager
+            )
+            
+            if has_items_without_price:
+                button_text = lang.get("armoury_dialog.buttons.search_missing_prices", default="Search Missing Prices")
+                self.search_prices_button.setText(f"🔍 {button_text} ({len(self.items_without_price)} items)")
             else:
-                self.search_prices_button.setEnabled(False)
-                self.search_prices_button.setText("🔍 Search Missing Prices")
+                button_text = lang.get("armoury_dialog.buttons.search_missing_prices", default="Search Missing Prices")
+                self.search_prices_button.setText(f"🔍 {button_text}")
                 
         except Exception as e:
             logging.error(f"Erreur lors de la prévisualisation : {e}")
@@ -3075,7 +3140,7 @@ class CookieManagerDialog(QDialog):
             self.details_label.setText(
                 lang.get("cookie_manager.details_need_import")
             )
-            self.delete_button.setEnabled(False)
+            ui_state_on_selection_changed(self, selection_count=0, is_valid=False, enable_delete=False)
             
         elif info.get('error'):
             # Erreur de lecture
@@ -3083,7 +3148,7 @@ class CookieManagerDialog(QDialog):
             self.status_label.setStyleSheet("color: orange;")
             self.expiry_label.setText("")
             self.details_label.setText(f"Erreur: {info['error']}")
-            self.delete_button.setEnabled(True)
+            ui_state_on_selection_changed(self, selection_count=1, is_valid=True, enable_delete=True)
             
         elif not info['is_valid']:
             # Expired cookies
@@ -3097,7 +3162,7 @@ class CookieManagerDialog(QDialog):
             details += lang.get("cookie_manager.details_need_new")
             
             self.details_label.setText(details)
-            self.delete_button.setEnabled(True)
+            ui_state_on_selection_changed(self, selection_count=1, is_valid=True, enable_delete=True)
             
         else:
             # Cookies valides
@@ -3138,7 +3203,7 @@ class CookieManagerDialog(QDialog):
             details += lang.get("cookie_manager.file_location", path=info['file_path'])
             
             self.details_label.setText(details)
-            self.delete_button.setEnabled(True)
+            ui_state_on_selection_changed(self, selection_count=1, is_valid=True, enable_delete=True)
         
         # Reset browser label (will be updated after test/generation)
         if not (info and info.get('is_valid')):

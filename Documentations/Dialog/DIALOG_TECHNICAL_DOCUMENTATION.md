@@ -12,15 +12,16 @@
 
 1. [Overview](#overview)
 2. [Message Helper System](#message-helper-system)
-3. [Progress Dialog System](#progress-dialog-system)
-4. [ProgressStep Class](#progressstep-class)
-5. [StepConfiguration Class](#stepconfiguration-class)
-6. [ProgressStepsDialog Class](#progressstepsdialog-class)
-7. [Worker Thread Pattern](#worker-thread-pattern)
-8. [Thread Safety Patterns](#thread-safety-patterns)
-9. [Implemented Dialogs](#implemented-dialogs)
-10. [Multilingual Support](#multilingual-support)
-11. [Performance Considerations](#performance-considerations)
+3. [State Management System](#state-management-system) ⭐ NEW - Phase 13
+4. [Progress Dialog System](#progress-dialog-system)
+5. [ProgressStep Class](#progressstep-class)
+6. [StepConfiguration Class](#stepconfiguration-class)
+7. [ProgressStepsDialog Class](#progressstepsdialog-class)
+8. [Worker Thread Pattern](#worker-thread-pattern)
+9. [Thread Safety Patterns](#thread-safety-patterns)
+10. [Implemented Dialogs](#implemented-dialogs)
+11. [Multilingual Support](#multilingual-support)
+12. [Performance Considerations](#performance-considerations)
 
 ---
 
@@ -237,6 +238,226 @@ if msg_show_confirmation(
 - Phase 13: UI State Manager
 - Phase 14: UI Validation Helper
 - Phase 15: UI File Dialog Wrapper
+
+---
+
+## State Management System
+
+### Phase 13: UI State Manager Extraction
+
+**Module**: `UI/ui_state_manager.py` (v0.109 Phase 13)  
+**Purpose**: Centralize button and UI element state management  
+**Status**: ✅ COMPLETE - 5 state management functions extracted
+
+### Design Philosophy
+
+**Problem**: 20+ scattered `.setEnabled()` calls across dialogs.py, making state dependencies unclear
+
+**Solution**: Extract common state patterns into reusable functions with clear intent and dependencies
+
+**Benefit**: Single source of truth for button states, easier to test, reduced complexity
+
+### Functions Provided
+
+#### 1. `ui_state_set_herald_buttons(parent, character_selected, herald_url, scraping_active, validation_active)`
+Manages Herald update button states based on character and scraping status.
+
+```python
+ui_state_set_herald_buttons(
+    self,
+    character_selected=True,
+    herald_url="https://herald.daocplayers.com/...",
+    scraping_active=False,
+    validation_active=False
+)
+```
+
+**Buttons Controlled**:
+- `update_herald_button`
+- `open_herald_button`
+- `update_rvr_button`
+
+**State Logic**:
+- Enabled if: character selected AND herald URL provided AND no operations active
+- Disabled if: no character OR no URL OR scraping/validation active
+
+#### 2. `ui_state_set_armor_buttons(parent, character_selected, file_selected, items_without_price, db_manager=None)`
+Manages armor preview and search button states with database mode validation.
+
+```python
+ui_state_set_armor_buttons(
+    self,
+    character_selected=True,
+    file_selected=True,
+    items_without_price=True,
+    db_manager=self.db_manager
+)
+```
+
+**Parameters**:
+- `parent`: Parent widget containing armor buttons
+- `character_selected`: True if character selected
+- `file_selected`: True if armor file loaded
+- `items_without_price`: True if items missing prices
+- `db_manager`: ItemsDatabaseManager instance (optional) - validates database mode
+
+**Buttons Controlled**:
+- `preview_download_button`
+- `search_prices_button`
+
+**State Logic**:
+- preview_download_button: enabled if character selected AND file loaded
+- search_prices_button: enabled if file loaded AND items without prices AND personal database active
+- If database is embedded (read-only), search button disabled with tooltip: "Enable personal database in Settings/Armory to add/update item prices."
+
+#### 3. `ui_state_set_stats_buttons(parent, character_selected, has_stats, scraping_active)`
+Manages character stats update button states.
+
+```python
+ui_state_set_stats_buttons(
+    self,
+    character_selected=True,
+    has_stats=True,
+    scraping_active=False
+)
+```
+
+**State Logic**:
+- Buttons enabled if: character selected AND has stats AND no scraping active
+- Buttons disabled during active scraping operations
+
+#### 4. `ui_state_set_dialog_buttons(parent, button_states)`
+Generic button state controller for setting multiple button states at once.
+
+```python
+ui_state_set_dialog_buttons(self, {
+    "delete_button": has_selection,
+    "edit_button": has_selection,
+    "save_button": is_valid_input,
+    "cancel_button": True
+})
+```
+
+**Parameters**:
+- `button_states`: Dictionary mapping button names to enabled state (bool)
+
+**Usage**: When multiple buttons need state updates in one call
+
+#### 5. `ui_state_on_selection_changed(parent, selection_count, is_valid, enable_delete, enable_edit, enable_export)`
+Unified handler for UI state changes when selection changes.
+
+```python
+ui_state_on_selection_changed(
+    self,
+    selection_count=1,
+    is_valid=True,
+    enable_delete=True,
+    enable_edit=True,
+    enable_export=False
+)
+```
+
+**Buttons Controlled** (if present):
+- `delete_button`
+- `edit_button`
+- `export_button`
+
+**State Logic**:
+- Delete: enabled if selection_count > 0 AND valid AND enable_delete
+- Edit: enabled if selection_count == 1 AND valid AND enable_edit
+- Export: enabled if selection_count > 0 AND valid AND enable_export
+
+### State Management Patterns
+
+| Pattern | Function | Use Case |
+|---------|----------|----------|
+| **Herald Operations** | `ui_state_set_herald_buttons()` | Enable/disable during character updates |
+| **File Operations** | `ui_state_set_armor_buttons()` | Manage preview/search buttons |
+| **Multi-Button Updates** | `ui_state_set_dialog_buttons()` | Generic state controller |
+| **Selection-Based States** | `ui_state_on_selection_changed()` | Handle list/table selection changes |
+| **Async Operations** | `ui_state_set_stats_buttons()` | Disable during scraping |
+
+### Integration Examples
+
+#### Example 1: Herald Validation Complete
+```python
+def _on_herald_validation_finished(self, accessible, message):
+    """Called when Herald validation completes"""
+    herald_url = self.character_data.get('url', '').strip()
+    ui_state_set_herald_buttons(
+        self,
+        character_selected=True,
+        herald_url=herald_url,
+        scraping_active=False,
+        validation_active=False
+    )
+```
+
+#### Example 2: File Selected in Armor Dialog
+```python
+def on_selection_changed(self):
+    """Updates buttons when file is selected"""
+    if not selected_items:
+        ui_state_set_armor_buttons(
+            self,
+            character_selected=False,
+            file_selected=False,
+            items_without_price=False
+        )
+        return
+    
+    ui_state_set_armor_buttons(
+        self,
+        character_selected=True,
+        file_selected=True,
+        items_without_price=has_items_without_price
+    )
+```
+
+#### Example 3: List Selection Changed
+```python
+def on_item_selection_changed(self):
+    """Handle cookie list selection"""
+    has_selection = bool(self.cookie_list.selectedItems())
+    ui_state_on_selection_changed(
+        self,
+        selection_count=1 if has_selection else 0,
+        is_valid=has_selection,
+        enable_delete=True
+    )
+```
+
+### Quality Standards
+
+✅ **PEP 8 Compliant**
+- Proper naming: `ui_state_{component}_{action}()`
+- Type hints on all parameters
+- Comprehensive docstrings
+
+✅ **Logging Integration**
+- All state changes logged at DEBUG level
+- Includes state reason in log message
+- Button name validation with warnings
+
+✅ **Safe Attributes**
+- Uses `hasattr()` to check for button existence
+- Won't crash if button not found in parent
+- Gracefully logs missing buttons
+
+✅ **Reusable**
+- No hardcoded button names (except patterns)
+- Flexible boolean parameters
+- Easy to extend for new buttons
+
+### Performance Considerations
+
+**State Updates**: O(n) where n = number of buttons affected (typically 1-4)
+
+**Logging Overhead**: Minimal (DEBUG level, conditional)
+
+**Memory Usage**: Negligible (no state caching, direct attribute access)
+
+**Best Practice**: Call state managers immediately after state change, not pre-emptively
 
 ---
 

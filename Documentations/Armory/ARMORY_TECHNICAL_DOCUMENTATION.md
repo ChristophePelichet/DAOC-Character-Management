@@ -1,9 +1,9 @@
 # 🛡️ Armory System - Technical Documentation
 
-**Version**: 3.1  
+**Version**: 3.2  
 **Date**: November 2025  
-**Last Updated**: December 19, 2025 (Item Model Viewer Module Integration - Phase 10)  
-**Component**: `UI/mass_import_monitor.py`, `UI/template_import_dialog.py`, `UI/dialogs.py`  
+**Last Updated**: December 19, 2025 (Search Button State Management with Database Mode Validation)  
+**Component**: `UI/dialogs.py`, `UI/ui_state_manager.py`, `Functions/items_database_manager.py`  
 **Related**: `Functions/items_scraper.py`, `Functions/items_parser.py`, `Functions/import_worker.py`, `Functions/build_items_database.py`, `Functions/template_manager.py`, `Functions/template_metadata.py`, `Functions/superadmin_tools.py`, `Functions/template_parser.py`, `Functions/armor_upload_handler.py`, `Functions/item_model_viewer.py`, `Tools/fix_currency_mapping.py`
 
 ---
@@ -965,6 +965,37 @@ if not currency and item.get('merchant_zone'):
 ```
 
 **Note:** All new items scraped automatically include normalized `merchant_currency` field. Fallback mapping only needed for legacy data or edge cases.
+
+### Search Button State Management
+
+**Feature:** Intelligent button enabling based on database configuration (v0.109+)
+
+**Implementation:**
+- Module: `UI/ui_state_manager.py` function `ui_state_set_armor_buttons()`
+- Database Check: `Functions/items_database_manager.py` method `is_personal_database()`
+
+**Button Behavior:**
+
+| State | Database Mode | Items Without Prices | Button State | Tooltip |
+|-------|---------------|----------------------|--------------|---------|
+| ✅ Enabled | Personal | Yes | **Active** | "Search online for items without price in database" |
+| ✅ Enabled | Personal | No | Disabled | (Default tooltip) |
+| ❌ Disabled | Embedded | Yes | **Disabled** | "Enable personal database in Settings/Armory to add/update item prices.\nPersonal database allows you to maintain your own price list." |
+| ❌ Disabled | Embedded | No | Disabled | (Default tooltip) |
+
+**Rationale:** 
+- Embedded database is read-only → Cannot add/update prices
+- Personal database is writable → Can perform price search and storage
+- Tooltip guides users to enable personal database in Settings
+
+**Update Trigger:**
+- Template file selection
+- Template parsing completion
+- UI state manager calls whenever:
+  - Character selection changes
+  - File selection changes
+  - Items without price list changes
+  - Database mode changes (via settings update)
 
 ---
 

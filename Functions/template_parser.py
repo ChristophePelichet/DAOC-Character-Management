@@ -260,7 +260,7 @@ def template_parse(
     template_manager=None,
     db_manager=None,
     metadata_path: Path = None,
-) -> str:
+) -> tuple:
     """
     Main template parser - detects format and delegates to specific parser.
 
@@ -276,7 +276,7 @@ def template_parse(
         metadata_path: Path to metadata.json file
 
     Returns:
-        str: Formatted template display with stats, equipment, prices
+        tuple: (formatted_content: str, items_without_price: list)
     """
     format_type = template_detect_format(content)
 
@@ -768,7 +768,7 @@ def template_parse_loki(
                 output.append(f"  {currency_str} {total_str}")
             output.append("")
 
-    return "\n".join(output)
+    return "\n".join(output), items_without_price
 
 
 def template_parse_zenkcraft(
@@ -1386,4 +1386,4 @@ def template_parse_zenkcraft(
                 output.append(f"  {currency_str} {total_str}")
             output.append("")
 
-    return "\n".join(output)
+    return "\n".join(output), items_without_price

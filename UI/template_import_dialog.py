@@ -6,14 +6,14 @@ Version refactorisée avec contexte de personnage
 from pathlib import Path
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QLabel,
-    QFileDialog, QGroupBox, QLineEdit, QComboBox, QMessageBox,
-    QWidget, QFormLayout
+    QGroupBox, QLineEdit, QComboBox, QMessageBox,
+    QFormLayout
 )
 from PySide6.QtCore import Qt, Signal
 
 from Functions.language_manager import lang
 from Functions.template_manager import TemplateManager
-from Functions.template_metadata import normalize_description
+from UI.ui_file_dialogs import dialog_open_template_file
 from UI.widgets.tag_selector import TagSelector
 
 
@@ -197,12 +197,7 @@ class TemplateImportDialog(QDialog):
     
     def _browse_file(self):
         """Browse for template file"""
-        file_path, _ = QFileDialog.getOpenFileName(
-            self,
-            lang.get("template_import.select_file", default="Sélectionner un fichier template"),
-            "",
-            lang.get("template_import.file_filter", default="Fichiers template (*.txt);;Tous les fichiers (*.*)")
-        )
+        file_path = dialog_open_template_file(self)
         
         if file_path:
             self.selected_file = Path(file_path)

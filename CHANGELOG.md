@@ -69,12 +69,21 @@
     - Eliminates scattered QFileDialog calls and repeated setup code
     - Zero direct QFileDialog usage in dialogs.py
 
+16. **Phase 16**: Extended UI File Dialogs (`UI/ui_file_dialogs.py` - 280+ lines total)
+    - Extended wrapper module to handle QFileDialog calls in non-dialogs.py UI files
+    - 5 additional wrapper functions: open template file, select multiple files, save report, open/save log files
+    - Refactored 4 UI files: template_import_dialog.py, settings_dialog.py, mass_import_monitor.py, debug_window.py
+    - Centralized 13 additional QFileDialog calls from other UI modules
+    - All file dialogs now use consistent lang.get() translation pattern
+    - Complete elimination of direct QFileDialog imports from UI layer (except ui_file_dialogs.py)
+
 **Refactoring Statistics**:
 - Total functions extracted: 60+
-- Total lines extracted: ~3700 lines
+- Total lines extracted: ~3850 lines
 - Thin wrappers in dialogs.py: ~180 lines
-- Net code reduction: ~3520 lines
+- Net code reduction: ~3670 lines
 - Modules created: 15 dedicated domain-specific modules
+- QFileDialog calls centralized: 18 (5 in dialogs.py + 13 in other UI files)
 
 **Quality Standards Applied**:
 - ✅ Domain-driven naming conventions for all modules and functions

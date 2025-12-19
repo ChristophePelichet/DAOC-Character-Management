@@ -148,3 +148,123 @@ def dialog_select_backup_path(
         title_key="backup_path_dialog_title",
         initial_dir=current_path
     )
+
+
+def dialog_open_template_file(parent) -> str:
+    """
+    Open template file selection dialog.
+
+    Wrapper for template file selection with appropriate title and filters.
+
+    Parameters:
+        parent: Parent widget
+
+    Returns:
+        str: Selected file path, empty string if cancelled
+    """
+    return dialog_open_file(
+        parent,
+        title_key="template_import.select_file",
+        filter_key="template_import.file_filter"
+    )
+
+
+def dialog_select_multiple_files(
+    parent,
+    title_key: str,
+    filter_key: str = "",
+    initial_dir: str = ""
+) -> list:
+    """
+    Open multiple file selection dialog.
+
+    Allows user to select multiple files at once.
+
+    Parameters:
+        parent: Parent widget
+        title_key: Translation key for dialog title
+        filter_key: Translation key for file filter (optional)
+        initial_dir: Initial directory path (optional)
+
+    Returns:
+        list: List of selected file paths, empty list if cancelled
+    """
+    title = lang.get(title_key)
+    file_filter = lang.get(filter_key) if filter_key else lang.get("all_files")
+
+    files, _ = QFileDialog.getOpenFileNames(
+        parent,
+        title,
+        initial_dir,
+        file_filter
+    )
+
+    return files if files else []
+
+
+def dialog_save_report_file(
+    parent,
+    default_filename: str = ""
+) -> str:
+    """
+    Open save report file dialog.
+
+    Wrapper for saving export/report files.
+
+    Parameters:
+        parent: Parent widget
+        default_filename: Default filename (suggestion)
+
+    Returns:
+        str: Selected save path, empty string if cancelled
+    """
+    return dialog_save_file(
+        parent,
+        title_key="export_file_dialog_title",
+        default_filename=default_filename,
+        filter_key="all_files"
+    )
+
+
+def dialog_open_log_file(parent) -> str:
+    """
+    Open log file selection dialog.
+
+    Wrapper for log file selection with appropriate title.
+
+    Parameters:
+        parent: Parent widget
+
+    Returns:
+        str: Selected file path, empty string if cancelled
+    """
+    return dialog_open_file(
+        parent,
+        title_key="select_log_file",
+        filter_key="log_files"
+    )
+
+
+def dialog_save_log_file(
+    parent,
+    default_filename: str = ""
+) -> str:
+    """
+    Open save log file dialog.
+
+    Wrapper for exporting log files.
+
+    Parameters:
+        parent: Parent widget
+        default_filename: Default filename (suggestion)
+
+    Returns:
+        str: Selected save path, empty string if cancelled
+    """
+    return dialog_save_file(
+        parent,
+        title_key="export_log_file_dialog_title",
+        default_filename=default_filename,
+        filter_key="log_files"
+    )
+

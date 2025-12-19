@@ -1232,6 +1232,112 @@ class EdenStatusThread(QThread):
 **New Approach** (flag-based):
 - Button re-enable delay: IMMEDIATE with result ✅
 
+#### Herald URL Validation (Phase 8)
+
+**Module**: `Functions/herald_url_validator.py`
+
+**Purpose**: Handle real-time Herald URL validation and browser interaction
+
+**Functions**:
+
+##### 1. herald_url_on_text_changed()
+**Signature**: `herald_url_on_text_changed(parent_window, text: str) -> None`
+
+**Purpose**: Validate Herald URL field and update button states in real-time
+
+**Behavior**:
+- Called every time user types in the Herald URL field
+- Checks if Herald scraping is active (return if true)
+- Enables `update_rvr_button` if URL is valid (non-empty)
+- Sets tooltip using `lang.get()` for translations
+
+**Integration Point**:
+```python
+# In CharacterSheetWindow.__init__
+self.herald_url_edit.textChanged.connect(
+    lambda text: herald_url_on_text_changed(self, text)
+)
+```
+
+##### 2. herald_url_open_url()
+**Signature**: `herald_url_open_url(parent_window) -> None`
+
+**Purpose**: Open Herald URL in browser with authentication cookies
+
+**Behavior**:
+- Validates URL is not empty (shows warning if missing)
+- Adds protocol (`https://`) if not present
+- Launches browser in separate thread to prevent UI blocking
+- Uses `CookieManager` for authenticated session
+- Shows error dialog if browser launch fails
+
+**Error Handling**:
+- Missing URL: Warning dialog with `lang.get()`
+- Launch failure: Critical dialog with error message
+- Thread errors: Logged but not raised (thread-safe)
+
+**Integration Point**:
+```python
+# In CharacterSheetWindow
+self.open_herald_button.clicked.connect(lambda: herald_url_open_url(self))
+```
+
+##### 3. _herald_url_open_in_thread()
+**Signature**: `_herald_url_open_in_thread(url: str) -> None`
+
+**Purpose**: Internal worker function for opening URL in separate thread
+
+**Behavior**:
+- Runs in daemon thread (non-blocking)
+- Initializes `CookieManager`
+- Calls `open_url_with_cookies_subprocess()`
+- Logs errors without raising exceptions (thread-safe)
+
+**Error Handling**:
+- Browser errors: Logged as warning
+- Cookie errors: Logged as error
+- Never raises exceptions (safe for background thread)
+
+##### 4. herald_url_update_button_states()
+**Signature**: `herald_url_update_button_states(parent_window) -> None`
+
+**Purpose**: Manage button enable/disable states based on validation and scraping
+
+**Behavior**:
+- Checks if Eden validation is running
+- Disables buttons if validation in progress
+- Disables `update_rvr_button` if no URL configured
+- Disables buttons if Herald scraping is active
+- Sets appropriate tooltips for each state
+
+**State Matrix**:
+| Validation | URL | Scraping | Update Herald | Update RvR |
+|------------|-----|----------|---------------|-----------|
+| Running | - | - | Disabled | Disabled |
+| Done | No | - | Enabled | Disabled |
+| Done | Yes | No | Enabled | Enabled |
+| Done | Yes | Yes | Enabled | Disabled |
+
+**Integration Point**:
+```python
+# Called from multiple places:
+# 1. After Eden validation completes
+# 2. When Herald URL changes
+# 3. Before/after Herald scraping
+# 4. When Herald scraping flag changes
+```
+
+**Initialization**: `Functions/herald_url_validator.py` (236 lines)
+
+**Quality Standards**:
+- ✅ All strings use `lang.get()` for i18n
+- ✅ No hardcoded text in English or French
+- ✅ All comments in English
+- ✅ Type hints for all parameters
+- ✅ Comprehensive docstrings with examples
+- ✅ Proper error handling with logging
+- ✅ Thread-safe execution
+
 ---
 
 ## Error Handling

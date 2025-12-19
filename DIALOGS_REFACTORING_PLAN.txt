@@ -3,7 +3,7 @@ DIALOGS.PY REFACTORING PLAN
 ================================================================================
 File: UI/dialogs.py
 Date: 13 December 2025
-Updated: 19 December 2025 (Phase 1-6 Complete - v0.109 Refactoring Merge)
+Updated: 19 December 2025 (Phase 1-8 Complete - v0.109 Refactoring Merge)
 Purpose: Extract functions to dedicated modules for better maintainability
 ================================================================================
 
@@ -294,24 +294,77 @@ Status: READY FOR PRODUCTION - MERGE TO DIALOGS-CLEANUP
 
 ---
 
-FUTURE PHASES (NOT STARTED)
+✅ PHASE 8: HERALD URL VALIDATION EXTRACTION (COMPLETED - v0.109)
 ================================================================================
+Target File: Functions/herald_url_validator.py (236 lines)
+Extracted: 4 functions from CharacterSheetWindow class
+Date Completed: 19 December 2025
+Branch: refactor/v0.109-herald-url-validation
 
-PHASE 8: HERALD URL VALIDATION (Medium Priority)
-================================================================================
-================================================================================
-Current Location: CharacterSheetWindow class
-Target File: Functions/herald_url_validator.py
-Naming Convention: herald_url_{action}_{object}
+Extracted Functions:
+1. ✅ herald_url_on_text_changed(parent_window, text)
+   - Validate Herald URL field and update button states
+   - Enables/disables update_rvr_button based on URL validity
+   - Checks if Herald scraping is in progress (return if true)
+   - Sets appropriate tooltips via lang.get()
+   - Thin wrapper: 2 lines in dialogs.py
 
-Functions to Extract:
-1. on_herald_url_changed() - Validate Herald URL format and update button states
-2. _update_herald_buttons_state() - Enable/disable Herald buttons based on connection state
-3. open_herald_url() - Open Herald URL in browser
+2. ✅ herald_url_open_url(parent_window)
+   - Open Herald URL in browser with authentication cookies
+   - Validates URL is not empty (shows warning if missing)
+   - Adds protocol (https://) if not present
+   - Launches browser in separate thread to prevent UI blocking
+   - Handles errors with QMessageBox
+   - Thin wrapper: 1 line in dialogs.py
+
+3. ✅ _herald_url_open_in_thread(url)
+   - Internal: Open Herald URL with cookies in separate thread
+   - Uses CookieManager for authenticated session
+   - Logs errors without raising exceptions (thread-safe)
+   - Daemon thread execution
+
+4. ✅ herald_url_update_button_states(parent_window)
+   - Update Herald button states based on validation and scraping status
+   - Checks if Eden validation is running
+   - Disables buttons if validation in progress or scraping active
+   - Updates tooltips based on state
+   - State matrix: validation/URL/scraping combinations
+   - Thin wrapper: 1 line in dialogs.py
+
+Quality Metrics:
+- ✅ PEP 8 compliant (ruff checks: 0 errors)
+- ✅ Type hints complete for all parameters
+- ✅ Comprehensive docstrings with examples and process flow
+- ✅ No hardcoded strings (all messages use lang.get() with defaults)
+- ✅ No French comments (100% English docstrings and comments)
+- ✅ Error handling robust (validation, UI feedback, logging)
+- ✅ Thread-safe execution (no race conditions)
+- ✅ Syntax validation: PASSED
+
+Code Structure:
+- Created herald_url_validator.py: ~236 lines
+- Updated dialogs.py: ~4 lines of thin wrappers
+- Removed from dialogs.py: ~126 lines of business logic
+- Net result: ~122 lines saved, improved modularity
+
+Integration Points:
+- herald_url_on_text_changed(): Called on herald_url_edit.textChanged signal
+- herald_url_open_url(): Called on open_herald_button.clicked signal
+- herald_url_update_button_states(): Called from multiple places (validation, scraping state changes)
+
+Documentation:
+- Added to EDEN_TECHNICAL_DOCUMENTATION.md under "UI Integration" section
+- Complete function signatures, behavior, error handling, integration points
+- State matrix for button management
+
+Status: READY FOR PRODUCTION - MERGE TO DIALOGS-CLEANUP
 
 ---
 
-GROUP 9: ARMOR UPLOAD & PREVIEW (Medium Priority)
+FUTURE PHASES (NOT STARTED)
+================================================================================
+
+PHASE 9: ARMOR UPLOAD & PREVIEW (Medium Priority)
 Current Location: ArmorManagementDialog class
 Target File: Functions/armor_upload_handler.py
 Naming Convention: armor_{action}_{object}
@@ -348,8 +401,8 @@ Functions to Extract:
 EXTRACTION SUMMARY
 ================================================================================
 
-Total Phases: 11 (7 started, 4 future)
-Started Phases: 7
+Total Phases: 11 (8 started, 3 future)
+Started Phases: 8
 - Phase 1: ✅ COMPLETE (Template Parser - 1392 lines)
 - Phase 2: ✅ COMPLETE (Item Price Manager - 205 lines)
 - Phase 3: ✅ COMPLETE (Ruff Cleanup - 22 errors fixed)
@@ -357,19 +410,19 @@ Started Phases: 7
 - Phase 5: ✅ COMPLETE (Character RR Calculator - 209 lines)
 - Phase 6: ✅ COMPLETE (Character Herald Scrapper - 422 lines)
 - Phase 7: ✅ COMPLETE (Character Banner Management - 141 lines)
+- Phase 8: ✅ COMPLETE (Herald URL Validation - 236 lines)
 
-Future Phases: 4
-- Phase 8: Herald URL Validation (Medium Priority)
+Future Phases: 3
 - Phase 9: Armor Upload & Preview (Medium Priority)
 - Phase 10: Item Model Viewer (Low Priority)
 - Phase 11: Achievements Display (Low Priority)
 
-Estimated Removed from dialogs.py: ~1804 lines (1750 + 54 from Phase 7)
-Estimated Moved to Dedicated Modules: ~2647 lines (2500 + 141 from Phase 7 + 6 missing)
+Estimated Removed from dialogs.py: ~1930 lines (1804 + 126 from Phase 8)
+Estimated Moved to Dedicated Modules: ~2883 lines (2647 + 236 from Phase 8)
 Net Result: Better separation of concerns, improved code reusability, consistent naming patterns
 
 
-GROUP 11: CHARACTER RENAMING (Low Priority)
+GROUP 12: CHARACTER RENAMING (Low Priority)
 ================================================================================
 Current Location: CharacterSheetWindow class
 Target File: Functions/character_rename_handler.py
@@ -382,7 +435,7 @@ Naming Convention: character_{action}_{object}
     Notes: Validates name, updates JSON file
 
 
-GROUP 12: WORKER THREAD MANAGEMENT (Medium Priority)
+GROUP 13: WORKER THREAD MANAGEMENT (Medium Priority)
 ================================================================================
 Current Location: Various classes
 Target File: Functions/herald_workers.py

@@ -174,7 +174,10 @@
         "clean_eden_button": "Clean Eden",
         "clean_eden_tooltip": "Delete all cookies and Chrome profile temporary files",
         "clean_cache_button": "Clean cache",
-        "clean_cache_tooltip": "Delete items cache from web searches"
+        "clean_cache_tooltip": "Delete items cache from web searches",
+        "open_folder_button": "Open folder",
+        "eden_storage_info": "Automatic storage in",
+        "item_cache_storage_info": "Automatic storage in"
     },
     "herald_buttons": {
         "validation_in_progress": "⏳ Eden validation in progress... Please wait"
@@ -293,17 +296,15 @@
             "move_folder_merge_question": "Do you want to merge the files?",
             "move_folder_delete_title": "Delete old folder?",
             "move_folder_delete_question": "The folder has been copied successfully. Do you want to delete the old folder?",
-            "theme_change_restart": "The theme has been changed. Please restart the application for the changes to take effect.",
-            "clean_eden_confirm_title": "Confirm Cleanup",
-            "clean_eden_confirm_message": "⚠️ This action will delete:\n\n• All Eden cookies\n• Complete Chrome profile (cache, history, session)\n\n📁 Folder: {path}\n\nYou will need to regenerate your cookies after this operation.\n\nContinue?",
+            "theme_change_restart": "The theme has been changed. Please restart the application for the changes to take effect."
+        },
+        "success_messages": {
             "clean_eden_success_title": "Cleanup Successful",
             "clean_eden_success_message": "✅ The Eden folder has been successfully cleaned.\n\nAll cookies and temporary files have been deleted.",
             "clean_eden_empty_title": "Empty folder",
             "clean_eden_empty_message": "ℹ️ The Eden folder is already empty or doesn't exist.",
             "clean_eden_error_title": "Error",
             "clean_eden_error_message": "❌ Cleaning error:\n\n{error}",
-            "clean_cache_confirm_title": "Confirm cleaning",
-            "clean_cache_confirm_message": "⚠️ This action will delete:\n\n• Items cache from web searches\n\n📁 Folder: {path}\n\nDatabase items won't be affected.\n\nContinue?",
             "clean_cache_success_title": "Cleaning successful",
             "clean_cache_success_message": "✅ Items cache has been cleaned.\n\nCache deleted.",
             "clean_cache_empty_title": "Empty folder",
@@ -536,6 +537,14 @@
             "select_log_folder": "Select Logs Folder",
             "select_armor_folder": "Select Armoury Folder",
             "select_cookies_folder": "Select Cookies Folder"
+        },
+        "herald": {
+            "config_cookies_group_title": "Cookies path",
+            "config_item_cache_group_title": "Items cache path",
+            "clean_eden_confirm_title": "Confirm cleanup",
+            "clean_eden_confirm_message": "⚠️ This action will delete:\n\n• All Eden cookies\n• Complete Chrome profile (cache, history, session)\n\n📁 Folder: {path}\n\nYou will need to regenerate your cookies after this operation.\n\nContinue?",
+            "clean_cache_confirm_title": "Confirm cleanup",
+            "clean_cache_confirm_message": "⚠️ This action will delete:\n\n• Items cache found via web search\n\n📁 Folder: {path}\n\nDatabase items will not be affected.\n\nContinue?"
         }
     },
     "tooltips": {

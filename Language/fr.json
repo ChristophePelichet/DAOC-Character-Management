@@ -174,7 +174,10 @@
         "clean_eden_button": "Nettoyer Eden",
         "clean_eden_tooltip": "Supprime tous les cookies et fichiers temporaires du profil Chrome",
         "clean_cache_button": "Nettoyer le cache",
-        "clean_cache_tooltip": "Supprime le cache des items trouvés via recherche web"
+        "clean_cache_tooltip": "Supprime le cache des items trouvés via recherche web",
+        "open_folder_button": "Ouvrir le dossier",
+        "eden_storage_info": "Stockage automatique dans",
+        "item_cache_storage_info": "Stockage automatique dans"
     },
     "herald_buttons": {
         "validation_in_progress": "⏳ Validation Eden en cours... Veuillez patienter"
@@ -293,23 +296,21 @@
             "move_folder_merge_question": "Voulez-vous fusionner les fichiers ?",
             "move_folder_delete_title": "Supprimer l'ancien dossier ?",
             "move_folder_delete_question": "Le dossier a été copié avec succès. Voulez-vous supprimer l'ancien dossier ?",
-            "theme_change_restart": "Le thème a été changé. Veuillez redémarrer l'application pour que les changements prennent effet.",
-            "clean_eden_confirm_title": "Confirmer le nettoyage",
-            "clean_eden_confirm_message": "⚠️ Cette action va supprimer :\n\n• Tous les cookies Eden\n• Le profil Chrome complet (cache, historique, session)\n\n📁 Dossier : {path}\n\nVous devrez régénérer vos cookies après cette opération.\n\nContinuer ?",
+            "theme_change_restart": "Le thème a été changé. Veuillez redémarrer l'application pour que les changements prennent effet."
+        },
+        "success_messages": {
             "clean_eden_success_title": "Nettoyage réussi",
             "clean_eden_success_message": "✅ Le dossier Eden a été nettoyé avec succès.\n\nTous les cookies et fichiers temporaires ont été supprimés.",
             "clean_eden_empty_title": "Dossier vide",
             "clean_eden_empty_message": "ℹ️ Le dossier Eden est déjà vide ou n'existe pas.",
             "clean_eden_error_title": "Erreur",
             "clean_eden_error_message": "❌ Erreur lors du nettoyage :\n\n{error}",
-            "clean_cache_confirm_title": "Confirmer le nettoyage",
-            "clean_cache_confirm_message": "⚠️ Cette action va supprimer :\n\n• Le cache des items trouvés via recherche web\n\n📁 Dossier : {path}\n\nLes items de la base de données ne seront pas affectés.\n\nContinuer ?",
             "clean_cache_success_title": "Nettoyage réussi",
             "clean_cache_success_message": "✅ Le cache des items a été nettoyé.\n\nCache supprimé.",
             "clean_cache_empty_title": "Dossier vide",
             "clean_cache_empty_message": "ℹ️ Le cache est déjà vide ou n'existe pas.",
             "clean_cache_error_title": "Erreur",
-            "clean_cache_error_message": "❌ Erreur lors du nettoyage :\n\n{error}",
+            "clean_cache_error_message": "❌ Erreur lors du nettoyage :\n\n{error}"
             "config_cookies_group_title": "Chemin des cookies",
             "config_item_cache_group_title": "Chemin du cache des items"
         }
@@ -544,6 +545,14 @@
             "select_log_folder": "Sélectionner le dossier des logs",
             "select_armor_folder": "Sélectionner le dossier de l'armurerie",
             "select_cookies_folder": "Sélectionner le dossier des cookies"
+        },
+        "herald": {
+            "config_cookies_group_title": "Chemin des cookies",
+            "config_item_cache_group_title": "Chemin du cache des items",
+            "clean_eden_confirm_title": "Confirmer le nettoyage",
+            "clean_eden_confirm_message": "⚠️ Cette action va supprimer :\n\n• Tous les cookies Eden\n• Le profil Chrome complet (cache, historique, session)\n\n📁 Dossier : {path}\n\nVous devrez régénérer vos cookies après cette opération.\n\nContinuer ?",
+            "clean_cache_confirm_title": "Confirmer le nettoyage",
+            "clean_cache_confirm_message": "⚠️ Cette action va supprimer :\n\n• Le cache des items trouvés via recherche web\n\n📁 Dossier : {path}\n\nLes items de la base de données ne seront pas affectés.\n\nContinuer ?"
         }
     },
     "debug": {

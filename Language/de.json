@@ -174,7 +174,10 @@
         "clean_eden_button": "Eden bereinigen",
         "clean_eden_tooltip": "Alle Cookies und temporären Chrome-Profildateien löschen",
         "clean_cache_button": "Cache leeren",
-        "clean_cache_tooltip": "Items-Cache von Websuchen löschen"
+        "clean_cache_tooltip": "Items-Cache von Websuchen löschen",
+        "open_folder_button": "Ordner öffnen",
+        "eden_storage_info": "Automatische Speicherung in",
+        "item_cache_storage_info": "Automatische Speicherung in"
     },
     "herald_buttons": {
         "validation_in_progress": "⏳ Eden-Validierung läuft... Bitte warten"
@@ -293,23 +296,21 @@
             "move_folder_merge_question": "Möchten Sie die Dateien zusammenführen?",
             "move_folder_delete_title": "Alten Ordner löschen?",
             "move_folder_delete_question": "Der Ordner wurde erfolgreich kopiert. Möchten Sie den alten Ordner löschen?",
-            "theme_change_restart": "Das Theme wurde geändert. Bitte starten Sie die Anwendung neu, damit die Änderungen wirksam werden.",
-            "clean_eden_confirm_title": "Bereinigung bestätigen",
-            "clean_eden_confirm_message": "⚠️ Diese Aktion löscht:\n\n• Alle Eden-Cookies\n• Vollständiges Chrome-Profil (Cache, Verlauf, Sitzung)\n\n📁 Ordner: {path}\n\nSie müssen Ihre Cookies nach diesem Vorgang neu generieren.\n\nFortfahren?",
+            "theme_change_restart": "Das Theme wurde geändert. Bitte starten Sie die Anwendung neu, damit die Änderungen wirksam werden."
+        },
+        "success_messages": {
             "clean_eden_success_title": "Bereinigung erfolgreich",
             "clean_eden_success_message": "✅ Der Eden-Ordner wurde erfolgreich bereinigt.\n\nAlle Cookies und temporären Dateien wurden gelöscht.",
             "clean_eden_empty_title": "Leerer Ordner",
             "clean_eden_empty_message": "ℹ️ Der Eden-Ordner ist bereits leer oder existiert nicht.",
             "clean_eden_error_title": "Fehler",
             "clean_eden_error_message": "❌ Bereinigungs fehler:\n\n{error}",
-            "clean_cache_confirm_title": "Bereinigung bestätigen",
-            "clean_cache_confirm_message": "⚠️ Diese Aktion löscht:\n\n• Items-Cache von Websuchen\n\n📁 Ordner: {path}\n\nDatenbank-Items sind nicht betroffen.\n\nFortfahren?",
             "clean_cache_success_title": "Bereinigung erfolgreich",
             "clean_cache_success_message": "✅ Items-Cache wurde geleert.\n\nCache gelöscht.",
             "clean_cache_empty_title": "Leerer Ordner",
             "clean_cache_empty_message": "ℹ️ Der Cache ist bereits leer oder existiert nicht.",
             "clean_cache_error_title": "Fehler",
-            "clean_cache_error_message": "❌ Bereinigungs fehler:\n\n{error}",
+            "clean_cache_error_message": "❌ Bereinigungs fehler:\n\n{error}"
             "config_cookies_group_title": "Cookie-Pfad",
             "config_item_cache_group_title": "Items-Cache-Pfad"
         }
@@ -544,6 +545,14 @@
             "select_log_folder": "Logs-Ordner auswählen",
             "select_armor_folder": "Waffenkammer-Ordner auswählen",
             "select_cookies_folder": "Cookie-Ordner auswählen"
+        },
+        "herald": {
+            "config_cookies_group_title": "Cookies-Pfad",
+            "config_item_cache_group_title": "Element-Cache-Pfad",
+            "clean_eden_confirm_title": "Bereinigung bestätigen",
+            "clean_eden_confirm_message": "⚠️ Diese Aktion löscht:\n\n• Alle Eden-Cookies\n• Vollständiges Chrome-Profil (Cache, Verlauf, Sitzung)\n\n📁 Ordner: {path}\n\nSie müssen Ihre Cookies nach diesem Vorgang neu generieren.\n\nFortfahren?",
+            "clean_cache_confirm_title": "Bereinigung bestätigen",
+            "clean_cache_confirm_message": "⚠️ Diese Aktion löscht:\n\n• Element-Cache von Web-Suchen\n\n📁 Ordner: {path}\n\nDatenbankitems werden nicht beeinträchtigt.\n\nFortfahren?"
         }
     },
     "debug": {

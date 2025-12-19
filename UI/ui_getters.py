@@ -11,7 +11,7 @@ Functions:
     ui_get_selected_changes() - Get selected changes from a table widget
 """
 
-from PyQt5.QtCore import Qt
+from PySide6.QtCore import Qt
 
 
 def ui_get_visibility_config(checkboxes: dict) -> dict:

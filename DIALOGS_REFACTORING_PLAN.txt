@@ -1129,74 +1129,95 @@ Status: COMPLETED - READY FOR MERGE
 
 ---
 
-📋 PHASE 19: SIMPLE GETTERS & SETTERS EXTRACTION (IN PROGRESS - v0.109)
+📋 PHASE 19: SIMPLE GETTERS & SETTERS EXTRACTION (COMPLETED - v0.109)
 ================================================================================
-Target Files: Multiple UI modules (new dedicated modules)
+Target Files: UI/ui_getters.py, Functions/herald_ui_wrappers.py
 Priority: LOW
-Date Planned: December 2025
 Date Started: 19 December 2025
+Date Completed: 19 December 2025
 Branch: feature/v0.109-phase-19-simple-getters-extraction
 
 Objective:
-🔄 IN PROGRESS - Extract simple getter/setter utility functions from dialogs.py
-🔄 IN PROGRESS - Create dedicated modules for reusable UI utilities
-🔄 IN PROGRESS - Improve code organization for simple data retrieval functions
+✅ COMPLETED - Extract simple getter/setter utility functions from dialogs.py
+✅ COMPLETED - Create dedicated modules for reusable UI utilities
+✅ COMPLETED - Improve code organization for simple data retrieval functions
 
 Extracted Functions (4 total):
-1. ⏳ get_selected_category() [SearchResultsDialog]
-   - Location: dialogs.py lines ~6739-6747
-   - Lines: 4 code lines (ultra simple getter)
-   - Purpose: Get selected category from radio buttons
-   - Returns: str (category key)
-   - Target Module: TBD (UI getters module or dedicated)
-   - Thin wrapper: 2 lines in dialogs.py
-
-2. ⏳ update_rvr_stats() [CharacterSheetWindow]
-   - Location: dialogs.py lines ~1099-1102
-   - Lines: 3 code lines (ultra simple wrapper)
-   - Purpose: Update RvR statistics from Herald URL
-   - Returns: None (calls character_herald_update_rvr_stats)
-   - Target Module: TBD (UI update wrappers)
-   - Thin wrapper: 2 lines in dialogs.py
-
-3. ⏳ get_visibility_config() [SettingsDialog]
-   - Location: dialogs.py lines ~1771-1773
-   - Lines: 2 code lines (ultra simple dict comprehension)
+1. ✅ ui_get_visibility_config(checkboxes) [SettingsDialog]
+   - Location: dialogs.py lines ~1776-1778
+   - Lines: 1 code line (ultra simple dict comprehension)
    - Purpose: Return visibility state of all columns (checkboxes)
    - Returns: dict {key: bool}
-   - Target Module: TBD (UI getters module)
+   - Target Module: UI/ui_getters.py
    - Thin wrapper: 1 line in dialogs.py
+   - New module: 40 lines total
 
-4. ⏳ get_selected_changes() [ImportChangesReviewDialog]
-   - Location: dialogs.py lines ~5723-5738
-   - Lines: 13 code lines (simple table iteration)
+2. ✅ ui_get_selected_category(category_buttons) [SearchResultsDialog]
+   - Location: dialogs.py lines ~6739-6747
+   - Lines: 3 code lines (ultra simple getter)
+   - Purpose: Get selected category from radio buttons
+   - Returns: str (category key)
+   - Target Module: UI/ui_getters.py
+   - Thin wrapper: 1 line in dialogs.py
+   - Module lines: Included in UI/ui_getters.py
+
+3. ✅ ui_get_selected_changes(changes_table) [ImportChangesReviewDialog]
+   - Location: dialogs.py lines ~5728-5743
+   - Lines: 12 code lines (simple table iteration)
    - Purpose: Retrieve selected changes from changes table
    - Returns: dict {field: value_raw}
-   - Target Module: TBD (UI getters module or import utilities)
+   - Target Module: UI/ui_getters.py
+   - Thin wrapper: 1 line in dialogs.py
+   - Module lines: Included in UI/ui_getters.py
+
+4. ✅ herald_ui_update_rvr_stats(dialog, herald_url_edit) [CharacterSheetWindow]
+   - Location: dialogs.py lines ~1105-1107
+   - Lines: 2 code lines (ultra simple wrapper)
+   - Purpose: Update RvR statistics from Herald URL
+   - Returns: None (calls character_herald_update_rvr_stats)
+   - Target Module: Functions/herald_ui_wrappers.py
    - Thin wrapper: 2 lines in dialogs.py
+   - New module: 37 lines total
 
-Total Code Reduction Expected: ~22 lines from dialogs.py
-Architecture Decision Pending:
-- Option A: Single module UI/ui_getters.py for all 4 functions
-- Option B: Separate modules by domain (ui_getters.py, ui_updates.py, etc.)
-- Option C: Add to existing domain modules (character_*, herald_*, etc.)
+Total Code Reduction: ~18 lines from dialogs.py
+New Modules: 2 (UI/ui_getters.py: 119 lines, Functions/herald_ui_wrappers.py: 37 lines)
 
-Quality Standards - PENDING:
-⏳ PEP 8 compliance (awaiting implementation)
-⏳ Type hints (awaiting implementation)
-⏳ Docstrings: 100% English (awaiting implementation)
-⏳ Syntax validation (awaiting implementation)
-⏳ Import testing (awaiting implementation)
+Quality Standards - ALL MET:
+✅ PEP 8 compliant (ruff validation: 0 errors)
+✅ Type hints: Complete (all parameters annotated)
+✅ Docstrings: 100% English with comprehensive examples
+✅ No hardcoded strings (all use lang.get() for translations)
+✅ No French comments (all English documentation)
+✅ Proper error handling with try-except and logging
+✅ Syntax validation: PASSED
+✅ Import testing: PASSED
+✅ Pre-existing F401 errors fixed (character_herald_update_rvr_stats removed)
 
 Git Status:
-🔄 Branch: feature/v0.109-phase-19-simple-getters-extraction (created Dec 19, 2025)
-⏳ Implementation: IN PROGRESS
-⏳ Code extraction: PENDING
-⏳ Testing: PENDING
-⏳ Commit: PENDING
-⏳ Ready for merge: NOT YET
+✅ Branch: feature/v0.109-phase-19-simple-getters-extraction (created Dec 19, 2025)
+✅ Code extraction: COMPLETED
+✅ PEP 8 validation: PASSED (ruff 0 errors)
+✅ Import cleanup: COMPLETED
+✅ Ready for merge: YES
 
-Status: IN PROGRESS - AWAITING IMPLEMENTATION
+Architecture:
+- Module 1: UI/ui_getters.py (3 simple UI getter functions)
+  - ui_get_visibility_config() - Dict comprehension from checkboxes
+  - ui_get_selected_category() - Radio button selection getter
+  - ui_get_selected_changes() - Table widget iteration getter
+  - All functions are pure utilities with no side effects
+  
+- Module 2: Functions/herald_ui_wrappers.py (UI wrapper for Herald operations)
+  - herald_ui_update_rvr_stats() - Bridge between UI component and business logic
+  - Extracts URL from QLineEdit and passes to character_herald_update_rvr_stats()
+  - Separates UI concerns from business logic
+
+- Integration:
+  - All 4 methods in dialogs.py now act as thin 1-2 line wrappers
+  - Imports kept local to avoid circular dependencies
+  - Maintains backward compatibility with existing UI layer
+
+Status: COMPLETED - READY FOR MERGE
 
 ---
 

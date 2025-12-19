@@ -73,6 +73,15 @@ class ItemsDatabaseManager:
         
         logging.info("ItemsDatabaseManager initialized", extra={"action": "ITEMDB_INIT"})
 
+    def is_personal_database(self) -> bool:
+        """
+        Check if personal database is enabled
+        
+        Returns:
+            bool: True if personal database is active, False if using embedded database
+        """
+        return self.config_manager.config.get("armory", {}).get("use_personal_database", False)
+
     def get_active_database_path(self) -> Path:
         """
         Get path to the active database based on config
@@ -385,7 +394,7 @@ class ItemsDatabaseManager:
             self.config_manager.config["armory"]["last_internal_db_version"] = internal_db.get("version", "1.0")
             self.config_manager.save_config()
             
-            logging.info(f"Reset personal database from internal copy", extra={"action": "ITEMDB_RESET"})
+            logging.info("Reset personal database from internal copy", extra={"action": "ITEMDB_RESET"})
             return True, "Personal database reset successfully"
             
         except Exception as e:

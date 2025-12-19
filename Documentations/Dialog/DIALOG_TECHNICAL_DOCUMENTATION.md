@@ -1,26 +1,29 @@
 # 💬 Dialog System - Technical Documentation
 
-**Version**: 2.0  
+**Version**: 2.2  
 **Date**: November 2025  
-**Last Updated**: November 26, 2025  
-**Component**: `UI/progress_dialog_base.py`, `UI/dialogs.py`  
-**Related**: `UI/settings_dialog.py`, `UI/armory_import_dialog.py`, `UI/failed_items_review_dialog.py`, `UI/template_import_dialog.py`  
-**Branch**: 108_Imp_Armo
+**Last Updated**: December 19, 2025  
+**Component**: `UI/progress_dialog_base.py`, `UI/dialogs.py`, `UI/ui_message_helper.py`, `UI/ui_file_dialogs.py`  
+**Related**: `UI/settings_dialog.py`, `UI/armory_import_dialog.py`, `UI/failed_items_review_dialog.py`, `UI/template_import_dialog.py`, `Functions/character_actions_manager.py`  
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
 1. [Overview](#overview)
-2. [Progress Dialog System](#progress-dialog-system)
-3. [ProgressStep Class](#progressstep-class)
-4. [StepConfiguration Class](#stepconfiguration-class)
-5. [ProgressStepsDialog Class](#progressstepsdialog-class)
-6. [Worker Thread Pattern](#worker-thread-pattern)
-7. [Thread Safety Patterns](#thread-safety-patterns)
-8. [Implemented Dialogs](#implemented-dialogs)
-9. [Multilingual Support](#multilingual-support)
-10. [Performance Considerations](#performance-considerations)
+2. [Message Helper System](#message-helper-system)
+3. [State Management System](#state-management-system)
+4. [Validation Helper System](#validation-helper-system)
+5. [File Dialog Wrapper System](#file-dialog-wrapper-system)
+6. [Progress Dialog System](#progress-dialog-system)
+7. [ProgressStep Class](#progressstep-class)
+8. [StepConfiguration Class](#stepconfiguration-class)
+9. [ProgressStepsDialog Class](#progressstepsdialog-class)
+10. [Worker Thread Pattern](#worker-thread-pattern)
+11. [Thread Safety Patterns](#thread-safety-patterns)
+12. [Implemented Dialogs](#implemented-dialogs)
+13. [Multilingual Support](#multilingual-support)
+14. [Performance Considerations](#performance-considerations)
 
 ---
 
@@ -39,6 +42,925 @@ The Dialog System provides a unified, thread-safe, translatable framework for al
 - ✅ **Reusable configurations** for common operations
 - ✅ **Guaranteed resource cleanup**
 - ✅ **User-friendly progress tracking**
+
+---
+
+## Message Helper System
+
+### Phase 12: UI Message Helper Extraction
+
+**Module**: `UI/ui_message_helper.py` (v0.109 Phase 12)  
+**Purpose**: Centralize and standardize all QMessageBox calls across the application  
+**Status**: ✅ COMPLETE - 5 helper functions extracted
+
+### Design Philosophy
+
+**Problem**: 40+ repetitive `QMessageBox` calls scattered throughout `dialogs.py` and `character_actions_manager.py`  
+**Solution**: Extract common patterns into reusable helpers with automatic translation and logging  
+**Benefit**: Single source of truth for message display, consistency, easier maintenance
+
+### Functions Provided
+
+#### 1. `msg_show_success(parent, title_key, message_key, **kwargs)`
+Displays a success message with `QMessageBox.information()`
+
+```python
+msg_show_success(
+    self,
+    "titles.success",
+    "character_sheet.messages.info_update_success"
+)
+```
+
+- Automatically translates title and message via `lang.get()`
+- Supports dynamic parameters: `msg_show_success(..., level="10", rp=5000)`
+- Logs success event
+
+#### 2. `msg_show_error(parent, title_key, message_key, **kwargs)`
+Displays an error message with `QMessageBox.critical()`
+
+```python
+msg_show_error(
+    self,
+    "titles.error",
+    "character_sheet.messages.save_error",
+    error="File not found"
+)
+```
+
+- Supports plain text errors with "!" prefix: `msg_show_error(..., "!Plain text error")`
+- Automatically logs ERROR action
+- Uses default: "An error occurred"
+
+#### 3. `msg_show_warning(parent, title_key, message_key, **kwargs)`
+Displays a warning message with `QMessageBox.warning()`
+
+```python
+msg_show_warning(
+    self,
+    "titles.warning",
+    "messages.errors.char_name_empty"
+)
+```
+
+- Supports plain text warnings with "!" prefix: `msg_show_warning(..., "!Name cannot be empty")`
+- Automatically logs WARNING action
+- Uses default: "Warning"
+
+#### 4. `msg_show_confirmation(parent, title, message) -> bool`
+Displays a yes/no dialog and returns user's choice
+
+```python
+if msg_show_confirmation(self, "Delete Character?", "Are you sure?"):
+    # User clicked Yes
+    delete_character()
+```
+
+- Returns `True` if user clicked Yes, `False` otherwise
+- Default button is "No" for safety
+- Both parameters are plain text (not translated)
+
+#### 5. `msg_show_info_with_details(parent, title_key, details_text)`
+Displays informational message with formatted multi-line text
+
+```python
+msg_show_info_with_details(
+    self,
+    "stats_update_title",
+    "Tower Captures: 100\nKeep Captures: 50\nRelic Captures: 25"
+)
+```
+
+- Useful for displaying complex results with multiple stats
+- `details_text` is plain text with newlines
+- Supports HTML formatting if needed
+
+### Translation Support
+
+All functions use `lang.get()` for automatic translation:
+
+| Key Pattern | Type | Example |
+|---|---|---|
+| `titles.success` | System title | ✅ Success |
+| `titles.error` | System title | ❌ Error |
+| `titles.warning` | System title | ⚠️ Warning |
+| `messages.errors.*` | Messages | "Character name cannot be empty" |
+| `!Plain text` | Plain text (no translation) | Direct text bypass |
+
+### Plain Text Mode
+
+When you need to pass dynamic or non-translated text, use the "!" prefix:
+
+```python
+# Translated key
+msg_show_error(self, "titles.error", "messages.errors.char_name_empty")
+
+# Plain text (for dynamic content)
+msg_show_error(self, "titles.error", f"!Failed to save: {error_msg}")
+```
+
+### Logging Integration
+
+All helpers automatically log their messages:
+
+```python
+msg_show_success(...)     # Logs: logger_ui.info(...)
+msg_show_error(...)       # Logs: log_with_action(..., "error", ..., action="ERROR")
+msg_show_warning(...)     # Logs: log_with_action(..., "warning", ..., action="WARNING")
+msg_show_confirmation(...) # No logging (user choice)
+msg_show_info_with_details(...) # Logs: logger_ui.info(...)
+```
+
+### Usage Examples
+
+#### Example 1: Rename Character Validation
+```python
+# In character_actions_manager.py
+if not new_name:
+    msg_show_warning(
+        self.main_window,
+        "titles.warning",
+        "messages.errors.char_name_empty"
+    )
+    return
+```
+
+#### Example 2: Save Error with Context
+```python
+from Functions.character_manager import save_character
+success, msg = save_character(data)
+
+if not success:
+    msg_show_error(
+        self,
+        "titles.error",
+        f"!Failed to save character: {msg}"
+    )
+```
+
+#### Example 3: Destructive Action Confirmation
+```python
+if msg_show_confirmation(
+    self,
+    "Delete Armor File?",
+    f"Are you sure you want to delete '{filename}'?\nThis cannot be undone."
+):
+    delete_armor_file(filename)
+```
+
+### Quality Standards
+
+✅ **PEP 8 Compliant**
+- Proper indentation, spacing, line length
+- Type hints on all functions
+- Comprehensive docstrings
+
+✅ **No Hardcoded Text**
+- All UI strings use `lang.get()`
+- Supports dynamic parameters via `**kwargs`
+- Plain text mode with "!" prefix for special cases
+
+✅ **100% English Documentation**
+- All docstrings in English
+- All comments in English
+- Module docstring with usage examples
+
+✅ **Complete Error Handling**
+- Graceful fallback with defaults
+- Logging on all message displays
+- Safe defaults (No button by default in confirmations)
+
+### Integration Points
+
+**Files Using Message Helper**:
+- `UI/dialogs.py` - CharacterSheetWindow (3 replacements)
+- `Functions/character_actions_manager.py` - rename_selected_character() (2 replacements)
+
+**Future Expansions**:
+- Phase 13: UI State Manager
+- Phase 14: UI Validation Helper
+- Phase 15: UI File Dialog Wrapper
+
+---
+
+## State Management System
+
+### Phase 13: UI State Manager Extraction
+
+**Module**: `UI/ui_state_manager.py` (v0.109 Phase 13)  
+**Purpose**: Centralize button and UI element state management  
+**Status**: ✅ COMPLETE - 5 state management functions extracted
+
+### Design Philosophy
+
+**Problem**: 20+ scattered `.setEnabled()` calls across dialogs.py, making state dependencies unclear
+
+**Solution**: Extract common state patterns into reusable functions with clear intent and dependencies
+
+**Benefit**: Single source of truth for button states, easier to test, reduced complexity
+
+### Functions Provided
+
+#### 1. `ui_state_set_herald_buttons(parent, character_selected, herald_url, scraping_active, validation_active)`
+Manages Herald update button states based on character and scraping status.
+
+```python
+ui_state_set_herald_buttons(
+    self,
+    character_selected=True,
+    herald_url="https://herald.daocplayers.com/...",
+    scraping_active=False,
+    validation_active=False
+)
+```
+
+**Buttons Controlled**:
+- `update_herald_button`
+- `open_herald_button`
+- `update_rvr_button`
+
+**State Logic**:
+- Enabled if: character selected AND herald URL provided AND no operations active
+- Disabled if: no character OR no URL OR scraping/validation active
+
+#### 2. `ui_state_set_armor_buttons(parent, character_selected, file_selected, items_without_price, db_manager=None)`
+Manages armor preview and search button states with database mode validation.
+
+```python
+ui_state_set_armor_buttons(
+    self,
+    character_selected=True,
+    file_selected=True,
+    items_without_price=True,
+    db_manager=self.db_manager
+)
+```
+
+**Parameters**:
+- `parent`: Parent widget containing armor buttons
+- `character_selected`: True if character selected
+- `file_selected`: True if armor file loaded
+- `items_without_price`: True if items missing prices
+- `db_manager`: ItemsDatabaseManager instance (optional) - validates database mode
+
+**Buttons Controlled**:
+- `preview_download_button`
+- `search_prices_button`
+
+**State Logic**:
+- preview_download_button: enabled if character selected AND file loaded
+- search_prices_button: enabled if file loaded AND items without prices AND personal database active
+- If database is embedded (read-only), search button disabled with tooltip: "Enable personal database in Settings/Armory to add/update item prices."
+
+#### 3. `ui_state_set_stats_buttons(parent, character_selected, has_stats, scraping_active)`
+Manages character stats update button states.
+
+```python
+ui_state_set_stats_buttons(
+    self,
+    character_selected=True,
+    has_stats=True,
+    scraping_active=False
+)
+```
+
+**State Logic**:
+- Buttons enabled if: character selected AND has stats AND no scraping active
+- Buttons disabled during active scraping operations
+
+#### 4. `ui_state_set_dialog_buttons(parent, button_states)`
+Generic button state controller for setting multiple button states at once.
+
+```python
+ui_state_set_dialog_buttons(self, {
+    "delete_button": has_selection,
+    "edit_button": has_selection,
+    "save_button": is_valid_input,
+    "cancel_button": True
+})
+```
+
+**Parameters**:
+- `button_states`: Dictionary mapping button names to enabled state (bool)
+
+**Usage**: When multiple buttons need state updates in one call
+
+#### 5. `ui_state_on_selection_changed(parent, selection_count, is_valid, enable_delete, enable_edit, enable_export)`
+Unified handler for UI state changes when selection changes.
+
+```python
+ui_state_on_selection_changed(
+    self,
+    selection_count=1,
+    is_valid=True,
+    enable_delete=True,
+    enable_edit=True,
+    enable_export=False
+)
+```
+
+**Buttons Controlled** (if present):
+- `delete_button`
+- `edit_button`
+- `export_button`
+
+**State Logic**:
+- Delete: enabled if selection_count > 0 AND valid AND enable_delete
+- Edit: enabled if selection_count == 1 AND valid AND enable_edit
+- Export: enabled if selection_count > 0 AND valid AND enable_export
+
+### State Management Patterns
+
+| Pattern | Function | Use Case |
+|---------|----------|----------|
+| **Herald Operations** | `ui_state_set_herald_buttons()` | Enable/disable during character updates |
+| **File Operations** | `ui_state_set_armor_buttons()` | Manage preview/search buttons |
+| **Multi-Button Updates** | `ui_state_set_dialog_buttons()` | Generic state controller |
+| **Selection-Based States** | `ui_state_on_selection_changed()` | Handle list/table selection changes |
+| **Async Operations** | `ui_state_set_stats_buttons()` | Disable during scraping |
+
+### Integration Examples
+
+#### Example 1: Herald Validation Complete
+```python
+def _on_herald_validation_finished(self, accessible, message):
+    """Called when Herald validation completes"""
+    herald_url = self.character_data.get('url', '').strip()
+    ui_state_set_herald_buttons(
+        self,
+        character_selected=True,
+        herald_url=herald_url,
+        scraping_active=False,
+        validation_active=False
+    )
+```
+
+#### Example 2: File Selected in Armor Dialog
+```python
+def on_selection_changed(self):
+    """Updates buttons when file is selected"""
+    if not selected_items:
+        ui_state_set_armor_buttons(
+            self,
+            character_selected=False,
+            file_selected=False,
+            items_without_price=False
+        )
+        return
+    
+    ui_state_set_armor_buttons(
+        self,
+        character_selected=True,
+        file_selected=True,
+        items_without_price=has_items_without_price
+    )
+```
+
+#### Example 3: List Selection Changed
+```python
+def on_item_selection_changed(self):
+    """Handle cookie list selection"""
+    has_selection = bool(self.cookie_list.selectedItems())
+    ui_state_on_selection_changed(
+        self,
+        selection_count=1 if has_selection else 0,
+        is_valid=has_selection,
+        enable_delete=True
+    )
+```
+
+### Quality Standards
+
+✅ **PEP 8 Compliant**
+- Proper naming: `ui_state_{component}_{action}()`
+- Type hints on all parameters
+- Comprehensive docstrings
+
+✅ **Logging Integration**
+- All state changes logged at DEBUG level
+- Includes state reason in log message
+- Button name validation with warnings
+
+✅ **Safe Attributes**
+- Uses `hasattr()` to check for button existence
+- Won't crash if button not found in parent
+- Gracefully logs missing buttons
+
+✅ **Reusable**
+- No hardcoded button names (except patterns)
+- Flexible boolean parameters
+- Easy to extend for new buttons
+
+### Performance Considerations
+
+**State Updates**: O(n) where n = number of buttons affected (typically 1-4)
+
+**Logging Overhead**: Minimal (DEBUG level, conditional)
+
+**Memory Usage**: Negligible (no state caching, direct attribute access)
+
+**Best Practice**: Call state managers immediately after state change, not pre-emptively
+
+---
+
+## Validation Helper System
+
+### Phase 14: UI Validation Helper Extraction
+
+**Module**: `Functions/ui_validation_helper.py` (v0.109 Phase 14)  
+**Purpose**: Centralize input field validation across dialogs  
+**File Size**: 480 lines (pure utility module)  
+**Functions**: 15 validators covering text, URLs, numbers, files, and domain-specific validations
+
+#### Overview
+
+Centralized validation module to:
+- Eliminate 20+ repetitive validation patterns in dialogs.py
+- Ensure consistent error messages (all in French)
+- Support complex validations (file paths, URLs, DAOC-specific fields)
+- Provide type-safe returns with structured dict format
+
+#### Design Pattern: Functional Validation
+
+**Features**:
+- All functions are stateless (no side effects)
+- All functions return consistent dict format: `{'valid': bool, 'message': str, 'value': Any}`
+- No raising exceptions - errors returned in dict
+- All messages are French (appropriate for user-facing validation)
+
+**Naming Convention**: `validate_{field_type}_{constraint}`
+- `validate_non_empty_text()` - basic text field
+- `validate_character_name()` - domain-specific character name
+- `validate_url_field()` - specialized Herald URLs
+- `validate_filepath_exists()` - file system operations
+
+#### Function Categories
+
+**1. Basic Text Validation** (3 functions)
+- `validate_non_empty_text()` - Check field not empty
+- `validate_text_field()` - Validate with max_length constraint
+- `validate_email_field()` - Validate email format
+
+**2. Domain-Specific (DAOC) Validation** (5 functions)
+- `validate_character_name()` - Character names (max 30 chars)
+- `validate_guild_name()` - Guild names (optional, max 50 chars)
+- `validate_realm_selection()` - Realm selected (Albion/Hibernia/Midgard)
+- `validate_class_selection()` - Class selected
+- `validate_race_selection()` - Race selected
+
+**3. Specialized Validation** (5 functions)
+- `validate_url_field()` - Herald URLs (must contain 'herald', http/https)
+- `validate_numeric_field()` - Integer ranges with min/max
+- `validate_filepath_exists()` - File path exists
+- `validate_directory_exists()` - Directory exists
+- `validate_email_field()` - Email format validation
+
+**4. Selection Validation** (2 functions)
+- `validate_not_selected()` - Combo box not empty
+- `validate_multiple_selections()` - List has minimum items
+
+#### Return Format (Standardized)
+
+All functions return:
+```python
+{
+    'valid': bool,           # True if validation passed
+    'message': str,          # Error message (French) if invalid, empty if valid
+    'value': Any             # Converted/cleaned value if valid, fallback if invalid
+}
+```
+
+**Value Types**:
+- Text functions: `str` (stripped)
+- Numeric functions: `int` (0 if invalid)
+- File functions: `str` (absolute path or empty)
+- Selection functions: `str` or `bool` or `list`
+
+#### Integration in dialogs.py (3 locations)
+
+1. **`save_basic_info()` (line ~920)**
+   - Calls `validate_basic_character_info()` with guild and Herald URL
+   - Single validation call replaces separate guild + URL validations
+   - Receives `{'valid', 'message', 'guild', 'url'}` dict
+
+2. **`rename_character()` (line ~1650)**
+   - Calls `validate_character_rename()` with new character name
+   - Simple wrapper around `validate_character_name()`
+   - Uses `msg_show_warning()` for error display
+
+3. **`get_data()` in NewCharacterDialog (line ~1890)**
+   - Calls `validate_new_character_dialog_data()` with character name and guild
+   - Handles both character name (required) and guild (optional) validation
+   - Uses `QMessageBox.warning()` for errors
+   - Returns validated name and guild directly
+
+**All validation logic is in Functions/ui_validation_helper.py - dialogs.py only calls the validators**
+
+#### Usage Pattern
+
+```python
+# Basic pattern
+result = validate_character_name(self.name_edit.text())
+if not result['valid']:
+    QMessageBox.critical(self, "Erreur", result['message'])
+    return
+name = result['value']  # Safe to use - already validated
+```
+
+#### Validation Patterns
+
+**Pattern 1: Required Field**
+```python
+result = validate_non_empty_text(self.name_edit.text())
+if not result['valid']: return show_error(result['message'])
+name = result['value']
+```
+
+**Pattern 2: Optional Field**
+```python
+result = validate_guild_name(self.guild_edit.text())  # Empty allowed
+guild = result['value']  # May be empty string
+```
+
+**Pattern 3: Conditional Validation**
+```python
+url_text = self.herald_url_edit.text()
+if url_text.strip():  # Only validate if provided
+    result = validate_url_field(url_text)
+    if not result['valid']: return show_error(result['message'])
+    url = result['value']
+```
+
+#### Performance Notes
+
+**O(n) complexity** where n = input length
+- Text field validations: <1ms
+- File operations: ~10-100ms (filesystem access)
+- Regex validations: <1ms
+- **Optimization**: Validate on blur event, not on every keystroke
+
+#### Error Handling
+
+**Defensive Programming**:
+- No exceptions raised
+- Errors returned in 'message' field
+- Always return dict (never None)
+- Graceful degradation for edge cases
+
+**File Operations**:
+- Catch exceptions (permission errors, invalid paths)
+- Log errors with `logging.error()`
+- Return user-friendly error messages
+
+#### Testing Results
+
+✅ All 15 functions tested and working
+✅ 3 wrapper functions tested and working
+✅ Application starts correctly with new module
+✅ Validation chain tested:
+  - Valid inputs return `valid=True` with proper value
+  - Invalid inputs return `valid=False` with error message
+  - Error messages are French and appropriate
+  - Wrapper functions combine multiple validations correctly
+
+#### Wrapper Functions Reference
+
+**validate_basic_character_info(character_name: str, guild_name: str, herald_url: str) -> dict**
+
+Validates all basic character information fields together.
+
+Parameters:
+  character_name: Character name (not used, for future compatibility)
+  guild_name: Guild name to validate (optional field)
+  herald_url: Herald URL to validate (optional field)
+
+Returns:
+  {
+    'valid': bool,           # False if any field invalid
+    'message': str,          # Error message if invalid
+    'guild': str             # Validated guild (empty if invalid)
+    'url': str               # Validated URL (empty if invalid)
+  }
+
+Behavior:
+  - Validates guild first using `validate_guild_name()`
+  - If guild invalid: returns early with error message
+  - Validates Herald URL if provided
+  - Returns both validated values on success
+
+---
+
+**validate_character_rename(new_name: str) -> dict**
+
+Validates character name for rename operation.
+
+Wrapper around `validate_character_name()` for clarity.
+
+Parameters:
+  new_name: New character name
+
+Returns:
+  {
+    'valid': bool,      # False if name invalid
+    'message': str,     # Error message if invalid
+    'value': str        # Validated name if valid
+  }
+
+---
+
+**validate_new_character_creation(character_name: str) -> dict**
+
+Validates character name for new character creation.
+
+Wrapper around `validate_character_name()` for clarity.
+
+Parameters:
+  character_name: Character name to validate
+
+Returns:
+  {
+    'valid': bool,      # False if name invalid
+    'message': str,     # Error message if invalid
+    'value': str        # Validated name if valid
+  }
+
+---
+
+**validate_new_character_dialog_data(character_name: str, guild_name: str) -> dict**
+
+Validates all fields for new character dialog (character name and optional guild).
+
+Parameters:
+  character_name: Character name to validate (required)
+  guild_name: Guild name to validate (optional)
+
+Returns:
+  {
+    'valid': bool,      # False if any field invalid
+    'message': str,     # Error message if invalid
+    'name': str         # Validated character name
+    'guild': str        # Validated guild (empty if not provided)
+  }
+
+Behavior:
+  - Validates character name first using `validate_character_name()`
+  - If character name invalid: returns early with error message
+  - Then validates guild name using `validate_guild_name()` (optional field)
+  - Returns both validated and stripped values on success
+
+Usage in `NewCharacterDialog.get_data()`:
+  ```python
+  result = validate_new_character_dialog_data(
+      self.name_edit.text(),
+      self.guild_edit.text()
+  )
+  if not result['valid']:
+      QMessageBox.warning(self, lang.get("error_title"), result['message'])
+      return None
+  name = result['name']      # Already validated and stripped
+  guild = result['guild']    # Already validated and stripped
+  ```
+
+#### Migration from Old Code
+
+**Before** (scattered validation):
+```python
+new_name = self.name_edit.text().strip()
+if not new_name:
+    msg_show_warning(self, "titles.warning", "char_name_empty")
+    return
+```
+
+**After** (centralized):
+```python
+result = validate_character_name(self.name_edit.text())
+if not result['valid']:
+    msg_show_warning(self, "titles.warning", result['message'])
+    return
+new_name = result['value']
+```
+
+**Benefits**:
+- Single place to update validation rules
+- Consistent error messages across all dialogs
+- Reduced code duplication (~25 lines eliminated)
+- Easier to test and maintain
+
+#### Wrapper Functions (Dialog-Specific)
+
+Three wrapper functions encapsulate validation for specific dialog use cases:
+
+**1. `validate_basic_character_info(character_name, guild_name, herald_url)`**
+- Purpose: Validate all basic info fields together
+- Returns: `{'valid': bool, 'message': str, 'guild': str, 'url': str}`
+- Used in: `CharacterSheetWindow.save_basic_info()`
+- Example:
+  ```python
+  result = validate_basic_character_info("", self.guild_edit.text(), self.herald_url_edit.text())
+  if not result['valid']:
+      QMessageBox.critical(self, "Erreur", result['message'])
+      return
+  new_guild = result['guild']
+  herald_url = result['url']
+  ```
+
+**2. `validate_character_rename(new_name)`**
+- Purpose: Validate character name for rename operation
+- Returns: `{'valid': bool, 'message': str, 'value': str}`
+- Used in: `CharacterSheetWindow.rename_character()`
+- Wrapper for `validate_character_name()` for clarity
+
+**3. `validate_new_character_creation(character_name)`**
+- Purpose: Validate character name for new character dialog
+- Returns: `{'valid': bool, 'message': str, 'value': str}`
+- Used in: `NewCharacterDialog.get_data()` (legacy, deprecated)
+- Wrapper for `validate_character_name()` for clarity
+
+**4. `validate_new_character_dialog_data(character_name, guild_name)`**
+- Purpose: Validate both character name and guild for new character dialog
+- Returns: `{'valid': bool, 'message': str, 'name': str, 'guild': str}`
+- Used in: `NewCharacterDialog.get_data()`
+- Combines `validate_character_name()` + `validate_guild_name()`
+- Example:
+  ```python
+  # In NewCharacterDialog.get_data()
+  name_text = self.character_name_edit.text()
+  guild_text = self.guild_edit.text()
+  result = validate_new_character_dialog_data(name_text, guild_text)
+  
+  if not result['valid']:
+      QMessageBox.critical(self, "Erreur", result['message'])
+      return
+  character_name = result['name']
+  guild = result['guild']
+  ```
+
+**Architecture**: dialogs.py contains ONLY UI calls to validation functions. All validation logic is in Functions/ui_validation_helper.py.
+
+---
+
+## File Dialog Wrapper System
+
+### Phase 15: UI File Dialog Wrapper Extraction
+
+**Module**: `UI/ui_file_dialogs.py` (v0.109 Phase 15)  
+**Purpose**: Centralize QFileDialog usage for consistent file selection behavior  
+**Status**: ✅ COMPLETE - 5 file dialog wrapper functions extracted
+
+### Design Philosophy
+
+**Problem**: 5 scattered `QFileDialog` calls in dialogs.py with repeated setup code
+
+**Solution**: Extract common patterns into reusable wrappers with automatic translation
+
+**Benefit**: Single source of truth for file dialogs, consistency, reduced code duplication
+
+### Functions Provided
+
+#### 1. `dialog_open_file(parent, title_key, filter_key="", initial_dir="")`
+
+Opens file selection dialog.
+
+```python
+file_path = dialog_open_file(
+    self,
+    title_key="cookie_manager.browse_dialog_title",
+    filter_key="cookie_manager.browse_dialog_filter",
+    initial_dir=""
+)
+```
+
+**Parameters**:
+- `parent`: Parent widget
+- `title_key`: Translation key for dialog title
+- `filter_key`: Translation key for file filter (optional)
+- `initial_dir`: Initial directory path (optional)
+
+**Returns**: Selected file path, empty string if cancelled
+
+**Used in**: `CookieManagerDialog.browse_cookie_file()`
+
+---
+
+#### 2. `dialog_save_file(parent, title_key, default_filename="", filter_key="")`
+
+Opens save file dialog.
+
+```python
+save_path = dialog_save_file(
+    self,
+    title_key="armoury_dialog.dialogs.download_file",
+    default_filename=filename,
+    filter_key="armoury_dialog.dialogs.all_files"
+)
+```
+
+**Parameters**:
+- `parent`: Parent widget
+- `title_key`: Translation key for dialog title
+- `default_filename`: Default filename (suggestion)
+- `filter_key`: Translation key for file filter (optional)
+
+**Returns**: Selected save path, empty string if cancelled
+
+**Used in**: `ArmorManagementDialog.download_file()`
+
+---
+
+#### 3. `dialog_select_directory(parent, title_key, initial_dir="")`
+
+Opens directory selection dialog.
+
+```python
+directory = dialog_select_directory(
+    self,
+    title_key="select_folder_dialog_title",
+    initial_dir=""
+)
+```
+
+**Parameters**:
+- `parent`: Parent widget
+- `title_key`: Translation key for dialog title
+- `initial_dir`: Initial directory path (optional)
+
+**Returns**: Selected directory path, empty string if cancelled
+
+**Used in**: `SettingsDialog.browse_folder()` (generic for character/config folders)
+
+---
+
+#### 4. `dialog_open_armor_file(parent)`
+
+Opens armor file selection dialog (wrapper).
+
+```python
+file_path = dialog_open_armor_file(self)
+if file_path:
+    # Process armor file
+```
+
+**Parameters**:
+- `parent`: Parent widget
+
+**Returns**: Selected file path, empty string if cancelled
+
+**Used in**: Armor template file selection workflows
+
+---
+
+#### 5. `dialog_select_backup_path(parent, current_path="")`
+
+Opens backup directory selection dialog (wrapper).
+
+```python
+backup_path = dialog_select_backup_path(self, current_path)
+if backup_path:
+    # Use backup path
+```
+
+**Parameters**:
+- `parent`: Parent widget
+- `current_path`: Current path (used as initial directory)
+
+**Returns**: Selected directory path, empty string if cancelled
+
+**Used in**: 
+- `BackupSettingsDialog.browse_backup_path()`
+- `BackupSettingsDialog.browse_cookies_backup_path()`
+
+### Integration Points (dialogs.py - 5 locations)
+
+| Location | Method | Wrapper Used |
+|----------|--------|--------------|
+| Line ~2251 | `browse_folder()` | `dialog_select_directory()` |
+| Line ~2771 | `download_file()` | `dialog_save_file()` |
+| Line ~3238 | `browse_cookie_file()` | `dialog_open_file()` |
+| Line ~6059 | `browse_backup_path()` | `dialog_select_backup_path()` |
+| Line ~6071 | `browse_cookies_backup_path()` | `dialog_select_backup_path()` |
+
+### Benefits
+
+✅ **Consistency**: All file dialogs follow same pattern  
+✅ **Translation**: Automatic via `lang.get()`  
+✅ **Maintainability**: Single place to modify dialog behavior  
+✅ **Code Reduction**: ~20 lines eliminated from dialogs.py  
+✅ **Reusability**: Easy to add new file dialog patterns  
+
+### Quality Standards
+
+✅ **PEP 8 Compliant**
+- Proper indentation and spacing
+- Type hints on all parameters
+- Comprehensive docstrings
+
+✅ **No Hardcoded Text**
+- All titles/filters use translation keys
+- Automatic `lang.get()` integration
+
+✅ **100% English Documentation**
+- All docstrings in English
+- All comments in English
 
 ---
 

@@ -13,11 +13,11 @@ if sys.stderr is None:
     sys.stderr = open('nul', 'w') if sys.platform == 'win32' else open('/dev/null', 'w')
 
 from PySide6.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QFormLayout, QGroupBox, QLabel, 
-    QPushButton, QLineEdit, QComboBox, QCheckBox, QSlider, QMessageBox,
-    QDialogButtonBox, QFileDialog, QTableWidget, QTableWidgetItem, QHeaderView,
-    QWidget, QTextEdit, QApplication, QProgressBar, QMenu, QGridLayout, QFrame, QScrollArea, QSplitter,
-    QListWidget, QButtonGroup, QRadioButton
+    QDialog, QVBoxLayout, QHBoxLayout, QFormLayout, QGroupBox, QLabel,
+    QPushButton, QLineEdit, QComboBox, QCheckBox, QMessageBox,
+    QDialogButtonBox, QTableWidget, QTableWidgetItem, QHeaderView,
+    QWidget, QTextEdit, QApplication, QProgressBar, QMenu, QGridLayout,
+    QFrame, QScrollArea, QSplitter, QListWidget, QButtonGroup, QRadioButton
 )
 from PySide6.QtCore import Qt, QThread, Signal, QTimer
 from PySide6.QtGui import QBrush, QColor, QIcon, QPixmap
@@ -28,7 +28,56 @@ from Functions.logging_manager import get_log_dir, get_logger, log_with_action, 
 from Functions.data_manager import DataManager
 from Functions.theme_manager import get_scaled_size
 from Functions.items_database_manager import ItemsDatabaseManager
-from UI.template_import_dialog import TemplateImportDialog
+from Functions.items_price_manager import items_price_sync_template
+from Functions.character_validator import (
+    character_populate_classes_combo, character_populate_races_combo,
+    character_handle_realm_change, character_handle_class_change,
+    character_handle_race_change
+)
+from Functions.character_rr_calculator import (
+    character_rr_get_valid_levels, character_rr_calculate_points_info,
+    character_rr_calculate_from_points
+)
+from Functions.character_herald_scrapper import (
+    character_herald_update,
+    character_herald_apply_scraped_stats, character_herald_apply_partial_stats
+)
+from Functions.character_banner import (
+    banner_load_class_image, banner_set_placeholder
+)
+from Functions.herald_url_validator import (
+    herald_url_on_text_changed, herald_url_open_url,
+    herald_url_update_button_states
+)
+from Functions.ui_validation_helper import (
+    validate_basic_character_info,
+    validate_character_rename, validate_new_character_dialog_data
+)
+from Functions.armor_upload_handler import (
+    armor_upload_file, armor_import_template, armor_open_file,
+    armor_delete_file
+)
+from Functions.item_model_viewer import (
+    item_model_on_link_clicked, item_model_show
+)
+from Functions.character_achievement_formatter import (
+    character_update_achievements_display
+)
+from UI.ui_message_helper import (
+    msg_show_success, msg_show_error, msg_show_warning, 
+    msg_show_confirmation, msg_show_info_with_details
+)
+from UI.ui_state_manager import (
+    ui_state_set_herald_buttons, ui_state_set_armor_buttons,
+    ui_state_on_selection_changed
+)
+from UI.ui_file_dialogs import (
+    dialog_open_file, dialog_save_file, dialog_select_directory,
+    dialog_select_backup_path
+)
+from UI.ui_getters import (
+    ui_get_visibility_config, ui_get_selected_category, ui_get_selected_changes
+)
 
 # Get CHARACTER logger
 logger_char = get_logger(LOGGER_CHARACTER)
@@ -534,16 +583,18 @@ class CharacterSheetWindow(QDialog):
         herald_url = self.character_data.get('url', '').strip()
         herald_validation_done = self._is_herald_validation_done()
         
-        if not herald_url:
-            self.update_rvr_button.setEnabled(False)
-            self.update_rvr_button.setToolTip(lang.get("character_sheet.labels.no_herald_url"))
-        elif not herald_validation_done:
-            self.update_rvr_button.setEnabled(False)
-            self.update_rvr_button.setToolTip(lang.get("character_sheet.labels.herald_validation_pending"))
-            # Subscribe to validation end signal to reactivate the button
-            if hasattr(self.parent_app, 'ui_manager') and hasattr(self.parent_app.ui_manager, 'eden_status_thread'):
-                thread = self.parent_app.ui_manager.eden_status_thread
-                if thread:
+        ui_state_set_herald_buttons(
+            self,
+            character_selected=True,
+            herald_url=herald_url,
+            scraping_active=False,
+            validation_active=not herald_validation_done
+        )
+        
+        # Subscribe to validation end signal to reactivate the button
+        if hasattr(self.parent_app, 'ui_manager') and hasattr(self.parent_app.ui_manager, 'eden_status_thread'):
+            thread = self.parent_app.ui_manager.eden_status_thread
+            if thread:
                     thread.status_updated.connect(self._on_herald_validation_finished)
         
         buttons_layout.addWidget(self.update_rvr_button)
@@ -642,131 +693,47 @@ class CharacterSheetWindow(QDialog):
     
     def _update_class_banner(self):
         """Update the class banner image based on current class and realm"""
-        from Functions.path_manager import get_resource_path
-        
         realm = self.character_data.get('realm', 'Albion')
         class_name = self.character_data.get('class', '')
-        
-        if not class_name:
-            # No class selected, show placeholder or hide
-            self.banner_label.clear()
-            self.banner_label.setText(lang.get("character_sheet.labels.no_class_selected"))
-            self.banner_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            self.banner_label.setStyleSheet("color: gray; font-style: italic;")
-            return
-        
-        # Build banner path: Img/Banner/{realm}/{class}.jpg
-        # Normalize realm and class names (handle abbreviations)
-        realm_map = {
-            "Albion": "Alb",
-            "Hibernia": "Hib",
-            "Midgard": "Mid"
-        }
-        realm_folder = realm_map.get(realm, realm)
-        
-        # Class name should be lowercase for filename
-        class_filename = class_name.lower().replace(" ", "_")
-        
-        # Use get_resource_path for PyInstaller compatibility
-        banner_path = get_resource_path(os.path.join("Img", "Banner", realm_folder, f"{class_filename}.jpg"))
-        
-        # Try with .png if .jpg doesn't exist
-        if not os.path.exists(banner_path):
-            banner_path = get_resource_path(os.path.join("Img", "Banner", realm_folder, f"{class_filename}.png"))
-        
-        if os.path.exists(banner_path):
-            pixmap = QPixmap(banner_path)
-            if not pixmap.isNull():
-                # Set pixmap without scaling - Qt will handle scaling with setScaledContents(True)
-                self.banner_label.setPixmap(pixmap)
-                self.banner_label.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignHCenter)
-                self.banner_label.setStyleSheet("")
-            else:
-                self._set_banner_placeholder(f"Invalid\nimage:\n{class_name}")
-        else:
-            # Banner not found
-            self._set_banner_placeholder(f"Banner\nnot found:\n{realm}\n{class_name}")
+        banner_load_class_image(self, realm, class_name)
     
     def _set_banner_placeholder(self, text):
         """Set placeholder text for banner"""
-        self.banner_label.clear()
-        self.banner_label.setText(text)
-        self.banner_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.banner_label.setStyleSheet(f"color: gray; font-style: italic; font-size: {get_scaled_size(9):.1f}pt;")
+        banner_set_placeholder(self, text)
     
     def _populate_classes_sheet(self):
         """Populates class dropdown based on selected realm."""
-        self.class_combo.clear()
-        realm = self.realm_combo.currentText()
-        
-        # Get all classes for the realm
-        classes = self.data_manager.get_classes(realm)
-        current_language = config.get("ui.language", "en")
-        
-        for cls in classes:
-            # Get translated name
-            if current_language == "fr" and "name_fr" in cls:
-                display_name = cls["name_fr"]
-            elif current_language == "de" and "name_de" in cls:
-                display_name = cls["name_de"]
-            else:
-                display_name = cls["name"]
-            
-            # Store actual name as item data
-            self.class_combo.addItem(display_name, cls["name"])
-    
+        character_populate_classes_combo(self.class_combo, self.data_manager, self.realm_combo.currentText())
+
     def _populate_races_sheet(self):
         """Populates race dropdown based on selected class and realm."""
-        self.race_combo.clear()
         realm = self.realm_combo.currentText()
-        
-        # Get selected class (actual name from item data)
         class_index = self.class_combo.currentIndex()
-        if class_index < 0:
-            # If no class selected, show all races
-            races = self.data_manager.get_races(realm)
-        else:
-            class_name = self.class_combo.itemData(class_index)
-            if not class_name:
-                races = self.data_manager.get_races(realm)
-            else:
-                # Filter races that can be this class
-                races = self.data_manager.get_available_races_for_class(realm, class_name)
-        
-        current_language = config.get("ui.language", "en")
-        
-        for race in races:
-            # Get translated name
-            if current_language == "fr" and "name_fr" in race:
-                display_name = race["name_fr"]
-            elif current_language == "de" and "name_de" in race:
-                display_name = race["name_de"]
-            else:
-                display_name = race["name"]
-            
-            # Store actual name as item data
-            self.race_combo.addItem(display_name, race["name"])
+        class_name = self.class_combo.itemData(class_index) if class_index >= 0 else None
+        character_populate_races_combo(self.race_combo, self.data_manager, realm, class_name)
     
     def _on_realm_changed_sheet(self):
         """Called when realm is changed in character sheet."""
-        self._populate_classes_sheet()
-        self._populate_races_sheet()
-        # Update character_data and banner
-        self.character_data['realm'] = self.realm_combo.currentText()
+        character_handle_realm_change(
+            self.realm_combo, self.class_combo, self.race_combo,
+            self.data_manager, self.character_data
+        )
+        # Update banner after realm change
         self._update_class_banner()
     
     def _on_class_changed_sheet(self):
         """Called when class is changed in character sheet."""
-        self._populate_races_sheet()
-        # Update character_data and banner
-        class_data = self.class_combo.currentData()
-        if class_data:
-            self.character_data['class'] = class_data
-            self._update_class_banner()
+        character_handle_class_change(
+            self.class_combo, self.race_combo,
+            self.data_manager, self.realm_combo.currentText(),
+            self.character_data
+        )
+        # Update banner after class change
+        self._update_class_banner()
     
     def _on_race_changed_sheet(self):
-        """Called when race is changed in character sheet (no action needed)."""
-        pass
+        """Called when race is changed in character sheet."""
+        character_handle_race_change(self.race_combo, self.character_data)
     
     def on_rank_changed(self, value):
         """Called when rank dropdown changes."""
@@ -788,55 +755,56 @@ class CharacterSheetWindow(QDialog):
     
     def update_level_dropdown(self, rank, current_level=1):
         """Updates level dropdown based on selected rank."""
-        self.level_combo_rank.blockSignals(True)  # Prevent triggering change event
+        self.level_combo_rank.blockSignals(True)
         self.level_combo_rank.clear()
-        
-        # Rank 1 has levels 0-10, others have 0-9
-        max_level = 10 if rank == 1 else 9
-        for i in range(0, max_level + 1):
-            self.level_combo_rank.addItem(f"L{i}", i)
-        
+
+        valid_levels = character_rr_get_valid_levels(rank)
+        for level in valid_levels:
+            self.level_combo_rank.addItem(f"L{level}", level)
+
         # Set current level
-        if current_level <= max_level:
+        if current_level <= valid_levels[-1]:
             self.level_combo_rank.setCurrentIndex(current_level)
         else:
             self.level_combo_rank.setCurrentIndex(0)
-        
+
         self.level_combo_rank.blockSignals(False)
     
     def update_rp_info(self):
         """Updates RP display for the selected rank/level."""
         if not hasattr(self.parent_app, 'data_manager'):
             return
-        
+
         rank = self.rank_combo.currentData()
         level = self.level_combo_rank.currentData()
-        level_str = f"{rank}L{level}"
-        
-        # Find RP for this level and update the main display
-        rank_info = self.parent_app.data_manager.get_rank_by_level(self.realm, level_str)
-        if rank_info:
-            self.rank_title_label.setText(
-                f"Rank {rank_info['rank']} - {rank_info['title']} ({rank_info['level']} - {rank_info['realm_points']:,} RP)"
-            )
+
+        info = character_rr_calculate_points_info(
+            self.parent_app.data_manager, self.realm, rank, level
+        )
+
+        if info:
+            level_str = info.get('current_level_str', f"{rank}L{level}")
+            rank_data = self.parent_app.data_manager.get_rank_by_level(self.realm, level_str)
+            if rank_data:
+                self.rank_title_label.setText(
+                    f"Rank {rank_data['rank']} - {rank_data['title']} "
+                    f"({rank_data['level']} - {rank_data['realm_points']:,} RP)"
+                )
     
     def update_rank_display(self, realm_points):
         """Updates current rank and title display."""
-        # Convert realm_points to integer if it's a string
-        if isinstance(realm_points, str):
-            realm_points = int(realm_points.replace(' ', '').replace('\xa0', '').replace(',', ''))
-        
-        if hasattr(self.parent_app, 'data_manager'):
-            rank_info = self.parent_app.data_manager.get_realm_rank_info(self.realm, realm_points)
-            if rank_info:
-                self.rank_title_label.setText(
-                    f"Rank {rank_info['rank']} - {rank_info['title']} ({rank_info['level']} - {realm_points:,} RP)"
-                )
-            else:
-                self.rank_title_label.setText(f"Rank 1 - Guardian (1L1 - 0 RP)")
-        else:
-            realm_rank = self.character_data.get('realm_rank', '1L1')
-            self.rank_title_label.setText(f"{realm_rank} - {realm_points:,} RP")
+        if not hasattr(self.parent_app, 'data_manager'):
+            return
+
+        rank_info = character_rr_calculate_from_points(
+            self.parent_app.data_manager, self.realm, realm_points
+        )
+
+        if rank_info:
+            self.rank_title_label.setText(
+                f"Rank {rank_info['rank']} - {rank_info['title']} "
+                f"({rank_info['level']} - {rank_info['realm_points']:,} RP)"
+            )
     
     def auto_apply_rank(self):
         """Automatically applies the selected rank to the character (no confirmation)."""
@@ -963,7 +931,19 @@ class CharacterSheetWindow(QDialog):
             new_season = self.season_combo.currentText()
             new_server = self.server_combo.currentText()
             new_page = int(self.page_combo.currentText())
-            new_guild = self.guild_edit.text().strip()
+            
+            # Validate all basic character info fields using centralized validation
+            validation_result = validate_basic_character_info(
+                "",  # character_name not used in this context
+                self.guild_edit.text(),
+                self.herald_url_edit.text()
+            )
+            if not validation_result['valid']:
+                QMessageBox.critical(self, "Erreur", validation_result['message'])
+                return
+            
+            new_guild = validation_result['guild']
+            herald_url = validation_result['url']
             
             # Get race and class (actual names from item data)
             race_index = self.race_combo.currentIndex()
@@ -1013,11 +993,7 @@ class CharacterSheetWindow(QDialog):
             self.character_data['guild'] = new_guild
             self.character_data['race'] = new_race
             self.character_data['class'] = new_class
-            
-            # Save Eden Herald URL
-            herald_url = self.herald_url_edit.text().strip()
-            if herald_url:
-                self.character_data['url'] = herald_url
+            self.character_data['url'] = herald_url
             
             # Save character (it's already moved if realm changed)
             if old_realm == new_realm:
@@ -1046,14 +1022,14 @@ class CharacterSheetWindow(QDialog):
                         sys.stderr.flush()
                         logging.warning(f"[BACKUP_TRIGGER] Backup after basic info modification failed: {e}")
             
-            QMessageBox.information(self, lang.get("dialogs.titles.success"), lang.get("character_sheet.messages.info_update_success"))
+            msg_show_success(self, "titles.success", "character_sheet.messages.info_update_success")
             # Refresh list in parent
             if hasattr(self.parent_app, 'refresh_character_list'):
                 self.parent_app.refresh_character_list()
                 
         except Exception as e:
             log_with_action(logger_char, "error", f"Error saving basic info: {str(e)}", action="ERROR")
-            QMessageBox.critical(self, lang.get("dialogs.titles.error"), lang.get("character_sheet.messages.save_error", error=str(e)))
+            msg_show_error(self, "titles.error", "character_sheet.messages.save_error", error=str(e))
 
     def open_armor_manager(self):
         """Opens the armor management dialog."""
@@ -1076,17 +1052,7 @@ class CharacterSheetWindow(QDialog):
     
     def on_herald_url_changed(self, text):
         """Enable/disable the stats update button based on the Herald URL"""
-        # Don't re-enable buttons if Herald scraping is in progress
-        if self.herald_scraping_in_progress:
-            return
-            
-        is_url_valid = bool(text.strip())
-        self.update_rvr_button.setEnabled(is_url_valid)
-        
-        if is_url_valid:
-            self.update_rvr_button.setToolTip(lang.get("update_rvr_pvp_tooltip"))
-        else:
-            self.update_rvr_button.setToolTip("Veuillez d'abord configurer l'URL Herald")
+        herald_url_on_text_changed(self, text)
     
     def _is_herald_validation_done(self):
         """Check if Herald startup validation is complete"""
@@ -1105,243 +1071,34 @@ class CharacterSheetWindow(QDialog):
         """Called when Herald startup validation completes"""
         # Re-enable button if Herald accessible AND a URL is configured
         herald_url = self.character_data.get('url', '').strip()
-        if accessible and herald_url:
-            self.update_rvr_button.setEnabled(True)
-            self.update_rvr_button.setToolTip(lang.get("update_rvr_pvp_tooltip"))
+        ui_state_set_herald_buttons(
+            self,
+            character_selected=True,
+            herald_url=herald_url,
+            scraping_active=False,
+            validation_active=False
+        )
     
     def show_stats_info(self):
         """Display an information window about statistics"""
-        QMessageBox.information(
+        msg_show_info_with_details(
             self,
-            lang.get("stats_info_title"),
+            "stats_info_title",
             lang.get("stats_info_message")
         )
     
     def _update_achievements_display(self, achievements_list):
-        """
-        Update achievements display with the provided list.
-        Uses QGridLayout in 2 columns of 8 achievements with vertical separator.
-        
-        Args:
-            achievements_list: List of dicts with 'title', 'progress', and 'current' keys
-        """
-        # Clear existing widgets
-        while self.achievements_container_layout.count():
-            item = self.achievements_container_layout.takeAt(0)
-            if item.widget():
-                item.widget().deleteLater()
-            elif item.layout():
-                # Clear nested layouts
-                while item.layout().count():
-                    nested_item = item.layout().takeAt(0)
-                    if nested_item.widget():
-                        nested_item.widget().deleteLater()
-        
-        if not achievements_list or len(achievements_list) == 0:
-            # Show placeholder
-            placeholder = QLabel("—")
-            placeholder.setStyleSheet("color: gray; font-style: italic;")
-            placeholder.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            self.achievements_container_layout.addWidget(placeholder)
-            self.achievements_container_layout.addStretch()
-            return
-        
-        # Create horizontal layout for 2 columns
-        columns_layout = QHBoxLayout()
-        columns_layout.setSpacing(15)
-        
-        # Split achievements into 2 groups of 8 (or less)
-        mid_point = 8
-        first_column = achievements_list[:mid_point]
-        second_column = achievements_list[mid_point:]
-        
-        # === First column (left) ===
-        first_grid = QGridLayout()
-        first_grid.setHorizontalSpacing(10)
-        first_grid.setVerticalSpacing(2)
-        first_grid.setColumnStretch(0, 3)  # Title column
-        first_grid.setColumnStretch(1, 0)  # Progress column (fixed)
-        first_grid.setColumnStretch(2, 2)  # Current tier column
-        
-        for row, achievement in enumerate(first_column):
-            title = achievement.get('title', 'Unknown')
-            progress = achievement.get('progress', '0/0')
-            current_tier = achievement.get('current', None)
-            
-            # Title
-            title_label = QLabel(title)
-            title_label.setStyleSheet(f"font-size: {get_scaled_size(9):.1f}pt;")
-            first_grid.addWidget(title_label, row, 0, Qt.AlignmentFlag.AlignLeft)
-            
-            # Progress
-            progress_label = QLabel(progress)
-            progress_label.setStyleSheet(f"font-weight: bold; font-size: {get_scaled_size(9):.1f}pt;")
-            first_grid.addWidget(progress_label, row, 1, Qt.AlignmentFlag.AlignRight)
-            
-            # Current tier
-            if current_tier and current_tier != "None":
-                current_label = QLabel(f"({current_tier})")
-                current_label.setStyleSheet(f"font-size: {get_scaled_size(8):.1f}pt; color: #6c757d; font-style: italic;")
-                first_grid.addWidget(current_label, row, 2, Qt.AlignmentFlag.AlignLeft)
-        
-        columns_layout.addLayout(first_grid, 1)  # Stretch factor 1
-        
-        # === Vertical separator ===
-        if second_column:  # Only add separator if there's a second column
-            separator = QFrame()
-            separator.setFrameShape(QFrame.Shape.VLine)
-            separator.setFrameShadow(QFrame.Shadow.Sunken)
-            separator.setStyleSheet("color: #cccccc;")
-            columns_layout.addWidget(separator)
-        
-        # === Second column (right) ===
-        if second_column:
-            second_grid = QGridLayout()
-            second_grid.setHorizontalSpacing(10)
-            second_grid.setVerticalSpacing(2)
-            second_grid.setColumnStretch(0, 3)  # Title column
-            second_grid.setColumnStretch(1, 0)  # Progress column (fixed)
-            second_grid.setColumnStretch(2, 2)  # Current tier column
-            
-            for row, achievement in enumerate(second_column):
-                title = achievement.get('title', 'Unknown')
-                progress = achievement.get('progress', '0/0')
-                current_tier = achievement.get('current', None)
-                
-                # Title
-                title_label = QLabel(title)
-                title_label.setStyleSheet(f"font-size: {get_scaled_size(9):.1f}pt;")
-                second_grid.addWidget(title_label, row, 0, Qt.AlignmentFlag.AlignLeft)
-                
-                # Progress
-                progress_label = QLabel(progress)
-                progress_label.setStyleSheet(f"font-weight: bold; font-size: {get_scaled_size(9):.1f}pt;")
-                second_grid.addWidget(progress_label, row, 1, Qt.AlignmentFlag.AlignRight)
-                
-                # Current tier
-                if current_tier and current_tier != "None":
-                    current_label = QLabel(f"({current_tier})")
-                    current_label.setStyleSheet(f"font-size: {get_scaled_size(8):.1f}pt; color: #6c757d; font-style: italic;")
-                    second_grid.addWidget(current_label, row, 2, Qt.AlignmentFlag.AlignLeft)
-            
-            columns_layout.addLayout(second_grid, 1)  # Stretch factor 1
-        
-        # Add columns layout to container
-        self.achievements_container_layout.addLayout(columns_layout)
-        
-        # Add stretch at the end
-        self.achievements_container_layout.addStretch()
+        """Update achievements display with the provided list."""
+        character_update_achievements_display(self, achievements_list)
     
     def open_herald_url(self):
         """Ouvre l'URL du Herald dans le navigateur avec les cookies"""
-        url = self.herald_url_edit.text().strip()
-        
-        if not url:
-            QMessageBox.warning(
-                self,
-                "URL manquante",
-                "Veuillez entrer une URL Herald valide."
-            )
-            return
-        
-        # Check that l'URL commence par http:// or https://
-        if not url.startswith(('http://', 'https://')):
-            url = 'https://' + url
-            self.herald_url_edit.setText(url)
-        
-        try:
-            # Open the URL with cookies in a separate thread
-            import threading
-            thread = threading.Thread(target=self._open_url_in_thread, args=(url,), daemon=True)
-            thread.start()
-        except Exception as e:
-            QMessageBox.critical(
-                self,
-                "Erreur",
-                f"Impossible d'ouvrir l'URL : {str(e)}"
-            )
-    
-    def _open_url_in_thread(self, url):
-        """Open URL with cookies in a separate thread."""
-        try:
-            from Functions.cookie_manager import CookieManager
-            cookie_manager = CookieManager()
-            result = cookie_manager.open_url_with_cookies_subprocess(url)
-            
-            if not result.get('success', False):
-                import logging
-                logging.warning(f"Erreur lors de l'ouverture de l'URL: {result.get('message', 'Erreur inconnue')}")
-        except Exception as e:
-            import logging
-            logging.error(f"Erreur lors de l'ouverture de l'URL avec cookies: {e}")
+        herald_url_open_url(self)
     
     def update_rvr_stats(self):
         """Update RvR statistics from Herald"""
-        url = self.herald_url_edit.text().strip()
-        
-        if not url:
-            QMessageBox.warning(
-                self,
-                "URL manquante",
-                "Veuillez entrer une URL Herald valide pour récupérer les statistiques."
-            )
-            return
-        
-        # CRITICAL: Check if Eden validation is running - button should be disabled
-        # If user somehow triggered this while validation running, return silently
-        main_window = self.parent()
-        if main_window and hasattr(main_window, 'ui_manager'):
-            if hasattr(main_window.ui_manager, 'eden_status_thread') and main_window.ui_manager.eden_status_thread:
-                if main_window.ui_manager.eden_status_thread.isRunning():
-                    return  # Silent return - button is disabled with tooltip
-        
-        # Check URL format
-        if not url.startswith(('http://', 'https://')):
-            url = 'https://' + url
-            self.herald_url_edit.setText(url)
-        
-        # Disable button during update
-        self.update_rvr_button.setEnabled(False)
-        
-        # Import required components
-        from UI.progress_dialog_base import ProgressStepsDialog, StepConfiguration
-        
-        # Build steps (SCRAPER_INIT + STATS_SCRAPING + CLEANUP)
-        steps = StepConfiguration.build_steps(
-            StepConfiguration.SCRAPER_INIT,   # Step 0: Init scraper
-            StepConfiguration.STATS_SCRAPING, # Steps 1-5: RvR, PvP, PvE, Wealth, Achievements
-            StepConfiguration.CLEANUP         # Step 6: Close browser
-        )
-        
-        # Créer le dialogue de progression
-        self.progress_dialog = ProgressStepsDialog(
-            parent=self,
-            title=lang.get("progress_stats_update_title", default="📊 Mise à jour des statistiques..."),
-            steps=steps,
-            description=lang.get("progress_stats_update_desc", default="Récupération des statistiques RvR, PvP, PvE et Wealth depuis le Herald Eden"),
-            show_progress_bar=True,
-            determinate_progress=True,  # Mode avec pourcentage
-            allow_cancel=False
-        )
-        
-        # Create update thread
-        self.stats_update_thread = StatsUpdateThread(url)
-        
-        # ✅ Pattern 1 : Connecter via wrappers thread-safe
-        self.stats_update_thread.step_started.connect(self._on_stats_step_started)
-        self.stats_update_thread.step_completed.connect(self._on_stats_step_completed)
-        self.stats_update_thread.step_error.connect(self._on_stats_step_error)
-        
-        # Connecter les signaux de fin
-        self.stats_update_thread.stats_updated.connect(self._on_stats_updated)
-        self.stats_update_thread.update_failed.connect(self._on_stats_failed)
-        
-        # ✅ Pattern 4 : Connecter rejected AVANT show()
-        self.progress_dialog.rejected.connect(self._on_stats_progress_dialog_closed)
-        
-        # Show dialog and start worker
-        self.progress_dialog.show()
-        self.stats_update_thread.start()
+        from Functions.herald_ui_wrappers import herald_ui_update_rvr_stats
+        herald_ui_update_rvr_stats(self, self.herald_url_edit)
     
     # ✅ Pattern 1 : Wrappers thread-safe pour stats update
     def _on_stats_step_started(self, step_index):
@@ -1376,9 +1133,15 @@ class CharacterSheetWindow(QDialog):
         # Stop thread cleanly
         self._stop_stats_thread()
         
-        # Re-enable button
-        if not self.herald_scraping_in_progress:
-            self.update_rvr_button.setEnabled(True)
+        # Re-enable button using state manager
+        herald_url = self.character_data.get('url', '').strip()
+        ui_state_set_herald_buttons(
+            self,
+            character_selected=True,
+            herald_url=herald_url,
+            scraping_active=False,
+            validation_active=False
+        )
     
     def _stop_stats_thread(self):
         """✅ Pattern 2 + 3: Stop stats thread with complete cleanup"""
@@ -1394,7 +1157,7 @@ class CharacterSheetWindow(QDialog):
                     self.stats_update_thread.step_error.disconnect()
                     self.stats_update_thread.stats_updated.disconnect()
                     self.stats_update_thread.update_failed.disconnect()
-                except:
+                except Exception:
                     pass
                 
                 # 3. Attendre 3s
@@ -1418,7 +1181,7 @@ class CharacterSheetWindow(QDialog):
             try:
                 self.progress_dialog.close()
                 self.progress_dialog.deleteLater()
-            except:
+            except Exception:
                 pass
             
             # Supprimer l'attribut seulement s'il existe encore
@@ -1544,9 +1307,16 @@ class CharacterSheetWindow(QDialog):
             
             QMessageBox.critical(self, lang.get("character_sheet.messages.stats_fetch_error_title"), error_msg)
         
-        # Réactiver le bouton
+        # Réactiver le bouton avec state manager
         if not self.herald_scraping_in_progress:
-            self.update_rvr_button.setEnabled(True)
+            herald_url = self.character_data.get('url', '').strip()
+            ui_state_set_herald_buttons(
+                self,
+                character_selected=True,
+                herald_url=herald_url,
+                scraping_active=False,
+                validation_active=False
+            )
     
     def _on_stats_failed(self, error_message):
         """Called in case of complete update failure"""
@@ -1565,289 +1335,39 @@ class CharacterSheetWindow(QDialog):
             f"{lang.get('character_sheet.messages.stats_fetch_failed')}\n{error_message}"
         )
         
-        # Re-enable button
+        # Re-enable buttons with state manager
         if not self.herald_scraping_in_progress:
-            self.update_rvr_button.setEnabled(True)
+            herald_url = self.character_data.get('url', '').strip()
+            ui_state_set_herald_buttons(
+                self,
+                character_selected=True,
+                herald_url=herald_url,
+                scraping_active=False,
+                validation_active=False
+            )
         
         log_with_action(logger_char, "error", f"Stats update error: {error_message}", action="ERROR")
     
     def _update_herald_buttons_state(self):
         """Update Herald button states based on Eden validation status"""
-        from Functions.language_manager import lang
-        
-        # Check if validation is in progress
-        main_window = self.parent()
-        is_validation_running = False
-        
-        if main_window and hasattr(main_window, 'ui_manager'):
-            ui_manager = main_window.ui_manager
-            is_validation_running = (
-                hasattr(ui_manager, 'eden_status_thread') and 
-                ui_manager.eden_status_thread and 
-                ui_manager.eden_status_thread.isRunning()
-            )
-        
-        # Update "Update from Herald" button
-        if hasattr(self, 'update_herald_button'):
-            if is_validation_running:
-                self.update_herald_button.setEnabled(False)
-                self.update_herald_button.setToolTip(lang.get("herald_buttons.validation_in_progress", default="⏳ Validation Eden en cours... Veuillez patienter"))
-            else:
-                self.update_herald_button.setEnabled(True)
-                self.update_herald_button.setToolTip(lang.get("character_sheet.labels.update_from_herald_tooltip"))
-        
-        # Update "Update RvR Stats" button
-        if hasattr(self, 'update_rvr_button'):
-            herald_url = self.herald_url_edit.text().strip() if hasattr(self, 'herald_url_edit') else ''
-            
-            if is_validation_running:
-                self.update_rvr_button.setEnabled(False)
-                self.update_rvr_button.setToolTip(lang.get("herald_buttons.validation_in_progress", default="⏳ Validation Eden en cours... Veuillez patienter"))
-            elif not herald_url or self.herald_scraping_in_progress:
-                # Keep disabled state if no URL or scraping in progress
-                pass
-            else:
-                self.update_rvr_button.setEnabled(True)
-                self.update_rvr_button.setToolTip(lang.get("update_rvr_pvp_tooltip"))
+        herald_url_update_button_states(self)
     
     def _update_all_stats_ui(self, result_rvr, result_pvp, result_pve, result_wealth, result_achievements):
         """Update all UI labels with complete stats"""
-        # RvR Captures
-        tower = result_rvr['tower_captures']
-        keep = result_rvr['keep_captures']
-        relic = result_rvr['relic_captures']
-        
-        self.tower_captures_label.setText(f"{tower:,}")
-        self.keep_captures_label.setText(f"{keep:,}")
-        self.relic_captures_label.setText(f"{relic:,}")
-        
-        # PvP Stats
-        solo_kills = result_pvp['solo_kills']
-        solo_kills_alb = result_pvp['solo_kills_alb']
-        solo_kills_hib = result_pvp['solo_kills_hib']
-        solo_kills_mid = result_pvp['solo_kills_mid']
-        
-        deathblows = result_pvp['deathblows']
-        deathblows_alb = result_pvp['deathblows_alb']
-        deathblows_hib = result_pvp['deathblows_hib']
-        deathblows_mid = result_pvp['deathblows_mid']
-        
-        kills = result_pvp['kills']
-        kills_alb = result_pvp['kills_alb']
-        kills_hib = result_pvp['kills_hib']
-        kills_mid = result_pvp['kills_mid']
-        
-        self.solo_kills_label.setText(f"{solo_kills:,}")
-        self.deathblows_label.setText(f"{deathblows:,}")
-        self.kills_label.setText(f"{kills:,}")
-        
-        self.solo_kills_detail_label.setText(
-            f'→ <span style="color: #C41E3A;">Alb</span>: {solo_kills_alb:,}  |  '
-            f'<span style="color: #228B22;">Hib</span>: {solo_kills_hib:,}  |  '
-            f'<span style="color: #4169E1;">Mid</span>: {solo_kills_mid:,}'
+        character_herald_apply_scraped_stats(
+            self, result_rvr, result_pvp, result_pve, result_wealth, result_achievements
         )
-        self.deathblows_detail_label.setText(
-            f'→ <span style="color: #C41E3A;">Alb</span>: {deathblows_alb:,}  |  '
-            f'<span style="color: #228B22;">Hib</span>: {deathblows_hib:,}  |  '
-            f'<span style="color: #4169E1;">Mid</span>: {deathblows_mid:,}'
-        )
-        self.kills_detail_label.setText(
-            f'→ <span style="color: #C41E3A;">Alb</span>: {kills_alb:,}  |  '
-            f'<span style="color: #228B22;">Hib</span>: {kills_hib:,}  |  '
-            f'<span style="color: #4169E1;">Mid</span>: {kills_mid:,}'
-        )
-        
-        # PvE Stats
-        dragon_kills = result_pve['dragon_kills']
-        legion_kills = result_pve['legion_kills']
-        mini_dragon_kills = result_pve['mini_dragon_kills']
-        epic_encounters = result_pve['epic_encounters']
-        epic_dungeons = result_pve['epic_dungeons']
-        sobekite = result_pve['sobekite']
-        
-        self.dragon_kills_value.setText(f"{dragon_kills:,}")
-        self.legion_kills_value.setText(f"{legion_kills:,}")
-        self.mini_dragon_kills_value.setText(f"{mini_dragon_kills:,}")
-        self.epic_encounters_value.setText(f"{epic_encounters:,}")
-        self.epic_dungeons_value.setText(f"{epic_dungeons:,}")
-        self.sobekite_value.setText(f"{sobekite:,}")
-        
-        # Wealth
-        money = result_wealth['money']
-        self.money_label.setText(str(money))
-        
-        # Achievements (optionnel)
-        if result_achievements.get('success'):
-            achievements = result_achievements['achievements']
-            self._update_achievements_display(achievements)
-            self.character_data['achievements'] = achievements
-        
-        # Update character_data
-        self.character_data['tower_captures'] = tower
-        self.character_data['keep_captures'] = keep
-        self.character_data['relic_captures'] = relic
-        
-        self.character_data['solo_kills'] = solo_kills
-        self.character_data['deathblows'] = deathblows
-        self.character_data['kills'] = kills
-        self.character_data['solo_kills_alb'] = solo_kills_alb
-        self.character_data['solo_kills_hib'] = solo_kills_hib
-        self.character_data['solo_kills_mid'] = solo_kills_mid
-        self.character_data['deathblows_alb'] = deathblows_alb
-        self.character_data['deathblows_hib'] = deathblows_hib
-        self.character_data['deathblows_mid'] = deathblows_mid
-        self.character_data['kills_alb'] = kills_alb
-        self.character_data['kills_hib'] = kills_hib
-        self.character_data['kills_mid'] = kills_mid
-        
-        self.character_data['dragon_kills'] = dragon_kills
-        self.character_data['legion_kills'] = legion_kills
-        self.character_data['mini_dragon_kills'] = mini_dragon_kills
-        self.character_data['epic_encounters'] = epic_encounters
-        self.character_data['epic_dungeons'] = epic_dungeons
-        self.character_data['sobekite'] = sobekite
-        
-        self.character_data['money'] = money
     
     def _update_partial_stats_ui(self, result_rvr, result_pvp, result_pve, result_wealth, result_achievements):
         """Update UI and character_data for partial update"""
-        from Functions.character_manager import save_character
-        
-        if result_rvr and result_rvr.get('success'):
-            tower = result_rvr['tower_captures']
-            keep = result_rvr['keep_captures']
-            relic = result_rvr['relic_captures']
-            
-            self.tower_captures_label.setText(f"{tower:,}")
-            self.keep_captures_label.setText(f"{keep:,}")
-            self.relic_captures_label.setText(f"{relic:,}")
-            
-            self.character_data['tower_captures'] = tower
-            self.character_data['keep_captures'] = keep
-            self.character_data['relic_captures'] = relic
-            
-            save_character(self.character_data, allow_overwrite=True)
-        
-        if result_pvp and result_pvp.get('success'):
-            solo_kills = result_pvp['solo_kills']
-            solo_kills_alb = result_pvp['solo_kills_alb']
-            solo_kills_hib = result_pvp['solo_kills_hib']
-            solo_kills_mid = result_pvp['solo_kills_mid']
-            
-            deathblows = result_pvp['deathblows']
-            deathblows_alb = result_pvp['deathblows_alb']
-            deathblows_hib = result_pvp['deathblows_hib']
-            deathblows_mid = result_pvp['deathblows_mid']
-            
-            kills = result_pvp['kills']
-            kills_alb = result_pvp['kills_alb']
-            kills_hib = result_pvp['kills_hib']
-            kills_mid = result_pvp['kills_mid']
-            
-            self.solo_kills_label.setText(f"{solo_kills:,}")
-            self.deathblows_label.setText(f"{deathblows:,}")
-            self.kills_label.setText(f"{kills:,}")
-            
-            self.solo_kills_detail_label.setText(
-                f'→ <span style="color: #C41E3A;">Alb</span>: {solo_kills_alb:,}  |  '
-                f'<span style="color: #228B22;">Hib</span>: {solo_kills_hib:,}  |  '
-                f'<span style="color: #4169E1;">Mid</span>: {solo_kills_mid:,}'
-            )
-            self.deathblows_detail_label.setText(
-                f'→ <span style="color: #C41E3A;">Alb</span>: {deathblows_alb:,}  |  '
-                f'<span style="color: #228B22;">Hib</span>: {deathblows_hib:,}  |  '
-                f'<span style="color: #4169E1;">Mid</span>: {deathblows_mid:,}'
-            )
-            self.kills_detail_label.setText(
-                f'→ <span style="color: #C41E3A;">Alb</span>: {kills_alb:,}  |  '
-                f'<span style="color: #228B22;">Hib</span>: {kills_hib:,}  |  '
-                f'<span style="color: #4169E1;">Mid</span>: {kills_mid:,}'
-            )
-            
-            self.character_data['solo_kills'] = solo_kills
-            self.character_data['deathblows'] = deathblows
-            self.character_data['kills'] = kills
-            self.character_data['solo_kills_alb'] = solo_kills_alb
-            self.character_data['solo_kills_hib'] = solo_kills_hib
-            self.character_data['solo_kills_mid'] = solo_kills_mid
-            self.character_data['deathblows_alb'] = deathblows_alb
-            self.character_data['deathblows_hib'] = deathblows_hib
-            self.character_data['deathblows_mid'] = deathblows_mid
-            self.character_data['kills_alb'] = kills_alb
-            self.character_data['kills_hib'] = kills_hib
-            self.character_data['kills_mid'] = kills_mid
-            
-            save_character(self.character_data, allow_overwrite=True)
+        character_herald_apply_partial_stats(
+            self, result_rvr, result_pvp, result_pve, result_wealth, result_achievements
+        )
     
     def update_from_herald(self):
         """Update character data from Herald"""
         url = self.herald_url_edit.text().strip()
-        
-        if not url:
-            QMessageBox.warning(
-                self,
-                lang.get("update_char_error"),
-                lang.get("update_char_no_url")
-            )
-            return
-        
-        # CRITICAL: Check if Eden validation is running - button should be disabled
-        # If user somehow triggered this while validation running, return silently
-        main_window = self.parent()
-        if main_window and hasattr(main_window, 'ui_manager'):
-            if hasattr(main_window.ui_manager, 'eden_status_thread') and main_window.ui_manager.eden_status_thread:
-                if main_window.ui_manager.eden_status_thread.isRunning():
-                    return  # Silent return - button is disabled with tooltip
-        
-        # Marquer qu'un scraping Herald est en cours AVANT toute modification d'URL
-        self.herald_scraping_in_progress = True
-        
-        # Check URL format
-        if not url.startswith(('http://', 'https://')):
-            url = 'https://' + url
-            self.herald_url_edit.setText(url)
-        
-        # Disable all buttons during update
-        self.update_herald_button.setEnabled(False)
-        self.open_herald_button.setEnabled(False)
-        self.update_rvr_button.setEnabled(False)
-        
-        # Import required components
-        from UI.progress_dialog_base import ProgressStepsDialog, StepConfiguration
-        
-        # Build steps (CHARACTER_UPDATE)
-        steps = StepConfiguration.build_steps(
-            StepConfiguration.CHARACTER_UPDATE  # 8 steps: Extract name → Init → Load cookies → Navigate → Wait → Extract data → Format → Close
-        )
-        
-        # Create progress dialog
-        self.progress_dialog = ProgressStepsDialog(
-            parent=self,
-            title=lang.get("progress_character_update_title", default="🌐 Mise à jour depuis Herald..."),
-            steps=steps,
-            description=lang.get("progress_character_update_desc", default="Récupération des informations du personnage depuis Eden Herald"),
-            show_progress_bar=True,
-            determinate_progress=True,
-            allow_cancel=False
-        )
-        
-        # Create update thread
-        self.char_update_thread = CharacterUpdateThread(url)
-        
-        # ✅ Pattern 1 : Connecter via wrappers thread-safe
-        self.char_update_thread.step_started.connect(self._on_char_update_step_started)
-        self.char_update_thread.step_completed.connect(self._on_char_update_step_completed)
-        self.char_update_thread.step_error.connect(self._on_char_update_step_error)
-        
-        # Connecter signal de fin
-        self.char_update_thread.update_finished.connect(self._on_herald_scraping_finished)
-        
-        # ✅ Pattern 4 : Connecter rejected AVANT show()
-        self.progress_dialog.rejected.connect(self._on_char_update_progress_dialog_closed)
-        
-        # Show dialog and start worker
-        self.progress_dialog.show()
-        self.char_update_thread.start()
+        character_herald_update(self, url)
     
     # ✅ Pattern 1 : Wrappers thread-safe pour character update
     def _on_char_update_step_started(self, step_index):
@@ -1882,12 +1402,16 @@ class CharacterSheetWindow(QDialog):
         # Stop thread cleanly
         self._stop_char_update_thread()
         
-        # Re-enable buttons
+        # Re-enable buttons using state manager
         self.herald_scraping_in_progress = False
-        self.update_herald_button.setEnabled(True)
-        self.open_herald_button.setEnabled(True)
-        if not self.herald_scraping_in_progress:
-            self.update_rvr_button.setEnabled(True)
+        herald_url = self.character_data.get('url', '').strip()
+        ui_state_set_herald_buttons(
+            self,
+            character_selected=True,
+            herald_url=herald_url,
+            scraping_active=False,
+            validation_active=False
+        )
     
     def _stop_char_update_thread(self):
         """✅ Pattern 2 + 3: Stop character update thread with complete cleanup"""
@@ -1902,7 +1426,7 @@ class CharacterSheetWindow(QDialog):
                     self.char_update_thread.step_completed.disconnect()
                     self.char_update_thread.step_error.disconnect()
                     self.char_update_thread.update_finished.disconnect()
-                except:
+                except Exception:
                     pass
                 
                 # 3. Attendre 3s
@@ -1926,7 +1450,7 @@ class CharacterSheetWindow(QDialog):
             try:
                 self.progress_dialog.close()
                 self.progress_dialog.deleteLater()
-            except:
+            except Exception:
                 pass
             
             # Supprimer l'attribut seulement s'il existe encore
@@ -2114,11 +1638,14 @@ class CharacterSheetWindow(QDialog):
                 self._stop_char_update_thread()
             
             # Always re-enable all buttons, even in case of error or early return
-            herald_url = self.herald_url_edit.text().strip()
-            
-            self.update_herald_button.setEnabled(bool(herald_url))
-            self.open_herald_button.setEnabled(bool(herald_url))
-            self.update_rvr_button.setEnabled(bool(herald_url))
+            herald_url = self.character_data.get('url', '').strip()
+            ui_state_set_herald_buttons(
+                self,
+                character_selected=True,
+                herald_url=herald_url,
+                scraping_active=False,
+                validation_active=False
+            )
             
             # Force visual update
             QApplication.processEvents()
@@ -2127,35 +1654,29 @@ class CharacterSheetWindow(QDialog):
         """Renames the character with validation."""
         try:
             old_name = self.character_data.get('name', '')
-            new_name = self.name_edit.text().strip()
             
-            if not new_name:
-                QMessageBox.warning(self, "Erreur", "Le nom du personnage ne peut pas être vide.")
-                self.name_edit.setText(old_name)  # Reset to original name
+            # Validate new name using centralized validation
+            result = validate_character_rename(self.name_edit.text())
+            if not result['valid']:
+                msg_show_warning(self, "titles.warning", result['message'])
+                self.name_edit.setText(old_name)
                 return
             
+            new_name = result['value']
             if old_name == new_name:
-                QMessageBox.information(self, "Information", "Le nom n'a pas changé.")
+                msg_show_info_with_details(self, "titles.info", "Le nom n'a pas changé.")
                 return
             
             # Confirm rename
-            reply = QMessageBox.question(
-                self,
-                "Confirmer le renommage",
-                f"Renommer '{old_name}' en '{new_name}' ?",
-                QMessageBox.Yes | QMessageBox.No,
-                QMessageBox.Yes
-            )
-            
-            if reply == QMessageBox.Yes:
+            if msg_show_confirmation(self, "Confirmer le renommage", f"Renommer '{old_name}' en '{new_name}' ?"):
                 from Functions.character_manager import rename_character
-                success, msg = rename_character(old_name, new_name)
+                from Functions.character_rename_handler import character_rename_with_validation
+                
+                success, msg = character_rename_with_validation(
+                    self.character_data, new_name, rename_character
+                )
                 
                 if success:
-                    # Update character data
-                    self.character_data['name'] = new_name
-                    self.character_data['id'] = new_name
-                    
                     # Update window title
                     self.setWindowTitle(f"Fiche personnage - {new_name}")
                     
@@ -2163,12 +1684,11 @@ class CharacterSheetWindow(QDialog):
                     if hasattr(self.parent_app, 'refresh_character_list'):
                         self.parent_app.refresh_character_list()
                 else:
-                    error_msg = "Un personnage avec ce nom existe déjà." if msg == "char_exists_error" else msg
-                    QMessageBox.critical(self, "Erreur", f"Échec du renommage : {error_msg}")
+                    msg_show_error(self, "titles.error", f"Échec du renommage : {msg}")
                     self.name_edit.setText(old_name)  # Reset to original name
                     
         except Exception as e:
-            QMessageBox.critical(self, "Erreur", f"Erreur lors du renommage : {str(e)}")
+            msg_show_error(self, "titles.error", f"Erreur lors du renommage : {str(e)}")
             # Reset to original name in case of error
             if hasattr(self, 'character_data'):
                 self.name_edit.setText(self.character_data.get('name', ''))
@@ -2249,7 +1769,7 @@ class ColumnsConfigDialog(QDialog):
     
     def get_visibility_config(self):
         """Returns a dictionary with the visibility state of each column."""
-        return {key: checkbox.isChecked() for key, checkbox in self.checkboxes.items()}
+        return ui_get_visibility_config(self.checkboxes)
 
 
 class NewCharacterDialog(QDialog):
@@ -2371,17 +1891,22 @@ class NewCharacterDialog(QDialog):
 
     def get_data(self):
         """Returns the entered data if valid."""
-        name = self.name_edit.text().strip()
-        if not name:
-            QMessageBox.warning(self, lang.get("error_title"), lang.get("char_name_empty_error"))
+        validation_result = validate_new_character_dialog_data(
+            self.name_edit.text(),
+            self.guild_edit.text()
+        )
+        if not validation_result['valid']:
+            QMessageBox.warning(self, lang.get("error_title"), validation_result['message'])
             return None
+        name = validation_result['name']
+        guild = validation_result['guild']
+        
         realm = self.realm_combo.currentText()
-        race = self.race_combo.currentData()  # Get actual race name
-        class_name = self.class_combo.currentData()  # Get actual class name
+        race = self.race_combo.currentData()
+        class_name = self.class_combo.currentData()
         season = self.season_combo.currentText()
         level = int(self.level_combo.currentText())
         page = int(self.page_combo.currentText())
-        guild = self.guild_edit.text().strip()
         
         # Validate race/class combination
         if race and class_name:
@@ -2725,7 +2250,7 @@ class ConfigurationDialog(QDialog):
 
     def browse_folder(self, line_edit, title_key):
         """Generic folder browser."""
-        directory = QFileDialog.getExistingDirectory(self, lang.get(title_key))
+        directory = dialog_select_directory(self, title_key)
         if directory:
             line_edit.setText(directory)
 
@@ -3023,168 +2548,29 @@ class ArmorManagementDialog(QDialog):
     
     def upload_armor(self):
         """Opens file dialog to upload an armor file."""
-        file_path, _ = QFileDialog.getOpenFileName(
-            self,
-            lang.get("armoury_dialog.dialogs.select_file"),
-            "",
-            lang.get("armoury_dialog.dialogs.all_files")
-        )
-        
-        if file_path:
-            # Open preview dialog before import
-            from Functions.config_manager import config
-            available_seasons = config.get("game.seasons", ["S3"])
-            
-            preview_dialog = ArmorUploadPreviewDialog(
-                self,
-                file_path,
-                self.season,
-                available_seasons,
-                self.realm,
-                self.character_name
-            )
-            
-            if preview_dialog.exec() == QDialog.Accepted:
-                try:
-                    # Get the chosen season and filename
-                    target_season = preview_dialog.season_combo.currentText()
-                    new_filename = preview_dialog.filename_edit.text().strip()
-                    
-                    # If season changed, create a new ArmorManager for that season
-                    if target_season != self.season:
-                        from Functions.armor_manager import ArmorManager
-                        target_armor_manager = ArmorManager(target_season, self.realm, self.character_name)
-                    else:
-                        target_armor_manager = self.armor_manager
-                    
-                    # Upload with optional rename
-                    result_path = target_armor_manager.upload_armor(file_path, new_filename)
-                    
-                    season_info = lang.get("armoury_dialog.messages.season_info", season=target_season) if target_season != self.season else ""
-                    QMessageBox.information(
-                        self, 
-                        lang.get("dialogs.titles.success"),
-                        lang.get("armoury_dialog.messages.upload_success", filename=os.path.basename(result_path), season_info=season_info)
-                    )
-                    
-                    # Refresh only if same season
-                    if target_season == self.season:
-                        self.refresh_list()
-                    
-                    logging.info(f"Fichier d'armure uploadé : {result_path} (Saison: {target_season})")
-                except Exception as e:
-                    logging.error(f"Erreur lors de l'upload du fichier d'armure : {e}")
-                    QMessageBox.critical(self, lang.get("dialogs.titles.error"), lang.get("armoury_dialog.messages.upload_error", error=str(e)))
+        armor_upload_file(self, self.armor_manager, self.season, self.character_name, self.realm)
     
     def import_template(self):
         """Opens new template import dialog."""
-        # Get character class from character_data
-        character_class = self.character_data.get('class', '')
-        realm = self.character_data.get('realm', '')
-        name = self.character_data.get('name', '')
-        
-        if not character_class:
-            QMessageBox.warning(
-                self,
-                lang.get("template_import.error_title"),
-                lang.get("template_import.error_no_class")
-            )
-            return
-        
-        # Get class translations from data_manager
-        class_fr = character_class
-        class_de = character_class
-        
-        if hasattr(self, 'data_manager') and self.data_manager:
-            realm_classes = self.data_manager.get_classes(realm)
-            for cls in realm_classes:
-                if cls.get('name') == character_class:
-                    class_fr = cls.get('name_fr', character_class)
-                    class_de = cls.get('name_de', character_class)
-                    break
-        
-        # Prepare character data for dialog
-        character_data = {
-            'character_class': character_class,
-            'class_fr': class_fr,
-            'class_de': class_de,
-            'realm': realm,
-            'name': name
-        }
-        
-        dialog = TemplateImportDialog(self, character_data)
-        # Connect signal to refresh list immediately when template is imported
-        # Must update index first to include new template
-        dialog.template_imported.connect(lambda: (
-            self.template_manager.update_index(),
-            self.refresh_list()
-        ))
-        if dialog.exec() == QDialog.Accepted:
-            # Template imported successfully
-            QMessageBox.information(
-                self,
-                "Succès",
-                "Template importé avec succès !"
-            )
+        armor_import_template(
+            self, self.character_data, self.data_manager, self.template_manager
+        )
     
     def _sync_template_prices_with_db(self, metadata_path, metadata):
         """
         Sync template prices with database.
-        Check if items with prices in JSON now exist in DB.
-        If yes: remove from JSON (DB will be used instead).
-        If no: keep in JSON.
+        Wrapper around items_price_sync_template() for backward compatibility.
         
         Args:
             metadata_path: Path to the metadata JSON file
             metadata: Loaded metadata dict
         """
-        if not metadata or 'prices' not in metadata:
-            return
-        
-        prices_dict = metadata.get('prices', {})
-        if not prices_dict:
-            return
-        
-        items_to_remove = []
-        realm_lower = self.realm.lower()
-        
-        try:
-            for item_name in prices_dict.keys():
-                # Check if item now exists in database
-                item_name_lower = item_name.lower()
-                
-                # Try realm-specific search
-                search_key_realm = f"{item_name_lower}:{realm_lower}"
-                item_data = self.db_manager.search_item(search_key_realm)
-                
-                # Try ":all" suffix
-                if not item_data:
-                    search_key_all = f"{item_name_lower}:all"
-                    item_data = self.db_manager.search_item(search_key_all)
-                
-                # Try without suffix
-                if not item_data:
-                    item_data = self.db_manager.search_item(item_name)
-                
-                # If item found in DB with a price, mark for removal from JSON
-                if item_data and 'merchant_price' in item_data:
-                    items_to_remove.append(item_name)
-                    logging.info(f"Item '{item_name}' now found in DB, will remove from template JSON")
-            
-            # Remove items from JSON if any found in DB
-            if items_to_remove:
-                for item_name in items_to_remove:
-                    del metadata['prices'][item_name]
-                
-                # Save updated metadata
-                import json
-                with open(metadata_path, 'w', encoding='utf-8') as f:
-                    json.dump(metadata, f, indent=2, ensure_ascii=False)
-                
-                logging.info(f"Synced {len(items_to_remove)} items from template JSON to DB")
-                
-        except Exception as e:
-            logging.error(f"Error syncing template prices with DB: {e}", exc_info=True)
+        items_price_sync_template(
+            metadata_path=metadata_path,
+            metadata=metadata,
+            db_manager=self.db_manager,
+            realm=self.realm
+        )
     
     def parse_zenkcraft_template(self, content, season=""):
         """
@@ -3195,6 +2581,9 @@ class ArmorManagementDialog(QDialog):
         Supports:
         - Zenkcraft format (default)
         - Loki format (Slot (Item):)
+        
+        Returns:
+            tuple: (formatted_content: str, items_without_price: list)
         """
         from Functions.template_parser import template_parse
         return template_parse(content, self.realm, self.template_manager, self.db_manager)
@@ -3206,16 +2595,27 @@ class ArmorManagementDialog(QDialog):
         if not selected_items:
             self.preview_area.clear()
             self.preview_area.setPlaceholderText(lang.get("armoury_dialog.preview.no_selection"))
-            self.preview_download_button.setEnabled(False)
-            self.search_prices_button.setEnabled(False)
+            ui_state_set_armor_buttons(
+                self,
+                character_selected=False,
+                file_selected=False,
+                items_without_price=False,
+                db_manager=self.db_manager
+            )
             return
         
         # Get filename from the first column of selected row
         row = selected_items[0].row()
         filename = self.table.item(row, 0).text()
         
-        # Enable download button
-        self.preview_download_button.setEnabled(True)
+        # Update button states
+        ui_state_set_armor_buttons(
+            self,
+            character_selected=True,
+            file_selected=True,
+            items_without_price=False,
+            db_manager=self.db_manager
+        )
         
         try:
             # Get file path using TemplateManager
@@ -3230,7 +2630,12 @@ class ArmorManagementDialog(QDialog):
                 content = f.read()
             
             # Parse and format Zenkcraft template
-            formatted_content = self.parse_zenkcraft_template(content, self.season)
+            # Returns tuple: (formatted_content, items_without_price)
+            parse_result = self.parse_zenkcraft_template(content, self.season)
+            formatted_content, items_without_price = parse_result
+            
+            # Store items_without_price for search button state
+            self.items_without_price = items_without_price
             
             # Convert to HTML with color support
             import re
@@ -3255,13 +2660,22 @@ class ArmorManagementDialog(QDialog):
             # Display formatted content
             self.preview_area.setHtml(html_content)
             
-            # Enable/disable search button based on items_without_price
-            if hasattr(self, 'items_without_price') and self.items_without_price:
-                self.search_prices_button.setEnabled(True)
-                self.search_prices_button.setText(f"🔍 Search Prices ({len(self.items_without_price)} items)")
+            # Update search button based on items_without_price
+            has_items_without_price = bool(self.items_without_price)
+            ui_state_set_armor_buttons(
+                self,
+                character_selected=True,
+                file_selected=True,
+                items_without_price=has_items_without_price,
+                db_manager=self.db_manager
+            )
+            
+            if has_items_without_price:
+                button_text = lang.get("armoury_dialog.buttons.search_missing_prices", default="Search Missing Prices")
+                self.search_prices_button.setText(f"🔍 {button_text} ({len(self.items_without_price)} items)")
             else:
-                self.search_prices_button.setEnabled(False)
-                self.search_prices_button.setText("🔍 Search Missing Prices")
+                button_text = lang.get("armoury_dialog.buttons.search_missing_prices", default="Search Missing Prices")
+                self.search_prices_button.setText(f"🔍 {button_text}")
                 
         except Exception as e:
             logging.error(f"Erreur lors de la prévisualisation : {e}")
@@ -3269,128 +2683,19 @@ class ArmorManagementDialog(QDialog):
     
     def _on_model_link_clicked(self, url):
         """Handle click on model viewer link in preview."""
-        try:
-            from PySide6.QtCore import QUrl
-            
-            # Check if this is a model link
-            if url.scheme() == "model":
-                item_name = url.path()
-                # Open model viewer without changing current selection/preview
-                self._show_item_model(item_name)
-                # Prevent default link navigation that would clear the preview
-                return
-        except Exception as e:
-            logging.error(f"Error handling model link click: {e}")
+        item_model_on_link_clicked(self, url)
     
     def _show_item_model(self, item_name):
         """Show model image for the specified item."""
-        try:
-            # Search for item in database
-            item_data = self.db_manager.search_item(item_name)
-            
-            if not item_data:
-                # Try with realm suffix
-                item_name_lower = item_name.lower()
-                realm_lower = self.realm.lower()
-                search_key = f"{item_name_lower}:{realm_lower}"
-                item_data = self.db_manager.search_item(search_key)
-            
-            if not item_data:
-                # Try with :all suffix
-                search_key = f"{item_name.lower()}:all"
-                item_data = self.db_manager.search_item(search_key)
-            
-            # Support both 'model_id' and 'model' fields
-            model_id = item_data.get('model_id') or item_data.get('model') if item_data else None
-            
-            if model_id:
-                model_category = item_data.get('model_category', 'items')
-                
-                # Show model viewer dialog with embedded image (non-modal)
-                from UI.model_viewer_dialog import ModelViewerDialog
-                dialog = ModelViewerDialog(
-                    self,
-                    model_id=model_id,
-                    item_name=item_name,
-                    model_category=model_category
-                )
-                dialog.show()
-            else:
-                QMessageBox.information(
-                    self,
-                    lang.get("dialogs.titles.info", default="Information"),
-                    lang.get("armoury_dialog.messages.no_model_found", 
-                            default=f"No model information found for '{item_name}'.",
-                            item_name=item_name)
-                )
-        except Exception as e:
-            logging.error(f"Error showing item model for '{item_name}': {e}")
-            QMessageBox.critical(
-                self,
-                lang.get("dialogs.titles.error", default="Error"),
-                lang.get("armoury_dialog.messages.model_viewer_error",
-                        default=f"Error opening model viewer: {str(e)}",
-                        error=str(e))
-            )
+        item_model_show(self, item_name)
     
     def open_armor(self, filename):
         """Opens an armor file with the default application."""
-        try:
-            import subprocess
-            import platform
-            
-            template_path = self.template_manager._get_template_path(self.realm, filename)
-            
-            if not template_path.exists():
-                QMessageBox.warning(self, lang.get("dialogs.titles.error"), 
-                    lang.get("armoury_dialog.messages.file_not_found", filename=filename))
-                return
-            
-            # Open file with default application
-            if platform.system() == 'Windows':
-                os.startfile(str(template_path))
-            elif platform.system() == 'Darwin':  # macOS
-                subprocess.run(['open', str(template_path)])
-            else:  # Linux
-                subprocess.run(['xdg-open', str(template_path)])
-            
-            logging.info(f"Ouverture du fichier d'armure : {filename}")
-        except Exception as e:
-            logging.error(f"Erreur lors de l'ouverture du fichier d'armure : {e}")
-            QMessageBox.critical(self, lang.get("dialogs.titles.error"), lang.get("armoury_dialog.messages.open_error", error=str(e)))
+        armor_open_file(self, self.template_manager, self.realm, filename)
     
     def delete_armor(self, filename):
         """Deletes an armor file after confirmation."""
-        reply = QMessageBox.question(
-            self,
-            lang.get("armoury_dialog.dialogs.confirm_delete"),
-            lang.get("armoury_dialog.messages.delete_confirm", filename=filename),
-            QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.No
-        )
-        
-        if reply == QMessageBox.Yes:
-            try:
-                # Use TemplateManager to delete template
-                success = self.template_manager.delete_template(filename, self.realm)
-                
-                if success:
-                    QMessageBox.information(
-                        self, 
-                        lang.get("dialogs.titles.success"),
-                        lang.get("armoury_dialog.messages.delete_success", filename=filename)
-                    )
-                    self.refresh_list()
-                    logging.info(f"Fichier d'armure supprimé : {filename}")
-                else:
-                    QMessageBox.warning(
-                        self,
-                        lang.get("dialogs.titles.error"),
-                        lang.get("armoury_dialog.messages.delete_error", error="Delete operation failed")
-                    )
-            except Exception as e:
-                logging.error(f"Erreur lors de la suppression du fichier d'armure : {e}")
-                QMessageBox.critical(self, lang.get("dialogs.titles.error"), lang.get("armoury_dialog.messages.delete_error", error=str(e)))
+        armor_delete_file(self, self.template_manager, self.realm, filename)
     
     def download_selected_armor(self):
         """Downloads the currently selected armor file (called from preview panel button)."""
@@ -3415,31 +2720,15 @@ class ArmorManagementDialog(QDialog):
         row = item.row()
         filename = self.table.item(row, 0).text()
         
-        # Create context menu
-        menu = QMenu(self)
-        
-        # View action
-        view_action = menu.addAction(lang.get("armoury_dialog.context_menu.view"))
-        view_action.triggered.connect(lambda: self.view_armor(filename))
-        
-        # Download action
-        download_action = menu.addAction(lang.get("armoury_dialog.context_menu.download"))
-        download_action.triggered.connect(lambda: self.download_armor(filename))
-        
-        menu.addSeparator()
-        
-        # Open action
-        open_action = menu.addAction(lang.get("armoury_dialog.context_menu.open"))
-        open_action.triggered.connect(lambda: self.open_armor(filename))
-        
-        menu.addSeparator()
-        
-        # Delete action
-        delete_action = menu.addAction(lang.get("armoury_dialog.context_menu.delete"))
-        delete_action.triggered.connect(lambda: self.delete_armor(filename))
-        
-        # Show menu at cursor position
-        menu.exec_(self.table.viewport().mapToGlobal(position))
+        # Build and show context menu
+        from UI.ui_context_menus import ui_show_armor_context_menu
+        callbacks = {
+            'view': self.view_armor,
+            'download': self.download_armor,
+            'open': self.open_armor,
+            'delete': self.delete_armor,
+        }
+        ui_show_armor_context_menu(self, self.table, position, filename, callbacks)
     
     def view_armor(self, filename):
         """Opens armor viewer dialog."""
@@ -3465,11 +2754,11 @@ class ArmorManagementDialog(QDialog):
                 return
             
             # Ask user where to save the file
-            save_path, _ = QFileDialog.getSaveFileName(
+            save_path = dialog_save_file(
                 self,
-                lang.get("armoury_dialog.dialogs.download_file"),
-                filename,
-                lang.get("armoury_dialog.dialogs.all_files")
+                title_key="armoury_dialog.dialogs.download_file",
+                default_filename=filename,
+                filter_key="armoury_dialog.dialogs.all_files"
             )
             
             if save_path:
@@ -3486,7 +2775,8 @@ class ArmorManagementDialog(QDialog):
             QMessageBox.critical(self, lang.get("dialogs.titles.error"), lang.get("armoury_dialog.messages.download_error", error=str(e)))
     
     def search_missing_prices(self):
-        """Search for missing item prices online using Eden scraper."""
+        """Search for missing item prices online using Eden scraper.
+        Wrapper around items_price_find_missing() for backward compatibility."""
         if not hasattr(self, 'items_without_price') or not self.items_without_price:
             QMessageBox.information(
                 self,
@@ -3800,7 +3090,7 @@ class CookieManagerDialog(QDialog):
         if self.connection_thread and self.connection_thread.isRunning():
             try:
                 self.connection_thread.finished.disconnect()
-            except:
+            except Exception:
                 pass
             self.connection_thread.quit()
             self.connection_thread.wait()
@@ -3860,7 +3150,7 @@ class CookieManagerDialog(QDialog):
             self.details_label.setText(
                 lang.get("cookie_manager.details_need_import")
             )
-            self.delete_button.setEnabled(False)
+            ui_state_on_selection_changed(self, selection_count=0, is_valid=False, enable_delete=False)
             
         elif info.get('error'):
             # Erreur de lecture
@@ -3868,7 +3158,7 @@ class CookieManagerDialog(QDialog):
             self.status_label.setStyleSheet("color: orange;")
             self.expiry_label.setText("")
             self.details_label.setText(f"Erreur: {info['error']}")
-            self.delete_button.setEnabled(True)
+            ui_state_on_selection_changed(self, selection_count=1, is_valid=True, enable_delete=True)
             
         elif not info['is_valid']:
             # Expired cookies
@@ -3882,7 +3172,7 @@ class CookieManagerDialog(QDialog):
             details += lang.get("cookie_manager.details_need_new")
             
             self.details_label.setText(details)
-            self.delete_button.setEnabled(True)
+            ui_state_on_selection_changed(self, selection_count=1, is_valid=True, enable_delete=True)
             
         else:
             # Cookies valides
@@ -3923,7 +3213,7 @@ class CookieManagerDialog(QDialog):
             details += lang.get("cookie_manager.file_location", path=info['file_path'])
             
             self.details_label.setText(details)
-            self.delete_button.setEnabled(True)
+            ui_state_on_selection_changed(self, selection_count=1, is_valid=True, enable_delete=True)
         
         # Reset browser label (will be updated after test/generation)
         if not (info and info.get('is_valid')):
@@ -3931,11 +3221,10 @@ class CookieManagerDialog(QDialog):
     
     def browse_cookie_file(self):
         """Open dialog to select a cookie file"""
-        file_path, _ = QFileDialog.getOpenFileName(
+        file_path = dialog_open_file(
             self,
-            lang.get("cookie_manager.browse_dialog_title"),
-            "",
-            lang.get("cookie_manager.browse_dialog_filter")
+            title_key="cookie_manager.browse_dialog_title",
+            filter_key="cookie_manager.browse_dialog_filter"
         )
         
         if file_path:
@@ -3956,7 +3245,6 @@ class CookieManagerDialog(QDialog):
             return
         
         # Check that the File existe before d'essayer d'importer
-        from pathlib import Path
         import os
         
         if not os.path.exists(file_path):
@@ -4155,7 +3443,7 @@ class CookieManagerDialog(QDialog):
                     self.cookie_gen_thread.step_error.disconnect()
                     self.cookie_gen_thread.generation_finished.disconnect()
                     self.cookie_gen_thread.user_action_required.disconnect()
-                except:
+                except Exception:
                     pass
                 
                 # Attendre 3 secondes
@@ -4179,7 +3467,7 @@ class CookieManagerDialog(QDialog):
             try:
                 self.progress_dialog.close()
                 self.progress_dialog.deleteLater()
-            except:
+            except Exception:
                 pass
             
             # Supprimer l'attribut seulement s'il existe encore
@@ -4193,7 +3481,6 @@ class CookieManagerDialog(QDialog):
     def _on_cookie_generation_finished(self, success, message, cookie_count):
         """Callback called when generation is complete"""
         from PySide6.QtCore import QTimer
-        from PySide6.QtWidgets import QMessageBox
         
         # Display success/error in dialog
         if hasattr(self, 'progress_dialog') and self.progress_dialog:
@@ -4252,7 +3539,7 @@ class CookieManagerDialog(QDialog):
         if self.connection_thread and self.connection_thread.isRunning():
             try:
                 self.connection_thread.finished.disconnect(self.on_connection_test_finished)
-            except:
+            except Exception:
                 pass
             # No longer keep reference to thread
             self.connection_thread = None
@@ -5071,7 +4358,6 @@ class CharacterUpdateThread(QThread):
         """Exécute la mise à jour du personnage avec sécurité thread"""
         import logging
         import time
-        import traceback
         from datetime import datetime
         from urllib.parse import urlparse, parse_qs
         from bs4 import BeautifulSoup
@@ -5568,7 +4854,7 @@ class HeraldSearchDialog(QDialog):
                     self.search_thread.step_started.disconnect()
                     self.search_thread.step_completed.disconnect()
                     self.search_thread.step_error.disconnect()
-                except:
+                except Exception:
                     pass
                 
                 # Attendre que le thread se termine (avec timeout de 3 secondes)
@@ -5591,7 +4877,7 @@ class HeraldSearchDialog(QDialog):
             try:
                 self.progress_dialog.close()
                 self.progress_dialog.deleteLater()
-            except:
+            except Exception:
                 pass
             
             # Supprimer l'attribut seulement s'il existe encore
@@ -5614,7 +4900,7 @@ class HeraldSearchDialog(QDialog):
                     thread_ref.step_started.disconnect()
                     thread_ref.step_completed.disconnect()
                     thread_ref.step_error.disconnect()
-                except:
+                except Exception:
                     pass
                 
                 # Cleanup asynchrone avec QTimer pour ne pas bloquer la fermeture
@@ -5630,7 +4916,7 @@ class HeraldSearchDialog(QDialog):
                                     thread_ref.cleanup_driver()
                                     thread_ref.terminate()
                                     thread_ref.wait()
-                                except:
+                                except Exception:
                                     pass
                             
                             logging.info("Thread de recherche Herald arrêté (async)")
@@ -5648,14 +4934,14 @@ class HeraldSearchDialog(QDialog):
             try:
                 self.progress_dialog.close()
                 self.progress_dialog.deleteLater()
-            except:
+            except Exception:
                 pass
             
             # Supprimer l'attribut seulement s'il existe encore
             if hasattr(self, 'progress_dialog'):
                 try:
                     delattr(self, 'progress_dialog')
-                except:
+                except Exception:
                     pass
     
     def _cleanup_temp_files(self):
@@ -5803,7 +5089,7 @@ class HeraldSearchDialog(QDialog):
         try:
             from Functions.theme_manager import get_scaled_size
             return get_scaled_size(base_size)
-        except:
+        except Exception:
             return base_size
     
     def on_search_finished(self, success, message, json_path):
@@ -5820,7 +5106,6 @@ class HeraldSearchDialog(QDialog):
             # Le dialogue se fermera automatiquement après complete_all()
             # Mais on le ferme manuellement si erreur
             if not success:
-                import time
                 QTimer.singleShot(2000, self.progress_dialog.close)
         
         # Réactiver the contrôles
@@ -6297,13 +5582,13 @@ class CharacterUpdateDialog(QDialog):
                     new_value = new_value.replace(' ', '').replace(',', '')
                     try:
                         new_value = int(new_value)
-                    except:
+                    except Exception:
                         pass
                 if isinstance(current_value, str):
                     current_value = current_value.replace(' ', '').replace(',', '')
                     try:
                         current_value = int(current_value)
-                    except:
+                    except Exception:
                         pass
             
             # Cas spécial pour realm_rank : s'assurer qu'on compare les codes (XLY) et pas les titres
@@ -6436,20 +5721,7 @@ class CharacterUpdateDialog(QDialog):
     
     def get_selected_changes(self):
         """Retourne les modifications sélectionnées."""
-        selected = {}
-        
-        
-        for row in range(self.changes_table.rowCount()):
-            item = self.changes_table.item(row, 0)
-            if item:
-                checkbox = item.data(Qt.UserRole)
-                field = item.data(Qt.UserRole + 1)
-                value_raw = item.data(Qt.UserRole + 2)  # Retrieve the valeur brute
-                
-                if checkbox and checkbox.isChecked():
-                    selected[field] = value_raw  # Utiliser la valeur brute
-        
-        return selected
+        return ui_get_selected_changes(self.changes_table)
     
     def has_changes(self):
         """Retourne True s'il y a au moins un changement détecté."""
@@ -6555,7 +5827,7 @@ class BackupSettingsDialog(QDialog):
                 from datetime import datetime
                 dt = datetime.fromisoformat(last_backup_date)
                 last_backup_str = dt.strftime("%Y-%m-%d %H:%M:%S")
-            except:
+            except Exception:
                 last_backup_str = "N/A"
         else:
             last_backup_str = "Aucune sauvegarde"
@@ -6667,7 +5939,7 @@ class BackupSettingsDialog(QDialog):
                 from datetime import datetime
                 dt = datetime.fromisoformat(cookies_last_backup_date)
                 cookies_last_backup_str = dt.strftime("%Y-%m-%d %H:%M:%S")
-            except:
+            except Exception:
                 cookies_last_backup_str = "N/A"
         else:
             cookies_last_backup_str = "Aucune sauvegarde"
@@ -6756,11 +6028,7 @@ class BackupSettingsDialog(QDialog):
     def browse_backup_path(self):
         """Open directory selection dialog for backup path."""
         current_path = self.path_edit.text()
-        selected_dir = QFileDialog.getExistingDirectory(
-            self,
-            lang.get("backup_path_dialog_title"),
-            current_path
-        )
+        selected_dir = dialog_select_backup_path(self, current_path)
         if selected_dir:
             self.path_edit.setText(selected_dir)
             self.path_edit.setCursorPosition(0)
@@ -6768,11 +6036,7 @@ class BackupSettingsDialog(QDialog):
     def browse_cookies_backup_path(self):
         """Open directory selection dialog for cookies backup path."""
         current_path = self.cookies_path_edit.text()
-        selected_dir = QFileDialog.getExistingDirectory(
-            self,
-            lang.get("backup_path_dialog_title"),
-            current_path
-        )
+        selected_dir = dialog_select_backup_path(self, current_path)
         if selected_dir:
             self.cookies_path_edit.setText(selected_dir)
             self.cookies_path_edit.setCursorPosition(0)
@@ -6863,7 +6127,7 @@ class BackupSettingsDialog(QDialog):
                 from datetime import datetime
                 dt = datetime.fromisoformat(cookies_last_backup_date)
                 cookies_last_backup_str = dt.strftime("%Y-%m-%d %H:%M:%S")
-            except:
+            except Exception:
                 cookies_last_backup_str = "N/A"
         else:
             cookies_last_backup_str = "Aucune sauvegarde"
@@ -6909,7 +6173,7 @@ class BackupSettingsDialog(QDialog):
                 from datetime import datetime
                 dt = datetime.fromisoformat(last_backup_date)
                 last_backup_str = dt.strftime("%Y-%m-%d %H:%M:%S")
-            except:
+            except Exception:
                 last_backup_str = "N/A"
         else:
             last_backup_str = "Aucune sauvegarde"
@@ -7284,8 +6548,8 @@ class SearchMissingPricesDialog(QDialog):
                             ItemsDatabaseManager.set_item_category(item_name, selected_category)
                             
                             # Get category label for display
-                            category_label = ItemsDatabaseManager.get_category_label(selected_category, lang.current_language)
-                            category_icon = ItemsDatabaseManager.get_category_icon(selected_category)
+                            ItemsDatabaseManager.get_category_label(selected_category, lang.current_language)
+                            ItemsDatabaseManager.get_category_icon(selected_category)
                             
                             found_count += 1  # Count as handled
                             logging.info(f"Categorized {item_name} as: {selected_category}")
@@ -7308,7 +6572,7 @@ class SearchMissingPricesDialog(QDialog):
             )
             
             if failed_items:
-                result_message += f"\n\nFailed items:\n" + "\n".join(failed_items[:10])
+                result_message += "\n\nFailed items:\n" + "\n".join(failed_items[:10])
                 if len(failed_items) > 10:
                     result_message += f"\n... and {len(failed_items) - 10} more"
             
@@ -7389,6 +6653,7 @@ class ItemCategoryDialog(QDialog):
     """Dialog to categorize an item without price (quest_reward, event_reward, unknown)"""
     
     def __init__(self, item_name, parent=None):
+        from Functions.language_manager import lang
         super().__init__(parent)
         self.item_name = item_name
         self.selected_category = None
@@ -7459,7 +6724,4 @@ class ItemCategoryDialog(QDialog):
     
     def get_selected_category(self):
         """Get the selected category key"""
-        checked_button = self.category_buttons.checkedButton()
-        if checked_button:
-            return checked_button.property("category_key")
-        return "unknown"
+        return ui_get_selected_category(self.category_buttons)

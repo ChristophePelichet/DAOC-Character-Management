@@ -10,19 +10,22 @@ from pathlib import Path
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QFormLayout, QGroupBox, QLabel,
     QPushButton, QLineEdit, QComboBox, QCheckBox, QDialogButtonBox,
-    QFileDialog, QListWidget, QStackedWidget, QWidget, QListWidgetItem,
+    QListWidget, QStackedWidget, QWidget, QListWidgetItem,
     QFrame, QMessageBox, QProgressDialog, QApplication
 )
 from PySide6.QtCore import Qt, QSize
-from PySide6.QtGui import QIcon, QFont
 
 from Functions.language_manager import lang
-from Functions.config_manager import config, get_config_dir, ConfigManager
+from Functions.config_manager import config, ConfigManager
 from Functions.character_manager import get_character_dir
 from Functions.path_manager import PathManager
 from Functions.logging_manager import get_log_dir
-from Functions.path_manager import get_armor_dir, path_manager
+from Functions.path_manager import get_armor_dir
 from Functions.backup_manager import BackupManager
+from UI.ui_file_dialogs import (
+    dialog_select_directory,
+    dialog_select_multiple_files
+)
 
 
 class SettingsDialog(QDialog):
@@ -731,7 +734,7 @@ class SettingsDialog(QDialog):
                 from datetime import datetime
                 dt = datetime.fromisoformat(last_backup_date)
                 last_backup_str = dt.strftime("%Y-%m-%d %H:%M:%S")
-            except:
+            except Exception:
                 last_backup_str = "N/A"
         else:
             last_backup_str = lang.get("backup_no_backup", default="Aucune sauvegarde")
@@ -873,7 +876,7 @@ class SettingsDialog(QDialog):
                 from datetime import datetime
                 dt = datetime.fromisoformat(last_cookies_backup_date)
                 last_cookies_str = dt.strftime("%Y-%m-%d %H:%M:%S")
-            except:
+            except Exception:
                 last_cookies_str = "N/A"
         else:
             last_cookies_str = lang.get("backup_no_backup", default="Aucune sauvegarde")
@@ -1015,7 +1018,7 @@ class SettingsDialog(QDialog):
                 from datetime import datetime
                 dt = datetime.fromisoformat(last_armor_backup_date)
                 last_armor_str = dt.strftime("%Y-%m-%d %H:%M:%S")
-            except:
+            except Exception:
                 last_armor_str = "N/A"
         else:
             last_armor_str = lang.get("backup_no_backup", default="Aucune sauvegarde")
@@ -1451,7 +1454,7 @@ class SettingsDialog(QDialog):
     
     def _browse_folder(self, line_edit, title_key):
         """Generic folder browser"""
-        directory = QFileDialog.getExistingDirectory(self, lang.get(title_key))
+        directory = dialog_select_directory(self, title_key)
         if directory:
             # Normalize path to use backslashes on Windows
             normalized_directory = directory.replace('/', '\\')
@@ -1493,14 +1496,14 @@ class SettingsDialog(QDialog):
         
     def _browse_backup_path(self):
         """Browse for backup folder"""
-        directory = QFileDialog.getExistingDirectory(self, lang.get("backup_select_folder", default="Sélectionner le dossier de sauvegarde"))
+        directory = dialog_select_directory(self, "backup_select_folder")
         if directory:
             normalized_directory = directory.replace('/', '\\')
             self.backup_path_edit.setText(normalized_directory)
     
     def _browse_cookies_backup_path(self):
         """Browse for cookies backup folder"""
-        directory = QFileDialog.getExistingDirectory(self, lang.get("backup_select_folder", default="Sélectionner le dossier de sauvegarde"))
+        directory = dialog_select_directory(self, "backup_select_folder")
         if directory:
             normalized_directory = directory.replace('/', '\\')
             self.cookies_backup_path_edit.setText(normalized_directory)
@@ -1605,13 +1608,9 @@ class SettingsDialog(QDialog):
     def _move_armor_folder(self):
         """Move armor folder to new location"""
         from PySide6.QtWidgets import QMessageBox
-        import shutil
         
         # Browse for new location
-        new_location = QFileDialog.getExistingDirectory(
-            self, 
-            lang.get("select_new_armor_location", default="Sélectionner le nouvel emplacement pour Armory")
-        )
+        new_location = dialog_select_directory(self, "select_new_armor_location")
         
         if not new_location:
             return
@@ -1685,7 +1684,6 @@ class SettingsDialog(QDialog):
         """Clean all Eden folder content (cookies + Chrome profile)"""
         from PySide6.QtWidgets import QMessageBox
         from Functions.path_manager import get_eden_data_dir
-        import shutil
         
         eden_path = get_eden_data_dir()
         
@@ -1751,7 +1749,6 @@ class SettingsDialog(QDialog):
     def _clean_item_cache(self):
         """Clean Item Cache folder"""
         from PySide6.QtWidgets import QMessageBox
-        import shutil
         import os
         
         user_profile = os.getenv('LOCALAPPDATA') or os.getenv('APPDATA')
@@ -1832,7 +1829,6 @@ class SettingsDialog(QDialog):
     
     def _move_folder(self, line_edit, config_key, folder_label):
         """Move or create a folder at a new location"""
-        import shutil
         from PySide6.QtWidgets import QMessageBox, QProgressDialog
         from PySide6.QtCore import Qt
         
@@ -1840,10 +1836,7 @@ class SettingsDialog(QDialog):
         source_exists = current_path and os.path.exists(current_path)
         
         # Ask for destination parent directory
-        parent_dir = QFileDialog.getExistingDirectory(
-            self,
-            lang.get("move_folder_select_destination", default="Sélectionnez le dossier parent de destination")
-        )
+        parent_dir = dialog_select_directory(self, "move_folder_select_destination")
         
         if not parent_dir:
             return  # User cancelled
@@ -2164,7 +2157,6 @@ class SettingsDialog(QDialog):
     def _on_backup_auto_delete_changed(self, state):
         """Handle Characters backup auto-delete checkbox state change"""
         from PySide6.QtWidgets import QMessageBox
-        from PySide6.QtCore import Qt
         
         # If unchecked (user is disabling auto-delete), show warning
         # state is 0 for unchecked, 2 for checked
@@ -2196,7 +2188,6 @@ class SettingsDialog(QDialog):
     def _on_cookies_auto_delete_changed(self, state):
         """Handle Cookies backup auto-delete checkbox state change"""
         from PySide6.QtWidgets import QMessageBox
-        from PySide6.QtCore import Qt
         
         # If unchecked (user is disabling auto-delete), show warning
         # state is 0 for unchecked, 2 for checked
@@ -2256,7 +2247,6 @@ class SettingsDialog(QDialog):
     def _on_armor_auto_delete_changed(self, state):
         """Handle Armor backup auto-delete checkbox state change"""
         from PySide6.QtWidgets import QMessageBox
-        from PySide6.QtCore import Qt
         
         # If unchecked (user is disabling auto-delete), show warning
         # state is 0 for unchecked, 2 for checked
@@ -2306,10 +2296,7 @@ class SettingsDialog(QDialog):
     
     def _browse_armor_backup_path(self):
         """Browse for armor backup folder"""
-        folder = QFileDialog.getExistingDirectory(
-            self,
-            lang.get("backup_path_label", default="Dossier de sauvegarde")
-        )
+        folder = dialog_select_directory(self, "backup_path_label")
         if folder:
             self.armor_backup_path_edit.setText(folder)
             self.armor_backup_path_edit.setCursorPosition(0)
@@ -2558,11 +2545,11 @@ class SettingsDialog(QDialog):
     def _select_template_files(self):
         """Select multiple .txt template files"""
         try:
-            title = lang.get('superadmin.select_files_title', 
-                default="Sélectionner les fichiers templates")
-            file_filter = "Template files (*.txt);;All files (*.*)"
-            
-            files, _ = QFileDialog.getOpenFileNames(self, title, "", file_filter)
+            files = dialog_select_multiple_files(
+                self,
+                title_key='superadmin.select_files_title',
+                filter_key="superadmin.files_filter"
+            )
             
             if files:
                 self.superadmin_selected_files = files
@@ -2837,7 +2824,6 @@ class SettingsDialog(QDialog):
             item_filter: List of item names to refresh, or None for all items
             skip_filters: Boolean to bypass utility/level filters
         """
-        from PySide6.QtWidgets import QProgressDialog
         from PySide6.QtCore import Qt
         
         # Create progress dialog

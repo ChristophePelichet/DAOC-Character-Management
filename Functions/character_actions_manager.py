@@ -4,7 +4,6 @@ Regroupe: création, suppression, renommage, duplication, ouverture de fiche
 """
 import logging
 from PySide6.QtWidgets import QMessageBox, QInputDialog, QDialog, QLineEdit
-from PySide6.QtCore import Qt
 
 from Functions.character_manager import (
     create_character_data, save_character, delete_character,
@@ -14,6 +13,7 @@ from Functions.logging_manager import get_logger, log_with_action, LOGGER_CHARAC
 from Functions.language_manager import lang
 from Functions.config_manager import config
 from UI.dialogs import NewCharacterDialog, CharacterSheetWindow
+from UI.ui_message_helper import msg_show_warning, msg_show_error
 
 # Get CHARACTER logger
 logger = get_logger(LOGGER_CHARACTER)
@@ -188,7 +188,7 @@ class CharacterActionsManager:
             old_name
         )
         
-        if not ok or not new_name:
+        if not ok:
             log_with_action(logger, "info", f"Character rename cancelled by user for '{old_name}'", action="RENAME")
             return
             
@@ -197,10 +197,10 @@ class CharacterActionsManager:
             return
             
         if not new_name:
-            QMessageBox.warning(
+            msg_show_warning(
                 self.main_window,
-                lang.get("error_title"),
-                lang.get("char_name_empty_error")
+                "titles.warning",
+                "messages.errors.char_name_empty"
             )
             return
         
@@ -224,10 +224,10 @@ class CharacterActionsManager:
                 else msg
             )
             logger.error("f\"Failed to rename character from '{old_name}' to '{new_name}': {error_msg}\"", extra={"action": "RENAME"})
-            QMessageBox.critical(
+            msg_show_error(
                 self.main_window,
-                lang.get("error_title"),
-                error_msg
+                "titles.error",
+                f"!Échec du renommage : {error_msg}"
             )
             
     def duplicate_selected_character(self):

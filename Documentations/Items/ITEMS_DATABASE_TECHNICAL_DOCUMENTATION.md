@@ -4472,14 +4472,293 @@ print(f"Writable: {os.access(backup_folder, os.W_OK)}")
 
 ---
 
+## 17. Item Price Management Module
+
+### 17.1 Overview
+
+The **Item Price Manager** module (`Functions/items_price_manager.py`) provides specialized functions for synchronizing item prices between template metadata and the items database. It handles price validation, deduplication, and missing item detection.
+
+**Purpose:**
+- Synchronize template item prices with database prices
+- Identify items without prices in templates
+- Maintain database as single source of truth for prices
+- Support multi-realm item lookup
+
+**Module Location:** `Functions/items_price_manager.py`  
+**Lines of Code:** 205  
+**Functions:** 2  
+**Dependencies:** json, logging, typing (Dict, List, Optional, Any)
+
+### 17.2 Core Functions
+
+#### Function 1: `items_price_sync_template()`
+
+**Purpose:** Synchronize template metadata prices with database, removing duplicates
+
+**Signature:**
+```python
+def items_price_sync_template(
+    metadata_path: str,
+    metadata: Dict[str, Any],
+    db_manager=None,
+    realm: str = ""
+) -> int
+```
+
+**Parameters:**
+- `metadata_path` (str): Full path to template metadata JSON file
+- `metadata` (Dict): Parsed metadata dict containing prices
+- `db_manager` (optional): ItemsDatabaseManager instance for lookups
+- `realm` (str): Target realm (Albion, Hibernia, Midgard, All)
+
+**Returns:** int - Count of items synchronized to database
+
+**Logic Flow:**
+1. Check if metadata contains 'prices' dictionary
+2. For each item in prices:
+   - Search database with realm-specific key (name:realm)
+   - Fallback to ":all" suffix search
+   - Fallback to generic name search
+3. If item found in database with merchant_price:
+   - Mark item for removal from JSON (database is source of truth)
+4. Remove marked items from metadata prices
+5. Save updated metadata back to file
+6. Return count of synced items
+
+**Example Usage:**
+```python
+from Functions.items_price_manager import items_price_sync_template
+from Functions.items_database_manager import ItemsDatabaseManager
+
+db_manager = ItemsDatabaseManager()
+metadata_path = "Armory/Hibernia/template.metadata.json"
+metadata = {"prices": {"Sword": {"price": 100}, ...}}
+
+synced_count = items_price_sync_template(
+    metadata_path=metadata_path,
+    metadata=metadata,
+    db_manager=db_manager,
+    realm="Hibernia"
+)
+print(f"Synced {synced_count} items to database")
+```
+
+**Error Handling:**
+- Returns 0 if no prices found in metadata
+- Catches all exceptions with logging
+- Non-blocking: continues if individual lookups fail
+- Preserves original metadata if save fails
+
+#### Function 2: `items_price_find_missing()`
+
+**Purpose:** Identify items without prices in template metadata or database
+
+**Signature:**
+```python
+def items_price_find_missing(
+    items_list: List[Dict[str, Any]],
+    realm: str,
+    db_manager=None,
+    metadata: Optional[Dict[str, Any]] = None
+) -> List[Dict[str, Any]]
+```
+
+**Parameters:**
+- `items_list` (List[Dict]): List of item dicts from template parse
+- `realm` (str): Target realm for lookup
+- `db_manager` (optional): ItemsDatabaseManager instance
+- `metadata` (optional): Template metadata dict with prices
+
+**Returns:** List[Dict] - Items with price status details
+
+**Logic Flow:**
+1. For each item in items_list:
+   - Check if price exists in metadata (if provided)
+   - Check if price exists in database:
+     - Try realm-specific key (name:realm)
+     - Try ":all" suffix variant
+     - Try generic name search
+   - Build result dict with:
+     - item name and slot
+     - has_price_in_metadata (bool)
+     - has_price_in_db (bool)
+     - price_value (if found)
+     - price_source (metadata/db/none)
+2. Return list of items lacking prices
+
+**Example Usage:**
+```python
+from Functions.items_price_manager import items_price_find_missing
+from Functions.items_database_manager import ItemsDatabaseManager
+
+db_manager = ItemsDatabaseManager()
+items = [
+    {"name": "Sword", "slot": "Right Hand"},
+    {"name": "Armor", "slot": "Torso"},
+]
+metadata = {"prices": {"Sword": {"price": 100}}}
+
+missing = items_price_find_missing(
+    items_list=items,
+    realm="Hibernia",
+    db_manager=db_manager,
+    metadata=metadata
+)
+
+for item in missing:
+    if not item['has_price_in_metadata'] and not item['has_price_in_db']:
+        print(f"Missing: {item['name']} ({item['slot']})")
+```
+
+**Returns Structure:**
+```python
+[
+    {
+        "name": "Armor Item",
+        "slot": "Torso",
+        "has_price_in_metadata": False,
+        "has_price_in_db": False,
+        "price_value": None,
+        "price_source": "none"
+    },
+    {
+        "name": "Sword",
+        "slot": "Right Hand",
+        "has_price_in_metadata": True,
+        "has_price_in_db": True,
+        "price_value": 100,
+        "price_source": "metadata"
+    }
+]
+```
+
+**Error Handling:**
+- Debug logging for each search attempt
+- Non-blocking on lookup failures
+- Returns items with is_price_missing=True on any error
+- Never crashes, always returns valid list
+
+### 17.3 Integration Points
+
+**UI Integration:**
+- `UI/dialogs.py` - ArmorManagementDialog class
+  - `_sync_template_prices_with_db()` - Thin wrapper calling `items_price_sync_template()`
+  - `search_missing_prices()` - UI method that launches SearchMissingPricesDialog
+
+**Database Integration:**
+- `Functions/items_database_manager.py` - ItemsDatabaseManager
+  - `get_item()` - Search by name:realm composite key
+  - `search_item()` - Generic name search
+
+**Template System:**
+- `Functions/template_manager.py` - Loads template metadata
+- `Functions/items_price_manager.py` - Works with template metadata dicts
+
+### 17.4 Realm-Aware Price Lookup Strategy
+
+The module implements a robust 3-tier fallback strategy for realm-aware searches:
+
+```python
+# Tier 1: Exact realm match
+search_key = f"{item_name}:{realm}"
+item = db_manager.get_item(search_key)
+
+# Tier 2: Universal items (":all" realm)
+if not item:
+    search_key = f"{item_name}:all"
+    item = db_manager.get_item(search_key)
+
+# Tier 3: Generic fallback
+if not item:
+    item = db_manager.search_item(item_name)
+```
+
+**Rationale:**
+- **Tier 1** ensures realm-specific prices are used
+- **Tier 2** finds universal items available in all realms
+- **Tier 3** catches items by name without realm specificity
+
+### 17.5 Quality Standards
+
+**Code Quality:**
+- ✅ PEP 8 compliant (ruff validation: 0 errors)
+- ✅ Line length <88 characters
+- ✅ Type hints on all parameters and returns
+- ✅ Comprehensive docstrings with examples
+
+**Error Handling:**
+- ✅ Try-except blocks with logging
+- ✅ Graceful degradation on failures
+- ✅ Non-blocking operations
+- ✅ Debug-level logging for troubleshooting
+
+**Testing:**
+- ✅ Syntax validation passed
+- ✅ App integration verified
+- ✅ Backward compatibility maintained
+
+### 17.6 Best Practices
+
+#### ✅ DO: Use with ItemsDatabaseManager
+
+```python
+from Functions.items_database_manager import ItemsDatabaseManager
+
+db_manager = ItemsDatabaseManager()
+count = items_price_sync_template(
+    metadata_path,
+    metadata,
+    db_manager=db_manager,  # Pass manager for better results
+    realm="Hibernia"
+)
+```
+
+#### ❌ DON'T: Mix Price Sources
+
+```python
+# WRONG: Don't manually update prices in JSON while using this module
+# It will remove them!
+metadata['prices']['My Sword'] = {'price': 999}  # ← Will be synced away
+```
+
+#### ✅ DO: Check Results
+
+```python
+missing = items_price_find_missing(items, realm, db_manager, metadata)
+no_price_count = len([i for i in missing if not i['has_price_in_metadata'] and not i['has_price_in_db']])
+print(f"Items without price: {no_price_count}")
+```
+
+### 17.7 Related Files
+
+**Module File:**
+- `Functions/items_price_manager.py` - Price management functions
+
+**Integration Points:**
+- `UI/dialogs.py` - ArmorManagementDialog wrapper methods
+- `Functions/template_manager.py` - Template loading
+- `Functions/items_database_manager.py` - Database access
+
+**Dialogs:**
+- `UI/dialogs.py:SearchMissingPricesDialog` - UI for missing prices
+
+---
+
 ## Document Information
 
 **Created:** 2025-11-19  
-**Version:** 2.3  
+**Version:** 2.4  
 **Author:** Technical Documentation Team  
-**Last Reviewed:** 2025-12-02
+**Last Reviewed:** 2025-12-18
 
 **Change Log:**
+- **2025-12-18 (v2.4):** Added Item Price Management Module documentation
+  - Added items_price_manager.py module section
+  - Documented items_price_sync_template() function
+  - Documented items_price_find_missing() function
+  - Added realm-aware price lookup strategy
+  - Added integration points and best practices
+  - Added quality standards and error handling
 - **2025-12-02 (v2.3):** Merged Items Database Migration documentation
   - Added migration system overview
   - Added v1 → v2 migration process details
@@ -4495,38 +4774,10 @@ print(f"Writable: {os.access(backup_folder, os.W_OK)}")
 - `Data/items_database_src.json` - Internal database file
 - `Armory/items_database.json` - Personal database file (Mode 2)
 - `Functions/items_scraper.py` - Scraper implementation
+- `Functions/items_price_manager.py` - Item price synchronization
 - `Functions/superadmin_tools.py` - Database management
 - `Functions/items_database_manager.py` - Dual-mode manager
 - `Functions/items_database_migration.py` - Migration orchestrator
+- `UI/dialogs.py` - ArmorManagementDialog with price integration
 - `UI/mass_import_monitor.py` - Import monitoring window with threading
 - `Tools/test_items_migration.py` - Migration test suite
-
-**Change Log:**
-- 2025-12-02 v2.3: Merged items database migration documentation
-  - Consolidated ITEMS_DATABASE_MIGRATION_EN.md into technical docs
-  - Added complete migration system documentation
-  - Added v1 → v2 migration workflow and data merging strategy
-  - Added backup system and rollback procedures
-  - Added validation rules and integration points
-  - Added comprehensive testing and logging documentation
-  - Added future migrations framework design
-  - Added best practices and troubleshooting guides
-- 2025-11-20 v2.1: Added Mass Import System & Threading Architecture section
-  - Documented critical processEvents() crash fix
-  - Added threading architecture improvements
-  - Added worker cleanup strategy
-  - Added window close protection
-  - Added performance impact analysis
-  - Added testing validation results
-  - Added lessons learned and best practices
-- 2025-11-19 v2.0: Consolidated DUAL_MODE_DATABASE_EN.md content
-  - Added dual-mode architecture documentation
-  - Added ItemsDatabaseManager API reference
-  - Added configuration schema details
-  - Added UI integration and activation flow
-  - Added troubleshooting and best practices for dual-mode
-- 2025-11-19 v1.0: Initial comprehensive documentation created
-  - Consolidated information from SCRAPING_METHODOLOGY.md
-  - Consolidated information from DB_V2_IMPLEMENTATION.md
-  - Added technical implementation details
-  - Added API reference and best practices

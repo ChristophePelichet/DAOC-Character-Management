@@ -2,25 +2,121 @@
 
 ## v0.109
 
-### ♻️ Code Refactoring
-- **Template Parser Module Extraction** (`Functions/template_parser.py` - 1392 lines)
-  - Extracted 8 core functions from `UI/dialogs.py` equipment parsing logic
-    - `template_parse()` - Main entry point for template parsing
-    - `template_detect_format()` - Loki/Zenkcraft format detection
-    - `template_parse_loki()` - Parse Loki format templates with full layout
-    - `template_parse_zenkcraft()` - Parse Zenkcraft format templates
-    - `template_get_item_price()` - Multi-source price lookup (database, metadata, categories)
-    - `template_format_item_with_price()` - Item display formatting with icons
-    - `template_merge_columns()` - 2-column layout with proper alignment
-    - `template_strip_color_markers()` - Remove color markers for width calculation
-  - Domain-driven function naming convention: `template_*` prefix for logical grouping
-  - Complete PEP 8 compliance (line length <88 chars, type hints, docstrings)
-  - No hardcoded strings (all UI text uses `lang.get()` for translations)
-  - No French comments (English only in code)
-  - Removed 1381 lines from `dialogs.py` (1st refactor phase)
-  - Added comprehensive technical documentation (850+ lines in ARMORY_TECHNICAL_DOCUMENTATION.md)
-  - Proper error handling with graceful degradation
-  - Full support for multi-realm item lookup and price synchronization
+### ♻️ Code Refactoring - dialogs.py Module Extraction & UI Helper Systems (Complete)
+
+**Extraction Scope**: Extract business logic from `UI/dialogs.py` into dedicated domain-specific modules for improved maintainability, testability, and code reuse. Consolidate input validation and file dialogs into centralized helper modules.
+
+**19 Phases Completed** - Extracted 65+ functions into 19 new modules, removed ~3950+ lines from dialogs.py:
+
+1. **Phase 1**: Template Parser (`Functions/template_parser.py` - 1392 lines)
+   - Template format detection, parsing (Loki/Zenkcraft), price lookup, item formatting
+   - Returns tuple: (formatted_content, items_without_price) for complete workflow integration
+   
+2. **Phase 2**: Item Price Manager (`Functions/items_price_manager.py` - 205 lines)
+   - Template price sync with database, missing price detection
+   
+3. **Phase 3**: Ruff Compliance Cleanup
+   - Fixed 19 E722, 2 F841, 1 F823, 4 pre-extraction errors → 0 errors
+   
+4. **Phase 4**: Character Validator (`Functions/character_validator.py` - 280 lines)
+   - Class/race retrieval, combo population, realm/class/race change handlers
+   
+5. **Phase 5**: Character Realm Rank Calculator (`Functions/character_rr_calculator.py` - 209 lines)
+   - Valid level retrieval, points progression, rank calculation with realm-aware restrictions
+   
+6. **Phase 6**: Character Herald Scrapper (`Functions/character_herald_scrapper.py` - 422 lines)
+   - Complete/RvR-only character update, stats UI updates with selective loading
+   
+7. **Phase 7**: Character Banner Management (`Functions/character_banner.py` - 141 lines)
+   - Class banner image loading with realm/class mapping, fallback support
+   
+8. **Phase 8**: Herald URL Validation (`Functions/herald_url_validator.py` - 236 lines)
+   - URL validation, button state management, browser opening with cookies
+   
+9. **Phase 9**: Armor Upload & Management (`Functions/armor_upload_handler.py` - 362 lines)
+   - File upload with cross-season support, template import, file opening, deletion
+
+10. **Phase 10**: Item Model Viewer (`Functions/item_model_viewer.py` - 167 lines)
+    - Model link click handling, item model display with multi-source search, error handling
+
+11. **Phase 11**: Character Achievement Formatter (`Functions/character_achievement_formatter.py` - 256 lines)
+    - Achievements display formatting with 2-column layout, progress tracking, tier display
+
+12. **Phase 12**: UI Message Helper (`UI/ui_message_helper.py` - 195 lines)
+    - Centralized QMessageBox handling with automatic translation and logging
+    - 5 functions: success, error, warning, confirmation, info_with_details
+    - Support for dynamic parameters and plain text messages
+
+13. **Phase 13**: UI State Manager (`UI/ui_state_manager.py` - 285 lines)
+    - Centralized button state management for all dialogs
+    - 5 functions: herald buttons, armor buttons, stats buttons, generic multi-button, selection handler
+    - State validation with database mode checks (embedded vs. personal)
+    - Intelligent tooltip management for user guidance
+    - Added `is_personal_database()` method to `ItemsDatabaseManager` for database mode detection
+
+14. **Phase 14**: UI Validation Helper (`Functions/ui_validation_helper.py` - 680+ lines)
+    - Centralized input field validation across all dialogs
+    - 15 core validation functions: text fields, URLs, emails, numeric fields, file paths, selections
+    - 4 wrapper functions for dialog-specific validation scenarios
+    - Eliminates 20+ repetitive validation patterns from dialogs.py
+    - Returns consistent dict format with 'valid', 'message', and value fields
+    - Zero inline validation code in dialogs.py
+
+15. **Phase 15**: UI File Dialog Wrapper (`UI/ui_file_dialogs.py` - 140 lines)
+    - Centralized QFileDialog usage for consistent file selection behavior
+    - 5 wrapper functions: open file, save file, select directory, open armor file, select backup path
+    - Automatic translation support via lang.get()
+    - Eliminates scattered QFileDialog calls and repeated setup code
+    - Zero direct QFileDialog usage in dialogs.py
+
+16. **Phase 16**: Extended UI File Dialogs (`UI/ui_file_dialogs.py` - 280+ lines total)
+    - Extended wrapper module to handle QFileDialog calls in non-dialogs.py UI files
+    - 5 additional wrapper functions: open template file, select multiple files, save report, open/save log files
+    - Refactored 4 UI files: template_import_dialog.py, settings_dialog.py, mass_import_monitor.py, debug_window.py
+    - Centralized 13 additional QFileDialog calls from other UI modules
+    - All file dialogs now use consistent lang.get() translation pattern
+    - Complete elimination of direct QFileDialog imports from UI layer (except ui_file_dialogs.py)
+
+17. **Phase 17**: Character Rename Handler (`Functions/character_rename_handler.py` - 60 lines)
+    - Character renaming logic extraction with validation and persistence
+    - 1 function: character_rename_with_validation() for complete rename workflow
+    - Decoupled rename logic from UI layer, reusable across contexts
+
+18. **Phase 18**: Armor Context Menu Builder (`UI/ui_context_menus.py` - 88 lines)
+    - Context menu construction for armor files with standard actions
+    - 1 function: ui_show_armor_context_menu() handles view, download, open, delete actions
+    - Consistent menu styling and action callback pattern
+    - Complete UI component extraction with thin wrapper in dialogs.py
+
+19. **Phase 19**: Simple Getters & Setters (`UI/ui_getters.py` - 119 lines, `Functions/herald_ui_wrappers.py` - 37 lines)
+    - Pure utility functions for data retrieval from UI components
+    - 4 functions: ui_get_visibility_config(), ui_get_selected_category(), ui_get_selected_changes(), herald_ui_update_rvr_stats()
+    - Separated UI concerns from business logic with thin wrappers
+
+**Refactoring Statistics**:
+- Total functions extracted: 65+
+- Total lines extracted: ~3950+ lines
+- Thin wrappers in dialogs.py: ~260 lines
+- Net code reduction: ~3690 lines
+- Modules created: 19 dedicated domain-specific modules
+- QFileDialog calls centralized: 18 (5 in dialogs.py + 13 in other UI files)
+
+**Quality Standards Applied**:
+- ✅ Domain-driven naming conventions for all modules and functions
+- ✅ PEP 8 compliant (ruff validation: 0 errors across all modules, ignoring F401/E501)
+- ✅ Type hints and comprehensive docstrings (English only)
+- ✅ Zero hardcoded UI strings (all use `lang.get()` with translation fallbacks)
+- ✅ English-only code and comments
+- ✅ Complete documentation updates (DIALOG_TECHNICAL_DOCUMENTATION.md, DIALOG_STATE_TECHNICAL_DOCUMENTATION.md, ARMORY_TECHNICAL_DOCUMENTATION.md, etc.)
+
+**Key Improvements**:
+- Centralized button state management reduces scattered `.setEnabled()` calls
+- Template parser returns items_without_price for accurate button state
+- Database mode validation ensures buttons reflect actual capabilities
+- Intelligent tooltips guide users when features are unavailable
+- All validation logic consolidated in ui_validation_helper.py (zero validation code in dialogs.py)
+- Consistent error messages and validation rules across all dialogs
+- Complete separation of concerns: business logic extracted from UI layer
 
 ---
 

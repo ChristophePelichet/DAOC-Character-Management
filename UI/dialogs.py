@@ -2721,31 +2721,15 @@ class ArmorManagementDialog(QDialog):
         row = item.row()
         filename = self.table.item(row, 0).text()
         
-        # Create context menu
-        menu = QMenu(self)
-        
-        # View action
-        view_action = menu.addAction(lang.get("armoury_dialog.context_menu.view"))
-        view_action.triggered.connect(lambda: self.view_armor(filename))
-        
-        # Download action
-        download_action = menu.addAction(lang.get("armoury_dialog.context_menu.download"))
-        download_action.triggered.connect(lambda: self.download_armor(filename))
-        
-        menu.addSeparator()
-        
-        # Open action
-        open_action = menu.addAction(lang.get("armoury_dialog.context_menu.open"))
-        open_action.triggered.connect(lambda: self.open_armor(filename))
-        
-        menu.addSeparator()
-        
-        # Delete action
-        delete_action = menu.addAction(lang.get("armoury_dialog.context_menu.delete"))
-        delete_action.triggered.connect(lambda: self.delete_armor(filename))
-        
-        # Show menu at cursor position
-        menu.exec_(self.table.viewport().mapToGlobal(position))
+        # Build and show context menu
+        from UI.ui_context_menus import ui_show_armor_context_menu
+        callbacks = {
+            'view': self.view_armor,
+            'download': self.download_armor,
+            'open': self.open_armor,
+            'delete': self.delete_armor,
+        }
+        ui_show_armor_context_menu(self, self.table, position, filename, callbacks)
     
     def view_armor(self, filename):
         """Opens armor viewer dialog."""

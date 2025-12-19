@@ -49,7 +49,10 @@ from Functions.herald_url_validator import (
     herald_url_on_text_changed, herald_url_open_url,
     herald_url_update_button_states
 )
-from UI.template_import_dialog import TemplateImportDialog
+from Functions.armor_upload_handler import (
+    armor_upload_file, armor_import_template, armor_open_file,
+    armor_delete_file
+)
 
 # Get CHARACTER logger
 logger_char = get_logger(LOGGER_CHARACTER)
@@ -2592,109 +2595,13 @@ class ArmorManagementDialog(QDialog):
     
     def upload_armor(self):
         """Opens file dialog to upload an armor file."""
-        file_path, _ = QFileDialog.getOpenFileName(
-            self,
-            lang.get("armoury_dialog.dialogs.select_file"),
-            "",
-            lang.get("armoury_dialog.dialogs.all_files")
-        )
-        
-        if file_path:
-            # Open preview dialog before import
-            from Functions.config_manager import config
-            available_seasons = config.get("game.seasons", ["S3"])
-            
-            preview_dialog = ArmorUploadPreviewDialog(
-                self,
-                file_path,
-                self.season,
-                available_seasons,
-                self.realm,
-                self.character_name
-            )
-            
-            if preview_dialog.exec() == QDialog.Accepted:
-                try:
-                    # Get the chosen season and filename
-                    target_season = preview_dialog.season_combo.currentText()
-                    new_filename = preview_dialog.filename_edit.text().strip()
-                    
-                    # If season changed, create a new ArmorManager for that season
-                    if target_season != self.season:
-                        from Functions.armor_manager import ArmorManager
-                        target_armor_manager = ArmorManager(target_season, self.realm, self.character_name)
-                    else:
-                        target_armor_manager = self.armor_manager
-                    
-                    # Upload with optional rename
-                    result_path = target_armor_manager.upload_armor(file_path, new_filename)
-                    
-                    season_info = lang.get("armoury_dialog.messages.season_info", season=target_season) if target_season != self.season else ""
-                    QMessageBox.information(
-                        self, 
-                        lang.get("dialogs.titles.success"),
-                        lang.get("armoury_dialog.messages.upload_success", filename=os.path.basename(result_path), season_info=season_info)
-                    )
-                    
-                    # Refresh only if same season
-                    if target_season == self.season:
-                        self.refresh_list()
-                    
-                    logging.info(f"Fichier d'armure uploadé : {result_path} (Saison: {target_season})")
-                except Exception as e:
-                    logging.error(f"Erreur lors de l'upload du fichier d'armure : {e}")
-                    QMessageBox.critical(self, lang.get("dialogs.titles.error"), lang.get("armoury_dialog.messages.upload_error", error=str(e)))
+        armor_upload_file(self, self.armor_manager, self.season, self.character_name, self.realm)
     
     def import_template(self):
         """Opens new template import dialog."""
-        # Get character class from character_data
-        character_class = self.character_data.get('class', '')
-        realm = self.character_data.get('realm', '')
-        name = self.character_data.get('name', '')
-        
-        if not character_class:
-            QMessageBox.warning(
-                self,
-                lang.get("template_import.error_title"),
-                lang.get("template_import.error_no_class")
-            )
-            return
-        
-        # Get class translations from data_manager
-        class_fr = character_class
-        class_de = character_class
-        
-        if hasattr(self, 'data_manager') and self.data_manager:
-            realm_classes = self.data_manager.get_classes(realm)
-            for cls in realm_classes:
-                if cls.get('name') == character_class:
-                    class_fr = cls.get('name_fr', character_class)
-                    class_de = cls.get('name_de', character_class)
-                    break
-        
-        # Prepare character data for dialog
-        character_data = {
-            'character_class': character_class,
-            'class_fr': class_fr,
-            'class_de': class_de,
-            'realm': realm,
-            'name': name
-        }
-        
-        dialog = TemplateImportDialog(self, character_data)
-        # Connect signal to refresh list immediately when template is imported
-        # Must update index first to include new template
-        dialog.template_imported.connect(lambda: (
-            self.template_manager.update_index(),
-            self.refresh_list()
-        ))
-        if dialog.exec() == QDialog.Accepted:
-            # Template imported successfully
-            QMessageBox.information(
-                self,
-                "Succès",
-                "Template importé avec succès !"
-            )
+        armor_import_template(
+            self, self.character_data, self.data_manager, self.template_manager
+        )
     
     def _sync_template_prices_with_db(self, metadata_path, metadata):
         """
@@ -2860,62 +2767,11 @@ class ArmorManagementDialog(QDialog):
     
     def open_armor(self, filename):
         """Opens an armor file with the default application."""
-        try:
-            import subprocess
-            import platform
-            
-            template_path = self.template_manager._get_template_path(self.realm, filename)
-            
-            if not template_path.exists():
-                QMessageBox.warning(self, lang.get("dialogs.titles.error"), 
-                    lang.get("armoury_dialog.messages.file_not_found", filename=filename))
-                return
-            
-            # Open file with default application
-            if platform.system() == 'Windows':
-                os.startfile(str(template_path))
-            elif platform.system() == 'Darwin':  # macOS
-                subprocess.run(['open', str(template_path)])
-            else:  # Linux
-                subprocess.run(['xdg-open', str(template_path)])
-            
-            logging.info(f"Ouverture du fichier d'armure : {filename}")
-        except Exception as e:
-            logging.error(f"Erreur lors de l'ouverture du fichier d'armure : {e}")
-            QMessageBox.critical(self, lang.get("dialogs.titles.error"), lang.get("armoury_dialog.messages.open_error", error=str(e)))
+        armor_open_file(self, self.template_manager, self.realm, filename)
     
     def delete_armor(self, filename):
         """Deletes an armor file after confirmation."""
-        reply = QMessageBox.question(
-            self,
-            lang.get("armoury_dialog.dialogs.confirm_delete"),
-            lang.get("armoury_dialog.messages.delete_confirm", filename=filename),
-            QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.No
-        )
-        
-        if reply == QMessageBox.Yes:
-            try:
-                # Use TemplateManager to delete template
-                success = self.template_manager.delete_template(filename, self.realm)
-                
-                if success:
-                    QMessageBox.information(
-                        self, 
-                        lang.get("dialogs.titles.success"),
-                        lang.get("armoury_dialog.messages.delete_success", filename=filename)
-                    )
-                    self.refresh_list()
-                    logging.info(f"Fichier d'armure supprimé : {filename}")
-                else:
-                    QMessageBox.warning(
-                        self,
-                        lang.get("dialogs.titles.error"),
-                        lang.get("armoury_dialog.messages.delete_error", error="Delete operation failed")
-                    )
-            except Exception as e:
-                logging.error(f"Erreur lors de la suppression du fichier d'armure : {e}")
-                QMessageBox.critical(self, lang.get("dialogs.titles.error"), lang.get("armoury_dialog.messages.delete_error", error=str(e)))
+        armor_delete_file(self, self.template_manager, self.realm, filename)
     
     def download_selected_armor(self):
         """Downloads the currently selected armor file (called from preview panel button)."""

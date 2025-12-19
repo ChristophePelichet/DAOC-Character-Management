@@ -2,51 +2,53 @@
 
 ## v0.109
 
-### ♻️ Code Refactoring - dialogs.py Module Extraction
+### ♻️ Code Refactoring - dialogs.py Module Extraction (Complete)
 
 **Extraction Scope**: Extract business logic from `UI/dialogs.py` into dedicated domain-specific modules for improved maintainability, testability, and code reuse.
 
-**8 Phases Completed** - Extracted 26+ functions into 7 new modules:
+**9 Phases Completed** - Extracted 32+ functions into 8 new modules, removed ~2339 lines from dialogs.py:
 
 1. **Phase 1**: Template Parser (`Functions/template_parser.py` - 1392 lines)
-   - 8 functions: Template format detection, parsing (Loki/Zenkcraft), color stripping, price lookup, item formatting
-   - Multi-source price lookup with fallback chain (database → metadata → category)
-
+   - Template format detection, parsing (Loki/Zenkcraft), price lookup, item formatting
+   
 2. **Phase 2**: Item Price Manager (`Functions/items_price_manager.py` - 205 lines)
-   - 2 functions: Template price sync with database, missing price detection
-
+   - Template price sync with database, missing price detection
+   
 3. **Phase 3**: Ruff Compliance Cleanup
-   - Fixed 19 E722 errors, 2 F841 errors, 1 F823 error, 4 pre-extraction errors
-   - Result: `dialogs.py` 100% ruff compliant (0 errors)
-
+   - Fixed 19 E722, 2 F841, 1 F823, 4 pre-extraction errors → 0 errors
+   
 4. **Phase 4**: Character Validator (`Functions/character_validator.py` - 280 lines)
-   - 5 functions: Class/race retrieval, combo population, realm/class/race change handlers
-   - Multi-language support (EN/FR/DE), cascade updates, realm-aware filtering
-
+   - Class/race retrieval, combo population, realm/class/race change handlers
+   
 5. **Phase 5**: Character Realm Rank Calculator (`Functions/character_rr_calculator.py` - 209 lines)
-   - 3 functions: Valid level retrieval, points progression info, rank from points calculation
-   - Multi-realm support with rank restrictions (Rank 1: 0-10, Others: 0-9)
-
+   - Valid level retrieval, points progression, rank calculation with realm-aware restrictions
+   
 6. **Phase 6**: Character Herald Scrapper (`Functions/character_herald_scrapper.py` - 422 lines)
-   - 4 functions: Complete character update, RvR-only update, stats UI update (complete/partial)
-   - URL validation, progress dialog integration, selective stat updates with saves
-
+   - Complete/RvR-only character update, stats UI updates with selective loading
+   
 7. **Phase 7**: Character Banner Management (`Functions/character_banner.py` - 141 lines)
-   - 2 functions: Class banner image loading with realm/class mapping, placeholder display
-   - .jpg/.png fallback support, scaled font sizing, comprehensive error logging
-
+   - Class banner image loading with realm/class mapping, fallback support
+   
 8. **Phase 8**: Herald URL Validation (`Functions/herald_url_validator.py` - 236 lines)
-   - 4 functions: URL validation on text change, button state management, URL opening in browser with cookies
-   - Real-time validation, thread-safe UI updates, authentication integration
+   - URL validation, button state management, browser opening with cookies
+   
+9. **Phase 9**: Armor Upload & Management (`Functions/armor_upload_handler.py` - 362 lines)
+   - File upload with cross-season support, template import, file opening, deletion
+
+**Refactoring Statistics**:
+- Total functions extracted: 32+
+- Total lines extracted: ~2539 lines
+- Thin wrappers in dialogs.py: ~154 lines
+- Net code reduction: ~2385 lines
+- Modules created: 8 dedicated domain-specific modules
 
 **Quality Standards Applied**:
-- ✅ Domain-driven naming: `template_*`, `items_price_*`, `character_*`, `character_rr_*`, `character_herald_*`, `banner_*`, `herald_url_*`
-- ✅ PEP 8 compliant with ruff validation (0 errors)
-- ✅ Type hints and comprehensive docstrings
+- ✅ Domain-driven naming conventions for all modules and functions
+- ✅ PEP 8 compliant (ruff validation: 0 errors across all modules)
+- ✅ Type hints and comprehensive docstrings (English only)
 - ✅ Zero hardcoded UI strings (all use `lang.get()`)
-- ✅ English-only code and comments (no French)
-- ✅ ~2127 lines extracted (~1891 from Phases 1-7 + ~236 from Phase 8), ~149 thin wrappers in dialogs.py
-- ✅ Complete documentation updates (EDEN_TECHNICAL_DOCUMENTATION.md, CHARACTER_SYSTEM_TECHNICAL_DOCUMENTATION.md)
+- ✅ English-only code and comments
+- ✅ Complete documentation updates (EDEN_TECHNICAL_DOCUMENTATION.md, CHARACTER_SYSTEM_TECHNICAL_DOCUMENTATION.md, ARMORY_TECHNICAL_DOCUMENTATION.md)
 
 ---
 

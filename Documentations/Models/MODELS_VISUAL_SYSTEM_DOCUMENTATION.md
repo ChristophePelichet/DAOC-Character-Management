@@ -1,12 +1,11 @@
 # 🖼️ Model Visual System - Technical Documentation
 
-**Version**: 108  
+**Version**: 1.0
 **Date**: November 2025  
-**Last Updated**: December 1, 2025  
+**Last Updated**: December 19, 2025 (Item Model Viewer Module - Phase 10)  
 **Component**: Complete model management system (3 types: Items, Mobs, Icons)  
 **Used by**: Armory, Database Editor, Character Sheet, Item Preview, Model Viewer Dialog  
-**Related**: `Img/Models/`, `Tools/DataScraping/download_all_models.py`, `Tools/DataScraping/scrape_models_metadata.py`, `Data/models_metadata.json`, `UI/model_viewer_dialog.py`  
-**Branch**: 108_Imp_Armo
+**Related**: `Img/Models/`, `Tools/DataScraping/download_all_models.py`, `Tools/DataScraping/scrape_models_metadata.py`, `Data/models_metadata.json`, `UI/model_viewer_dialog.py`, `Functions/item_model_viewer.py`  
 
 ---
 
@@ -1405,6 +1404,32 @@ thumbnail = pixmap.scaled(32, 32, Qt.KeepAspectRatio, Qt.SmoothTransformation)
 - Slots with visual models: Torso, Arms, Legs, Hands, Feet, Helmet, Cloak, Weapons
 - Jewelry slots excluded (no visual models)
 
+### v3.0 (December 19, 2025)
+
+**Phase 10 Refactoring - Item Model Viewer Module**:
+- ✅ **Module Extraction**: Created `Functions/item_model_viewer.py` (167 lines)
+- ✅ **Functions Extracted**: 2 functions (item_model_on_link_clicked, item_model_show)
+- ✅ **Code Quality**:
+  - PEP 8 compliant (ruff: 0 errors)
+  - Comprehensive docstrings with examples
+  - Type hints for all parameters
+  - Multi-language support (lang.get())
+  - Robust error handling with logging
+- ✅ **Integration**: Thin wrappers in ArmorManagementDialog (2 lines each)
+- ✅ **Code Reduction**: ~60 lines removed from dialogs.py
+
+**Key Improvements**:
+- Separated concerns: UI logic (dialogs.py) vs business logic (item_model_viewer.py)
+- Improved testability: Functions can be tested independently
+- Reusability: Functions can be used from other UI components
+- Better maintainability: Focused, single-purpose module
+
+**Statistics**:
+- Lines extracted: 60
+- Lines removed from dialogs.py: ~60
+- Thin wrappers added: 2 lines
+- Module lines: 167 (with docstrings and error handling)
+
 ### v2.0 (November 30, 2025)
 
 **Major Update - Comprehensive Model System**:
@@ -1478,4 +1503,4 @@ thumbnail = pixmap.scaled(32, 32, Qt.KeepAspectRatio, Qt.SmoothTransformation)
 
 ---
 
-*Last Updated: December 1, 2025 (Version 108 - v2.1)*
+*Last Updated: December 19, 2025 (Version 109 - Phase 10 Item Model Viewer Module)*

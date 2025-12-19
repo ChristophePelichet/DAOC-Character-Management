@@ -53,6 +53,9 @@ from Functions.armor_upload_handler import (
     armor_upload_file, armor_import_template, armor_open_file,
     armor_delete_file
 )
+from Functions.item_model_viewer import (
+    item_model_on_link_clicked, item_model_show
+)
 
 # Get CHARACTER logger
 logger_char = get_logger(LOGGER_CHARACTER)
@@ -2702,68 +2705,11 @@ class ArmorManagementDialog(QDialog):
     
     def _on_model_link_clicked(self, url):
         """Handle click on model viewer link in preview."""
-        try:
-            
-            # Check if this is a model link
-            if url.scheme() == "model":
-                item_name = url.path()
-                # Open model viewer without changing current selection/preview
-                self._show_item_model(item_name)
-                # Prevent default link navigation that would clear the preview
-                return
-        except Exception as e:
-            logging.error(f"Error handling model link click: {e}")
+        item_model_on_link_clicked(self, url)
     
     def _show_item_model(self, item_name):
         """Show model image for the specified item."""
-        try:
-            # Search for item in database
-            item_data = self.db_manager.search_item(item_name)
-            
-            if not item_data:
-                # Try with realm suffix
-                item_name_lower = item_name.lower()
-                realm_lower = self.realm.lower()
-                search_key = f"{item_name_lower}:{realm_lower}"
-                item_data = self.db_manager.search_item(search_key)
-            
-            if not item_data:
-                # Try with :all suffix
-                search_key = f"{item_name.lower()}:all"
-                item_data = self.db_manager.search_item(search_key)
-            
-            # Support both 'model_id' and 'model' fields
-            model_id = item_data.get('model_id') or item_data.get('model') if item_data else None
-            
-            if model_id:
-                model_category = item_data.get('model_category', 'items')
-                
-                # Show model viewer dialog with embedded image (non-modal)
-                from UI.model_viewer_dialog import ModelViewerDialog
-                dialog = ModelViewerDialog(
-                    self,
-                    model_id=model_id,
-                    item_name=item_name,
-                    model_category=model_category
-                )
-                dialog.show()
-            else:
-                QMessageBox.information(
-                    self,
-                    lang.get("dialogs.titles.info", default="Information"),
-                    lang.get("armoury_dialog.messages.no_model_found", 
-                            default=f"No model information found for '{item_name}'.",
-                            item_name=item_name)
-                )
-        except Exception as e:
-            logging.error(f"Error showing item model for '{item_name}': {e}")
-            QMessageBox.critical(
-                self,
-                lang.get("dialogs.titles.error", default="Error"),
-                lang.get("armoury_dialog.messages.model_viewer_error",
-                        default=f"Error opening model viewer: {str(e)}",
-                        error=str(e))
-            )
+        item_model_show(self, item_name)
     
     def open_armor(self, filename):
         """Opens an armor file with the default application."""

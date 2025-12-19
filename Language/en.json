@@ -179,16 +179,6 @@
         "eden_storage_info": "Automatic storage in",
         "item_cache_storage_info": "Automatic storage in"
     },
-    "settings": {
-        "herald": {
-            "config_cookies_group_title": "Cookies path",
-            "config_item_cache_group_title": "Items cache path",
-            "clean_eden_confirm_title": "Confirm cleanup",
-            "clean_eden_confirm_message": "⚠️ This action will delete:\n\n• All Eden cookies\n• Complete Chrome profile (cache, history, session)\n\n📁 Folder: {path}\n\nYou will need to regenerate your cookies after this operation.\n\nContinue?",
-            "clean_cache_confirm_title": "Confirm cleanup",
-            "clean_cache_confirm_message": "⚠️ This action will delete:\n\n• Items cache found via web search\n\n📁 Folder: {path}\n\nDatabase items will not be affected.\n\nContinue?"
-        }
-    },
     "herald_buttons": {
         "validation_in_progress": "⏳ Eden validation in progress... Please wait"
     },
@@ -547,6 +537,14 @@
             "select_log_folder": "Select Logs Folder",
             "select_armor_folder": "Select Armoury Folder",
             "select_cookies_folder": "Select Cookies Folder"
+        },
+        "herald": {
+            "config_cookies_group_title": "Cookies path",
+            "config_item_cache_group_title": "Items cache path",
+            "clean_eden_confirm_title": "Confirm cleanup",
+            "clean_eden_confirm_message": "⚠️ This action will delete:\n\n• All Eden cookies\n• Complete Chrome profile (cache, history, session)\n\n📁 Folder: {path}\n\nYou will need to regenerate your cookies after this operation.\n\nContinue?",
+            "clean_cache_confirm_title": "Confirm cleanup",
+            "clean_cache_confirm_message": "⚠️ This action will delete:\n\n• Items cache found via web search\n\n📁 Folder: {path}\n\nDatabase items will not be affected.\n\nContinue?"
         }
     },
     "tooltips": {

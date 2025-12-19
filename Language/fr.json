@@ -179,16 +179,6 @@
         "eden_storage_info": "Stockage automatique dans",
         "item_cache_storage_info": "Stockage automatique dans"
     },
-    "settings": {
-        "herald": {
-            "config_cookies_group_title": "Chemin des cookies",
-            "config_item_cache_group_title": "Chemin du cache des items",
-            "clean_eden_confirm_title": "Confirmer le nettoyage",
-            "clean_eden_confirm_message": "⚠️ Cette action va supprimer :\n\n• Tous les cookies Eden\n• Le profil Chrome complet (cache, historique, session)\n\n📁 Dossier : {path}\n\nVous devrez régénérer vos cookies après cette opération.\n\nContinuer ?",
-            "clean_cache_confirm_title": "Confirmer le nettoyage",
-            "clean_cache_confirm_message": "⚠️ Cette action va supprimer :\n\n• Le cache des items trouvés via recherche web\n\n📁 Dossier : {path}\n\nLes items de la base de données ne seront pas affectés.\n\nContinuer ?"
-        }
-    },
     "herald_buttons": {
         "validation_in_progress": "⏳ Validation Eden en cours... Veuillez patienter"
     },
@@ -555,6 +545,14 @@
             "select_log_folder": "Sélectionner le dossier des logs",
             "select_armor_folder": "Sélectionner le dossier de l'armurerie",
             "select_cookies_folder": "Sélectionner le dossier des cookies"
+        },
+        "herald": {
+            "config_cookies_group_title": "Chemin des cookies",
+            "config_item_cache_group_title": "Chemin du cache des items",
+            "clean_eden_confirm_title": "Confirmer le nettoyage",
+            "clean_eden_confirm_message": "⚠️ Cette action va supprimer :\n\n• Tous les cookies Eden\n• Le profil Chrome complet (cache, historique, session)\n\n📁 Dossier : {path}\n\nVous devrez régénérer vos cookies après cette opération.\n\nContinuer ?",
+            "clean_cache_confirm_title": "Confirmer le nettoyage",
+            "clean_cache_confirm_message": "⚠️ Cette action va supprimer :\n\n• Le cache des items trouvés via recherche web\n\n📁 Dossier : {path}\n\nLes items de la base de données ne seront pas affectés.\n\nContinuer ?"
         }
     },
     "debug": {

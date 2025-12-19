@@ -179,16 +179,6 @@
         "eden_storage_info": "Automatische Speicherung in",
         "item_cache_storage_info": "Automatische Speicherung in"
     },
-    "settings": {
-        "herald": {
-            "config_cookies_group_title": "Cookies-Pfad",
-            "config_item_cache_group_title": "Element-Cache-Pfad",
-            "clean_eden_confirm_title": "Bereinigung bestätigen",
-            "clean_eden_confirm_message": "⚠️ Diese Aktion löscht:\n\n• Alle Eden-Cookies\n• Komplettes Chrome-Profil (Cache, Verlauf, Sitzung)\n\n📁 Ordner: {path}\n\nNach diesem Vorgang müssen Sie Ihre Cookies neu generieren.\n\nFortfahren?",
-            "clean_cache_confirm_title": "Bereinigung bestätigen",
-            "clean_cache_confirm_message": "⚠️ Diese Aktion löscht:\n\n• Element-Cache von Web-Suchen\n\n📁 Ordner: {path}\n\nDatenbankitems werden nicht beeinträchtigt.\n\nFortfahren?"
-        }
-    },
     "herald_buttons": {
         "validation_in_progress": "⏳ Eden-Validierung läuft... Bitte warten"
     },
@@ -555,6 +545,14 @@
             "select_log_folder": "Logs-Ordner auswählen",
             "select_armor_folder": "Waffenkammer-Ordner auswählen",
             "select_cookies_folder": "Cookie-Ordner auswählen"
+        },
+        "herald": {
+            "config_cookies_group_title": "Cookies-Pfad",
+            "config_item_cache_group_title": "Element-Cache-Pfad",
+            "clean_eden_confirm_title": "Bereinigung bestätigen",
+            "clean_eden_confirm_message": "⚠️ Diese Aktion löscht:\n\n• Alle Eden-Cookies\n• Vollständiges Chrome-Profil (Cache, Verlauf, Sitzung)\n\n📁 Ordner: {path}\n\nSie müssen Ihre Cookies nach diesem Vorgang neu generieren.\n\nFortfahren?",
+            "clean_cache_confirm_title": "Bereinigung bestätigen",
+            "clean_cache_confirm_message": "⚠️ Diese Aktion löscht:\n\n• Element-Cache von Web-Suchen\n\n📁 Ordner: {path}\n\nDatenbankitems werden nicht beeinträchtigt.\n\nFortfahren?"
         }
     },
     "debug": {

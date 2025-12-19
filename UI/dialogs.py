@@ -79,6 +79,12 @@ from UI.ui_file_dialogs import (
     dialog_open_file, dialog_save_file, dialog_select_directory,
     dialog_open_armor_file, dialog_select_backup_path
 )
+from UI.ui_getters import (
+    ui_get_visibility_config, ui_get_selected_category, ui_get_selected_changes
+)
+from UI.ui_context_menus import ui_show_armor_context_menu
+from Functions.herald_ui_wrappers import herald_ui_update_rvr_stats
+from Functions.character_rename_handler import character_rename_with_validation
 
 # Get CHARACTER logger
 logger_char = get_logger(LOGGER_CHARACTER)
@@ -1098,8 +1104,7 @@ class CharacterSheetWindow(QDialog):
     
     def update_rvr_stats(self):
         """Update RvR statistics from Herald"""
-        url = self.herald_url_edit.text().strip()
-        character_herald_update_rvr_stats(self, url)
+        herald_ui_update_rvr_stats(self, self.herald_url_edit)
     
     # ✅ Pattern 1 : Wrappers thread-safe pour stats update
     def _on_stats_step_started(self, step_index):
@@ -1770,7 +1775,7 @@ class ColumnsConfigDialog(QDialog):
     
     def get_visibility_config(self):
         """Returns a dictionary with the visibility state of each column."""
-        return {key: checkbox.isChecked() for key, checkbox in self.checkboxes.items()}
+        return ui_get_visibility_config(self.checkboxes)
 
 
 class NewCharacterDialog(QDialog):
@@ -5722,20 +5727,7 @@ class CharacterUpdateDialog(QDialog):
     
     def get_selected_changes(self):
         """Retourne les modifications sélectionnées."""
-        selected = {}
-        
-        
-        for row in range(self.changes_table.rowCount()):
-            item = self.changes_table.item(row, 0)
-            if item:
-                checkbox = item.data(Qt.UserRole)
-                field = item.data(Qt.UserRole + 1)
-                value_raw = item.data(Qt.UserRole + 2)  # Retrieve the valeur brute
-                
-                if checkbox and checkbox.isChecked():
-                    selected[field] = value_raw  # Utiliser la valeur brute
-        
-        return selected
+        return ui_get_selected_changes(self.changes_table)
     
     def has_changes(self):
         """Retourne True s'il y a au moins un changement détecté."""
@@ -6738,7 +6730,4 @@ class ItemCategoryDialog(QDialog):
     
     def get_selected_category(self):
         """Get the selected category key"""
-        checked_button = self.category_buttons.checkedButton()
-        if checked_button:
-            return checked_button.property("category_key")
-        return "unknown"
+        return ui_get_selected_category(self.category_buttons)

@@ -1129,6 +1129,77 @@ Status: COMPLETED - READY FOR MERGE
 
 ---
 
+📋 PHASE 19: SIMPLE GETTERS & SETTERS EXTRACTION (IN PROGRESS - v0.109)
+================================================================================
+Target Files: Multiple UI modules (new dedicated modules)
+Priority: LOW
+Date Planned: December 2025
+Date Started: 19 December 2025
+Branch: feature/v0.109-phase-19-simple-getters-extraction
+
+Objective:
+🔄 IN PROGRESS - Extract simple getter/setter utility functions from dialogs.py
+🔄 IN PROGRESS - Create dedicated modules for reusable UI utilities
+🔄 IN PROGRESS - Improve code organization for simple data retrieval functions
+
+Extracted Functions (4 total):
+1. ⏳ get_selected_category() [SearchResultsDialog]
+   - Location: dialogs.py lines ~6739-6747
+   - Lines: 4 code lines (ultra simple getter)
+   - Purpose: Get selected category from radio buttons
+   - Returns: str (category key)
+   - Target Module: TBD (UI getters module or dedicated)
+   - Thin wrapper: 2 lines in dialogs.py
+
+2. ⏳ update_rvr_stats() [CharacterSheetWindow]
+   - Location: dialogs.py lines ~1099-1102
+   - Lines: 3 code lines (ultra simple wrapper)
+   - Purpose: Update RvR statistics from Herald URL
+   - Returns: None (calls character_herald_update_rvr_stats)
+   - Target Module: TBD (UI update wrappers)
+   - Thin wrapper: 2 lines in dialogs.py
+
+3. ⏳ get_visibility_config() [SettingsDialog]
+   - Location: dialogs.py lines ~1771-1773
+   - Lines: 2 code lines (ultra simple dict comprehension)
+   - Purpose: Return visibility state of all columns (checkboxes)
+   - Returns: dict {key: bool}
+   - Target Module: TBD (UI getters module)
+   - Thin wrapper: 1 line in dialogs.py
+
+4. ⏳ get_selected_changes() [ImportChangesReviewDialog]
+   - Location: dialogs.py lines ~5723-5738
+   - Lines: 13 code lines (simple table iteration)
+   - Purpose: Retrieve selected changes from changes table
+   - Returns: dict {field: value_raw}
+   - Target Module: TBD (UI getters module or import utilities)
+   - Thin wrapper: 2 lines in dialogs.py
+
+Total Code Reduction Expected: ~22 lines from dialogs.py
+Architecture Decision Pending:
+- Option A: Single module UI/ui_getters.py for all 4 functions
+- Option B: Separate modules by domain (ui_getters.py, ui_updates.py, etc.)
+- Option C: Add to existing domain modules (character_*, herald_*, etc.)
+
+Quality Standards - PENDING:
+⏳ PEP 8 compliance (awaiting implementation)
+⏳ Type hints (awaiting implementation)
+⏳ Docstrings: 100% English (awaiting implementation)
+⏳ Syntax validation (awaiting implementation)
+⏳ Import testing (awaiting implementation)
+
+Git Status:
+🔄 Branch: feature/v0.109-phase-19-simple-getters-extraction (created Dec 19, 2025)
+⏳ Implementation: IN PROGRESS
+⏳ Code extraction: PENDING
+⏳ Testing: PENDING
+⏳ Commit: PENDING
+⏳ Ready for merge: NOT YET
+
+Status: IN PROGRESS - AWAITING IMPLEMENTATION
+
+---
+
 ================================================================================
 
 v0.110 PLANNING:

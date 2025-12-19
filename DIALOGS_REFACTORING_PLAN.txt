@@ -993,8 +993,9 @@ COMPLETED PHASES (16):
 ✅ Phase 15: UI File Dialog Wrapper - 140 lines (centralized file dialogs for dialogs.py)
 ✅ Phase 16: Extended UI File Dialogs - 280+ lines (centralized file dialogs for all UI files)
 
-PLANNED FUTURE PHASES (0):
-📋 No planned phases at this time
+PLANNED FUTURE PHASES (2):
+📋 Phase 17: Character Renaming Handler (LOW PRIORITY - v0.109 - ~48 lines)
+📋 Phase 18: Simple UI Utility Functions (LOW PRIORITY - v0.109 - ~35 lines)
 
 EXTRACTION METRICS (v0.109):
 - Total lines extracted: 4,865 lines
@@ -1014,6 +1015,91 @@ v0.109 REFACTORING STATUS:
 ✅ Phase 16 extended UI file dialogs (in progress, not yet committed)
 
 📋 Phase 15 (File Dialogs) remains: LOW priority, can be deferred
+
+v0.110 PLANNING:
+- Enhanced error handling patterns
+- Additional UI helper modules (if needed)
+- Advanced validation chains
+- Context-aware validation messages
+
+================================================================================
+
+📋 PHASE 17: CHARACTER RENAMING HANDLER (PLANNED - v0.109)
+================================================================================
+Target File: Functions/character_rename_handler.py
+Priority: LOW
+Date Planned: December 2025
+Branch: refactor/v0.109-phase-17-character-renaming
+
+Objective:
+- Extract character renaming logic from CharacterSheetWindow class
+- Create dedicated module for character rename handling
+- Validate character name and update JSON file
+
+Extracted Functions (1 total):
+1. character_rename_with_validation(parent_window, character_name, old_name)
+   - Rename character with validation
+   - Validate name format and uniqueness
+   - Update JSON file with new name
+   - Returns: bool (success/failure)
+   - Used in: CharacterSheetWindow._on_rename_character()
+   - Thin wrapper: 1 line in dialogs.py
+
+Location in dialogs.py: Lines ~2126-2174 (~48 lines)
+
+Expected Code Reduction: ~48 lines from dialogs.py
+Expected Module Size: ~80 lines
+
+Quality Standards:
+- PEP 8 compliant (ruff validation)
+- Type hints: Complete
+- Docstrings: English only
+- No hardcoded strings (lang.get())
+- No French comments
+- Proper error handling
+
+Status: PLANNED - NOT STARTED
+
+---
+
+📋 PHASE 18: SIMPLE UI UTILITY FUNCTIONS (PLANNED - v0.109)
+================================================================================
+Target File: Functions/ui_utils.py
+Priority: LOW
+Date Planned: December 2025
+Branch: refactor/v0.109-phase-18-ui-utilities
+
+Objective:
+- Extract simple UI utility functions from dialogs.py
+- Create dedicated module for UI helper functions
+- Improve code organization for small utility functions
+
+Extracted Functions (1 total):
+1. ui_create_armor_context_menu(parent_window, selected_items)
+   - Create context menu for armor list
+   - Handles right-click actions on armor items
+   - Returns: QMenu with configured actions
+   - Used in: ArmorManagementDialog context menu handling
+   - Thin wrapper: 1 line in dialogs.py
+
+Location in dialogs.py: Lines ~4801-4835 (~35 lines)
+
+Expected Code Reduction: ~35 lines from dialogs.py
+Expected Module Size: ~60 lines
+
+Quality Standards:
+- PEP 8 compliant (ruff validation)
+- Type hints: Complete
+- Docstrings: English only
+- No hardcoded strings (lang.get())
+- No French comments
+- Proper error handling
+
+Status: PLANNED - NOT STARTED
+
+---
+
+================================================================================
 
 v0.110 PLANNING:
 - Enhanced error handling patterns

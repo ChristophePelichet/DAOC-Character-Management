@@ -126,6 +126,15 @@
 - **Window Controls**: Enable minimize button on CharacterSheetWindow
   - Minimize button no longer greyed out when viewing character details
   - All three window controls now functional: minimize, maximize, close
+- **Settings/Eden Translation**: Complete translation system for Eden settings section
+  - Translate all hardcoded French text in "Chemin des cookies" and "Chemin du cache des items" sections
+  - Translate cleanup confirmation dialogs (Clean Eden, Clean Cache)
+  - Translate "Ouvrir le dossier" buttons and "Stockage automatique dans" labels
+  - Add 6 new translation keys in settings.herald section
+  - Add cleanup confirmation messages in settings.herald section (title + message for both Eden and Cache)
+  - Full FR/EN/DE support for all Eden settings UI elements
+  - Fix JSON structure to prevent key duplication in language files
+  - All translations use lang.get() system for dynamic language switching
 
 ---
 
@@ -178,17 +187,6 @@
 - 🎨 Purple theme: visible text, readable placeholder
 - 🌍 Herald/Stats/Buttons translations (FR/EN/DE)
 - 📝 Replace emoji prints with logging to avoid Windows encoding errors in items parser
-- 🌐 **Settings/Eden translations**: Fixed hardcoded French text in Eden settings section
-  - All buttons, labels and tooltips now follow language selection
-  - Implemented retranslate_ui() for live language switching
-  - Fixed v2 language keys (buttons.*, settings.herald.*)
-  - Added 6 new translation keys: cookies path, cache path, storage info labels
-  - Translated cleanup confirmation dialogs (Clean Eden, Clean Cache)
-  - Full FR/EN/DE support for all Eden section UI elements
-  - Fixed JSON structure to avoid key duplication in language files
-- 🔄 **Settings live language update**: Settings dialog now auto-closes and reopens on language change
-  - All navigation items, page titles, and widgets instantly translated
-  - No need to manually close/reopen Settings window
 
 ---
 

@@ -6,7 +6,7 @@
 
 **Extraction Scope**: Extract business logic from `UI/dialogs.py` into dedicated domain-specific modules for improved maintainability, testability, and code reuse.
 
-**9 Phases Completed** - Extracted 32+ functions into 8 new modules, removed ~2339 lines from dialogs.py:
+**10 Phases Completed** - Extracted 34+ functions into 9 new modules, removed ~2399 lines from dialogs.py:
 
 1. **Phase 1**: Template Parser (`Functions/template_parser.py` - 1392 lines)
    - Template format detection, parsing (Loki/Zenkcraft), price lookup, item formatting
@@ -35,12 +35,15 @@
 9. **Phase 9**: Armor Upload & Management (`Functions/armor_upload_handler.py` - 362 lines)
    - File upload with cross-season support, template import, file opening, deletion
 
+10. **Phase 10**: Item Model Viewer (`Functions/item_model_viewer.py` - 167 lines)
+    - Model link click handling, item model display with multi-source search, error handling
+
 **Refactoring Statistics**:
-- Total functions extracted: 32+
-- Total lines extracted: ~2539 lines
-- Thin wrappers in dialogs.py: ~154 lines
-- Net code reduction: ~2385 lines
-- Modules created: 8 dedicated domain-specific modules
+- Total functions extracted: 34+
+- Total lines extracted: ~2706 lines
+- Thin wrappers in dialogs.py: ~156 lines
+- Net code reduction: ~2550 lines
+- Modules created: 9 dedicated domain-specific modules
 
 **Quality Standards Applied**:
 - ✅ Domain-driven naming conventions for all modules and functions
@@ -48,7 +51,7 @@
 - ✅ Type hints and comprehensive docstrings (English only)
 - ✅ Zero hardcoded UI strings (all use `lang.get()`)
 - ✅ English-only code and comments
-- ✅ Complete documentation updates (EDEN_TECHNICAL_DOCUMENTATION.md, CHARACTER_SYSTEM_TECHNICAL_DOCUMENTATION.md, ARMORY_TECHNICAL_DOCUMENTATION.md)
+- ✅ Complete documentation updates (EDEN_TECHNICAL_DOCUMENTATION.md, CHARACTER_SYSTEM_TECHNICAL_DOCUMENTATION.md, ARMORY_TECHNICAL_DOCUMENTATION.md, MODELS_VISUAL_SYSTEM_DOCUMENTATION.md)
 
 ---
 

@@ -1,10 +1,10 @@
 # 🛡️ Armory System - Technical Documentation
 
-**Version**: 3.0  
+**Version**: 3.1  
 **Date**: November 2025  
-**Last Updated**: December 19, 2025 (Armor Upload & Management Module - Phase 9)  
+**Last Updated**: December 19, 2025 (Item Model Viewer Module Integration - Phase 10)  
 **Component**: `UI/mass_import_monitor.py`, `UI/template_import_dialog.py`, `UI/dialogs.py`  
-**Related**: `Functions/items_scraper.py`, `Functions/items_parser.py`, `Functions/import_worker.py`, `Functions/build_items_database.py`, `Functions/template_manager.py`, `Functions/template_metadata.py`, `Functions/superadmin_tools.py`, `Functions/template_parser.py`, `Functions/armor_upload_handler.py`, `Tools/fix_currency_mapping.py`
+**Related**: `Functions/items_scraper.py`, `Functions/items_parser.py`, `Functions/import_worker.py`, `Functions/build_items_database.py`, `Functions/template_manager.py`, `Functions/template_metadata.py`, `Functions/superadmin_tools.py`, `Functions/template_parser.py`, `Functions/armor_upload_handler.py`, `Functions/item_model_viewer.py`, `Tools/fix_currency_mapping.py`
 
 ---
 

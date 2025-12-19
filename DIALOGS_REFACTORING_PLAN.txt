@@ -420,21 +420,61 @@ Status: READY FOR PRODUCTION - MERGE TO DIALOGS-CLEANUP
 
 ---
 
-FUTURE PHASES (NOT STARTED)
+✅ PHASE 10: ITEM MODEL VIEWER EXTRACTION (COMPLETED - v0.109)
 ================================================================================
+Target File: Functions/item_model_viewer.py (167 lines)
+Extracted: 2 functions from ArmorManagementDialog class
+Date Completed: 19 December 2025
+Branch: refactor/v0.109-item-model-viewer
 
-PHASE 10: ITEM MODEL VIEWER (Low Priority)
-Current Location: ArmorManagementDialog class
-Target File: Functions/item_model_viewer.py
-Naming Convention: item_model_{action}_{object}
+Extracted Functions:
+1. ✅ item_model_on_link_clicked(parent_window, url)
+   - Handle click on model viewer link in preview
+   - Validates URL scheme is "model" (custom protocol)
+   - Calls item_model_show() to display model
+   - Prevents default link navigation
+   - Thin wrapper: 1 line in dialogs.py
 
-Functions to Extract:
-1. _on_model_link_clicked() - Handle click on 🔍 icon to show item model
-2. _show_item_model() - Display 3D item model in dialog
+2. ✅ item_model_show(parent_window, item_name)
+   - Display model image for the specified item
+   - Multi-source search: direct → realm-specific → all realms
+   - Supports both 'model_id' and 'model' database fields
+   - Creates and displays ModelViewerDialog (non-modal)
+   - Shows error message if model not found
+   - Thin wrapper: 1 line in dialogs.py
+
+Quality Metrics:
+- ✅ PEP 8 compliant (ruff checks: 0 errors)
+- ✅ Type hints complete for all parameters
+- ✅ Comprehensive docstrings with examples and process flow
+- ✅ No hardcoded strings (all use lang.get() with defaults)
+- ✅ No French comments (100% English docstrings and comments)
+- ✅ Error handling robust (validation, UI feedback, logging)
+- ✅ Syntax validation: PASSED
+
+Code Structure:
+- Created item_model_viewer.py: ~167 lines
+- Updated dialogs.py: ~2 lines of thin wrappers
+- Removed from dialogs.py: ~60 lines of business logic
+- Net result: ~58 lines saved, improved modularity
+
+Integration Points:
+- item_model_on_link_clicked(): Connected to preview_area.anchorClicked signal
+- item_model_show(): Called from item_model_on_link_clicked() and other locations
+
+Documentation:
+- Updated MODELS_VISUAL_SYSTEM_DOCUMENTATION.md with Phase 10 section (v3.0)
+- Updated ARMORY_TECHNICAL_DOCUMENTATION.md (v3.0 → v3.1)
+- Reference to item_model_viewer module added
+
+Status: READY FOR PRODUCTION - MERGE TO DIALOGS-CLEANUP
 
 ---
 
-GROUP 11: ACHIEVEMENTS DISPLAY (Low Priority)
+FUTURE PHASES (NOT STARTED)
+================================================================================
+
+PHASE 11: ACHIEVEMENTS DISPLAY (Low Priority)
 Current Location: CharacterSheetWindow class
 Target File: Functions/achievement_formatter.py
 Naming Convention: achievement_{action}_{object}
@@ -447,8 +487,8 @@ Functions to Extract:
 EXTRACTION SUMMARY
 ================================================================================
 
-Total Phases: 11 (9 completed, 2 future)
-Completed Phases: 9
+Total Phases: 11 (10 completed, 1 future)
+Completed Phases: 10
 - Phase 1: ✅ COMPLETE (Template Parser - 1392 lines)
 - Phase 2: ✅ COMPLETE (Item Price Manager - 205 lines)
 - Phase 3: ✅ COMPLETE (Ruff Cleanup - 22 errors fixed)
@@ -458,15 +498,15 @@ Completed Phases: 9
 - Phase 7: ✅ COMPLETE (Character Banner Management - 141 lines)
 - Phase 8: ✅ COMPLETE (Herald URL Validation - 236 lines)
 - Phase 9: ✅ COMPLETE (Armor Upload & Management - 362 lines)
+- Phase 10: ✅ COMPLETE (Item Model Viewer - 167 lines)
 
-Future Phases: 2
-- Phase 10: Item Model Viewer (Low Priority)
+Future Phases: 1
 - Phase 11: Achievements Display (Low Priority)
 
-Total Lines Extracted: ~2539 lines
-Total Thin Wrappers in dialogs.py: ~154 lines
-Net Reduction in dialogs.py: ~2385 lines
-Total Modules Created: 8 dedicated modules
+Total Lines Extracted: ~2706 lines
+Total Thin Wrappers in dialogs.py: ~156 lines
+Net Reduction in dialogs.py: ~2550 lines
+Total Modules Created: 9 dedicated modules
 Quality: All modules PEP 8 compliant with 0 errors
 
 

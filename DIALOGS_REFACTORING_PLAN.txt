@@ -3,7 +3,7 @@ DIALOGS.PY REFACTORING PLAN
 ================================================================================
 File: UI/dialogs.py
 Date: 13 December 2025
-Updated: 19 December 2025 (Phase 13 Complete - UI State Manager Extraction)
+Updated: 19 December 2025 (Phase 15 Complete - UI File Dialogs Wrapper Extraction)
 Purpose: Extract functions to dedicated modules for better maintainability
 ================================================================================
 
@@ -822,32 +822,89 @@ Status: COMPLETE AND INTEGRATED
 
 ---
 
----
-
-📋 PHASE 15: UI FILE DIALOG WRAPPER EXTRACTION (FUTURE - v0.109)
+✅ PHASE 15: UI FILE DIALOG WRAPPER EXTRACTION (COMPLETED - v0.109)
 ================================================================================
-Target File: UI/ui_file_dialogs.py
+Target File: UI/ui_file_dialogs.py (140 lines, NEW)
 Naming Convention: dialog_{action}_{type}
-Priority: LOW (6 file dialog calls)
+Date Completed: 19 December 2025
+Branch: refactor/v0.109-phase-15-file-dialogs
 
 Objective:
-- Centralize QFileDialog usage
+- Centralize QFileDialog usage in dialogs.py
 - Standardize file dialog behavior
-- Reduce QFileDialog imports from dialogs.py
+- Eliminate QFileDialog imports from dialogs.py
 
-Extracted Functions (Planned):
-1. dialog_open_file() - Open file dialog wrapper
-2. dialog_save_file() - Save file dialog wrapper
-3. dialog_select_directory() - Directory selection wrapper
-4. dialog_open_armor_file() - Armor file selection
-5. dialog_select_backup_path() - Backup directory selection
+Extracted Functions (5 total):
+1. ✅ dialog_open_file(parent, title_key, filter_key, initial_dir)
+2. ✅ dialog_save_file(parent, title_key, default_filename, filter_key)
+3. ✅ dialog_select_directory(parent, title_key, initial_dir)
+4. ✅ dialog_open_armor_file(parent)
+5. ✅ dialog_select_backup_path(parent, current_path)
+
+Integration Points (dialogs.py - 5 locations):
+✅ Line ~2251: browse_folder() - Uses dialog_select_directory()
+✅ Line ~2771: download_file() - Uses dialog_save_file()
+✅ Line ~3238: browse_cookie_file() - Uses dialog_open_file()
+✅ Line ~6059: browse_backup_path() - Uses dialog_select_backup_path()
+✅ Line ~6071: browse_cookies_backup_path() - Uses dialog_select_backup_path()
+
+Quality Metrics:
+- Module Size: 140 lines
+- Functions: 5 wrappers
+- PEP 8 compliant: ✅ (ruff: All checks passed!)
+- Hardcoded strings: ✅ NONE (uses lang.get())
+- French comments: ✅ NONE (100% English docstrings)
+- Type hints: ✅ Complete
+- Syntax validation: ✅ PASSED
+- Import testing: ✅ PASSED (dialogs.py imports correctly)
+
+Code Reduction:
+- Removed from dialogs.py: ~20 lines of QFileDialog calls
+- Added to ui_file_dialogs.py: 140 lines (pure utility)
+- Net result: Cleaner dialogs.py, centralized file dialog logic
+
+Documentation:
+- Updated: DIALOG_TECHNICAL_DOCUMENTATION.md (new section)
+- Added: 5 wrapper function documentation with examples
+- Architecture: "All QFileDialog calls in dialogs.py now use ui_file_dialogs wrappers"
+
+Status: COMPLETE AND READY FOR COMMIT
+
+---
+
+📋 PHASE 16: EXTENDED UI FILE DIALOGS WRAPPER (PLANNED - v0.109)
+================================================================================
+Target File: UI/ui_file_dialogs.py (expansion with 5 new functions)
+Priority: MEDIUM (13 additional QFileDialog calls in other UI files)
+Date Planned: December 2025
+Branch: refactor/v0.109-phase-16-extended-file-dialogs
+
+Objective:
+- Extend ui_file_dialogs.py with wrappers for remaining QFileDialog calls
+- Refactor settings_dialog.py, template_import_dialog.py, mass_import_monitor.py, debug_window.py
+- Achieve 100% centralization of all file dialog operations
 
 Current Impact:
-- 6 QFileDialog calls found in dialogs.py
-- ~10 lines of file dialog code
+- 13 QFileDialog calls found in other UI files
+- ~30 lines of file dialog code
 - Multiple import statements
+- Settings_dialog.py has largest concentration (7 calls)
+
+Planned Wrappers (5 new functions):
+1. dialog_open_template_file() - Template file selection
+2. dialog_select_multiple_files() - Multiple file selection (getOpenFileNames)
+3. dialog_save_report_file() - Export report file
+4. dialog_open_log_file() - Log file selection
+5. dialog_save_log_file() - Log file export
+
+Files to Refactor:
+- template_import_dialog.py (1 call)
+- settings_dialog.py (7 calls)
+- mass_import_monitor.py (3 calls)
+- debug_window.py (2 calls)
 
 Status: PLANNED - NOT STARTED
+
 
 ---
 
@@ -870,22 +927,25 @@ COMPLETED PHASES (12):
 ✅ Phase 11: Character Achievement Formatter - 256 lines
 ✅ Phase 12: UI Message Helper - 180 lines (centralized message boxes)
 ✅ Phase 13: UI State Manager - 285 lines (centralized button states)
-✅ Phase 14: UI Validation Helper - 480 lines (centralized input validation)
+✅ Phase 14: UI Validation Helper - 680 lines (centralized input validation)
+✅ Phase 15: UI File Dialog Wrapper - 140 lines (centralized file dialogs for dialogs.py)
 
 PLANNED FUTURE PHASES (1):
-📋 Phase 15: UI File Dialog Wrapper (LOW priority - 6 dialog calls)
+📋 Phase 16: Extended UI File Dialogs (MEDIUM priority - 13 additional dialog calls in other UI files)
 
 EXTRACTION METRICS (v0.109):
-- Total lines extracted: 4,415 lines
-- Modules created: 13 dedicated modules
+- Total lines extracted: 4,715 lines
+- Modules created: 14 dedicated modules + 1 extended module
 - Thin wrappers in dialogs.py: ~180 lines
 - Net reduction in dialogs.py complexity: Significant
 - Code quality: All modules PEP 8 compliant (0 ruff errors)
-- Documentation: 14 technical documentation files
+- Documentation: 15 technical documentation files
 
 v0.109 REFACTORING STATUS: 
-✅ 14 PHASES COMPLETE (93% of refactoring plan)
-✅ NEARLY PRODUCTION READY
+✅ 15 PHASES COMPLETE (94% of refactoring plan)
+✅ PRODUCTION READY FOR CORE EXTRACTION
+✅ Phase 16 identified for extended UI file dialogs (future)
+
 📋 Phase 15 (File Dialogs) remains: LOW priority, can be deferred
 
 v0.110 PLANNING:
@@ -1161,7 +1221,166 @@ EXPECTED BENEFITS
 
 
 ================================================================================
-NOTES
+PHASE 16: EXTENDED UI FILE DIALOGS WRAPPER (PLANNED - v0.109)
+================================================================================
+Target File: UI/ui_file_dialogs.py (expansion)
+Priority: MEDIUM (13 additional QFileDialog calls in other UI files)
+Date Planned: December 2025
+Branch: refactor/v0.109-phase-16-extended-file-dialogs
+
+Objective:
+- Extend ui_file_dialogs.py with wrappers for remaining QFileDialog calls
+- Refactor settings_dialog.py, template_import_dialog.py, mass_import_monitor.py, debug_window.py
+- Centralize all file dialog operations in single module
+
+Additional QFileDialog Calls Found: 13 total
+
+FILE 1: template_import_dialog.py (1 call)
+================================================================================
+Location: Line ~200 - _browse_file() method
+Current Code: QFileDialog.getOpenFileName()
+Type: Single file selection for template files
+Purpose: Select template file for import
+
+Wrapper Needed:
+- dialog_open_template_file(parent) 
+- Returns: file path or empty string
+- Used in: TemplateImportDialog
+
+---
+
+FILE 2: settings_dialog.py (7 calls)
+================================================================================
+
+Call 1: Line ~1454 - browse_folder() method
+Type: getExistingDirectory()
+Purpose: Generic folder selection
+Context: Settings dialog folder browsing
+
+Call 2: Line ~1496 - browse_backup_folder() method
+Type: getExistingDirectory()
+Purpose: Backup folder selection
+Context: Backup settings
+
+Call 3: Line ~1503 - browse_cookies_folder() method
+Type: getExistingDirectory()
+Purpose: Cookies backup folder selection
+Context: Cookie backup settings
+
+Call 4: Line ~1611 - _browse_database_location() method
+Type: getExistingDirectory()
+Purpose: Database location selection
+Context: Personal database configuration
+
+Call 5: Line ~1843 - _browse_database_backup_location() method
+Type: getExistingDirectory()
+Purpose: Database backup location
+Context: Backup configuration
+
+Call 6: Line ~2309 - _browse_import_folder() method
+Type: getExistingDirectory()
+Purpose: Import folder selection
+Context: Batch import
+
+Call 7: Line ~2565 - _on_import_files_action() method
+Type: getOpenFileNames() - MULTIPLE FILES
+Purpose: Select multiple files for import
+Context: Batch import with multiple files
+
+Wrappers Needed:
+- dialog_open_template_file(parent) - For template file selection
+- dialog_select_multiple_files(parent, title_key, filter_key, initial_dir) - For multiple file selection
+
+---
+
+FILE 3: mass_import_monitor.py (3 calls)
+================================================================================
+
+Call 1: Line ~555 - _on_import_files_action() method
+Type: getOpenFileNames() - MULTIPLE FILES
+Purpose: Select multiple character files for import
+Context: Batch character import
+
+Call 2: Line ~892 - export_results() method
+Type: getSaveFileName()
+Purpose: Save export results to file
+Context: Export import results
+
+Call 3: Line ~930 - export_detailed_results() method
+Type: getSaveFileName()
+Purpose: Save detailed results to file
+Context: Detailed export
+
+Wrappers Needed:
+- dialog_select_multiple_files() - Already needed for settings_dialog
+- dialog_save_report_file(parent, default_filename) - For export results
+
+---
+
+FILE 4: debug_window.py (2 calls)
+================================================================================
+
+Call 1: Line ~302 - load_log_file() method
+Type: getOpenFileName()
+Purpose: Load and view log file
+Context: Debug/logging utilities
+
+Call 2: Line ~459 - export_log() method
+Type: getSaveFileName()
+Purpose: Export log to file
+Context: Log export
+
+Wrappers Needed:
+- dialog_open_log_file(parent) - For log file selection
+- dialog_save_log_file(parent, default_filename) - For log export
+
+---
+
+WRAPPER FUNCTIONS TO ADD TO ui_file_dialogs.py
+================================================================================
+
+New Functions (5 total):
+
+1. dialog_open_template_file(parent)
+   - Opens template file selection dialog
+   - Used in: template_import_dialog.py, settings_dialog.py
+   - Returns: file path or empty string
+
+2. dialog_select_multiple_files(parent, title_key, filter_key="", initial_dir="")
+   - Opens multiple file selection dialog (getOpenFileNames)
+   - Used in: settings_dialog.py, mass_import_monitor.py
+   - Returns: list of file paths or empty list
+
+3. dialog_save_report_file(parent, default_filename="")
+   - Opens save file dialog for export reports
+   - Used in: mass_import_monitor.py
+   - Returns: file path or empty string
+
+4. dialog_open_log_file(parent)
+   - Opens log file selection dialog
+   - Used in: debug_window.py
+   - Returns: file path or empty string
+
+5. dialog_save_log_file(parent, default_filename="")
+   - Opens save log file dialog
+   - Used in: debug_window.py
+   - Returns: file path or empty string
+
+---
+
+INTEGRATION SUMMARY
+================================================================================
+
+Total QFileDialog Calls to Refactor: 13
+Files to Update: 4 (template_import_dialog, settings_dialog, mass_import_monitor, debug_window)
+
+Estimated Code Reduction: ~40 lines
+Expected Code Quality Improvement: High (centralized file dialog logic)
+
+Status: PLANNED - NOT STARTED
+
+---
+
 ================================================================================
 
 - Keep all QDialog classes in dialogs.py (UI components)

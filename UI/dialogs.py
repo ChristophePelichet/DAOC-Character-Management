@@ -75,6 +75,10 @@ from UI.ui_state_manager import (
     ui_state_set_herald_buttons, ui_state_set_armor_buttons,
     ui_state_on_selection_changed
 )
+from UI.ui_file_dialogs import (
+    dialog_open_file, dialog_save_file, dialog_select_directory,
+    dialog_open_armor_file, dialog_select_backup_path
+)
 
 # Get CHARACTER logger
 logger_char = get_logger(LOGGER_CHARACTER)
@@ -2248,7 +2252,7 @@ class ConfigurationDialog(QDialog):
 
     def browse_folder(self, line_edit, title_key):
         """Generic folder browser."""
-        directory = QFileDialog.getExistingDirectory(self, lang.get(title_key))
+        directory = dialog_select_directory(self, title_key)
         if directory:
             line_edit.setText(directory)
 
@@ -2768,11 +2772,11 @@ class ArmorManagementDialog(QDialog):
                 return
             
             # Ask user where to save the file
-            save_path, _ = QFileDialog.getSaveFileName(
+            save_path = dialog_save_file(
                 self,
-                lang.get("armoury_dialog.dialogs.download_file"),
-                filename,
-                lang.get("armoury_dialog.dialogs.all_files")
+                title_key="armoury_dialog.dialogs.download_file",
+                default_filename=filename,
+                filter_key="armoury_dialog.dialogs.all_files"
             )
             
             if save_path:
@@ -3235,11 +3239,10 @@ class CookieManagerDialog(QDialog):
     
     def browse_cookie_file(self):
         """Open dialog to select a cookie file"""
-        file_path, _ = QFileDialog.getOpenFileName(
+        file_path = dialog_open_file(
             self,
-            lang.get("cookie_manager.browse_dialog_title"),
-            "",
-            lang.get("cookie_manager.browse_dialog_filter")
+            title_key="cookie_manager.browse_dialog_title",
+            filter_key="cookie_manager.browse_dialog_filter"
         )
         
         if file_path:
@@ -6056,11 +6059,7 @@ class BackupSettingsDialog(QDialog):
     def browse_backup_path(self):
         """Open directory selection dialog for backup path."""
         current_path = self.path_edit.text()
-        selected_dir = QFileDialog.getExistingDirectory(
-            self,
-            lang.get("backup_path_dialog_title"),
-            current_path
-        )
+        selected_dir = dialog_select_backup_path(self, current_path)
         if selected_dir:
             self.path_edit.setText(selected_dir)
             self.path_edit.setCursorPosition(0)
@@ -6068,11 +6067,7 @@ class BackupSettingsDialog(QDialog):
     def browse_cookies_backup_path(self):
         """Open directory selection dialog for cookies backup path."""
         current_path = self.cookies_path_edit.text()
-        selected_dir = QFileDialog.getExistingDirectory(
-            self,
-            lang.get("backup_path_dialog_title"),
-            current_path
-        )
+        selected_dir = dialog_select_backup_path(self, current_path)
         if selected_dir:
             self.cookies_path_edit.setText(selected_dir)
             self.cookies_path_edit.setCursorPosition(0)

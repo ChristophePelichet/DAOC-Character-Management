@@ -2,6 +2,13 @@
 
 ## v0.109
 
+### 🐛 Bug Fixes
+
+**Herald Search Dialog - Realm Combobox**
+- Fixed realm combobox text truncation where "Midgard" was displayed as "Mi...rd"
+- Added `setMinimumWidth(180)` to ensure proper display of all realm names
+- Issue: Combobox width was too constrained in the layout
+
 ### ♻️ Code Refactoring - dialogs.py Module Extraction & UI Helper Systems (Complete)
 
 **Extraction Scope**: Extract business logic from `UI/dialogs.py` into dedicated domain-specific modules for improved maintainability, testability, and code reuse. Consolidate input validation and file dialogs into centralized helper modules.

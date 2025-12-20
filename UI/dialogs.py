@@ -4751,6 +4751,7 @@ class HeraldSearchDialog(QDialog):
         else:
             self.realm_combo.addItem("🟢 Hibernia", "hib")
         self.realm_combo.setToolTip(self.lang.get("herald_search.realm_tooltip"))
+        self.realm_combo.setMinimumWidth(180)  # Set minimum width to prevent text truncation
         realm_layout.addWidget(realm_label)
         realm_layout.addWidget(self.realm_combo)
         realm_layout.addStretch()

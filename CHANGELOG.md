@@ -4,6 +4,17 @@
 
 ### 🐛 Bug Fixes
 
+**Language Selection & About Dialog Translation**
+- Fixed language selection showing incorrect languages (only English and Spanish visible)
+- Fixed missing languages (French and German) not appearing in Settings > General
+- Fixed JSON syntax errors in fr.json and de.json (missing commas at line 314)
+- Fixed incomplete Spanish translation file (_es.json) appearing in language selector
+- Fixed About dialog credits appearing in English regardless of selected language
+- Implemented full translation support for About and Credits tabs using lang.get()
+- Credits now fully translatable: titles, descriptions, contributor names, labels
+- About tab translatable: description, creator, repository, all UI text
+- Added language refresh when switching languages in Settings - dialogs now update instantly
+
 **Herald Search Dialog - Realm Combobox**
 - Fixed realm combobox text truncation where "Midgard" was displayed as "Mi...rd"
 - Added `setMinimumWidth(180)` to ensure proper display of all realm names

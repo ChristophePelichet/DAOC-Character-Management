@@ -192,20 +192,20 @@ class AboutDialog(QDialog):
             
             <h3 style="color: {h3_color}; font-size: 18px; margin-top: 20px;">{lang.get("dialogs.about_dialog.dol_project_title", default="Dawn of Light (DOL)")}</h3>
             <ul>
-                <li><strong>{lang.get("dialogs.about_dialog.dol_project_label", default="Project:")}:</strong> <a href="https://github.com/Dawn-of-Light" style="color: {link_color};">Dawn of Light</a></li>
-                <li><strong>{lang.get("dialogs.about_dialog.dol_description_label", default="Description:")}:</strong> {lang.get("dialogs.about_dialog.dol_description", default="Open-source DAOC server emulator")}</li>
+                <li><strong>{lang.get("dialogs.about_dialog.dol_project_label", default="Project:")}  </strong> <a href="https://github.com/Dawn-of-Light" style="color: {link_color};">Dawn of Light</a></li>
+                <li><strong>{lang.get("dialogs.about_dialog.dol_description_label", default="Description:")}  </strong> {lang.get("dialogs.about_dialog.dol_description", default="Open-source DAOC server emulator")}</li>
             </ul>
             
             <h3 style="color: {h3_color}; font-size: 18px; margin-top: 20px;">{lang.get("dialogs.about_dialog.eden_server_title", default="Eden DAOC")}</h3>
             <ul>
-                <li><strong>{lang.get("dialogs.about_dialog.eden_server_label", default="Server:")}:</strong> <a href="https://www.eden-daoc.net/" style="color: {link_color};">Eden DAOC</a></li>
-                <li><strong>{lang.get("dialogs.about_dialog.eden_description_label", default="Description:")}:</strong> {lang.get("dialogs.about_dialog.eden_description", default="DAOC private server")}</li>
+                <li><strong>{lang.get("dialogs.about_dialog.eden_server_label", default="Server:")}  </strong> <a href="https://www.eden-daoc.net/" style="color: {link_color};">Eden DAOC</a></li>
+                <li><strong>{lang.get("dialogs.about_dialog.eden_description_label", default="Description:")}  </strong> {lang.get("dialogs.about_dialog.eden_description", default="DAOC private server")}</li>
             </ul>
             
             <h3 style="color: {h3_color}; font-size: 18px; margin-top: 20px;">{lang.get("dialogs.about_dialog.dolmodels_source_title", default="Eve-of-Darkness DolModels")}</h3>
             <ul>
-                <li><strong>{lang.get("dialogs.about_dialog.dolmodels_source_label", default="Source:")}:</strong> <a href="https://github.com/Eve-of-Darkness/DolModels" style="color: {link_color};">Eve-of-Darkness/DolModels</a></li>
-                <li><strong>{lang.get("dialogs.about_dialog.dolmodels_description_label", default="Description:")}:</strong> {lang.get("dialogs.about_dialog.dolmodels_description", default="1000+ DAOC item model images")}</li>
+                <li><strong>{lang.get("dialogs.about_dialog.dolmodels_source_label", default="Source:")}  </strong> <a href="https://github.com/Eve-of-Darkness/DolModels" style="color: {link_color};">Eve-of-Darkness/DolModels</a></li>
+                <li><strong>{lang.get("dialogs.about_dialog.dolmodels_description_label", default="Description:")}  </strong> {lang.get("dialogs.about_dialog.dolmodels_description", default="1000+ DAOC item model images")}</li>
             </ul>
             
             <hr style="border: none; border-top: 2px solid {hr_color}; margin: 30px 0;">

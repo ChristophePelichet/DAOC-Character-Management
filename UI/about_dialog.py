@@ -36,9 +36,9 @@ class AboutDialog(QDialog):
         self.tabs = QTabWidget()
         
         # Add tabs
-        self.tabs.addTab(self._create_about_tab(), lang.get("about_dialog.tab_about", default="About"))
-        self.tabs.addTab(self._create_credits_tab(), lang.get("about_dialog.tab_credits", default="Credits"))
-        self.tabs.addTab(self._create_license_tab(), lang.get("about_dialog.tab_license", default="License"))
+        self.tabs.addTab(self._create_about_tab(), lang.get("dialogs.about_dialog.tab_about", default="About"))
+        self.tabs.addTab(self._create_credits_tab(), lang.get("dialogs.about_dialog.tab_credits", default="Credits"))
+        self.tabs.addTab(self._create_license_tab(), lang.get("dialogs.about_dialog.tab_license", default="License"))
         
         main_layout.addWidget(self.tabs)
         

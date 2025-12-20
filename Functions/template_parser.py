@@ -200,6 +200,17 @@ def template_get_item_price(
                 }
                 currency = currency_map.get(merchant_zone, '')
 
+            # Convert copper to PP for display (database stores in copper)
+            if currency == "Gold":
+                try:
+                    copper_value = int(price)
+                    platinum = copper_value / 100_000_000
+                    display_price = f"{int(platinum)}" if platinum % 1 == 0 else f"{platinum:.2f}"
+                    currency = "PP"
+                    price = display_price
+                except (ValueError, TypeError):
+                    pass
+
             if currency:
                 return (f"{price} {currency}", 'db', item_category)
             return (str(price), 'db', item_category)
@@ -980,6 +991,17 @@ def template_parse_zenkcraft(
             if item_data and 'merchant_price' in item_data:
                 price = item_data['merchant_price']
                 currency = item_data.get('merchant_currency', '')
+
+                # Convert copper to PP for display (database stores in copper)
+                if currency == "Gold":
+                    try:
+                        copper_value = int(price)
+                        platinum = copper_value / 100_000_000
+                        display_price = f"{int(platinum)}" if platinum % 1 == 0 else f"{platinum:.2f}"
+                        currency = "PP"
+                        price = display_price
+                    except (ValueError, TypeError):
+                        pass
 
                 if currency:
                     return (f"{price} {currency}", 'db', item_category)

@@ -19,7 +19,19 @@
 - Fixed realm combobox text truncation where "Midgard" was displayed as "Mi...rd"
 - Added `setMinimumWidth(180)` to ensure proper display of all realm names
 - Issue: Combobox width was too constrained in the layout
+### ✨ Features
 
+**Armory Template Preview - Copper to Platinum Price Conversion**
+- Implemented automatic conversion of raw copper prices to human-readable Platinum (PP) format
+- Database stores prices in copper (smallest denomination) for calculation accuracy
+- Display layer converts copper to PP: `copper / 100,000,000 = platinum`
+- Changes currency label from "Gold" to "PP" for clarity
+- Example: 2,000,000,000 copper displays as "20 PP"
+- Applied to Armory template preview (double-click character → Armory → Select template → Preview)
+- Includes decimal formatting for fractional Platinum values (e.g., 20.50 PP)
+- Safe error handling ensures invalid prices pass through unchanged
+- Technical: Modifications in `Functions/template_parser.py` (2 locations for complete coverage)
+- Documentation: Added "Price Display Conversion (v0.109+)" section to ARMORY_TECHNICAL_DOCUMENTATION.md
 ### ♻️ Code Refactoring - dialogs.py Module Extraction & UI Helper Systems (Complete)
 
 **Extraction Scope**: Extract business logic from `UI/dialogs.py` into dedicated domain-specific modules for improved maintainability, testability, and code reuse. Consolidate input validation and file dialogs into centralized helper modules.

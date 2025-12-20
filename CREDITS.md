@@ -29,6 +29,17 @@ This project would not be possible without the contributions of various open-sou
 
 ---
 
+## 🌍 Translations
+
+**Language Contributors:**
+
+- **French**  - Ewoline 
+- **English** - Ewoline / Claude IA
+- **German**  - Ewoline / Claude IA
+- **Spanish** - *Coming soon*
+
+---
+
 ## 📄 License Information
 
 This project is distributed under the **MIT License**.

@@ -217,6 +217,18 @@ class AboutDialog(QDialog):
                 <li><strong>Morfuin / Leifur</strong></li>
                 <li><strong>Laelly</strong></li>
             </ul>
+            
+            <hr style="border: none; border-top: 2px solid {hr_color}; margin: 30px 0;">
+            
+            <h2 style="color: {h2_color}; border-bottom: 2px solid {highlight_color}; padding-bottom: 8px; font-size: 22px;">🌍 Translations</h2>
+            
+            <p><strong>Language Contributors:</strong></p>
+            <ul>
+                <li><strong>French</strong> - Ewoline / IA</li>
+                <li><strong>English</strong> - Ewoline / IA</li>
+                <li><strong>German</strong> - Ewoline / IA</li>
+                <li><strong>Spanish</strong> - <em>Coming soon</em></li>
+            </ul>
         </div>
         """
     

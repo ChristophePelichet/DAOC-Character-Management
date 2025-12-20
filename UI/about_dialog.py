@@ -182,37 +182,37 @@ class AboutDialog(QDialog):
         
         return f"""
         <div style="font-family: 'Segoe UI', Arial, sans-serif; padding: 20px;">
-            <h1 style="color: {h1_color}; border-bottom: 3px solid {highlight_color}; padding-bottom: 10px; font-size: 28px;">Credits &amp; Acknowledgments</h1>
+            <h1 style="color: {h1_color}; border-bottom: 3px solid {highlight_color}; padding-bottom: 10px; font-size: 28px;">{lang.get("dialogs.about_dialog.credits_title", default="Credits & Acknowledgments")}</h1>
             
-            <p>This project would not be possible without the contributions of various open-source projects, data sources, and the DAOC community.</p>
-            
-            <hr style="border: none; border-top: 2px solid {hr_color}; margin: 30px 0;">
-            
-            <h2 style="color: {h2_color}; border-bottom: 2px solid {highlight_color}; padding-bottom: 8px; font-size: 22px;">DAOC Community</h2>
-            
-            <h3 style="color: {h3_color}; font-size: 18px; margin-top: 20px;">Dawn of Light (DOL)</h3>
-            <ul>
-                <li><strong>Project:</strong> <a href="https://github.com/Dawn-of-Light" style="color: {link_color};">Dawn of Light</a></li>
-                <li><strong>Description:</strong> Open-source DAOC server emulator</li>
-            </ul>
-            
-            <h3 style="color: {h3_color}; font-size: 18px; margin-top: 20px;">Eden DAOC</h3>
-            <ul>
-                <li><strong>Server:</strong> <a href="https://www.eden-daoc.net/" style="color: {link_color};">Eden DAOC</a></li>
-                <li><strong>Description:</strong> DAOC private server</li>
-            </ul>
-            
-            <h3 style="color: {h3_color}; font-size: 18px; margin-top: 20px;">Eve-of-Darkness DolModels</h3>
-            <ul>
-                <li><strong>Source:</strong> <a href="https://github.com/Eve-of-Darkness/DolModels" style="color: {link_color};">Eve-of-Darkness/DolModels</a></li>
-                <li><strong>Description:</strong> 1000+ DAOC item model images</li>
-            </ul>
+            <p>{lang.get("dialogs.about_dialog.credits_intro", default="This project would not be possible without the contributions of various open-source projects, data sources, and the DAOC community.")}</p>
             
             <hr style="border: none; border-top: 2px solid {hr_color}; margin: 30px 0;">
             
-            <h2 style="color: {h2_color}; border-bottom: 2px solid {highlight_color}; padding-bottom: 8px; font-size: 22px;">Special Thanks</h2>
+            <h2 style="color: {h2_color}; border-bottom: 2px solid {highlight_color}; padding-bottom: 8px; font-size: 22px;">{lang.get("dialogs.about_dialog.daoc_community_title", default="DAOC Community")}</h2>
             
-            <p><strong>Testers and friends who made this project possible:</strong></p>
+            <h3 style="color: {h3_color}; font-size: 18px; margin-top: 20px;">{lang.get("dialogs.about_dialog.dol_project_title", default="Dawn of Light (DOL)")}</h3>
+            <ul>
+                <li><strong>{lang.get("dialogs.about_dialog.dol_project_label", default="Project:")}:</strong> <a href="https://github.com/Dawn-of-Light" style="color: {link_color};">Dawn of Light</a></li>
+                <li><strong>{lang.get("dialogs.about_dialog.dol_description_label", default="Description:")}:</strong> {lang.get("dialogs.about_dialog.dol_description", default="Open-source DAOC server emulator")}</li>
+            </ul>
+            
+            <h3 style="color: {h3_color}; font-size: 18px; margin-top: 20px;">{lang.get("dialogs.about_dialog.eden_server_title", default="Eden DAOC")}</h3>
+            <ul>
+                <li><strong>{lang.get("dialogs.about_dialog.eden_server_label", default="Server:")}:</strong> <a href="https://www.eden-daoc.net/" style="color: {link_color};">Eden DAOC</a></li>
+                <li><strong>{lang.get("dialogs.about_dialog.eden_description_label", default="Description:")}:</strong> {lang.get("dialogs.about_dialog.eden_description", default="DAOC private server")}</li>
+            </ul>
+            
+            <h3 style="color: {h3_color}; font-size: 18px; margin-top: 20px;">{lang.get("dialogs.about_dialog.dolmodels_source_title", default="Eve-of-Darkness DolModels")}</h3>
+            <ul>
+                <li><strong>{lang.get("dialogs.about_dialog.dolmodels_source_label", default="Source:")}:</strong> <a href="https://github.com/Eve-of-Darkness/DolModels" style="color: {link_color};">Eve-of-Darkness/DolModels</a></li>
+                <li><strong>{lang.get("dialogs.about_dialog.dolmodels_description_label", default="Description:")}:</strong> {lang.get("dialogs.about_dialog.dolmodels_description", default="1000+ DAOC item model images")}</li>
+            </ul>
+            
+            <hr style="border: none; border-top: 2px solid {hr_color}; margin: 30px 0;">
+            
+            <h2 style="color: {h2_color}; border-bottom: 2px solid {highlight_color}; padding-bottom: 8px; font-size: 22px;">{lang.get("dialogs.about_dialog.special_thanks_title", default="Special Thanks")}</h2>
+            
+            <p><strong>{lang.get("dialogs.about_dialog.special_thanks_text", default="Testers and friends who made this project possible:")}:</strong></p>
             <ul>
                 <li><strong>Morfuin / Leifur</strong></li>
                 <li><strong>Laelly</strong></li>
@@ -220,14 +220,14 @@ class AboutDialog(QDialog):
             
             <hr style="border: none; border-top: 2px solid {hr_color}; margin: 30px 0;">
             
-            <h2 style="color: {h2_color}; border-bottom: 2px solid {highlight_color}; padding-bottom: 8px; font-size: 22px;">🌍 Translations</h2>
+            <h2 style="color: {h2_color}; border-bottom: 2px solid {highlight_color}; padding-bottom: 8px; font-size: 22px;">{lang.get("dialogs.about_dialog.translations_title", default="🌍 Translations")}</h2>
             
-            <p><strong>Language Contributors:</strong></p>
+            <p><strong>{lang.get("dialogs.about_dialog.translations_label", default="Language Contributors:")}:</strong></p>
             <ul>
-                <li><strong>French</strong> - Ewoline / IA</li>
-                <li><strong>English</strong> - Ewoline / IA</li>
-                <li><strong>German</strong> - Ewoline / IA</li>
-                <li><strong>Spanish</strong> - <em>Coming soon</em></li>
+                <li><strong>{lang.get("dialogs.about_dialog.translation_french", default="French")}</strong> - {lang.get("dialogs.about_dialog.translation_credits", default="Ewoline / IA")}</li>
+                <li><strong>{lang.get("dialogs.about_dialog.translation_english", default="English")}</strong> - {lang.get("dialogs.about_dialog.translation_credits", default="Ewoline / IA")}</li>
+                <li><strong>{lang.get("dialogs.about_dialog.translation_german", default="German")}</strong> - {lang.get("dialogs.about_dialog.translation_credits", default="Ewoline / IA")}</li>
+                <li><strong>{lang.get("dialogs.about_dialog.translation_spanish", default="Spanish")}</strong> - <em>{lang.get("dialogs.about_dialog.translation_spanish_coming", default="Coming soon")}</em></li>
             </ul>
         </div>
         """
@@ -461,6 +461,10 @@ class AboutDialog(QDialog):
         self.tabs.setTabText(1, lang.get("about_dialog.tab_credits", default="Credits"))
         self.tabs.setTabText(2, lang.get("about_dialog.tab_license", default="License"))
         
-        # Reload tabs content
-        # (Simple approach: just update the window title and tab labels)
-        # Full reload would require recreating tabs, but for MVP this is sufficient
+        # Reload credits tab content with new language
+        credits_widget = self.tabs.widget(1)
+        if credits_widget and credits_widget.layout().count() > 0:
+            credits_browser = credits_widget.layout().itemAt(0).widget()
+            if credits_browser:
+                credits_html = self._get_themed_credits_html()
+                credits_browser.setHtml(credits_html)

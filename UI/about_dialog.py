@@ -115,9 +115,6 @@ class AboutDialog(QDialog):
             
             <h2>{lang.get("dialogs.about_dialog.repository_title", default="Repository")}</h2>
             <p><a href="https://github.com/ChristophePelichet/DAOC-Character-Management" style="color: {link_color};">{lang.get("dialogs.about_dialog.repository_label", default="GitHub - DAOC Character Management")}</a></p>
-            
-            <h2>{lang.get("dialogs.about_dialog.license_title", default="License")}</h2>
-            <p>{lang.get("dialogs.about_dialog.copyright_text", default="MIT License - Copyright © 2025 Christophe Pelichet (Ewoline)")}</p>
         </div>
         """
     

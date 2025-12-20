@@ -385,47 +385,43 @@ class UIManager:
             self.version_download_link.hide()
     
     def check_eden_status(self):
-        """Vérifie le statut de connexion Eden en arrière-plan"""
-        # Vérifier s'il y a au moins un character avec une URL Herald configurée
-        has_character_with_url = False
-        if hasattr(self, 'main_window') and hasattr(self.main_window, 'tree_manager'):
-            for char_id, char_data in self.main_window.tree_manager.characters_by_id.items():
-                if char_data.get('url', '').strip():
-                    has_character_with_url = True
-                    break
-        
-        # Si pas de character avec URL, ne pas déclencher la vérification Eden
-        if not has_character_with_url:
-            self.eden_status_label.setText("ℹ️ Aucun URL Herald configurée")
-            self.eden_status_label.setStyleSheet("padding: 5px; color: gray;")
-            self.refresh_button.setEnabled(False)
-            return
-        
-        # Arrêter un thread en cours if existant
+        """
+        Verify Herald connection status by testing cookies and Eden accessibility.
+
+        This function runs the Eden connection test independently of whether
+        characters have Herald URLs configured. The test validates:
+        1. Cookies are available and valid
+        2. Connection to eden-daoc.net/herald is possible
+
+        The button state (enabled/disabled) is managed separately by
+        herald_url_validator.py based on whether a URL is configured
+        in the selected character.
+        """
+        # Stop existing validation thread if running
         if self.eden_status_thread and self.eden_status_thread.isRunning():
             self.eden_status_thread.quit()
             self.eden_status_thread.wait()
         
-        # Marquer la validation comme en cours
+        # Mark validation as in progress
         self.eden_validation_in_progress = True
         
-        # Afficher the statut of chargement and désactiver the boutons
+        # Display loading status and disable buttons
         self.eden_status_label.setText("⏳ Vérification en cours...")
         self.eden_status_label.setStyleSheet("padding: 5px; color: gray;")
         self.refresh_button.setEnabled(False)
         self.search_button.setEnabled(False)
         
-        # Create the Manager of cookies
+        # Create cookie manager
         from Functions.cookie_manager import CookieManager
         cookie_manager = CookieManager()
         
-        # Lancer the thread of Checking
+        # Launch validation thread (always, independent of character URLs)
         self.eden_status_thread = EdenStatusThread(cookie_manager)
         self.eden_status_thread.status_updated.connect(self.update_eden_status)
         self.eden_status_thread.finished.connect(self._on_validation_finished)
         self.eden_status_thread.start()
         
-        # Désactiver immédiatement les boutons/actions Herald APRÈS avoir démarré le thread
+        # Update Herald button states immediately (thread-safe)
         self._update_herald_buttons_state()
     
     def update_eden_status(self, accessible, message):

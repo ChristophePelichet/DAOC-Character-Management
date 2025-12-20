@@ -162,6 +162,8 @@ def get_available_languages():
     Scans the 'Language' folder and returns a dictionary mapping language codes to full names.
     Sorts languages with a specific order: 'fr', 'en', then alphabetically.
     Supports both v1 (flat) and v2 (hierarchical) language file structures.
+    
+    Note: Ignores files starting with underscore (_) as they are work-in-progress translations.
     """
     lang_dir = get_resource_path('Language')
     if not os.path.exists(lang_dir):
@@ -169,6 +171,10 @@ def get_available_languages():
     
     languages = {}
     for filename in os.listdir(lang_dir):
+        # Skip files starting with underscore (work-in-progress translations)
+        if filename.startswith('_'):
+            continue
+        
         if filename.endswith('.json') and not filename.endswith('.backup'):
             code = os.path.splitext(filename)[0]
             try:

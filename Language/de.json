@@ -310,7 +310,7 @@
             "clean_cache_empty_title": "Leerer Ordner",
             "clean_cache_empty_message": "ℹ️ Der Cache ist bereits leer oder existiert nicht.",
             "clean_cache_error_title": "Fehler",
-            "clean_cache_error_message": "❌ Bereinigungs fehler:\n\n{error}"
+            "clean_cache_error_message": "❌ Bereinigungs fehler:\n\n{error}",
             "config_cookies_group_title": "Cookie-Pfad",
             "config_item_cache_group_title": "Items-Cache-Pfad"
         }

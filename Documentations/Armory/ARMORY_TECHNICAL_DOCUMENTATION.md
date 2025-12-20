@@ -2058,6 +2058,71 @@ The Template Preview System provides a rich, formatted preview of Zenkcraft temp
 - **Adaptive Separators**: Auto-width section dividers
 - **Multi-Column Sections**: Resistances and Bonuses use internal `/` separators
 - **HTML Rendering**: Monospace Courier New 10pt with &nbsp; spacing
+- **Price Display Conversion**: Copper prices converted to Platinum (PP) for readability (v0.109+)
+
+### Price Display Conversion (v0.109+)
+
+#### Problem
+
+Database stores prices in **copper** (smallest denomination) for calculation accuracy. However, displaying raw copper values (e.g., "2000000000 Gold") is unreadable. Users expect human-readable **Platinum (PP)** format.
+
+**Example:**
+```
+Before: 2000000000 Gold  (copper value, unreadable)
+After:  20 PP           (Platinum, readable)
+```
+
+#### Solution
+
+Convert copper to Platinum **at display time only**:
+- **Conversion Formula**: `copper_value / 100_000_000 = platinum_value`
+- **Database**: Values remain in copper (preserves calculation accuracy)
+- **Display**: Converted to PP with currency label changed from "Gold" to "PP"
+
+#### Implementation
+
+Two files handle price display, each with copper conversion:
+
+| File | Location | Purpose | When Used |
+|------|----------|---------|-----------|
+| **template_parser.py** | `Functions/` | Core template parser used by Armory preview | Double-click character → Armory → Select template → Preview |
+| **template_preview_dialog.py** | `UI/dialog_templates/` | Separate dialog for template list preview with item table + totals | Click Preview in TemplateListWidget (template management UI) |
+
+**Critical:** Both files are separate systems. Modifications must be made in BOTH locations to ensure consistent behavior.
+
+**Code Location in template_parser.py:**
+
+- **Line ~187-210** (function `template_get_item_price`):
+  ```python
+  if currency == "Gold":
+      try:
+          copper_value = int(price)
+          platinum = copper_value / 100_000_000
+          display_price = f"{int(platinum)}" if platinum % 1 == 0 else f"{platinum:.2f}"
+          currency = "PP"
+          price = display_price
+      except (ValueError, TypeError):
+          pass
+  ```
+
+- **Line ~992-1012** (function used in Zenkcraft parsing):
+  ```python
+  if currency == "Gold":
+      try:
+          copper_value = int(price)
+          platinum = copper_value / 100_000_000
+          display_price = f"{int(platinum)}" if platinum % 1 == 0 else f"{platinum:.2f}"
+          currency = "PP"
+          price = display_price
+      except (ValueError, TypeError):
+          pass
+  ```
+
+**Conversion Features:**
+- ✅ Integer formatting when no decimals (e.g., "20" instead of "20.00")
+- ✅ Decimal formatting when needed (e.g., "20.50")
+- ✅ Safe error handling (invalid values pass through unchanged)
+- ✅ Applied to both template parser functions
 
 ### Layout Architecture
 

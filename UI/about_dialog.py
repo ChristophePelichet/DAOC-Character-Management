@@ -107,17 +107,17 @@ class AboutDialog(QDialog):
         
         return f"""
         <div style="font-family: 'Segoe UI', Arial, sans-serif; padding: 20px;">
-            <h2>{lang.get("about_dialog.description_title", default="Description")}</h2>
-            <p>{lang.get("about_dialog.description_text", default="Character management application for Dark Age of Camelot (DAOC), developed in Python with PySide6.")}</p>
+            <h2>{lang.get("dialogs.about_dialog.description_title", default="Description")}</h2>
+            <p>{lang.get("dialogs.about_dialog.description_text", default="Character management application for Dark Age of Camelot (DAOC), developed in Python with PySide6.")}</p>
             
-            <h2>{lang.get("about_dialog.creator_title", default="Creator")}</h2>
-            <p><strong>Ewoline</strong></p>
+            <h2>{lang.get("dialogs.about_dialog.creator_title", default="Creator")}</h2>
+            <p><strong>{lang.get("dialogs.about_dialog.creator_name", default="Ewoline")}</strong></p>
             
-            <h2>{lang.get("about_dialog.repository_title", default="Repository")}</h2>
-            <p><a href="https://github.com/ChristophePelichet/DAOC-Character-Management" style="color: {link_color};">GitHub - DAOC Character Management</a></p>
+            <h2>{lang.get("dialogs.about_dialog.repository_title", default="Repository")}</h2>
+            <p><a href="https://github.com/ChristophePelichet/DAOC-Character-Management" style="color: {link_color};">{lang.get("dialogs.about_dialog.repository_label", default="GitHub - DAOC Character Management")}</a></p>
             
-            <h2>{lang.get("about_dialog.license_title", default="License")}</h2>
-            <p>MIT License - Copyright &copy; 2025 Christophe Pelichet (Ewoline)</p>
+            <h2>{lang.get("dialogs.about_dialog.license_title", default="License")}</h2>
+            <p>{lang.get("dialogs.about_dialog.copyright_text", default="MIT License - Copyright © 2025 Christophe Pelichet (Ewoline)")}</p>
         </div>
         """
     
@@ -457,9 +457,22 @@ class AboutDialog(QDialog):
         self.setWindowTitle(lang.get("app.about_title", app_name=self.app_name))
         
         # Update tab titles
-        self.tabs.setTabText(0, lang.get("about_dialog.tab_about", default="About"))
-        self.tabs.setTabText(1, lang.get("about_dialog.tab_credits", default="Credits"))
-        self.tabs.setTabText(2, lang.get("about_dialog.tab_license", default="License"))
+        self.tabs.setTabText(0, lang.get("dialogs.about_dialog.tab_about", default="About"))
+        self.tabs.setTabText(1, lang.get("dialogs.about_dialog.tab_credits", default="Credits"))
+        self.tabs.setTabText(2, lang.get("dialogs.about_dialog.tab_license", default="License"))
+        
+        # Reload about tab content with new language
+        about_widget = self.tabs.widget(0)
+        if about_widget and about_widget.layout().count() > 0:
+            # Find the text browser in the layout (skip labels and spacing)
+            for i in range(about_widget.layout().count()):
+                item = about_widget.layout().itemAt(i)
+                if item and item.widget():
+                    widget = item.widget()
+                    if widget.__class__.__name__ == 'QTextBrowser':
+                        about_html = self._get_themed_about_html()
+                        widget.setHtml(about_html)
+                        break
         
         # Reload credits tab content with new language
         credits_widget = self.tabs.widget(1)

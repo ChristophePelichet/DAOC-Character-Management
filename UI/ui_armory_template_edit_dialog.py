@@ -272,6 +272,13 @@ class TemplateEditDialog(QDialog):
             
             # Update metadata
             self.metadata.character_class = new_class
+            
+            # Get class info to update translations
+            class_info = self.data_manager.get_class_info(new_realm, new_class)
+            if class_info:
+                self.metadata.class_fr = class_info.get('name_fr', new_class)
+                self.metadata.class_de = class_info.get('name_de', new_class)
+            
             self.metadata.realm = new_realm
             self.metadata.season = new_season
             self.metadata.description = new_description

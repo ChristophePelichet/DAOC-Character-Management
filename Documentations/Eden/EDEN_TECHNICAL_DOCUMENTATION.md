@@ -87,6 +87,7 @@ The Eden Herald System provides comprehensive integration with the Eden-DAOC Her
            ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │              EDEN SCRAPER (Core Connection Logic)               │
+│  - sanitize_filename() - Safe filename creation (v0.109+)       │
 │  - _connect_to_eden_herald() - Single connection function       │
 │  - search_herald_character() - Character search                 │
 │  - scrape_character_from_url() - Character update               │
@@ -208,9 +209,10 @@ scraper, error = _connect_to_eden_herald(
 
 Functions using `_connect_to_eden_herald()`:
 
-1. **`search_herald_character()`** - Character search operations
-2. **`scrape_character_from_url()`** - Character update from URL
-3. **`CharacterProfileScraper.connect()`** - Stats scraping connection
+1. **`sanitize_filename()`** - Filename sanitization (v0.109+)
+2. **`search_herald_character()`** - Character search operations
+3. **`scrape_character_from_url()`** - Character update from URL
+4. **`CharacterProfileScraper.connect()`** - Stats scraping connection
 
 ---
 
@@ -415,9 +417,58 @@ _CACHE_DURATION_SECONDS = 10
 
 ### Character Search
 
+#### `sanitize_filename()` Function
+
+**Location**: `Functions/eden_scraper.py` (line ~24)  
+**Purpose**: Sanitize text for safe use as filename (removes Windows/POSIX invalid characters)
+
+**Function Signature**:
+```python
+def sanitize_filename(text):
+    """
+    Sanitise un texte pour l'utiliser comme nom de fichier.
+    Supprime les caractères invalides Windows et autres systèmes.
+    
+    Caractères invalides: * ? " < > | : \\ /
+    
+    Args:
+        text (str): Texte à sanitiser
+        
+    Returns:
+        str: Texte sanitisé pour utilisation en nom de fichier
+    """
+```
+
+**Features**:
+- ✅ Removes Windows-invalid characters: `* ? " < > | : \ /`
+- ✅ Replaces spaces with underscores
+- ✅ Removes leading/trailing underscores
+- ✅ Returns fallback "search" if result is empty
+
+**Examples**:
+```python
+>>> sanitize_filename("ewo*")
+"ewo"
+
+>>> sanitize_filename("test?file|name")
+"testfilename"
+
+>>> sanitize_filename("test  name")
+"test_name"
+
+>>> sanitize_filename("***")
+"search"
+```
+
+**Used In**:
+- `search_herald_character()` - Sanitizes character name before JSON filename creation
+- Backend safety net for invalid characters in filenames
+
+---
+
 #### `search_herald_character()` Function
 
-**Location**: `Functions/eden_scraper.py` (line ~475)  
+**Location**: `Functions/eden_scraper.py` (line ~490)  
 **Purpose**: Search for characters on Eden Herald and save results to JSON
 
 **Function Signature**:
@@ -434,6 +485,12 @@ def search_herald_character(character_name, realm_filter=""):
         tuple: (success: bool, message: str, json_path: str)
     """
 ```
+
+**Character Name Sanitization** (v0.109+):
+- Input: `character_name` parameter
+- Processing: `sanitize_filename(character_name)` removes invalid characters
+- Output: Safe filename for JSON creation
+- Benefit: Prevents "Invalid argument" errors on Windows when searching with special characters (* ? " < > | : \ /)
 
 **Return Values**:
 
@@ -463,7 +520,8 @@ PHASE 4: HTML Parsing & Extraction (<1s)
   
 PHASE 5: File Management (<1s)
   ├─ Clean old JSON files in temp folder
-  ├─ Save raw search data
+  ├─ **Sanitize character name** (v0.109+ security feature)
+  ├─ Save raw search data with sanitized filename
   └─ Save formatted characters (RETURNED PATH)
   
 PHASE 6: Cleanup & Return (<1s)
@@ -476,14 +534,16 @@ PHASE 6: Cleanup & Return (<1s)
 
 **Location**: OS temp folder (`/tmp/EdenSearchResult/` or Windows equivalent)
 
-**File 1 - Raw Search Data**:
+**File 1 - Raw Search Data** (sanitized filename):
 ```
 search_PlayerName_20251113_143052.json
+search_ewo_20251113_143052.json        (if input was "ewo*" - sanitized)
 ```
 
-**File 2 - Formatted Characters** (PRIMARY OUTPUT):
+**File 2 - Formatted Characters** (PRIMARY OUTPUT, sanitized filename):
 ```
 characters_PlayerName_20251113_143052.json
+characters_ewo_20251113_143052.json    (if input was "ewo*" - sanitized)
 ```
 
 **Content Structure**:
@@ -534,6 +594,17 @@ success, message, json_path = search_herald_character("Player", realm_filter="mi
 
 # Search only in Hibernia
 success, message, json_path = search_herald_character("Player", realm_filter="hib")
+```
+
+**Search with Special Characters** (v0.109+ - auto-sanitized):
+```python
+# Input with special characters
+success, message, json_path = search_herald_character("ewo*")
+# Filename created: search_ewo_20251113_143052.json (asterisk removed)
+
+# Input with multiple invalid chars
+success, message, json_path = search_herald_character("test?name|here")
+# Filename created: search_testnamehere_20251113_143052.json (invalid chars removed)
 ```
 
 ---

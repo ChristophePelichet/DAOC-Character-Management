@@ -5,53 +5,24 @@
 ### 🐛 Bug Fixes
 
 **Language Selection & About Dialog Translation**
-- Fixed language selection showing incorrect languages (only English and Spanish visible)
-- Fixed missing languages (French and German) not appearing in Settings > General
-- Fixed JSON syntax errors in fr.json and de.json (missing commas at line 314)
-- Fixed incomplete Spanish translation file (_es.json) appearing in language selector
-- Fixed About dialog credits appearing in English regardless of selected language
-- Implemented full translation support for About and Credits tabs using lang.get()
-- Credits now fully translatable: titles, descriptions, contributor names, labels
-- About tab translatable: description, creator, repository, all UI text
-- Added language refresh when switching languages in Settings - dialogs now update instantly
+- Fixed About and Credits dialogs not translating based on selected language
+- Implemented full multilingual support (FR/EN/DE) for all dialog elements
 
 **Herald Search Dialog - Realm Combobox**
 - Fixed realm combobox text truncation where "Midgard" was displayed as "Mi...rd"
-- Added `setMinimumWidth(180)` to ensure proper display of all realm names
-- Issue: Combobox width was too constrained in the layout
 
 **Herald Search Dialog - Critical UI Freeze Bug**
 - Fixed 4+ second UI freeze when closing Herald search dialog after performing a search
-- Root cause: Synchronous `_stop_search_thread_async()` call from within `dialog.exec()` event loop blocked main thread
-- Solution: Implemented async dialog destruction using dedicated `DialogDestructionWorker` thread
-- Changes: Modified `open_herald_search()` to use worker thread for non-blocking cleanup
-- Simplified `accept()` and `closeEvent()` to eliminate blocking operations
-- Thread now terminates naturally without explicit stopping - non-blocking approach
-- Result: Dialog closes instantly with zero UI freeze
 
 **Herald Search Dialog - Invalid Character Bug (Filename)**
 - Fixed JSON error when searching for character names containing special characters (* ? " < > | : \ /)
-- Root cause: Character name directly used in filename without sanitization, causing Windows "Invalid argument" error
-- Solution: Implemented two-layer protection:
-  1. **Frontend validation**: Real-time character filtering in Herald search dialog input field
-  2. **Backend sanitization**: `sanitize_filename()` function removes invalid chars before JSON file creation
-- Created `sanitize_filename()` utility function in `Functions/eden_scraper.py` for reusable sanitization
-- Frontend prevents user from typing invalid characters (auto-removed in real-time)
-- Backend provides safety net: even if invalid char somehow gets through, file is still created successfully
-- Result: Search works reliably with any character name, error-free JSON creation
+ 
 ### ✨ Features
 
 **Armory Template Preview - Copper to Platinum Price Conversion**
 - Implemented automatic conversion of raw copper prices to human-readable Platinum (PP) format
-- Database stores prices in copper (smallest denomination) for calculation accuracy
-- Display layer converts copper to PP: `copper / 100,000,000 = platinum`
-- Changes currency label from "Gold" to "PP" for clarity
-- Example: 2,000,000,000 copper displays as "20 PP"
-- Applied to Armory template preview (double-click character → Armory → Select template → Preview)
-- Includes decimal formatting for fractional Platinum values (e.g., 20.50 PP)
-- Safe error handling ensures invalid prices pass through unchanged
-- Technical: Modifications in `Functions/template_parser.py` (2 locations for complete coverage)
-- Documentation: Added "Price Display Conversion (v0.109+)" section to ARMORY_TECHNICAL_DOCUMENTATION.md
+
+  
 ### ♻️ Code Refactoring - dialogs.py Module Extraction & UI Helper Systems (Complete)
 
 **Extraction Scope**: Extract business logic from `UI/dialogs.py` into dedicated domain-specific modules for improved maintainability, testability, and code reuse. Consolidate input validation and file dialogs into centralized helper modules.

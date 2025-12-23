@@ -10,7 +10,7 @@ from PySide6.QtGui import QAction
 from PySide6.QtCore import Qt, QThread, Signal
 
 from Functions.language_manager import lang
-from UI.ui_armory_all_templates import UIArmoryAllTemplates
+from UI.ui_armory_template_view_all import UIArmoryAllTemplates
 
 
 class EdenStatusThread(QThread):

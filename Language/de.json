@@ -1041,6 +1041,7 @@
         "info": "Verwalten Sie Waffenkammer-Vorlagen, die mit Drittanbieter-Software (Zenkcraft, etc.) erstellt wurden",
         "table_headers": {
             "filename": "Dateiname",
+            "class": "Klasse",
             "season": "Saison",
             "modified": "Änderungsdatum"
         },

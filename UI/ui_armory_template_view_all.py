@@ -118,8 +118,11 @@ class UIArmoryAllTemplates(QMainWindow):
         
         # Left panel: Table
         table = QTableWidget()
-        table.setColumnCount(1)
-        table.setHorizontalHeaderLabels([lang.get("armoury_dialog.table_headers.filename", default="Template")])
+        table.setColumnCount(2)
+        table.setHorizontalHeaderLabels([
+            lang.get("armoury_dialog.table_headers.filename", default="Template"),
+            lang.get("armoury_dialog.table_headers.class", default="Class")
+        ])
         table.horizontalHeader().setStretchLastSection(True)
         table.setSelectionBehavior(QTableWidget.SelectRows)
         table.setEditTriggers(QTableWidget.NoEditTriggers)
@@ -193,9 +196,15 @@ class UIArmoryAllTemplates(QMainWindow):
                     row = table.rowCount()
                     table.insertRow(row)
                     
+                    # Filename column
                     filename_item = QTableWidgetItem(template)
                     filename_item.setData(Qt.UserRole, template)
                     table.setItem(row, 0, filename_item)
+                    
+                    # Class column - get from metadata
+                    class_name = self._get_template_class(realm, template)
+                    class_item = QTableWidgetItem(class_name)
+                    table.setItem(row, 1, class_item)
                 
                 logger.info(f"Loaded {len(templates)} templates for {realm} from {realm_dir}")
                 
@@ -208,6 +217,28 @@ class UIArmoryAllTemplates(QMainWindow):
                 lang.get("dialogs.titles.error", default="Error"),
                 f"Error loading templates: {e}"
             )
+
+    def _get_template_class(self, realm, template_filename):
+        """Get template class from metadata file
+        
+        Args:
+            realm: The realm
+            template_filename: Template filename (with .txt extension)
+            
+        Returns:
+            Class name or "Unknown" if not found
+        """
+        try:
+            metadata_path = self.template_manager._get_metadata_path(realm, template_filename)
+            if metadata_path.exists():
+                from Functions.template_metadata import TemplateMetadata
+                metadata = TemplateMetadata.load(metadata_path)
+                if metadata and metadata.character_class:
+                    return metadata.character_class
+        except Exception as e:
+            logger.debug(f"Could not load class for {realm}/{template_filename}: {e}")
+        
+        return "Unknown"
 
     def _on_template_selected(self, realm):
         """Handle template selection

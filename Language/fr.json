@@ -1041,6 +1041,7 @@
         "info": "Gérez les templates d'armurerie créés avec des logiciels tiers (Zenkcraft, etc.)",
         "table_headers": {
             "filename": "Nom du fichier",
+            "class": "Classe",
             "season": "Saison",
             "modified": "Date de modification"
         },

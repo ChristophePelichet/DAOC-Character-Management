@@ -1041,6 +1041,7 @@
         "info": "Manage armoury templates created with third-party software (Zenkcraft, etc.)",
         "table_headers": {
             "filename": "Filename",
+            "class": "Class",
             "season": "Season",
             "modified": "Modified Date"
         },

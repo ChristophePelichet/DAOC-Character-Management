@@ -1,10 +1,10 @@
 # 🛡️ Armory System - Technical Documentation
 
-**Version**: 3.2  
+**Version**: 3.3  
 **Date**: November 2025  
-**Last Updated**: December 19, 2025 (Search Button State Management with Database Mode Validation)  
-**Component**: `UI/dialogs.py`, `UI/ui_state_manager.py`, `Functions/items_database_manager.py`  
-**Related**: `Functions/items_scraper.py`, `Functions/items_parser.py`, `Functions/import_worker.py`, `Functions/build_items_database.py`, `Functions/template_manager.py`, `Functions/template_metadata.py`, `Functions/superadmin_tools.py`, `Functions/template_parser.py`, `Functions/armor_upload_handler.py`, `Functions/item_model_viewer.py`, `Tools/fix_currency_mapping.py`
+**Last Updated**: December 23, 2025 (Template Edit/Download Features, UI Refactoring & Naming Convention Updates)  
+**Component**: `UI/ui_armory_template_view_all.py`, `UI/ui_armory_template_import_dialog.py`, `UI/dialogs.py`, `Functions/template_manager.py`  
+**Related**: `Functions/template_metadata.py`, `Functions/data_manager.py`, `UI/ui_armory_template_edit_dialog.py`, `UI/ui_armory_template_tag_selector.py`, `Functions/ui_manager.py`
 
 ---
 
@@ -3961,3 +3961,34 @@ Uses existing `game` section in `config.json`:
 - Added database repair tool documentation
 - Updated statistics and recent additions
 - Corrected all currency mapping references to use ZONE_CURRENCY standards
+**Change Summary (v3.3) - December 23, 2025:**
+- **Template Edit Dialog**: New `TemplateEditDialog` (renamed to `ui_armory_template_edit_dialog.py`)
+  - Edit template metadata: class, realm, season, description
+  - Real-time preview of new template filename
+  - Automatic file movement when properties change
+  - Updates class translations (class_fr, class_de) from DataManager
+- **Context Menu Enhancements**:
+  - ✏️ Edit action with proper translations
+  - 🗑️ Delete action with confirmation
+  - 💾 Download/Export action for both UIArmoryTemplateViewAll and ArmorManagementDialog
+  - Full translation support in all languages (en, fr, de, es)
+- **UI Refactoring & Naming Convention**:
+  - Renamed `ui_armory_all_templates.py` → `ui_armory_template_view_all.py`
+  - Renamed `template_import_dialog.py` → `ui_armory_template_import_dialog.py`
+  - Renamed `ui_armory_tag_selector.py` → `ui_armory_template_tag_selector.py`
+  - Updated all imports in related files (ui_manager.py, armor_upload_handler.py, etc.)
+- **Menu & Emoji Updates**:
+  - ⚔️ Crossed swords emoji added to Armory menu in Tools
+  - Context menu items now include appropriate emojis
+  - All translations dynamically applied via lang.get()
+- **Template File Extension Handling**:
+  - Fixed metadata file path handling (.txt.json files)
+  - UIArmoryTemplateViewAll now displays .txt extension in templates list
+  - Preview loading correctly handles full filenames with extensions
+
+**Commits (v3.3):**
+1. **7805446** - `fix: correct template file extension handling in edit dialog and preview`
+2. **6e52d09** - `fix: update class translations (class_fr and class_de) when editing template`
+3. **af2c43f** - `feat: add context menu emojis and translations, implement template download feature`
+4. **ff3f771** - `refactor: rename armory template UI files to follow naming convention`
+5. **77a1375** - `refactor: rename ui_armory_all_templates.py to ui_armory_template_view_all.py`

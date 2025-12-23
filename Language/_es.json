@@ -772,6 +772,10 @@
         "view_model_error": "Model viewer not available"
     },
     "armoury_dialog": {
+        "table_headers": {
+            "filename": "Filename",
+            "class": "Class"
+        }
     },
     "armoury_upload": {
     },

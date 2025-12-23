@@ -102,23 +102,29 @@ class TemplateManager:
         self,
         character_class: str,
         season: str,
-        description: str
+        description: str,
+        include_season: bool = True
     ) -> str:
         """
         Generate template filename according to convention.
         
-        Format: {Class}_{Season}_{Description}.txt
+        Format: {Class}_{Season}_{Description}.txt (if include_season=True)
+                {Class}_{Description}.txt (if include_season=False)
         
         Args:
             character_class: Class name (English)
             season: Season identifier (S1, S2, etc.)
             description: Template description
+            include_season: Whether to include season in the filename (default: True)
         
         Returns:
             Generated filename
         """
         normalized_desc = normalize_description(description)
-        return f"{character_class}_{season}_{normalized_desc}.txt"
+        if include_season:
+            return f"{character_class}_{season}_{normalized_desc}.txt"
+        else:
+            return f"{character_class}_{normalized_desc}.txt"
     
     def create_template(
         self,
@@ -131,7 +137,8 @@ class TemplateManager:
         description: str,
         character_name: str,
         tags: Optional[List[str]] = None,
-        notes: str = ""
+        notes: str = "",
+        include_season: bool = True
     ) -> Optional[str]:
         """
         Create a new template from source file.
@@ -147,16 +154,18 @@ class TemplateManager:
             character_name: Name of character importing
             tags: Optional tags
             notes: Optional notes
+            include_season: Whether to include season in filename (default: True)
         
         Returns:
             Template filename if successful, None otherwise
         """
         try:
-            # Generate template name
+            # Generate template name with include_season parameter
             template_name = self.generate_template_name(
                 character_class,
                 season,
-                description
+                description,
+                include_season=include_season
             )
             
             # Check if template already exists

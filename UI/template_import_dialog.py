@@ -7,7 +7,7 @@ from pathlib import Path
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QLabel,
     QGroupBox, QLineEdit, QComboBox, QMessageBox,
-    QFormLayout
+    QFormLayout, QCheckBox
 )
 from PySide6.QtCore import Qt, Signal
 
@@ -175,9 +175,21 @@ class TemplateImportDialog(QDialog):
         if current_season in seasons:
             self.season_combo.setCurrentText(current_season)
         
+        # Season row with combo and checkbox
+        season_row = QHBoxLayout()
+        season_row.addWidget(self.season_combo)
+        
+        # Add checkbox to include season in filename (default: unchecked)
+        self.include_season_check = QCheckBox(
+            lang.get("template_import.include_season_in_name", default="Inclure la saison dans le nom")
+        )
+        self.include_season_check.setChecked(False)  # Default: don't include season
+        season_row.addWidget(self.include_season_check)
+        season_row.addStretch()
+        
         info_layout.addRow(
             lang.get("template_import.season_label", default="Saison:"),
-            self.season_combo
+            season_row
         )
         
         # Description field
@@ -250,6 +262,7 @@ class TemplateImportDialog(QDialog):
         self.import_button.clicked.connect(self._import_template)
         self.description_edit.textChanged.connect(self._update_preview)
         self.season_combo.currentTextChanged.connect(self._update_preview)
+        self.include_season_check.stateChanged.connect(self._update_preview)
         
         # In non-auto-detect mode, connect realm change to update available classes
         if not self.auto_detect_mode and self.realm_combo:
@@ -284,6 +297,7 @@ class TemplateImportDialog(QDialog):
         """Update template name preview"""
         description = self.description_edit.text().strip()
         season = self.season_combo.currentText()
+        include_season = self.include_season_check.isChecked()
         
         # Enable import button only if file and description are set
         can_import = bool(self.selected_file is not None and description and season != "Personnalisé...")
@@ -297,11 +311,12 @@ class TemplateImportDialog(QDialog):
             self.preview_name.setText(f"⚠️ {lang.get('template_import.select_season', default='Veuillez sélectionner une saison')}")
             return
         
-        # Generate preview name
+        # Generate preview name with include_season parameter
         template_name = self.template_manager.generate_template_name(
             self.character_class,
             season,
-            description
+            description,
+            include_season=include_season
         )
         
         self.preview_name.setText(f"✓ {template_name}")
@@ -343,6 +358,7 @@ class TemplateImportDialog(QDialog):
         
         description = self.description_edit.text().strip()
         season = self.season_combo.currentText()
+        include_season = self.include_season_check.isChecked()
         tags = self.tag_selector.get_tags()
         
         if not description:
@@ -365,7 +381,8 @@ class TemplateImportDialog(QDialog):
                 description=description,
                 character_name=self.character_name,
                 tags=tags,
-                notes=""
+                notes="",
+                include_season=include_season
             )
             
             if template_name:

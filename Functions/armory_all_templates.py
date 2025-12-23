@@ -143,7 +143,7 @@ class ArmoryAllTemplatesManager:
         # Path structure: Armory/[Realm]/Templates/file.txt -> Armory/[Realm]/Json/file.txt.json
         realm_path = template["path"].parent.parent  # Go up from Templates to Realm folder
         json_path = realm_path / "Json" / f"{template['file']}.json"
-        
+
         if json_path.exists():
             json_path.unlink()
             logger.info(f"Deleted template metadata: {json_path}")

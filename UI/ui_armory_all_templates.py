@@ -287,7 +287,7 @@ class UIArmoryAllTemplates(QMainWindow):
 
     def import_template(self):
         """Open the import template dialog for all realms without requiring a character"""
-        from UI.template_import_dialog import TemplateImportDialog
+        from UI.ui_armory_template_import_dialog import TemplateImportDialog
         
         # Create a generic character data dict
         generic_character = {

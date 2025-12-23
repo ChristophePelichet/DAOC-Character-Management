@@ -14,7 +14,7 @@ from PySide6.QtCore import Qt, Signal
 from Functions.language_manager import lang
 from Functions.template_manager import TemplateManager
 from UI.ui_file_dialogs import dialog_open_template_file
-from UI.ui_armory_tag_selector import ArmoryTagSelector
+from UI.ui_armory_template_tag_selector import ArmoryTagSelector
 
 
 class TemplateImportDialog(QDialog):

@@ -162,7 +162,7 @@ def armor_import_template(
         >>> armor_import_template(dialog, char_data, data_manager, template_manager)
         # Validates class and opens template import dialog
     """
-    from UI.template_import_dialog import TemplateImportDialog
+    from UI.ui_armory_template_import_dialog import TemplateImportDialog
 
     character_class = character_data.get('class', '')
     realm = character_data.get('realm', '')

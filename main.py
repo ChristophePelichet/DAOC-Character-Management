@@ -895,21 +895,46 @@ class CharacterApp(QMainWindow):
     def open_herald_search(self):
         """Ouvre la fenêtre de recherche Herald"""
         # CRITICAL: Check if Eden validation is still running (avoid Chrome profile conflict)
-        # CRITICAL: Check if Eden validation is running - button should be disabled
         # If user somehow triggered this while validation running, return silently
         if hasattr(self.ui_manager, 'eden_status_thread') and self.ui_manager.eden_status_thread:
             if self.ui_manager.eden_status_thread.isRunning():
                 return  # Silent return - button is disabled with tooltip
         
-        from UI.dialogs import HeraldSearchDialog
+        from UI.dialogs import HeraldSearchDialog, DialogDestructionWorker
+        from PySide6.QtCore import QThread
+        
         dialog = HeraldSearchDialog(self)
         dialog.exec()
+        
+        # Use worker thread to destroy dialog WITHOUT blocking main thread
+        # This prevents Qt event loop from blocking during dialog destruction
+        destruction_thread = QThread()
+        destruction_worker = DialogDestructionWorker(dialog)
+        destruction_worker.moveToThread(destruction_thread)
+        
+        # Connect signals to manage thread lifecycle
+        destruction_worker.finished.connect(destruction_thread.quit)
+        destruction_worker.finished.connect(destruction_worker.deleteLater)
+        destruction_thread.finished.connect(destruction_thread.deleteLater)
+        
+        # Store thread reference to prevent garbage collection
+        self._herald_dialogs = getattr(self, '_herald_dialogs', [])
+        self._herald_dialogs.append((dialog, destruction_thread))
+        
+        # Start destruction in background thread
+        destruction_thread.started.connect(destruction_worker.destroy_dialog)
+        destruction_thread.start()
     
     def open_herald_search_with_validation(self):
         """Ouvre la recherche Herald avec vérification de la validation Eden"""
+        from Functions.debug_freeze_tracker import freeze_tracker
+        
+        freeze_tracker.checkpoint("open_herald_search_with_validation() START")
+        
         # Vérifier si le thread de validation est en cours
         if hasattr(self.ui_manager, 'eden_status_thread') and self.ui_manager.eden_status_thread and self.ui_manager.eden_status_thread.isRunning():
             # Validation en cours - afficher message et attendre
+            freeze_tracker.checkpoint("Eden validation running - showing dialog")
             self._show_waiting_for_validation_dialog(validation_already_running=True)
         else:
             # Vérifier l'état actuel de la connexion Eden
@@ -918,12 +943,16 @@ class CharacterApp(QMainWindow):
                 
                 # Si Herald est accessible, ouvrir directement
                 if "✅" in status_text:
+                    freeze_tracker.checkpoint("Herald status OK - calling open_herald_search()")
                     self.open_herald_search()
+                    freeze_tracker.checkpoint("open_herald_search() returned to open_herald_search_with_validation()")
                 # Si en attente initiale (⏳), attendre sans relancer
                 elif "⏳" in status_text:
+                    freeze_tracker.checkpoint("Herald waiting - showing dialog")
                     self._show_waiting_for_validation_dialog(validation_already_running=True)
                 # Si erreur ou pas de cookie, afficher message explicatif
                 elif "❌" in status_text:
+                    freeze_tracker.checkpoint("Herald error - showing warning dialog")
                     QMessageBox.warning(
                         self,
                         lang.get("herald_validation_failed_title", default="Connexion impossible"),
@@ -931,10 +960,16 @@ class CharacterApp(QMainWindow):
                     )
                 else:
                     # État inconnu, ouvrir quand même
+                    freeze_tracker.checkpoint("Herald unknown status - calling open_herald_search()")
                     self.open_herald_search()
+                    freeze_tracker.checkpoint("open_herald_search() returned")
             else:
                 # Pas de barre de statut Eden, ouvrir directement
+                freeze_tracker.checkpoint("No Eden status label - calling open_herald_search()")
                 self.open_herald_search()
+                freeze_tracker.checkpoint("open_herald_search() returned")
+        
+        freeze_tracker.checkpoint("open_herald_search_with_validation() COMPLETE")
     
     def _show_waiting_for_validation_dialog(self, validation_already_running=False):
         """Affiche une boîte de dialogue d'attente pendant la validation Eden"""

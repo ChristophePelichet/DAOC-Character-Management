@@ -19,6 +19,15 @@
 - Fixed realm combobox text truncation where "Midgard" was displayed as "Mi...rd"
 - Added `setMinimumWidth(180)` to ensure proper display of all realm names
 - Issue: Combobox width was too constrained in the layout
+
+**Herald Search Dialog - Critical UI Freeze Bug**
+- Fixed 4+ second UI freeze when closing Herald search dialog after performing a search
+- Root cause: Synchronous `_stop_search_thread_async()` call from within `dialog.exec()` event loop blocked main thread
+- Solution: Implemented async dialog destruction using dedicated `DialogDestructionWorker` thread
+- Changes: Modified `open_herald_search()` to use worker thread for non-blocking cleanup
+- Simplified `accept()` and `closeEvent()` to eliminate blocking operations
+- Thread now terminates naturally without explicit stopping - non-blocking approach
+- Result: Dialog closes instantly with zero UI freeze
 ### ✨ Features
 
 **Armory Template Preview - Copper to Platinum Price Conversion**

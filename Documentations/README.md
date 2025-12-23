@@ -15,7 +15,14 @@ Complete index of technical and user documentation for the character manager.
   - Currency normalization system
   - Database persistence (dual-mode architecture)
 
-### 💾 [Backups/](Backups/) - Backup System
+### � [Debug/](Debug/) - Debug Utilities
+- **DEBUG_TECHNICAL_DOCUMENTATION.md** - Debug utilities documentation
+  - Freeze Tracker for UI freeze investigation and performance profiling
+  - Millisecond-precision timing for operation sequences
+  - Visual warning system for slow operations
+  - Future expansion for additional debug utilities
+
+### �💾 [Backups/](Backups/) - Backup System
 - **BACKUP_TECHNICAL_DOCUMENTATION.md** - Complete backup system documentation
   - Automatic backup system (characters, config, cookies)
   - Manual backup functionality
@@ -108,11 +115,12 @@ Complete index of technical and user documentation for the character manager.
 
 ## 🔍 Documentation by Feature
 
-### System Architecture
+### System Architecture & Debugging
 - [Armory/ARMORY_TECHNICAL_DOCUMENTATION.md](Armory/ARMORY_TECHNICAL_DOCUMENTATION.md) - Armory system (2636 lines)
 - [Dialog/DIALOG_TECHNICAL_DOCUMENTATION.md](Dialog/DIALOG_TECHNICAL_DOCUMENTATION.md) - Dialog system (1002 lines)
 - [Settings/SETTINGS_TECHNICAL_DOCUMENTATION.md](Settings/SETTINGS_TECHNICAL_DOCUMENTATION.md) - Settings system (935 lines)
 - [Themes/THEME_TECHNICAL_DOCUMENTATION.md](Themes/THEME_TECHNICAL_DOCUMENTATION.md) - Theme system (1600+ lines)
+- [Debug/DEBUG_TECHNICAL_DOCUMENTATION.md](Debug/DEBUG_TECHNICAL_DOCUMENTATION.md) - Debug utilities (Freeze Tracker)
 
 ### Data Management
 - [Items/ITEMS_DATABASE_TECHNICAL_DOCUMENTATION.md](Items/ITEMS_DATABASE_TECHNICAL_DOCUMENTATION.md) - Items database (3632 lines)
@@ -132,10 +140,10 @@ Complete index of technical and user documentation for the character manager.
 
 ## 📊 Documentation Statistics
 
-- **Total files**: 12 major technical documents
+- **Total files**: 13 major technical documents
 - **Total lines**: 16,500+ lines of comprehensive documentation
 - **Languages**: FR/EN (DE partial)
-- **Categories**: 12 functional areas
+- **Categories**: 13 functional areas
 - **Documentation by size**:
   - Items Database: 3632 lines
   - Armory System: 2636 lines
@@ -147,6 +155,7 @@ Complete index of technical and user documentation for the character manager.
   - Visual System: 842 lines
   - Language System: 431 lines
   - Help System: 398 lines
+  - Debug Utilities: Freeze Tracker utilities
   - Configuration: Complete with examples
   - Backup System: Complete with examples
 

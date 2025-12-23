@@ -4744,6 +4744,8 @@ class HeraldSearchDialog(QDialog):
         self.name_input = QLineEdit()
         self.name_input.setPlaceholderText(self.lang.get("herald_search.name_placeholder"))
         self.name_input.returnPressed.connect(self.start_search)
+        # Ajouter validation pour interdire les caractères invalides Windows
+        self.name_input.textChanged.connect(self._validate_character_name)
         input_layout.addWidget(input_label)
         input_layout.addWidget(self.name_input)
         search_layout.addLayout(input_layout)
@@ -4966,6 +4968,40 @@ class HeraldSearchDialog(QDialog):
                         logging.warning(f"Impossible de supprimer {file}: {e}")
         except Exception as e:
             logging.warning(f"Erreur lors du nettoyage des fichiers temporaires: {e}")
+    
+    def _validate_character_name(self):
+        """
+        Valide le nom du caractère en temps réel.
+        Supprime les caractères invalides pour Windows/systèmes de fichiers.
+        
+        Caractères interdits: * ? " < > | : \\ /
+        """
+        import re
+        
+        text = self.name_input.text()
+        # Caractères invalides pour Windows et POSIX: * ? " < > | : \ /
+        invalid_chars = r'[*?"<>|:\\\/]'
+        
+        # Vérifier s'il y a des caractères invalides
+        if re.search(invalid_chars, text):
+            # Obtenir la position du curseur
+            cursor_pos = self.name_input.cursorPosition()
+            
+            # Supprimer les caractères invalides
+            cleaned_text = re.sub(invalid_chars, '', text)
+            
+            # Mettre à jour le texte (sans émettre de signal textChanged via blockSignals)
+            self.name_input.blockSignals(True)
+            self.name_input.setText(cleaned_text)
+            self.name_input.setCursorPosition(max(0, cursor_pos - 1))
+            self.name_input.blockSignals(False)
+            
+            # Afficher un tooltip pour informer l'utilisateur
+            tooltip = self.lang.get("herald_search.invalid_chars_tooltip", 
+                                   default="Caractères invalides: * ? \" < > | : \\ /")
+            self.name_input.setToolTip(tooltip)
+        else:
+            self.name_input.setToolTip(self.lang.get("herald_search.name_placeholder"))
     
     def start_search(self):
         """Lance la recherche"""

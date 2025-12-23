@@ -28,6 +28,17 @@
 - Simplified `accept()` and `closeEvent()` to eliminate blocking operations
 - Thread now terminates naturally without explicit stopping - non-blocking approach
 - Result: Dialog closes instantly with zero UI freeze
+
+**Herald Search Dialog - Invalid Character Bug (Filename)**
+- Fixed JSON error when searching for character names containing special characters (* ? " < > | : \ /)
+- Root cause: Character name directly used in filename without sanitization, causing Windows "Invalid argument" error
+- Solution: Implemented two-layer protection:
+  1. **Frontend validation**: Real-time character filtering in Herald search dialog input field
+  2. **Backend sanitization**: `sanitize_filename()` function removes invalid chars before JSON file creation
+- Created `sanitize_filename()` utility function in `Functions/eden_scraper.py` for reusable sanitization
+- Frontend prevents user from typing invalid characters (auto-removed in real-time)
+- Backend provides safety net: even if invalid char somehow gets through, file is still created successfully
+- Result: Search works reliably with any character name, error-free JSON creation
 ### ✨ Features
 
 **Armory Template Preview - Copper to Platinum Price Conversion**

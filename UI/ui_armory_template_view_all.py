@@ -123,7 +123,7 @@ class UIArmoryAllTemplates(QMainWindow):
             lang.get("armoury_dialog.table_headers.filename", default="Template"),
             lang.get("armoury_dialog.table_headers.class", default="Class")
         ])
-        table.horizontalHeader().setStretchLastSection(True)
+        table.horizontalHeader().setStretchLastSection(False)
         table.setSelectionBehavior(QTableWidget.SelectRows)
         table.setEditTriggers(QTableWidget.NoEditTriggers)
         table.setSortingEnabled(True)
@@ -131,7 +131,12 @@ class UIArmoryAllTemplates(QMainWindow):
         table.itemSelectionChanged.connect(lambda: self._on_template_selected(realm))
         table.setContextMenuPolicy(Qt.CustomContextMenu)
         table.customContextMenuRequested.connect(lambda pos: self._show_context_menu(realm, pos))
+        # Connect column resize signal to save column widths
+        table.horizontalHeader().sectionResized.connect(lambda: self._save_column_widths(realm))
         self.tables[realm] = table
+        
+        # Restore saved column widths
+        self._restore_column_widths(realm, table)
         
         splitter.addWidget(table)
         
@@ -481,5 +486,50 @@ class UIArmoryAllTemplates(QMainWindow):
                 lang.get("dialogs.titles.error", default="Erreur"),
                 lang.get("armoury_dialog.messages.download_error", default="Erreur lors du téléchargement", error=str(e))
             )
+
+    def _save_column_widths(self, realm):
+        """Save current column widths to config for a realm
+        
+        Args:
+            realm: The realm name
+        """
+        try:
+            table = self.tables[realm]
+            config = ConfigManager()
+            
+            # Save width for each column
+            column_widths = {}
+            for col in range(table.columnCount()):
+                column_widths[str(col)] = table.columnWidth(col)
+            
+            config.set(f"ui.template_view_column_widths.{realm}", column_widths, save=True)
+            logger.debug(f"Saved column widths for {realm}: {column_widths}")
+        except Exception as e:
+            logger.debug(f"Error saving column widths for {realm}: {e}")
+
+    def _restore_column_widths(self, realm, table):
+        """Restore column widths from config for a realm
+        
+        Args:
+            realm: The realm name
+            table: The QTableWidget to restore widths for
+        """
+        try:
+            config = ConfigManager()
+            column_widths = config.get(f"ui.template_view_column_widths.{realm}", default=None)
+            
+            if column_widths and isinstance(column_widths, dict) and len(column_widths) == table.columnCount():
+                for col in range(table.columnCount()):
+                    width = column_widths.get(str(col), None)
+                    if width:
+                        table.setColumnWidth(col, int(width))
+                logger.debug(f"Restored column widths for {realm}: {column_widths}")
+            else:
+                # Set default widths if not saved
+                table.setColumnWidth(0, 300)  # Template filename
+                table.setColumnWidth(1, 100)  # Class
+                logger.debug(f"Using default column widths for {realm}")
+        except Exception as e:
+            logger.debug(f"Error restoring column widths for {realm}: {e}")
 
 

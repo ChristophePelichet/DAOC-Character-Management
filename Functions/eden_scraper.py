@@ -8,6 +8,7 @@ Intégré depuis eden_scraper/ pour centraliser la gestion
 
 import os
 import traceback
+import re
 from datetime import datetime
 from pathlib import Path
 
@@ -19,6 +20,45 @@ module_logger = get_logger(LOGGER_EDEN)
 
 from bs4 import BeautifulSoup
 import json
+
+
+def sanitize_filename(text):
+    """
+    Sanitise un texte pour l'utiliser comme nom de fichier.
+    Supprime les caractères invalides Windows et autres systèmes.
+    
+    Caractères invalides: * ? " < > | : \\ /
+    
+    Args:
+        text (str): Texte à sanitiser
+        
+    Returns:
+        str: Texte sanitisé pour utilisation en nom de fichier
+        
+    Examples:
+        >>> sanitize_filename("ewo*")
+        "ewo"
+        >>> sanitize_filename("test?file|name")
+        "testfilename"
+        >>> sanitize_filename("test/path")
+        "testpath"
+    """
+    # Caractères invalides pour Windows et POSIX: * ? " < > | : \ /
+    invalid_chars = r'[*?"<>|:\\\/]'
+    sanitized = re.sub(invalid_chars, '', text)
+    
+    # Remplacer les espaces multiples par un seul espace
+    sanitized = re.sub(r'\s+', '_', sanitized)
+    
+    # Supprimer les espaces en début/fin
+    sanitized = sanitized.strip('_')
+    
+    # Si complètement vide après sanitisation, utiliser un défaut
+    if not sanitized:
+        sanitized = "search"
+    
+    return sanitized
+
 
 
 class EdenScraper:
@@ -588,7 +628,9 @@ def search_herald_character(character_name, realm_filter=""):
             module_logger.info("Aucun ancien fichier à nettoyer", extra={"action": "CLEANUP"})
         
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        json_filename = f"search_{character_name}_{timestamp}.json"
+        # Sanitise le nom du caractère pour éviter les caractères invalides dans le nom de fichier
+        safe_character_name = sanitize_filename(character_name)
+        json_filename = f"search_{safe_character_name}_{timestamp}.json"
         json_path = temp_dir / json_filename
         
         with open(json_path, 'w', encoding='utf-8') as f:

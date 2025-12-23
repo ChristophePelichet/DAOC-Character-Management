@@ -126,6 +126,8 @@ class UIArmoryAllTemplates(QMainWindow):
         table.horizontalHeader().setStretchLastSection(True)
         table.setSelectionBehavior(QTableWidget.SelectRows)
         table.setEditTriggers(QTableWidget.NoEditTriggers)
+        table.setSortingEnabled(True)
+        table.sortByColumn(0, Qt.AscendingOrder)
         table.itemSelectionChanged.connect(lambda: self._on_template_selected(realm))
         table.setContextMenuPolicy(Qt.CustomContextMenu)
         table.customContextMenuRequested.connect(lambda pos: self._show_context_menu(realm, pos))

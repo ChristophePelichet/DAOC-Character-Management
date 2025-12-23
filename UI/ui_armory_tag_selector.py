@@ -1,5 +1,5 @@
 """
-Tag Selector Widget - Permet la sélection de tags avec auto-complétion
+Armory Tag Selector Widget - Permet la sélection de tags avec auto-complétion
 """
 
 from PySide6.QtWidgets import (
@@ -59,7 +59,7 @@ class TagBadge(QFrame):
         layout.addWidget(remove_btn)
 
 
-class TagSelector(QWidget):
+class ArmoryTagSelector(QWidget):
     """
     Widget pour sélectionner des tags avec auto-complétion.
     Limite de 5 tags.
@@ -210,3 +210,7 @@ class TagSelector(QWidget):
         # Add new tags
         for tag in tags[:self.MAX_TAGS]:
             self._add_tag(tag)
+
+
+# Backward compatibility alias
+TagSelector = ArmoryTagSelector

@@ -14,7 +14,7 @@ from PySide6.QtCore import Qt, Signal
 from Functions.language_manager import lang
 from Functions.template_manager import TemplateManager
 from UI.ui_file_dialogs import dialog_open_template_file
-from UI.widgets.tag_selector import TagSelector
+from UI.ui_armory_tag_selector import ArmoryTagSelector
 
 
 class TemplateImportDialog(QDialog):
@@ -192,7 +192,7 @@ class TemplateImportDialog(QDialog):
         )
         
         # Tags selector
-        self.tag_selector = TagSelector(self)
+        self.tag_selector = ArmoryTagSelector(self)
         info_layout.addRow(
             lang.get("template_import.tags_label", default="Tags (optionnel):"),
             self.tag_selector

@@ -10,6 +10,7 @@ from PySide6.QtGui import QAction
 from PySide6.QtCore import Qt, QThread, Signal
 
 from Functions.language_manager import lang
+from UI.ui_armory_all_templates import UIArmoryAllTemplates
 
 
 class EdenStatusThread(QThread):
@@ -60,7 +61,7 @@ class UIManager:
         self.eden_status_thread = None
         
     def create_menu_bar(self):
-        """Crée la barre de menus avec Fichier, Actions, Affichage, Aide"""
+        """Crée la barre de menus avec Fichier, Outils, Aide"""
         menubar = self.main_window.menuBar()
         menubar.clear()
         
@@ -88,6 +89,14 @@ class UIManager:
         file_menu.addAction(settings_action)
         
         # Note: Backup settings moved to Settings > Backup section
+        
+        # Menu Outils
+        tools_menu = menubar.addMenu(lang.get("menu.tools.label", default="Outils"))
+        
+        # Armurerie - Browse all templates
+        armory_action = QAction(lang.get("menu.tools.armory", default="Armurerie"), self.main_window)
+        armory_action.triggered.connect(self._open_all_templates_window)
+        tools_menu.addAction(armory_action)
         
         # Menu Aide
         help_menu = menubar.addMenu(lang.get("menu_help"))
@@ -574,6 +583,22 @@ class UIManager:
         
         dialog = AboutDialog(self.main_window, app_name, app_version)
         dialog.exec()
+    
+    def _open_all_templates_window(self):
+        """Ouvre la fenêtre pour consulter tous les templates disponibles"""
+        logging.info("Opening armory templates window")
+        try:
+            window = UIArmoryAllTemplates(self.main_window)
+            window.show()
+            logging.info("Armory templates window opened successfully")
+        except Exception as e:
+            import traceback
+            logging.error(f"Erreur lors de l'ouverture de la fenêtre Armurerie: {e}\n{traceback.format_exc()}")
+            QMessageBox.critical(
+                self.main_window,
+                lang.get("error_title", default="Erreur"),
+                lang.get("armory.window_error", default="Erreur lors de l'ouverture de la fenêtre Armurerie") + f"\n\n{str(e)}"
+            )
     
     def _open_wiki_documentation(self):
         """Ouvre le Wiki GitHub dans le navigateur"""

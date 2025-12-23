@@ -19,25 +19,30 @@ from UI.widgets.tag_selector import TagSelector
 
 class TemplateImportDialog(QDialog):
     """
-    Dialogue pour importer un template d'armurerie depuis la fiche d'un personnage.
-    Le contexte (classe, realm) est automatiquement détecté depuis le personnage.
+    Dialogue pour importer un template d'armurerie.
+    Peut fonctionner en deux modes:
+    - Mode personnage: auto-détecte la classe et le realm
+    - Mode armurerie (généraliste): affiche des dropdowns pour sélectionner classe et realm
     """
     
     template_imported = Signal(str)  # template_name
     
-    def __init__(self, parent, character):
+    def __init__(self, parent, character, auto_detect_mode=True):
         """
         Initialize dialog with character context.
         
         Args:
             parent: Parent window
             character: Character dict with class, realm, name, etc.
+            auto_detect_mode: If True, auto-detect class/realm from character (read-only)
+                            If False, show dropdowns for manual selection (for Armory general view)
         """
         super().__init__(parent)
         
         self.character = character
         self.template_manager = TemplateManager()
         self.selected_file = None
+        self.auto_detect_mode = auto_detect_mode
         
         # Extract character info
         self.character_class = character.get('character_class', '')
@@ -46,6 +51,9 @@ class TemplateImportDialog(QDialog):
         self.realm = character.get('realm', 'Albion')
         self.character_name = character.get('name', 'Unknown')
         
+        # Load available classes by realm (for non-auto-detect mode)
+        self.classes_by_realm = self._load_classes_by_realm()
+        
         self.setWindowTitle(lang.get("template_import.window_title", default="Importer un template"))
         self.resize(600, 500)
         self.setWindowFlags(Qt.Window | Qt.WindowCloseButtonHint)
@@ -53,6 +61,30 @@ class TemplateImportDialog(QDialog):
         self._setup_ui()
         self._connect_signals()
         self._update_preview()
+    
+    def _load_classes_by_realm(self):
+        """Load available classes for each realm from data file"""
+        classes_by_realm = {}
+        try:
+            from Functions.data_manager import DataManager
+            dm = DataManager()
+            data = dm.load_classes_races()
+            
+            for realm in ['Albion', 'Hibernia', 'Midgard']:
+                if realm in data:
+                    classes_by_realm[realm] = [
+                        cls['name'] for cls in data[realm].get('classes', [])
+                    ]
+            return classes_by_realm
+        except Exception as e:
+            import logging
+            logging.warning(f"Could not load classes by realm: {e}")
+            # Fallback
+            return {
+                'Albion': [],
+                'Hibernia': [],
+                'Midgard': []
+            }
     
     def _setup_ui(self):
         """Configure l'interface"""
@@ -81,23 +113,47 @@ class TemplateImportDialog(QDialog):
         context_group = QGroupBox(lang.get("template_import.context_group_title", default="🎯 Contexte (auto-détecté)"))
         context_layout = QFormLayout()
         
-        # Class (read-only)
-        self.class_label = QLabel(f"<b>{self.character_class}</b>")
-        # Use theme colors with slight transparency for read-only effect
-        self.class_label.setStyleSheet("padding: 5px; border-radius: 3px; opacity: 0.7;")
-        context_layout.addRow(
-            lang.get("template_import.class_label", default="Classe:"),
-            self.class_label
-        )
+        # Realm (read-only or dropdown) - FIRST
+        if self.auto_detect_mode:
+            # Mode auto-detect: affiche juste le realm en lecture seule
+            self.realm_label = QLabel(f"<b>{self.realm}</b>")
+            self.realm_label.setStyleSheet("padding: 5px; border-radius: 3px; opacity: 0.7;")
+            context_layout.addRow(
+                lang.get("template_import.realm_label", default="Royaume:"),
+                self.realm_label
+            )
+            self.realm_combo = None
+        else:
+            # Mode sélection manuelle: affiche un dropdown pour le realm
+            self.realm_combo = QComboBox()
+            self.realm_combo.addItems(['Albion', 'Hibernia', 'Midgard'])
+            self.realm_combo.setCurrentText(self.realm)
+            context_layout.addRow(
+                lang.get("template_import.realm_label", default="Royaume:"),
+                self.realm_combo
+            )
+            self.realm_label = None
         
-        # Realm (read-only)
-        self.realm_label = QLabel(f"<b>{self.realm}</b>")
-        # Use theme colors with slight transparency for read-only effect
-        self.realm_label.setStyleSheet("padding: 5px; border-radius: 3px; opacity: 0.7;")
-        context_layout.addRow(
-            lang.get("template_import.realm_label", default="Royaume:"),
-            self.realm_label
-        )
+        # Class (read-only or dropdown) - SECOND
+        if self.auto_detect_mode:
+            # Mode auto-detect: affiche juste la classe en lecture seule
+            self.class_label = QLabel(f"<b>{self.character_class}</b>")
+            self.class_label.setStyleSheet("padding: 5px; border-radius: 3px; opacity: 0.7;")
+            context_layout.addRow(
+                lang.get("template_import.class_label", default="Classe:"),
+                self.class_label
+            )
+            self.class_combo = None
+        else:
+            # Mode sélection manuelle: affiche un dropdown pour la classe
+            self.class_combo = QComboBox()
+            self.class_combo.addItem("")  # Empty option
+            # Will be populated when realm is selected
+            context_layout.addRow(
+                lang.get("template_import.class_label", default="Classe:"),
+                self.class_combo
+            )
+            self.class_label = None
         
         context_group.setLayout(context_layout)
         layout.addWidget(context_group)
@@ -194,6 +250,24 @@ class TemplateImportDialog(QDialog):
         self.import_button.clicked.connect(self._import_template)
         self.description_edit.textChanged.connect(self._update_preview)
         self.season_combo.currentTextChanged.connect(self._update_preview)
+        
+        # In non-auto-detect mode, connect realm change to update available classes
+        if not self.auto_detect_mode and self.realm_combo:
+            self.realm_combo.currentTextChanged.connect(self._on_realm_changed)
+            # Populate initial classes for current realm
+            self._on_realm_changed()
+    
+    def _on_realm_changed(self):
+        """Update available classes when realm changes"""
+        if not self.class_combo or not self.realm_combo:
+            return
+        
+        current_realm = self.realm_combo.currentText()
+        self.class_combo.clear()
+        self.class_combo.addItem("")  # Empty option
+        
+        if current_realm in self.classes_by_realm:
+            self.class_combo.addItems(self.classes_by_realm[current_realm])
     
     def _browse_file(self):
         """Browse for template file"""
@@ -216,11 +290,11 @@ class TemplateImportDialog(QDialog):
         self.import_button.setEnabled(can_import)
         
         if not description:
-            self.preview_name.setText("⚠️ Veuillez saisir une description")
+            self.preview_name.setText(f"⚠️ {lang.get('template_import.enter_description', default='Veuillez saisir une description')}")
             return
         
         if season == "Personnalisé...":
-            self.preview_name.setText("⚠️ Veuillez sélectionner une saison")
+            self.preview_name.setText(f"⚠️ {lang.get('template_import.select_season', default='Veuillez sélectionner une saison')}")
             return
         
         # Generate preview name
@@ -238,9 +312,34 @@ class TemplateImportDialog(QDialog):
             QMessageBox.warning(
                 self,
                 lang.get("template_import.import_error_title", default="Erreur d'import"),
-                "Fichier source invalide"
+                lang.get("template_import.invalid_source_file", default="Fichier source invalide")
             )
             return
+        
+        # In non-auto-detect mode, check that class and realm are selected
+        if not self.auto_detect_mode:
+            if not self.class_combo.currentText():
+                QMessageBox.warning(
+                    self,
+                    lang.get("template_import.import_error_title", default="Erreur d'import"),
+                    lang.get("template_import.select_class", default="Veuillez sélectionner une classe")
+                )
+                return
+            
+            if not self.realm_combo.currentText():
+                QMessageBox.warning(
+                    self,
+                    lang.get("template_import.import_error_title", default="Erreur d'import"),
+                    lang.get("template_import.select_realm", default="Veuillez sélectionner un royaume")
+                )
+                return
+            
+            # Update character class and realm from dropdowns
+            self.character_class = self.class_combo.currentText()
+            self.realm = self.realm_combo.currentText()
+            # For non-character imports, use the English class name for all languages
+            self.character_class_fr = self.character_class
+            self.character_class_de = self.character_class
         
         description = self.description_edit.text().strip()
         season = self.season_combo.currentText()
@@ -250,7 +349,7 @@ class TemplateImportDialog(QDialog):
             QMessageBox.warning(
                 self,
                 lang.get("template_import.import_error_title", default="Erreur d'import"),
-                "Veuillez saisir une description"
+                lang.get("template_import.enter_description", default="Veuillez saisir une description")
             )
             return
         

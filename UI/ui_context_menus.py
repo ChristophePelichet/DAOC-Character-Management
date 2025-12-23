@@ -11,7 +11,7 @@ from Functions.language_manager import lang
 
 def ui_show_armor_context_menu(parent, table, position, filename, callbacks):
     """
-    Show armor context menu with view, download, open, delete actions.
+    Show armor context menu with download and delete actions.
 
     Creates and displays a context menu for armor files with standard actions.
     Actions are connected to provided callback functions.
@@ -22,9 +22,7 @@ def ui_show_armor_context_menu(parent, table, position, filename, callbacks):
         position: QPoint position where menu was requested (from right-click)
         filename: Armor filename for the selected row
         callbacks: Dictionary with action callback functions:
-                  - 'view': callable(filename) - View armor handler
                   - 'download': callable(filename) - Download/export handler
-                  - 'open': callable(filename) - Open file handler
                   - 'delete': callable(filename) - Delete armor handler
 
     Returns:
@@ -32,9 +30,7 @@ def ui_show_armor_context_menu(parent, table, position, filename, callbacks):
 
     Example:
         >>> callbacks = {
-        ...     'view': self.view_armor,
         ...     'download': self.download_armor,
-        ...     'open': self.open_armor,
         ...     'delete': self.delete_armor,
         ... }
         >>> ui_show_armor_context_menu(
@@ -49,12 +45,6 @@ def ui_show_armor_context_menu(parent, table, position, filename, callbacks):
     # Create context menu
     menu = QMenu(parent)
 
-    # View action
-    view_action = menu.addAction(
-        lang.get("armoury_dialog.context_menu.view")
-    )
-    view_action.triggered.connect(lambda: callbacks['view'](filename))
-
     # Download action
     download_action = menu.addAction(
         lang.get("armoury_dialog.context_menu.download")
@@ -62,14 +52,6 @@ def ui_show_armor_context_menu(parent, table, position, filename, callbacks):
     download_action.triggered.connect(
         lambda: callbacks['download'](filename)
     )
-
-    menu.addSeparator()
-
-    # Open action
-    open_action = menu.addAction(
-        lang.get("armoury_dialog.context_menu.open")
-    )
-    open_action.triggered.connect(lambda: callbacks['open'](filename))
 
     menu.addSeparator()
 

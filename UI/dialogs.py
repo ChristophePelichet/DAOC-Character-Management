@@ -2700,13 +2700,87 @@ class ArmorManagementDialog(QDialog):
         row = item.row()
         filename = self.table.item(row, 0).text()
         
-        # Build and show context menu
-        from UI.ui_context_menus import ui_show_armor_context_menu
-        callbacks = {
-            'download': self.download_armor,
-            'delete': self.delete_armor,
-        }
-        ui_show_armor_context_menu(self, self.table, position, filename, callbacks)
+        from PySide6.QtWidgets import QMenu
+        
+        menu = QMenu(self)
+        
+        # Edit action
+        edit_action = menu.addAction(lang.get("template_context_menu.edit", default="Editer"))
+        edit_action.triggered.connect(lambda: self._edit_template(filename))
+        
+        # Delete action
+        delete_action = menu.addAction(lang.get("template_context_menu.delete", default="Supprimer"))
+        delete_action.triggered.connect(lambda: self._delete_template_dialog(filename))
+        
+        menu.addSeparator()
+        
+        # Download action
+        download_action = menu.addAction(lang.get("armoury_dialog.buttons.download", default="Télécharger"))
+        download_action.triggered.connect(lambda: self.download_armor(filename))
+        
+        menu.exec(self.table.mapToGlobal(position))
+    
+    def _edit_template(self, template_name):
+        """Edit template information"""
+        from UI.ui_armory_template_edit_dialog import TemplateEditDialog
+        from Functions.template_metadata import TemplateMetadata
+        
+        try:
+            # Load metadata - template_name includes .txt extension
+            metadata_path = self.template_manager._get_metadata_path(self.realm, template_name)
+            logging.debug(f"Looking for metadata at: {metadata_path}")
+            logging.debug(f"Metadata exists: {metadata_path.exists()}")
+            if not metadata_path.exists():
+                error_msg = f"Fichier de métadonnées non trouvé: {metadata_path}"
+                logging.error(error_msg)
+                QMessageBox.warning(
+                    self,
+                    "Erreur",
+                    error_msg
+                )
+                return
+            
+            metadata = TemplateMetadata.load(metadata_path)
+            if not metadata:
+                QMessageBox.warning(
+                    self,
+                    lang.get("dialogs.titles.error", default="Erreur"),
+                    lang.get("template_edit.metadata_invalid", default="Métadonnées invalides")
+                )
+                return
+            
+            # Open edit dialog
+            dialog = TemplateEditDialog(self, template_name, self.realm, metadata)
+            if dialog.exec():
+                # Reload templates when edit succeeds
+                self.refresh_list()
+        
+        except Exception as e:
+            logging.error(f"Error editing template: {e}")
+            QMessageBox.critical(
+                self,
+                lang.get("dialogs.titles.error", default="Erreur"),
+                f"Erreur lors de l'édition du template: {str(e)}"
+            )
+    
+    def _delete_template_dialog(self, template_name):
+        """Delete a template with confirmation"""
+        reply = QMessageBox.question(
+            self,
+            lang.get("template_context_menu.confirm_delete", default="Confirmer la suppression"),
+            lang.get("template_context_menu.delete_confirm_message", default="Êtes-vous sûr de vouloir supprimer ce template?"),
+            QMessageBox.Yes | QMessageBox.No
+        )
+        
+        if reply == QMessageBox.Yes:
+            if self.template_manager.delete_template(template_name, self.realm):
+                self.refresh_list()
+            else:
+                QMessageBox.warning(
+                    self,
+                    lang.get("dialogs.titles.error", default="Erreur"),
+                    lang.get("template_context_menu.delete_error", default="Impossible de supprimer le template")
+                )
     
     def view_armor(self, filename):
         """Opens armor viewer dialog."""

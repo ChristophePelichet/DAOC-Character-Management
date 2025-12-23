@@ -124,6 +124,8 @@ class UIArmoryAllTemplates(QMainWindow):
         table.setSelectionBehavior(QTableWidget.SelectRows)
         table.setEditTriggers(QTableWidget.NoEditTriggers)
         table.itemSelectionChanged.connect(lambda: self._on_template_selected(realm))
+        table.setContextMenuPolicy(Qt.CustomContextMenu)
+        table.customContextMenuRequested.connect(lambda pos: self._show_context_menu(realm, pos))
         self.tables[realm] = table
         
         splitter.addWidget(table)
@@ -182,7 +184,7 @@ class UIArmoryAllTemplates(QMainWindow):
                 
                 # List all .txt files in the realm directory
                 template_files = sorted(realm_dir.glob("*.txt"))
-                templates = [f.stem for f in template_files]  # Get filename without extension
+                templates = [f.name for f in template_files]  # Get full filename with extension
                 
                 table = self.tables[realm]
                 table.setRowCount(0)
@@ -230,12 +232,12 @@ class UIArmoryAllTemplates(QMainWindow):
         
         Args:
             realm: The realm
-            filename: The template filename
+            filename: The template filename (includes .txt extension)
         """
         try:
             # Read template file directly - templates are in Armory/[Realm]/Templates/
             realm_dir = self.template_manager.armory_path / realm / "Templates"
-            template_file = realm_dir / f"{filename}.txt"
+            template_file = realm_dir / filename
             
             if not template_file.exists():
                 self.previews[realm].setHtml(f"<span style='color: red;'>Template file not found: {template_file}</span>")
@@ -304,4 +306,97 @@ class UIArmoryAllTemplates(QMainWindow):
         dialog.template_imported.connect(lambda: self._load_all_templates())
         
         dialog.exec()
+    
+    def _show_context_menu(self, realm, pos):
+        """Show context menu for template operations"""
+        from PySide6.QtWidgets import QMenu
+        
+        table = self.tables[realm]
+        item = table.itemAt(pos)
+        
+        if not item:
+            return
+        
+        row = table.row(item)
+        template_name = table.item(row, 0).text()
+        
+        menu = QMenu(self)
+        
+        # Edit action
+        edit_action = menu.addAction(lang.get("template_context_menu.edit", default="Editer"))
+        edit_action.triggered.connect(lambda: self._edit_template(realm, template_name))
+        
+        # Delete action
+        delete_action = menu.addAction(lang.get("template_context_menu.delete", default="Supprimer"))
+        delete_action.triggered.connect(lambda: self._delete_template(realm, template_name))
+        
+        menu.exec(table.mapToGlobal(pos))
+    
+    def _edit_template(self, realm, template_name):
+        """Edit template information"""
+        from UI.ui_armory_template_edit_dialog import TemplateEditDialog
+        from Functions.template_metadata import TemplateMetadata
+        
+        try:
+            # Load metadata - template_name includes .txt extension
+            metadata_path = self.template_manager._get_metadata_path(realm, template_name)
+            logger.debug(f"Looking for metadata at: {metadata_path}")
+            logger.debug(f"Metadata exists: {metadata_path.exists()}")
+            if not metadata_path.exists():
+                from PySide6.QtWidgets import QMessageBox
+                error_msg = f"Fichier de métadonnées non trouvé: {metadata_path}"
+                logger.error(error_msg)
+                QMessageBox.warning(
+                    self,
+                    "Erreur",
+                    error_msg
+                )
+                return
+            
+            metadata = TemplateMetadata.load(metadata_path)
+            if not metadata:
+                from PySide6.QtWidgets import QMessageBox
+                QMessageBox.warning(
+                    self,
+                    lang.get("dialogs.titles.error", default="Erreur"),
+                    lang.get("template_edit.metadata_invalid", default="Métadonnées invalides")
+                )
+                return
+            
+            # Open edit dialog
+            dialog = TemplateEditDialog(self, template_name, realm, metadata)
+            if dialog.exec():
+                # Reload templates when edit succeeds
+                self._load_all_templates()
+        
+        except Exception as e:
+            from PySide6.QtWidgets import QMessageBox
+            logger.error(f"Error editing template: {e}")
+            QMessageBox.critical(
+                self,
+                lang.get("dialogs.titles.error", default="Erreur"),
+                f"Erreur lors de l'édition du template: {str(e)}"
+            )
+    
+    def _delete_template(self, realm, template_name):
+        """Delete a template"""
+        from PySide6.QtWidgets import QMessageBox
+        
+        reply = QMessageBox.question(
+            self,
+            lang.get("template_context_menu.confirm_delete", default="Confirmer la suppression"),
+            lang.get("template_context_menu.delete_confirm_message", default="Êtes-vous sûr de vouloir supprimer ce template?"),
+            QMessageBox.Yes | QMessageBox.No
+        )
+        
+        if reply == QMessageBox.Yes:
+            if self.template_manager.delete_template(template_name, realm):
+                self._load_all_templates()
+            else:
+                QMessageBox.warning(
+                    self,
+                    lang.get("dialogs.titles.error", default="Erreur"),
+                    lang.get("template_context_menu.delete_error", default="Impossible de supprimer le template")
+                )
+
 

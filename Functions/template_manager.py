@@ -202,6 +202,7 @@ class TemplateManager:
             )
             
             # Save metadata to Json folder
+            # Metadata filename includes .txt extension from template_name
             metadata_path = self._get_metadata_path(realm, template_name)
             if not metadata.save_to_path(metadata_path):
                 # Rollback template file

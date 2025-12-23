@@ -323,12 +323,21 @@ class UIArmoryAllTemplates(QMainWindow):
         menu = QMenu(self)
         
         # Edit action
-        edit_action = menu.addAction(lang.get("template_context_menu.edit", default="Editer"))
+        edit_text = "✏️ " + lang.get("template_context_menu.edit", default="Editer")
+        edit_action = menu.addAction(edit_text)
         edit_action.triggered.connect(lambda: self._edit_template(realm, template_name))
         
         # Delete action
-        delete_action = menu.addAction(lang.get("template_context_menu.delete", default="Supprimer"))
+        delete_text = "🗑️ " + lang.get("template_context_menu.delete", default="Supprimer")
+        delete_action = menu.addAction(delete_text)
         delete_action.triggered.connect(lambda: self._delete_template(realm, template_name))
+        
+        menu.addSeparator()
+        
+        # Download action
+        download_text = "💾 " + lang.get("template_context_menu.download", default="Download")
+        download_action = menu.addAction(download_text)
+        download_action.triggered.connect(lambda: self._download_template(realm, template_name))
         
         menu.exec(table.mapToGlobal(pos))
     
@@ -398,5 +407,46 @@ class UIArmoryAllTemplates(QMainWindow):
                     lang.get("dialogs.titles.error", default="Erreur"),
                     lang.get("template_context_menu.delete_error", default="Impossible de supprimer le template")
                 )
+
+    def _download_template(self, realm, template_name):
+        """Download/export template to user-selected location"""
+        try:
+            from PySide6.QtWidgets import QFileDialog
+            import shutil
+            
+            # Get source file path
+            source_file = self.template_manager._get_template_path(realm, template_name)
+            
+            if not source_file.exists():
+                QMessageBox.warning(
+                    self,
+                    lang.get("dialogs.titles.error", default="Erreur"),
+                    lang.get("armoury_dialog.messages.file_not_found", default="Fichier non trouvé", filename=template_name)
+                )
+                return
+            
+            # Ask user where to save the file
+            save_path, _ = QFileDialog.getSaveFileName(
+                self,
+                lang.get("armoury_dialog.dialogs.download_file", default="Enregistrer le fichier"),
+                template_name,
+                lang.get("armoury_dialog.dialogs.all_files", default="Tous les fichiers (*.*)")
+            )
+            
+            if save_path:
+                shutil.copy2(str(source_file), save_path)
+                QMessageBox.information(
+                    self,
+                    lang.get("dialogs.titles.success", default="Succès"),
+                    lang.get("armoury_dialog.messages.download_success", default="Fichier téléchargé avec succès", filename=source_file.name)
+                )
+                logger.info(f"Template downloaded: {save_path}")
+        except Exception as e:
+            logger.error(f"Error downloading template: {e}")
+            QMessageBox.critical(
+                self,
+                lang.get("dialogs.titles.error", default="Erreur"),
+                lang.get("armoury_dialog.messages.download_error", default="Erreur lors du téléchargement", error=str(e))
+            )
 
 

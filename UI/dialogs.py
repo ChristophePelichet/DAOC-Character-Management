@@ -2705,17 +2705,20 @@ class ArmorManagementDialog(QDialog):
         menu = QMenu(self)
         
         # Edit action
-        edit_action = menu.addAction(lang.get("template_context_menu.edit", default="Editer"))
+        edit_text = "✏️ " + lang.get("template_context_menu.edit", default="Editer")
+        edit_action = menu.addAction(edit_text)
         edit_action.triggered.connect(lambda: self._edit_template(filename))
         
         # Delete action
-        delete_action = menu.addAction(lang.get("template_context_menu.delete", default="Supprimer"))
+        delete_text = "🗑️ " + lang.get("template_context_menu.delete", default="Supprimer")
+        delete_action = menu.addAction(delete_text)
         delete_action.triggered.connect(lambda: self._delete_template_dialog(filename))
         
         menu.addSeparator()
         
         # Download action
-        download_action = menu.addAction(lang.get("armoury_dialog.buttons.download", default="Télécharger"))
+        download_text = "💾 " + lang.get("template_context_menu.download", default="Download")
+        download_action = menu.addAction(download_text)
         download_action.triggered.connect(lambda: self.download_armor(filename))
         
         menu.exec(self.table.mapToGlobal(position))

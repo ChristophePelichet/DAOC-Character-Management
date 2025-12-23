@@ -138,7 +138,7 @@
         },
         "tools": {
             "label": "Outils",
-            "armory": "Armurerie",
+            "armory": "⚔️ Armurerie",
             "backup": "Sauvegarde"
         },
         "view": {
@@ -775,6 +775,14 @@
         "load_error": "Erreur lors du chargement",
         "info_items": "{count} items",
         "info_imported": "Importé le {date}"
+    },
+    "template_context_menu": {
+        "edit": "Éditer",
+        "delete": "Supprimer",
+        "download": "Télécharger",
+        "confirm_delete": "Confirmer la suppression",
+        "delete_confirm_message": "Êtes-vous sûr de vouloir supprimer ce template?",
+        "delete_error": "Impossible de supprimer le template"
     },
     "template_preview": {
         "window_title": "Aperçu du template - {name}",

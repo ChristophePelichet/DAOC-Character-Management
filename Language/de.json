@@ -138,7 +138,7 @@
         },
         "tools": {
             "label": "Werkzeuge",
-            "armory": "Rüstkammer",
+            "armory": "⚔️ Rüstkammer",
             "backup": "Sicherung"
         },
         "view": {
@@ -775,6 +775,14 @@
         "load_error": "Fehler beim Laden",
         "info_items": "{count} Items",
         "info_imported": "Importiert am {date}"
+    },
+    "template_context_menu": {
+        "edit": "Bearbeiten",
+        "delete": "Löschen",
+        "download": "Herunterladen",
+        "confirm_delete": "Löschen bestätigen",
+        "delete_confirm_message": "Möchten Sie diese Vorlage wirklich löschen?",
+        "delete_error": "Fehler beim Löschen der Vorlage"
     },
     "template_preview": {
         "window_title": "Vorlagenvorschau - {name}",

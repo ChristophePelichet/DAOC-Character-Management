@@ -19,7 +19,7 @@ from PySide6.QtWidgets import (
     QWidget, QTextEdit, QApplication, QProgressBar, QMenu, QGridLayout,
     QFrame, QScrollArea, QSplitter, QListWidget, QButtonGroup, QRadioButton
 )
-from PySide6.QtCore import Qt, QThread, Signal, QTimer
+from PySide6.QtCore import Qt, QThread, Signal, QTimer, QObject
 from PySide6.QtGui import QBrush, QColor, QIcon, QPixmap
 from Functions.language_manager import lang
 from Functions.config_manager import config, get_config_dir
@@ -4639,6 +4639,21 @@ class CharacterUpdateThread(QThread):
             self.update_finished.emit(result_success, result_data, result_error)
 
 
+class DialogDestructionWorker(QObject):
+    """Worker thread pour détruire le dialog sans bloquer la boucle d'événements"""
+    finished = Signal()
+    
+    def __init__(self, dialog):
+        super().__init__()
+        self.dialog = dialog
+    
+    def destroy_dialog(self):
+        """Détruit le dialog dans un thread séparé"""
+        if self.dialog is not None:
+            self.dialog.deleteLater()
+        self.finished.emit()
+
+
 class HeraldSearchDialog(QDialog):
     """Fenêtre de recherche de personnage sur le Herald Eden"""
     
@@ -4835,25 +4850,11 @@ class HeraldSearchDialog(QDialog):
         layout.addLayout(button_layout)
     
     def closeEvent(self, event):
-        """Appelé à la fermeture de la fenêtre - nettoie les fichiers temporaires et arrête le thread"""
-        # Cleanup asynchrone sans bloquer la fermeture
-        QTimer.singleShot(0, self._async_full_cleanup)
-        
-        # Appeler la méthode parent pour fermer réellement la fenêtre
+        """Appelé à la fermeture de la fenêtre"""
         super().closeEvent(event)
-    
-    def _async_full_cleanup(self):
-        """Cleanup complet de manière asynchrone"""
-        try:
-            self._stop_search_thread_async()
-            self._cleanup_temp_files()
-        except Exception as e:
-            logging.warning(f"Erreur pendant le cleanup async: {e}")
     
     def accept(self):
         """Appelé quand on ferme avec le bouton Fermer"""
-        # Cleanup asynchrone pour éviter la latence à la fermeture
-        QTimer.singleShot(0, self._async_full_cleanup)
         super().accept()
     
     def _stop_search_thread(self):
@@ -4919,28 +4920,20 @@ class HeraldSearchDialog(QDialog):
                 except Exception:
                     pass
                 
-                # Cleanup asynchrone avec QTimer pour ne pas bloquer la fermeture
-                def _async_thread_cleanup():
-                    try:
-                        if thread_ref and thread_ref.isRunning():
-                            # Attendre 100ms que le thread s'arrête
-                            thread_ref.wait(100)
-                            
-                            if thread_ref.isRunning():
-                                logging.warning("Thread encore actif - Cleanup forcé du navigateur")
-                                try:
-                                    thread_ref.cleanup_driver()
-                                    thread_ref.terminate()
-                                    thread_ref.wait()
-                                except Exception:
-                                    pass
+                # Only schedule cleanup if thread is still running
+                if thread_ref.isRunning():
+                    # Cleanup asynchrone avec QTimer pour ne pas bloquer la fermeture
+                    def _async_thread_cleanup():
+                        try:
+                            if thread_ref and thread_ref.isRunning():
+                                thread_ref.terminate()
                             
                             logging.info("Thread de recherche Herald arrêté (async)")
-                    except Exception as e:
-                        logging.warning(f"Erreur lors du cleanup async du thread: {e}")
-                
-                # Exécuter le cleanup après 50ms pour ne pas bloquer la fermeture
-                QTimer.singleShot(50, _async_thread_cleanup)
+                        except Exception as e:
+                            logging.warning(f"Erreur lors du cleanup async du thread: {e}")
+                    
+                    # Schedule cleanup after 50ms
+                    QTimer.singleShot(50, _async_thread_cleanup)
             
             # Nettoyer immédiatement la référence dans self
             self.search_thread = None
@@ -4948,17 +4941,14 @@ class HeraldSearchDialog(QDialog):
         # Fermer la fenêtre de progression si elle existe
         if hasattr(self, 'progress_dialog'):
             try:
-                self.progress_dialog.close()
+                # Don't call close() - it blocks! Just use deleteLater()
                 self.progress_dialog.deleteLater()
             except Exception:
                 pass
             
-            # Supprimer l'attribut seulement s'il existe encore
+            # Don't use delattr() - it blocks! Just set to None
             if hasattr(self, 'progress_dialog'):
-                try:
-                    delattr(self, 'progress_dialog')
-                except Exception:
-                    pass
+                self.progress_dialog = None
     
     def _cleanup_temp_files(self):
         """Supprime les fichiers temporaires de recherche"""

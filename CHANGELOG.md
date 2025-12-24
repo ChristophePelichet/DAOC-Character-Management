@@ -16,6 +16,15 @@
 
 **Herald Search Dialog - Invalid Character Bug (Filename)**
 - Fixed JSON error when searching for character names containing special characters (* ? " < > | : \ /)
+
+**Debug Settings Panel - Info Text Removal**
+- Removed redundant debug mode information text from Settings > Debug panel
+- Cleaned up language files (removed hardcoded info messages)
+
+**Eden Debug Window - Translation Support**
+- Added translation support for Eden Debug window (title, buttons, labels)
+- Implemented `retranslate_ui()` method for dynamic language switching
+- Textures now respect user language preference (FR/EN/DE)
  
 ### ✨ Features
 

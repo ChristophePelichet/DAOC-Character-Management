@@ -402,8 +402,7 @@
             },
             "debug": {
                 "title": "Debug",
-                "subtitle": "Debugging and diagnostics options",
-                "info": "Debug mode is useful for diagnosing issues.\n\nDebug logs are saved in the Logs/ folder"
+                "subtitle": "Debugging and diagnostics options"
             },
             "armory": {
                 "title": "Armory",
@@ -608,6 +607,13 @@
         "loaded": "Ready. Loaded in {duration:.2f} seconds.",
         "selection_count": "{count} of {total} character(s) selected",
         "status_group_title": "Eden Herald Status"
+    },
+    "eden_debug_window": {
+        "title": "🌐 Debug Eden - Connexions & Cookies",
+        "clear_button": "🗑️ Clear",
+        "export_button": "💾 Export",
+        "logs_title": "📋 Eden Logs Real-Time",
+        "ready_text": "Ready to capture Eden logs..."
     },
     "themes": {
         "light": "Light",

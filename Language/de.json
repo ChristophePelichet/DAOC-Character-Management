@@ -410,8 +410,7 @@
             },
             "debug": {
                 "title": "Debug",
-                "subtitle": "Debug-Optionen für die Diagnose",
-                "info": "Der Debug-Modus ist nützlich zur Diagnose von Problemen.\n\nDebug-Protokolle werden im Logs/-Ordner gespeichert"
+                "subtitle": "Debug-Optionen für die Diagnose"
             },
             "armory": {
                 "title": "Waffenkammer",
@@ -608,6 +607,13 @@
         "loaded": "Bereit. Geladen in {duration:.2f} Sekunden.",
         "selection_count": "{count} von {total} Charakter(e) ausgewählt",
         "status_group_title": "Eden Herald Status"
+    },
+    "eden_debug_window": {
+        "title": "🌐 Debug Eden - Connexions & Cookies",
+        "clear_button": "🗑️ Löschen",
+        "export_button": "💾 Exportieren",
+        "logs_title": "📋 Eden-Protokolle in Echtzeit",
+        "ready_text": "Bereit, Eden-Protokolle zu erfassen..."
     },
     "themes": {
         "light": "Hell",

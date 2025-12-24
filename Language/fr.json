@@ -785,6 +785,26 @@
         "delete_confirm_message": "Êtes-vous sûr de vouloir supprimer ce template?",
         "delete_error": "Impossible de supprimer le template"
     },
+    "template_edit": {
+        "window_title": "Éditer le template - {name}",
+        "info_group_title": "Informations du template",
+        "realm_label": "Royaume :",
+        "class_label": "Classe :",
+        "season_label": "Saison :",
+        "description_label": "Description :",
+        "preview_label": "Aperçu du nouveau nom",
+        "cancel_button": "Annuler",
+        "save_button": "Sauvegarder",
+        "error_title": "Erreur",
+        "success_title": "Succès",
+        "invalid_fields": "Veuillez remplir tous les champs correctement",
+        "duplicate_error": "Un template avec ce nom existe déjà",
+        "fill_all_fields": "Veuillez remplir tous les champs",
+        "select_valid_season": "Veuillez sélectionner une saison valide",
+        "success_message": "Template modifié avec succès",
+        "save_error": "Impossible de sauvegarder les métadonnées",
+        "error_message": "Erreur lors de la modification :\n{error}"
+    },
     "template_preview": {
         "window_title": "Aperçu du template - {name}",
         "metadata_group": "📋 Informations",

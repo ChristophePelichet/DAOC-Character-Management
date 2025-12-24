@@ -785,6 +785,26 @@
         "delete_confirm_message": "Möchten Sie diese Vorlage wirklich löschen?",
         "delete_error": "Fehler beim Löschen der Vorlage"
     },
+    "template_edit": {
+        "window_title": "Vorlage bearbeiten - {name}",
+        "info_group_title": "Vorlageninformationen",
+        "realm_label": "Reich:",
+        "class_label": "Klasse:",
+        "season_label": "Saison:",
+        "description_label": "Beschreibung:",
+        "preview_label": "Vorschau des neuen Namens",
+        "cancel_button": "Abbrechen",
+        "save_button": "Speichern",
+        "error_title": "Fehler",
+        "success_title": "Erfolg",
+        "invalid_fields": "Bitte füllen Sie alle Felder korrekt aus",
+        "duplicate_error": "Eine Vorlage mit diesem Namen existiert bereits",
+        "fill_all_fields": "Bitte füllen Sie alle Felder aus",
+        "select_valid_season": "Bitte wählen Sie eine gültige Saison",
+        "success_message": "Vorlage erfolgreich geändert",
+        "save_error": "Metadaten konnten nicht gespeichert werden",
+        "error_message": "Fehler bei der Änderung:\n{error}"
+    },
     "template_preview": {
         "window_title": "Vorlagenvorschau - {name}",
         "metadata_group": "📋 Informationen",

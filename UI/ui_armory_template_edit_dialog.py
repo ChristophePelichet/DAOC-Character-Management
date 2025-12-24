@@ -1,5 +1,5 @@
 """
-Template Edit Dialog - Interface pour éditer les informations d'un template
+Template Edit Dialog - Interface for editing template metadata information
 """
 
 from PySide6.QtWidgets import (
@@ -15,9 +15,9 @@ from Functions.data_manager import DataManager
 
 class TemplateEditDialog(QDialog):
     """
-    Dialogue pour éditer les informations d'un template.
-    Permet de modifier: classe, realm, saison, description.
-    Les fichiers sont automatiquement déplacés dans le bon dossier.
+    Dialog for editing template metadata.
+    Allows modification of: class, realm, season, description.
+    Files are automatically moved to the correct folder.
     """
 
     def __init__(self, parent, template_name, realm, metadata):
@@ -159,10 +159,15 @@ class TemplateEditDialog(QDialog):
 
     def _load_current_values(self):
         """Load current template values into controls"""
-        # Set realm
+        # Set realm first
         self.realm_combo.setCurrentText(self.realm)
 
-        # Set class
+        # Populate classes for the current realm
+        current_realm = self.realm_combo.currentText()
+        if current_realm in self.classes_by_realm:
+            self.class_combo.addItems(self.classes_by_realm[current_realm])
+
+        # Set class to the template's class
         if self.metadata.character_class in self.classes_by_realm.get(self.realm, []):
             self.class_combo.setCurrentText(self.metadata.character_class)
 
@@ -183,9 +188,6 @@ class TemplateEditDialog(QDialog):
         self.season_combo.currentTextChanged.connect(self._update_preview)
         self.description_edit.textChanged.connect(self._update_preview)
 
-        # Populate initial classes
-        self._on_realm_changed()
-
     def _on_realm_changed(self):
         """Update available classes when realm changes"""
         current_realm = self.realm_combo.currentText()
@@ -203,11 +205,19 @@ class TemplateEditDialog(QDialog):
         description = self.description_edit.text().strip()
 
         if not character_class or not description:
-            self.preview_name.setText("⚠️ Remplissez tous les champs")
+            warning_msg = lang.get(
+                "template_edit.fill_all_fields",
+                default="Please fill in all fields"
+            )
+            self.preview_name.setText(f"⚠️ {warning_msg}")
             return
 
         if season == "Personnalisé...":
-            self.preview_name.setText("⚠️ Sélectionnez une saison valide")
+            season_msg = lang.get(
+                "template_edit.select_valid_season",
+                default="Please select a valid season"
+            )
+            self.preview_name.setText(f"⚠️ {season_msg}")
             return
 
         # Generate preview
@@ -245,7 +255,6 @@ class TemplateEditDialog(QDialog):
             )
 
             # Get file paths
-            # template_name already includes .txt extension
             old_template_path = self.template_manager._get_template_path(self.realm, self.template_name)
             old_metadata_path = self.template_manager._get_metadata_path(self.realm, self.template_name)
 

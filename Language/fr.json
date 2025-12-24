@@ -412,13 +412,6 @@
                 "title": "Debug",
                 "subtitle": "Options de débogage pour le diagnostic"
             },
-            "eden_debug_window": {
-                "title": "🌐 Debug Eden - Connexions & Cookies",
-                "clear_button": "🗑️ Effacer",
-                "export_button": "💾 Exporter",
-                "logs_title": "📋 Logs Eden en temps réel",
-                "ready_text": "Prêt à capturer les logs Eden..."
-            },
             "armory": {
                 "title": "Armurerie",
                 "subtitle": "Import et gestion de la base de données d'items",
@@ -614,6 +607,13 @@
         "loaded": "Prêt. Chargé en {duration:.2f} secondes.",
         "selection_count": "{count} sur {total} personnage(s) sélectionné(s)",
         "status_group_title": "Statut Eden Herald"
+    },
+    "eden_debug_window": {
+        "title": "🌐 Debug Eden - Connexions & Cookies",
+        "clear_button": "🗑️ Effacer",
+        "export_button": "💾 Exporter",
+        "logs_title": "📋 Logs Eden en temps réel",
+        "ready_text": "Prêt à capturer les logs Eden..."
     },
     "themes": {
         "light": "Clair",

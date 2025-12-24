@@ -70,9 +70,9 @@ def get_img_dir():
 
 def setup_eden_performance_logger():
     """
-    Configure le logger dédié pour les logs de performance Eden.
-    Crée un fichier séparé: Logs/eden_performance_YYYY-MM-DD.log
-    Activé uniquement si system.eden.enable_performance_logs = true dans config.json
+    Configure the dedicated logger for Eden performance logs.
+    Creates a separate file: Logs/eden_performance_YYYY-MM-DD.log
+    Enabled only if system.eden.enable_performance_logs = true in config.json
     """
     from datetime import datetime
     

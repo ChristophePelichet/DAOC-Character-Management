@@ -1,21 +1,21 @@
 #!/usr/bin/env python3
 """
-Log Source Editor - Outil pour éditer les logs directement dans le code source
+Log Source Editor - Tool to edit logs directly in source code
 
-Permet de:
-- Scanner tous les fichiers Python du projet
-- Trouver tous les appels de logging (logger.info, logger.debug, etc.)
-- Afficher et éditer les ACTIONS et MESSAGES
-- Sauvegarder les modifications dans les fichiers source
-- Mémoriser le dernier projet édité et le charger automatiquement au démarrage
+Allows:
+- Scan all Python files in the project
+- Find all logging calls (logger.info, logger.debug, etc.)
+- Display and edit ACTIONS and MESSAGES
+- Save modifications to source files
+- Remember last edited project and load it automatically on startup
 
-Fonctionnalités:
-- 🔍 Scan récursif de tous les fichiers .py
-- 📋 Table interactive avec filtres (Logger, Level, Modified)
-- ✏️ Éditeur avec ComboBox d'actions (historique + auto-complétion)
-- ⌨️ Raccourcis clavier (Enter, Ctrl+Enter)
-- 💾 Sauvegarde directe dans les fichiers source
-- 📂 Chargement automatique du dernier projet au démarrage
+Features:
+- 🔍 Recursive scan of all .py files
+- 📋 Interactive table with filters (Logger, Level, Modified)
+- ✏️ Editor with ComboBox for actions (history + auto-completion)
+- ⌨️ Keyboard shortcuts (Enter, Ctrl+Enter)
+- 💾 Direct save to source files
+- 📂 Automatic loading of last project on startup
 """
 
 import sys
@@ -30,7 +30,7 @@ from PySide6.QtWidgets import (
     QLineEdit, QTextEdit, QMessageBox, QHeaderView, QProgressBar,
     QGroupBox, QSplitter, QFileDialog
 )
-from PySide6.QtCore import Qt, Signal, QThread, QTimer
+from PySide6.QtCore import Qt, Signal, QThread
 from PySide6.QtGui import QColor, QFont, QKeySequence, QShortcut
 
 # Import des loggers constants depuis the système of logging
@@ -39,7 +39,7 @@ from Functions.debug_logging_manager import ALL_LOGGERS, LOGGER_ROOT
 
 
 class LogEntry:
-    """Représente un log trouvé dans le code source"""
+    """Represents a log found in source code"""
     def __init__(self, file_path: str, line_number: int, logger_name: str, 
                  level: str, action: str, message: str, full_line: str):
         self.file_path = file_path
@@ -66,7 +66,7 @@ class LogEntry:
 
 
 class LogScanner(QThread):
-    """Thread pour scanner les fichiers et trouver les logs"""
+    """Thread to scan files and find logs"""
     progress = Signal(int, int)  # (current, total)
     log_found = Signal(LogEntry)
     finished_scanning = Signal(int)  # total logs found
@@ -144,7 +144,7 @@ class LogScanner(QThread):
         self.finished_scanning.emit(self.count)
     
     def _detect_logger_name(self, file_path: Path, lines) -> str:
-        """Détecte le nom du logger en analysant le fichier"""
+        """Detects the logger name by analyzing the file"""
         file_str = str(file_path).lower()
         
         # Mapping basé on the chemin of the File
@@ -173,7 +173,7 @@ class LogScanner(QThread):
         return 'ROOT'
     
     def _parse_log_content(self, line: str) -> Tuple[str, str]:
-        """Parse le contenu d'un log pour extraire action et message"""
+        """Parse log content to extract action and message"""
         action = ""
         message = ""
         
@@ -220,8 +220,8 @@ class LogScanner(QThread):
 
 class LogSourceEditor(QMainWindow):
     """
-    Éditeur de logs au niveau du code source
-    Permet de scanner, visualiser et modifier les logs avant compilation
+    Source code log editor
+    Allows scanning, viewing and modifying logs before compilation
     """
     
     # File of Configuration for Save the préférences
@@ -268,7 +268,7 @@ class LogSourceEditor(QMainWindow):
         self._load_config()
         
     def _load_config(self):
-        """Charge la configuration sauvegardée"""
+        """Load saved configuration"""
         try:
             if self.CONFIG_FILE.exists():
                 with open(self.CONFIG_FILE, 'r', encoding='utf-8') as f:
@@ -287,7 +287,7 @@ class LogSourceEditor(QMainWindow):
             print(f"Erreur lors du chargement de la configuration: {e}")
     
     def _save_config(self):
-        """Sauvegarde la configuration"""
+        """Save configuration"""
         try:
             config = {
                 'last_project_path': self.last_project_path
@@ -298,7 +298,7 @@ class LogSourceEditor(QMainWindow):
             print(f"Erreur lors de la sauvegarde de la configuration: {e}")
         
     def _create_toolbar(self) -> QWidget:
-        """Crée la barre d'outils"""
+        """Create the toolbar"""
         toolbar_widget = QWidget()
         toolbar_layout = QHBoxLayout(toolbar_widget)
         
@@ -358,7 +358,7 @@ class LogSourceEditor(QMainWindow):
         return toolbar_widget
     
     def _create_log_table(self) -> QGroupBox:
-        """Crée la table affichant les logs"""
+        """Create the log table display"""
         group = QGroupBox("📋 Logs trouvés dans le code")
         layout = QVBoxLayout(group)
         
@@ -395,7 +395,7 @@ class LogSourceEditor(QMainWindow):
         return group
     
     def _create_editor(self) -> QGroupBox:
-        """Crée l'éditeur pour modifier un log"""
+        """Create the editor to modify a log"""
         group = QGroupBox("✏️ Éditeur de log")
         layout = QVBoxLayout(group)
         
@@ -468,7 +468,7 @@ class LogSourceEditor(QMainWindow):
         return group
     
     def scan_project(self):
-        """Scanner le projet pour trouver les logs"""
+        """Scan the project to find logs"""
         # Par défaut, utiliser the dernier projet or the Folder parent (racine of the projet)
         default_path = self.last_project_path if self.last_project_path and Path(self.last_project_path).exists() else str(Path(__file__).parent.parent)
         
@@ -488,7 +488,7 @@ class LogSourceEditor(QMainWindow):
         self._scan_path(project_root)
     
     def _scan_path(self, project_root: str):
-        """Scanner un chemin spécifique"""
+        """Scan a specific path"""
         # Confirmation si beaucoup de fichiers
         py_count = len(list(Path(project_root).rglob("*.py")))
         
@@ -529,12 +529,12 @@ class LogSourceEditor(QMainWindow):
         self.scanner.start()
     
     def _on_scan_progress(self, current, total):
-        """Mise à jour de la progress bar"""
+        """Update progress bar"""
         self.progress_bar.setMaximum(total)
         self.progress_bar.setValue(current)
         
     def _on_log_found(self, log_entry: LogEntry):
-        """Ajouter un log à la table"""
+        """Add a log to the table"""
         self.logs.append(log_entry)
         self._add_log_to_table(log_entry)
         
@@ -542,7 +542,7 @@ class LogSourceEditor(QMainWindow):
         self._update_stats()
     
     def _add_log_to_table(self, log: LogEntry):
-        """Ajouter une ligne à la table"""
+        """Add a row to the table"""
         row = self.table.rowCount()
         self.table.insertRow(row)
         
@@ -594,7 +594,7 @@ class LogSourceEditor(QMainWindow):
         self.table.setItem(row, 6, modified_item)
     
     def _on_scan_finished(self, total):
-        """Scan terminé"""
+        """Scan finished"""
         self.progress_bar.setVisible(False)
         self._update_stats()
         
@@ -638,7 +638,7 @@ class LogSourceEditor(QMainWindow):
         for level, count in sorted(by_level.items()):
             stats_msg += f"   • {level}: {count}\n"
         
-        stats_msg += f"\n🎯 Actions :\n"
+        stats_msg += "\n🎯 Actions :\n"
         stats_msg += f"   • Avec action: {with_action}\n"
         stats_msg += f"   • Sans action: {without_action}\n"
         if unique_actions:
@@ -653,7 +653,7 @@ class LogSourceEditor(QMainWindow):
         )
     
     def on_log_selected(self):
-        """Un log a été sélectionné dans la table"""
+        """A log was selected from the table"""
         # Ne not traiter if on est en train of mettre à jour
         if self._updating:
             return
@@ -681,7 +681,7 @@ class LogSourceEditor(QMainWindow):
         self.original_code.setPlainText(log.full_line)
     
     def apply_changes(self):
-        """Appliquer les modifications au log courant"""
+        """Apply modifications to the current log"""
         # Bloquer the mises à jour for éviter that on_log_selected écrase the champs
         self._updating = True
         
@@ -730,7 +730,7 @@ class LogSourceEditor(QMainWindow):
             self._updating = False
     
     def reset_changes(self):
-        """Réinitialiser les modifications"""
+        """Reset modifications"""
         if not self.current_log:
             return
         
@@ -748,7 +748,7 @@ class LogSourceEditor(QMainWindow):
         self.status_label.setText("↩️ Modifications annulées")
     
     def _refresh_table_row(self):
-        """Rafraîchir la ligne de la table pour le log courant"""
+        """Refresh the table row for the current log"""
         # Bloquer the signaux pendant the mise à jour for éviter the boucles
         self.table.blockSignals(True)
         
@@ -777,7 +777,7 @@ class LogSourceEditor(QMainWindow):
         self.table.blockSignals(False)
     
     def apply_filter(self):
-        """Appliquer les filtres à la table"""
+        """Apply filters to the table"""
         logger_filter = self.logger_filter.currentText()
         level_filter = self.level_filter.currentText()
         modified_filter = self.modified_filter.currentText()
@@ -814,7 +814,7 @@ class LogSourceEditor(QMainWindow):
         self._update_stats(visible_count)
     
     def _update_stats(self, visible_count=None):
-        """Mettre à jour les statistiques affichées"""
+        """Update displayed statistics"""
         total = len(self.logs)
         modified = sum(1 for log in self.logs if log.modified)
         
@@ -828,7 +828,7 @@ class LogSourceEditor(QMainWindow):
         self.stats_label.setText(stats_text)
     
     def save_modifications(self):
-        """Sauvegarder toutes les modifications dans les fichiers source"""
+        """Save all modifications to source files"""
         modified_logs = [log for log in self.logs if log.modified]
         
         if not modified_logs:
@@ -934,7 +934,7 @@ class LogSourceEditor(QMainWindow):
         self.status_label.setText(f"💾 {success_count} logs sauvegardés")
     
     def _build_new_log_line(self, log: LogEntry, original_line: str) -> str:
-        """Construire la nouvelle ligne de log avec préservation du format"""
+        """Build a new log line preserving the original format"""
         # Garder l'indentation exacte
         indent = len(original_line) - len(original_line.lstrip())
         indent_str = original_line[:indent]
@@ -948,15 +948,12 @@ class LogSourceEditor(QMainWindow):
         
         level_lower = log.level.lower()
         
-        # Garder le format du message original (f-string, string normale, etc.)
-        original_msg = original_line.strip()
+        # Detect if it's an f-string
+        is_fstring = re.search(r'logger\.(\w+)\s*\(\s*f["\']', original_line)
         
-        # Détecter if c'est une f-string
-        is_fstring = re.search(r'logger\.\w+\s*\(\s*f["\']', original_line)
-        
-        # Construire le nouveau message
+        # Build the new message
         if is_fstring:
-            # Préserver the f-string
+            # Preserve the f-string
             new_msg = f'f"{log.new_message}"'
         else:
             # String normale - échapper the guillemets

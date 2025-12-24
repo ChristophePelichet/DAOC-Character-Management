@@ -339,7 +339,7 @@ class DebugWindow(QMainWindow):
 # ============================================================================
 
 class EdenDebugWindow(QMainWindow):
-    """Fenêtre de debug dédiée aux connexions Eden, cookies et Herald"""
+    """Dedicated debug window for Eden connections, cookies and Herald"""
     
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -351,7 +351,7 @@ class EdenDebugWindow(QMainWindow):
         self.setCentralWidget(central_widget)
         main_layout = QVBoxLayout(central_widget)
         
-        # Barre de boutons
+        # Button bar
         button_layout = QHBoxLayout()
         
         clear_button = QPushButton("🗑️ Effacer")
@@ -365,7 +365,7 @@ class EdenDebugWindow(QMainWindow):
         button_layout.addStretch()
         main_layout.addLayout(button_layout)
         
-        # Zone of logs with syntaxe colorée
+        # Log area with syntax highlighting
         logs_group = QGroupBox("📋 Logs Eden en temps réel")
         logs_layout = QVBoxLayout()
         
@@ -388,7 +388,7 @@ class EdenDebugWindow(QMainWindow):
         self.info_label.setStyleSheet("color: #666; font-style: italic;")
         main_layout.addWidget(self.info_label)
         
-        # Setup of the handler spécifique Eden
+        # Setup of the Eden-specific handler
         self.eden_handler = QTextEditHandler(self.append_colored_log)
         formatter = logging.Formatter('%(asctime)s - %(message)s', datefmt='%H:%M:%S')
         self.eden_handler.setFormatter(formatter)
@@ -402,7 +402,7 @@ class EdenDebugWindow(QMainWindow):
         self.log_count = 0
     
     def append_colored_log(self, message):
-        """Ajoute un log avec coloration syntaxique"""
+        """Add a log with syntax highlighting"""
         self.log_count += 1
         
         # Extraire le niveau et le message
@@ -412,7 +412,7 @@ class EdenDebugWindow(QMainWindow):
             timestamp = ""
             content = message
         
-        # Colorer selon the mots-clés
+        # Color based on keywords
         if '✅' in content or 'succès' in content.lower() or 'réussi' in content.lower():
             color = '#4ec9b0'  # Vert clair
             icon = '✅'
@@ -438,20 +438,20 @@ class EdenDebugWindow(QMainWindow):
             color = '#d4d4d4'  # Blanc
             icon = '•'
         
-        # Construire the message formaté
+        # Build the formatted message
         html_message = f'<span style="color: #808080;">{timestamp}</span> <span style="color: {color};">{icon} {content}</span>'
         
         self.logs_widget.append(html_message)
         self.info_label.setText(f"📊 {self.log_count} logs capturés")
     
     def clear_logs(self):
-        """Efface tous les logs"""
+        """Clear all logs"""
         self.logs_widget.clear()
         self.log_count = 0
         self.info_label.setText("Logs effacés - Prêt à capturer de nouveaux logs")
     
     def export_logs(self):
-        """Exporte les logs dans un fichier"""
+        """Export logs to a file"""
         file_path = dialog_save_file(self, "debug_export_logs_title")
         
         if file_path:
@@ -463,7 +463,7 @@ class EdenDebugWindow(QMainWindow):
                 self.info_label.setText(f"❌ Erreur d'export: {e}")
     
     def closeEvent(self, event):
-        """Nettoyage à la fermeture"""
+        """Clean up when closing the window"""
         eden_logger = logging.getLogger('eden')
         eden_logger.removeHandler(self.eden_handler)
         super().closeEvent(event)

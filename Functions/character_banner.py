@@ -12,7 +12,7 @@ from PySide6.QtCore import Qt
 from Functions.language_manager import lang
 from Functions.path_manager import get_resource_path
 from Functions.theme_manager import get_scaled_size
-from Functions.logging_manager import get_logger, LOGGER_CHARACTER
+from Functions.debug_logging_manager import get_logger, LOGGER_CHARACTER
 
 
 logger = get_logger(LOGGER_CHARACTER)

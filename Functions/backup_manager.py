@@ -4,7 +4,7 @@ import zipfile
 import sys
 import logging
 from datetime import datetime
-from Functions.logging_manager import get_logger, LOGGER_BACKUP, log_with_action
+from Functions.debug_logging_manager import get_logger, LOGGER_BACKUP, log_with_action
 
 # Fix for PyInstaller --noconsole mode: sys.stderr can be None
 if sys.stderr is None:

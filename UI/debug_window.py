@@ -11,7 +11,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import QThread, Signal, Slot, Qt
 from PySide6.QtGui import QAction, QActionGroup
 from Functions.language_manager import lang
-from Functions.logging_manager import ALL_LOGGERS
+from Functions.debug_logging_manager import ALL_LOGGERS
 from UI.ui_file_dialogs import (
     dialog_open_file,
     dialog_save_file
@@ -393,8 +393,8 @@ class EdenDebugWindow(QMainWindow):
         formatter = logging.Formatter('%(asctime)s - %(message)s', datefmt='%H:%M:%S')
         self.eden_handler.setFormatter(formatter)
         
-        # Ajouter le handler au logger Eden (utiliser la constante du logging_manager)
-        from Functions.logging_manager import LOGGER_EDEN
+        # Add the handler to the Eden logger (use constant from debug_logging_manager)
+        from Functions.debug_logging_manager import LOGGER_EDEN
         eden_logger = logging.getLogger(LOGGER_EDEN)
         eden_logger.addHandler(self.eden_handler)
         eden_logger.setLevel(logging.DEBUG)

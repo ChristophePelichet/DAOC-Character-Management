@@ -10,7 +10,7 @@ from datetime import datetime
 from Functions.config_manager import config
 from Functions.path_manager import get_base_path
 from Functions.language_manager import lang
-from Functions.logging_manager import get_logger, log_with_action, LOGGER_BACKUP
+from Functions.debug_logging_manager import get_logger, log_with_action, LOGGER_BACKUP
 
 logger = get_logger(LOGGER_BACKUP)
 

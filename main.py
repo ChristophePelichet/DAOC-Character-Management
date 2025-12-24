@@ -25,7 +25,7 @@ from PySide6.QtCore import Qt, Slot, QTimer
 # Import des managers fonctionnels
 from Functions.config_manager import config, get_config_dir
 from Functions.language_manager import lang, get_available_languages
-from Functions.logging_manager import setup_logging, get_log_dir
+from Functions.debug_logging_manager import setup_logging, get_log_dir
 from Functions.path_manager import get_base_path, get_resource_path
 from Functions.data_manager import DataManager
 from Functions.backup_manager import BackupManager

@@ -13,7 +13,7 @@ from Functions.character_manager import (
 )
 from Functions.language_manager import lang
 from Functions.config_manager import config
-from Functions.logging_manager import get_img_dir
+from Functions.debug_logging_manager import get_img_dir
 
 
 class RealmSortProxyModel(QSortFilterProxyModel):

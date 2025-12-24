@@ -4,7 +4,7 @@ import uuid
 import logging
 from Functions.config_manager import config
 from Functions.path_manager import get_base_path
-from Functions.logging_manager import get_logger, log_with_action, LOGGER_CHARACTER
+from Functions.debug_logging_manager import get_logger, log_with_action, LOGGER_CHARACTER
 
 # Get CHARACTER logger
 logger = get_logger(LOGGER_CHARACTER)

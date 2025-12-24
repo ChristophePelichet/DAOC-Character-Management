@@ -19,7 +19,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 
-from .logging_manager import get_logger, LOGGER_EDEN
+from .debug_logging_manager import get_logger, LOGGER_EDEN
 from .path_manager import get_resource_path
 
 

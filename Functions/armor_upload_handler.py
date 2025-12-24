@@ -11,7 +11,7 @@ import subprocess
 
 from PySide6.QtWidgets import QMessageBox, QFileDialog, QDialog
 from Functions.language_manager import lang
-from Functions.logging_manager import get_logger, LOGGER_UI
+from Functions.debug_logging_manager import get_logger, LOGGER_UI
 
 logger = get_logger(LOGGER_UI)
 

@@ -17,7 +17,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt
 
 from Functions.theme_manager import get_scaled_size
-from Functions.logging_manager import get_logger, LOGGER_UI
+from Functions.debug_logging_manager import get_logger, LOGGER_UI
 
 # Get logger instance
 logger = get_logger(LOGGER_UI)

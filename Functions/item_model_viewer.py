@@ -15,7 +15,7 @@ Language: English (code and comments)
 from PySide6.QtWidgets import QMessageBox
 
 from Functions.language_manager import lang
-from Functions.logging_manager import get_logger, LOGGER_UI
+from Functions.debug_logging_manager import get_logger, LOGGER_UI
 
 # Get logger instance
 logger = get_logger(LOGGER_UI)

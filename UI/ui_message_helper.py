@@ -28,7 +28,7 @@ Example:
 from PySide6.QtWidgets import QMessageBox
 
 from Functions.language_manager import lang
-from Functions.logging_manager import get_logger, log_with_action, LOGGER_CHARACTER
+from Functions.debug_logging_manager import get_logger, log_with_action, LOGGER_CHARACTER
 
 
 logger_ui = get_logger(LOGGER_CHARACTER)

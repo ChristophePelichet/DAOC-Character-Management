@@ -34,7 +34,7 @@ from PySide6.QtCore import Qt, Signal, QThread, QTimer
 from PySide6.QtGui import QColor, QFont, QKeySequence, QShortcut
 
 # Import des loggers constants depuis the système of logging
-sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from Functions.debug_logging_manager import ALL_LOGGERS, LOGGER_ROOT
 
 

@@ -1435,16 +1435,6 @@ class SettingsDialog(QDialog):
         debug_eden_group.setLayout(debug_eden_layout)
         layout.addWidget(debug_eden_group)
         
-        # Info about debug
-        info_label = QLabel(
-            "💡 " + lang.get("settings_debug_info",
-                           default="Le mode debug est utile pour diagnostiquer des problèmes.\n\n"
-                                  "Les logs de debug sont sauvegardés dans le dossier Logs/")
-        )
-        info_label.setWordWrap(True)
-        info_label.setStyleSheet("background-color: palette(alternate-base); padding: 10px; border-radius: 5px;")
-        layout.addWidget(info_label)
-        
         layout.addStretch()
         self.pages.addWidget(page)
         

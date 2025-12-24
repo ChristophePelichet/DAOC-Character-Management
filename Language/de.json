@@ -410,8 +410,7 @@
             },
             "debug": {
                 "title": "Debug",
-                "subtitle": "Debug-Optionen für die Diagnose",
-                "info": "Der Debug-Modus ist nützlich zur Diagnose von Problemen.\n\nDebug-Protokolle werden im Logs/-Ordner gespeichert"
+                "subtitle": "Debug-Optionen für die Diagnose"
             },
             "armory": {
                 "title": "Waffenkammer",

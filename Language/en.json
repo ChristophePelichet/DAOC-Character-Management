@@ -402,8 +402,7 @@
             },
             "debug": {
                 "title": "Debug",
-                "subtitle": "Debugging and diagnostics options",
-                "info": "Debug mode is useful for diagnosing issues.\n\nDebug logs are saved in the Logs/ folder"
+                "subtitle": "Debugging and diagnostics options"
             },
             "armory": {
                 "title": "Armory",

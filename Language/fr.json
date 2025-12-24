@@ -410,8 +410,7 @@
             },
             "debug": {
                 "title": "Debug",
-                "subtitle": "Options de débogage pour le diagnostic",
-                "info": "Le mode debug est utile pour diagnostiquer des problèmes.\n\nLes logs de debug sont sauvegardés dans le dossier Logs/"
+                "subtitle": "Options de débogage pour le diagnostic"
             },
             "armory": {
                 "title": "Armurerie",

@@ -22,6 +22,13 @@
 **Armory Template Preview - Copper to Platinum Price Conversion**
 - Implemented automatic conversion of raw copper prices to human-readable Platinum (PP) format
 
+**All-Templates View & Template Management**
+- New multi-realm view with tabs (Albion, Hibernia, Midgard) for browsing all templates
+- Template editing dialog with real-time filename preview
+- Column sorting and width persistence in template table
+- Optional season inclusion in template filenames
+- Full translation support and PEP 8 compliance (0 violations)
+
   
 ### ♻️ Code Refactoring - dialogs.py Module Extraction & UI Helper Systems (Complete)
 

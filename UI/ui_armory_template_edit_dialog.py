@@ -23,7 +23,7 @@ class TemplateEditDialog(QDialog):
     def __init__(self, parent, template_name, realm, metadata):
         """
         Initialize dialog.
-        
+
         Args:
             parent: Parent window
             template_name: Current template filename (without .txt)
@@ -41,11 +41,11 @@ class TemplateEditDialog(QDialog):
         # Load available classes by realm
         self.classes_by_realm = self._load_classes_by_realm()
 
-        self.setWindowTitle(
-            lang.get("template_edit.window_title", default="Editer le template - {name}").format(
-                name=template_name
-            )
-        )
+        window_title = lang.get(
+            "template_edit.window_title",
+            default="Editer le template - {name}"
+        ).format(name=template_name)
+        self.setWindowTitle(window_title)
         self.resize(500, 350)
         self.setWindowFlags(Qt.Window | Qt.WindowCloseButtonHint)
 
@@ -79,7 +79,11 @@ class TemplateEditDialog(QDialog):
         layout = QVBoxLayout(self)
 
         # Edit group
-        edit_group = QGroupBox(lang.get("template_edit.info_group_title", default="Informations du template"))
+        info_group_title = lang.get(
+            "template_edit.info_group_title",
+            default="Informations du template"
+        )
+        edit_group = QGroupBox(info_group_title)
         edit_layout = QFormLayout()
 
         # Realm selector
@@ -119,7 +123,11 @@ class TemplateEditDialog(QDialog):
         layout.addWidget(edit_group)
 
         # Preview group
-        preview_group = QGroupBox(lang.get("template_edit.preview_label", default="Aperçu du nouveau nom"))
+        preview_label = lang.get(
+            "template_edit.preview_label",
+            default="Aperçu du nouveau nom"
+        )
+        preview_group = QGroupBox(preview_label)
         preview_layout = QVBoxLayout()
 
         self.preview_name = QLabel("")
@@ -141,15 +149,20 @@ class TemplateEditDialog(QDialog):
         button_layout = QHBoxLayout()
         button_layout.addStretch()
 
-        cancel_button = QPushButton(lang.get("template_edit.cancel_button", default="Annuler"))
+        cancel_button = QPushButton(
+            lang.get("template_edit.cancel_button", default="Annuler")
+        )
         cancel_button.clicked.connect(self.reject)
         button_layout.addWidget(cancel_button)
 
-        self.save_button = QPushButton(lang.get("template_edit.save_button", default="Sauvegarder"))
+        self.save_button = QPushButton(
+            lang.get("template_edit.save_button", default="Sauvegarder")
+        )
         self.save_button.setMinimumWidth(120)
         self.save_button.setMinimumHeight(35)
         self.save_button.setStyleSheet(
-            "QPushButton { background-color: #4CAF50; color: white; font-weight: bold; border-radius: 5px; }"
+            "QPushButton { background-color: #4CAF50; color: white; "
+            "font-weight: bold; border-radius: 5px; } "
             "QPushButton:hover { background-color: #45a049; }"
         )
         self.save_button.clicked.connect(self._save_changes)
@@ -241,7 +254,10 @@ class TemplateEditDialog(QDialog):
             QMessageBox.warning(
                 self,
                 lang.get("template_edit.error_title", default="Erreur"),
-                lang.get("template_edit.invalid_fields", default="Veuillez remplir tous les champs correctement")
+                lang.get(
+                    "template_edit.invalid_fields",
+                    default="Veuillez remplir tous les champs correctement"
+                )
             )
             return
 
@@ -255,18 +271,29 @@ class TemplateEditDialog(QDialog):
             )
 
             # Get file paths
-            old_template_path = self.template_manager._get_template_path(self.realm, self.template_name)
-            old_metadata_path = self.template_manager._get_metadata_path(self.realm, self.template_name)
+            old_template_path = self.template_manager._get_template_path(
+                self.realm, self.template_name
+            )
+            old_metadata_path = self.template_manager._get_metadata_path(
+                self.realm, self.template_name
+            )
 
-            new_template_path = self.template_manager._get_template_path(new_realm, new_template_name)
-            new_metadata_path = self.template_manager._get_metadata_path(new_realm, new_template_name)
+            new_template_path = self.template_manager._get_template_path(
+                new_realm, new_template_name
+            )
+            new_metadata_path = self.template_manager._get_metadata_path(
+                new_realm, new_template_name
+            )
 
             # Check if new name already exists
             if new_template_path.exists():
                 QMessageBox.warning(
                     self,
                     lang.get("template_edit.error_title", default="Erreur"),
-                    lang.get("template_edit.duplicate_error", default="Un template avec ce nom existe déjà")
+                    lang.get(
+                        "template_edit.duplicate_error",
+                        default="Un template avec ce nom existe déjà"
+                    )
                 )
                 return
 
@@ -300,21 +327,28 @@ class TemplateEditDialog(QDialog):
                 QMessageBox.information(
                     self,
                     lang.get("template_edit.success_title", default="Succès"),
-                    lang.get("template_edit.success_message", default="Template modifié avec succès")
+                    lang.get(
+                        "template_edit.success_message",
+                        default="Template modifié avec succès"
+                    )
                 )
                 self.accept()
             else:
                 QMessageBox.critical(
                     self,
                     lang.get("template_edit.error_title", default="Erreur"),
-                    lang.get("template_edit.save_error", default="Impossible de sauvegarder les métadonnées")
+                    lang.get(
+                        "template_edit.save_error",
+                        default="Impossible de sauvegarder les métadonnées"
+                    )
                 )
 
         except Exception as e:
             QMessageBox.critical(
                 self,
                 lang.get("template_edit.error_title", default="Erreur"),
-                lang.get("template_edit.error_message", default="Erreur lors de la modification:\n{error}").format(
-                    error=str(e)
-                )
+                lang.get(
+                    "template_edit.error_message",
+                    default="Erreur lors de la modification:\n{error}"
+                ).format(error=str(e))
             )

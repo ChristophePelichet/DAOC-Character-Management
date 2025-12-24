@@ -60,8 +60,8 @@ class TagBadge(QFrame):
 
 class ArmoryTagSelector(QWidget):
     """
-    Widget pour sélectionner des tags avec auto-complétion.
-    Limite de 5 tags.
+    Widget for selecting tags with auto-completion.
+    Limit of 5 tags maximum.
     """
 
     MAX_TAGS = 5
@@ -74,7 +74,7 @@ class ArmoryTagSelector(QWidget):
         self._load_suggested_tags()
 
     def _setup_ui(self):
-        """Configure l'interface"""
+        """Setup the UI"""
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(5)
@@ -84,11 +84,13 @@ class ArmoryTagSelector(QWidget):
         input_row.setSpacing(5)
 
         self.tag_input = QLineEdit()
-        self.tag_input.setPlaceholderText("Tapez un tag et appuyez sur Entrée...")
+        self.tag_input.setPlaceholderText(
+            "Type a tag and press Enter..."
+        )
         self.tag_input.returnPressed.connect(self._add_tag_from_input)
         input_row.addWidget(self.tag_input, 1)
 
-        add_btn = QPushButton("+ Ajouter")
+        add_btn = QPushButton("+ Add")
         add_btn.setFixedWidth(80)
         add_btn.clicked.connect(self._add_tag_from_input)
         input_row.addWidget(add_btn)
@@ -104,7 +106,7 @@ class ArmoryTagSelector(QWidget):
         layout.addWidget(self.tags_container)
 
         # Suggested tags (clickable)
-        suggested_label = QLabel("<i>Tags suggérés :</i>")
+        suggested_label = QLabel("<i>Suggested tags:</i>")
         suggested_label.setStyleSheet("color: #666; font-size: 10px;")
         layout.addWidget(suggested_label)
 

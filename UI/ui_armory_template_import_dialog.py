@@ -30,12 +30,12 @@ class TemplateImportDialog(QDialog):
     def __init__(self, parent, character, auto_detect_mode=True):
         """
         Initialize dialog with character context.
-        
+
         Args:
             parent: Parent window
             character: Character dict with class, realm, name, etc.
-            auto_detect_mode: If True, auto-detect class/realm from character (read-only)
-                            If False, show dropdowns for manual selection (for Armory general view)
+            auto_detect_mode: If True, auto-detect class/realm from character
+                            If False, show dropdowns for manual selection
         """
         super().__init__(parent)
 
@@ -54,7 +54,11 @@ class TemplateImportDialog(QDialog):
         # Load available classes by realm (for non-auto-detect mode)
         self.classes_by_realm = self._load_classes_by_realm()
 
-        self.setWindowTitle(lang.get("template_import.window_title", default="Importer un template"))
+        window_title = lang.get(
+            "template_import.window_title",
+            default="Importer un template"
+        )
+        self.setWindowTitle(window_title)
         self.resize(600, 500)
         self.setWindowFlags(Qt.Window | Qt.WindowCloseButtonHint)
 
@@ -91,17 +95,31 @@ class TemplateImportDialog(QDialog):
         layout = QVBoxLayout(self)
 
         # === File Selection Group ===
-        file_group = QGroupBox(lang.get("template_import.file_group_title", default="📂 Fichier source"))
+        file_group_title = lang.get(
+            "template_import.file_group_title",
+            default="📂 Fichier source"
+        )
+        file_group = QGroupBox(file_group_title)
         file_layout = QVBoxLayout()
 
         # File selection row
         file_row = QHBoxLayout()
-        self.file_label = QLabel(lang.get("template_import.no_file_selected", default="Aucun fichier sélectionné"))
+        self.file_label = QLabel(
+            lang.get(
+                "template_import.no_file_selected",
+                default="Aucun fichier sélectionné"
+            )
+        )
         # Use default text color from palette (adapts to theme)
         self.file_label.setStyleSheet("")
         file_row.addWidget(self.file_label, 1)
 
-        self.browse_button = QPushButton(lang.get("template_import.browse_button", default="📁 Parcourir..."))
+        self.browse_button = QPushButton(
+            lang.get(
+                "template_import.browse_button",
+                default="📁 Parcourir..."
+            )
+        )
         self.browse_button.setMinimumWidth(120)
         file_row.addWidget(self.browse_button)
 
@@ -110,14 +128,20 @@ class TemplateImportDialog(QDialog):
         layout.addWidget(file_group)
 
         # === Context Group (read-only, grayed out) ===
-        context_group = QGroupBox(lang.get("template_import.context_group_title", default="🎯 Contexte (auto-détecté)"))
+        context_group_title = lang.get(
+            "template_import.context_group_title",
+            default="🎯 Contexte (auto-détecté)"
+        )
+        context_group = QGroupBox(context_group_title)
         context_layout = QFormLayout()
 
         # Realm (read-only or dropdown) - FIRST
         if self.auto_detect_mode:
             # Mode auto-detect: affiche juste le realm en lecture seule
             self.realm_label = QLabel(f"<b>{self.realm}</b>")
-            self.realm_label.setStyleSheet("padding: 5px; border-radius: 3px; opacity: 0.7;")
+            self.realm_label.setStyleSheet(
+                "padding: 5px; border-radius: 3px; opacity: 0.7;"
+            )
             context_layout.addRow(
                 lang.get("template_import.realm_label", default="Royaume:"),
                 self.realm_label
@@ -138,7 +162,9 @@ class TemplateImportDialog(QDialog):
         if self.auto_detect_mode:
             # Mode auto-detect: affiche juste la classe en lecture seule
             self.class_label = QLabel(f"<b>{self.character_class}</b>")
-            self.class_label.setStyleSheet("padding: 5px; border-radius: 3px; opacity: 0.7;")
+            self.class_label.setStyleSheet(
+                "padding: 5px; border-radius: 3px; opacity: 0.7;"
+            )
             context_layout.addRow(
                 lang.get("template_import.class_label", default="Classe:"),
                 self.class_label
@@ -159,7 +185,11 @@ class TemplateImportDialog(QDialog):
         layout.addWidget(context_group)
 
         # === Information Group (user input) ===
-        info_group = QGroupBox(lang.get("template_import.info_group_title", default="📝 Informations"))
+        info_group_title = lang.get(
+            "template_import.info_group_title",
+            default="📝 Informations"
+        )
+        info_group = QGroupBox(info_group_title)
         info_layout = QFormLayout()
 
         # Season selector (dropdown)
@@ -181,7 +211,10 @@ class TemplateImportDialog(QDialog):
 
         # Add checkbox to include season in filename (default: unchecked)
         self.include_season_check = QCheckBox(
-            lang.get("template_import.include_season_in_name", default="Inclure la saison dans le nom")
+            lang.get(
+                "template_import.include_season_in_name",
+                default="Inclure la saison dans le nom"
+            )
         )
         self.include_season_check.setChecked(False)  # Default: don't include season
         season_row.addWidget(self.include_season_check)
@@ -195,7 +228,10 @@ class TemplateImportDialog(QDialog):
         # Description field
         self.description_edit = QLineEdit()
         self.description_edit.setPlaceholderText(
-            lang.get("template_import.description_placeholder", default="Ex: low cost sans ml10")
+            lang.get(
+                "template_import.description_placeholder",
+                default="Ex: low cost sans ml10"
+            )
         )
         self.description_edit.setMaxLength(50)
         info_layout.addRow(
@@ -217,7 +253,12 @@ class TemplateImportDialog(QDialog):
         preview_group = QGroupBox("📄 Aperçu")
         preview_layout = QVBoxLayout()
 
-        preview_label = QLabel(lang.get("template_import.preview_label", default="Nom du fichier:"))
+        preview_label = QLabel(
+            lang.get(
+                "template_import.preview_label",
+                default="Nom du fichier:"
+            )
+        )
         preview_layout.addWidget(preview_label)
 
         self.preview_name = QLabel("")
@@ -239,18 +280,27 @@ class TemplateImportDialog(QDialog):
         button_layout = QHBoxLayout()
         button_layout.addStretch()
 
-        cancel_button = QPushButton(lang.get("template_import.cancel_button", default="Annuler"))
+        cancel_button = QPushButton(
+            lang.get("template_import.cancel_button", default="Annuler")
+        )
         cancel_button.clicked.connect(self.reject)
         button_layout.addWidget(cancel_button)
 
-        self.import_button = QPushButton(lang.get("template_import.import_button", default="📥 Importer"))
+        self.import_button = QPushButton(
+            lang.get(
+                "template_import.import_button",
+                default="📥 Importer"
+            )
+        )
         self.import_button.setMinimumWidth(120)
         self.import_button.setMinimumHeight(35)
         self.import_button.setEnabled(False)
         self.import_button.setStyleSheet(
-            "QPushButton { background-color: #4CAF50; color: white; font-weight: bold; border-radius: 5px; }"
-            "QPushButton:hover { background-color: #45a049; }"
-            "QPushButton:disabled { background-color: #cccccc; color: #666666; }"
+            "QPushButton { background-color: #4CAF50; color: white; "
+            "font-weight: bold; border-radius: 5px; } "
+            "QPushButton:hover { background-color: #45a049; } "
+            "QPushButton:disabled { background-color: #cccccc; "
+            "color: #666666; }"
         )
         button_layout.addWidget(self.import_button)
 
@@ -300,15 +350,28 @@ class TemplateImportDialog(QDialog):
         include_season = self.include_season_check.isChecked()
 
         # Enable import button only if file and description are set
-        can_import = bool(self.selected_file is not None and description and season != "Personnalisé...")
+        can_import = bool(
+            self.selected_file is not None and description
+            and season != "Personnalisé..."
+        )
         self.import_button.setEnabled(can_import)
 
         if not description:
-            self.preview_name.setText(f"⚠️ {lang.get('template_import.enter_description', default='Veuillez saisir une description')}")
+            self.preview_name.setText(
+                f"⚠️ {lang.get(
+                    'template_import.enter_description',
+                    default='Veuillez saisir une description'
+                )}"
+            )
             return
 
         if season == "Personnalisé...":
-            self.preview_name.setText(f"⚠️ {lang.get('template_import.select_season', default='Veuillez sélectionner une saison')}")
+            self.preview_name.setText(
+                f"⚠️ {lang.get(
+                    'template_import.select_season',
+                    default='Veuillez sélectionner une saison'
+                )}"
+            )
             return
 
         # Generate preview name with include_season parameter
@@ -326,8 +389,14 @@ class TemplateImportDialog(QDialog):
         if not self.selected_file or not self.selected_file.exists():
             QMessageBox.warning(
                 self,
-                lang.get("template_import.import_error_title", default="Erreur d'import"),
-                lang.get("template_import.invalid_source_file", default="Fichier source invalide")
+                lang.get(
+                    "template_import.import_error_title",
+                    default="Erreur d'import"
+                ),
+                lang.get(
+                    "template_import.invalid_source_file",
+                    default="Fichier source invalide"
+                )
             )
             return
 
@@ -336,16 +405,28 @@ class TemplateImportDialog(QDialog):
             if not self.class_combo.currentText():
                 QMessageBox.warning(
                     self,
-                    lang.get("template_import.import_error_title", default="Erreur d'import"),
-                    lang.get("template_import.select_class", default="Veuillez sélectionner une classe")
+                    lang.get(
+                        "template_import.import_error_title",
+                        default="Erreur d'import"
+                    ),
+                    lang.get(
+                        "template_import.select_class",
+                        default="Veuillez sélectionner une classe"
+                    )
                 )
                 return
 
             if not self.realm_combo.currentText():
                 QMessageBox.warning(
                     self,
-                    lang.get("template_import.import_error_title", default="Erreur d'import"),
-                    lang.get("template_import.select_realm", default="Veuillez sélectionner un royaume")
+                    lang.get(
+                        "template_import.import_error_title",
+                        default="Erreur d'import"
+                    ),
+                    lang.get(
+                        "template_import.select_realm",
+                        default="Veuillez sélectionner un royaume"
+                    )
                 )
                 return
 
@@ -364,8 +445,14 @@ class TemplateImportDialog(QDialog):
         if not description:
             QMessageBox.warning(
                 self,
-                lang.get("template_import.import_error_title", default="Erreur d'import"),
-                lang.get("template_import.enter_description", default="Veuillez saisir une description")
+                lang.get(
+                    "template_import.import_error_title",
+                    default="Erreur d'import"
+                ),
+                lang.get(
+                    "template_import.enter_description",
+                    default="Veuillez saisir une description"
+                )
             )
             return
 
@@ -388,25 +475,39 @@ class TemplateImportDialog(QDialog):
             if template_name:
                 QMessageBox.information(
                     self,
-                    lang.get("template_import.import_success_title", default="Import réussi"),
-                    lang.get("template_import.import_success_message", default="Template '{name}' importé avec succès").format(
-                        name=template_name
-                    )
+                    lang.get(
+                        "template_import.import_success_title",
+                        default="Import réussi"
+                    ),
+                    lang.get(
+                        "template_import.import_success_message",
+                        default="Template '{name}' importé avec succès"
+                    ).format(name=template_name)
                 )
                 self.template_imported.emit(template_name)
                 self.accept()
             else:
                 QMessageBox.warning(
                     self,
-                    lang.get("template_import.import_error_title", default="Erreur d'import"),
-                    lang.get("template_import.duplicate_error", default="Un template avec ce nom existe déjà")
+                    lang.get(
+                        "template_import.import_error_title",
+                        default="Erreur d'import"
+                    ),
+                    lang.get(
+                        "template_import.duplicate_error",
+                        default="Un template avec ce nom existe déjà"
+                    )
                 )
 
         except Exception as e:
             QMessageBox.critical(
                 self,
-                lang.get("template_import.import_error_title", default="Erreur d'import"),
-                lang.get("template_import.import_error_message", default="Impossible d'importer le template:\n{error}").format(
-                    error=str(e)
-                )
+                lang.get(
+                    "template_import.import_error_title",
+                    default="Erreur d'import"
+                ),
+                lang.get(
+                    "template_import.import_error_message",
+                    default="Impossible d'importer le template:\n{error}"
+                ).format(error=str(e))
             )

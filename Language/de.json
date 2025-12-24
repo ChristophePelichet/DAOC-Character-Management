@@ -412,6 +412,13 @@
                 "title": "Debug",
                 "subtitle": "Debug-Optionen für die Diagnose"
             },
+            "eden_debug_window": {
+                "title": "🌐 Debug Eden - Connexions & Cookies",
+                "clear_button": "🗑️ Löschen",
+                "export_button": "💾 Exportieren",
+                "logs_title": "📋 Eden-Protokolle in Echtzeit",
+                "ready_text": "Bereit, Eden-Protokolle zu erfassen..."
+            },
             "armory": {
                 "title": "Waffenkammer",
                 "subtitle": "Import und Verwaltung der Gegenstände-Datenbank",

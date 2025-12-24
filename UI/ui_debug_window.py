@@ -343,7 +343,7 @@ class EdenDebugWindow(QMainWindow):
     
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("🌐 Debug Eden - Connexions & Cookies")
+        self.setWindowTitle(lang.get("eden_debug_window_title", default="🌐 Debug Eden - Connexions & Cookies"))
         self.setGeometry(150, 150, 1000, 600)
         
         # Central Widget
@@ -354,19 +354,19 @@ class EdenDebugWindow(QMainWindow):
         # Button bar
         button_layout = QHBoxLayout()
         
-        clear_button = QPushButton("🗑️ Effacer")
-        clear_button.clicked.connect(self.clear_logs)
-        button_layout.addWidget(clear_button)
+        self.clear_button = QPushButton(lang.get("eden_debug_window_clear_button", default="🗑️ Effacer"))
+        self.clear_button.clicked.connect(self.clear_logs)
+        button_layout.addWidget(self.clear_button)
         
-        export_button = QPushButton("💾 Exporter")
-        export_button.clicked.connect(self.export_logs)
-        button_layout.addWidget(export_button)
+        self.export_button = QPushButton(lang.get("eden_debug_window_export_button", default="💾 Exporter"))
+        self.export_button.clicked.connect(self.export_logs)
+        button_layout.addWidget(self.export_button)
         
         button_layout.addStretch()
         main_layout.addLayout(button_layout)
         
         # Log area with syntax highlighting
-        logs_group = QGroupBox("📋 Logs Eden en temps réel")
+        self.logs_group = QGroupBox(lang.get("eden_debug_window_logs_title", default="📋 Logs Eden en temps réel"))
         logs_layout = QVBoxLayout()
         
         self.logs_widget = QTextEdit()
@@ -380,11 +380,11 @@ class EdenDebugWindow(QMainWindow):
             }
         """)
         logs_layout.addWidget(self.logs_widget)
-        logs_group.setLayout(logs_layout)
-        main_layout.addWidget(logs_group)
+        self.logs_group.setLayout(logs_layout)
+        main_layout.addWidget(self.logs_group)
         
         # Info footer
-        self.info_label = QLabel("Prêt à capturer les logs Eden...")
+        self.info_label = QLabel(lang.get("eden_debug_window_ready_text", default="Prêt à capturer les logs Eden..."))
         self.info_label.setStyleSheet("color: #666; font-style: italic;")
         main_layout.addWidget(self.info_label)
         
@@ -461,6 +461,14 @@ class EdenDebugWindow(QMainWindow):
                 self.info_label.setText(f"✅ Logs exportés: {file_path}")
             except Exception as e:
                 self.info_label.setText(f"❌ Erreur d'export: {e}")
+    
+    def retranslate_ui(self):
+        """Update UI text when language changes"""
+        self.setWindowTitle(lang.get("eden_debug_window_title", default="🌐 Debug Eden - Connexions & Cookies"))
+        self.clear_button.setText(lang.get("eden_debug_window_clear_button", default="🗑️ Effacer"))
+        self.export_button.setText(lang.get("eden_debug_window_export_button", default="💾 Exporter"))
+        self.logs_group.setTitle(lang.get("eden_debug_window_logs_title", default="📋 Logs Eden en temps réel"))
+        self.info_label.setText(lang.get("eden_debug_window_ready_text", default="Prêt à capturer les logs Eden..."))
     
     def closeEvent(self, event):
         """Clean up when closing the window"""

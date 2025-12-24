@@ -404,6 +404,13 @@
                 "title": "Debug",
                 "subtitle": "Debugging and diagnostics options"
             },
+            "eden_debug_window": {
+                "title": "🌐 Debug Eden - Connexions & Cookies",
+                "clear_button": "🗑️ Effacer",
+                "export_button": "💾 Exporter",
+                "logs_title": "📋 Logs Eden en temps réel",
+                "ready_text": "Ready to capture Eden logs..."
+            },
             "armory": {
                 "title": "Armory",
                 "subtitle": "Import and management of items database",

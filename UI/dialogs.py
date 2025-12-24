@@ -24,7 +24,7 @@ from PySide6.QtGui import QBrush, QColor, QIcon, QPixmap
 from Functions.language_manager import lang
 from Functions.config_manager import config, get_config_dir
 from Functions.character_manager import get_character_dir
-from Functions.logging_manager import get_log_dir, get_logger, log_with_action, LOGGER_CHARACTER
+from Functions.debug_logging_manager import get_log_dir, get_logger, log_with_action, LOGGER_CHARACTER
 from Functions.data_manager import DataManager
 from Functions.theme_manager import get_scaled_size
 from Functions.items_database_manager import ItemsDatabaseManager

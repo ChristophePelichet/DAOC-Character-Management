@@ -10,7 +10,7 @@ import os
 from pathlib import Path
 from Functions.character_profile_scraper import CharacterProfileScraper
 from Functions.cookie_manager import CookieManager
-from Functions.logging_manager import get_logger, log_with_action
+from Functions.debug_logging_manager import get_logger, log_with_action
 
 wealth_logger = get_logger("WEALTH")
 

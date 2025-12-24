@@ -23,7 +23,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-from Functions.logging_manager import get_logger, log_with_action
+from Functions.debug_logging_manager import get_logger, log_with_action
 from Functions.config_manager import config
 
 # Create dedicated logger for character profile scraping

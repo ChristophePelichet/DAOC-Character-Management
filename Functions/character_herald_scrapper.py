@@ -7,7 +7,7 @@ both complete character updates and partial RvR-only updates.
 """
 
 import logging
-from Functions.logging_manager import get_logger, LOGGER_CHARACTER
+from Functions.debug_logging_manager import get_logger, LOGGER_CHARACTER
 
 
 logger = get_logger(LOGGER_CHARACTER)

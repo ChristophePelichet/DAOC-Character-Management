@@ -19,7 +19,7 @@ from Functions.language_manager import lang
 from Functions.config_manager import config, ConfigManager
 from Functions.character_manager import get_character_dir
 from Functions.path_manager import PathManager
-from Functions.logging_manager import get_log_dir
+from Functions.debug_logging_manager import get_log_dir
 from Functions.path_manager import get_armor_dir
 from Functions.backup_manager import BackupManager
 from UI.ui_file_dialogs import (
@@ -1479,7 +1479,7 @@ class SettingsDialog(QDialog):
         if old_path != new_path:
             config.set("folders.logs", new_path)
             config.save_config()
-            from Functions.logging_manager import setup_logging
+            from Functions.debug_logging_manager import setup_logging
             setup_logging()
         
     def _browse_armor_folder(self):
@@ -1893,7 +1893,7 @@ class SettingsDialog(QDialog):
             
             # Reinitialize logging if log folder changed
             if config_key == "log_folder":
-                from Functions.logging_manager import setup_logging
+                from Functions.debug_logging_manager import setup_logging
                 setup_logging()
             
             QMessageBox.information(
@@ -1970,7 +1970,7 @@ class SettingsDialog(QDialog):
                 
                 # Reinitialize logging if log folder changed
                 if config_key == "log_folder":
-                    from Functions.logging_manager import setup_logging
+                    from Functions.debug_logging_manager import setup_logging
                     setup_logging()
                 
                 # Ask if user wants to delete old folder (or auto-delete if empty)
@@ -2049,7 +2049,7 @@ class SettingsDialog(QDialog):
                 
                 # Reinitialize logging if log folder changed
                 if config_key == "log_folder":
-                    from Functions.logging_manager import setup_logging
+                    from Functions.debug_logging_manager import setup_logging
                     setup_logging()
                 
                 QMessageBox.information(

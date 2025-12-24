@@ -1,41 +1,41 @@
-"""Script de surveillance des logs en temps réel"""
+"""Real-time log file monitoring script"""
 import time
 import os
 
 log_file = r"d:\Projets\Python\DAOC---Gestion-des-personnages\Logs\debug.log"
 
 print("=" * 70)
-print("SURVEILLANCE DU FICHIER DE LOG EN TEMPS RÉEL")
+print("REAL-TIME LOG FILE MONITORING")
 print("=" * 70)
-print(f"\nFichier surveillé: {log_file}")
+print(f"\nMonitored file: {log_file}")
 print("\nINSTRUCTIONS:")
-print("1. Laissez ce script tourner")
-print("2. Lancez l'application (F5 dans VS Code)")
-print("3. Les logs apparaîtront ici en temps réel")
-print("4. Appuyez sur Ctrl+C pour arrêter la surveillance")
+print("1. Leave this script running")
+print("2. Launch the application (F5 in VS Code)")
+print("3. Logs will appear here in real-time")
+print("4. Press Ctrl+C to stop monitoring")
 print("\n" + "-" * 70)
-print("En attente des logs...\n")
+print("Waiting for logs...\n")
 
-# Create the File s'il n'existe not
+# Create the file if it does not exist
 if not os.path.exists(log_file):
     open(log_file, 'w').close()
 
-# Position actuelle dans le fichier
+# Current position in the file
 last_position = 0
 
 try:
     with open(log_file, 'r', encoding='utf-8', errors='ignore') as f:
-        # Aller à the fin of the File
+        # Go to the end of the file
         f.seek(0, 2)
         last_position = f.tell()
         
         while True:
-            # Lire les nouvelles lignes
+            # Read new lines
             f.seek(last_position)
             new_lines = f.read()
             
             if new_lines:
-                # Afficher les lignes pertinentes en couleur
+                # Display relevant lines with color coding
                 for line in new_lines.strip().split('\n'):
                     if any(keyword in line for keyword in [
                         'REALM_ICONS', 'Verification', 'tree_realm_icons',
@@ -54,5 +54,5 @@ try:
             
 except KeyboardInterrupt:
     print("\n\n" + "-" * 70)
-    print("Surveillance arrêtée.")
+    print("Monitoring stopped.")
     print("-" * 70)

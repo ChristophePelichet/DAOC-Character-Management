@@ -29,7 +29,7 @@ Example:
 """
 
 from Functions.language_manager import lang
-from Functions.logging_manager import get_logger, LOGGER_CHARACTER
+from Functions.debug_logging_manager import get_logger, LOGGER_CHARACTER
 
 logger_ui = get_logger(LOGGER_CHARACTER)
 

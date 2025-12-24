@@ -3,7 +3,7 @@ UI Package - User Interface Components
 Contains all UI-related classes and widgets.
 """
 
-from .debug_window import DebugWindow, QTextEditHandler, LogLevelFilter, LogFileReaderThread
+from .ui_debug_window import DebugWindow, QTextEditHandler, LogLevelFilter, LogFileReaderThread
 from .delegates import (
     CenterIconDelegate,
     CenterCheckboxDelegate,

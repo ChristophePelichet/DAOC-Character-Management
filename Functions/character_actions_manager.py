@@ -9,7 +9,7 @@ from Functions.character_manager import (
     create_character_data, save_character, delete_character,
     rename_character, duplicate_character, REALMS
 )
-from Functions.logging_manager import get_logger, log_with_action, LOGGER_CHARACTER
+from Functions.debug_logging_manager import get_logger, log_with_action, LOGGER_CHARACTER
 from Functions.language_manager import lang
 from Functions.config_manager import config
 from UI.dialogs import NewCharacterDialog, CharacterSheetWindow

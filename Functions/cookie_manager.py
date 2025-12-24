@@ -13,7 +13,7 @@ from datetime import datetime
 from pathlib import Path
 
 # Import new logging system
-from .logging_manager import get_logger, LOGGER_EDEN, LOGGER_EDEN_PERF, setup_eden_performance_logger
+from .debug_logging_manager import get_logger, LOGGER_EDEN, LOGGER_EDEN_PERF, setup_eden_performance_logger
 
 # Dedicated logger for Eden
 eden_logger = get_logger(LOGGER_EDEN)

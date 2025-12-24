@@ -1,5 +1,5 @@
 """
-Armory Tag Selector Widget - Permet la sélection de tags avec auto-complétion
+Armory Tag Selector Widget - Allows tag selection with auto-completion
 """
 
 from PySide6.QtWidgets import (
@@ -12,7 +12,7 @@ from Functions.language_manager import lang
 
 
 class TagBadge(QFrame):
-    """Widget badge pour afficher un tag sélectionné"""
+    """Widget badge for displaying a selected tag"""
 
     removed = Signal(str)  # tag_name
 

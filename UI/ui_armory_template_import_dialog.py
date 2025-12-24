@@ -1,6 +1,6 @@
 """
-Template Import Dialog - Interface pour importer des templates d'armurerie
-Version refactorisée avec contexte de personnage
+Template Import Dialog - Interface for importing armory templates
+Refactored version with character context
 """
 
 from pathlib import Path
@@ -19,10 +19,10 @@ from UI.ui_armory_template_tag_selector import ArmoryTagSelector
 
 class TemplateImportDialog(QDialog):
     """
-    Dialogue pour importer un template d'armurerie.
-    Peut fonctionner en deux modes:
-    - Mode personnage: auto-détecte la classe et le realm
-    - Mode armurerie (généraliste): affiche des dropdowns pour sélectionner classe et realm
+    Dialog for importing an armory template.
+    Can operate in two modes:
+    - Character mode: auto-detects class and realm
+    - Armory mode (generic): displays dropdowns to select class and realm
     """
 
     template_imported = Signal(str)  # template_name

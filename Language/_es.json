@@ -143,6 +143,7 @@
         },
         "tools": {
             "label": "Herramientas",
+            "armory": "⚔️ Armory",
             "backup": "Copia de seguridad"
         }
     },
@@ -492,6 +493,7 @@
         "season_label": "Season:",
         "description_label": "Description:",
         "description_placeholder": "Ex: low cost without ml10",
+        "include_season_in_name": "Include season in template name",
         "tags_label": "Tags (optional):",
         "preview_label": "File name:",
         "import_button": "📥 Import",
@@ -535,6 +537,34 @@
         "load_error": "Error loading template",
         "info_items": "{count} items",
         "info_imported": "Imported on {date}"
+    },
+    "template_context_menu": {
+        "edit": "Edit",
+        "delete": "Delete",
+        "download": "Download",
+        "confirm_delete": "Confirm deletion",
+        "delete_confirm_message": "Are you sure you want to delete this template?",
+        "delete_error": "Error deleting template"
+    },
+    "template_edit": {
+        "window_title": "Edit template - {name}",
+        "info_group_title": "Template information",
+        "realm_label": "Realm:",
+        "class_label": "Class:",
+        "season_label": "Season:",
+        "description_label": "Description:",
+        "preview_label": "Preview new name",
+        "cancel_button": "Cancel",
+        "save_button": "Save",
+        "error_title": "Error",
+        "success_title": "Success",
+        "invalid_fields": "Please fill in all fields correctly",
+        "duplicate_error": "A template with this name already exists",
+        "fill_all_fields": "Please fill in all fields",
+        "select_valid_season": "Please select a valid season",
+        "success_message": "Template modified successfully",
+        "save_error": "Unable to save metadata",
+        "error_message": "Error during modification:\n{error}"
     },
     "template_preview": {
         "window_title": "Template Preview - {name}",
@@ -763,6 +793,10 @@
         "view_model_error": "Model viewer not available"
     },
     "armoury_dialog": {
+        "table_headers": {
+            "filename": "Filename",
+            "class": "Class"
+        }
     },
     "armoury_upload": {
     },

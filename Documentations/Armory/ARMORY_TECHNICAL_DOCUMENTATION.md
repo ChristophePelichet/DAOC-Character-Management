@@ -1,10 +1,10 @@
 # 🛡️ Armory System - Technical Documentation
 
-**Version**: 3.2  
+**Version**: 3.4  
 **Date**: November 2025  
-**Last Updated**: December 19, 2025 (Search Button State Management with Database Mode Validation)  
-**Component**: `UI/dialogs.py`, `UI/ui_state_manager.py`, `Functions/items_database_manager.py`  
-**Related**: `Functions/items_scraper.py`, `Functions/items_parser.py`, `Functions/import_worker.py`, `Functions/build_items_database.py`, `Functions/template_manager.py`, `Functions/template_metadata.py`, `Functions/superadmin_tools.py`, `Functions/template_parser.py`, `Functions/armor_upload_handler.py`, `Functions/item_model_viewer.py`, `Tools/fix_currency_mapping.py`
+**Last Updated**: December 24, 2025 (Column Sorting, Width Persistence, PEP 8 Refactoring & Localization Fixes)  
+**Component**: `UI/ui_armory_template_view_all.py`, `UI/ui_armory_template_import_dialog.py`, `UI/dialogs.py`, `Functions/template_manager.py`  
+**Related**: `Functions/template_metadata.py`, `Functions/data_manager.py`, `UI/ui_armory_template_edit_dialog.py`, `UI/ui_armory_template_tag_selector.py`, `Functions/ui_manager.py`
 
 ---
 
@@ -3925,9 +3925,9 @@ Uses existing `game` section in `config.json`:
 
 **Developer:** GitHub Copilot  
 **Created:** November 19, 2025  
-**Last Updated:** December 18, 2025  
-**Version:** 2.8  
-**Branch:** 108_Imp_Armo
+**Last Updated:** December 24, 2025  
+**Version:** 3.4  
+**Branch:** feature/v0.109-all-templates-view
 
 **Change Summary (v2.8):**
 - Added complete Equipment Parsing & Display section (9 subsections)
@@ -3961,3 +3961,88 @@ Uses existing `game` section in `config.json`:
 - Added database repair tool documentation
 - Updated statistics and recent additions
 - Corrected all currency mapping references to use ZONE_CURRENCY standards
+**Change Summary (v3.3) - December 23, 2025:**
+- **Template Edit Dialog**: New `TemplateEditDialog` (renamed to `ui_armory_template_edit_dialog.py`)
+  - Edit template metadata: class, realm, season, description
+  - Real-time preview of new template filename
+  - Automatic file movement when properties change
+  - Updates class translations (class_fr, class_de) from DataManager
+- **Context Menu Enhancements**:
+  - ✏️ Edit action with proper translations
+  - 🗑️ Delete action with confirmation
+  - 💾 Download/Export action for both UIArmoryTemplateViewAll and ArmorManagementDialog
+  - Full translation support in all languages (en, fr, de, es)
+- **UI Refactoring & Naming Convention**:
+  - Renamed `ui_armory_all_templates.py` → `ui_armory_template_view_all.py`
+  - Renamed `template_import_dialog.py` → `ui_armory_template_import_dialog.py`
+  - Renamed `ui_armory_tag_selector.py` → `ui_armory_template_tag_selector.py`
+  - Updated all imports in related files (ui_manager.py, armor_upload_handler.py, etc.)
+- **Menu & Emoji Updates**:
+  - ⚔️ Crossed swords emoji added to Armory menu in Tools
+  - Context menu items now include appropriate emojis
+  - All translations dynamically applied via lang.get()
+- **Template File Extension Handling**:
+  - Fixed metadata file path handling (.txt.json files)
+  - UIArmoryTemplateViewAll now displays .txt extension in templates list
+  - Preview loading correctly handles full filenames with extensions
+
+**Commits (v3.3):**
+1. **7805446** - `fix: correct template file extension handling in edit dialog and preview`
+2. **6e52d09** - `fix: update class translations (class_fr and class_de) when editing template`
+3. **af2c43f** - `feat: add context menu emojis and translations, implement template download feature`
+4. **ff3f771** - `refactor: rename armory template UI files to follow naming convention`
+5. **77a1375** - `refactor: rename ui_armory_all_templates.py to ui_armory_template_view_all.py`
+
+**Change Summary (v3.4) - December 24, 2025:**
+- **All-Templates View with Realm Tabs**:
+  - Multi-realm template browsing: Albion, Hibernia, Midgard tabs
+  - Single unified import interface across all realms (non-auto-detect mode)
+  - Generic character context for universal template management
+- **Table Features & Persistence**:
+  - ✅ Class column added to template table with sorting support
+  - ✅ Column sorting enabled (Template name, Class) - ascending/descending
+  - ✅ Column width persistence via ConfigManager (auto-save/restore)
+  - ✅ Table state remembered across application sessions
+- **Translation & Localization Fixes**:
+  - ✅ All French docstrings translated to English in template UI files
+  - ✅ Hardcoded French strings replaced with `lang.get()` calls
+  - ✅ Added complete `template_edit` translation section to all 4 language files (en, fr, de, _es)
+  - ✅ Fixed class selection bug: moved combo population from _connect_signals() to _load_current_values()
+  - ✅ Added missing `template_import.include_season_in_name` translation key
+- **PEP 8 Code Quality**:
+  - ✅ Fixed 50 PEP 8 violations (E501 line length, W293 trailing whitespace)
+  - ✅ Refactored long `lang.get()` calls across multiple lines
+  - ✅ 100% Ruff validation passed (0 errors)
+  - ✅ English docstrings in all template UI modules
+  - ✅ Consistent code formatting in ui_armory_template_*.py files
+- **Documentation & Badges**:
+  - ✅ Added Ruff code quality badge to README
+  - ✅ Added PEP8 code style badge to README
+  - ✅ Highlighted code quality standards in project overview
+
+**Files Modified (v3.4):**
+- `UI/ui_armory_template_view_all.py` - Column width persistence, full PEP 8 refactoring
+- `UI/ui_armory_template_edit_dialog.py` - Translation fixes, class selection bug, docstring translation, PEP 8 formatting
+- `UI/ui_armory_template_import_dialog.py` - Docstring translation, PEP 8 formatting
+- `UI/ui_armory_template_tag_selector.py` - Docstring & UI string translation, PEP 8 formatting
+- `Language/en.json` - Added `template_edit` section (19 keys)
+- `Language/fr.json` - Added `template_edit` section with French translations
+- `Language/de.json` - Added `template_edit` section with German translations
+- `Language/_es.json` - Added `template_edit` section with English defaults
+- `README.md` - Added Ruff and PEP8 badges
+
+**Commits (v3.4):**
+1. **7a3cc25** - `feat: implement all-templates view with realm tabs and import functionality`
+2. **6a6203f** - `refactor: move ArmoryTagSelector out of widgets package and remove unused TemplateListWidget`
+3. **70b6456** - `feat: add optional season inclusion in template filename`
+4. **993ec62** - `chore: remove obsolete dialogs refactoring plan`
+5. **2b9cd79** - `chore: remove unused TemplatePreviewDialog and dialog_templates package`
+6. **49e2098** - `feat: add Class column to template table with sorting support`
+7. **d42b253** - `feat: enable sorting on template table columns`
+8. **81beef3** - `refactor: use ConfigManager for column width persistence`
+9. **afdd764** - `fix: refactor PEP 8 E501 violations and apply code quality improvements`
+10. **b16c4b8** - `fix: add missing translation keys for template import season checkbox`
+11. **4d938f8** - `fix: fix template edit dialog localization, translation keys, and class selection bug`
+12. **805b1c6** - `fix: translate French docstrings to English in template UI files`
+13. **13dccd2** - `refactor: apply PEP 8 formatting to template UI files`
+14. **26ad45c** - `docs: add PEP 8 code quality badges to README`

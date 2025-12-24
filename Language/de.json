@@ -136,6 +136,11 @@
             "new_character": "➕ Neuer Charakter",
             "search_herald": "🔍 Im Herald suchen"
         },
+        "tools": {
+            "label": "Werkzeuge",
+            "armory": "⚔️ Rüstkammer",
+            "backup": "Sicherung"
+        },
         "view": {
             "label": "Ansicht",
             "columns": "Spalten"
@@ -164,10 +169,6 @@
             "label": "Aktion",
             "resistances": "Widerstände",
             "armor_management": "📁 Waffenkammer"
-        },
-        "tools": {
-            "label": "Werkzeuge",
-            "backup": "Sicherung"
         }
     },
     "misc": {
@@ -727,6 +728,12 @@
         "season_label": "Saison:",
         "description_label": "Beschreibung:",
         "description_placeholder": "Z.B.: günstig ohne ml10",
+        "include_season_in_name": "Saison im Vorlagennamen einschließen",
+        "invalid_source_file": "Ungültige Quelldatei",
+        "select_class": "Bitte wählen Sie eine Klasse",
+        "select_realm": "Bitte wählen Sie ein Reich",
+        "select_season": "Bitte wählen Sie eine Saison",
+        "enter_description": "Bitte geben Sie eine Beschreibung ein",
         "tags_label": "Tags (optional):",
         "preview_label": "Dateiname:",
         "import_button": "📥 Importieren",
@@ -769,6 +776,34 @@
         "load_error": "Fehler beim Laden",
         "info_items": "{count} Items",
         "info_imported": "Importiert am {date}"
+    },
+    "template_context_menu": {
+        "edit": "Bearbeiten",
+        "delete": "Löschen",
+        "download": "Herunterladen",
+        "confirm_delete": "Löschen bestätigen",
+        "delete_confirm_message": "Möchten Sie diese Vorlage wirklich löschen?",
+        "delete_error": "Fehler beim Löschen der Vorlage"
+    },
+    "template_edit": {
+        "window_title": "Vorlage bearbeiten - {name}",
+        "info_group_title": "Vorlageninformationen",
+        "realm_label": "Reich:",
+        "class_label": "Klasse:",
+        "season_label": "Saison:",
+        "description_label": "Beschreibung:",
+        "preview_label": "Vorschau des neuen Namens",
+        "cancel_button": "Abbrechen",
+        "save_button": "Speichern",
+        "error_title": "Fehler",
+        "success_title": "Erfolg",
+        "invalid_fields": "Bitte füllen Sie alle Felder korrekt aus",
+        "duplicate_error": "Eine Vorlage mit diesem Namen existiert bereits",
+        "fill_all_fields": "Bitte füllen Sie alle Felder aus",
+        "select_valid_season": "Bitte wählen Sie eine gültige Saison",
+        "success_message": "Vorlage erfolgreich geändert",
+        "save_error": "Metadaten konnten nicht gespeichert werden",
+        "error_message": "Fehler bei der Änderung:\n{error}"
     },
     "template_preview": {
         "window_title": "Vorlagenvorschau - {name}",
@@ -1027,6 +1062,7 @@
         "info": "Verwalten Sie Waffenkammer-Vorlagen, die mit Drittanbieter-Software (Zenkcraft, etc.) erstellt wurden",
         "table_headers": {
             "filename": "Dateiname",
+            "class": "Klasse",
             "season": "Saison",
             "modified": "Änderungsdatum"
         },
@@ -1323,6 +1359,58 @@
         "select_realm": "Bitte wählen Sie ein Königreich",
         "select_class": "Bitte wählen Sie eine Klasse",
         "select_race": "Bitte wählen Sie eine Rasse"
+    },
+    "armory": {
+        "all_templates_window_title": "Rüstkammer - Alle Vorlagen",
+        "search_label": "Suche:",
+        "search_placeholder": "Nach Vorlagenname suchen...",
+        "realm_filter_label": "Königreich:",
+        "all_realms": "Alle Königreiche",
+        "class_filter_label": "Klasse:",
+        "all_classes": "Alle Klassen",
+        "column_realm": "Königreich",
+        "column_class": "Klasse",
+        "column_name": "Vorlagenname",
+        "column_season": "Saison",
+        "column_actions": "Aktionen",
+        "row_actions": "...",
+        "status_showing": "Zeige {shown} von {total} Vorlagen",
+        "add_template_button": "➕ Vorlage Hinzufügen",
+        "add_template_dialog_title": "Wählen Sie eine Vorlagendatei zum Hinzufügen",
+        "add_template_success_title": "Vorlage Hinzugefügt",
+        "add_template_success_message": "Die Vorlage wurde erfolgreich zur Rüstkammer hinzugefügt!",
+        "add_template_error": "Fehler beim Hinzufügen der Vorlage",
+        "file_not_found": "Die ausgewählte Datei wurde nicht gefunden",
+        "invalid_filename_format": "Der Dateiname muss im Format sein: Klasse_Saison_Beschreibung.txt",
+        "select_realm_title": "Königreich Auswählen",
+        "select_realm_message": "Zu welchem Königreich möchten Sie diese Vorlage hinzufügen?",
+        "file_exists_title": "Datei Existiert",
+        "file_exists_message": "Diese Vorlage existiert bereits. Überschreiben?",
+        "preview_button": "👁️ Vorschau",
+        "import_button": "📥 Vorlage Importieren",
+        "delete_button": "🗑️ Löschen",
+        "preview_title": "Vorlagenvorschau",
+        "preview_panel_title": "Vorlagenvorschau",
+        "preview_no_content": "Kein Inhalt zur Vorschau verfügbar",
+        "preview_error": "Fehler beim Laden der Vorschau",
+        "select_template_preview": "Wählen Sie eine Vorlage zur Vorschau...",
+        "import_success_title": "Erfolgreich importiert",
+        "import_success_message": "Vorlage erfolgreich importiert!",
+        "import_error": "Fehler beim Importieren der Vorlage",
+        "delete_confirm_title": "Vorlage löschen",
+        "delete_confirm_message": "Sind Sie sicher, dass Sie '{name}' löschen möchten?\nDiese Aktion kann nicht rückgängig gemacht werden.",
+        "delete_success_title": "Gelöscht",
+        "delete_success_message": "Vorlage erfolgreich gelöscht",
+        "delete_error_title": "Fehler",
+        "delete_error": "Fehler beim Löschen der Vorlage",
+        "download_dialog_title": "Vorlage Speichern",
+        "download_success_title": "Erfolg",
+        "download_success_message": "Vorlage erfolgreich heruntergeladen!",
+        "download_error_title": "Fehler",
+        "context_delete": "Vorlage löschen",
+        "context_download": "Vorlage Herunterladen",
+        "error_title": "Fehler",
+        "window_error": "Fehler beim Öffnen des Vorlagenfensters"
     },
     "version_check": {
         "current": "Aktuelle Version:",

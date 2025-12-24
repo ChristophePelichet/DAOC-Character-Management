@@ -2477,24 +2477,7 @@ class ArmorManagementDialog(QDialog):
         
         # Add preview container to right layout
         right_layout.addWidget(preview_container)
-        
-        # Button layout for preview actions
-        preview_buttons_layout = QHBoxLayout()
-        
-        # Download button in preview panel
-        self.preview_download_button = QPushButton(lang.get("armoury_dialog.context_menu.download", default="Download"))
-        self.preview_download_button.setEnabled(False)  # Disabled until file selected
-        self.preview_download_button.clicked.connect(self.download_selected_armor)
-        preview_buttons_layout.addWidget(self.preview_download_button)
-        
-        # Search missing prices button
-        self.search_prices_button = QPushButton("🔍 " + lang.get("armoury_dialog.buttons.search_missing_prices", default="Search Missing Prices"))
-        self.search_prices_button.setEnabled(False)  # Disabled until items_without_price is populated
-        self.search_prices_button.clicked.connect(self.search_missing_prices)
-        self.search_prices_button.setToolTip(lang.get("armoury_dialog.tooltips.search_missing_prices", default="Search online for items without price in database"))
-        preview_buttons_layout.addWidget(self.search_prices_button)
-        
-        right_layout.addLayout(preview_buttons_layout)
+
         
         splitter.addWidget(right_widget)
         
@@ -2684,13 +2667,6 @@ class ArmorManagementDialog(QDialog):
                 items_without_price=has_items_without_price,
                 db_manager=self.db_manager
             )
-            
-            if has_items_without_price:
-                button_text = lang.get("armoury_dialog.buttons.search_missing_prices", default="Search Missing Prices")
-                self.search_prices_button.setText(f"🔍 {button_text} ({len(self.items_without_price)} items)")
-            else:
-                button_text = lang.get("armoury_dialog.buttons.search_missing_prices", default="Search Missing Prices")
-                self.search_prices_button.setText(f"🔍 {button_text}")
                 
         except Exception as e:
             logging.error(f"Erreur lors de la prévisualisation : {e}")
@@ -2712,18 +2688,7 @@ class ArmorManagementDialog(QDialog):
         """Deletes an armor file after confirmation."""
         armor_delete_file(self, self.template_manager, self.realm, filename)
     
-    def download_selected_armor(self):
-        """Downloads the currently selected armor file (called from preview panel button)."""
-        selected_items = self.table.selectedItems()
-        if not selected_items:
-            return
-        
-        # Get filename from selected row
-        row = selected_items[0].row()
-        filename = self.table.item(row, 0).text()
-        
-        # Call existing download method
-        self.download_armor(filename)
+
     
     def show_context_menu(self, position):
         """Shows context menu for armor files."""
@@ -2735,15 +2700,90 @@ class ArmorManagementDialog(QDialog):
         row = item.row()
         filename = self.table.item(row, 0).text()
         
-        # Build and show context menu
-        from UI.ui_context_menus import ui_show_armor_context_menu
-        callbacks = {
-            'view': self.view_armor,
-            'download': self.download_armor,
-            'open': self.open_armor,
-            'delete': self.delete_armor,
-        }
-        ui_show_armor_context_menu(self, self.table, position, filename, callbacks)
+        from PySide6.QtWidgets import QMenu
+        
+        menu = QMenu(self)
+        
+        # Edit action
+        edit_text = "✏️ " + lang.get("template_context_menu.edit", default="Editer")
+        edit_action = menu.addAction(edit_text)
+        edit_action.triggered.connect(lambda: self._edit_template(filename))
+        
+        # Delete action
+        delete_text = "🗑️ " + lang.get("template_context_menu.delete", default="Supprimer")
+        delete_action = menu.addAction(delete_text)
+        delete_action.triggered.connect(lambda: self._delete_template_dialog(filename))
+        
+        menu.addSeparator()
+        
+        # Download action
+        download_text = "💾 " + lang.get("template_context_menu.download", default="Download")
+        download_action = menu.addAction(download_text)
+        download_action.triggered.connect(lambda: self.download_armor(filename))
+        
+        menu.exec(self.table.mapToGlobal(position))
+    
+    def _edit_template(self, template_name):
+        """Edit template information"""
+        from UI.ui_armory_template_edit_dialog import TemplateEditDialog
+        from Functions.template_metadata import TemplateMetadata
+        
+        try:
+            # Load metadata - template_name includes .txt extension
+            metadata_path = self.template_manager._get_metadata_path(self.realm, template_name)
+            logging.debug(f"Looking for metadata at: {metadata_path}")
+            logging.debug(f"Metadata exists: {metadata_path.exists()}")
+            if not metadata_path.exists():
+                error_msg = f"Fichier de métadonnées non trouvé: {metadata_path}"
+                logging.error(error_msg)
+                QMessageBox.warning(
+                    self,
+                    "Erreur",
+                    error_msg
+                )
+                return
+            
+            metadata = TemplateMetadata.load(metadata_path)
+            if not metadata:
+                QMessageBox.warning(
+                    self,
+                    lang.get("dialogs.titles.error", default="Erreur"),
+                    lang.get("template_edit.metadata_invalid", default="Métadonnées invalides")
+                )
+                return
+            
+            # Open edit dialog
+            dialog = TemplateEditDialog(self, template_name, self.realm, metadata)
+            if dialog.exec():
+                # Reload templates when edit succeeds
+                self.refresh_list()
+        
+        except Exception as e:
+            logging.error(f"Error editing template: {e}")
+            QMessageBox.critical(
+                self,
+                lang.get("dialogs.titles.error", default="Erreur"),
+                f"Erreur lors de l'édition du template: {str(e)}"
+            )
+    
+    def _delete_template_dialog(self, template_name):
+        """Delete a template with confirmation"""
+        reply = QMessageBox.question(
+            self,
+            lang.get("template_context_menu.confirm_delete", default="Confirmer la suppression"),
+            lang.get("template_context_menu.delete_confirm_message", default="Êtes-vous sûr de vouloir supprimer ce template?"),
+            QMessageBox.Yes | QMessageBox.No
+        )
+        
+        if reply == QMessageBox.Yes:
+            if self.template_manager.delete_template(template_name, self.realm):
+                self.refresh_list()
+            else:
+                QMessageBox.warning(
+                    self,
+                    lang.get("dialogs.titles.error", default="Erreur"),
+                    lang.get("template_context_menu.delete_error", default="Impossible de supprimer le template")
+                )
     
     def view_armor(self, filename):
         """Opens armor viewer dialog."""
@@ -2789,44 +2829,7 @@ class ArmorManagementDialog(QDialog):
             logging.error(f"Erreur lors du téléchargement du fichier d'armure : {e}")
             QMessageBox.critical(self, lang.get("dialogs.titles.error"), lang.get("armoury_dialog.messages.download_error", error=str(e)))
     
-    def search_missing_prices(self):
-        """Search for missing item prices online using Eden scraper.
-        Wrapper around items_price_find_missing() for backward compatibility."""
-        if not hasattr(self, 'items_without_price') or not self.items_without_price:
-            QMessageBox.information(
-                self,
-                lang.get("armoury_dialog.search_prices.title", default="Search Prices"),
-                lang.get("armoury_dialog.search_prices.no_items", default="No items without price to search.")
-            )
-            return
-        
-        # Get selected filename
-        selected_items = self.table.selectedItems()
-        if not selected_items:
-            QMessageBox.warning(
-                self,
-                lang.get("armoury_dialog.search_prices.title", default="Search Prices"),
-                lang.get("armoury_dialog.search_prices.no_selection", default="Please select an armor file first.")
-            )
-            return
-        
-        filename = selected_items[0].text()
-        
-        # Show search dialog
-        from Functions.cookie_manager import CookieManager
-        
-        dialog = SearchMissingPricesDialog(
-            self,
-            self.items_without_price,
-            self.realm,
-            self.template_manager,
-            filename,
-            CookieManager()
-        )
-        
-        if dialog.exec() == QDialog.Accepted:
-            # Refresh preview to show updated prices
-            self.on_selection_changed()
+
 
 
 class ArmorUploadPreviewDialog(QDialog):

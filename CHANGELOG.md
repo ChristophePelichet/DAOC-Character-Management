@@ -22,7 +22,12 @@
 **Armory Template Preview - Copper to Platinum Price Conversion**
 - Implemented automatic conversion of raw copper prices to human-readable Platinum (PP) format
 
-  
+**All-Templates View & Template Management**
+- New multi-realm view with tabs (Albion, Hibernia, Midgard) for browsing all templates
+- Template editing dialog with real-time filename preview
+- Column sorting and width persistence in template table
+- Optional season inclusion in template filenames
+
 ### ♻️ Code Refactoring - dialogs.py Module Extraction & UI Helper Systems (Complete)
 
 **Extraction Scope**: Extract business logic from `UI/dialogs.py` into dedicated domain-specific modules for improved maintainability, testability, and code reuse. Consolidate input validation and file dialogs into centralized helper modules.
@@ -139,7 +144,7 @@
 - Consistent error messages and validation rules across all dialogs
 - Complete separation of concerns: business logic extracted from UI layer
 
-### 🐛 Bug Fixes & UI Improvements
+### 🐛 Bug Fixes & UI Improvements (dialogs.py Refactoring)
 - **Dialog Validation Flow**: NewCharacterDialog stays open on validation errors, allowing users to correct input without losing context
   - Override dialog's `accept()` method to validate before closing
   - Invalid name/guild shows error message but keeps dialog open

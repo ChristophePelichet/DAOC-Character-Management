@@ -136,6 +136,11 @@
             "new_character": "➕ New Character",
             "search_herald": "🔍 Search on Herald"
         },
+        "tools": {
+            "label": "Tools",
+            "armory": "⚔️ Armory",
+            "backup": "Backup"
+        },
         "view": {
             "label": "View",
             "columns": "Columns"
@@ -164,10 +169,6 @@
             "label": "Action",
             "resistances": "Resistances",
             "armor_management": "📁 Armoury"
-        },
-        "tools": {
-            "label": "Tools",
-            "backup": "Backup"
         }
     },
     "misc": {
@@ -727,6 +728,7 @@
         "season_label": "Season:",
         "description_label": "Description:",
         "description_placeholder": "Ex: low cost without ml10",
+        "include_season_in_name": "Include season in template name",
         "tags_label": "Tags (optional):",
         "preview_label": "File name:",
         "import_button": "📥 Import",
@@ -737,6 +739,11 @@
         "import_success_message": "Template '{name}' imported successfully",
         "import_error_title": "Import Error",
         "import_error_message": "Cannot import template:\n{error}",
+        "invalid_source_file": "Invalid source file",
+        "select_class": "Please select a class",
+        "select_realm": "Please select a realm",
+        "select_season": "Please select a season",
+        "enter_description": "Please enter a description",
         "duplicate_error": "A template with this name already exists",
         "tags_suggested": {
             "budget": ["low-cost", "budget", "premium", "high-end"],
@@ -769,6 +776,34 @@
         "load_error": "Error loading template",
         "info_items": "{count} items",
         "info_imported": "Imported on {date}"
+    },
+    "template_context_menu": {
+        "edit": "Edit",
+        "delete": "Delete",
+        "download": "Download",
+        "confirm_delete": "Confirm Deletion",
+        "delete_confirm_message": "Are you sure you want to delete this template?",
+        "delete_error": "Error deleting template"
+    },
+    "template_edit": {
+        "window_title": "Edit Template - {name}",
+        "info_group_title": "Template Information",
+        "realm_label": "Realm:",
+        "class_label": "Class:",
+        "season_label": "Season:",
+        "description_label": "Description:",
+        "preview_label": "Preview of new name",
+        "cancel_button": "Cancel",
+        "save_button": "Save",
+        "error_title": "Error",
+        "success_title": "Success",
+        "invalid_fields": "Please fill in all fields correctly",
+        "duplicate_error": "A template with this name already exists",
+        "fill_all_fields": "Please fill in all fields",
+        "select_valid_season": "Please select a valid season",
+        "success_message": "Template modified successfully",
+        "save_error": "Unable to save metadata",
+        "error_message": "Error while modifying:\n{error}"
     },
     "template_preview": {
         "window_title": "Template Preview - {name}",
@@ -1027,6 +1062,7 @@
         "info": "Manage armoury templates created with third-party software (Zenkcraft, etc.)",
         "table_headers": {
             "filename": "Filename",
+            "class": "Class",
             "season": "Season",
             "modified": "Modified Date"
         },
@@ -1334,6 +1370,58 @@
         "select_realm": "Please select a realm",
         "select_class": "Please select a class",
         "select_race": "Please select a race"
+    },
+    "armory": {
+        "all_templates_window_title": "Armory - All Templates",
+        "search_label": "Search:",
+        "search_placeholder": "Search by template name...",
+        "realm_filter_label": "Realm:",
+        "all_realms": "All Realms",
+        "class_filter_label": "Class:",
+        "all_classes": "All Classes",
+        "column_realm": "Realm",
+        "column_class": "Class",
+        "column_name": "Template Name",
+        "column_season": "Season",
+        "column_actions": "Actions",
+        "row_actions": "...",
+        "status_showing": "Showing {shown} of {total} templates",
+        "add_template_button": "➕ Add Template",
+        "add_template_dialog_title": "Select Template File to Add",
+        "add_template_success_title": "Template Added",
+        "add_template_success_message": "Template has been added to the armory successfully!",
+        "add_template_error": "Error adding template",
+        "file_not_found": "Selected file not found",
+        "invalid_filename_format": "Filename must be in format: Class_Season_Description.txt",
+        "select_realm_title": "Select Realm",
+        "select_realm_message": "Which realm do you want to add this template to?",
+        "file_exists_title": "File Exists",
+        "file_exists_message": "This template already exists. Overwrite?",
+        "preview_button": "👁️ Preview",
+        "import_button": "📥 Import Template",
+        "delete_button": "🗑️ Delete",
+        "preview_title": "Template Preview",
+        "preview_panel_title": "Template Preview",
+        "preview_no_content": "No content available for preview",
+        "preview_error": "Error loading preview",
+        "select_template_preview": "Select a template to view preview...",
+        "import_success_title": "Import Successful",
+        "import_success_message": "Template imported successfully!",
+        "import_error": "Error importing template",
+        "delete_confirm_title": "Delete Template",
+        "delete_confirm_message": "Are you sure you want to delete '{name}'?\nThis action cannot be undone.",
+        "delete_success_title": "Deleted",
+        "delete_success_message": "Template deleted successfully",
+        "delete_error_title": "Error",
+        "delete_error": "Error deleting template",
+        "download_dialog_title": "Save Template",
+        "download_success_title": "Success",
+        "download_success_message": "Template downloaded successfully!",
+        "download_error_title": "Error",
+        "context_delete": "Delete Template",
+        "context_download": "Download Template",
+        "error_title": "Error",
+        "window_error": "Error opening templates window"
     },
     "version_check": {
         "current": "Current version:",

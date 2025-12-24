@@ -136,6 +136,11 @@
             "new_character": "➕ Nouveau Personnage",
             "search_herald": "🔍 Rechercher sur Herald"
         },
+        "tools": {
+            "label": "Outils",
+            "armory": "⚔️ Armurerie",
+            "backup": "Sauvegarde"
+        },
         "view": {
             "label": "Affichage",
             "columns": "Colonnes"
@@ -164,10 +169,6 @@
             "label": "Action",
             "resistances": "Résistances",
             "armor_management": "📁 Armurerie"
-        },
-        "tools": {
-            "label": "Outils",
-            "backup": "Sauvegarde"
         }
     },
     "misc": {
@@ -727,6 +728,7 @@
         "season_label": "Saison :",
         "description_label": "Description :",
         "description_placeholder": "Ex: low cost sans ml10",
+        "include_season_in_name": "Inclure la saison dans le nom du template",
         "tags_label": "Tags (optionnel) :",
         "preview_label": "Nom du fichier :",
         "import_button": "📥 Importer",
@@ -738,6 +740,11 @@
         "import_error_title": "Erreur d'import",
         "import_error_message": "Impossible d'importer le template :\n{error}",
         "duplicate_error": "Un template avec ce nom existe déjà",
+        "invalid_source_file": "Fichier source invalide",
+        "select_class": "Veuillez sélectionner une classe",
+        "select_realm": "Veuillez sélectionner un royaume",
+        "select_season": "Veuillez sélectionner une saison",
+        "enter_description": "Veuillez saisir une description",
         "tags_suggested": {
             "budget": ["low-cost", "budget", "premium", "high-end"],
             "content": ["pve", "pvp", "rvr", "solo", "groupe"],
@@ -769,6 +776,34 @@
         "load_error": "Erreur lors du chargement",
         "info_items": "{count} items",
         "info_imported": "Importé le {date}"
+    },
+    "template_context_menu": {
+        "edit": "Éditer",
+        "delete": "Supprimer",
+        "download": "Télécharger",
+        "confirm_delete": "Confirmer la suppression",
+        "delete_confirm_message": "Êtes-vous sûr de vouloir supprimer ce template?",
+        "delete_error": "Impossible de supprimer le template"
+    },
+    "template_edit": {
+        "window_title": "Éditer le template - {name}",
+        "info_group_title": "Informations du template",
+        "realm_label": "Royaume :",
+        "class_label": "Classe :",
+        "season_label": "Saison :",
+        "description_label": "Description :",
+        "preview_label": "Aperçu du nouveau nom",
+        "cancel_button": "Annuler",
+        "save_button": "Sauvegarder",
+        "error_title": "Erreur",
+        "success_title": "Succès",
+        "invalid_fields": "Veuillez remplir tous les champs correctement",
+        "duplicate_error": "Un template avec ce nom existe déjà",
+        "fill_all_fields": "Veuillez remplir tous les champs",
+        "select_valid_season": "Veuillez sélectionner une saison valide",
+        "success_message": "Template modifié avec succès",
+        "save_error": "Impossible de sauvegarder les métadonnées",
+        "error_message": "Erreur lors de la modification :\n{error}"
     },
     "template_preview": {
         "window_title": "Aperçu du template - {name}",
@@ -1027,6 +1062,7 @@
         "info": "Gérez les templates d'armurerie créés avec des logiciels tiers (Zenkcraft, etc.)",
         "table_headers": {
             "filename": "Nom du fichier",
+            "class": "Classe",
             "season": "Saison",
             "modified": "Date de modification"
         },
@@ -1334,6 +1370,58 @@
         "select_realm": "Veuillez sélectionner un royaume",
         "select_class": "Veuillez sélectionner une classe",
         "select_race": "Veuillez sélectionner une race"
+    },
+    "armory": {
+        "all_templates_window_title": "Armurerie - Tous les Modèles",
+        "search_label": "Recherche :",
+        "search_placeholder": "Rechercher par nom de modèle...",
+        "realm_filter_label": "Royaume :",
+        "all_realms": "Tous les Royaumes",
+        "class_filter_label": "Classe :",
+        "all_classes": "Toutes les Classes",
+        "column_realm": "Royaume",
+        "column_class": "Classe",
+        "column_name": "Nom du Modèle",
+        "column_season": "Saison",
+        "column_actions": "Actions",
+        "row_actions": "...",
+        "status_showing": "Affichage de {shown} sur {total} modèles",
+        "add_template_button": "➕ Ajouter un Modèle",
+        "add_template_dialog_title": "Sélectionner un Fichier Modèle à Ajouter",
+        "add_template_success_title": "Modèle Ajouté",
+        "add_template_success_message": "Le modèle a été ajouté à l'armurerie avec succès !",
+        "add_template_error": "Erreur lors de l'ajout du modèle",
+        "file_not_found": "Le fichier sélectionné n'a pas été trouvé",
+        "invalid_filename_format": "Le nom du fichier doit être au format : Classe_Saison_Description.txt",
+        "select_realm_title": "Sélectionner un Royaume",
+        "select_realm_message": "Dans quel royaume voulez-vous ajouter ce modèle ?",
+        "file_exists_title": "Le Fichier Existe",
+        "file_exists_message": "Ce modèle existe déjà. Voulez-vous le remplacer ?",
+        "preview_button": "👁️ Aperçu",
+        "import_button": "📥 Importer un Modèle",
+        "delete_button": "🗑️ Supprimer",
+        "preview_title": "Aperçu du Modèle",
+        "preview_panel_title": "Aperçu du Modèle",
+        "preview_no_content": "Aucun contenu disponible pour l'aperçu",
+        "preview_error": "Erreur lors du chargement de l'aperçu",
+        "select_template_preview": "Sélectionner un modèle pour voir l'aperçu...",
+        "import_success_title": "Importation Réussie",
+        "import_success_message": "Modèle importé avec succès !",
+        "import_error": "Erreur lors de l'importation du modèle",
+        "delete_confirm_title": "Supprimer le Modèle",
+        "delete_confirm_message": "Êtes-vous sûr de vouloir supprimer '{name}' ?\nCette action ne peut pas être annulée.",
+        "delete_success_title": "Supprimé",
+        "delete_success_message": "Modèle supprimé avec succès",
+        "delete_error_title": "Erreur",
+        "delete_error": "Erreur lors de la suppression du modèle",
+        "download_dialog_title": "Enregistrer le Modèle",
+        "download_success_title": "Succès",
+        "download_success_message": "Modèle téléchargé avec succès !",
+        "download_error_title": "Erreur",
+        "context_delete": "Supprimer le Modèle",
+        "context_download": "Télécharger le Modèle",
+        "error_title": "Erreur",
+        "window_error": "Erreur lors de l'ouverture de la fenêtre des modèles"
     },
     "version_check": {
         "current": "Version actuelle:",

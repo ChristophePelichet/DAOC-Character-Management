@@ -4,7 +4,7 @@
 **Date**: November 2025  
 **Last Updated**: December 19, 2025  
 **Component**: `UI/progress_dialog_base.py`, `UI/dialogs.py`, `UI/ui_message_helper.py`, `UI/ui_file_dialogs.py`  
-**Related**: `UI/settings_dialog.py`, `UI/armory_import_dialog.py`, `UI/failed_items_review_dialog.py`, `UI/template_import_dialog.py`, `Functions/character_actions_manager.py`  
+**Related**: `UI/settings_dialog.py`, `UI/armory_import_dialog.py`, `UI/failed_items_review_dialog.py`, `UI/ui_armory_template_import_dialog.py`, `Functions/character_actions_manager.py`  
 
 ---
 

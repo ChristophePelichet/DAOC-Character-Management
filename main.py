@@ -556,7 +556,7 @@ class CharacterApp(QMainWindow):
     def open_eden_debug(self):
         """Ouvre la fenêtre de debug Eden"""
         if self.eden_debug_window is None:
-            from UI.debug_window import EdenDebugWindow
+            from UI.ui_debug_window import EdenDebugWindow
             self.eden_debug_window = EdenDebugWindow(self)
         
         self.eden_debug_window.show()

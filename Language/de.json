@@ -728,6 +728,7 @@
         "season_label": "Saison:",
         "description_label": "Beschreibung:",
         "description_placeholder": "Z.B.: günstig ohne ml10",
+        "include_season_in_name": "Saison im Vorlagennamen einschließen",
         "invalid_source_file": "Ungültige Quelldatei",
         "select_class": "Bitte wählen Sie eine Klasse",
         "select_realm": "Bitte wählen Sie ein Reich",

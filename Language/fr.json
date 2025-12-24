@@ -728,6 +728,7 @@
         "season_label": "Saison :",
         "description_label": "Description :",
         "description_placeholder": "Ex: low cost sans ml10",
+        "include_season_in_name": "Inclure la saison dans le nom du template",
         "tags_label": "Tags (optionnel) :",
         "preview_label": "Nom du fichier :",
         "import_button": "📥 Importer",

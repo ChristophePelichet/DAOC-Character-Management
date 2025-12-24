@@ -1799,6 +1799,276 @@ except Exception as e:
 
 ---
 
+## Armor Manager Module
+
+### Overview
+
+The Armor Manager (`Functions/armor_manager.py`) provides core functionality for managing armor template files at the character level. It handles file operations (upload, list, delete, open) organized by season/realm/character directory structure.
+
+**Key Responsibilities**:
+- File upload with automatic duplicate handling
+- File enumeration with metadata (filename, path, size, modified time)
+- File deletion with error handling
+- File opening with default system application (Windows)
+- Per-character directory management with automatic creation
+
+**File**: `Functions/armor_manager.py` (161 lines)
+
+### Class Reference
+
+#### ArmorManager
+
+**Purpose**: Manage armor template files for a specific character across seasons and realms
+
+**Initialization**:
+```python
+from Functions.armor_manager import ArmorManager
+
+armor_mgr = ArmorManager(
+    season="S3",
+    realm="Albion",
+    character_name="MyCharacter"
+)
+```
+
+**Parameters**:
+- `season` (str): Season identifier (e.g., "S3")
+- `realm` (str): Realm name ("Albion", "Hibernia", or "Midgard")
+- `character_name` (str): Character name for directory organization
+
+**Directory Structure Created**:
+```
+Armory/
+└── S3/
+    └── Albion/
+        └── MyCharacter/          # Created automatically
+            ├── armor1.png
+            ├── armor2.jpg
+            └── armor3.pdf
+```
+
+---
+
+### Method Reference
+
+#### 1. upload_armor()
+
+**Purpose**: Upload an armor template file to character's armory directory with automatic duplicate handling
+
+**Signature**:
+```python
+def upload_armor(self, source_file_path, custom_filename=None) -> str | None
+```
+
+**Parameters**:
+- `source_file_path` (str): Full path to source file to upload
+- `custom_filename` (str, optional): Custom name for file (preserves extension if omitted)
+
+**Returns**:
+- `str`: Full path to uploaded file
+- `None`: If upload failed
+
+**Behavior**:
+1. Validates source file exists
+2. Uses custom filename if provided, otherwise uses original filename
+3. Handles duplicate filenames by appending counter (e.g., `armor_1.png`, `armor_2.png`)
+4. Copies file with metadata preservation (timestamps)
+5. Logs operation as INFO level
+6. Catches exceptions and logs as ERROR
+
+**Example**:
+```python
+result = armor_mgr.upload_armor(
+    source_file_path="C:/Users/User/Documents/armor_config.png",
+    custom_filename="Paladin_Plate"  # Will become "Paladin_Plate.png"
+)
+# Returns: "Armory/S3/Albion/MyCharacter/Paladin_Plate.png"
+```
+
+---
+
+#### 2. list_armors()
+
+**Purpose**: Retrieve all armor template files for character with metadata
+
+**Signature**:
+```python
+def list_armors(self) -> list[dict]
+```
+
+**Returns**:
+```python
+[
+    {
+        'filename': str,      # Filename only (e.g., "armor.png")
+        'path': str,          # Full path to file
+        'size': int,          # File size in bytes
+        'modified': float     # Modification timestamp (Unix time)
+    },
+    ...
+]
+```
+
+**Behavior**:
+1. Returns empty list if directory doesn't exist
+2. Enumerates all files (skips subdirectories)
+3. Collects file metadata via `os.stat()`
+4. Sorts by filename alphabetically
+5. Returns sorted list or empty list if error
+
+**Example**:
+```python
+armors = armor_mgr.list_armors()
+for armor in armors:
+    size_kb = armor['size'] / 1024
+    print(f"{armor['filename']}: {size_kb:.1f} KB")
+
+# Output:
+# armor1.png: 256.3 KB
+# armor2.jpg: 512.0 KB
+```
+
+---
+
+#### 3. delete_armor()
+
+**Purpose**: Delete an armor template file from character's directory
+
+**Signature**:
+```python
+def delete_armor(self, filename) -> bool
+```
+
+**Parameters**:
+- `filename` (str): Filename to delete (not full path)
+
+**Returns**:
+- `True`: File deleted successfully
+- `False`: File not found or deletion failed
+
+**Behavior**:
+1. Constructs full path from filename
+2. Validates file exists before deletion
+3. Removes file via `os.remove()`
+4. Logs success as INFO level
+5. Logs missing file as WARNING level
+6. Catches exceptions and logs as ERROR
+
+**Example**:
+```python
+success = armor_mgr.delete_armor("armor_config.png")
+if success:
+    print("File deleted")
+else:
+    print("Deletion failed or file not found")
+```
+
+---
+
+#### 4. open_armor()
+
+**Purpose**: Open armor template file with default system application (Windows)
+
+**Signature**:
+```python
+def open_armor(self, filename) -> bool
+```
+
+**Parameters**:
+- `filename` (str): Filename to open (not full path)
+
+**Returns**:
+- `True`: File opened successfully
+- `False`: File not found or opening failed
+
+**Behavior**:
+1. Constructs full path from filename
+2. Validates file exists
+3. Opens with `os.startfile()` (Windows-specific)
+4. Logs operation as INFO level
+5. Catches exceptions and logs as ERROR
+6. **Note**: Requires platform detection for macOS/Linux support
+
+**Example**:
+```python
+success = armor_mgr.open_armor("armor_config.png")
+# Opens file in default image viewer
+```
+
+---
+
+#### 5. get_armor_count()
+
+**Purpose**: Get total number of armor template files for character
+
+**Signature**:
+```python
+def get_armor_count(self) -> int
+```
+
+**Returns**:
+- `int`: Number of armor files (0 if none)
+
+**Behavior**:
+1. Calls `list_armors()` internally
+2. Returns length of returned list
+3. Graceful error handling (returns 0 on error)
+
+**Example**:
+```python
+count = armor_mgr.get_armor_count()
+print(f"Character has {count} armor templates")
+```
+
+---
+
+### Integration Points
+
+**Used By**:
+- `Functions/armor_upload_handler.py` - Handles file selection and upload dialogs
+- `UI/dialogs.py` - ArmorManagementDialog displays files and calls methods
+- `UI/ui_debug_window.py` - Debug window for logging operations
+
+**Initialization Pattern**:
+```python
+# In UI/dialogs.py
+class ArmorManagementDialog:
+    def __init__(self, character_id, season, realm, character_name):
+        self.armor_manager = ArmorManager(season, realm, character_name)
+        self.refresh_list()
+```
+
+---
+
+### Error Handling
+
+All methods include try/except blocks with logging:
+- **INFO**: Successful operations (upload, delete, open)
+- **WARNING**: File not found conditions
+- **ERROR**: Exceptions during operations
+
+All exceptions are caught and logged without raising, allowing graceful fallback to UI feedback.
+
+---
+
+### File Structure
+
+```
+Functions/armor_manager.py
+├── Imports (os, shutil, logging, path_manager)
+├── Logger initialization
+├── Class ArmorManager
+│   ├── __init__(season, realm, character_name)
+│   ├── upload_armor(source_file_path, custom_filename)
+│   ├── list_armors()
+│   ├── delete_armor(filename)
+│   ├── open_armor(filename)
+│   └── get_armor_count()
+└── No module-level functions
+```
+
+---
+
 ## Armor Upload & Management Module (Phase 9)
 
 ### Overview

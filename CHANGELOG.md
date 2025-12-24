@@ -135,6 +135,30 @@
 - ✅ English-only code and comments
 - ✅ Complete documentation updates (DIALOG_TECHNICAL_DOCUMENTATION.md, DIALOG_STATE_TECHNICAL_DOCUMENTATION.md, ARMORY_TECHNICAL_DOCUMENTATION.md, etc.)
 
+### ♻️ Debug Logging System Refactoring & Organization
+
+**Module & File Renaming**:
+- `logging_manager.py` → `Functions/debug_logging_manager.py` (clarity on debug-specific purpose)
+- `debug_window.py` → `UI/ui_debug_window.py` (UI naming consistency)
+- `log_source_editor.py` → `Tools/Debug-Log/tools_debug_log_editor.py` (tool-specific naming prefix)
+- `watch_logs.py` → `Tools/Debug-Log/tools_debug_watch_logs.py` (tool-specific naming prefix)
+
+**Organization**:
+- Created dedicated `Tools/Debug-Log/` directory for all debug utilities
+- Updated 25+ imports across entire codebase to reference new module locations
+- Updated all docstrings: 100% English (converted 24+ French docstrings to English)
+
+**Documentation**:
+- Consolidated 3 separate guides into comprehensive `DEBUG_TECHNICAL_DOCUMENTATION.md` (v2.0)
+- Merged: DEBUG v1.0 + LOG_SOURCE_EDITOR_V0.2 + LOGGER_REALTIME_GUIDE
+- Removed obsolete documentation: LOG_SOURCE_EDITOR_V0.2.md, LOGGER_REALTIME_GUIDE_FR.md
+- Added: System architecture diagrams, tool reference tables, usage examples
+
+**Code Quality**:
+- ✅ 100% Ruff compliance (all debug modules verified)
+- ✅ 100% English docstrings and comments
+- ✅ PEP 8 adherence across all debug utilities
+
 **Key Improvements**:
 - Centralized button state management reduces scattered `.setEnabled()` calls
 - Template parser returns items_without_price for accurate button state

@@ -33,6 +33,11 @@
  
 ### ✨ Features
 
+**Sound Control System**
+- Global on/off toggle for all message dialogs in Settings > Audio Settings
+- Default enabled for backward compatibility
+- Complete sound suppression when disabled (no system beeps)
+
 **Armor Resistances Table Viewer**
 - Interactive table viewer for armor resistance values across all DAOC realms (Albion, Midgard, Hibernia)
 - Tab-based realm navigation with realm logo icons
@@ -40,8 +45,6 @@
 - Sortable columns (click headers to sort ascending/descending with numeric awareness)
 - Color-coded resistance values (Green = Resistant, Orange = Neutral, Red = Vulnerable)
 - Settings integration for persistent configuration
-- Multi-language support (EN/FR/DE)
-- Dynamic dialog sizing (500x300 min, 95% screen max)
 
 **Armory Template Preview - Copper to Platinum Price Conversion**
 - Implemented automatic conversion of raw copper prices to human-readable Platinum (PP) format
@@ -57,6 +60,18 @@
 - Toggle maximize button shows window state (□ = normal, ▢ = maximized)
 - Flexible window sizing for better workspace management
 - Visual feedback with state indicator changes
+
+### 🧹 Code Quality - Ruff PEP 8 Cleanup
+
+**Compliance Status**
+- All modified files validated with ruff (21 files checked)
+- 26 initial violations identified and resolved
+- Final status: ✅ 0 errors - All files PEP 8 compliant
+
+**Corrections Applied**
+- Removed 21 unused imports (QMessageBox, Optional, QTextEdit, QSpinBox, QFont, Qt, QSize)
+- Removed 5 unused variables (price, old_name, old_realm, items_updated, logging)
+- Added missing SilentMessageBox import in character_herald_scrapper.py
 
 ### ♻️ Code Refactoring - dialogs.py Module Extraction & UI Helper Systems (Complete)
 

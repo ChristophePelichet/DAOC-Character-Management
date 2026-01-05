@@ -6,13 +6,13 @@ This project would not be possible without the contributions of various open-sou
 
 ## 🎮 DAOC Community
 
-### Dawn of Light (DOL)
-- **Project**: [Dawn of Light](https://github.com/Dawn-of-Light)
-- **Description**: Open-source DAOC server emulator
-
 ### Eden DAOC
 - **Server**: [Eden DAOC](https://www.eden-daoc.net/)
 - **Description**: DAOC private server
+
+### Dawn of Light (DOL)
+- **Project**: [Dawn of Light](https://github.com/Dawn-of-Light)
+- **Description**: Open-source DAOC server emulator
 
 ### Eve-of-Darkness DolModels
 - **Source**: [Eve-of-Darkness/DolModels](https://github.com/Eve-of-Darkness/DolModels)

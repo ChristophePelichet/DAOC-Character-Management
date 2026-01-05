@@ -14,7 +14,15 @@ Complete index of technical and user documentation for the character manager.
   - Multi-realm items management
   - Currency normalization system
   - Database persistence (dual-mode architecture)
-
+### 🛡️ [Armor-Resists/](Armor-Resists/) - Armor Resistances Table
+- **ARMOR_RESISTS_TECHNICAL_DOCUMENTATION.md** - Armor resistances viewer (v0.2.1)
+  - Tab-based realm selection (Albion, Midgard, Hibernia)
+  - Numeric percentage display (-5%, 0%, 10%)
+  - Color-coded text formatting
+  - Configurable display modes (compact/detailed view)
+  - Settings integration with persistent configuration
+  - Multi-language support (EN/FR/DE)
+  - Integration into Tools menu
 ### � [Debug/](Debug/) - Debug Utilities
 - **DEBUG_TECHNICAL_DOCUMENTATION.md** - Debug utilities documentation
   - Freeze Tracker for UI freeze investigation and performance profiling
@@ -117,6 +125,7 @@ Complete index of technical and user documentation for the character manager.
 
 ### System Architecture & Debugging
 - [Armory/ARMORY_TECHNICAL_DOCUMENTATION.md](Armory/ARMORY_TECHNICAL_DOCUMENTATION.md) - Armory system (2636 lines)
+- [Armor-Resists/ARMOR_RESISTS_TECHNICAL_DOCUMENTATION.md](Armor-Resists/ARMOR_RESISTS_TECHNICAL_DOCUMENTATION.md) - Armor resistances table (v0.2.1)
 - [Dialog/DIALOG_TECHNICAL_DOCUMENTATION.md](Dialog/DIALOG_TECHNICAL_DOCUMENTATION.md) - Dialog system (1002 lines)
 - [Settings/SETTINGS_TECHNICAL_DOCUMENTATION.md](Settings/SETTINGS_TECHNICAL_DOCUMENTATION.md) - Settings system (935 lines)
 - [Themes/THEME_TECHNICAL_DOCUMENTATION.md](Themes/THEME_TECHNICAL_DOCUMENTATION.md) - Theme system (1600+ lines)
@@ -140,10 +149,10 @@ Complete index of technical and user documentation for the character manager.
 
 ## 📊 Documentation Statistics
 
-- **Total files**: 13 major technical documents
-- **Total lines**: 16,500+ lines of comprehensive documentation
+- **Total files**: 14 major technical documents
+- **Total lines**: 17,000+ lines of comprehensive documentation
 - **Languages**: FR/EN (DE partial)
-- **Categories**: 13 functional areas
+- **Categories**: 14 functional areas
 - **Documentation by size**:
   - Items Database: 3632 lines
   - Armory System: 2636 lines
@@ -152,6 +161,7 @@ Complete index of technical and user documentation for the character manager.
   - Character System: 1000+ lines (includes validator + migration)
   - Dialog System: 1002 lines
   - Settings System: 935 lines
+  - Armor Resistances: v0.2.1 (multi-realm feature with configurable display)
   - Visual System: 842 lines
   - Language System: 431 lines
   - Help System: 398 lines
@@ -162,6 +172,19 @@ Complete index of technical and user documentation for the character manager.
 ---
 
 ## 🆕 Recent Updates
+
+### January 5, 2026 - v0.2.1 (Armor Resistances Table)
+**Armor Resistances Feature & Settings Integration**
+- NEW: `Armor-Resists/ARMOR_RESISTS_TECHNICAL_DOCUMENTATION.md` (v0.2.1)
+  - Tab-based realm selection with numeric percentage display
+  - Configurable display modes (compact/detailed view)
+  - Settings integration (Settings > Armory)
+  - Persistent configuration (armory.armor_resists_show_classes)
+  - Multi-language support (EN/FR/DE)
+  - Color-coded text formatting (Green/Orange/Red)
+- FEATURE: Mauler class temporarily hidden (implementation pending)
+- BRANCH: `feature/v0.109-armor-resists-table`
+- COMMITS: 5+ commits documenting feature development and refinements
 
 ### December 18, 2025 - v0.109 (Phase 4 - Character Validator)
 **Character System Consolidation & Phase 4 Completion**

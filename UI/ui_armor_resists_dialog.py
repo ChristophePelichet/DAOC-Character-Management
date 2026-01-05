@@ -7,7 +7,8 @@ from PySide6.QtWidgets import (
     QTabWidget
 )
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QColor, QBrush
+from PySide6.QtGui import QColor, QBrush, QIcon
+from pathlib import Path
 
 from Functions.language_manager import lang
 from Functions.config_manager import config
@@ -53,17 +54,34 @@ def ui_armor_resists_create_dialog(parent=None):
     # Check if we should show classes
     show_classes = config.get("armory.armor_resists_show_classes", False)
     
-    # Create tab for each realm
+    # Get base path for images
+    from Functions.path_manager import get_base_path
+    img_path = Path(get_base_path()) / "Img"
+    
+    # Create tab for each realm with logo icons
     realm_mapping = {
-        "albion": lang.get("armor_resists.realm.albion", default="Albion"),
-        "midgard": lang.get("armor_resists.realm.midgard", default="Midgard"),
-        "hibernia": lang.get("armor_resists.realm.hibernia", default="Hibernia")
+        "albion": {
+            "name": lang.get('armor_resists.realm.albion', default='Albion'),
+            "icon": str(img_path / "albion_logo.png")
+        },
+        "midgard": {
+            "name": lang.get('armor_resists.realm.midgard', default='Midgard'),
+            "icon": str(img_path / "midgard_logo.png")
+        },
+        "hibernia": {
+            "name": lang.get('armor_resists.realm.hibernia', default='Hibernia'),
+            "icon": str(img_path / "hibernia_logo.png")
+        }
     }
     
     for realm_key in ["albion", "midgard", "hibernia"]:
         if realm_key in realms:
             table = QTableWidget()
-            tab_widget.addTab(table, realm_mapping[realm_key])
+            realm_info = realm_mapping[realm_key]
+            
+            # Add tab with icon and name
+            icon = QIcon(realm_info["icon"])
+            tab_widget.addTab(table, icon, realm_info["name"])
             
             # Apply filter if classes should not be shown
             realm_data = realms[realm_key]
@@ -103,7 +121,15 @@ def ui_armor_resists_adjust_dialog_size(dialog, tab_widget):
     """
     # Get the first table to calculate size
     if tab_widget.count() == 0:
-        dialog.setGeometry(100, 100, 1000, 500)
+        # Fallback if no tables
+        screen = dialog.screen()
+        screen_rect = screen.availableGeometry()
+        dialog.setGeometry(
+            screen_rect.x(), 
+            screen_rect.y(), 
+            screen_rect.width() // 2, 
+            screen_rect.height() // 2
+        )
         return
     
     first_table = tab_widget.widget(0)
@@ -113,8 +139,8 @@ def ui_armor_resists_adjust_dialog_size(dialog, tab_widget):
     for col in range(first_table.columnCount()):
         width += first_table.columnWidth(col)
     
-    # Add generous spacing for vertical scrollbar, borders, and padding
-    width += 150
+    # Add spacing for vertical scrollbar and padding
+    width += 50
     
     # Calculate required height based on rows and headers
     height = 0
@@ -130,20 +156,22 @@ def ui_armor_resists_adjust_dialog_size(dialog, tab_widget):
     # Add tab bar height
     height += tab_widget.tabBar().height() if tab_widget.tabBar() else 30
     
-    # Add spacing for horizontal scrollbar and borders
-    height += 80
+    # Add spacing for horizontal scrollbar and padding
+    height += 50
     
-    # Constrain size to reasonable limits
-    # Minimum: 1000x500 (wider to accommodate all columns)
+    # Constrain size to screen dimensions
+    # Minimum reasonable size: 500x300
     # Maximum: 95% of screen size
     screen = dialog.screen()
     screen_rect = screen.availableGeometry()
     
+    min_width = 500
+    min_height = 300
     max_width = int(screen_rect.width() * 0.95)
     max_height = int(screen_rect.height() * 0.95)
     
-    final_width = max(1000, min(width, max_width))
-    final_height = max(500, min(height, max_height))
+    final_width = max(min_width, min(width, max_width))
+    final_height = max(min_height, min(height, max_height))
     
     # Center the dialog on screen
     x = (screen_rect.width() - final_width) // 2 + screen_rect.x()
@@ -189,6 +217,17 @@ def ui_armor_resists_populate_table(table, realm_data):
         # Get translated name or default to English name
         name_key = f"name_{lang_code}" if lang_code != "en" else "name"
         header_text = header.get(name_key, header.get("name", ""))
+        
+        # Customize "Armor Type" to just "Armor"
+        if header_text == "Armor Type":
+            header_text = "Armor"
+        elif header_text == "Type d'armure" or header_text == "Rüstungstyp":
+            # For French and German, also simplify
+            if lang_code == "fr":
+                header_text = "Armure"
+            elif lang_code == "de":
+                header_text = "Rüstung"
+        
         header_names.append(header_text)
     
     table.setHorizontalHeaderLabels(header_names)
@@ -225,4 +264,6 @@ def ui_armor_resists_populate_table(table, realm_data):
     
     # Resize columns to content
     header = table.horizontalHeader()
-    header.setSectionResizeMode(QHeaderView.Stretch)
+    # Resize all columns to content width
+    for col in range(table.columnCount()):
+        header.setSectionResizeMode(col, QHeaderView.ResizeToContents)

@@ -1,10 +1,10 @@
 # 🛡️ Armor Resistances Technical Documentation
 
-**Version**: 0.2  
+**Version**: 0.2.2  
 **Date**: January 2026  
-**Last Updated**: January 5, 2026 (Settings Integration & Display Mode Toggle)  
+**Last Updated**: January 5, 2026 (Realm Logo Icons Integration)  
 **Component**: `UI/ui_armor_resists_dialog.py`, `Functions/armor_resists_manager.py`, `UI/settings_dialog.py`  
-**Related**: `Data/armor_resists.json`, `Functions/ui_manager.py`, `main.py`, `Configuration/config.json`
+**Related**: `Data/armor_resists.json`, `Functions/ui_manager.py`, `Functions/path_manager.py`, `main.py`, `Configuration/config.json`, `Img/albion_logo.png`, `Img/midgard_logo.png`, `Img/hibernia_logo.png`
 
 ---
 
@@ -36,7 +36,9 @@ The **Armor Resistances** feature provides users with an interactive table viewe
 - Support multi-language interface (English, French, German)
 
 ### Key Features
-- ✅ Tab-based realm selection (Albion, Midgard, Hibernia)
+- ✅ Tab-based realm selection with logo icons (Albion, Midgard, Hibernia)
+  - **Realm icons** from `Img/` folder (albion_logo.png, midgard_logo.png, hibernia_logo.png)
+  - Icons displayed alongside realm names in tab headers
 - ✅ Numeric percentage display (-5%, 0%, 10%)
 - ✅ Color-coded text (Green = Resistant, Orange = Neutral, Red = Vulnerable)
 - ✅ Configurable display mode (Settings > Armory > "Display classes")
@@ -46,6 +48,15 @@ The **Armor Resistances** feature provides users with an interactive table viewe
 - ✅ Integrated into Tools menu
 - ✅ Non-modal dialog window
 - ✅ Settings integration with persistent configuration
+- ✅ Dynamic dialog sizing (min 500x300, max 95% screen)
+- ✅ Dynamic column sizing (ResizeToContents)
+
+### Current Implementation Status
+
+⚠️ **Mauler Class**: Currently hidden from display (not implemented yet)
+- Data structure exists in configuration files for future implementation
+- Filtered out from armor_resists table display
+- Can be re-enabled when implementation is complete
 
 ---
 
@@ -220,7 +231,8 @@ Each realm table contains:
 │  • 3 tabs (Albion, Midgard, Hibernia)                  │
 │  • Table widget with filtered data                     │
 │  • Maximize/Minimize buttons                           │
-│  • Auto-sized (min 1000x500)                           │
+│  • Auto-sized (min 500x300, max 95% screen)
+  • Realm logos from Img/ folder                           │
 └──────────┬─────────────────────────────────────────────┘
            │
            ↓
@@ -438,9 +450,12 @@ def ui_armor_resists_create_dialog(parent=None) -> QDialog:
 ```
 
 Creates and returns a non-modal dialog with:
-- Dialog window (min 1000x500 pixels, max 95% of screen)
-- QTabWidget with 3 tabs (Albion, Midgard, Hibernia)
+- Dialog window (min 500x300 pixels, max 95% of screen)
+- QTabWidget with 3 tabs with realm logos (Albion, Midgard, Hibernia)
+  - Icons loaded from: `Img/albion_logo.png`, `Img/midgard_logo.png`, `Img/hibernia_logo.png`
+  - Icons displayed alongside realm names in tab headers
 - Table widget per tab (auto-populated)
+- Dynamic column sizing (ResizeToContents)
 - Maximize/Minimize buttons
 - Auto-sizing based on content
 
@@ -650,6 +665,17 @@ Next time dialog opens → Uses new language
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 0.2.2 | 2026-01-05 | ✅ Realm Logo Icons Integration |
+| | | • Added realm logo icons to tab headers |
+| | | • Icons loaded from Img/albion_logo.png, Img/midgard_logo.png, Img/hibernia_logo.png |
+| | | • Dynamic dialog sizing: 500x300 min, 95% screen max |
+| | | • Dynamic column sizing with ResizeToContents |
+| | | • Simplified column headers ("Armor Type" → "Armor") |
+| | | • Code quality improvements (PEP 8 compliance, ruff lint checks) |
+| 0.2.1 | 2026-01-05 | ✅ Mauler Class Hidden Temporarily |
+| | | • Filtered out Mauler class from armor resistances display |
+| | | • Data structure preserved for future implementation |
+| | | • Can be re-enabled when feature is implemented |
 | 0.2 | 2026-01-05 | ✅ Settings Integration & Display Mode Toggle |
 | | | • Added configurable display mode (compact/detailed) |
 | | | • Integrated into Settings > Armory |
@@ -660,7 +686,7 @@ Next time dialog opens → Uses new language
 | | | • Dialog auto-sizing (min 1000x500, max 95% screen) |
 | | | • Maximize/Minimize buttons |
 | | | • Bug fixes and UI refinements |
-| 0.109 | 2026-01-05 | ✅ Initial Release |
+| 0.1 | 2026-01-05 | ✅ Initial Release |
 | | | • Added armor resistance table viewer |
 | | | • Realm selector (Albion, Midgard, Hibernia) |
 | | | • Color-coded display (Green/Orange/Red) |
@@ -754,5 +780,6 @@ Next time dialog opens → Uses new language
 
 **Last Updated**: 2026-01-05  
 **Author**: Ewoline (IA Assistant)  
-**Status**: ✅ Production Ready (v0.2)
+**Status**: ✅ Production Ready (v0.2.1)
 **Features Complete**: Tab-based UI, Numeric display, Configurable view modes, Settings integration
+**Known Limitations**: Mauler class temporarily hidden (implementation pending)

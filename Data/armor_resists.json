@@ -15,7 +15,6 @@
     "Heretic",
     "Necromancer",
     "Reaver",
-    "Mauler",
     "Champion",
     "Druid",
     "Hero",
@@ -413,23 +412,6 @@
           "Class_de": "Räuber",
           "Armor Type_fr": "Mailles",
           "Armor Type_de": "Kette"
-        },
-        {
-          "Class": "Mauler",
-          "Armor Type": "Leather",
-          "Thrust": "10%",
-          "Crush": "-5%",
-          "Slash": "0%",
-          "Cold": "10%",
-          "Energy": "0%",
-          "Heat": "-5%",
-          "Matter": "0%",
-          "Spirit": "0%",
-          "Body": "10%",
-          "Class_fr": "Mauler",
-          "Class_de": "Mauler",
-          "Armor Type_fr": "Cuir",
-          "Armor Type_de": "Leder"
         }
       ]
     },
@@ -747,23 +729,6 @@
           "Class_de": "Valewalker",
           "Armor Type_fr": "Tissu",
           "Armor Type_de": "Stoff"
-        },
-        {
-          "Class": "Mauler",
-          "Armor Type": "Leather",
-          "Thrust": "0%",
-          "Crush": "-5%",
-          "Slash": "10%",
-          "Cold": "10%",
-          "Energy": "0%",
-          "Heat": "-5%",
-          "Matter": "0%",
-          "Spirit": "0%",
-          "Body": "10%",
-          "Class_fr": "Mauler",
-          "Class_de": "Mauler",
-          "Armor Type_fr": "Cuir",
-          "Armor Type_de": "Leder"
         }
       ]
     },
@@ -996,23 +961,6 @@
           "Class_de": "Hexenmeister",
           "Armor Type_fr": "Tissu",
           "Armor Type_de": "Stoff"
-        },
-        {
-          "Class": "Mauler",
-          "Armor Type": "Leather",
-          "Thrust": "10%",
-          "Crush": "0%",
-          "Slash": "-5%",
-          "Cold": "10%",
-          "Energy": "0%",
-          "Heat": "-5%",
-          "Matter": "0%",
-          "Spirit": "0%",
-          "Body": "10%",
-          "Class_fr": "Mauler",
-          "Class_de": "Mauler",
-          "Armor Type_fr": "Cuir",
-          "Armor Type_de": "Leder"
         },
         {
           "Class": "Savage",

@@ -98,6 +98,11 @@ class UIManager:
         armory_action.triggered.connect(self._open_all_templates_window)
         tools_menu.addAction(armory_action)
 
+        # Armor Resistances - View armor resistance table
+        armor_resists_action = QAction(lang.get("menu.tools.armor_resists", default="🛡️ Armor Resistances"), self.main_window)
+        armor_resists_action.triggered.connect(self._open_armor_resists_dialog)
+        tools_menu.addAction(armor_resists_action)
+
         # Menu Aide
         help_menu = menubar.addMenu(lang.get("menu_help"))
 
@@ -598,6 +603,13 @@ class UIManager:
                 lang.get("error_title", default="Erreur"),
                 lang.get("armory.window_error", default="Erreur lors de l'ouverture de la fenêtre Armurerie") + f"\n\n{str(e)}"
             )
+
+    def _open_armor_resists_dialog(self):
+        """Opens the armor resistance table dialog"""
+        from UI.ui_armor_resists_dialog import ui_armor_resists_create_dialog
+        
+        dialog = ui_armor_resists_create_dialog(self.main_window)
+        dialog.exec()
 
     def _open_wiki_documentation(self):
         """Ouvre le Wiki GitHub dans le navigateur"""

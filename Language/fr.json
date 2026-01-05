@@ -1,4 +1,4 @@
-{
+﻿{
     "window": {
         "main_title": "DAOC - Gestion des personnages",
         "welcome_message": "Bienvenue dans le gestionnaire de personnages !",
@@ -139,6 +139,7 @@
         "tools": {
             "label": "Outils",
             "armory": "⚔️ Armurerie",
+            "armor_resists": "🛡️ Résistances d'Armure",
             "backup": "Sauvegarde"
         },
         "view": {
@@ -1435,5 +1436,41 @@
         "update_available": "🎉 Mise à jour disponible !",
         "up_to_date": "✅ À jour",
         "error": "⚠️ Erreur de vérification"
+    },
+    "armor_resists": {
+        "dialog": {
+            "title": "🛡️ Résistances d'Armure"
+        },
+        "realm_label": "Sélectionnez un Royaume :",
+        "realm": {
+            "albion": "Albion",
+            "midgard": "Midgard",
+            "hibernia": "Hibernia"
+        }
+    },
+    "common": {
+        "close_button": "Fermer"
+    },
+    "error": {
+        "data_load_failed": "Erreur lors du chargement des données"
+    }
+}
+},
+    "armor_resists": {
+        "dialog": {
+            "title": " Résistances d'Armure"
+        },
+        "realm_label": "Sélectionnez un Royaume :",
+        "realm": {
+            "albion": "Albion",
+            "midgard": "Midgard",
+            "hibernia": "Hibernia"
+        }
+    },
+    "common": {
+        "close_button": "Fermer"
+    },
+    "error": {
+        "data_load_failed": "Erreur lors du chargement des données"
     }
 }

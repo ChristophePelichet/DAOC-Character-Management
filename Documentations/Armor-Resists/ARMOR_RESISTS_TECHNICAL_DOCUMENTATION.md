@@ -1,8 +1,8 @@
 # 🛡️ Armor Resistances Technical Documentation
 
-**Version**: 0.2.2  
+**Version**: 0.2.3  
 **Date**: January 2026  
-**Last Updated**: January 5, 2026 (Realm Logo Icons Integration)  
+**Last Updated**: January 5, 2026 (Sortable Columns Implementation)  
 **Component**: `UI/ui_armor_resists_dialog.py`, `Functions/armor_resists_manager.py`, `UI/settings_dialog.py`  
 **Related**: `Data/armor_resists.json`, `Functions/ui_manager.py`, `Functions/path_manager.py`, `main.py`, `Configuration/config.json`, `Img/albion_logo.png`, `Img/midgard_logo.png`, `Img/hibernia_logo.png`
 
@@ -36,6 +36,7 @@ The **Armor Resistances** feature provides users with an interactive table viewe
 - Support multi-language interface (English, French, German)
 
 ### Key Features
+- ✅ **Sortable columns** - Click on any column header to sort ascending/descending
 - ✅ Tab-based realm selection with logo icons (Albion, Midgard, Hibernia)
   - **Realm icons** from `Img/` folder (albion_logo.png, midgard_logo.png, hibernia_logo.png)
   - Icons displayed alongside realm names in tab headers
@@ -665,6 +666,12 @@ Next time dialog opens → Uses new language
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 0.2.3 | 2026-01-05 | ✅ Sortable Columns Implementation |
+| | | • Enable table sorting by clicking column headers |
+| | | • Click header to sort ascending, click again for descending |
+| | | • Works on all columns (Class, Armor Type, and resistance values) |
+| | | • Automatic numeric sorting for percentage values |
+| | | • Sorting persists until user clicks different column |
 | 0.2.2 | 2026-01-05 | ✅ Realm Logo Icons Integration |
 | | | • Added realm logo icons to tab headers |
 | | | • Icons loaded from Img/albion_logo.png, Img/midgard_logo.png, Img/hibernia_logo.png |
@@ -760,6 +767,13 @@ Next time dialog opens → Uses new language
 ### Q: Can users filter or search the table?
 **A:** No. Current implementation displays full table without filtering. Could be added as enhancement in future version.
 
+### Q: Can users sort the table by clicking on column headers?
+**A:** Yes! Click on any column header to sort the table by that column. Click again to reverse the sort order (ascending/descending). This works for:
+- **Armor Type**: Alphabetical sort (Cloth, Leather, Studded, etc.)
+- **Class names**: Alphabetical sort (for detailed view)
+- **Resistance values**: Numeric sort (-5%, 0%, 10%, etc.)
+- Sorting persists until you click a different column header
+
 ### Q: What's the purpose of realm selector?
 **A:** DAOC has 3 realms with different armor types and sometimes different resistance values. The selector allows users to switch between realm-specific tables.
 
@@ -769,6 +783,195 @@ Next time dialog opens → Uses new language
 
 - [Armor Resists JSON Data](../../../Data/armor_resists.json)
 - [Functions Implementation](../../../Functions/armor_resists_manager.py)
+
+---
+
+## Commit History & Modifications
+
+### Latest Commits
+
+#### Commit: `ce48340` - feat: add realm logo icons to armor resistances tabs
+**Date**: January 5, 2026  
+**Branch**: `feature/v0.109-armor-resists-table`
+
+**Changes**:
+- ✅ Load PNG icons from Img/ folder (albion_logo.png, midgard_logo.png, hibernia_logo.png)
+- ✅ Display icons alongside realm names in tab headers using QIcon
+- ✅ Update realm_mapping dict to include icon paths and load paths
+- ✅ Improve visual distinction between realms
+- ✅ Update documentation to v0.2.2 with icon integration details
+- ✅ Pass PEP 8 linting checks with ruff
+
+**Files Modified**:
+- `UI/ui_armor_resists_dialog.py` - Added QIcon import, Updated realm_mapping with icons
+- `Documentations/Armor-Resists/ARMOR_RESISTS_TECHNICAL_DOCUMENTATION.md` - Updated to v0.2.2
+
+---
+
+#### Commit: `e14ab39` - docs: update armor resistances documentation to version 0.2.1
+**Date**: January 5, 2026  
+**Branch**: `feature/v0.109-armor-resists-table`
+
+**Changes**:
+- ✅ Update documentation to version 0.2.1
+- ✅ Add Mauler class filtering details
+- ✅ Document hidden class implementation
+- ✅ Add FAQ section with detailed answers
+- ✅ Update version history with all implemented features
+
+**Files Modified**:
+- `Documentations/Armor-Resists/ARMOR_RESISTS_TECHNICAL_DOCUMENTATION.md` - Updated to v0.2.1
+- `Documentations/README.md` - Added Armor-Resists documentation entry
+
+---
+
+#### Previous Commits (Feature Development)
+- Dynamic dialog sizing (500x300 min, 95% screen max)
+- Dynamic column sizing with ResizeToContents
+- Header simplification (Armor Type → Armor in all languages)
+- Settings integration with persistent configuration
+- Tab-based realm selection (Albion, Midgard, Hibernia)
+- Numeric percentage display (-5%, 0%, 10%)
+- Color-coded text display
+- Mauler class filtering
+- Multi-language support (EN/FR/DE)
+- Core armor resistances feature implementation
+
+---
+
+## Code Quality & Testing
+
+### Linting Status
+- ✅ **ruff**: All checks passed
+- ✅ **PEP 8**: Fully compliant
+- ✅ **Syntax**: No errors detected by Pylance
+
+### Testing Performed
+- ✅ Dialog opens without errors
+- ✅ Realm tabs display correctly with icons
+- ✅ Data loads and displays properly
+- ✅ Settings toggle works correctly
+- ✅ Language switching verified (EN/FR/DE)
+- ✅ Dynamic sizing tested on various screen sizes
+- ✅ Column resizing works as expected
+
+---
+
+## Implementation Details by Version
+
+### Version 0.2.3 (Current)
+**Focus**: Sortable Columns Feature
+- Added column sorting functionality via header clicks
+- Implemented using QTableWidget.setSortingEnabled(True)
+- Supports both ascending and descending sort
+- Automatic numeric sorting for percentage values
+- Works on all columns (Armor Type, Class, Resistance values)
+
+**Key Technical Changes**:
+```python
+# Enable sorting by clicking on headers
+table.setSortingEnabled(True)
+```
+
+This single line enables:
+- Click on any column header to sort by that column
+- Click again to toggle between ascending and descending
+- Visual indicator (arrow) shows current sort direction
+- Numeric values automatically sorted numerically (not as strings)
+
+### Version 0.2.2
+**Focus**: Visual Polish with Realm Icons
+- Added realm logo icons from `Img/` folder to tab headers
+- Icons load using QIcon and display alongside realm names
+- Improves UI usability with visual realm distinction
+- Maintained backward compatibility with all features
+
+**Key Technical Changes**:
+```python
+# Import QIcon for rendering images
+from PySide6.QtGui import QIcon
+
+# Load icons and create tabs with them
+icon = QIcon(realm_info["icon"])
+tab_widget.addTab(table, icon, realm_info["name"])
+```
+
+### Version 0.2.1
+**Focus**: Mauler Class Filtering
+- Filtered out Mauler class from display
+- Data structure preserved for future implementation
+- Documentation updated with filtering details
+
+### Version 0.2
+**Focus**: Settings Integration & Display Mode Toggle
+- Added configurable display mode (compact/detailed)
+- Integrated into Settings > Armory
+- Persistent configuration saving
+- Tab-based realm selection (replaced dropdown)
+- Numeric percentage display
+- Color-coded text only (no background)
+- Dialog auto-sizing
+- Multiple UI refinements
+
+### Version 0.1
+**Focus**: Initial Release
+- Armor resistance table viewer
+- Realm selector (Albion, Midgard, Hibernia)
+- Color-coded display (Green/Orange/Red)
+- Multi-language support (EN/FR/DE)
+- Menu integration (Tools → Armor Resistances)
+- PEP 8 compliant code
+
+---
+
+## Future Enhancements
+
+### Possible Improvements for Future Versions
+1. **Search/Filter functionality**
+   - Add search box to filter armor types
+   - Add resistance type filter
+   - Save user filters in config
+   - ✅ **Sorting implemented in v0.2.3** - Column headers now clickable
+
+2. **Dynamic Language Support**
+   - Implement retranslate_ui() callback
+   - Update dialog in real-time when language changes
+   - No need to close/reopen dialog
+
+3. **Mauler Class Support**
+   - Implement Mauler class display
+   - Add Mauler-specific armor types
+   - Update UI to accommodate new data
+
+4. **Export Functionality**
+   - Export table to CSV
+   - Export to PDF
+   - Copy table to clipboard
+
+5. **User Preferences**
+   - Remember last selected realm
+   - Save window position and size
+   - Configurable column visibility
+
+6. **Visual Enhancements**
+   - Add resistance type icons
+   - Implement table sorting
+   - Add row highlighting on hover
+   - Implement dark theme support
+
+---
+
+## Known Limitations
+
+| Limitation | Workaround | Future Solution |
+|-----------|-----------|-----------------|
+| Language updates require dialog restart | Close and reopen dialog | Implement retranslate_ui() |
+| No search/filter functionality | Manually scan table | Add search box widget |
+| No export capability | Manual copy/paste | Implement CSV/PDF export |
+| Fixed armor type list | Edit JSON manually | Add UI for custom armor types |
+| No Mauler class data | N/A | Implement Mauler support |
+
+
 - [UI Dialog Implementation](../../../UI/ui_armor_resists_dialog.py)
 - [Settings Dialog Integration](../../../UI/settings_dialog.py)
 - [Main App Configuration](../../../main.py)

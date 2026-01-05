@@ -210,6 +210,9 @@ def ui_armor_resists_populate_table(table, realm_data):
     # Hide row numbers
     table.verticalHeader().hide()
     
+    # Enable sorting by clicking on headers
+    table.setSortingEnabled(True)
+    
     # Set headers
     header_names = []
     lang_code = lang.current_language

@@ -1,10 +1,10 @@
 # Theme System - Technical Documentation
 
-Complete technical documentation for the theme management system in DAOC Character Manager.
-
 **Version**: 0.108  
+**Date**: November 2025  
 **Last Updated**: November 17, 2025  
-**Module**: `Functions/theme_manager.py`
+**Component**: `Functions/theme_manager.py`  
+**Related**: `Themes/*.json`, `Configuration/config.json`, `Functions/config_manager.py`, `UI/ui_manager.py`, `main.py`
 
 ---
 

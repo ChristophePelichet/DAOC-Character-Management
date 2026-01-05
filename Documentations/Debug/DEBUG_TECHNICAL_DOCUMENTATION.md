@@ -3,9 +3,8 @@
 **Version**: 2.0  
 **Date**: December 2025  
 **Last Updated**: December 24, 2025 (v0.109 Refactoring)  
-**Components**: 
-- `Functions/debug_freeze_tracker.py`
-- `Functions/debug_logging_manager.py`
+**Component**: `Functions/debug_freeze_tracker.py`, `Functions/debug_logging_manager.py`  
+**Related**: `Functions/superadmin_tools.py`, `main.py`, `UI/ui_manager.py`, `UI/dialogs.py`
 - `UI/ui_debug_window.py`
 - `Tools/Debug-Log/tools_debug_log_editor.py`
 - `Tools/Debug-Log/tools_debug_watch_logs.py`

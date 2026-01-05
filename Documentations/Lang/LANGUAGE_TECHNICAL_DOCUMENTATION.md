@@ -1,5 +1,13 @@
 # Language System - Technical Documentation
 
+**Version**: 2.0  
+**Date**: November 2025  
+**Last Updated**: December 2025  
+**Component**: `Functions/language_manager.py`, `Functions/language_migration.py`, `Functions/language_schema.py`  
+**Related**: `Language/*.json`, `Functions/config_manager.py`, `UI/ui_manager.py`, `main.py`
+
+---
+
 ## Table of Contents
 
 1. [Overview](#overview)

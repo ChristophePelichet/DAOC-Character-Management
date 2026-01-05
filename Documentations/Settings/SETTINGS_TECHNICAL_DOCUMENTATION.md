@@ -1,5 +1,13 @@
 # Settings System - Technical Documentation
 
+**Version**: 2.0  
+**Date**: November 2025  
+**Last Updated**: December 2025  
+**Component**: `UI/settings_dialog.py`, `Functions/config_manager.py`  
+**Related**: `Configuration/config.json`, `Functions/config_schema.py`, `Functions/config_migration.py`, `Functions/theme_manager.py`, `Functions/language_manager.py`, `main.py`
+
+---
+
 ## Table of Contents
 
 1. [Overview](#overview)

@@ -1,8 +1,10 @@
 ﻿# Items Database - Technical Documentation
-**Version:** 2.0  
-**Last Updated:** 2025-11-19  
-**Project:** DAOC Character Management  
-**Component:** Items Database & Eden Scraping System
+
+**Version**: 2.0  
+**Date**: November 2025  
+**Last Updated**: December 2025  
+**Component**: `Functions/items_database_manager.py`, `Functions/items_parser.py`, `Functions/items_scraper.py`, `Functions/build_items_database.py`  
+**Related**: `Data/items_database_src.json`, `Functions/eden_scraper.py`, `Functions/items_price_manager.py`, `main.py`
 
 ---
 

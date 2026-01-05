@@ -1,8 +1,10 @@
 # GitHub Wiki Help System - Implementation Documentation
 
-**Date**: November 15, 2025  
 **Version**: 0.108  
-**Feature**: Wiki-based documentation system
+**Date**: November 2025  
+**Last Updated**: December 2025  
+**Component**: `Functions/help_manager.py`  
+**Related**: `main.py`, `UI/ui_manager.py`, `Functions/config_manager.py`
 
 ---
 

@@ -93,7 +93,7 @@ class SilentMessageBox:
             )
 
     @staticmethod
-    def question(parent, title: str, text: str) -> int:
+    def question(parent, title: str, text: str, buttons=None, defaultButton=None) -> int:
         """
         Show a question message box with Yes/No buttons.
 
@@ -101,13 +101,20 @@ class SilentMessageBox:
             parent: Parent widget
             title: Dialog title
             text: Message text
+            buttons: Qt button flags (optional, for compatibility)
+            defaultButton: Default button (optional, for compatibility)
 
         Returns:
             int: Button result code (StandardButton.Yes or StandardButton.No)
         """
         if SoundManager.should_play_sounds():
             from PySide6.QtWidgets import QMessageBox
-            return QMessageBox.question(parent, title, text)
+            if buttons is not None and defaultButton is not None:
+                return QMessageBox.question(parent, title, text, buttons, defaultButton)
+            elif buttons is not None:
+                return QMessageBox.question(parent, title, text, buttons)
+            else:
+                return QMessageBox.question(parent, title, text)
         else:
             SoundManager.suppress_pending_sounds()
             return SilentMessageBox._create_custom_dialog(

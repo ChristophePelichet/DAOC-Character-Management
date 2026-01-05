@@ -80,17 +80,7 @@ def armor_resists_format_cell_value(value):
     if not value:
         return "—"
     
-    value = str(value).strip()
-    
-    # Map display names
-    if value == "Resistant":
-        return "✓"
-    elif value == "Vulnerable":
-        return "✗"
-    elif value == "Neutral":
-        return "◯"
-    else:
-        return value
+    return str(value).strip()
 
 
 def armor_resists_get_cell_color(value):

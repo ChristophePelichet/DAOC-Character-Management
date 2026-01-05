@@ -4,7 +4,7 @@ Armor Resistances Dialog UI - Creates and manages the armor resistance table dia
 
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QTableWidget, QTableWidgetItem, QHeaderView,
-    QComboBox, QPushButton, QLabel
+    QTabWidget
 )
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor, QBrush
@@ -13,14 +13,13 @@ from Functions.language_manager import lang
 from Functions.armor_resists_manager import (
     armor_resists_load_data,
     armor_resists_get_realms_data,
-    armor_resists_format_cell_value,
     armor_resists_get_cell_color
 )
 
 
 def ui_armor_resists_create_dialog(parent=None):
     """
-    Create and return the armor resistance table dialog.
+    Create and return the armor resistance table dialog with tabs for each realm.
     
     Args:
         parent: Parent widget.
@@ -30,39 +29,37 @@ def ui_armor_resists_create_dialog(parent=None):
     """
     dialog = QDialog(parent)
     dialog.setWindowTitle(lang.get("armor_resists.dialog.title", default="🛡️ Armor Resistances"))
-    dialog.setGeometry(100, 100, 1000, 600)
+    dialog.setGeometry(100, 100, 1200, 700)
     
     layout = QVBoxLayout()
     
-    # Realm selector
-    selector_layout = QVBoxLayout()
-    realm_label = QLabel(lang.get("armor_resists.realm_label", default="Select Realm:"))
-    realm_combo = QComboBox()
-    selector_layout.addWidget(realm_label)
-    selector_layout.addWidget(realm_combo)
+    # Tab widget for realms
+    tab_widget = QTabWidget()
     
-    layout.addLayout(selector_layout)
+    # Load data
+    data = armor_resists_load_data()
     
-    # Table widget
-    table = QTableWidget()
-    table.setColumnCount(0)
-    table.setRowCount(0)
-    layout.addWidget(table)
+    if not data:
+        dialog.setLayout(layout)
+        return dialog
     
-    # Close button
-    close_button = QPushButton(lang.get("common.close_button", default="Close"))
-    close_button.clicked.connect(dialog.accept)
-    layout.addWidget(close_button)
+    realms = armor_resists_get_realms_data(data)
     
+    # Create tab for each realm
+    realm_mapping = {
+        "albion": lang.get("armor_resists.realm.albion", default="Albion"),
+        "midgard": lang.get("armor_resists.realm.midgard", default="Midgard"),
+        "hibernia": lang.get("armor_resists.realm.hibernia", default="Hibernia")
+    }
+    
+    for realm_key in ["albion", "midgard", "hibernia"]:
+        if realm_key in realms:
+            table = QTableWidget()
+            tab_widget.addTab(table, realm_mapping[realm_key])
+            ui_armor_resists_populate_table(table, realms[realm_key])
+    
+    layout.addWidget(tab_widget)
     dialog.setLayout(layout)
-    
-    # Load and populate data
-    ui_armor_resists_load_and_populate(dialog, realm_combo, table)
-    
-    # Connect realm selection change
-    realm_combo.currentIndexChanged.connect(
-        lambda: ui_armor_resists_populate_realm(table, realm_combo)
-    )
     
     return dialog
 
@@ -76,31 +73,7 @@ def ui_armor_resists_load_and_populate(dialog, realm_combo, table):
         realm_combo: The realm combo box.
         table: The table widget.
     """
-    data = armor_resists_load_data()
-    
-    if not data:
-        table.setColumnCount(1)
-        table.setRowCount(1)
-        item = QTableWidgetItem(lang.get("error.data_load_failed", default="Error loading data"))
-        table.setItem(0, 0, item)
-        return
-    
-    realms = armor_resists_get_realms_data(data)
-    
-    # Populate realm combo box
-    realm_mapping = {
-        "albion": lang.get("armor_resists.realm.albion", default="Albion"),
-        "midgard": lang.get("armor_resists.realm.midgard", default="Midgard"),
-        "hibernia": lang.get("armor_resists.realm.hibernia", default="Hibernia")
-    }
-    
-    for realm_key in ["albion", "midgard", "hibernia"]:
-        if realm_key in realms:
-            realm_combo.addItem(realm_mapping[realm_key], realm_key)
-    
-    # Populate table with first realm
-    if realm_combo.count() > 0:
-        ui_armor_resists_populate_realm(table, realm_combo)
+    pass  # No longer used with tab widget
 
 
 def ui_armor_resists_populate_realm(table, realm_combo):
@@ -111,18 +84,17 @@ def ui_armor_resists_populate_realm(table, realm_combo):
         table: The table widget.
         realm_combo: The realm combo box.
     """
-    realm_key = realm_combo.currentData()
+    pass  # No longer used with tab widget
+
+
+def ui_armor_resists_populate_table(table, realm_data):
+    """
+    Populate a table with data for a specific realm.
     
-    if not realm_key:
-        return
-    
-    data = armor_resists_load_data()
-    realms = armor_resists_get_realms_data(data)
-    
-    if realm_key not in realms:
-        return
-    
-    realm_data = realms[realm_key]
+    Args:
+        table: The table widget.
+        realm_data: The realm data dictionary.
+    """
     headers = realm_data.get("headers", [])
     rows = realm_data.get("data", [])
     
@@ -148,10 +120,10 @@ def ui_armor_resists_populate_realm(table, realm_combo):
             header_name = header.get("name", "")
             cell_value = row_data.get(header_name, "")
             
-            # Format the cell value
+            # Display the cell value
             if header_name != "Class" and header_name != "Armor Type":
-                # These are resistance values
-                display_value = armor_resists_format_cell_value(cell_value)
+                # These are resistance values - display raw value (not symbols)
+                display_value = str(cell_value)
             else:
                 # Class and Armor Type columns - use localized version if available
                 localized_key = f"{header_name}_{lang_code}" if lang_code != "en" else header_name
@@ -168,18 +140,16 @@ def ui_armor_resists_populate_realm(table, realm_combo):
                     item.setBackground(QBrush(bg_color))
                     item.setForeground(QBrush(text_color))
             
-            # Center align and bold header row
+            # Center align
             item.setTextAlignment(Qt.AlignCenter)
-            if row_idx == 0:
-                font = item.font()
-                font.setBold(True)
-                item.setFont(font)
             
             table.setItem(row_idx, col_idx, item)
     
     # Resize columns to content
     header = table.horizontalHeader()
     header.setSectionResizeMode(QHeaderView.Stretch)
+
+
 
 
 def ui_armor_resists_apply_cell_colors(table):

@@ -2144,6 +2144,26 @@ class ConfigurationDialog(QDialog):
         armory_info_layout.addWidget(self.armory_db_info_label, 1)
         armory_layout.addLayout(armory_info_layout)
         
+        # Armor Resistances Settings
+        armor_resists_layout = QVBoxLayout()
+        armor_resists_label = QLabel(lang.get("armor_resists.settings.title", default="📊 Armor Resistances Table:"))
+        armor_resists_label.setStyleSheet("font-weight: bold; padding-top: 10px;")
+        armor_resists_layout.addWidget(armor_resists_label)
+        logging.debug("Armor resistances label created")
+        
+        self.armor_resists_show_classes_check = QCheckBox(
+            lang.get("armor_resists.settings.show_classes", default="Display classes (detailed view)")
+        )
+        self.armor_resists_show_classes_check.setToolTip(
+            lang.get("armor_resists.settings.show_classes_tooltip", 
+                    default="If enabled, displays resistances for each class.\nIf disabled, displays only resistances by armor type.")
+        )
+        armor_resists_layout.addWidget(self.armor_resists_show_classes_check)
+        logging.debug("Armor resistances checkbox created and added to layout")
+        
+        armory_layout.addLayout(armor_resists_layout)
+        logging.debug("Armor resistances layout added to armory layout")
+        
         armory_group.setLayout(armory_layout)
         content_layout.addWidget(armory_group)
         logging.debug("Armory settings group added to content_layout")
@@ -2261,6 +2281,12 @@ class ConfigurationDialog(QDialog):
         self.allow_browser_download_check.setChecked(allow_download)
         
         # Update armory database info
+        armor_resists_show_classes = config.get("armory.armor_resists_show_classes", False)
+        logging.debug(f"Loading armor_resists_show_classes from config: {armor_resists_show_classes}")
+        logging.debug(f"Checkbox object: {self.armor_resists_show_classes_check}")
+        self.armor_resists_show_classes_check.setChecked(armor_resists_show_classes)
+        logging.debug(f"Checkbox checked state set to: {armor_resists_show_classes}")
+        
         self.update_armory_db_info()
 
     def browse_folder(self, line_edit, title_key):
@@ -2337,6 +2363,15 @@ class ConfigurationDialog(QDialog):
             if hasattr(self, 'armory_db_info_label'):
                 self.armory_db_info_label.setText("Erreur")
                 self.armory_db_info_label.setStyleSheet("color: #f44336;")
+
+    def accept(self):
+        """Save configuration and close dialog."""
+        # Save armor resists display setting
+        config.set("armory.armor_resists_show_classes", 
+                   self.armor_resists_show_classes_check.isChecked())
+        
+        # Call parent accept to close dialog
+        super().accept()
 
 
 class ArmorManagementDialog(QDialog):

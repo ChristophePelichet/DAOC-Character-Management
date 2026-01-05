@@ -139,6 +139,7 @@
         "tools": {
             "label": "Outils",
             "armory": "⚔️ Armurerie",
+            "armor_resists": "🛡️ Résistances d'Armure",
             "backup": "Sauvegarde"
         },
         "view": {
@@ -752,12 +753,43 @@
         "select_season": "Veuillez sélectionner une saison",
         "enter_description": "Veuillez saisir une description",
         "tags_suggested": {
-            "budget": ["low-cost", "budget", "premium", "high-end"],
-            "content": ["pve", "pvp", "rvr", "solo", "groupe"],
-            "level": ["débutant", "intermédiaire", "avancé"],
-            "ml": ["ml1", "ml5", "ml10", "sans-ml"],
-            "source": ["eden", "officiel", "communauté", "personnel"],
-            "spec": ["heal", "dps", "tank", "support", "cc"]
+            "budget": [
+                "low-cost",
+                "budget",
+                "premium",
+                "high-end"
+            ],
+            "content": [
+                "pve",
+                "pvp",
+                "rvr",
+                "solo",
+                "groupe"
+            ],
+            "level": [
+                "débutant",
+                "intermédiaire",
+                "avancé"
+            ],
+            "ml": [
+                "ml1",
+                "ml5",
+                "ml10",
+                "sans-ml"
+            ],
+            "source": [
+                "eden",
+                "officiel",
+                "communauté",
+                "personnel"
+            ],
+            "spec": [
+                "heal",
+                "dps",
+                "tank",
+                "support",
+                "cc"
+            ]
         }
     },
     "template_list": {
@@ -1435,5 +1467,27 @@
         "update_available": "🎉 Mise à jour disponible !",
         "up_to_date": "✅ À jour",
         "error": "⚠️ Erreur de vérification"
+    },
+    "armor_resists": {
+        "dialog": {
+            "title": "🛡️ Résistances d'Armure"
+        },
+        "realm_label": "Sélectionnez un Royaume :",
+        "realm": {
+            "albion": "Albion",
+            "midgard": "Midgard",
+            "hibernia": "Hibernia"
+        },
+        "settings": {
+            "title": "📊 Tableau des résistances d'armure :",
+            "show_classes": "Afficher les classes (vue détaillée)",
+            "show_classes_tooltip": "Si activé, affiche les résistances pour chaque classe.\nSi désactivé, affiche seulement les résistances par type d'armure."
+        }
+    },
+    "common": {
+        "close_button": "Fermer"
+    },
+    "error": {
+        "data_load_failed": "Erreur lors du chargement des données"
     }
 }

@@ -139,6 +139,7 @@
         "tools": {
             "label": "Tools",
             "armory": "⚔️ Armory",
+            "armor_resists": "🛡️ Armor Resistances",
             "backup": "Backup"
         },
         "view": {
@@ -1435,5 +1436,27 @@
         "update_available": "🎉 Update available!",
         "up_to_date": "✅ Up to date",
         "error": "⚠️ Check failed"
+    },
+    "armor_resists": {
+        "dialog": {
+            "title": "🛡️ Armor Resistances"
+        },
+        "realm_label": "Select Realm:",
+        "realm": {
+            "albion": "Albion",
+            "midgard": "Midgard",
+            "hibernia": "Hibernia"
+        },
+        "settings": {
+            "title": "🛡️ Armor Resistances Table:",
+            "show_classes": "Display classes (detailed view)",
+            "show_classes_tooltip": "If enabled, displays resistances for each class.\nIf disabled, displays only resistances by armor type."
+        }
+    },
+    "common": {
+        "close_button": "Close"
+    },
+    "error": {
+        "data_load_failed": "Error loading data"
     }
 }

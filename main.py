@@ -730,6 +730,11 @@ class CharacterApp(QMainWindow):
         if language_changed:
             config.set("ui.language", new_lang_code)
         
+        # Armor resistances display settings
+        if hasattr(dialog, 'armor_resists_show_classes_check'):
+            config.set("armory.armor_resists_show_classes", 
+                      dialog.armor_resists_show_classes_check.isChecked())
+        
         # Save all configuration changes to disk
         config.save_config()
         

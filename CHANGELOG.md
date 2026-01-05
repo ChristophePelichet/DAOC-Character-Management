@@ -28,6 +28,16 @@
  
 ### ✨ Features
 
+**Armor Resistances Table Viewer**
+- Interactive table viewer for armor resistance values across all DAOC realms (Albion, Midgard, Hibernia)
+- Tab-based realm navigation with realm logo icons
+- Configurable display modes: compact (5 armor types) or detailed (16+ rows with classes)
+- Sortable columns (click headers to sort ascending/descending with numeric awareness)
+- Color-coded resistance values (Green = Resistant, Orange = Neutral, Red = Vulnerable)
+- Settings integration for persistent configuration
+- Multi-language support (EN/FR/DE)
+- Dynamic dialog sizing (500x300 min, 95% screen max)
+
 **Armory Template Preview - Copper to Platinum Price Conversion**
 - Implemented automatic conversion of raw copper prices to human-readable Platinum (PP) format
 

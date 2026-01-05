@@ -139,6 +139,7 @@
         "tools": {
             "label": "Werkzeuge",
             "armory": "⚔️ Rüstkammer",
+            "armor_resists": "🛡️ Rüstungswiderstände",
             "backup": "Sicherung"
         },
         "view": {
@@ -1424,5 +1425,27 @@
         "update_available": "🎉 Update verfügbar!",
         "up_to_date": "✅ Aktuell",
         "error": "⚠️ Prüfung fehlgeschlagen"
+    },
+    "armor_resists": {
+        "dialog": {
+            "title": "🛡️ Rüstungswiderstände"
+        },
+        "realm_label": "Königreich auswählen:",
+        "realm": {
+            "albion": "Albion",
+            "midgard": "Midgard",
+            "hibernia": "Hibernia"
+        },
+        "settings": {
+            "title": "🛡️ Rüstungswiderstandstabelle:",
+            "show_classes": "Klassen anzeigen (Detaillierte Ansicht)",
+            "show_classes_tooltip": "Wenn aktiviert, werden Widerstände für jede Klasse angezeigt.\nWenn deaktiviert, werden nur Widerstände nach Rüstungstyp angezeigt."
+        }
+    },
+    "common": {
+        "close_button": "Schließen"
+    },
+    "error": {
+        "data_load_failed": "Fehler beim Laden der Daten"
     }
 }

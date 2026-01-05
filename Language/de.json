@@ -1435,6 +1435,10 @@
             "albion": "Albion",
             "midgard": "Midgard",
             "hibernia": "Hibernia"
+        },
+        "settings": {
+            "show_classes": "Klassen anzeigen (Detaillierte Ansicht)",
+            "show_classes_tooltip": "Wenn aktiviert, werden Widerstände für jede Klasse angezeigt.\nWenn deaktiviert, werden nur Widerstände nach Rüstungstyp angezeigt."
         }
     },
     "common": {

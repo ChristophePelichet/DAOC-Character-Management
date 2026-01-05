@@ -115,3 +115,54 @@ def armor_resists_get_cell_color(value):
             return (255, 152, 0)  # Orange
     except (ValueError, AttributeError):
         return None
+
+def armor_resists_filter_armor_types_only(realm_data):
+    """
+    Filter realm data to show only armor types without class duplicates.
+    
+    Args:
+        realm_data (dict): The realm data dictionary with headers and data.
+    
+    Returns:
+        dict: Filtered realm data with Class column removed and one row per armor type.
+    """
+    if not realm_data:
+        return {}
+    
+    headers = realm_data.get("headers", [])
+    rows = realm_data.get("data", [])
+    
+    # Create new headers without Class column
+    filtered_headers = [h for h in headers if h.get("name") != "Class"]
+    
+    # Track seen armor types to keep only first occurrence
+    seen_armor_types = set()
+    filtered_rows = []
+    
+    for row in rows:
+        armor_type = row.get("Armor Type", "")
+        
+        # Skip if we've already seen this armor type
+        if armor_type in seen_armor_types:
+            continue
+        
+        seen_armor_types.add(armor_type)
+        
+        # Create new row without Class data
+        filtered_row = {}
+        for header in filtered_headers:
+            header_name = header.get("name", "")
+            filtered_row[header_name] = row.get(header_name, "")
+        
+        # Keep localized versions of Armor Type if present
+        for key in ["Armor Type_fr", "Armor Type_de"]:
+            if key in row:
+                filtered_row[key] = row[key]
+        
+        filtered_rows.append(filtered_row)
+    
+    return {
+        "title": realm_data.get("title", ""),
+        "headers": filtered_headers,
+        "data": filtered_rows
+    }

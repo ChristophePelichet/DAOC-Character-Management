@@ -2144,6 +2144,23 @@ class ConfigurationDialog(QDialog):
         armory_info_layout.addWidget(self.armory_db_info_label, 1)
         armory_layout.addLayout(armory_info_layout)
         
+        # Armor Resistances Settings
+        armor_resists_layout = QVBoxLayout()
+        armor_resists_label = QLabel("📊 Tableau des résistances d'armure:")
+        armor_resists_label.setStyleSheet("font-weight: bold; padding-top: 10px;")
+        armor_resists_layout.addWidget(armor_resists_label)
+        
+        self.armor_resists_show_classes_check = QCheckBox(
+            "Afficher les classes (vue détaillée)"
+        )
+        self.armor_resists_show_classes_check.setToolTip(
+            "Si activé, affiche les résistances pour chaque classe.\n"
+            "Si désactivé, affiche seulement les résistances par type d'armure."
+        )
+        armor_resists_layout.addWidget(self.armor_resists_show_classes_check)
+        
+        armory_layout.addLayout(armor_resists_layout)
+        
         armory_group.setLayout(armory_layout)
         content_layout.addWidget(armory_group)
         logging.debug("Armory settings group added to content_layout")
@@ -2261,6 +2278,9 @@ class ConfigurationDialog(QDialog):
         self.allow_browser_download_check.setChecked(allow_download)
         
         # Update armory database info
+        armor_resists_show_classes = config.get("armory.armor_resists_show_classes", False)
+        self.armor_resists_show_classes_check.setChecked(armor_resists_show_classes)
+        
         self.update_armory_db_info()
 
     def browse_folder(self, line_edit, title_key):
@@ -2337,6 +2357,15 @@ class ConfigurationDialog(QDialog):
             if hasattr(self, 'armory_db_info_label'):
                 self.armory_db_info_label.setText("Erreur")
                 self.armory_db_info_label.setStyleSheet("color: #f44336;")
+
+    def accept(self):
+        """Save configuration and close dialog."""
+        # Save armor resists display setting
+        config.set("armory.armor_resists_show_classes", 
+                   self.armor_resists_show_classes_check.isChecked())
+        
+        # Call parent accept to close dialog
+        super().accept()
 
 
 class ArmorManagementDialog(QDialog):

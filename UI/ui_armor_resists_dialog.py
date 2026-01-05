@@ -10,9 +10,11 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor, QBrush
 
 from Functions.language_manager import lang
+from Functions.config_manager import config
 from Functions.armor_resists_manager import (
     armor_resists_load_data,
     armor_resists_get_realms_data,
+    armor_resists_filter_armor_types_only,
     armor_resists_get_cell_color
 )
 
@@ -48,6 +50,9 @@ def ui_armor_resists_create_dialog(parent=None):
     
     realms = armor_resists_get_realms_data(data)
     
+    # Check if we should show classes
+    show_classes = config.get("armory.armor_resists_show_classes", False)
+    
     # Create tab for each realm
     realm_mapping = {
         "albion": lang.get("armor_resists.realm.albion", default="Albion"),
@@ -59,7 +64,13 @@ def ui_armor_resists_create_dialog(parent=None):
         if realm_key in realms:
             table = QTableWidget()
             tab_widget.addTab(table, realm_mapping[realm_key])
-            ui_armor_resists_populate_table(table, realms[realm_key])
+            
+            # Apply filter if classes should not be shown
+            realm_data = realms[realm_key]
+            if not show_classes:
+                realm_data = armor_resists_filter_armor_types_only(realm_data)
+            
+            ui_armor_resists_populate_table(table, realm_data)
     
     layout.addWidget(tab_widget)
     dialog.setLayout(layout)

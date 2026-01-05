@@ -1446,6 +1446,10 @@
             "albion": "Albion",
             "midgard": "Midgard",
             "hibernia": "Hibernia"
+        },
+        "settings": {
+            "show_classes": "Display classes (detailed view)",
+            "show_classes_tooltip": "If enabled, displays resistances for each class.\nIf disabled, displays only resistances by armor type."
         }
     },
     "common": {

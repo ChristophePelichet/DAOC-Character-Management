@@ -2,9 +2,10 @@
 Template Edit Dialog - Interface for editing template metadata information
 """
 
+from UI.ui_sound_manager import SilentMessageBox
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QLabel,
-    QGroupBox, QComboBox, QMessageBox, QFormLayout, QLineEdit
+    QGroupBox, QComboBox, QFormLayout, QLineEdit
 )
 from PySide6.QtCore import Qt
 
@@ -251,7 +252,7 @@ class TemplateEditDialog(QDialog):
         new_description = self.description_edit.text().strip()
 
         if not new_class or not new_description or new_season == "Personnalisé...":
-            QMessageBox.warning(
+            SilentMessageBox.warning(
                 self,
                 lang.get("template_edit.error_title", default="Erreur"),
                 lang.get(
@@ -287,7 +288,7 @@ class TemplateEditDialog(QDialog):
 
             # Check if new name already exists
             if new_template_path.exists():
-                QMessageBox.warning(
+                SilentMessageBox.warning(
                     self,
                     lang.get("template_edit.error_title", default="Erreur"),
                     lang.get(
@@ -324,7 +325,7 @@ class TemplateEditDialog(QDialog):
                 # Update template manager index
                 self.template_manager.update_index()
 
-                QMessageBox.information(
+                SilentMessageBox.information(
                     self,
                     lang.get("template_edit.success_title", default="Succès"),
                     lang.get(
@@ -334,7 +335,7 @@ class TemplateEditDialog(QDialog):
                 )
                 self.accept()
             else:
-                QMessageBox.critical(
+                SilentMessageBox.critical(
                     self,
                     lang.get("template_edit.error_title", default="Erreur"),
                     lang.get(
@@ -344,7 +345,7 @@ class TemplateEditDialog(QDialog):
                 )
 
         except Exception as e:
-            QMessageBox.critical(
+            SilentMessageBox.critical(
                 self,
                 lang.get("template_edit.error_title", default="Erreur"),
                 lang.get(

@@ -1443,7 +1443,15 @@
         }
     },
     "common": {
-        "close_button": "Schließen"
+        "close_button": "Schließen",
+        "dialog_ok": "OK",
+        "dialog_yes": "Ja",
+        "dialog_no": "Nein"
+    },
+    "config": {
+        "audio_group_title": "Audioeinstellungen",
+        "enable_sounds_label": "Nachrichtenfeld-Sounds aktivieren",
+        "enable_sounds_tooltip": "Deaktivieren Sie dies, um Systembiepieptöne in Nachrichtenkästchen zu unterdrücken"
     },
     "error": {
         "data_load_failed": "Fehler beim Laden der Daten"

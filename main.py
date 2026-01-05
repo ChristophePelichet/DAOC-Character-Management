@@ -18,6 +18,7 @@ if sys.stderr is None:
 if sys.stdout is None:
     sys.stdout = open('nul', 'w') if sys.platform == 'win32' else open('/dev/null', 'w')
 
+from UI.ui_sound_manager import SilentMessageBox
 from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QMessageBox, QDialog, QStyleFactory, QHBoxLayout, QLabel, QProgressBar
 from PySide6.QtGui import QStandardItemModel, QIcon
 from PySide6.QtCore import Qt, Slot, QTimer
@@ -259,7 +260,7 @@ class CharacterApp(QMainWindow):
         # Check if the personnage a une URL Herald
         herald_url = character_data.get('url', '').strip()
         if not herald_url:
-            QMessageBox.warning(
+            SilentMessageBox.warning(
                 self,
                 lang.get("update_char_error"),
                 lang.get("update_char_no_url")
@@ -410,7 +411,7 @@ class CharacterApp(QMainWindow):
         self._stop_main_char_update_thread()
         
         if not success:
-            QMessageBox.critical(
+            SilentMessageBox.critical(
                 self,
                 lang.get("update_char_error"),
                 f"{lang.get('update_char_error')}: {error_msg}"
@@ -425,7 +426,7 @@ class CharacterApp(QMainWindow):
         
         # ✅ Check if there are any changes before showing dialog
         if not dialog.has_changes():
-            QMessageBox.information(
+            SilentMessageBox.information(
                 self,
                 lang.get("update_char_no_changes_title", default="Aucune mise à jour"),
                 lang.get("update_char_already_uptodate", default="Le personnage est déjà à jour. Aucune modification détectée.")
@@ -436,7 +437,7 @@ class CharacterApp(QMainWindow):
             selected_changes = dialog.get_selected_changes()
             
             if not selected_changes:
-                QMessageBox.information(
+                SilentMessageBox.information(
                     self,
                     lang.get("update_char_cancelled"),
                     lang.get("update_char_no_changes")
@@ -452,7 +453,7 @@ class CharacterApp(QMainWindow):
             success, msg = save_character(character_data, allow_overwrite=True)
             
             if not success:
-                QMessageBox.critical(
+                SilentMessageBox.critical(
                     self,
                     lang.get("error_title", default="Erreur"),
                     f"Échec de la sauvegarde : {msg}"
@@ -476,13 +477,13 @@ class CharacterApp(QMainWindow):
                 sys.stderr.flush()
                 logging.warning(f"[BACKUP_TRIGGER] Backup after character update failed: {e}")
             
-            QMessageBox.information(
+            SilentMessageBox.information(
                 self,
                 lang.get("success_title", default="Succès"),
                 lang.get("update_char_success")
             )
         else:
-            QMessageBox.information(
+            SilentMessageBox.information(
                 self,
                 lang.get("update_char_cancelled"),
                 lang.get("update_char_cancelled")
@@ -539,7 +540,7 @@ class CharacterApp(QMainWindow):
             visibility_config = dialog.get_visibility_config()
             config.set("column_visibility", visibility_config)
             self.tree_manager.apply_column_visibility()
-            QMessageBox.information(
+            SilentMessageBox.information(
                 self,
                 lang.get("success_title", default="Succès"),
                 lang.get("columns_config_saved", default="Configuration sauvegardée.")
@@ -730,6 +731,10 @@ class CharacterApp(QMainWindow):
         if language_changed:
             config.set("ui.language", new_lang_code)
         
+        # Audio Settings
+        if hasattr(dialog, 'enable_sounds_checkbox'):
+            config.set("ui.enable_sounds", dialog.enable_sounds_checkbox.isChecked())
+        
         # Armor resistances display settings
         if hasattr(dialog, 'armor_resists_show_classes_check'):
             config.set("armory.armor_resists_show_classes", 
@@ -746,7 +751,7 @@ class CharacterApp(QMainWindow):
         if new_debug_mode and not old_debug_mode:
             logging.info("Debug mode ACTIVATED")
             
-        QMessageBox.information(
+        SilentMessageBox.information(
             self,
             lang.get("success_title"),
             lang.get("config_saved_success")
@@ -771,7 +776,7 @@ class CharacterApp(QMainWindow):
             new_char_folder = config.get("folders.characters", "")
             logging.warning(f"Path changed to location requiring migration: {new_char_folder}")
             
-            reply = QMessageBox.question(
+            reply = SilentMessageBox.question(
                 self,
                 lang.get("migration_path_change_title"),
                 lang.get("migration_path_change_question"),
@@ -794,7 +799,7 @@ class CharacterApp(QMainWindow):
                     
                     if success:
                         logging.info(f"Migration successful. Backup: {backup_path}")
-                        QMessageBox.information(
+                        SilentMessageBox.information(
                             self,
                             lang.get("success_title"),
                             f"✅ {migration_message}\n\n💾 {lang.get('migration_backup_location')}\n{backup_path}"
@@ -802,7 +807,7 @@ class CharacterApp(QMainWindow):
                         self.tree_manager.refresh_character_list()
                     else:
                         logging.error(f"Migration failed: {migration_message}")
-                        QMessageBox.critical(
+                        SilentMessageBox.critical(
                             self,
                             lang.get("error_title"),
                             f"{lang.get('migration_error')}\n\n{migration_message}"
@@ -812,7 +817,7 @@ class CharacterApp(QMainWindow):
                     progress.deleteLater()
             else:
                 logging.info("User declined immediate migration")
-                QMessageBox.information(
+                SilentMessageBox.information(
                     self,
                     lang.get("info_title"),
                     lang.get("migration_path_change_later")
@@ -958,7 +963,7 @@ class CharacterApp(QMainWindow):
                 # Si erreur ou pas de cookie, afficher message explicatif
                 elif "❌" in status_text:
                     freeze_tracker.checkpoint("Herald error - showing warning dialog")
-                    QMessageBox.warning(
+                    SilentMessageBox.warning(
                         self,
                         lang.get("herald_validation_failed_title", default="Connexion impossible"),
                         lang.get("herald_validation_failed_message", default="Impossible de se connecter au Herald Eden.\n\nStatut: {status}\n\nVeuillez vérifier vos cookies dans le menu Outils.").replace("{status}", status_text)
@@ -1008,7 +1013,7 @@ class CharacterApp(QMainWindow):
             if check_count[0] >= max_checks:
                 check_timer.stop()
                 progress.close()
-                QMessageBox.warning(
+                SilentMessageBox.warning(
                     self,
                     lang.get("herald_validation_timeout_title", default="Délai dépassé"),
                     lang.get("herald_validation_timeout_message", default="La validation de la connexion Eden prend trop de temps.\nVeuillez vérifier vos cookies et réessayer.")
@@ -1033,7 +1038,7 @@ class CharacterApp(QMainWindow):
                             error_msg = lang.get("herald_validation_failed_message", default="Impossible de se connecter au Herald Eden.\n\nStatut: {status}\n\nVeuillez vérifier vos cookies dans le menu Outils.")
                             # Remplacer le placeholder status
                             error_msg = error_msg.replace("{status}", status_text)
-                            QMessageBox.warning(
+                            SilentMessageBox.warning(
                                 self,
                                 lang.get("herald_validation_failed_title", default="Connexion impossible"),
                                 error_msg

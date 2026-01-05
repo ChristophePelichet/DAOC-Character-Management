@@ -3,6 +3,7 @@ Character Actions Manager - Gère toutes les actions sur les personnages
 Regroupe: création, suppression, renommage, duplication, ouverture de fiche
 """
 import logging
+from UI.ui_sound_manager import SilentMessageBox
 from PySide6.QtWidgets import QMessageBox, QInputDialog, QDialog, QLineEdit
 
 from Functions.character_manager import (
@@ -70,7 +71,7 @@ class CharacterActionsManager:
                 logging.warning(f"Backup after character creation failed: {e}")
             self.tree_manager.refresh_character_list()
             log_with_action(logger, "info", f"Character '{character_name}' ({race} {class_name}) created successfully", action="CREATE")
-            QMessageBox.information(
+            SilentMessageBox.information(
                 self.main_window,
                 lang.get("success_title"),
                 lang.get("char_saved_success", name=character_name)
@@ -82,7 +83,7 @@ class CharacterActionsManager:
                 else response
             )
             log_with_action(logger, "error", f"Failed to create character '{character_name}': {error_message}", action="ERROR")
-            QMessageBox.critical(
+            SilentMessageBox.critical(
                 self.main_window,
                 lang.get("error_title"),
                 error_message
@@ -103,14 +104,14 @@ class CharacterActionsManager:
         checked_ids = self.tree_manager.get_checked_character_ids()
         
         if not checked_ids:
-            QMessageBox.warning(
+            SilentMessageBox.warning(
                 self.main_window,
                 lang.get("info_title"),
                 lang.get("no_characters_selected_warning")
             )
             return
             
-        reply = QMessageBox.question(
+        reply = SilentMessageBox.question(
             self.main_window,
             lang.get("delete_char_confirm_title"),
             lang.get("bulk_delete_confirm_message", count=len(checked_ids)),
@@ -137,7 +138,7 @@ class CharacterActionsManager:
             return
             
         if confirm:
-            reply = QMessageBox.question(
+            reply = SilentMessageBox.question(
                 self.main_window,
                 lang.get("delete_char_confirm_title"),
                 lang.get("delete_char_confirm_message", name=char_name),
@@ -164,7 +165,7 @@ class CharacterActionsManager:
                 self.tree_manager.refresh_character_list()
         else:
             logger.error("f\"Failed to delete character '{char_name}': {msg}\"", extra={"action": "FILE"})
-            QMessageBox.critical(
+            SilentMessageBox.critical(
                 self.main_window,
                 lang.get("error_title"),
                 msg
@@ -254,7 +255,7 @@ class CharacterActionsManager:
             
         new_name = new_name.strip()
         if not new_name:
-            QMessageBox.warning(
+            SilentMessageBox.warning(
                 self.main_window,
                 lang.get("error_title"),
                 lang.get("char_name_empty_error")
@@ -280,7 +281,7 @@ class CharacterActionsManager:
                 else msg
             )
             logger.error("f\"Failed to duplicate character from '{original_name}' to '{new_name}': {error_m...", extra={"action": "DUPLICATE"})
-            QMessageBox.critical(
+            SilentMessageBox.critical(
                 self.main_window,
                 lang.get("error_title"),
                 error_msg
@@ -322,7 +323,7 @@ class CharacterActionsManager:
             char = self.tree_manager.get_selected_character()
             
             if not char:
-                QMessageBox.information(
+                SilentMessageBox.information(
                     self.main_window,
                     lang.get("info_title", default="Information"),
                     "Veuillez sélectionner un personnage dans la liste pour accéder à la gestion de ses armures.\n\n"
@@ -336,7 +337,7 @@ class CharacterActionsManager:
             character_name = char.get('name', '')
             
             if not character_name or not realm:
-                QMessageBox.warning(
+                SilentMessageBox.warning(
                     self.main_window,
                     "Erreur",
                     "Impossible de déterminer le nom ou le royaume du personnage."
@@ -350,4 +351,4 @@ class CharacterActionsManager:
             import traceback
             error_msg = f"Erreur lors de l'ouverture de la gestion des armures:\n{str(e)}\n\n{traceback.format_exc()}"
             logging.error(error_msg)
-            QMessageBox.critical(self.main_window, "Erreur", error_msg)
+            SilentMessageBox.critical(self.main_window, "Erreur", error_msg)

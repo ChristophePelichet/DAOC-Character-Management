@@ -5,6 +5,7 @@ Displays all armor templates for each realm with preview functionality
 
 import logging
 
+from UI.ui_sound_manager import SilentMessageBox
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QTabWidget,
     QTableWidget, QTableWidgetItem, QTextBrowser, QSplitter, QLabel, QMessageBox
@@ -236,7 +237,7 @@ class UIArmoryAllTemplates(QMainWindow):
             logger.error(f"Error loading templates: {e}")
             import traceback
             logger.error(traceback.format_exc())
-            QMessageBox.critical(
+            SilentMessageBox.critical(
                 self,
                 lang.get("dialogs.titles.error", default="Error"),
                 f"Error loading templates: {e}"
@@ -435,10 +436,9 @@ class UIArmoryAllTemplates(QMainWindow):
             logger.debug(f"Looking for metadata at: {metadata_path}")
             logger.debug(f"Metadata exists: {metadata_path.exists()}")
             if not metadata_path.exists():
-                from PySide6.QtWidgets import QMessageBox
                 error_msg = f"Fichier de métadonnées non trouvé: {metadata_path}"
                 logger.error(error_msg)
-                QMessageBox.warning(
+                SilentMessageBox.warning(
                     self,
                     "Erreur",
                     error_msg
@@ -447,7 +447,6 @@ class UIArmoryAllTemplates(QMainWindow):
 
             metadata = TemplateMetadata.load(metadata_path)
             if not metadata:
-                from PySide6.QtWidgets import QMessageBox
                 error_title = lang.get(
                     "dialogs.titles.error", default="Erreur"
                 )
@@ -455,7 +454,7 @@ class UIArmoryAllTemplates(QMainWindow):
                     "template_edit.metadata_invalid",
                     default="Métadonnées invalides"
                 )
-                QMessageBox.warning(self, error_title, error_message)
+                SilentMessageBox.warning(self, error_title, error_message)
                 return
 
             # Open edit dialog
@@ -465,15 +464,13 @@ class UIArmoryAllTemplates(QMainWindow):
                 self._load_all_templates()
 
         except Exception as e:
-            from PySide6.QtWidgets import QMessageBox
             logger.error(f"Error editing template: {e}")
             error_title = lang.get("dialogs.titles.error", default="Erreur")
             error_msg = f"Erreur lors de l'édition du template: {str(e)}"
-            QMessageBox.critical(self, error_title, error_msg)
+            SilentMessageBox.critical(self, error_title, error_msg)
 
     def _delete_template(self, realm, template_name):
         """Delete a template"""
-        from PySide6.QtWidgets import QMessageBox
 
         confirm_title = lang.get(
             "template_context_menu.confirm_delete",
@@ -483,7 +480,7 @@ class UIArmoryAllTemplates(QMainWindow):
             "template_context_menu.delete_confirm_message",
             default="Êtes-vous sûr de vouloir supprimer ce template?"
         )
-        reply = QMessageBox.question(
+        reply = SilentMessageBox.question(
             self, confirm_title, confirm_msg,
             QMessageBox.Yes | QMessageBox.No
         )
@@ -499,12 +496,12 @@ class UIArmoryAllTemplates(QMainWindow):
                     "template_context_menu.delete_error",
                     default="Impossible de supprimer le template"
                 )
-                QMessageBox.warning(self, error_title, error_msg)
+                SilentMessageBox.warning(self, error_title, error_msg)
 
     def _download_template(self, realm, template_name):
         """Download/export template to user-selected location"""
         try:
-            from PySide6.QtWidgets import QFileDialog, QMessageBox
+            from PySide6.QtWidgets import QFileDialog
             import shutil
 
             # Get source file path
@@ -521,7 +518,7 @@ class UIArmoryAllTemplates(QMainWindow):
                     default="Fichier non trouvé",
                     filename=template_name
                 )
-                QMessageBox.warning(self, error_title, error_msg)
+                SilentMessageBox.warning(self, error_title, error_msg)
                 return
 
             # Ask user where to save the file
@@ -547,7 +544,7 @@ class UIArmoryAllTemplates(QMainWindow):
                     default="Fichier téléchargé avec succès",
                     filename=source_file.name
                 )
-                QMessageBox.information(self, success_title, success_msg)
+                SilentMessageBox.information(self, success_title, success_msg)
                 logger.info(f"Template downloaded: {save_path}")
         except Exception as e:
             logger.error(f"Error downloading template: {e}")
@@ -557,7 +554,7 @@ class UIArmoryAllTemplates(QMainWindow):
                 default="Erreur lors du téléchargement",
                 error=str(e)
             )
-            QMessageBox.critical(self, error_title, error_msg)
+            SilentMessageBox.critical(self, error_title, error_msg)
 
     def _save_column_widths(self, realm):
         """Save current column widths to config for a realm

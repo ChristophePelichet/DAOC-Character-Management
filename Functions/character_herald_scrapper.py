@@ -6,7 +6,6 @@ scraped statistics to the UI and character data structure. It supports
 both complete character updates and partial RvR-only updates.
 """
 
-import logging
 from Functions.debug_logging_manager import get_logger, LOGGER_CHARACTER
 
 
@@ -37,13 +36,13 @@ def character_herald_update(parent_window, url: str) -> None:
         - Shows ProgressStepsDialog with CHARACTER_UPDATE steps
         - Receives update_finished signal when complete
     """
-    from PySide6.QtWidgets import QMessageBox
+    from UI.ui_sound_manager import SilentMessageBox
     from Functions.language_manager import lang
     from UI.progress_dialog_base import ProgressStepsDialog, StepConfiguration
 
     # Validate URL
     if not url:
-        QMessageBox.warning(
+        SilentMessageBox.warning(
             parent_window,
             lang.get("update_char_error"),
             lang.get("update_char_no_url")
@@ -128,13 +127,13 @@ def character_herald_update_rvr_stats(parent_window, url: str) -> None:
         - Shows ProgressStepsDialog with STATS_SCRAPING steps
         - Receives stats_updated signal when complete
     """
-    from PySide6.QtWidgets import QMessageBox
+    from UI.ui_sound_manager import SilentMessageBox
     from Functions.language_manager import lang
     from UI.progress_dialog_base import ProgressStepsDialog, StepConfiguration
 
     # Validate URL
     if not url:
-        QMessageBox.warning(
+        SilentMessageBox.warning(
             parent_window,
             "URL manquante",
             "Veuillez entrer une URL Herald valide pour récupérer les statistiques."

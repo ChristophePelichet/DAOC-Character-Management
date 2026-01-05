@@ -5,6 +5,7 @@ Detailed monitoring window for database management and mass item import
 
 import logging
 from datetime import datetime
+from UI.ui_sound_manager import SilentMessageBox
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QGroupBox,
     QTextEdit, QPushButton, QLabel, QProgressBar,
@@ -884,8 +885,7 @@ class MassImportMonitor(QMainWindow):
     def export_errors(self):
         """Export only errors to file"""
         if not self.error_list:
-            from PySide6.QtWidgets import QMessageBox
-            QMessageBox.information(self, lang.get('mass_import_monitor.export_errors', default='Export erreurs'), 
+            SilentMessageBox.information(self, lang.get('mass_import_monitor.export_errors', default='Export erreurs'), 
                                    lang.get('mass_import_monitor.no_errors', default='Aucune erreur à exporter'))
             return
         
@@ -909,13 +909,11 @@ class MassImportMonitor(QMainWindow):
                     for error in self.error_list:
                         f.write(error + "\n")
                 
-                from PySide6.QtWidgets import QMessageBox
-                QMessageBox.information(self, lang.get('mass_import_monitor.export_errors', default='Export erreurs'), 
+                SilentMessageBox.information(self, lang.get('mass_import_monitor.export_errors', default='Export erreurs'), 
                                        f"{lang.get('mass_import_monitor.export_success', default='Erreurs exportées vers:')}\n{file_path}")
             
             except Exception as e:
-                from PySide6.QtWidgets import QMessageBox
-                QMessageBox.critical(self, lang.get('mass_import_monitor.export_errors', default='Export erreurs'), 
+                SilentMessageBox.critical(self, lang.get('mass_import_monitor.export_errors', default='Export erreurs'), 
                                     f"{lang.get('mass_import_monitor.export_error', default='Impossible d\'exporter les erreurs:')}\n{e}")
     
     def export_logs(self):
@@ -996,8 +994,7 @@ class MassImportMonitor(QMainWindow):
                 self.log_message(lang.get("settings.pages.mass_import_monitor.retry_filtered_message", count=len(selected_items), default=f"🔄 Retrying {len(selected_items)} filtered item(s) WITHOUT restrictions..."), "info")
                 
                 # Show the dialog is closed, import will continue in background
-                from PySide6.QtWidgets import QMessageBox
-                QMessageBox.information(
+                SilentMessageBox.information(
                     self,
                     lang.get("settings.pages.mass_import_monitor.retry_in_progress_title", default="Retry in Progress"),
                     lang.get("settings.pages.mass_import_monitor.retry_in_progress_message", count=len(selected_items), default=f"Retrying {len(selected_items)} item(s).\n\nThe import will continue in the Database Management Tools window.")

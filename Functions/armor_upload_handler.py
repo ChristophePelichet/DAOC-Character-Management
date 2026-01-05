@@ -9,6 +9,7 @@ import os
 import platform
 import subprocess
 
+from UI.ui_sound_manager import SilentMessageBox
 from PySide6.QtWidgets import QMessageBox, QFileDialog, QDialog
 from Functions.language_manager import lang
 from Functions.debug_logging_manager import get_logger, LOGGER_UI
@@ -100,7 +101,7 @@ def armor_upload_file(
             else ""
         )
 
-        QMessageBox.information(
+        SilentMessageBox.information(
             parent_window,
             lang.get("dialogs.titles.success"),
             lang.get(
@@ -119,7 +120,7 @@ def armor_upload_file(
 
     except Exception as e:
         logger.error(f"Error uploading armor file: {e}")
-        QMessageBox.critical(
+        SilentMessageBox.critical(
             parent_window,
             lang.get("dialogs.titles.error"),
             lang.get(
@@ -169,7 +170,7 @@ def armor_import_template(
     name = character_data.get('name', '')
 
     if not character_class:
-        QMessageBox.warning(
+        SilentMessageBox.warning(
             parent_window,
             lang.get("template_import.error_title"),
             lang.get("template_import.error_no_class")
@@ -202,7 +203,7 @@ def armor_import_template(
     ))
 
     if dialog.exec() == QDialog.Accepted:
-        QMessageBox.information(
+        SilentMessageBox.information(
             parent_window,
             lang.get("dialogs.titles.success"),
             lang.get(
@@ -248,7 +249,7 @@ def armor_open_file(
         template_path = template_manager._get_template_path(realm, filename)
 
         if not template_path.exists():
-            QMessageBox.warning(
+            SilentMessageBox.warning(
                 parent_window,
                 lang.get("dialogs.titles.error"),
                 lang.get(
@@ -269,7 +270,7 @@ def armor_open_file(
 
     except Exception as e:
         logger.error(f"Error opening armor file: {e}")
-        QMessageBox.critical(
+        SilentMessageBox.critical(
             parent_window,
             lang.get("dialogs.titles.error"),
             lang.get(
@@ -313,7 +314,7 @@ def armor_delete_file(
         >>> armor_delete_file(dialog, template_manager, "Albion", "oldarmor.txt")
         # Shows confirmation, deletes file, refreshes list
     """
-    reply = QMessageBox.question(
+    reply = SilentMessageBox.question(
         parent_window,
         lang.get("armoury_dialog.dialogs.confirm_delete"),
         lang.get(
@@ -331,7 +332,7 @@ def armor_delete_file(
         success = template_manager.delete_template(filename, realm)
 
         if success:
-            QMessageBox.information(
+            SilentMessageBox.information(
                 parent_window,
                 lang.get("dialogs.titles.success"),
                 lang.get(
@@ -342,7 +343,7 @@ def armor_delete_file(
             parent_window.refresh_list()
             logger.info(f"Armor file deleted: {filename}")
         else:
-            QMessageBox.warning(
+            SilentMessageBox.warning(
                 parent_window,
                 lang.get("dialogs.titles.error"),
                 lang.get(
@@ -353,7 +354,7 @@ def armor_delete_file(
 
     except Exception as e:
         logger.error(f"Error deleting armor file: {e}")
-        QMessageBox.critical(
+        SilentMessageBox.critical(
             parent_window,
             lang.get("dialogs.titles.error"),
             lang.get(

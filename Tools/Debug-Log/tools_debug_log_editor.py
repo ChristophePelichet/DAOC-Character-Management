@@ -24,6 +24,7 @@ import json
 from pathlib import Path
 from typing import Tuple
 
+from UI.ui_sound_manager import SilentMessageBox
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QTableWidget, QTableWidgetItem, QPushButton, QLabel, QComboBox,
@@ -492,7 +493,7 @@ class LogSourceEditor(QMainWindow):
         # Confirmation si beaucoup de fichiers
         py_count = len(list(Path(project_root).rglob("*.py")))
         
-        reply = QMessageBox.question(
+        reply = SilentMessageBox.question(
             self,
             "Confirmer le scan",
             f"🔍 Scanner {py_count} fichiers Python dans :\n{project_root}\n\n"
@@ -646,7 +647,7 @@ class LogSourceEditor(QMainWindow):
         
         self.status_label.setText(f"✅ {total} logs trouvés")
         
-        QMessageBox.information(
+        SilentMessageBox.information(
             self,
             "Scan terminé",
             stats_msg
@@ -724,7 +725,7 @@ class LogSourceEditor(QMainWindow):
                 self.status_label.setText("Aucune modification (identique à l'original)")
                 
         except Exception as e:
-            QMessageBox.critical(self, "Erreur", f"Erreur lors de l'application des modifications:\n{e}")
+            SilentMessageBox.critical(self, "Erreur", f"Erreur lors de l'application des modifications:\n{e}")
         finally:
             # Toujours débloquer
             self._updating = False
@@ -832,7 +833,7 @@ class LogSourceEditor(QMainWindow):
         modified_logs = [log for log in self.logs if log.modified]
         
         if not modified_logs:
-            QMessageBox.information(self, "Aucune modification", "Aucun log n'a été modifié.")
+            SilentMessageBox.information(self, "Aucune modification", "Aucun log n'a été modifié.")
             return
         
         # Afficher un aperçu des modifications
@@ -855,7 +856,7 @@ class LogSourceEditor(QMainWindow):
             preview += f"... et {len(file_groups)-5} autres fichiers\n\n"
         
         # Confirmation
-        reply = QMessageBox.question(
+        reply = SilentMessageBox.question(
             self,
             "Confirmer la sauvegarde",
             f"{preview}"
@@ -912,7 +913,7 @@ class LogSourceEditor(QMainWindow):
             if len(error_files) > 5:
                 result_msg += f"\n... et {len(error_files)-5} autres"
         
-        QMessageBox.information(
+        SilentMessageBox.information(
             self,
             "Sauvegarde terminée",
             result_msg

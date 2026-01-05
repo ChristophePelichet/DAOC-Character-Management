@@ -1454,7 +1454,15 @@
         }
     },
     "common": {
-        "close_button": "Close"
+        "close_button": "Close",
+        "dialog_ok": "OK",
+        "dialog_yes": "Yes",
+        "dialog_no": "No"
+    },
+    "config": {
+        "audio_group_title": "Audio Settings",
+        "enable_sounds_label": "Enable message box sounds",
+        "enable_sounds_tooltip": "Disable to suppress system beep sounds in message boxes"
     },
     "error": {
         "data_load_failed": "Error loading data"

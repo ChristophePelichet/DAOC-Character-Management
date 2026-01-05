@@ -4738,6 +4738,7 @@ class HeraldSearchDialog(QDialog):
     def _load_realm_icons_for_combo(self):
         """Charge les icônes des royaumes pour le menu déroulant"""
         from pathlib import Path
+        from Functions.path_manager import get_resource_path
         
         self.realm_combo_icons = {}
         realm_logos = {
@@ -4747,7 +4748,7 @@ class HeraldSearchDialog(QDialog):
         }
         
         for realm, logo_path in realm_logos.items():
-            full_path = Path(logo_path)
+            full_path = Path(get_resource_path(logo_path))
             if full_path.exists():
                 pixmap = QPixmap(str(full_path))
                 # Redimensionner l'icône à 20x20 pixels for the combo

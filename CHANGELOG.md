@@ -11,6 +11,11 @@
 **Herald Search Dialog - Realm Combobox**
 - Fixed realm combobox text truncation where "Midgard" was displayed as "Mi...rd"
 
+**Herald Search Dialog - Realm Icons in PyInstaller**
+- Fixed missing realm icons in compiled executable
+- Icons now load correctly from bundled resources using get_resource_path()
+- Realm logos display properly in Herald search dialog (Albion red, Midgard blue, Hibernia magenta)
+
 **Herald Search Dialog - Critical UI Freeze Bug**
 - Fixed 4+ second UI freeze when closing Herald search dialog after performing a search
 

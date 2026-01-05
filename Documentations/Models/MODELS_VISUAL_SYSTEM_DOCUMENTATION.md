@@ -1,8 +1,8 @@
 # 🖼️ Model Visual System - Technical Documentation
 
-**Version**: 1.0
+**Version**: 3.1
 **Date**: November 2025  
-**Last Updated**: December 19, 2025 (Item Model Viewer Module - Phase 10)  
+**Last Updated**: January 5, 2026 (Simplified Model Viewer UI - removed category label)  
 **Component**: Complete model management system (3 types: Items, Mobs, Icons)  
 **Used by**: Armory, Database Editor, Character Sheet, Item Preview, Model Viewer Dialog  
 **Related**: `Img/Models/`, `Tools/DataScraping/download_all_models.py`, `Tools/DataScraping/scrape_models_metadata.py`, `Data/models_metadata.json`, `UI/model_viewer_dialog.py`, `Functions/item_model_viewer.py`  
@@ -564,7 +564,7 @@ GRAND TOTAL: 838 models
 
 **Features**:
 - ✅ Displays embedded WebP images from `Img/Models/items/`
-- ✅ Shows item name, model ID, and category
+- ✅ Shows item name and model ID
 - ✅ Auto-scales image to fit window with aspect ratio preservation
 - ✅ Handles missing images gracefully
 - ✅ Modern UI with dark theme
@@ -755,13 +755,9 @@ def display_model_preview(label: QLabel, model_id: str, model_type: str = "items
             Qt.SmoothTransformation
         ))
         
-        # Set rich tooltip with metadata
+        # Set tooltip with metadata
         if model_meta:
-            tooltip = f"""
-            <b>{model_meta['name']}</b><br>
-            Category: {model_meta['main_category']} / {model_meta['subcategory']}<br>
-            Model ID: {model_id}
-            """
+            tooltip = f"<b>{model_meta['name']}</b><br>Model ID: {model_id}"
             label.setToolTip(tooltip)
     else:
         label.setText(f"Model {model_id}\n(No image)")
@@ -1379,12 +1375,31 @@ thumbnail = pixmap.scaled(32, 32, Qt.KeepAspectRatio, Qt.SmoothTransformation)
 
 ## Version History
 
+### v3.1 (January 5, 2026)
+
+**UI Simplification - Model Viewer Dialog**:
+- ✅ **Simplified UI**: Removed green "Category: items" text from model visualization
+- ✅ **Cleaner Display**: Now shows only item name and model ID
+- ✅ **Improved UX**: Less visual clutter in model viewer dialog
+- ✅ **Code Cleanup**: Removed unused QMessageBox import
+
+**Changes**:
+- Removed category label display (green text with category information)
+- Simplified the dialog layout for cleaner appearance
+- Category information still available in tooltips if needed
+- Improved code quality and maintainability
+
+**Benefits**:
+- More focused UI - attention on the model image itself
+- Cleaner appearance without the extra label
+- Faster rendering (no extra label widget)
+
 ### v2.1 (December 1, 2025)
 
 **Model Viewer Dialog Integration**:
 - ✅ **New Component**: `UI/model_viewer_dialog.py`
   - Reusable dialog for displaying model images
-  - Shows item name, model ID, and category
+  - Shows item name and model ID
   - Auto-scaling with aspect ratio preservation
   - Dark theme UI with modern styling
   - Multilingual support

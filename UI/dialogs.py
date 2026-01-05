@@ -28,6 +28,7 @@ from Functions.debug_logging_manager import get_log_dir, get_logger, log_with_ac
 from Functions.data_manager import DataManager
 from Functions.theme_manager import get_scaled_size
 from Functions.items_database_manager import ItemsDatabaseManager
+from UI.ui_sound_manager import SilentMessageBox
 from Functions.items_price_manager import items_price_sync_template
 from Functions.character_validator import (
     character_populate_classes_combo, character_populate_races_combo,
@@ -863,28 +864,26 @@ class CharacterSheetWindow(QDialog):
         level_str = f"{rank}L{level}"
         
         if not hasattr(self.parent_app, 'data_manager'):
-            QMessageBox.warning(self, "Erreur", "Data Manager non disponible")
+            SilentMessageBox.warning(self, "Erreur", "Data Manager non disponible")
             return
         
         # Get RP for this level
         rank_info = self.parent_app.data_manager.get_rank_by_level(self.realm, level_str)
         if not rank_info:
-            QMessageBox.warning(self, "Erreur", f"Impossible de trouver les données pour {level_str}")
+            SilentMessageBox.warning(self, "Erreur", f"Impossible de trouver les données pour {level_str}")
             return
         
         new_rp = rank_info['realm_points']
         
         # Confirm
-        reply = QMessageBox.question(
+        reply = SilentMessageBox.question(
             self,
             "Confirmer",
             f"Définir le rang à {level_str} ({rank_info['title']}) ?\n"
             f"Cela définira les Realm Points à {new_rp:,}.",
-            QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.Yes
         )
         
-        if reply == QMessageBox.Yes:
+        if reply == QMessageBox.StandardButton.Yes:
             # Update data
             self.character_data['realm_points'] = new_rp
             self.character_data['realm_rank'] = level_str
@@ -895,7 +894,7 @@ class CharacterSheetWindow(QDialog):
             
             if success:
                 log_with_action(logger_char, "info", f"Character rank applied to {level_str} with {new_rp:,} RP after confirmation", action="RANK_UPDATE")
-                QMessageBox.information(self, lang.get("dialogs.titles.success"), lang.get("character_sheet.messages.rank_update_success", level=level_str, rp=new_rp))
+                SilentMessageBox.information(self, lang.get("dialogs.titles.success"), lang.get("character_sheet.messages.rank_update_success", level=level_str, rp=new_rp))
                 # Update display
                 self.update_rank_display(new_rp)
                 # Refresh list
@@ -920,7 +919,7 @@ class CharacterSheetWindow(QDialog):
                         logging.warning(f"[BACKUP_TRIGGER] Backup after rank modification failed: {e}")
             else:
                 log_with_action(logger_char, "error", f"Failed to apply rank {level_str}: {msg}", action="ERROR")
-                QMessageBox.critical(self, "Erreur", f"Échec de la sauvegarde : {msg}")
+                SilentMessageBox.critical(self, "Erreur", f"Échec de la sauvegarde : {msg}")
 
     def save_basic_info(self):
         """Saves the basic character information (realm, level, season, server, page, guild, race and class)."""
@@ -939,7 +938,7 @@ class CharacterSheetWindow(QDialog):
                 self.herald_url_edit.text()
             )
             if not validation_result['valid']:
-                QMessageBox.critical(self, "Erreur", validation_result['message'])
+                SilentMessageBox.critical(self, "Erreur", validation_result['message'])
                 return
             
             new_guild = validation_result['guild']
@@ -955,7 +954,7 @@ class CharacterSheetWindow(QDialog):
             # Validate race/class combination
             if new_race and new_class:
                 if not self.data_manager.is_race_class_compatible(new_realm, new_race, new_class):
-                    QMessageBox.critical(
+                    SilentMessageBox.critical(
                         self, 
                         "Erreur", 
                         lang.get("invalid_race_class_combo", default="Cette combinaison de race et classe n'est pas valide.")
@@ -969,7 +968,7 @@ class CharacterSheetWindow(QDialog):
                 from Functions.character_manager import move_character_to_realm
                 success, msg = move_character_to_realm(self.character_data, old_realm, new_realm)
                 if not success:
-                    QMessageBox.critical(self, "Erreur", f"Échec du changement de royaume : {msg}")
+                    SilentMessageBox.critical(self, "Erreur", f"Échec du changement de royaume : {msg}")
                     return
                 
                 # Update local realm reference for color updates
@@ -1000,7 +999,7 @@ class CharacterSheetWindow(QDialog):
                 from Functions.character_manager import save_character
                 success, msg = save_character(self.character_data, allow_overwrite=True)
                 if not success:
-                    QMessageBox.critical(self, "Erreur", f"Échec de la sauvegarde : {msg}")
+                    SilentMessageBox.critical(self, "Erreur", f"Échec de la sauvegarde : {msg}")
                     return
                 
                 log_with_action(logger_char, "info", f"Character basic info updated: Level={new_level}, Season={new_season}, Guild={new_guild}", action="INFO_UPDATE")
@@ -1039,7 +1038,7 @@ class CharacterSheetWindow(QDialog):
             character_name = self.character_data.get('name', '')
             
             if not realm or not character_name:
-                QMessageBox.warning(self, lang.get("dialogs.titles.error"), lang.get("character_sheet.messages.character_id_error"))
+                SilentMessageBox.warning(self, lang.get("dialogs.titles.error"), lang.get("character_sheet.messages.character_id_error"))
                 return
             
             dialog = ArmorManagementDialog(self, season, realm, character_name, self.character_data)
@@ -1048,7 +1047,7 @@ class CharacterSheetWindow(QDialog):
             import traceback
             error_msg = lang.get("character_sheet.messages.armor_manager_error", error=str(e), traceback=traceback.format_exc())
             logging.error(error_msg)
-            QMessageBox.critical(self, lang.get("dialogs.titles.error"), error_msg)
+            SilentMessageBox.critical(self, lang.get("dialogs.titles.error"), error_msg)
     
     def on_herald_url_changed(self, text):
         """Enable/disable the stats update button based on the Herald URL"""
@@ -1240,7 +1239,7 @@ class CharacterSheetWindow(QDialog):
                 sobekite = result_pve['sobekite']
                 money = result_wealth['money']
                 
-                QMessageBox.information(
+                SilentMessageBox.information(
                     self,
                     lang.get("dialogs.titles.success"),
                     f"{lang.get('character_sheet.messages.stats_update_success')}\n\n"
@@ -1267,7 +1266,7 @@ class CharacterSheetWindow(QDialog):
                               f"K={kills}(A:{kills_alb},H:{kills_hib},M:{kills_mid})", 
                               action="RVR_UPDATE")
             else:
-                QMessageBox.warning(
+                SilentMessageBox.warning(
                     self,
                     lang.get("dialogs.titles.warning"),
                     lang.get("character_sheet.messages.stats_save_error", msg=msg)
@@ -1277,7 +1276,7 @@ class CharacterSheetWindow(QDialog):
             # Partial update: RvR OK, PvP KO
             self._update_partial_stats_ui(result_rvr, None, None, None, None)
             
-            QMessageBox.warning(
+            SilentMessageBox.warning(
                 self,
                 lang.get("character_sheet.messages.partial_update_title"),
                 lang.get("character_sheet.messages.rvr_success_pvp_failed", error=result_pvp.get('error', lang.get("character_sheet.messages.unknown_error")))
@@ -1287,7 +1286,7 @@ class CharacterSheetWindow(QDialog):
             # Partial update: PvP OK, RvR KO
             self._update_partial_stats_ui(None, result_pvp, None, None, None)
             
-            QMessageBox.warning(
+            SilentMessageBox.warning(
                 self,
                 lang.get("character_sheet.messages.partial_update_title"),
                 lang.get("character_sheet.messages.pvp_success_rvr_failed", error=result_rvr.get('error', lang.get("character_sheet.messages.unknown_error")))
@@ -1305,7 +1304,7 @@ class CharacterSheetWindow(QDialog):
             if not result_wealth.get('success'):
                 error_msg += f"❌ Wealth: {result_wealth.get('error', lang.get('character_sheet.messages.unknown_error'))}\n"
             
-            QMessageBox.critical(self, lang.get("character_sheet.messages.stats_fetch_error_title"), error_msg)
+            SilentMessageBox.critical(self, lang.get("character_sheet.messages.stats_fetch_error_title"), error_msg)
         
         # Réactiver le bouton avec state manager
         if not self.herald_scraping_in_progress:
@@ -1329,7 +1328,7 @@ class CharacterSheetWindow(QDialog):
             QTimer.singleShot(2000, self.progress_dialog.close)
         
         # Afficher l'erreur
-        QMessageBox.critical(
+        SilentMessageBox.critical(
             self,
             lang.get("character_sheet.messages.stats_fetch_error_title"),
             f"{lang.get('character_sheet.messages.stats_fetch_failed')}\n{error_message}"
@@ -1492,7 +1491,7 @@ class CharacterSheetWindow(QDialog):
                 # ✅ CRITICAL: Stop thread BEFORE displaying error
                 self._stop_char_update_thread()
                 
-                QMessageBox.critical(
+                SilentMessageBox.critical(
                     self,
                     lang.get("update_char_error"),
                     f"{lang.get('update_char_error')}: {error_msg}"
@@ -1507,7 +1506,7 @@ class CharacterSheetWindow(QDialog):
                 # ✅ CRITICAL: Stop thread BEFORE displaying message
                 self._stop_char_update_thread()
                 
-                QMessageBox.information(
+                SilentMessageBox.information(
                     self,
                     lang.get("update_char_no_changes_title", default="Aucune mise à jour"),
                     lang.get("update_char_already_uptodate", default="Le personnage est déjà à jour. Aucune modification détectée.")
@@ -1519,7 +1518,7 @@ class CharacterSheetWindow(QDialog):
                 selected_changes = dialog.get_selected_changes()
                 
                 if not selected_changes:
-                    QMessageBox.information(
+                    SilentMessageBox.information(
                         self,
                         lang.get("update_char_cancelled"),
                         lang.get("update_char_no_changes")
@@ -1589,7 +1588,7 @@ class CharacterSheetWindow(QDialog):
                 success, msg = save_character(self.character_data, allow_overwrite=True)
                 
                 if not success:
-                    QMessageBox.critical(
+                    SilentMessageBox.critical(
                         self,
                         lang.get("error_title", default="Erreur"),
                         f"Échec de la sauvegarde : {msg}"
@@ -1620,13 +1619,13 @@ class CharacterSheetWindow(QDialog):
                     self.parent_app.refresh_character_list()
                 
                 # Success message
-                QMessageBox.information(
+                SilentMessageBox.information(
                     self,
                     lang.get("success_title", default="Succès"),
                     lang.get("update_char_success")
                 )
             else:
-                QMessageBox.information(
+                SilentMessageBox.information(
                     self,
                     lang.get("update_char_cancelled"),
                     lang.get("update_char_cancelled")
@@ -1897,7 +1896,7 @@ class NewCharacterDialog(QDialog):
             self.guild_edit.text()
         )
         if not validation_result['valid']:
-            QMessageBox.warning(self, lang.get("error_title"), validation_result['message'])
+            SilentMessageBox.warning(self, lang.get("error_title"), validation_result['message'])
             return  # Don't close dialog, stay open for correction
         
         # Validate race/class combination
@@ -1907,7 +1906,7 @@ class NewCharacterDialog(QDialog):
         
         if race and class_name:
             if not self.data_manager.is_race_class_compatible(realm, race, class_name):
-                QMessageBox.warning(
+                SilentMessageBox.warning(
                     self,
                     lang.get("error_title"),
                     lang.get("invalid_race_class_combo", default=f"La race {race} ne peut pas jouer la classe {class_name}")
@@ -2577,7 +2576,7 @@ class ArmorManagementDialog(QDialog):
             
         except Exception as e:
             logging.error(f"Erreur lors du rafraîchissement de la liste des templates : {e}")
-            QMessageBox.critical(self, lang.get("dialogs.titles.error"), lang.get("armoury_dialog.messages.refresh_error", error=str(e)))
+            SilentMessageBox.critical(self, lang.get("dialogs.titles.error"), lang.get("armoury_dialog.messages.refresh_error", error=str(e)))
     
     def upload_armor(self):
         """Opens file dialog to upload an armor file."""
@@ -2771,7 +2770,7 @@ class ArmorManagementDialog(QDialog):
             if not metadata_path.exists():
                 error_msg = f"Fichier de métadonnées non trouvé: {metadata_path}"
                 logging.error(error_msg)
-                QMessageBox.warning(
+                SilentMessageBox.warning(
                     self,
                     "Erreur",
                     error_msg
@@ -2780,7 +2779,7 @@ class ArmorManagementDialog(QDialog):
             
             metadata = TemplateMetadata.load(metadata_path)
             if not metadata:
-                QMessageBox.warning(
+                SilentMessageBox.warning(
                     self,
                     lang.get("dialogs.titles.error", default="Erreur"),
                     lang.get("template_edit.metadata_invalid", default="Métadonnées invalides")
@@ -2795,7 +2794,7 @@ class ArmorManagementDialog(QDialog):
         
         except Exception as e:
             logging.error(f"Error editing template: {e}")
-            QMessageBox.critical(
+            SilentMessageBox.critical(
                 self,
                 lang.get("dialogs.titles.error", default="Erreur"),
                 f"Erreur lors de l'édition du template: {str(e)}"
@@ -2803,7 +2802,7 @@ class ArmorManagementDialog(QDialog):
     
     def _delete_template_dialog(self, template_name):
         """Delete a template with confirmation"""
-        reply = QMessageBox.question(
+        reply = SilentMessageBox.question(
             self,
             lang.get("template_context_menu.confirm_delete", default="Confirmer la suppression"),
             lang.get("template_context_menu.delete_confirm_message", default="Êtes-vous sûr de vouloir supprimer ce template?"),
@@ -2814,7 +2813,7 @@ class ArmorManagementDialog(QDialog):
             if self.template_manager.delete_template(template_name, self.realm):
                 self.refresh_list()
             else:
-                QMessageBox.warning(
+                SilentMessageBox.warning(
                     self,
                     lang.get("dialogs.titles.error", default="Erreur"),
                     lang.get("template_context_menu.delete_error", default="Impossible de supprimer le template")
@@ -2823,7 +2822,7 @@ class ArmorManagementDialog(QDialog):
     def view_armor(self, filename):
         """Opens armor viewer dialog."""
         # Placeholder for future armor viewer implementation
-        QMessageBox.information(
+        SilentMessageBox.information(
             self,
             lang.get("armoury_dialog.messages.view_title"),
             lang.get("armoury_dialog.messages.view_placeholder", filename=filename)
@@ -2836,7 +2835,7 @@ class ArmorManagementDialog(QDialog):
             source_file = self.template_manager._get_template_path(self.realm, filename)
             
             if not source_file.exists():
-                QMessageBox.warning(
+                SilentMessageBox.warning(
                     self,
                     lang.get("dialogs.titles.error"),
                     lang.get("armoury_dialog.messages.file_not_found", filename=filename)
@@ -2854,7 +2853,7 @@ class ArmorManagementDialog(QDialog):
             if save_path:
                 import shutil
                 shutil.copy2(str(source_file), save_path)
-                QMessageBox.information(
+                SilentMessageBox.information(
                     self,
                     lang.get("dialogs.titles.success"),
                     lang.get("armoury_dialog.messages.download_success", filename=os.path.basename(save_path))
@@ -2862,7 +2861,7 @@ class ArmorManagementDialog(QDialog):
                 logging.info(f"Fichier d'armure téléchargé : {save_path}")
         except Exception as e:
             logging.error(f"Erreur lors du téléchargement du fichier d'armure : {e}")
-            QMessageBox.critical(self, lang.get("dialogs.titles.error"), lang.get("armoury_dialog.messages.download_error", error=str(e)))
+            SilentMessageBox.critical(self, lang.get("dialogs.titles.error"), lang.get("armoury_dialog.messages.download_error", error=str(e)))
     
 
 
@@ -3290,7 +3289,7 @@ class CookieManagerDialog(QDialog):
         file_path = self.cookie_path_edit.text().strip()
         
         if not file_path:
-            QMessageBox.warning(
+            SilentMessageBox.warning(
                 self,
                 lang.get("cookie_manager.import_warning_title"),
                 lang.get("cookie_manager.import_warning_message")
@@ -3301,7 +3300,7 @@ class CookieManagerDialog(QDialog):
         import os
         
         if not os.path.exists(file_path):
-            QMessageBox.critical(
+            SilentMessageBox.critical(
                 self,
                 lang.get("cookie_manager.import_error_not_exists_title"),
                 lang.get("cookie_manager.import_error_not_exists_message", path=file_path)
@@ -3311,7 +3310,7 @@ class CookieManagerDialog(QDialog):
         success = self.cookie_manager.import_cookie_file(file_path)
         
         if success:
-            QMessageBox.information(
+            SilentMessageBox.information(
                 self,
                 lang.get("cookie_manager.import_success_title"),
                 lang.get("cookie_manager.import_success_message")
@@ -3323,7 +3322,7 @@ class CookieManagerDialog(QDialog):
             if self.parent() and hasattr(self.parent(), 'ui_manager'):
                 self.parent().ui_manager.check_eden_status()
         else:
-            QMessageBox.critical(
+            SilentMessageBox.critical(
                 self,
                 lang.get("cookie_manager.import_error_title"),
                 lang.get("cookie_manager.import_error_message", path=file_path)
@@ -3331,7 +3330,7 @@ class CookieManagerDialog(QDialog):
     
     def delete_cookies(self):
         """Delete cookies after confirmation"""
-        reply = QMessageBox.question(
+        reply = SilentMessageBox.question(
             self,
             lang.get("cookie_manager.delete_confirm_title"),
             lang.get("cookie_manager.delete_confirm_message"),
@@ -3343,7 +3342,7 @@ class CookieManagerDialog(QDialog):
             success = self.cookie_manager.delete_cookies()
             
             if success:
-                QMessageBox.information(
+                SilentMessageBox.information(
                     self,
                     lang.get("cookie_manager.delete_success_title"),
                     lang.get("cookie_manager.delete_success_message")
@@ -3354,7 +3353,7 @@ class CookieManagerDialog(QDialog):
                 if self.parent() and hasattr(self.parent(), 'ui_manager'):
                     self.parent().ui_manager.check_eden_status()
             else:
-                QMessageBox.critical(
+                SilentMessageBox.critical(
                     self,
                     lang.get("cookie_manager.delete_error_title"),
                     lang.get("cookie_manager.delete_error_message")
@@ -3561,7 +3560,7 @@ class CookieManagerDialog(QDialog):
         # Display final result
         if success:
             from PySide6.QtWidgets import QMessageBox
-            QMessageBox.information(
+            SilentMessageBox.information(
                 self,
                 lang.get("cookie_manager.import_success_title"),
                 f"{lang.get('cookie_manager.import_success_message')}\n\n{message}"
@@ -3569,7 +3568,7 @@ class CookieManagerDialog(QDialog):
         elif message and "Annulé" not in message:
             # Display error only if not cancelled
             from PySide6.QtWidgets import QMessageBox
-            QMessageBox.critical(
+            SilentMessageBox.critical(
                 self,
                 lang.get("cookie_manager.import_error_title"),
                 f"{lang.get('cookie_manager.import_error_title')} :\n\n{message}"
@@ -5050,7 +5049,7 @@ class HeraldSearchDialog(QDialog):
         character_name = self.name_input.text().strip()
         
         if not character_name:
-            QMessageBox.warning(
+            SilentMessageBox.warning(
                 self,
                 self.lang.get("herald_search.name_required_title"),
                 self.lang.get("herald_search.name_required_message")
@@ -5059,7 +5058,7 @@ class HeraldSearchDialog(QDialog):
         
         # Check the minimum of 3 caractères
         if len(character_name) < 3:
-            QMessageBox.warning(
+            SilentMessageBox.warning(
                 self,
                 self.lang.get("herald_search.name_too_short_title"),
                 self.lang.get("herald_search.name_too_short_message")
@@ -5350,7 +5349,7 @@ class HeraldSearchDialog(QDialog):
         
         # Confirmer l'import
         char_name = char_data.get('clean_name', char_data.get('name', ''))
-        reply = QMessageBox.question(
+        reply = SilentMessageBox.question(
             self,
             self.lang.get("herald_search.confirm_import_single_title"),
             self.lang.get("herald_search.confirm_import_single_message", name=char_name),
@@ -5375,7 +5374,7 @@ class HeraldSearchDialog(QDialog):
                     selected_chars.append(self.current_characters[row])
         
         if not selected_chars:
-            QMessageBox.warning(
+            SilentMessageBox.warning(
                 self,
                 self.lang.get("herald_search.no_selection_title"),
                 self.lang.get("herald_search.no_selection_message")
@@ -5384,7 +5383,7 @@ class HeraldSearchDialog(QDialog):
         
         # Confirmer l'import
         count = len(selected_chars)
-        reply = QMessageBox.question(
+        reply = SilentMessageBox.question(
             self,
             self.lang.get("herald_search.confirm_import_selected_title"),
             self.lang.get("herald_search.confirm_import_selected_message", count=count),
@@ -5402,7 +5401,7 @@ class HeraldSearchDialog(QDialog):
         
         # Confirmer l'import
         count = len(self.current_characters)
-        reply = QMessageBox.question(
+        reply = SilentMessageBox.question(
             self,
             self.lang.get("herald_search.confirm_import_all_title"),
             self.lang.get("herald_search.confirm_import_all_message", count=count),
@@ -5532,7 +5531,7 @@ class HeraldSearchDialog(QDialog):
                 if len(errors) > 5:
                     message += f"\n{lang.get('herald_import_more_errors', count=len(errors) - 5)}"
             
-            QMessageBox.information(self, lang.get("messages.info.herald_import_complete_title"), message)
+            SilentMessageBox.information(self, lang.get("messages.info.herald_import_complete_title"), message)
             
             # Rafraîchir l'interface principale de manière asynchrone pour éviter le freeze
             if hasattr(self.parent(), 'tree_manager') and hasattr(self.parent().tree_manager, 'refresh_character_list'):
@@ -5562,7 +5561,7 @@ class HeraldSearchDialog(QDialog):
             error_msg += "\n".join(errors[:10])
             if len(errors) > 10:
                 error_msg += f"\n{lang.get('herald_import_more_errors', count=len(errors) - 10)}"
-            QMessageBox.warning(self, lang.get("messages.info.herald_import_complete_title"), error_msg)
+            SilentMessageBox.warning(self, lang.get("messages.info.herald_import_complete_title"), error_msg)
 
 
 class CharacterUpdateDialog(QDialog):
@@ -6132,7 +6131,7 @@ class BackupSettingsDialog(QDialog):
         
         backup_path = self.path_edit.text()
         if not backup_path or not os.path.exists(backup_path):
-            QMessageBox.warning(self, "Attention", "Le dossier de sauvegarde n'existe pas ou n'est pas valide.")
+            SilentMessageBox.warning(self, "Attention", "Le dossier de sauvegarde n'existe pas ou n'est pas valide.")
             return
         
         try:
@@ -6143,7 +6142,7 @@ class BackupSettingsDialog(QDialog):
             else:  # Linux
                 subprocess.Popen(["xdg-open", backup_path])
         except Exception as e:
-            QMessageBox.critical(self, "Erreur", f"Impossible d'ouvrir le dossier : {str(e)}")
+            SilentMessageBox.critical(self, "Erreur", f"Impossible d'ouvrir le dossier : {str(e)}")
     
     def open_cookies_backup_folder(self):
         """Open the Cookies backup folder in file explorer."""
@@ -6152,7 +6151,7 @@ class BackupSettingsDialog(QDialog):
         
         backup_path = self.cookies_path_edit.text()
         if not backup_path or not os.path.exists(backup_path):
-            QMessageBox.warning(self, "Attention", "Le dossier de sauvegarde n'existe pas ou n'est pas valide.")
+            SilentMessageBox.warning(self, "Attention", "Le dossier de sauvegarde n'existe pas ou n'est pas valide.")
             return
         
         try:
@@ -6163,7 +6162,7 @@ class BackupSettingsDialog(QDialog):
             else:  # Linux
                 subprocess.Popen(["xdg-open", backup_path])
         except Exception as e:
-            QMessageBox.critical(self, "Erreur", f"Impossible d'ouvrir le dossier : {str(e)}")
+            SilentMessageBox.critical(self, "Erreur", f"Impossible d'ouvrir le dossier : {str(e)}")
     
     def update_usage_display(self, current_mb, size_limit_mb):
         """Update the usage display label with better formatting."""
@@ -6286,7 +6285,7 @@ class BackupSettingsDialog(QDialog):
         if result["success"]:
             print("[UI_BACKUP] SUCCESS - Updating display...")
             sys.stdout.flush()
-            QMessageBox.information(
+            SilentMessageBox.information(
                 self,
                 lang.get("backup_success_title"),
                 result["message"]
@@ -6300,7 +6299,7 @@ class BackupSettingsDialog(QDialog):
         else:
             print("[UI_BACKUP] FAILED - Showing error message...")
             sys.stdout.flush()
-            QMessageBox.warning(
+            SilentMessageBox.warning(
                 self,
                 lang.get("backup_error_title"),
                 result["message"]
@@ -6323,7 +6322,7 @@ class BackupSettingsDialog(QDialog):
         if result["success"]:
             print("[UI_BACKUP_COOKIES] SUCCESS - Updating display...")
             sys.stdout.flush()
-            QMessageBox.information(
+            SilentMessageBox.information(
                 self,
                 lang.get("backup_success_title"),
                 result["message"]
@@ -6336,7 +6335,7 @@ class BackupSettingsDialog(QDialog):
         else:
             print("[UI_BACKUP_COOKIES] FAILED - Showing error message...")
             sys.stdout.flush()
-            QMessageBox.warning(
+            SilentMessageBox.warning(
                 self,
                 lang.get("backup_error_title"),
                 result["message"]
@@ -6358,7 +6357,7 @@ class BackupSettingsDialog(QDialog):
                 size_limit = int(self.size_limit_spin.text())
                 self.config_manager.set("backup_size_limit_mb", size_limit)
             except ValueError:
-                QMessageBox.warning(self, lang.get("error_title"),
+                SilentMessageBox.warning(self, lang.get("error_title"),
                                   lang.get("backup_invalid_size_limit"))
                 return
             
@@ -6379,14 +6378,14 @@ class BackupSettingsDialog(QDialog):
                 cookies_size_limit = int(self.cookies_size_limit_spin.text())
                 self.config_manager.set("cookies_backup_size_limit_mb", cookies_size_limit)
             except ValueError:
-                QMessageBox.warning(self, lang.get("error_title"),
+                SilentMessageBox.warning(self, lang.get("error_title"),
                                   lang.get("backup_invalid_size_limit"))
                 return
             
             # Update backup manager with new settings for cookies
             self.backup_manager._ensure_cookies_backup_dir()
             
-            QMessageBox.information(
+            SilentMessageBox.information(
                 self,
                 lang.get("backup_settings_saved_title"),
                 lang.get("backup_settings_saved_message")
@@ -6396,7 +6395,7 @@ class BackupSettingsDialog(QDialog):
         
         except Exception as e:
             logging.error(f"Error saving backup settings: {e}", exc_info=True)
-            QMessageBox.critical(self, lang.get("error_title"),
+            SilentMessageBox.critical(self, lang.get("error_title"),
                                f"{lang.get('backup_settings_error')} : {str(e)}")
 
 
@@ -6529,7 +6528,7 @@ class SearchMissingPricesDialog(QDialog):
         selected_items = [item.text() for item in self.items_list.selectedItems()]
         
         if not selected_items:
-            QMessageBox.warning(
+            SilentMessageBox.warning(
                 self,
                 lang.get("search_prices_dialog.no_selection_title", default="No Selection"),
                 lang.get("search_prices_dialog.no_selection_message", default="Please select items to search.")
@@ -6537,7 +6536,7 @@ class SearchMissingPricesDialog(QDialog):
             return
         
         # Confirm action
-        reply = QMessageBox.question(
+        reply = SilentMessageBox.question(
             self,
             lang.get("search_prices_dialog.confirm_title", default="Confirm Search"),
             lang.get("search_prices_dialog.confirm_message", default=f"Search online for {len(selected_items)} item(s)?"),
@@ -6582,7 +6581,7 @@ class SearchMissingPricesDialog(QDialog):
             self.active_scraper = eden_scraper
             
             if not eden_scraper:
-                QMessageBox.critical(
+                SilentMessageBox.critical(
                     self,
                     lang.get("search_prices_dialog.error_title", default="Connection Error"),
                     error_message or lang.get("search_prices_dialog.error_connection", default="Failed to connect to Eden Herald")
@@ -6660,7 +6659,7 @@ class SearchMissingPricesDialog(QDialog):
                 if len(failed_items) > 10:
                     result_message += f"\n... and {len(failed_items) - 10} more"
             
-            QMessageBox.information(
+            SilentMessageBox.information(
                 self,
                 lang.get("search_prices_dialog.complete_title", default="Search Complete"),
                 result_message
@@ -6677,7 +6676,7 @@ class SearchMissingPricesDialog(QDialog):
             
         except Exception as e:
             logging.error(f"Error during price search: {e}", exc_info=True)
-            QMessageBox.critical(
+            SilentMessageBox.critical(
                 self,
                 lang.get("search_prices_dialog.error_title", default="Error"),
                 lang.get("search_prices_dialog.error_search", default=f"Search failed:\n{str(e)}")

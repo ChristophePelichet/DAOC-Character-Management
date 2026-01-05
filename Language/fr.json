@@ -1485,7 +1485,15 @@
         }
     },
     "common": {
-        "close_button": "Fermer"
+        "close_button": "Fermer",
+        "dialog_ok": "OK",
+        "dialog_yes": "Oui",
+        "dialog_no": "Non"
+    },
+    "config": {
+        "audio_group_title": "Paramètres audio",
+        "enable_sounds_label": "Activer les sons des boîtes de dialogue",
+        "enable_sounds_tooltip": "Désactiver pour supprimer les sons système dans les boîtes de dialogue"
     },
     "error": {
         "data_load_failed": "Erreur lors du chargement des données"

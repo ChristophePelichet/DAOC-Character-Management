@@ -3,6 +3,7 @@ Failed Items Review Dialog
 Allows user to review and retry items that were filtered during mass import
 """
 
+from UI.ui_sound_manager import SilentMessageBox
 from PySide6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QTableWidget, 
                                QTableWidgetItem, QPushButton, QLabel, QHeaderView,
                                QCheckBox, QMessageBox, QWidget)
@@ -312,7 +313,7 @@ class FailedItemsReviewDialog(QDialog):
             return
         
         # Confirmation
-        reply = QMessageBox.question(
+        reply = SilentMessageBox.question(
             self,
             lang.get("settings.pages.failed_items.confirm_title", default="Confirm Retry"),
             lang.get("settings.pages.failed_items.confirm_message", count=len(self.selected_items),
@@ -367,7 +368,7 @@ class FailedItemsReviewDialog(QDialog):
             # If user cancels, item is still ignored but without category
         
         # Confirmation
-        reply = QMessageBox.question(
+        reply = SilentMessageBox.question(
             self,
             lang.get("settings.pages.failed_items.ignore_confirm_title", default="Confirm Ignore"),
             lang.get("settings.pages.failed_items.ignore_confirm_message", count=len(selected),
@@ -404,7 +405,7 @@ class FailedItemsReviewDialog(QDialog):
             self.update_stats()
             
             # Show confirmation message
-            QMessageBox.information(
+            SilentMessageBox.information(
                 self,
                 lang.get("settings.pages.failed_items.ignore_success_title", default="Items Ignored"),
                 lang.get("settings.pages.failed_items.ignore_success_message", count=len(selected),

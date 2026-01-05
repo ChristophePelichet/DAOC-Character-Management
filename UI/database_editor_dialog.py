@@ -16,6 +16,7 @@ from pathlib import Path
 from datetime import datetime
 from typing import Optional, Dict, Any
 
+from UI.ui_sound_manager import SilentMessageBox
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QLineEdit, QComboBox, QTableWidget, QTableWidgetItem,
@@ -334,7 +335,7 @@ class DatabaseEditorDialog(QMainWindow):
         """Load the database from JSON file"""
         try:
             if not self.db_path.exists():
-                QMessageBox.critical(self, lang.get('error_title', default="Error"), 
+                SilentMessageBox.critical(self, lang.get('error_title', default="Error"), 
                     lang.get('db_editor.db_not_found', default="Database file not found:\n{path}").replace('{path}', str(self.db_path)))
                 return
             
@@ -352,7 +353,7 @@ class DatabaseEditorDialog(QMainWindow):
             
         except Exception as e:
             logging.error(f"Error loading database: {e}", exc_info=True, extra={"action": "DBEDITOR"})
-            QMessageBox.critical(self, lang.get('error_title', default="Error"), 
+            SilentMessageBox.critical(self, lang.get('error_title', default="Error"), 
                 lang.get('db_editor.load_error', default="Failed to load database:\n{error}").replace('{error}', str(e)))
     
     def _populate_table(self):
@@ -544,7 +545,7 @@ class DatabaseEditorDialog(QMainWindow):
             if field_def["required"]:
                 widget = self.field_widgets[field_name]
                 if isinstance(widget, QLineEdit) and not widget.text().strip():
-                    QMessageBox.warning(self, lang.get('db_editor.validation_error_title', default="Validation Error"), 
+                    SilentMessageBox.warning(self, lang.get('db_editor.validation_error_title', default="Validation Error"), 
                         lang.get('db_editor.required_field_error', 
                             default="Field '{field}' is required!").replace('{field}', field_def['label']))
                     widget.setFocus()
@@ -606,7 +607,7 @@ class DatabaseEditorDialog(QMainWindow):
                 self.items_table.selectRow(row)
                 break
         
-        QMessageBox.information(self, lang.get('success_title', default="Success"), 
+        SilentMessageBox.information(self, lang.get('success_title', default="Success"), 
             lang.get('db_editor.save_success', default="Item '{name}' saved successfully!").replace('{name}', item_data['name']))
     
     def _delete_current_item(self):
@@ -619,7 +620,7 @@ class DatabaseEditorDialog(QMainWindow):
         item_name = item.get('name', self.current_item_key)
         
         # Confirmation
-        reply = QMessageBox.question(self, lang.get('db_editor.delete_confirm_title', default="Confirm Deletion"),
+        reply = SilentMessageBox.question(self, lang.get('db_editor.delete_confirm_title', default="Confirm Deletion"),
             lang.get('db_editor.delete_confirm_message', 
                 default="Delete item '{name}'?\n\nThis action cannot be undone!").replace('{name}', item_name),
             QMessageBox.Yes | QMessageBox.No)
@@ -645,7 +646,7 @@ class DatabaseEditorDialog(QMainWindow):
         self._populate_table()
         self._filter_items()
         
-        QMessageBox.information(self, lang.get('success_title', default="Success"), 
+        SilentMessageBox.information(self, lang.get('success_title', default="Success"), 
             lang.get('db_editor.delete_success', default="Item '{name}' deleted successfully!").replace('{name}', item_name))
     
     def _add_new_item(self):
@@ -678,7 +679,7 @@ class DatabaseEditorDialog(QMainWindow):
         item_realm = realm_combo.currentText()
         
         if not item_name:
-            QMessageBox.warning(self, lang.get('db_editor.invalid_input_title', default="Invalid Input"), 
+            SilentMessageBox.warning(self, lang.get('db_editor.invalid_input_title', default="Invalid Input"), 
                 lang.get('db_editor.empty_name_error', default="Item name cannot be empty!"))
             return
         
@@ -688,7 +689,7 @@ class DatabaseEditorDialog(QMainWindow):
         # Check if exists
         items = self.database.get('items', {})
         if key in items:
-            QMessageBox.warning(self, lang.get('db_editor.duplicate_item_title', default="Duplicate Item"), 
+            SilentMessageBox.warning(self, lang.get('db_editor.duplicate_item_title', default="Duplicate Item"), 
                 lang.get('db_editor.duplicate_item_message', 
                     default="Item '{name}' ({realm}) already exists!").replace('{name}', item_name).replace('{realm}', item_realm))
             return
@@ -777,13 +778,13 @@ class DatabaseEditorDialog(QMainWindow):
             
         except Exception as e:
             logging.error(f"Error saving database: {e}", exc_info=True, extra={"action": "DBEDITOR"})
-            QMessageBox.critical(self, lang.get('error_title', default="Error"), 
+            SilentMessageBox.critical(self, lang.get('error_title', default="Error"), 
                 lang.get('db_editor.save_error', default="Failed to save database:\n{error}").replace('{error}', str(e)))
     
     def _reload_database(self):
         """Reload database from file (discard unsaved changes)"""
         if self.modified:
-            reply = QMessageBox.question(self, lang.get('db_editor.reload_title', default="Reload Database"),
+            reply = SilentMessageBox.question(self, lang.get('db_editor.reload_title', default="Reload Database"),
                 lang.get('db_editor.reload_confirm', 
                     default="Reload database from file?\n\nAll unsaved changes will be lost!"),
                 QMessageBox.Yes | QMessageBox.No)
@@ -857,7 +858,7 @@ class DatabaseEditorDialog(QMainWindow):
     def closeEvent(self, event):
         """Handle window close event - check for unsaved changes"""
         if self.modified:
-            reply = QMessageBox.question(
+            reply = SilentMessageBox.question(
                 self,
                 lang.get('db_editor.close_title', default="Close Editor"),
                 lang.get('db_editor.close_confirm', 
@@ -995,7 +996,7 @@ class DatabaseEditorDialog(QMainWindow):
         """Refresh item data from Eden using its ID"""
         try:
             # Confirmation dialog
-            reply = QMessageBox.question(
+            reply = SilentMessageBox.question(
                 self,
                 lang.get('db_editor.refresh_confirm_title', default="Refresh Item"),
                 lang.get('db_editor.refresh_confirm_message',
@@ -1034,7 +1035,7 @@ class DatabaseEditorDialog(QMainWindow):
             eden_scraper, error_message = _connect_to_eden_herald(headless=False)
             if not eden_scraper:
                 progress.close()
-                QMessageBox.critical(self,
+                SilentMessageBox.critical(self,
                     lang.get('error_title', default="Error"),
                     f"{lang.get('db_editor.refresh_connect_error', default='Failed to connect to Eden Herald')}:\n{error_message}")
                 return
@@ -1055,7 +1056,7 @@ class DatabaseEditorDialog(QMainWindow):
                 
                 if not item_details:
                     progress.close()
-                    QMessageBox.warning(self,
+                    SilentMessageBox.warning(self,
                         lang.get('warning_title', default="Warning"),
                         lang.get('db_editor.refresh_no_data', default="No data retrieved from Eden."))
                     return
@@ -1085,7 +1086,7 @@ class DatabaseEditorDialog(QMainWindow):
                     self._save_database()
                     
                     # Show success with details
-                    QMessageBox.information(self,
+                    SilentMessageBox.information(self,
                         lang.get('success_title', default="Success"),
                         f"{lang.get('db_editor.refresh_success', default='Item refreshed successfully!')}\n\n"
                         f"{lang.get('db_editor.updated_fields', default='Updated fields')}:\n" +
@@ -1095,7 +1096,7 @@ class DatabaseEditorDialog(QMainWindow):
                     from PySide6.QtCore import QTimer
                     QTimer.singleShot(0, lambda: self._refresh_display_after_update(item_key))
                 else:
-                    QMessageBox.information(self,
+                    SilentMessageBox.information(self,
                         lang.get('info_title', default="Information"),
                         lang.get('db_editor.refresh_no_changes', default="No changes detected."))
                 
@@ -1105,7 +1106,7 @@ class DatabaseEditorDialog(QMainWindow):
                 
         except Exception as e:
             logging.error(f"Error refreshing item from Eden: {e}", exc_info=True)
-            QMessageBox.critical(self,
+            SilentMessageBox.critical(self,
                 lang.get('error_title', default="Error"),
                 f"{lang.get('db_editor.refresh_error', default='Failed to refresh item')}:\n{str(e)}")
     
@@ -1113,7 +1114,7 @@ class DatabaseEditorDialog(QMainWindow):
         """Full scan of item by name - finds all variants across all realms"""
         try:
             # Confirmation dialog
-            reply = QMessageBox.question(
+            reply = SilentMessageBox.question(
                 self,
                 lang.get('db_editor.full_scan_confirm_title', default="Full Scan Item"),
                 lang.get('db_editor.full_scan_confirm_message',
@@ -1151,7 +1152,7 @@ class DatabaseEditorDialog(QMainWindow):
             eden_scraper, error_message = _connect_to_eden_herald(headless=False)
             if not eden_scraper:
                 progress.close()
-                QMessageBox.critical(self,
+                SilentMessageBox.critical(self,
                     lang.get('error_title', default="Error"),
                     f"{lang.get('db_editor.full_scan_connect_error', default='Failed to connect to Eden Herald')}:\n{error_message}")
                 return
@@ -1168,7 +1169,7 @@ class DatabaseEditorDialog(QMainWindow):
                 
                 if not variants:
                     progress.close()
-                    QMessageBox.warning(self,
+                    SilentMessageBox.warning(self,
                         lang.get('warning_title', default="Warning"),
                         lang.get('db_editor.full_scan_no_variants', 
                             default="No variants found for '{name}'.").replace('{name}', item_name))
@@ -1257,7 +1258,7 @@ class DatabaseEditorDialog(QMainWindow):
                         if len(updated_details) > 10:
                             result_message += f"\n... ({len(updated_details) - 10} more)"
                     
-                    QMessageBox.information(self,
+                    SilentMessageBox.information(self,
                         lang.get('success_title', default="Success"),
                         result_message)
                     
@@ -1269,7 +1270,7 @@ class DatabaseEditorDialog(QMainWindow):
                     if items_without_price:
                         QTimer.singleShot(100, lambda: self._prompt_tag_multiple_no_price_items(items_without_price))
                 else:
-                    QMessageBox.information(self,
+                    SilentMessageBox.information(self,
                         lang.get('info_title', default="Information"),
                         lang.get('db_editor.full_scan_no_changes', 
                             default=f"Scanned {len(variants)} variant(s), no changes needed."))
@@ -1280,13 +1281,13 @@ class DatabaseEditorDialog(QMainWindow):
                 
         except Exception as e:
             logging.error(f"Error during full scan: {e}", exc_info=True)
-            QMessageBox.critical(self,
+            SilentMessageBox.critical(self,
                 lang.get('error_title', default="Error"),
                 f"{lang.get('db_editor.full_scan_error', default='Failed to perform full scan')}:\\n{str(e)}")
     
     def _prompt_tag_no_price_item(self, item_key: str, item_name: str):
         """Prompt user to tag an item without merchant price"""
-        reply = QMessageBox.question(
+        reply = SilentMessageBox.question(
             self,
             lang.get('db_editor.tag_no_price_title', default="No Merchant Price Found"),
             lang.get('db_editor.tag_no_price_message',
@@ -1341,7 +1342,7 @@ class DatabaseEditorDialog(QMainWindow):
                 self._populate_table()
                 self._filter_items()
                 
-                QMessageBox.information(self,
+                SilentMessageBox.information(self,
                     lang.get('success_title', default="Success"),
                     lang.get('db_editor.tag_success', default="Item tagged successfully!"))
     
@@ -1353,7 +1354,7 @@ class DatabaseEditorDialog(QMainWindow):
         """
         from PySide6.QtWidgets import QDialog, QVBoxLayout, QLabel, QListWidget, QDialogButtonBox, QRadioButton, QGroupBox
         
-        reply = QMessageBox.question(
+        reply = SilentMessageBox.question(
             self,
             lang.get('db_editor.tag_multiple_no_price_title', default="Items Without Merchant Price"),
             lang.get('db_editor.tag_multiple_no_price_message',
@@ -1427,7 +1428,7 @@ class DatabaseEditorDialog(QMainWindow):
             self._populate_table()
             self._filter_items()
             
-            QMessageBox.information(self,
+            SilentMessageBox.information(self,
                 lang.get('success_title', default="Success"),
                 lang.get('db_editor.tag_multiple_success',
                     default="{count} item(s) tagged successfully!").replace('{count}', str(len(items_list))))
@@ -1480,7 +1481,7 @@ class DatabaseEditorDialog(QMainWindow):
             
         except Exception as e:
             logging.error(f"Error tagging item: {e}", exc_info=True)
-            QMessageBox.critical(self,
+            SilentMessageBox.critical(self,
                 lang.get('error_title', default="Error"),
                 f"{lang.get('db_editor.tag_error', default='Failed to tag item')}:\n{str(e)}")
     
@@ -1507,7 +1508,7 @@ class DatabaseEditorDialog(QMainWindow):
             
         except Exception as e:
             logging.error(f"Error removing tag: {e}", exc_info=True)
-            QMessageBox.critical(self,
+            SilentMessageBox.critical(self,
                 lang.get('error_title', default="Error"),
                 f"{lang.get('db_editor.remove_tag_error', default='Failed to remove tag')}:\n{str(e)}")
     
@@ -1521,7 +1522,7 @@ class DatabaseEditorDialog(QMainWindow):
             
             eden_id = item_id.text().strip()
             if not eden_id:
-                QMessageBox.warning(self,
+                SilentMessageBox.warning(self,
                     lang.get('warning_title', default="Warning"),
                     lang.get('db_editor.no_eden_id', default="No Eden ID available for this item."))
                 return
@@ -1536,7 +1537,7 @@ class DatabaseEditorDialog(QMainWindow):
             
         except Exception as e:
             logging.error(f"Error opening Eden page: {e}", exc_info=True)
-            QMessageBox.critical(self,
+            SilentMessageBox.critical(self,
                 lang.get('error_title', default="Error"),
                 f"{lang.get('db_editor.open_eden_error', default='Failed to open Eden page')}:\n{str(e)}")
     
@@ -1550,7 +1551,7 @@ class DatabaseEditorDialog(QMainWindow):
             
             model_id = model_widget.text().strip()
             if not model_id:
-                QMessageBox.warning(self,
+                SilentMessageBox.warning(self,
                     lang.get('warning_title', default="Warning"),
                     lang.get('db_editor.no_model_id', default="No Model ID available for this item."))
                 return
@@ -1560,7 +1561,7 @@ class DatabaseEditorDialog(QMainWindow):
             model_path = Path(f"Img/Models/items/{model_id}.webp")
             
             if not model_path.exists():
-                QMessageBox.warning(self,
+                SilentMessageBox.warning(self,
                     lang.get('warning_title', default="Warning"),
                     lang.get('db_editor.model_not_found', default="Model image not found:\n{path}").replace('{path}', str(model_path)))
                 return
@@ -1603,7 +1604,7 @@ class DatabaseEditorDialog(QMainWindow):
             
         except Exception as e:
             logging.error(f"Error viewing model image: {e}", exc_info=True)
-            QMessageBox.critical(self,
+            SilentMessageBox.critical(self,
                 lang.get('error_title', default="Error"),
                 f"{lang.get('db_editor.view_model_error', default='Failed to view model image')}:\n{str(e)}")
     
@@ -1615,7 +1616,7 @@ class DatabaseEditorDialog(QMainWindow):
         """
         try:
             # Confirmation
-            reply = QMessageBox.question(
+            reply = SilentMessageBox.question(
                 self,
                 lang.get('db_editor.batch_refresh_confirm_title', default="Batch Refresh Items"),
                 lang.get('db_editor.batch_refresh_confirm_message',
@@ -1661,7 +1662,7 @@ class DatabaseEditorDialog(QMainWindow):
             eden_scraper, error_message = _connect_to_eden_herald(headless=False)
             if not eden_scraper:
                 progress.close()
-                QMessageBox.critical(self,
+                SilentMessageBox.critical(self,
                     lang.get('error_title', default="Error"),
                     f"{lang.get('db_editor.refresh_connect_error', default='Failed to connect to Eden Herald')}:\n{error_message}")
                 return
@@ -1730,7 +1731,7 @@ class DatabaseEditorDialog(QMainWindow):
                 QTimer.singleShot(500, progress.close)
                 
                 # Show summary
-                QTimer.singleShot(600, lambda: QMessageBox.information(self,
+                QTimer.singleShot(600, lambda: SilentMessageBox.information(self,
                     lang.get('success_title', default="Success"),
                     lang.get('db_editor.batch_refresh_success',
                         default="Batch refresh completed!\n\n"
@@ -1738,7 +1739,7 @@ class DatabaseEditorDialog(QMainWindow):
                 
         except Exception as e:
             logging.error(f"Error in batch refresh: {e}", exc_info=True)
-            QMessageBox.critical(self,
+            SilentMessageBox.critical(self,
                 lang.get('error_title', default="Error"),
                 f"{lang.get('db_editor.batch_refresh_error', default='Batch refresh failed')}:\n{str(e)}")
     
@@ -1753,7 +1754,7 @@ class DatabaseEditorDialog(QMainWindow):
             unique_names = list(set(item['name'] for item in items_data))
             
             # Confirmation
-            reply = QMessageBox.question(
+            reply = SilentMessageBox.question(
                 self,
                 lang.get('db_editor.batch_full_scan_confirm_title', default="Batch Full Scan"),
                 lang.get('db_editor.batch_full_scan_confirm_message',
@@ -1801,7 +1802,7 @@ class DatabaseEditorDialog(QMainWindow):
             if not eden_scraper:
                 progress.error_step(0, error_message)
                 progress.close()
-                QMessageBox.critical(self,
+                SilentMessageBox.critical(self,
                     lang.get('error_title', default="Error"),
                     f"{lang.get('db_editor.full_scan_connect_error', default='Failed to connect to Eden Herald')}:\n{error_message}")
                 return
@@ -1930,7 +1931,7 @@ class DatabaseEditorDialog(QMainWindow):
                 
         except Exception as e:
             logging.error(f"Error in batch full scan: {e}", exc_info=True)
-            QMessageBox.critical(self,
+            SilentMessageBox.critical(self,
                 lang.get('error_title', default="Error"),
                 f"{lang.get('db_editor.batch_full_scan_error', default='Batch full scan failed')}:\n{str(e)}")
     
@@ -2069,14 +2070,14 @@ class DatabaseEditorDialog(QMainWindow):
             # Close parent dialog
             parent_dialog.accept()
             
-            QMessageBox.information(self,
+            SilentMessageBox.information(self,
                 lang.get('success_title', default="Success"),
                 lang.get('db_editor.batch_tag_success',
                     default="{count} item(s) tagged successfully!").replace('{count}', str(len(items_without_price))))
             
         except Exception as e:
             logging.error(f"Error tagging items from batch scan: {e}", exc_info=True)
-            QMessageBox.critical(self,
+            SilentMessageBox.critical(self,
                 lang.get('error_title', default="Error"),
                 f"{lang.get('db_editor.batch_tag_error', default='Failed to tag items')}:\n{str(e)}")
     
@@ -2104,7 +2105,7 @@ class DatabaseEditorDialog(QMainWindow):
             
         except Exception as e:
             logging.error(f"Error in batch tagging: {e}", exc_info=True)
-            QMessageBox.critical(self,
+            SilentMessageBox.critical(self,
                 lang.get('error_title', default="Error"),
                 f"{lang.get('db_editor.batch_tag_error', default='Batch tagging failed')}:\n{str(e)}")
 

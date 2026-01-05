@@ -4,6 +4,7 @@ Refactored version with character context
 """
 
 from pathlib import Path
+from UI.ui_sound_manager import SilentMessageBox
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QLabel,
     QGroupBox, QLineEdit, QComboBox, QMessageBox,
@@ -387,7 +388,7 @@ class TemplateImportDialog(QDialog):
     def _import_template(self):
         """Import template with metadata"""
         if not self.selected_file or not self.selected_file.exists():
-            QMessageBox.warning(
+            SilentMessageBox.warning(
                 self,
                 lang.get(
                     "template_import.import_error_title",
@@ -403,7 +404,7 @@ class TemplateImportDialog(QDialog):
         # In non-auto-detect mode, check that class and realm are selected
         if not self.auto_detect_mode:
             if not self.class_combo.currentText():
-                QMessageBox.warning(
+                SilentMessageBox.warning(
                     self,
                     lang.get(
                         "template_import.import_error_title",
@@ -417,7 +418,7 @@ class TemplateImportDialog(QDialog):
                 return
 
             if not self.realm_combo.currentText():
-                QMessageBox.warning(
+                SilentMessageBox.warning(
                     self,
                     lang.get(
                         "template_import.import_error_title",
@@ -443,7 +444,7 @@ class TemplateImportDialog(QDialog):
         tags = self.tag_selector.get_tags()
 
         if not description:
-            QMessageBox.warning(
+            SilentMessageBox.warning(
                 self,
                 lang.get(
                     "template_import.import_error_title",
@@ -473,7 +474,7 @@ class TemplateImportDialog(QDialog):
             )
 
             if template_name:
-                QMessageBox.information(
+                SilentMessageBox.information(
                     self,
                     lang.get(
                         "template_import.import_success_title",
@@ -487,7 +488,7 @@ class TemplateImportDialog(QDialog):
                 self.template_imported.emit(template_name)
                 self.accept()
             else:
-                QMessageBox.warning(
+                SilentMessageBox.warning(
                     self,
                     lang.get(
                         "template_import.import_error_title",
@@ -500,7 +501,7 @@ class TemplateImportDialog(QDialog):
                 )
 
         except Exception as e:
-            QMessageBox.critical(
+            SilentMessageBox.critical(
                 self,
                 lang.get(
                     "template_import.import_error_title",

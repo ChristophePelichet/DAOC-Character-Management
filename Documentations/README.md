@@ -71,6 +71,15 @@ Complete index of technical and user documentation for the character manager.
   - Chrome profile isolation
   - UI state management
 
+### 🔊 [Sound/](Sound/) - Sound Control System
+- **SOUND_CONTROL_TECHNICAL_DOCUMENTATION.md** - Sound control feature (v1.0)
+  - Message box sound suppression system
+  - Configuration management (ui.enable_sounds)
+  - Custom QDialog fallback for muted audio
+  - Windows winsound API integration
+  - Settings UI integration
+  - Multi-language support (EN/FR/DE)
+
 ### ❓ [Help/](Help/) - Help System
 - **HELP_TECHNICAL_DOCUMENTATION.md** - GitHub Wiki help system (398 lines)
   - Wiki-based documentation
@@ -144,15 +153,16 @@ Complete index of technical and user documentation for the character manager.
 - [Lang/LANGUAGE_TECHNICAL_DOCUMENTATION.md](Lang/LANGUAGE_TECHNICAL_DOCUMENTATION.md) - Multilingual system (431 lines)
 - [Help/HELP_TECHNICAL_DOCUMENTATION.md](Help/HELP_TECHNICAL_DOCUMENTATION.md) - Help system (398 lines)
 - [Models/MODELS_VISUAL_SYSTEM_DOCUMENTATION.md](Models/MODELS_VISUAL_SYSTEM_DOCUMENTATION.md) - Visual system (842 lines)
+- [Sound/SOUND_CONTROL_TECHNICAL_DOCUMENTATION.md](Sound/SOUND_CONTROL_TECHNICAL_DOCUMENTATION.md) - Sound control system (v1.0)
 
 ---
 
 ## 📊 Documentation Statistics
 
-- **Total files**: 14 major technical documents
-- **Total lines**: 17,000+ lines of comprehensive documentation
+- **Total files**: 15 major technical documents
+- **Total lines**: 18,000+ lines of comprehensive documentation
 - **Languages**: FR/EN (DE partial)
-- **Categories**: 14 functional areas
+- **Categories**: 15 functional areas
 - **Documentation by size**:
   - Items Database: 3632 lines
   - Armory System: 2636 lines
@@ -161,6 +171,7 @@ Complete index of technical and user documentation for the character manager.
   - Character System: 1000+ lines (includes validator + migration)
   - Dialog System: 1002 lines
   - Settings System: 935 lines
+  - Sound Control: v1.0 (message box audio suppression)
   - Armor Resistances: v0.2.1 (multi-realm feature with configurable display)
   - Visual System: 842 lines
   - Language System: 431 lines
@@ -172,6 +183,29 @@ Complete index of technical and user documentation for the character manager.
 ---
 
 ## 🆕 Recent Updates
+
+### January 2025 - v0.109 (Sound Control Feature)
+**Message Box Audio Suppression System**
+- NEW: `Sound/SOUND_CONTROL_TECHNICAL_DOCUMENTATION.md` (v1.0)
+  - Complete sound control feature documentation
+  - Custom QDialog fallback for muted sounds
+  - Windows winsound API integration (winsound.PlaySound(None, SND_PURGE))
+  - Multi-language support (EN/FR/DE)
+  - Settings integration (Settings > General > Audio Settings)
+  - Comprehensive error handling and fallback patterns
+- IMPLEMENTATION: 181 total QMessageBox → SilentMessageBox replacements across 15+ files
+- FILES CREATED:
+  - `Functions/sound_manager.py` - Business logic for sound settings
+  - `UI/ui_sound_manager.py` - Custom message box wrapper class
+- FILES MODIFIED: 15 files with dialog updates
+  - `UI/settings_dialog.py` (70 replacements)
+  - `UI/dialogs.py` (65 replacements)
+  - `main.py` (16 replacements)
+  - `UI/database_editor_dialog.py` (44 replacements)
+  - And 11 other files with targeted replacements
+- CONFIGURATION: Added `ui.enable_sounds` (default: true) to config schema
+- BRANCH: `feature/v0.109-sound-control` (awaiting user validation before merge)
+- STATUS: ✅ Complete - All imports tested and working
 
 ### January 5, 2026 - v0.2.1 (Armor Resistances Table)
 **Armor Resistances Feature & Settings Integration**

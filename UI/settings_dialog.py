@@ -22,6 +22,7 @@ from Functions.path_manager import PathManager
 from Functions.debug_logging_manager import get_log_dir
 from Functions.path_manager import get_armor_dir
 from Functions.backup_manager import BackupManager
+from UI.ui_sound_manager import SilentMessageBox
 from UI.ui_file_dialogs import (
     dialog_select_directory,
     dialog_select_multiple_files
@@ -264,6 +265,20 @@ class SettingsDialog(QDialog):
         
         language_group.setLayout(language_layout)
         layout.addWidget(language_group)
+        
+        # === Audio Settings ===
+        audio_group = QGroupBox("🔊 " + lang.get("config_audio_group_title", 
+                                                 default="Paramètres audio"))
+        audio_layout = QFormLayout()
+        
+        self.enable_sounds_checkbox = QCheckBox(lang.get("config_enable_sounds_label", 
+                                                         default="Activer les sons des boîtes de dialogue"))
+        self.enable_sounds_checkbox.setToolTip(lang.get("config_enable_sounds_tooltip",
+                                                       default="Désactiver pour supprimer les sons système dans les boîtes de dialogue"))
+        audio_layout.addRow(self.enable_sounds_checkbox)
+        
+        audio_group.setLayout(audio_layout)
+        layout.addWidget(audio_group)
         
         layout.addStretch()
         self.pages.addWidget(page)
@@ -1534,13 +1549,13 @@ class SettingsDialog(QDialog):
                 backup_info = self.backup_manager.get_backup_info()
                 self.backup_total_label.setText(str(len(backup_info["backups"])))
                 
-                QMessageBox.information(self, lang.get("success_title", default="Succès"), 
+                SilentMessageBox.information(self, lang.get("success_title", default="Succès"), 
                                        lang.get("backup_success", default="Sauvegarde créée avec succès"))
             else:
-                QMessageBox.warning(self, lang.get("warning_title", default="Attention"),
+                SilentMessageBox.warning(self, lang.get("warning_title", default="Attention"),
                                    lang.get("backup_failed", default="La sauvegarde a échoué"))
         except Exception as e:
-            QMessageBox.critical(self, lang.get("error_title", default="Erreur"),
+            SilentMessageBox.critical(self, lang.get("error_title", default="Erreur"),
                                 f"{lang.get('backup_error', default='Erreur lors de la sauvegarde')} : {str(e)}")
     
     def _backup_cookies_now(self):
@@ -1564,13 +1579,13 @@ class SettingsDialog(QDialog):
                 cookies_info = self.backup_manager.get_cookies_backup_info()
                 self.cookies_total_label.setText(str(len(cookies_info["backups"])))
                 
-                QMessageBox.information(self, lang.get("success_title", default="Succès"),
+                SilentMessageBox.information(self, lang.get("success_title", default="Succès"),
                                        lang.get("backup_success", default="Sauvegarde créée avec succès"))
             else:
-                QMessageBox.warning(self, lang.get("warning_title", default="Attention"),
+                SilentMessageBox.warning(self, lang.get("warning_title", default="Attention"),
                                    lang.get("backup_failed", default="La sauvegarde a échoué"))
         except Exception as e:
-            QMessageBox.critical(self, lang.get("error_title", default="Erreur"),
+            SilentMessageBox.critical(self, lang.get("error_title", default="Erreur"),
                                 f"{lang.get('backup_error', default='Erreur lors de la sauvegarde')} : {str(e)}")
     
     def _backup_armor_now(self):
@@ -1594,13 +1609,13 @@ class SettingsDialog(QDialog):
                 armor_info = self.backup_manager.get_armor_backup_info()
                 self.armor_total_label.setText(str(len(armor_info["backups"])))
                 
-                QMessageBox.information(self, lang.get("success_title", default="Succès"),
+                SilentMessageBox.information(self, lang.get("success_title", default="Succès"),
                                        lang.get("backup_success", default="Sauvegarde créée avec succès"))
             else:
-                QMessageBox.warning(self, lang.get("warning_title", default="Attention"),
+                SilentMessageBox.warning(self, lang.get("warning_title", default="Attention"),
                                    lang.get("backup_failed", default="La sauvegarde a échoué"))
         except Exception as e:
-            QMessageBox.critical(self, lang.get("error_title", default="Erreur"),
+            SilentMessageBox.critical(self, lang.get("error_title", default="Erreur"),
                                 f"{lang.get('backup_error', default='Erreur lors de la sauvegarde')} : {str(e)}")
     
     def _open_character_folder(self):
@@ -1627,7 +1642,7 @@ class SettingsDialog(QDialog):
             return
         
         # Confirm move
-        reply = QMessageBox.question(
+        reply = SilentMessageBox.question(
             self,
             lang.get("move_armor_confirm_title", default="Confirmer le déplacement"),
             lang.get("move_armor_confirm_message", 
@@ -1658,13 +1673,13 @@ class SettingsDialog(QDialog):
                 config.set("folders.armor", new_path)
                 config.save_config()
                 
-                QMessageBox.information(
+                SilentMessageBox.information(
                     self,
                     lang.get("move_success_title", default="Succès"),
                     lang.get("move_armor_success", default="Dossier Armory déplacé avec succès")
                 )
             except Exception as e:
-                QMessageBox.critical(
+                SilentMessageBox.critical(
                     self,
                     lang.get("error_title", default="Erreur"),
                     lang.get("move_armor_error", default=f"Erreur lors du déplacement : {str(e)}")
@@ -1695,7 +1710,7 @@ class SettingsDialog(QDialog):
         # Confirmation dialog
         message = lang.get("settings.herald.clean_eden_confirm_message").replace("{path}", str(eden_path))
         
-        reply = QMessageBox.question(
+        reply = SilentMessageBox.question(
             self,
             lang.get("settings.herald.clean_eden_confirm_title"),
             message,
@@ -1711,7 +1726,7 @@ class SettingsDialog(QDialog):
                     # Recreate empty folder
                     os.makedirs(eden_path, exist_ok=True)
                     
-                    QMessageBox.information(
+                    SilentMessageBox.information(
                         self,
                         lang.get("clean_eden_success_title", default="Nettoyage réussi"),
                         lang.get("clean_eden_success_message", 
@@ -1719,7 +1734,7 @@ class SettingsDialog(QDialog):
                                        "Dossier supprimé.")
                     )
             except Exception as e:
-                QMessageBox.critical(
+                SilentMessageBox.critical(
                     self,
                     lang.get("clean_eden_error_title", default="Erreur"),
                     lang.get("clean_eden_error_message", 
@@ -1759,7 +1774,7 @@ class SettingsDialog(QDialog):
         # Confirmation dialog
         message = lang.get("settings.herald.clean_cache_confirm_message").replace("{path}", cache_path)
         
-        reply = QMessageBox.question(
+        reply = SilentMessageBox.question(
             self,
             lang.get("settings.herald.clean_cache_confirm_title"),
             message,
@@ -1775,7 +1790,7 @@ class SettingsDialog(QDialog):
                     if os.path.exists(cache_file):
                         os.remove(cache_file)
                     
-                    QMessageBox.information(
+                    SilentMessageBox.information(
                         self,
                         lang.get("clean_cache_success_title", default="Nettoyage réussi"),
                         lang.get("clean_cache_success_message", 
@@ -1783,14 +1798,14 @@ class SettingsDialog(QDialog):
                                        "Cache supprimé.")
                     )
                 else:
-                    QMessageBox.information(
+                    SilentMessageBox.information(
                         self,
                         lang.get("clean_cache_empty_title", default="Dossier vide"),
                         lang.get("clean_cache_empty_message", 
                                 default="ℹ️ Le cache est déjà vide ou n'existe pas.")
                     )
             except Exception as e:
-                QMessageBox.critical(
+                SilentMessageBox.critical(
                     self,
                     lang.get("clean_cache_error_title", default="Erreur"),
                     lang.get("clean_cache_error_message", 
@@ -1869,7 +1884,7 @@ class SettingsDialog(QDialog):
         # Check if destination already exists and source exists (need to merge)
         destination_exists = os.path.exists(destination)
         if destination_exists and source_exists:
-            reply = QMessageBox.question(
+            reply = SilentMessageBox.question(
                 self,
                 lang.get("warning_title", default="Attention"),
                 f"{lang.get('move_folder_destination_exists', default='Le dossier existe déjà à la destination.')}\n\n"
@@ -1880,7 +1895,7 @@ class SettingsDialog(QDialog):
             )
             
             if reply != QMessageBox.Yes:
-                QMessageBox.information(
+                SilentMessageBox.information(
                     self,
                     lang.get("info_title", default="Information"),
                     lang.get("move_folder_cancelled", default="Opération annulée.")
@@ -1903,7 +1918,7 @@ class SettingsDialog(QDialog):
                 from Functions.debug_logging_manager import setup_logging
                 setup_logging()
             
-            QMessageBox.information(
+            SilentMessageBox.information(
                 self,
                 lang.get("success_title", default="Succès"),
                 lang.get("move_folder_using_existing", 
@@ -1913,7 +1928,7 @@ class SettingsDialog(QDialog):
         
         # If source exists, confirm move/copy
         if source_exists:
-            reply = QMessageBox.question(
+            reply = SilentMessageBox.question(
                 self,
                 lang.get("move_folder_confirm_title", default="Confirmer le déplacement"),
                 f"{lang.get('move_folder_confirm_message', default='Voulez-vous déplacer le dossier et son contenu ?')}\n\n"
@@ -1927,7 +1942,7 @@ class SettingsDialog(QDialog):
                 return
         else:
             # Just create new folder
-            reply = QMessageBox.question(
+            reply = SilentMessageBox.question(
                 self,
                 lang.get("create_folder_confirm_title", default="Créer le dossier"),
                 f"{lang.get('create_folder_confirm_message', default='Créer le dossier à cet emplacement ?')}\n\n"
@@ -1993,7 +2008,7 @@ class SettingsDialog(QDialog):
                         if not remaining_items:
                             shutil.rmtree(parent_backup)
                     
-                    QMessageBox.information(
+                    SilentMessageBox.information(
                         self,
                         lang.get("success_title", default="Succès"),
                         lang.get("move_folder_success", 
@@ -2001,7 +2016,7 @@ class SettingsDialog(QDialog):
                     )
                 else:
                     # Source still has files, ask user
-                    delete_reply = QMessageBox.question(
+                    delete_reply = SilentMessageBox.question(
                         self,
                         lang.get("move_folder_delete_title", default="Supprimer l'ancien dossier ?"),
                         f"{lang.get('move_folder_delete_message', default='Le dossier a été copié avec succès. Voulez-vous supprimer l ancien dossier ?')}\n\n"
@@ -2022,14 +2037,14 @@ class SettingsDialog(QDialog):
                             if not remaining_items:
                                 shutil.rmtree(parent_backup)
                         
-                        QMessageBox.information(
+                        SilentMessageBox.information(
                             self,
                             lang.get("success_title", default="Succès"),
                             lang.get("move_folder_success", 
                                     default=f"Dossier déplacé avec succès vers :\n{destination}")
                         )
                     else:
-                        QMessageBox.information(
+                        SilentMessageBox.information(
                             self,
                             lang.get("success_title", default="Succès"),
                             lang.get("move_folder_copy_success", 
@@ -2059,7 +2074,7 @@ class SettingsDialog(QDialog):
                     from Functions.debug_logging_manager import setup_logging
                     setup_logging()
                 
-                QMessageBox.information(
+                SilentMessageBox.information(
                     self,
                     lang.get("success_title", default="Succès"),
                     lang.get("create_folder_success", 
@@ -2070,7 +2085,7 @@ class SettingsDialog(QDialog):
             
         except Exception as e:
             progress.close()
-            QMessageBox.critical(
+            SilentMessageBox.critical(
                 self,
                 lang.get("error_title", default="Erreur"),
                 lang.get("move_folder_error", 
@@ -2116,6 +2131,9 @@ class SettingsDialog(QDialog):
         current_lang_name = self.available_languages.get(current_lang_code, "Français")
         self.language_combo.setCurrentText(current_lang_name)
         
+        # Audio Settings
+        self.enable_sounds_checkbox.setChecked(config.get("ui.enable_sounds", True))
+        
         # Theme
         current_theme = config.get("ui.theme", "dracula")
         theme_index = self.theme_combo.findData(current_theme)
@@ -2160,7 +2178,7 @@ class SettingsDialog(QDialog):
         # If unchecked (user is disabling auto-delete), show warning
         # state is 0 for unchecked, 2 for checked
         if state == 0:  # Qt.CheckState.Unchecked
-            reply = QMessageBox.warning(
+            reply = SilentMessageBox.warning(
                 self,
                 lang.get("backup_auto_delete_warning_title", default="⚠️ Avertissement"),
                 lang.get("backup_auto_delete_warning_message", default=(
@@ -2191,7 +2209,7 @@ class SettingsDialog(QDialog):
         # If unchecked (user is disabling auto-delete), show warning
         # state is 0 for unchecked, 2 for checked
         if state == 0:  # Qt.CheckState.Unchecked
-            reply = QMessageBox.warning(
+            reply = SilentMessageBox.warning(
                 self,
                 lang.get("backup_auto_delete_warning_title", default="⚠️ Avertissement"),
                 lang.get("backup_auto_delete_warning_message", default=(
@@ -2250,7 +2268,7 @@ class SettingsDialog(QDialog):
         # If unchecked (user is disabling auto-delete), show warning
         # state is 0 for unchecked, 2 for checked
         if state == 0:  # Qt.CheckState.Unchecked
-            reply = QMessageBox.warning(
+            reply = SilentMessageBox.warning(
                 self,
                 lang.get("backup_auto_delete_warning_title", default="⚠️ Avertissement"),
                 lang.get("backup_auto_delete_warning_message", default=(
@@ -2316,7 +2334,7 @@ class SettingsDialog(QDialog):
     
     def _cancel_changes(self):
         """Cancel changes and reload settings"""
-        reply = QMessageBox.question(
+        reply = SilentMessageBox.question(
             self,
             lang.get("warning_title", default="Attention"),
             lang.get("cancel_changes_confirm", default="Annuler les modifications non sauvegardées ?"),
@@ -2446,7 +2464,7 @@ class SettingsDialog(QDialog):
                         default="Voulez-vous créer votre base de données personnelle ?\nCeci copiera la base interne ({internal_count} items) dans votre dossier Armory.")
                     message = message.replace("{internal_count}", str(internal_count))
                     
-                    reply = QMessageBox.question(self, title, message, 
+                    reply = SilentMessageBox.question(self, title, message, 
                                                 QMessageBox.Yes | QMessageBox.No)
                     
                     if reply == QMessageBox.Yes:
@@ -2461,7 +2479,7 @@ class SettingsDialog(QDialog):
                                 default="Base de données personnelle créée avec succès\nEmplacement : {path}")
                             success_message = success_message.replace("{path}", result)
                             
-                            QMessageBox.information(self, success_title, success_message)
+                            SilentMessageBox.information(self, success_title, success_message)
                             
                             # Update UI to show stats/actions/import sections
                             self._update_armory_database_mode()
@@ -2471,7 +2489,7 @@ class SettingsDialog(QDialog):
                                 default="Impossible de créer la base de données personnelle :\n{error}")
                             error_message = error_message.replace("{error}", result)
                             
-                            QMessageBox.critical(self, error_title, error_message)
+                            SilentMessageBox.critical(self, error_title, error_message)
                             
                             # Uncheck checkbox
                             self.personal_db_check.setChecked(False)
@@ -2509,7 +2527,7 @@ class SettingsDialog(QDialog):
             message = message.replace("{user_count}", str(user_count))
             message = message.replace("{internal_count}", str(internal_count))
             
-            reply = QMessageBox.warning(self, title, message,
+            reply = SilentMessageBox.warning(self, title, message,
                                        QMessageBox.Yes | QMessageBox.No,
                                        QMessageBox.No)
             
@@ -2521,7 +2539,7 @@ class SettingsDialog(QDialog):
                     success_message = lang.get('armory_settings.reset_success_message',
                         default="Base de données personnelle réinitialisée avec succès")
                     
-                    QMessageBox.information(self, success_title, success_message)
+                    SilentMessageBox.information(self, success_title, success_message)
                     
                     # Update statistics
                     self._update_statistics()
@@ -2531,7 +2549,7 @@ class SettingsDialog(QDialog):
                         default="Impossible de réinitialiser la base de données :\n{error}")
                     error_message = error_message.replace("{error}", result)
                     
-                    QMessageBox.critical(self, error_title, error_message)
+                    SilentMessageBox.critical(self, error_title, error_message)
                     
         except Exception as e:
             logging.error(f"Error resetting personal database: {e}", exc_info=True)
@@ -2567,7 +2585,7 @@ class SettingsDialog(QDialog):
                 
         except Exception as e:
             logging.error(f"Error selecting template files: {e}", exc_info=True)
-            QMessageBox.critical(self, "Erreur", f"Impossible de sélectionner les fichiers:\n{e}")
+            SilentMessageBox.critical(self, "Erreur", f"Impossible de sélectionner les fichiers:\n{e}")
     
     def _open_mass_import_monitor(self):
         """Open Database Management Tools window"""
@@ -2592,7 +2610,7 @@ class SettingsDialog(QDialog):
             
         except Exception as e:
             logging.error(f"Error opening Database Management Tools: {e}", exc_info=True)
-            QMessageBox.critical(self, "Erreur", f"Erreur lors de l'ouverture de Database Management Tools:\n{e}")
+            SilentMessageBox.critical(self, "Erreur", f"Erreur lors de l'ouverture de Database Management Tools:\n{e}")
     
     def _refresh_superadmin_stats(self):
         """Refresh SuperAdmin statistics display"""
@@ -2635,20 +2653,20 @@ class SettingsDialog(QDialog):
             success, result = superadmin.backup_source_database()
             
             if success:
-                QMessageBox.information(
+                SilentMessageBox.information(
                     self,
                     lang.get('superadmin.backup_success_title', default="Sauvegarde réussie"),
                     lang.get('superadmin.backup_success_message', default="Base de données sauvegardée avec succès :\n\n") + result
                 )
             else:
-                QMessageBox.critical(
+                SilentMessageBox.critical(
                     self,
                     lang.get('superadmin.backup_error_title', default="Erreur de sauvegarde"),
                     lang.get('superadmin.backup_error_message', default="Erreur lors de la sauvegarde :\n\n") + result
                 )
                 
         except Exception as e:
-            QMessageBox.critical(
+            SilentMessageBox.critical(
                 self,
                 lang.get('superadmin.backup_error_title', default="Erreur de sauvegarde"),
                 lang.get('superadmin.backup_unexpected_error', default="Erreur inattendue :\n\n") + str(e)
@@ -2665,7 +2683,7 @@ class SettingsDialog(QDialog):
                        "Ceci supprimera tous les items avec le même nom + royaume.\n"
                        "Une sauvegarde sera créée automatiquement.")
             
-            reply = QMessageBox.question(self, title, message,
+            reply = SilentMessageBox.question(self, title, message,
                                         QMessageBox.Yes | QMessageBox.No)
             
             if reply != QMessageBox.Yes:
@@ -2682,7 +2700,7 @@ class SettingsDialog(QDialog):
             if success:
                 removed_label = lang.get('superadmin.clean_removed_count', default="Items supprimés")
                 result_message = message + f"\n\n{removed_label}: {removed_count}"
-                QMessageBox.information(self,
+                SilentMessageBox.information(self,
                     lang.get('superadmin.clean_success_title', 
                         default="Nettoyage réussi"),
                     result_message
@@ -2691,7 +2709,7 @@ class SettingsDialog(QDialog):
                 # Refresh statistics
                 self._refresh_superadmin_stats()
             else:
-                QMessageBox.critical(self,
+                SilentMessageBox.critical(self,
                     lang.get('superadmin.clean_error_title', 
                         default="Erreur de nettoyage"),
                     message
@@ -2699,7 +2717,7 @@ class SettingsDialog(QDialog):
                 
         except Exception as e:
             logging.error(f"Error cleaning duplicates: {e}", exc_info=True)
-            QMessageBox.critical(self, "Erreur", f"Erreur lors du nettoyage:\n{e}")
+            SilentMessageBox.critical(self, "Erreur", f"Erreur lors du nettoyage:\n{e}")
     
     def _single_item_refresh(self):
         """Refresh specific items from the source database"""
@@ -2726,13 +2744,13 @@ class SettingsDialog(QDialog):
             item_filter = [name.strip() for name in items_text.split(',') if name.strip()]
             
             if not item_filter:
-                QMessageBox.warning(self, 
+                SilentMessageBox.warning(self, 
                     lang.get('error_title', default="Error"),
                     lang.get('superadmin.single_refresh_no_items', default="No valid items entered."))
                 return
             
             # Ask about filter bypass
-            filter_reply = QMessageBox.question(
+            filter_reply = SilentMessageBox.question(
                 self,
                 lang.get('superadmin.filter_bypass_title', default="Filter Bypass"),
                 lang.get('superadmin.filter_bypass_message',
@@ -2753,7 +2771,7 @@ class SettingsDialog(QDialog):
             confirm_msg += lang.get('superadmin.filter_bypassed', default='BYPASSED') if skip_filters else lang.get('superadmin.filter_active', default='ACTIVE')
             confirm_msg += f"\n\n{lang.get('superadmin.confirm_continue', default='Continue?')}"
             
-            confirm_reply = QMessageBox.question(self, 
+            confirm_reply = SilentMessageBox.question(self, 
                 lang.get('superadmin.confirm_title', default="Confirm"),
                 confirm_msg)
             if confirm_reply != QMessageBox.Yes:
@@ -2764,7 +2782,7 @@ class SettingsDialog(QDialog):
             
         except Exception as e:
             logging.error(f"Error in single item refresh: {e}", exc_info=True)
-            QMessageBox.critical(self, 
+            SilentMessageBox.critical(self, 
                 lang.get("error_title", default="Error"),
                 f"{lang.get('superadmin.refresh_error', default='Refresh error')}:\n{str(e)}")
     
@@ -2772,7 +2790,7 @@ class SettingsDialog(QDialog):
         """Refresh all items from the source database"""
         try:
             # Ask about filter bypass
-            filter_reply = QMessageBox.question(
+            filter_reply = SilentMessageBox.question(
                 self,
                 lang.get('superadmin.filter_bypass_title', default="Filter Bypass"),
                 lang.get('superadmin.all_refresh_filter_message',
@@ -2799,7 +2817,7 @@ class SettingsDialog(QDialog):
             message += f"\n\n⚠️ {lang.get('superadmin.all_refresh_warning', default='This operation may take several minutes.')}\n"
             message += lang.get('superadmin.auto_backup', default='An automatic backup will be created.')
             
-            reply = QMessageBox.question(self,
+            reply = SilentMessageBox.question(self,
                 lang.get('superadmin.all_refresh_confirm_title', default="🔄 Confirm Item(s) - All Refresh"),
                 message,
                 QMessageBox.Yes | QMessageBox.No)
@@ -2812,7 +2830,7 @@ class SettingsDialog(QDialog):
             
         except Exception as e:
             logging.error(f"Error in all items refresh: {e}", exc_info=True)
-            QMessageBox.critical(self, 
+            SilentMessageBox.critical(self, 
                 lang.get("error_title", default="Error"),
                 f"{lang.get('superadmin.refresh_error', default='Refresh error')}:\n{str(e)}")
     
@@ -2871,7 +2889,7 @@ class SettingsDialog(QDialog):
             logging.info(f"REFRESH: Result - success={success}, stats={stats}")
         except InterruptedError:
             progress.close()
-            QMessageBox.information(self,
+            SilentMessageBox.information(self,
                 lang.get('superadmin.refresh_cancelled_title', default="Refresh Cancelled"),
                 lang.get('superadmin.refresh_cancelled_message', 
                     default="Refresh has been cancelled.\n\n"
@@ -2899,7 +2917,7 @@ class SettingsDialog(QDialog):
             stats_text += f"• Type: {fields.get('type', 0)}\n"
             stats_text += f"• Slot: {fields.get('slot', 0)}"
             
-            QMessageBox.information(self,
+            SilentMessageBox.information(self,
                 lang.get('superadmin.refresh_success_title', 
                     default="Refresh Successful"),
                 message + stats_text
@@ -2907,7 +2925,7 @@ class SettingsDialog(QDialog):
             
             self._refresh_superadmin_stats()
         else:
-            QMessageBox.critical(self,
+            SilentMessageBox.critical(self,
                 lang.get('superadmin.refresh_error_title', 
                     default="Refresh Error"),
                 message
@@ -2919,7 +2937,7 @@ class SettingsDialog(QDialog):
             # 🔧 DEBUG MODE: Demander si on veut filtrer des items spécifiques
             from PySide6.QtWidgets import QInputDialog
             
-            filter_reply = QMessageBox.question(
+            filter_reply = SilentMessageBox.question(
                 self,
                 "🔧 Mode Debug",
                 "Voulez-vous rafraîchir UNIQUEMENT des items spécifiques ?\n\n"
@@ -2943,14 +2961,14 @@ class SettingsDialog(QDialog):
                 )
                 
                 if not ok or not items_text.strip():
-                    QMessageBox.information(self, "Annulé", "Opération annulée.")
+                    SilentMessageBox.information(self, "Annulé", "Opération annulée.")
                     return
                 
                 # Parser les noms d'items
                 item_filter = [name.strip() for name in items_text.split(',') if name.strip()]
                 
                 if not item_filter:
-                    QMessageBox.warning(self, "Erreur", "Aucun item valide saisi.")
+                    SilentMessageBox.warning(self, "Erreur", "Aucun item valide saisi.")
                     return
                 
                 # Confirmation avec liste des items
@@ -2958,7 +2976,7 @@ class SettingsDialog(QDialog):
                 confirm_msg += "\n".join(f"• {name}" for name in item_filter)
                 confirm_msg += "\n\nContinuer ?"
                 
-                confirm_reply = QMessageBox.question(self, "Confirmer", confirm_msg)
+                confirm_reply = SilentMessageBox.question(self, "Confirmer", confirm_msg)
                 if confirm_reply != QMessageBox.Yes:
                     return
             
@@ -2981,7 +2999,7 @@ class SettingsDialog(QDialog):
                            "⚠️ Cette opération peut prendre plusieurs minutes.\n"
                            "Une sauvegarde sera créée automatiquement.")
             
-            reply = QMessageBox.question(self, title, message,
+            reply = SilentMessageBox.question(self, title, message,
                                         QMessageBox.Yes | QMessageBox.No)
             
             if reply != QMessageBox.Yes:
@@ -3035,7 +3053,7 @@ class SettingsDialog(QDialog):
                 logging.info(f"REFRESH: Result - success={success}, stats={stats}")
             except InterruptedError:
                 progress.close()
-                QMessageBox.information(self,
+                SilentMessageBox.information(self,
                     lang.get('superadmin.refresh_cancelled_title', default="Rafraîchissement annulé"),
                     lang.get('superadmin.refresh_cancelled_message', 
                         default="Le rafraîchissement a été annulé.\n\n"
@@ -3064,7 +3082,7 @@ class SettingsDialog(QDialog):
                 stats_text += f"• Type: {fields.get('type', 0)}\n"
                 stats_text += f"• Slot: {fields.get('slot', 0)}"
                 
-                QMessageBox.information(self,
+                SilentMessageBox.information(self,
                     lang.get('superadmin.refresh_success_title', 
                         default="Rafraîchissement réussi"),
                     message + stats_text
@@ -3073,7 +3091,7 @@ class SettingsDialog(QDialog):
                 # Refresh statistics
                 self._refresh_superadmin_stats()
             else:
-                QMessageBox.critical(self,
+                SilentMessageBox.critical(self,
                     lang.get('superadmin.refresh_error_title', 
                         default="Erreur de rafraîchissement"),
                     message
@@ -3081,7 +3099,7 @@ class SettingsDialog(QDialog):
                 
         except Exception as e:
             logging.error(f"Error refreshing items: {e}", exc_info=True)
-            QMessageBox.critical(self, 
+            SilentMessageBox.critical(self, 
                 lang.get("error_title", default="Erreur"), 
                 lang.get("superadmin.refresh_error_message", 
                     default="Erreur lors du rafraîchissement:\n{error}").replace("{error}", str(e))
@@ -3108,7 +3126,7 @@ class SettingsDialog(QDialog):
             
         except Exception as e:
             logging.error(f"Error opening database editor: {e}", exc_info=True)
-            QMessageBox.critical(self, 
+            SilentMessageBox.critical(self, 
                 lang.get("error_title", default="Erreur"),
                 f"Erreur lors de l'ouverture de l'éditeur:\n{str(e)}"
             )
@@ -3134,7 +3152,7 @@ class SettingsDialog(QDialog):
                 logging.info(f"[ITEMS DB MIGRATION] New items added: {stats.get('new_items_added', 0)}")
                 
                 # Optionally show notification to user (non-blocking)
-                # QMessageBox.information(self, 
+                # SilentMessageBox.information(self, 
                 #     lang.get("items_migration_success_title", default="Base mise à jour"),
                 #     lang.get("items_migration_success_message", 
                 #         default=f"Votre base personnelle a été mise à jour automatiquement.\n"

@@ -12,6 +12,7 @@ Naming Convention: item_model_{action}_{object}
 Language: English (code and comments)
 """
 
+from UI.ui_sound_manager import SilentMessageBox
 from PySide6.QtWidgets import QMessageBox
 
 from Functions.language_manager import lang
@@ -135,7 +136,7 @@ def item_model_show(parent_window, item_name: str) -> None:
             )
             dialog.show()
         else:
-            QMessageBox.information(
+            SilentMessageBox.information(
                 parent_window,
                 lang.get("dialogs.titles.info", default="Information"),
                 lang.get(
@@ -146,7 +147,7 @@ def item_model_show(parent_window, item_name: str) -> None:
             )
     except Exception as e:
         logger.error(f"Error showing item model for '{item_name}': {e}")
-        QMessageBox.critical(
+        SilentMessageBox.critical(
             parent_window,
             lang.get("dialogs.titles.error", default="Error"),
             lang.get(

@@ -26,6 +26,7 @@ Example:
 """
 
 from PySide6.QtWidgets import QMessageBox
+from UI.ui_sound_manager import SilentMessageBox
 
 from Functions.language_manager import lang
 from Functions.debug_logging_manager import get_logger, log_with_action, LOGGER_CHARACTER
@@ -58,7 +59,7 @@ def msg_show_success(parent, title_key: str, message_key: str, **kwargs) -> None
         message_key, default="Operation completed successfully", **kwargs
     )
 
-    QMessageBox.information(parent, title, message)
+    SilentMessageBox.information(parent, title, message)
     logger_ui.info(f"Success: {message_key}")
 
 
@@ -94,7 +95,7 @@ def msg_show_error(parent, title_key: str, message_key: str, **kwargs) -> None:
     else:
         message = lang.get(message_key, default="An error occurred", **kwargs)
 
-    QMessageBox.critical(parent, title, message)
+    SilentMessageBox.critical(parent, title, message)
     log_with_action(logger_ui, "error", f"Error: {message}", action="ERROR")
 
 
@@ -129,7 +130,7 @@ def msg_show_warning(parent, title_key: str, message_key: str, **kwargs) -> None
     else:
         message = lang.get(message_key, default="Warning", **kwargs)
 
-    QMessageBox.warning(parent, title, message)
+    SilentMessageBox.warning(parent, title, message)
     log_with_action(logger_ui, "warning", f"Warning: {message}", action="WARNING")
 
 
@@ -152,7 +153,7 @@ def msg_show_confirmation(parent, title: str, message: str) -> bool:
             # Delete the character
             pass
     """
-    reply = QMessageBox.question(
+    reply = SilentMessageBox.question(
         parent,
         title,
         message,

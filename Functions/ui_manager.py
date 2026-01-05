@@ -3,6 +3,7 @@ UI Manager - Gère la création et la configuration des éléments d'interface u
 Extrait de main.py pour réduire la complexité
 """
 import logging
+from UI.ui_sound_manager import SilentMessageBox
 from PySide6.QtWidgets import (
     QMenu, QMessageBox, QGroupBox, QHBoxLayout, QVBoxLayout, QPushButton, QStatusBar, QLabel
 )
@@ -598,7 +599,7 @@ class UIManager:
         except Exception as e:
             import traceback
             logging.error(f"Erreur lors de l'ouverture de la fenêtre Armurerie: {e}\n{traceback.format_exc()}")
-            QMessageBox.critical(
+            SilentMessageBox.critical(
                 self.main_window,
                 lang.get("error_title", default="Erreur"),
                 lang.get("armory.window_error", default="Erreur lors de l'ouverture de la fenêtre Armurerie") + f"\n\n{str(e)}"

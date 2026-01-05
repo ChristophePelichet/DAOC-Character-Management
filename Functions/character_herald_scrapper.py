@@ -37,13 +37,13 @@ def character_herald_update(parent_window, url: str) -> None:
         - Shows ProgressStepsDialog with CHARACTER_UPDATE steps
         - Receives update_finished signal when complete
     """
-    from PySide6.QtWidgets import QMessageBox
+    from UI.ui_sound_manager import SilentMessageBox
     from Functions.language_manager import lang
     from UI.progress_dialog_base import ProgressStepsDialog, StepConfiguration
 
     # Validate URL
     if not url:
-        QMessageBox.warning(
+        SilentMessageBox.warning(
             parent_window,
             lang.get("update_char_error"),
             lang.get("update_char_no_url")
@@ -134,7 +134,7 @@ def character_herald_update_rvr_stats(parent_window, url: str) -> None:
 
     # Validate URL
     if not url:
-        QMessageBox.warning(
+        SilentMessageBox.warning(
             parent_window,
             "URL manquante",
             "Veuillez entrer une URL Herald valide pour récupérer les statistiques."

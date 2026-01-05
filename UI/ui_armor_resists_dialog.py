@@ -8,7 +8,6 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor, QBrush, QIcon
-from pathlib import Path
 
 from Functions.language_manager import lang
 from Functions.config_manager import config
@@ -54,23 +53,22 @@ def ui_armor_resists_create_dialog(parent=None):
     # Check if we should show classes
     show_classes = config.get("armory.armor_resists_show_classes", False)
     
-    # Get base path for images
-    from Functions.path_manager import get_base_path
-    img_path = Path(get_base_path()) / "Img"
+    # Get resource path for images
+    from Functions.path_manager import get_resource_path
     
     # Create tab for each realm with logo icons
     realm_mapping = {
         "albion": {
             "name": lang.get('armor_resists.realm.albion', default='Albion'),
-            "icon": str(img_path / "albion_logo.png")
+            "icon": get_resource_path("Img/albion_logo.png")
         },
         "midgard": {
             "name": lang.get('armor_resists.realm.midgard', default='Midgard'),
-            "icon": str(img_path / "midgard_logo.png")
+            "icon": get_resource_path("Img/midgard_logo.png")
         },
         "hibernia": {
             "name": lang.get('armor_resists.realm.hibernia', default='Hibernia'),
-            "icon": str(img_path / "hibernia_logo.png")
+            "icon": get_resource_path("Img/hibernia_logo.png")
         }
     }
     

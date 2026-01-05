@@ -6,8 +6,7 @@ Shows embedded model images from Img/Models/items/ folder
 import logging
 from pathlib import Path
 from PySide6.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QMessageBox
+    QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton
 )
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
@@ -74,12 +73,6 @@ class ModelViewerDialog(QDialog):
         header_layout.addWidget(id_label)
         
         layout.addLayout(header_layout)
-        
-        # Category label
-        if self.model_category and self.model_category != "unknown":
-            category_label = QLabel(f"Category: {self.model_category}")
-            category_label.setStyleSheet("color: #4CAF50; font-style: italic;")
-            layout.addWidget(category_label)
         
         # Image display area
         self.image_label = QLabel()

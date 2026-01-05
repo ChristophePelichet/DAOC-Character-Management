@@ -13,7 +13,6 @@ from PySide6.QtWidgets import (
     QLabel,
     QPushButton,
 )
-from PySide6.QtCore import Qt, QSize
 from Functions.sound_manager import SoundManager
 from Functions.language_manager import lang
 

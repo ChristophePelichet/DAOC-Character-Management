@@ -1530,7 +1530,6 @@ class SettingsDialog(QDialog):
     
     def _backup_characters_now(self):
         """Execute characters backup now"""
-        from PySide6.QtWidgets import QMessageBox
         try:
             # Save current path from text field to config and reinitialize backup_manager
             config.set("backup.characters.path", self.backup_path_edit.text())
@@ -1560,7 +1559,6 @@ class SettingsDialog(QDialog):
     
     def _backup_cookies_now(self):
         """Execute cookies backup now"""
-        from PySide6.QtWidgets import QMessageBox
         try:
             # Save current path from text field to config and reinitialize backup_manager
             config.set("backup.cookies.path", self.cookies_backup_path_edit.text())
@@ -1590,7 +1588,6 @@ class SettingsDialog(QDialog):
     
     def _backup_armor_now(self):
         """Execute armor backup now"""
-        from PySide6.QtWidgets import QMessageBox
         try:
             # Save current path from text field to config and reinitialize backup_manager
             config.set("backup.armor.path", self.armor_backup_path_edit.text())

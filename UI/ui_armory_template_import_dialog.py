@@ -7,8 +7,7 @@ from pathlib import Path
 from UI.ui_sound_manager import SilentMessageBox
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QLabel,
-    QGroupBox, QLineEdit, QComboBox, QMessageBox,
-    QFormLayout, QCheckBox
+    QGroupBox, QLineEdit, QComboBox, QFormLayout, QCheckBox
 )
 from PySide6.QtCore import Qt, Signal
 

@@ -14,18 +14,17 @@ import logging
 import webbrowser
 from pathlib import Path
 from datetime import datetime
-from typing import Optional, Dict, Any
+from typing import Dict, Any
 
 from UI.ui_sound_manager import SilentMessageBox
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QLineEdit, QComboBox, QTableWidget, QTableWidgetItem,
-    QGroupBox, QFormLayout, QTextEdit, QMessageBox, QSplitter,
-    QHeaderView, QCheckBox, QSpinBox, QFrame, QApplication, QDialog,
+    QGroupBox, QFormLayout, QMessageBox, QSplitter,
+    QHeaderView, QCheckBox, QFrame, QApplication, QDialog,
     QDialogButtonBox, QRadioButton, QListWidget, QProgressDialog
 )
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QFont
 
 from Functions.language_manager import lang
 
@@ -434,7 +433,6 @@ class DatabaseEditorDialog(QMainWindow):
                 name = self.items_table.item(row, 0).text()
                 key = self.items_table.item(row, 1).text()
                 realm = self.items_table.item(row, 2).text()
-                price = self.items_table.item(row, 4).text()
                 
                 # Search filter
                 if search_text and search_text not in key.lower() and search_text not in name.lower():
@@ -574,8 +572,6 @@ class DatabaseEditorDialog(QMainWindow):
         items = self.database.get('items', {})
         
         # Check if key changed (name or realm changed)
-        old_name = items[self.current_item_key].get('name', '').lower()
-        old_realm = items[self.current_item_key].get('realm', '').lower()
         new_name = item_data['name'].lower()
         new_realm = item_data['realm'].lower()
         new_key = f"{new_name}:{new_realm}"
@@ -1192,7 +1188,6 @@ class DatabaseEditorDialog(QMainWindow):
                 
                 # STEP 2: Add all new variants
                 items_added = 0
-                items_updated = 0
                 updated_details = []
                 items_without_price = []  # Track items without price
                 

@@ -436,7 +436,6 @@ class UIArmoryAllTemplates(QMainWindow):
             logger.debug(f"Looking for metadata at: {metadata_path}")
             logger.debug(f"Metadata exists: {metadata_path.exists()}")
             if not metadata_path.exists():
-                from PySide6.QtWidgets import QMessageBox
                 error_msg = f"Fichier de métadonnées non trouvé: {metadata_path}"
                 logger.error(error_msg)
                 SilentMessageBox.warning(
@@ -448,7 +447,6 @@ class UIArmoryAllTemplates(QMainWindow):
 
             metadata = TemplateMetadata.load(metadata_path)
             if not metadata:
-                from PySide6.QtWidgets import QMessageBox
                 error_title = lang.get(
                     "dialogs.titles.error", default="Erreur"
                 )
@@ -466,7 +464,6 @@ class UIArmoryAllTemplates(QMainWindow):
                 self._load_all_templates()
 
         except Exception as e:
-            from PySide6.QtWidgets import QMessageBox
             logger.error(f"Error editing template: {e}")
             error_title = lang.get("dialogs.titles.error", default="Erreur")
             error_msg = f"Erreur lors de l'édition du template: {str(e)}"
@@ -474,7 +471,6 @@ class UIArmoryAllTemplates(QMainWindow):
 
     def _delete_template(self, realm, template_name):
         """Delete a template"""
-        from PySide6.QtWidgets import QMessageBox
 
         confirm_title = lang.get(
             "template_context_menu.confirm_delete",
@@ -505,7 +501,7 @@ class UIArmoryAllTemplates(QMainWindow):
     def _download_template(self, realm, template_name):
         """Download/export template to user-selected location"""
         try:
-            from PySide6.QtWidgets import QFileDialog, QMessageBox
+            from PySide6.QtWidgets import QFileDialog
             import shutil
 
             # Get source file path

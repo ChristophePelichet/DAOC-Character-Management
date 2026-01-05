@@ -5,7 +5,7 @@ Extrait de main.py pour réduire la complexité
 import logging
 from UI.ui_sound_manager import SilentMessageBox
 from PySide6.QtWidgets import (
-    QMenu, QMessageBox, QGroupBox, QHBoxLayout, QVBoxLayout, QPushButton, QStatusBar, QLabel
+    QMenu, QGroupBox, QHBoxLayout, QVBoxLayout, QPushButton, QStatusBar, QLabel
 )
 from PySide6.QtGui import QAction
 from PySide6.QtCore import Qt, QThread, Signal

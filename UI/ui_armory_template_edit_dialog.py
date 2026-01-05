@@ -5,7 +5,7 @@ Template Edit Dialog - Interface for editing template metadata information
 from UI.ui_sound_manager import SilentMessageBox
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QLabel,
-    QGroupBox, QComboBox, QMessageBox, QFormLayout, QLineEdit
+    QGroupBox, QComboBox, QFormLayout, QLineEdit
 )
 from PySide6.QtCore import Qt
 

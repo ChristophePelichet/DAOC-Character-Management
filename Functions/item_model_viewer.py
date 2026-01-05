@@ -13,7 +13,6 @@ Language: English (code and comments)
 """
 
 from UI.ui_sound_manager import SilentMessageBox
-from PySide6.QtWidgets import QMessageBox
 
 from Functions.language_manager import lang
 from Functions.debug_logging_manager import get_logger, LOGGER_UI

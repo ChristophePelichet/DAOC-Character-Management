@@ -1448,6 +1448,7 @@
             "hibernia": "Hibernia"
         },
         "settings": {
+            "title": "📊 Tableau des résistances d'armure :",
             "show_classes": "Afficher les classes (vue détaillée)",
             "show_classes_tooltip": "Si activé, affiche les résistances pour chaque classe.\nSi désactivé, affiche seulement les résistances par type d'armure."
         }

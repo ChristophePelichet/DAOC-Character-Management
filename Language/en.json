@@ -1448,6 +1448,7 @@
             "hibernia": "Hibernia"
         },
         "settings": {
+            "title": "🛡️ Armor Resistances Table:",
             "show_classes": "Display classes (detailed view)",
             "show_classes_tooltip": "If enabled, displays resistances for each class.\nIf disabled, displays only resistances by armor type."
         }

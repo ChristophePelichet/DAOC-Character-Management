@@ -2146,16 +2146,16 @@ class ConfigurationDialog(QDialog):
         
         # Armor Resistances Settings
         armor_resists_layout = QVBoxLayout()
-        armor_resists_label = QLabel("📊 Tableau des résistances d'armure:")
+        armor_resists_label = QLabel(lang.get("armor_resists.settings.title", default="📊 Armor Resistances Table:"))
         armor_resists_label.setStyleSheet("font-weight: bold; padding-top: 10px;")
         armor_resists_layout.addWidget(armor_resists_label)
         
         self.armor_resists_show_classes_check = QCheckBox(
-            "Afficher les classes (vue détaillée)"
+            lang.get("armor_resists.settings.show_classes", default="Display classes (detailed view)")
         )
         self.armor_resists_show_classes_check.setToolTip(
-            "Si activé, affiche les résistances pour chaque classe.\n"
-            "Si désactivé, affiche seulement les résistances par type d'armure."
+            lang.get("armor_resists.settings.show_classes_tooltip", 
+                    default="If enabled, displays resistances for each class.\nIf disabled, displays only resistances by armor type.")
         )
         armor_resists_layout.addWidget(self.armor_resists_show_classes_check)
         

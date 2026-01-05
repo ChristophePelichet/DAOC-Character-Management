@@ -52,6 +52,12 @@
 - Column sorting and width persistence in template table
 - Optional season inclusion in template filenames
 
+**Herald Search Dialog Window Controls**
+- Custom title bar with minimize (−) and maximize (□) buttons
+- Toggle maximize button shows window state (□ = normal, ▢ = maximized)
+- Flexible window sizing for better workspace management
+- Visual feedback with state indicator changes
+
 ### ♻️ Code Refactoring - dialogs.py Module Extraction & UI Helper Systems (Complete)
 
 **Extraction Scope**: Extract business logic from `UI/dialogs.py` into dedicated domain-specific modules for improved maintainability, testability, and code reuse. Consolidate input validation and file dialogs into centralized helper modules.

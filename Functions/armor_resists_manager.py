@@ -49,11 +49,11 @@ def armor_resists_get_realms_data(data):
         tables = data.get("tables", {})
         realms = {}
         
-        # Map table keys to realm names
+        # Map table keys to realm names (corrected mapping)
         table_mapping = {
             "table_1": "albion",
-            "table_2": "midgard",
-            "table_3": "hibernia"
+            "table_2": "hibernia",
+            "table_3": "midgard"
         }
         
         for table_key, realm_name in table_mapping.items():

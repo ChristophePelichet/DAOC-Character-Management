@@ -102,6 +102,9 @@ def ui_armor_resists_populate_table(table, realm_data):
     table.setColumnCount(len(headers))
     table.setRowCount(len(rows))
     
+    # Hide row numbers
+    table.verticalHeader().hide()
+    
     # Set headers
     header_names = []
     lang_code = lang.current_language
@@ -131,13 +134,11 @@ def ui_armor_resists_populate_table(table, realm_data):
             
             item = QTableWidgetItem(display_value)
             
-            # Set color for resistance values (not for Class/Armor Type columns)
+            # Set color for resistance values (only text color, not background)
             if header_name not in ["Class", "Armor Type"]:
                 color = armor_resists_get_cell_color(cell_value)
                 if color:
-                    text_color = QColor(255, 255, 255)  # White text
-                    bg_color = QColor(*color)
-                    item.setBackground(QBrush(bg_color))
+                    text_color = QColor(*color)
                     item.setForeground(QBrush(text_color))
             
             # Center align
@@ -148,33 +149,3 @@ def ui_armor_resists_populate_table(table, realm_data):
     # Resize columns to content
     header = table.horizontalHeader()
     header.setSectionResizeMode(QHeaderView.Stretch)
-
-
-
-
-def ui_armor_resists_apply_cell_colors(table):
-    """
-    Apply color formatting to all cells in the table based on their values.
-    
-    Args:
-        table: The table widget to format.
-    """
-    for row in range(table.rowCount()):
-        for col in range(table.columnCount()):
-            item = table.item(row, col)
-            if item is None:
-                continue
-            
-            # Skip class and armor type columns (first two)
-            if col < 2:
-                continue
-            
-            # Get the original value and apply color
-            value = item.text()
-            color = armor_resists_get_cell_color(value)
-            
-            if color:
-                text_color = QColor(255, 255, 255)  # White text
-                bg_color = QColor(*color)
-                item.setBackground(QBrush(bg_color))
-                item.setForeground(QBrush(text_color))

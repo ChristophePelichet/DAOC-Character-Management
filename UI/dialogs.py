@@ -4727,6 +4727,8 @@ class HeraldSearchDialog(QDialog):
         self.lang = lang
         
         self.setWindowTitle(lang.get("herald_search.window_title"))
+        # Enable system window controls (minimize, maximize, close)
+        self.setWindowFlags(self.windowFlags() | Qt.WindowMinimizeButtonHint | Qt.WindowMaximizeButtonHint)
         self.resize(700, 600)
         self.search_thread = None
         self.temp_json_path = None  # Stocke le chemin du fichier temp
@@ -4760,56 +4762,19 @@ class HeraldSearchDialog(QDialog):
     def init_ui(self):
         """Initialise l'interface"""
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)  # Remove margins for custom title bar
-        
-        # Barre de contrôle personnalisée (minimize/maximize)
-        title_bar_layout = QHBoxLayout()
-        title_bar_layout.setContentsMargins(10, 5, 10, 5)
-        
-        # Titre à gauche
-        title_label = QLabel(f"<b>{self.lang.get('herald_search.window_title')}</b>")
-        title_bar_layout.addWidget(title_label)
-        
-        # Espaceur
-        title_bar_layout.addStretch()
-        
-        # Boutons à droite
-        self.minimize_button = QPushButton("−")
-        self.minimize_button.setMaximumWidth(32)
-        self.minimize_button.setMaximumHeight(24)
-        self.minimize_button.clicked.connect(self.showMinimized)
-        self.minimize_button.setStyleSheet("QPushButton { font-weight: bold; padding: 2px; }")
-        title_bar_layout.addWidget(self.minimize_button)
-        
-        self.maximize_button = QPushButton("□")
-        self.maximize_button.setMaximumWidth(32)
-        self.maximize_button.setMaximumHeight(24)
-        self.maximize_button.clicked.connect(self.toggle_maximized)
-        self.maximize_button.setStyleSheet("QPushButton { font-weight: bold; padding: 2px; }")
-        title_bar_layout.addWidget(self.maximize_button)
-        
-        self.is_maximized = False  # Track maximize state
-        
-        # Ajouter la barre de contrôle au layout principal
-        title_bar_widget = QWidget()
-        title_bar_widget.setLayout(title_bar_layout)
-        title_bar_widget.setStyleSheet("background-color: #2b2b2b; border-bottom: 1px solid #444;")
-        layout.addWidget(title_bar_widget)
-        
-        # Contenu principal
-        main_content = QVBoxLayout()
+        layout.setContentsMargins(10, 10, 10, 10)
         
         # Titre
-        title_content_label = QLabel(f"<h2>{self.lang.get('herald_search.title_label')}</h2>")
-        title_content_label.setAlignment(Qt.AlignCenter)
-        main_content.addWidget(title_content_label)
+        title_label = QLabel(f"<h2>{self.lang.get('herald_search.title_label')}</h2>")
+        title_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(title_label)
         
         # Description
         desc_label = QLabel(self.lang.get("herald_search.description"))
         desc_label.setWordWrap(True)
         desc_label.setAlignment(Qt.AlignCenter)
         desc_label.setStyleSheet("color: gray; padding: 10px;")
-        main_content.addWidget(desc_label)
+        layout.addWidget(desc_label)
         
         # Groupe de recherche
         search_group = QGroupBox(self.lang.get("herald_search.search_group_title"))
@@ -4858,7 +4823,7 @@ class HeraldSearchDialog(QDialog):
         search_layout.addWidget(self.status_label)
         
         search_group.setLayout(search_layout)
-        main_content.addWidget(search_group)
+        layout.addWidget(search_group)
         
         # Zone of Results
         results_group = QGroupBox(self.lang.get("herald_search.results_group_title"))
@@ -4897,7 +4862,7 @@ class HeraldSearchDialog(QDialog):
         results_layout.addWidget(self.results_table)
         
         results_group.setLayout(results_layout)
-        main_content.addWidget(results_group)
+        layout.addWidget(results_group)
         
         # Boutons
         button_layout = QHBoxLayout()
@@ -4926,22 +4891,7 @@ class HeraldSearchDialog(QDialog):
         close_button.clicked.connect(self.accept)
         button_layout.addWidget(close_button)
         
-        main_content.addLayout(button_layout)
-        
-        # Ajouter le contenu principal au layout principal
-        main_widget = QWidget()
-        main_widget.setLayout(main_content)
-        layout.addWidget(main_widget)
-    
-    def toggle_maximized(self):
-        """Basculer entre fenêtre maximisée et normale"""
-        if self.is_maximized:
-            self.showNormal()
-            self.maximize_button.setText("□")
-        else:
-            self.showMaximized()
-            self.maximize_button.setText("▢")
-        self.is_maximized = not self.is_maximized
+        layout.addLayout(button_layout)
     
     def closeEvent(self, event):
         """Appelé à la fermeture de la fenêtre"""

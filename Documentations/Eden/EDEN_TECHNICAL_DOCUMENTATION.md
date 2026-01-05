@@ -1253,6 +1253,125 @@ def _update_herald_buttons_state(self):
 
 ---
 
+### Herald Search Dialog Window Controls
+
+#### Overview
+
+**Component**: `HeraldSearchDialog` (UI/dialogs.py)  
+**Version**: v0.109+  
+**Purpose**: Provide flexible window management for character search results
+
+The Herald Search Dialog features a custom title bar with minimize and maximize controls, allowing users to resize the window according to their needs.
+
+#### Window Controls
+
+**Location**: Custom title bar at top of Herald Search Dialog  
+**Components**:
+- 🏷️ **Title Label** (left) - "Herald Character Search"
+- ➖ **Minimize Button** (right) - Collapses window to taskbar
+- □ **Maximize Button** (right) - Expands/restores window state
+
+#### Implementation Details
+
+**File**: `UI/dialogs.py` - `HeraldSearchDialog` class (lines 4760-4941)
+
+**Title Bar Structure**:
+```python
+# Custom title bar layout
+title_bar_layout = QHBoxLayout()
+title_bar_layout.setContentsMargins(10, 5, 10, 5)
+
+# Title label on left
+title_label = QLabel("Herald Character Search")
+title_bar_layout.addWidget(title_label)
+
+# Stretch spacer to push buttons right
+title_bar_layout.addStretch()
+
+# Minimize button (−)
+self.minimize_button = QPushButton("−")
+self.minimize_button.setFixedSize(32, 24)
+self.minimize_button.clicked.connect(self.showMinimized)
+title_bar_layout.addWidget(self.minimize_button)
+
+# Maximize button (□)
+self.maximize_button = QPushButton("□")
+self.maximize_button.setFixedSize(32, 24)
+self.maximize_button.clicked.connect(self.toggle_maximized)
+title_bar_layout.addWidget(self.maximize_button)
+```
+
+**State Management**:
+```python
+# Initialize state tracking
+self.is_maximized = False
+
+def toggle_maximized(self):
+    """Toggle between maximized and normal window state"""
+    if self.is_maximized:
+        self.showNormal()
+        self.maximize_button.setText("□")  # Restore icon
+    else:
+        self.showMaximized()
+        self.maximize_button.setText("▢")  # Maximize icon
+    self.is_maximized = not self.is_maximized
+```
+
+#### Visual Design
+
+**Title Bar Styling**:
+- **Background**: Dark gray (#2b2b2b) - matches application theme
+- **Border**: Bottom border separator for visual distinction
+- **Button Size**: 32×24 pixels (compact but accessible)
+- **Font**: Standard dialog font
+
+**Button Icons**:
+| Button | Normal | Active | Function |
+|--------|--------|--------|----------|
+| Minimize | − | − | `showMinimized()` |
+| Maximize | □ | ▢ | `toggle_maximized()` |
+
+**Visual Feedback**:
+- Maximize button text changes to indicate window state:
+  - **□** = Window is normal (can be maximized)
+  - **▢** = Window is maximized (can be restored)
+
+#### User Benefits
+
+✅ **Flexible Workspace**
+- Minimize dialog to access other windows
+- Maximize to see more search results at once
+- Adjust size to fit various screen layouts
+
+✅ **Intuitive Controls**
+- Standard window control buttons
+- Visual feedback shows current state
+- Smooth transitions between states
+
+✅ **Theme Integration**
+- Controls match application dark theme
+- Consistent styling with other dialogs
+- Professional appearance
+
+#### Technical Notes
+
+**State Persistence**:
+- Window state resets when dialog is closed
+- State NOT saved between sessions
+- Intentional design: Fresh start for each search session
+
+**Accessibility**:
+- Buttons are keyboard-focusable
+- Clear visual indicators for button state
+- Tooltip support for button information
+
+**Performance**:
+- Minimize/maximize operations are instant
+- No overhead from state tracking
+- Efficient layout recalculation
+
+---
+
 ### Herald Validation
 
 #### Automatic Startup Validation

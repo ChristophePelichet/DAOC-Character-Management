@@ -1,5 +1,13 @@
 # Eden Herald System - Technical Documentation
 
+**Version**: 2.1  
+**Date**: November 2025  
+**Last Updated**: January 5, 2026 (Herald Search Window Controls & UI Documentation)  
+**Component**: `Functions/character_herald_scrapper.py`, `Functions/herald_url_validator.py`, `UI/dialogs.py`  
+**Related**: `Functions/character_profile_scraper.py`, `Functions/eden_scraper.py`, `Functions/cookie_manager.py`, `UI/ui_manager.py`, `Functions/language_manager.py`
+
+---
+
 ## Table of Contents
 
 1. [Overview](#overview)

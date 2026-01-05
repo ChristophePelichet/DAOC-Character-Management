@@ -267,13 +267,13 @@ class SettingsDialog(QDialog):
         layout.addWidget(language_group)
         
         # === Audio Settings ===
-        audio_group = QGroupBox("🔊 " + lang.get("config_audio_group_title", 
+        audio_group = QGroupBox("🔊 " + lang.get("config.audio_group_title", 
                                                  default="Paramètres audio"))
         audio_layout = QFormLayout()
         
-        self.enable_sounds_checkbox = QCheckBox(lang.get("config_enable_sounds_label", 
+        self.enable_sounds_checkbox = QCheckBox(lang.get("config.enable_sounds_label", 
                                                          default="Activer les sons des boîtes de dialogue"))
-        self.enable_sounds_checkbox.setToolTip(lang.get("config_enable_sounds_tooltip",
+        self.enable_sounds_checkbox.setToolTip(lang.get("config.enable_sounds_tooltip",
                                                        default="Désactiver pour supprimer les sons système dans les boîtes de dialogue"))
         audio_layout.addRow(self.enable_sounds_checkbox)
         

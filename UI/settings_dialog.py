@@ -1141,6 +1141,23 @@ class SettingsDialog(QDialog):
         layout.addWidget(db_group)
         layout.addSpacing(10)
         
+        # === ARMOR RESISTANCES TABLE ===
+        armor_resists_group = QGroupBox(lang.get("armor_resists.settings.title", default="🛡️ Tableau des résistances d'armure"))
+        armor_resists_layout = QVBoxLayout()
+        
+        self.armor_resists_show_classes_check = QCheckBox(
+            lang.get("armor_resists.settings.show_classes", default="Afficher les classes (vue détaillée)")
+        )
+        self.armor_resists_show_classes_check.setToolTip(
+            lang.get("armor_resists.settings.show_classes_tooltip", 
+                    default="Si activé, affiche les résistances pour chaque classe.\nSi désactivé, affiche seulement les résistances par type d'armure.")
+        )
+        armor_resists_layout.addWidget(self.armor_resists_show_classes_check)
+        
+        armor_resists_group.setLayout(armor_resists_layout)
+        layout.addWidget(armor_resists_group)
+        layout.addSpacing(10)
+        
         # === IMPORT SECTION ===
         self.import_group = QGroupBox(lang.get('settings.pages.armory.import_group_title', default="📥 Import d'items"))
         import_layout = QVBoxLayout()
@@ -2131,6 +2148,10 @@ class SettingsDialog(QDialog):
         # Armory database mode
         use_personal_db = config.get("armory.use_personal_database", False)
         self.personal_db_check.setChecked(use_personal_db)
+        
+        # Armor resistances display settings
+        armor_resists_show_classes = config.get("armory.armor_resists_show_classes", False)
+        self.armor_resists_show_classes_check.setChecked(armor_resists_show_classes)
     
     def _on_backup_auto_delete_changed(self, state):
         """Handle Characters backup auto-delete checkbox state change"""

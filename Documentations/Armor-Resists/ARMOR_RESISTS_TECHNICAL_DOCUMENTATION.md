@@ -1,10 +1,10 @@
 # 🛡️ Armor Resistances Technical Documentation
 
-**Version**: 0.109  
+**Version**: 0.2  
 **Date**: January 2026  
-**Last Updated**: January 5, 2026 (Initial Implementation & Multi-Language Support)  
-**Component**: `UI/ui_armor_resists_dialog.py`, `Functions/armor_resists_manager.py`  
-**Related**: `Data/armor_resists.json`, `Functions/ui_manager.py`, `Functions/language_manager.py`
+**Last Updated**: January 5, 2026 (Settings Integration & Display Mode Toggle)  
+**Component**: `UI/ui_armor_resists_dialog.py`, `Functions/armor_resists_manager.py`, `UI/settings_dialog.py`  
+**Related**: `Data/armor_resists.json`, `Functions/ui_manager.py`, `main.py`, `Configuration/config.json`
 
 ---
 
@@ -36,12 +36,16 @@ The **Armor Resistances** feature provides users with an interactive table viewe
 - Support multi-language interface (English, French, German)
 
 ### Key Features
-- ✅ Real-time realm selection via dropdown
-- ✅ Color-coded resistance values (Green = Resistant, Orange = Neutral, Red = Vulnerable)
-- ✅ Symbol-based indicators (✓ = Resistant, ◯ = Neutral, ✗ = Vulnerable)
+- ✅ Tab-based realm selection (Albion, Midgard, Hibernia)
+- ✅ Numeric percentage display (-5%, 0%, 10%)
+- ✅ Color-coded text (Green = Resistant, Orange = Neutral, Red = Vulnerable)
+- ✅ Configurable display mode (Settings > Armory > "Display classes")
+  - **Compact view** (default): 5 armor types only
+  - **Detailed view** (optional): 16+ rows with all classes
 - ✅ Multi-language support (EN, FR, DE)
 - ✅ Integrated into Tools menu
 - ✅ Non-modal dialog window
+- ✅ Settings integration with persistent configuration
 
 ---
 
@@ -145,9 +149,9 @@ armor_resists_manager.py
         {
           "Class": "Armsman",
           "Armor Type": "Plate",
-          "Thrust": "Resistant",
-          "Crush": "Vulnerable",
-          // ... resistance values for all 9 types
+          "Thrust": "10%",
+          "Crush": "-5%",
+          // ... resistance values (10%, 0%, -5%) for all 9 types
           "Class_fr": "Maitres d'armes",
           "Class_de": "Waffenmeister",
           // ... localized values for each column
@@ -155,9 +159,9 @@ armor_resists_manager.py
         // ... more armor type entries
       ]
     },
-    "table_2": {  // Midgard table (same structure)
+    "table_2": {  // Hibernia table (same structure)
     },
-    "table_3": {  // Hibernia table (same structure)
+    "table_3": {  // Midgard table (same structure)
     }
   }
 }
@@ -165,10 +169,10 @@ armor_resists_manager.py
 
 ### Resistance Values
 
-Three types of resistance values:
-- **Resistant** (✓) - Green color (76, 175, 80)
-- **Vulnerable** (✗) - Red color (244, 67, 54)
-- **Neutral** (◯) - Orange color (255, 152, 0)
+Three types of resistance values (numeric):
+- **Resistant** (10%) - Green color (76, 175, 80)
+- **Vulnerable** (-5%) - Red color (244, 67, 54)
+- **Neutral** (0%) - Orange color (255, 152, 0)
 
 ### Table Structure
 
@@ -195,49 +199,56 @@ Each realm table contains:
 └──────────┬──────────┘
            │
            ↓
-┌──────────────────────────────────────────┐
-│   Click Tools → Armor Resistances        │
-└──────────┬───────────────────────────────┘
+┌────────────────────────────────────────────────────────┐
+│   Option 1: Open from Tools menu                       │
+│   Click Tools → Armor Resistances                      │
+│                                                        │
+│   Option 2: Configure in Settings                      │
+│   Settings → Armory → Toggle "Display classes"         │
+└──────────┬─────────────────────────────────────────────┘
            │
            ↓
-┌──────────────────────────────────────────┐
-│  Load armor_resists.json data            │
-│  ui_armor_resists_load_and_populate()    │
-└──────────┬───────────────────────────────┘
+┌────────────────────────────────────────────────────────┐
+│  Load armor_resists.json data                          │
+│  Read config.armory.armor_resists_show_classes setting │
+│  Apply filter if needed (compact vs detailed view)     │
+└──────────┬─────────────────────────────────────────────┘
            │
            ↓
-┌──────────────────────────────────────────┐
-│  Display dialog with:                    │
-│  • Realm selector (dropdown)             │
-│  • Table widget                          │
-│  • Close button                          │
-└──────────┬───────────────────────────────┘
+┌────────────────────────────────────────────────────────┐
+│  Display dialog with:                                  │
+│  • 3 tabs (Albion, Midgard, Hibernia)                  │
+│  • Table widget with filtered data                     │
+│  • Maximize/Minimize buttons                           │
+│  • Auto-sized (min 1000x500)                           │
+└──────────┬─────────────────────────────────────────────┘
            │
            ↓
-┌──────────────────────────────────────────┐
-│  User selects realm from dropdown        │
-└──────────┬───────────────────────────────┘
+┌────────────────────────────────────────────────────────┐
+│  User clicks realm tab to switch view                  │
+└──────────┬─────────────────────────────────────────────┘
            │
            ↓
-┌──────────────────────────────────────────┐
-│  Populate table with realm data          │
-│  ui_armor_resists_populate_realm()       │
-│  • Set column headers (localized)        │
-│  • Add data rows                         │
-│  • Apply color formatting                │
-│  • Apply symbols formatting              │
-└──────────┬───────────────────────────────┘
+┌────────────────────────────────────────────────────────┐
+│  Populate table with realm data                        │
+│  ui_armor_resists_populate_table()                     │
+│  • Apply filter based on config setting                │
+│  • Format cell values (numeric: 10%, -5%, 0%)          │
+│  • Apply color to text (not background)                │
+│  • Hide row numbers                                    │
+│  • Auto-fit columns                                    │
+└──────────┬─────────────────────────────────────────────┘
            │
            ↓
-┌──────────────────────────────────────────┐
-│  Display formatted table                 │
-│  User reads resistance information       │
-└──────────┬───────────────────────────────┘
+┌────────────────────────────────────────────────────────┐
+│  Display formatted table                               │
+│  User reads resistance information                     │
+└──────────┬─────────────────────────────────────────────┘
            │
            ↓
-┌──────────────────────────────────────────┐
-│  User closes dialog                      │
-└──────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────┐
+│  User closes dialog or closes app                      │
+└────────────────────────────────────────────────────────┘
 ```
 
 ### Data Loading Sequence
@@ -258,6 +269,36 @@ Each realm table contains:
 
 ## Configuration & Settings
 
+### Application Configuration
+
+Configuration stored in `Configuration/config.json`:
+
+```json
+{
+  "armory": {
+    "armor_resists_show_classes": false
+  }
+}
+```
+
+**Setting Details**:
+- **Key**: `armory.armor_resists_show_classes`
+- **Type**: Boolean
+- **Default**: `false` (compact view)
+- **Values**:
+  - `false` → Display only armor types (5 rows)
+  - `true` → Display all classes with armor types (16+ rows)
+
+### Settings UI Integration
+
+Users can toggle the setting via **Settings > Armory > "Afficher les classes (vue détaillée)"**
+
+**Settings Implementation**:
+- File: `UI/settings_dialog.py` (SettingsDialog class)
+- Method: `_create_armory_page()`
+- Widget: `armor_resists_show_classes_check` (QCheckBox)
+- Saves to config via: `main.py` → `save_configuration()` method
+
 ### Localization Configuration
 
 The feature supports 3 languages via configuration:
@@ -275,9 +316,14 @@ The feature supports 3 languages via configuration:
   "menu.tools.armor_resists": "🛡️ Armor Resistances",
   "armor_resists.dialog.title": "🛡️ Armor Resistances",
   "armor_resists.realm_label": "Select Realm:",
-  "armor_resists.realm.albion": "Albion",
-  "armor_resists.realm.midgard": "Midgard",
-  "armor_resists.realm.hibernia": "Hibernia",
+  "armor_resists.realm": {
+    "albion": "Albion",
+    "midgard": "Midgard",
+    "hibernia": "Hibernia"
+  },
+  "armor_resists.settings.title": "🛡️ Armor Resistances Table:",
+  "armor_resists.settings.show_classes": "Display classes (detailed view)",
+  "armor_resists.settings.show_classes_tooltip": "If enabled, displays resistances for each class...",
   "common.close_button": "Close",
   "error.data_load_failed": "Error loading data"
 }
@@ -294,6 +340,7 @@ Language is automatically detected from configuration and used to:
 - Display localized realm names
 - Display localized class and armor type names
 - Display button labels and dialog titles
+- Display settings checkbox and tooltip
 
 ---
 
@@ -342,33 +389,33 @@ def armor_resists_format_cell_value(value: str) -> str:
     Format a cell value from the armor resistance table.
     
     Args:
-        value (str): The raw value from the table (e.g., "Resistant", "Vulnerable", "Neutral").
+        value (str): The raw value from the table (e.g., "10%", "-5%", "0%").
     
     Returns:
-        str: Formatted value ready for display.
+        str: Formatted value ready for display (returns as-is).
     """
 ```
-- `"Resistant"` → `"✓"`
-- `"Vulnerable"` → `"✗"`
-- `"Neutral"` → `"◯"`
+- `"10%"` → `"10%"` (Resistant)
+- `"-5%"` → `"-5%"` (Vulnerable)
+- `"0%"` → `"0%"` (Neutral)
 - Other → Returns as-is
 
 ##### `armor_resists_get_cell_color(value: str) -> tuple | None`
 ```python
 def armor_resists_get_cell_color(value: str) -> tuple:
     """
-    Determine the color for a cell based on its value.
+    Determine the color for a cell based on its numeric value.
     
     Args:
-        value (str): The raw value from the table.
+        value (str): The raw value from the table (e.g., "10%", "-5%", "0%").
     
     Returns:
         tuple: (r, g, b) color tuple or None for default color.
     """
 ```
-- `"Resistant"` → `(76, 175, 80)` - Green
-- `"Vulnerable"` → `(244, 67, 54)` - Red
-- `"Neutral"` → `(255, 152, 0)` - Orange
+- `"10%"` → `(76, 175, 80)` - Green (Resistant)
+- `"-5%"` → `(244, 67, 54)` - Red (Vulnerable)
+- `"0%"` → `(255, 152, 0)` - Orange (Neutral)
 - Other → `None`
 
 ---
@@ -386,60 +433,64 @@ def ui_armor_resists_create_dialog(parent=None) -> QDialog:
     Create and return the armor resistance table dialog.
     
     Returns:
-        QDialog: The armor resistance dialog.
+        QDialog: The armor resistance dialog with tab-based realm selection.
     """
 ```
 
 Creates and returns a non-modal dialog with:
-- Dialog window (1000x600 pixels)
-- Realm selector dropdown
-- Table widget (auto-populated)
-- Close button
+- Dialog window (min 1000x500 pixels, max 95% of screen)
+- QTabWidget with 3 tabs (Albion, Midgard, Hibernia)
+- Table widget per tab (auto-populated)
+- Maximize/Minimize buttons
+- Auto-sizing based on content
 
 **Initialization Steps**:
 1. Create QDialog instance
 2. Set window title (localized)
 3. Create main layout (QVBoxLayout)
-4. Add realm selector section
-5. Add table widget
-6. Add close button
-7. Connect signal/slot for realm selection change
-8. Load and populate initial data
+4. Create QTabWidget
+5. For each realm:
+   - Create QTableWidget
+   - Add to tab
+   - Populate with data
+6. Add tabs to QTabWidget
+7. Load and populate initial data
+8. Adjust dialog size
 
-##### `ui_armor_resists_load_and_populate(dialog, realm_combo, table)`
-
-Loads data and populates the realm selector combo box.
-
-**Steps**:
-1. Load JSON data via `armor_resists_load_data()`
-2. Check for data loading errors
-3. Extract realm-specific data
-4. Populate combo box with 3 realm options
-5. Call `ui_armor_resists_populate_realm()` for first realm
-
-##### `ui_armor_resists_populate_realm(table, realm_combo)`
+##### `ui_armor_resists_populate_table(table, realm_data, show_classes=False)`
 
 Populates the table with data for selected realm.
 
 **Steps**:
-1. Get selected realm key from combo box
-2. Extract realm table from data
-3. Set table dimensions (columns/rows)
-4. Set column headers with localization:
+1. If `show_classes=False`, filter data via `armor_resists_filter_armor_types_only()`
+2. Set table dimensions (columns/rows)
+3. Set column headers with localization:
    - Get column header from JSON
    - Check for localized version (`name_fr`, `name_de`)
    - Fall back to English if needed
-5. Populate data rows:
+4. Populate data rows:
    - For each row in table data:
      - For each column header:
        - Get cell value from row data
-       - Format value if resistance (symbol conversion)
        - Use localized name if class/armor type column
        - Create QTableWidgetItem
-       - Apply color if resistance value
-       - Set alignment and formatting
+       - Apply text color if resistance value (only text, no background)
+       - Set alignment (center for values, left for text)
        - Add to table
-6. Configure column width (stretch mode)
+5. Configure column width (stretch mode)
+6. Hide row numbers
+7. Auto-fit column widths
+
+##### `armor_resists_filter_armor_types_only(realm_data: dict) -> dict`
+
+Filters realm data to show only unique armor types (removes class rows).
+
+**Steps**:
+1. Track seen armor types
+2. For each row in realm data:
+   - If armor type not seen, include it
+   - Mark as seen
+3. Return filtered data with only first occurrence per armor type
 
 ---
 
@@ -486,11 +537,11 @@ Next time dialog opens → Uses new language
 
 ### Supported Languages
 
-| Language | Menu Label | Dialog Title | Realm Names |
-|----------|-----------|--------------|------------|
-| English | "🛡️ Armor Resistances" | "🛡️ Armor Resistances" | Albion, Midgard, Hibernia |
-| French | "🛡️ Résistances d'Armure" | "🛡️ Résistances d'Armure" | Albion, Midgard, Hibernia |
-| German | "🛡️ Rüstungswiderstände" | "🛡️ Rüstungswiderstände" | Albion, Midgard, Hibernia |
+| Language | Menu Label | Dialog Title | Realm Names | Settings Label |
+|----------|-----------|--------------|------------|----------------|
+| English | "🛡️ Armor Resistances" | "🛡️ Armor Resistances" | Albion, Midgard, Hibernia | "Display classes (detailed view)" |
+| French | "🛡️ Résistances d'Armure" | "🛡️ Résistances d'Armure" | Albion, Midgard, Hibernia | "Afficher les classes (vue détaillée)" |
+| German | "🛡️ Rüstungswiderstände" | "🛡️ Rüstungswiderstände" | Albion, Midgard, Hibernia | "Klassen anzeigen (detaillierte Ansicht)" |
 
 ---
 
@@ -599,7 +650,17 @@ Next time dialog opens → Uses new language
 
 | Version | Date | Changes |
 |---------|------|---------|
-| 0.109 | 2026-01-05 | ✅ Initial release |
+| 0.2 | 2026-01-05 | ✅ Settings Integration & Display Mode Toggle |
+| | | • Added configurable display mode (compact/detailed) |
+| | | • Integrated into Settings > Armory |
+| | | • Persistent configuration (armory.armor_resists_show_classes) |
+| | | • Tab-based realm selection (instead of dropdown) |
+| | | • Numeric percentage display (-5%, 0%, 10%) |
+| | | • Color-coded text only (no background) |
+| | | • Dialog auto-sizing (min 1000x500, max 95% screen) |
+| | | • Maximize/Minimize buttons |
+| | | • Bug fixes and UI refinements |
+| 0.109 | 2026-01-05 | ✅ Initial Release |
 | | | • Added armor resistance table viewer |
 | | | • Realm selector (Albion, Midgard, Hibernia) |
 | | | • Color-coded display (Green/Orange/Red) |
@@ -622,9 +683,32 @@ Next time dialog opens → Uses new language
 
 ### Q: How are resistance values formatted?
 **A:** 
-- Raw value: `"Resistant"` → Display: `"✓"` with green background
-- Raw value: `"Vulnerable"` → Display: `"✗"` with red background  
-- Raw value: `"Neutral"` → Display: `"◯"` with orange background
+- Raw value: `"10%"` → Display: `"10%"` with green text (Resistant)
+- Raw value: `"-5%"` → Display: `"-5%"` with red text (Vulnerable)  
+- Raw value: `"0%"` → Display: `"0%"` with orange text (Neutral)
+
+### Q: What's the difference between compact and detailed view?
+
+**A:** 
+- **Compact view** (default): Shows only 5 armor types per realm without class information
+  - Armor Type: Cloth, Leather, Studded, Chain, Plate/Reinforced/Scale
+  - Best for quick reference
+  - Less cluttered display
+  - Minimum 5 rows per realm
+  
+- **Detailed view** (optional): Shows all resistances by class
+  - 44 DAOC classes per realm with full class names
+  - 16+ rows per realm
+  - More comprehensive information
+  - Enables via Settings > Armory > "Display classes"
+
+### Q: Can I toggle the display mode in the dialog?
+
+**A:** No. The display mode is set via Settings > Armory and applies to all future dialog openings. Close and reopen the dialog to see the change.
+
+### Q: Is the setting persistent?
+
+**A:** Yes. The setting is saved in `Configuration/config.json` under `armory.armor_resists_show_classes` and persists across app restarts.
 
 ### Q: Is language dynamically updated when user changes language settings?
 **A:** No. User must close and reopen the dialog to see new language. Full dynamic translation would require `retranslate_ui()` callback.
@@ -659,12 +743,16 @@ Next time dialog opens → Uses new language
 
 - [Armor Resists JSON Data](../../../Data/armor_resists.json)
 - [Functions Implementation](../../../Functions/armor_resists_manager.py)
-- [UI Implementation](../../../UI/ui_armor_resists_dialog.py)
+- [UI Dialog Implementation](../../../UI/ui_armor_resists_dialog.py)
+- [Settings Dialog Integration](../../../UI/settings_dialog.py)
+- [Main App Configuration](../../../main.py)
 - [Menu Integration](../../../Functions/ui_manager.py)
 - [Language Configuration](../../../Language/)
+- [Application Configuration](../../../Configuration/config.json)
 
 ---
 
 **Last Updated**: 2026-01-05  
 **Author**: Ewoline (IA Assistant)  
-**Status**: ✅ Production Ready (v0.109)
+**Status**: ✅ Production Ready (v0.2)
+**Features Complete**: Tab-based UI, Numeric display, Configurable view modes, Settings integration

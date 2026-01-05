@@ -1,4 +1,4 @@
-﻿{
+{
     "window": {
         "main_title": "DAOC - Gestion des personnages",
         "welcome_message": "Bienvenue dans le gestionnaire de personnages !",
@@ -753,12 +753,43 @@
         "select_season": "Veuillez sélectionner une saison",
         "enter_description": "Veuillez saisir une description",
         "tags_suggested": {
-            "budget": ["low-cost", "budget", "premium", "high-end"],
-            "content": ["pve", "pvp", "rvr", "solo", "groupe"],
-            "level": ["débutant", "intermédiaire", "avancé"],
-            "ml": ["ml1", "ml5", "ml10", "sans-ml"],
-            "source": ["eden", "officiel", "communauté", "personnel"],
-            "spec": ["heal", "dps", "tank", "support", "cc"]
+            "budget": [
+                "low-cost",
+                "budget",
+                "premium",
+                "high-end"
+            ],
+            "content": [
+                "pve",
+                "pvp",
+                "rvr",
+                "solo",
+                "groupe"
+            ],
+            "level": [
+                "débutant",
+                "intermédiaire",
+                "avancé"
+            ],
+            "ml": [
+                "ml1",
+                "ml5",
+                "ml10",
+                "sans-ml"
+            ],
+            "source": [
+                "eden",
+                "officiel",
+                "communauté",
+                "personnel"
+            ],
+            "spec": [
+                "heal",
+                "dps",
+                "tank",
+                "support",
+                "cc"
+            ]
         }
     },
     "template_list": {
@@ -1459,5 +1490,4 @@
     "error": {
         "data_load_failed": "Erreur lors du chargement des données"
     }
-}
 }

@@ -29,7 +29,9 @@ def ui_armor_resists_create_dialog(parent=None):
     """
     dialog = QDialog(parent)
     dialog.setWindowTitle(lang.get("armor_resists.dialog.title", default="🛡️ Armor Resistances"))
-    dialog.setGeometry(100, 100, 1200, 700)
+    
+    # Add maximize/minimize buttons
+    dialog.setWindowFlags(dialog.windowFlags() | Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint)
     
     layout = QVBoxLayout()
     
@@ -41,6 +43,7 @@ def ui_armor_resists_create_dialog(parent=None):
     
     if not data:
         dialog.setLayout(layout)
+        dialog.setGeometry(100, 100, 600, 400)
         return dialog
     
     realms = armor_resists_get_realms_data(data)
@@ -61,6 +64,9 @@ def ui_armor_resists_create_dialog(parent=None):
     layout.addWidget(tab_widget)
     dialog.setLayout(layout)
     
+    # Auto-adjust size based on content
+    ui_armor_resists_adjust_dialog_size(dialog, tab_widget)
+    
     return dialog
 
 
@@ -74,6 +80,66 @@ def ui_armor_resists_load_and_populate(dialog, realm_combo, table):
         table: The table widget.
     """
     pass  # No longer used with tab widget
+
+
+def ui_armor_resists_adjust_dialog_size(dialog, tab_widget):
+    """
+    Adjust dialog size based on content (tables and tabs).
+    
+    Args:
+        dialog: The dialog instance.
+        tab_widget: The QTabWidget containing the tables.
+    """
+    # Get the first table to calculate size
+    if tab_widget.count() == 0:
+        dialog.setGeometry(100, 100, 600, 400)
+        return
+    
+    first_table = tab_widget.widget(0)
+    
+    # Calculate required width based on columns
+    width = 0
+    for col in range(first_table.columnCount()):
+        width += first_table.columnWidth(col)
+    
+    # Add spacing for vertical scrollbar and borders
+    width += 50
+    
+    # Calculate required height based on rows and headers
+    height = 0
+    
+    # Header height
+    if first_table.horizontalHeader():
+        height += first_table.horizontalHeader().height()
+    
+    # Rows height
+    for row in range(first_table.rowCount()):
+        height += first_table.rowHeight(row)
+    
+    # Add tab bar height
+    height += tab_widget.tabBar().height() if tab_widget.tabBar() else 30
+    
+    # Add spacing for horizontal scrollbar and borders
+    height += 80
+    
+    # Constrain size to reasonable limits
+    # Minimum: 600x400
+    # Maximum: 90% of screen size
+    screen = dialog.screen()
+    screen_rect = screen.availableGeometry()
+    
+    max_width = int(screen_rect.width() * 0.9)
+    max_height = int(screen_rect.height() * 0.9)
+    
+    final_width = max(600, min(width, max_width))
+    final_height = max(400, min(height, max_height))
+    
+    # Center the dialog on screen
+    x = (screen_rect.width() - final_width) // 2 + screen_rect.x()
+    y = (screen_rect.height() - final_height) // 2 + screen_rect.y()
+    
+    dialog.setGeometry(x, y, final_width, final_height)
+
 
 
 def ui_armor_resists_populate_realm(table, realm_combo):

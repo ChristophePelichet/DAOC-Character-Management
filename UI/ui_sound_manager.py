@@ -44,6 +44,12 @@ class SilentMessageBox:
             return QMessageBox.information(parent, title, text)
         else:
             SoundManager.suppress_pending_sounds()
+            # Additional sound suppression for robustness
+            try:
+                import winsound
+                winsound.PlaySound(None, winsound.SND_PURGE)
+            except Exception:
+                pass
             return SilentMessageBox._create_custom_dialog(
                 parent, title, text, "information"
             )
@@ -66,6 +72,12 @@ class SilentMessageBox:
             return QMessageBox.warning(parent, title, text)
         else:
             SoundManager.suppress_pending_sounds()
+            # Additional sound suppression for robustness
+            try:
+                import winsound
+                winsound.PlaySound(None, winsound.SND_PURGE)
+            except Exception:
+                pass
             return SilentMessageBox._create_custom_dialog(
                 parent, title, text, "warning"
             )
@@ -88,6 +100,12 @@ class SilentMessageBox:
             return QMessageBox.critical(parent, title, text)
         else:
             SoundManager.suppress_pending_sounds()
+            # Additional sound suppression for robustness
+            try:
+                import winsound
+                winsound.PlaySound(None, winsound.SND_PURGE)
+            except Exception:
+                pass
             return SilentMessageBox._create_custom_dialog(
                 parent, title, text, "critical"
             )
@@ -117,6 +135,12 @@ class SilentMessageBox:
                 return QMessageBox.question(parent, title, text)
         else:
             SoundManager.suppress_pending_sounds()
+            # Additional sound suppression for robustness
+            try:
+                import winsound
+                winsound.PlaySound(None, winsound.SND_PURGE)
+            except Exception:
+                pass
             return SilentMessageBox._create_custom_dialog(
                 parent, title, text, "question"
             )

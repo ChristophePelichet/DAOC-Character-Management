@@ -92,7 +92,7 @@ def ui_armor_resists_adjust_dialog_size(dialog, tab_widget):
     """
     # Get the first table to calculate size
     if tab_widget.count() == 0:
-        dialog.setGeometry(100, 100, 600, 400)
+        dialog.setGeometry(100, 100, 1000, 500)
         return
     
     first_table = tab_widget.widget(0)
@@ -102,8 +102,8 @@ def ui_armor_resists_adjust_dialog_size(dialog, tab_widget):
     for col in range(first_table.columnCount()):
         width += first_table.columnWidth(col)
     
-    # Add spacing for vertical scrollbar and borders
-    width += 50
+    # Add generous spacing for vertical scrollbar, borders, and padding
+    width += 150
     
     # Calculate required height based on rows and headers
     height = 0
@@ -123,16 +123,16 @@ def ui_armor_resists_adjust_dialog_size(dialog, tab_widget):
     height += 80
     
     # Constrain size to reasonable limits
-    # Minimum: 600x400
-    # Maximum: 90% of screen size
+    # Minimum: 1000x500 (wider to accommodate all columns)
+    # Maximum: 95% of screen size
     screen = dialog.screen()
     screen_rect = screen.availableGeometry()
     
-    max_width = int(screen_rect.width() * 0.9)
-    max_height = int(screen_rect.height() * 0.9)
+    max_width = int(screen_rect.width() * 0.95)
+    max_height = int(screen_rect.height() * 0.95)
     
-    final_width = max(600, min(width, max_width))
-    final_height = max(400, min(height, max_height))
+    final_width = max(1000, min(width, max_width))
+    final_height = max(500, min(height, max_height))
     
     # Center the dialog on screen
     x = (screen_rect.width() - final_width) // 2 + screen_rect.x()

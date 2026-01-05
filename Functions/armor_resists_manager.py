@@ -3,7 +3,7 @@ Armor Resistances Manager - Handles loading and formatting armor resistance data
 """
 
 import json
-import logging
+from pathlib import Path
 from Functions.path_manager import get_base_path
 from Functions.debug_logging_manager import get_logger, LOGGER_CHARACTER
 
@@ -18,7 +18,7 @@ def armor_resists_load_data():
         dict: Armor resistance data with tables and metadata, or empty dict on error.
     """
     try:
-        data_path = get_base_path() / "Data" / "armor_resists.json"
+        data_path = Path(get_base_path()) / "Data" / "armor_resists.json"
         
         if not data_path.exists():
             logger.error(f"Armor resists data file not found: {data_path}")

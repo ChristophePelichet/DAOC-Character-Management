@@ -7,10 +7,9 @@ from PySide6.QtWidgets import (
     QComboBox, QPushButton, QLabel
 )
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QColor, QBrush, QFont
+from PySide6.QtGui import QColor, QBrush
 
 from Functions.language_manager import lang
-from Functions.theme_manager import get_scaled_size
 from Functions.armor_resists_manager import (
     armor_resists_load_data,
     armor_resists_get_realms_data,

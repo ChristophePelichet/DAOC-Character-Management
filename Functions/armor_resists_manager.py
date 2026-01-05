@@ -88,7 +88,7 @@ def armor_resists_get_cell_color(value):
     Determine the color for a cell based on its value.
     
     Args:
-        value (str): The raw value from the table.
+        value (str): The raw value from the table (e.g., "10%", "-5%", "0%").
     
     Returns:
         tuple: (r, g, b) color tuple or None for default color.
@@ -96,16 +96,22 @@ def armor_resists_get_cell_color(value):
     if not value:
         return None
     
-    value = str(value).strip()
+    value_str = str(value).strip()
     
-    # Green for Resistant
-    if value == "Resistant":
-        return (76, 175, 80)  # Green
-    # Red for Vulnerable
-    elif value == "Vulnerable":
-        return (244, 67, 54)  # Red
-    # Orange for Neutral
-    elif value == "Neutral":
-        return (255, 152, 0)  # Orange
-    
-    return None
+    # Parse percentage value
+    try:
+        # Extract numeric part
+        numeric_str = value_str.rstrip('%')
+        numeric_val = int(numeric_str)
+        
+        # Green for positive (Resistant)
+        if numeric_val > 0:
+            return (76, 175, 80)  # Green
+        # Red for negative (Vulnerable)
+        elif numeric_val < 0:
+            return (244, 67, 54)  # Red
+        # Orange for zero (Neutral)
+        else:
+            return (255, 152, 0)  # Orange
+    except (ValueError, AttributeError):
+        return None

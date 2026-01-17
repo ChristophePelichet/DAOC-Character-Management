@@ -14,9 +14,6 @@ from pathlib import Path
 from typing import Dict, List, Tuple, Optional
 import json
 
-# Global cache for metadata to avoid rescanning on every widget open
-_METADATA_CACHE: Optional[Dict] = None
-
 
 def model_gallery_load_item_slots() -> Dict[str, List[str]]:
     """
@@ -87,13 +84,6 @@ def model_gallery_load_metadata() -> Dict[str, List[str]]:
         #         '1', '2', '3', ... (no subtype for weapons)
         #     }
     """
-    global _METADATA_CACHE
-    
-    # Return cached metadata if available
-    if _METADATA_CACHE is not None:
-        logging.info("Using cached metadata")
-        return _METADATA_CACHE
-    
     img_dir = Path(__file__).parent.parent / "Img" / "Models"
 
     logging.info(f"Loading metadata from: {img_dir}")
@@ -152,8 +142,6 @@ def model_gallery_load_metadata() -> Dict[str, List[str]]:
 
     logging.info(f"Metadata loading complete: {len(metadata)} types found")
     
-    # Cache the metadata
-    _METADATA_CACHE = metadata
     return metadata
 
 

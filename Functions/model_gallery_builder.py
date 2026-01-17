@@ -13,30 +13,6 @@ from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
 import logging
 
-# Global cache for file index to avoid rescanning on every widget open
-_FILE_CACHE: Optional[Dict[str, Path]] = None
-
-
-def model_gallery_warmup_cache():
-    """
-    Pre-load file cache to avoid slow first gallery open.
-    Call this once at application startup.
-    """
-    global _FILE_CACHE
-    if _FILE_CACHE is None:
-        logging.info("Warming up file cache...")
-        img_base_path = Path(__file__).parent.parent / "Img" / "Models"
-        _FILE_CACHE = {}
-        extensions = {".jpg", ".jpeg", ".png", ".webp"}
-        
-        for file in img_base_path.rglob("*"):
-            if file.is_file() and file.suffix.lower() in extensions:
-                model_id = file.stem
-                if model_id not in _FILE_CACHE:
-                    _FILE_CACHE[model_id] = file
-        
-        logging.info(f"File cache warmed up: {len(_FILE_CACHE)} files indexed")
-
 
 @dataclass
 class ModelThumbnail:
@@ -92,25 +68,18 @@ def model_gallery_build_thumbnail_list(
     # Convert model_ids to set for O(1) lookup
     model_ids_set = set(model_ids)
     
-    # Use global cache to avoid rescanning files
-    global _FILE_CACHE
-    if _FILE_CACHE is None:
-        # Build cache only once
-        logging.info("Building file cache from Img/Models/...")
-        _FILE_CACHE = {}
-        extensions = {".jpg", ".jpeg", ".png", ".webp"}
-        
-        for file in img_base_path.rglob("*"):
-            if file.is_file() and file.suffix.lower() in extensions:
-                model_id = file.stem
-                if model_id not in _FILE_CACHE:  # Keep first occurrence
-                    _FILE_CACHE[model_id] = file
-        
-        logging.info(f"File cache built: {len(_FILE_CACHE)} files indexed")
-    else:
-        logging.info(f"Using cached file index: {len(_FILE_CACHE)} files")
+    # Build file index from available images
+    logging.info("Building file index from Img/Models/...")
+    file_cache = {}
+    extensions = {".jpg", ".jpeg", ".png", ".webp"}
     
-    file_cache = _FILE_CACHE
+    for file in img_base_path.rglob("*"):
+        if file.is_file() and file.suffix.lower() in extensions:
+            model_id = file.stem
+            if model_id not in file_cache:  # Keep first occurrence
+                file_cache[model_id] = file
+    
+    logging.info(f"File index built: {len(file_cache)} files indexed")
 
     thumbnails = []
 

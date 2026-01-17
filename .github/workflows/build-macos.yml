@@ -53,17 +53,5 @@ jobs:
         files: DaocCharacterManager-Mac.zip
         generate_release_notes: true
         overwrite: true
-        body: |
-          ## 📥 Quick Download
-          * 🪟 **Windows:** Download the `.exe` file below.
-          * 🍎 **macOS:** Download the `.zip` file below.
-          
-          > 💡 **Tip for Mac users:** If you get a security warning, **Right-Click** the app and select **Open**.
-          
-          ---
-          ### 🛠️ Installation
-          1. Download the version for your OS.
-          2. Extract the files (for Mac) or run the `.exe` (for Windows).
-          3. Enjoy managing your DAOC characters!
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

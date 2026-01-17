@@ -167,72 +167,54 @@ def model_gallery_apply_visibility_filters(metadata: Dict) -> Dict:
     """
     Apply visibility filters from configuration to metadata.
 
-    Removes slots that are not in the visible_slots list from the configuration.
-    This allows users to hide certain model categories from the gallery view.
+    Filters to show only selected subcategories (e.g., bow, sword, helm, chest).
+    This allows users to hide certain model subcategories from the gallery view.
 
     Args:
         metadata: Output from model_gallery_load_metadata()
 
     Returns:
-        Filtered metadata containing only visible slots
+        Filtered metadata containing only visible subcategories
 
     Example:
         metadata = model_gallery_load_metadata()
         filtered = model_gallery_apply_visibility_filters(metadata)
-        # Now only contains slots that are enabled in settings
+        # Now only contains subcategories that are enabled in settings
     """
     try:
         from Functions.config_manager import config
 
-        visible_slots = config.get(
+        # Get visible subcategories from settings
+        visible_subcategories = config.get(
             "models_gallery.visible_slots",
-            [
-                "Weapons",
-                "Arms",
-                "Hands",
-                "Feet",
-                "Legs",
-                "Torso",
-                "Head",
-                "Shields",
-                "Cloaks",
-                "Quiver",
-                "Misc",
-                "Siege",
-                "Boats",
-                "Tents",
-                "Deco",
-            ],
+            ["arms", "boats", "bow", "cloaks", "chest", "feet", "hands", 
+             "head", "helm", "legs", "misc", "quiver", "shield", "sword", 
+             "torso", "tents", "siege", "deco"],
         )
 
         if not metadata or "items" not in metadata:
             return metadata
 
-        # Filter items: metadata['items'] = {'weapon': {'bow': [...], 'sword': [...]}, ...}
-        # visible_slots = ['Weapons', 'Shields', ...] but with different case/names
-        # Map new category names to visible_slots
-        category_mapping = {
-            'weapon': 'Weapons',
-            'armor': 'Arms',  # Maps to armor subcategories (arms, helm, chest, etc.)
-            'other': 'Misc',
-        }
-
+        # Filter items: keep only visible subcategories
+        # metadata['items'] = {'weapon': {'bow': [...], 'sword': [...]}, 'armor': {'helm': [...], ...}}
         filtered_items = {}
         
         for category, subcats in metadata["items"].items():
-            # Get the old slot name for this category
-            visible_slot_name = category_mapping.get(category)
-            
-            # Only include if the parent category is visible
-            if visible_slot_name and visible_slot_name in visible_slots:
-                # Keep all subcategories for this category
-                if isinstance(subcats, dict):
-                    filtered_items[category] = subcats
+            if isinstance(subcats, dict):
+                filtered_subcats = {}
+                for subcat_name, model_ids in subcats.items():
+                    # Keep subcategory if it's in visible list
+                    if subcat_name.lower() in [s.lower() for s in visible_subcategories]:
+                        filtered_subcats[subcat_name] = model_ids
+                
+                # Only add category if it has visible subcategories
+                if filtered_subcats:
+                    filtered_items[category] = filtered_subcats
 
         filtered_metadata = {"items": filtered_items}
 
         logging.info(
-            f"Applied visibility filters: {sum(sum(len(v) for v in subcats.values()) for subcats in filtered_items.values())} items in visible categories"
+            f"Applied visibility filters: {sum(sum(len(v) for v in subcats.values()) for subcats in filtered_items.values())} items in visible subcategories"
         )
 
         return filtered_metadata

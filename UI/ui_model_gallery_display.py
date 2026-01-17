@@ -73,6 +73,7 @@ class ModelThumbnailWidget(QFrame):
         id_font.setBold(True)
         id_label.setFont(id_font)
         id_label.setAlignment(Qt.AlignCenter)
+        id_label.setStyleSheet("color: #000000; font-weight: bold;")
         layout.addWidget(id_label)
 
         self.setLayout(layout)

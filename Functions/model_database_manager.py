@@ -17,16 +17,19 @@ import json
 
 def model_gallery_load_item_slots() -> Dict[str, List[str]]:
     """
-    Load item database and create mapping of model IDs to item slots.
+    Load DOL models database and create mapping of model IDs to item slots.
+    
+    Uses dol_models_database.json which contains all 3444 models scraped from
+    the Eden model gallery, organized by category (armor/feet, armor/hands, etc.)
     
     Returns:
         Dict mapping {slot: [model_ids]} for all items
-        Example: {'Helm': ['4063', '4064'], 'Chest': ['1186', '1187']}
+        Example: {'Feet': ['40', '45', ...], 'Hands': ['34', '39', ...]}
     """
-    db_file = Path(__file__).parent.parent / "Data" / "items_database_src.json"
+    db_file = Path(__file__).parent.parent / "Data" / "dol_models_database.json"
     
     if not db_file.exists():
-        logging.warning(f"Items database not found: {db_file}")
+        logging.warning(f"DOL models database not found: {db_file}")
         return {}
     
     try:
@@ -34,23 +37,28 @@ def model_gallery_load_item_slots() -> Dict[str, List[str]]:
             data = json.load(f)
         
         # Build mapping of slot -> model IDs
-        slot_mapping: Dict[str, set] = {}
+        # Each item_id maps to a slot, and we use item_id as the model_id for the gallery
+        slot_mapping: Dict[str, List[str]] = {}
         
-        for item_key, item_data in data.get("items", {}).items():
-            model_id = item_data.get("model")
+        for item_id, item_data in data.items():
             slot = item_data.get("slot")
             
-            if model_id and slot:
+            if slot:
                 if slot not in slot_mapping:
-                    slot_mapping[slot] = set()
-                slot_mapping[slot].add(str(model_id))
+                    slot_mapping[slot] = []
+                # Use item_id directly as the model_id
+                slot_mapping[slot].append(item_id)
         
-        # Convert sets to sorted lists
-        return {slot: sorted(list(model_ids), key=int) 
-                for slot, model_ids in slot_mapping.items()}
+        # Sort numeric IDs numerically
+        result = {}
+        for slot, model_ids in slot_mapping.items():
+            numeric_ids = sorted([mid for mid in model_ids if mid.isdigit()], key=int)
+            result[slot] = numeric_ids
+        
+        return result
     
     except Exception as e:
-        logging.error(f"Error loading item database: {e}")
+        logging.error(f"Error loading DOL models database: {e}")
         return {}
 
 

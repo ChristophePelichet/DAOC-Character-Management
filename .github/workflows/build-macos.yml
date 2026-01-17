@@ -2,13 +2,18 @@ name: Build macOS Executable
 
 on:
   push:
-    branches: [ main ] # Triggered when pushing to main branch
+    branches: [ main ]
+    tags:
+      - 'v*' # Trigger on version tags (e.g., v1.0.0)
   pull_request:
     branches: [ main ]
+  workflow_dispatch: # Allows manual trigger from the GitHub Actions tab
 
 jobs:
-  build:
-    runs-on: macos-latest # GitHub starts a virtual Mac machine
+  build-macos:
+    runs-on: macos-latest
+    permissions:
+      contents: write # Required to create and upload files to a Release
 
     steps:
     - name: Get source code
@@ -17,19 +22,37 @@ jobs:
     - name: Install Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.13' # Update according to your Python version
+        python-version: '3.13'
 
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install pyinstaller
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        # Specific macos requirements if any
         if [ -f requirements-macos.txt ]; then pip install -r requirements-macos.txt; fi
 
     - name: Compile executable
       run: pyinstaller DAOC-Character-Manager.spec
 
-    - name: Save executable (Artifact)
+    - name: Zip App Bundle
+      # macOS apps are folders; they must be zipped for easy distribution
+      run: |
+        cd dist
+        zip -r ../DAOC-Character-Manager-Mac.zip "DAOC Character Manager.app"
+
+    - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: DAOC Character Manager macOS Executable
-        path: dist/ # Directory where PyInstaller saves the executable
+        name: DAOC-Character-Manager-Mac-Zip
+        path: DAOC-Character-Manager-Mac.zip
+
+    - name: Publish Release
+      # Only runs when a tag is pushed (v1.0.0, etc.)
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v2
+      with:
+        files: DAOC-Character-Manager-Mac.zip
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

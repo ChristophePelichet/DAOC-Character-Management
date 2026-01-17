@@ -25,12 +25,8 @@ jobs:
         pip install pyinstaller
         if [ -f requirements-macos.txt ]; then pip install -r requirements-macos.txt; fi
 
-    - name: Compile with PyInstaller
-      run: |
-        # Replace 'main.py' with your main script name
-        # --onefile creates a single file, --windowed removes console window
-        #pyinstaller --onefile --windowed main.py
-        run: pyinstaller DAOC-Character-Manager.spec
+    - name: Compile executable
+      run: pyinstaller DAOC-Character-Manager.spec
 
     - name: Save executable (Artifact)
       uses: actions/upload-artifact@v4

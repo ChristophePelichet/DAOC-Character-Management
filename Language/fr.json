@@ -1530,6 +1530,8 @@
     },
     "models_db": {
         "statistics_title": "Statistiques de la Base de Données des Modèles",
+        "metadata_stats_title": "📊 Base de Données des Modèles",
+        "image_stats_title": "🖼️ Fichiers",
         "total": "Total des modèles",
         "items": "Items",
         "mobs": "Mobs",
@@ -1543,6 +1545,10 @@
         "mobs_files": "Fichiers mobs :",
         "icons_files": "Fichiers icônes :",
         "refresh_stats": "🔄 Actualiser les stats",
+        "refresh_db_stats": "🔄 Actualiser Base de Données",
+        "refresh_files_stats": "🔄 Actualiser Fichiers",
+        "metadata_stats_error": "Erreur lors du chargement des statistiques de la base de métadonnées",
+        "files_stats_error": "Erreur lors du chargement des statistiques des fichiers image",
         "refresh_stats_tooltip": "Actualiser les statistiques de la base de données des modèles",
         "refresh_metadata": "🔄 Actualiser les métadonnées",
         "refresh_metadata_btn": "🔄 Actualiser les métadonnées",
@@ -1561,3 +1567,4 @@
         "viewer_error": "Erreur lors de l'ouverture de la visionneuse de base de données des modèles",
         "viewer_coming_soon": "Visionneuse de base de données des modèles prochainement..."
     }
+}

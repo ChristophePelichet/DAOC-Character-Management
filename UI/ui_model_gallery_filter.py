@@ -72,7 +72,7 @@ class ModelsFilterPanelWidget(QWidget):
                            default="Category:"))
         )
         self.category_combo = QComboBox()
-        self.category_combo.setMinimumWidth(180)
+        self.category_combo.setMinimumWidth(250)
         self.category_combo.currentIndexChanged.connect(
             self._on_category_changed
         )
@@ -86,7 +86,7 @@ class ModelsFilterPanelWidget(QWidget):
                            default="Sub-Category:"))
         )
         self.subcategory_combo = QComboBox()
-        self.subcategory_combo.setMinimumWidth(180)
+        self.subcategory_combo.setMinimumWidth(250)
         self.subcategory_combo.currentIndexChanged.connect(
             self._on_subcategory_changed
         )

@@ -140,6 +140,7 @@
             "label": "Werkzeuge",
             "armory": "⚔️ Rüstkammer",
             "armor_resists": "🛡️ Rüstungswiderstände",
+            "models_overview": "🖼️ Modellgalerie",
             "backup": "Sicherung"
         },
         "view": {

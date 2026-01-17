@@ -60,8 +60,8 @@ class ModelsOverviewWidget(QWidget):
 
         # Left: Filter panel
         self.filter_panel = ModelsFilterPanelWidget(self.metadata)
-        self.filter_panel.setMinimumWidth(200)
-        self.filter_panel.setMaximumWidth(250)
+        self.filter_panel.setMinimumWidth(280)
+        self.filter_panel.setMaximumWidth(350)
         main_layout.addWidget(self.filter_panel)
 
         # Right: Gallery + stats

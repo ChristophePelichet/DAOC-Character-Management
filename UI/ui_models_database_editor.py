@@ -472,8 +472,8 @@ class ModelsDataDatabaseEditor(QDialog):
 
     def _load_entry_preview(self, entry: Dict[str, str]):
         """Load preview image for entry"""
-        category_dir = self.models_dir / entry['category']
-        image_path = category_dir / f"{entry['id']}.webp"
+        # All images are stored in Img/Models/Items/ directory regardless of category
+        image_path = self.models_dir / "Items" / f"{entry['id']}.webp"
 
         if image_path.exists():
             pixmap = QPixmap(str(image_path))

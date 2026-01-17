@@ -42,23 +42,23 @@ class ModelsGallerySettingsWidget(QWidget):
         self.lang = lang
         self.checkboxes = {}
 
-        # List of all available model slots
+        # List of all available model slots (sorted alphabetically)
         self.all_slots = [
-            "Weapons",
             "Arms",
-            "Hands",
-            "Feet",
-            "Legs",
-            "Torso",
-            "Head",
-            "Shields",
-            "Cloaks",
-            "Quiver",
-            "Misc",
-            "Siege",
             "Boats",
-            "Tents",
+            "Cloaks",
             "Deco",
+            "Feet",
+            "Hands",
+            "Head",
+            "Legs",
+            "Misc",
+            "Quiver",
+            "Shields",
+            "Siege",
+            "Tents",
+            "Torso",
+            "Weapons",
         ]
 
         self._setup_ui()

@@ -2,7 +2,7 @@
 
 **Version**: 3.1
 **Date**: November 2025  
-**Last Updated**: January 5, 2026 (Simplified Model Viewer UI - removed category label)  
+**Last Updated**: January 17, 2026 (Models Gallery Settings - visibility filters for 15 model slots)  
 **Component**: Complete model management system (3 types: Items, Mobs, Icons)  
 **Used by**: Armory, Database Editor, Character Sheet, Item Preview, Model Viewer Dialog  
 **Related**: `Img/Models/`, `Tools/DataScraping/download_all_models.py`, `Tools/DataScraping/scrape_models_metadata.py`, `Data/models_metadata.json`, `UI/model_viewer_dialog.py`, `Functions/item_model_viewer.py`  
@@ -20,7 +20,8 @@
 7. [PyInstaller Compatibility](#pyinstaller-compatibility)
 8. [Maintenance & Updates](#maintenance--updates)
 9. [Performance Considerations](#performance-considerations)
-10. [Troubleshooting](#troubleshooting)
+10. [Models Gallery Settings](#models-gallery-settings)
+11. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -1375,6 +1376,44 @@ thumbnail = pixmap.scaled(32, 32, Qt.KeepAspectRatio, Qt.SmoothTransformation)
 
 ## Version History
 
+### v3.2 (January 17, 2026)
+
+**Models Gallery Settings Implementation**:
+- ✅ **New Settings Page**: Models 🖼️ in Settings dialog
+  - 15 checkboxes for model slot visibility control
+  - Alphabetically sorted slots (Arms, Boats, Cloaks, ...)
+  - Auto-save on checkbox change
+- ✅ **Configuration Section**: New `models_gallery.visible_slots` in config
+  - Default: All 15 slots enabled
+  - Schema validation in config_schema.py
+- ✅ **Filtering Function**: `model_gallery_apply_visibility_filters()` in model_database_manager.py
+  - Filters metadata based on visible_slots setting
+  - Removes disabled slots from gallery display
+- ✅ **UI Widget**: New `ModelsGallerySettingsWidget` in UI/ui_models_gallery_settings.py
+  - 15 checkboxes with alphabetical ordering
+  - Real-time config persistence via `config.save_config()`
+  - Imports config singleton correctly (not config_manager)
+- ✅ **Gallery Integration**: ModelsOverviewWidget applies filters
+  - Gallery automatically reflects visibility settings
+  - Filtered metadata prevents disabled slots from appearing
+
+**Features**:
+- Customizable gallery display
+- Persistent visibility settings
+- Real-time updates without restart
+- Alphabetical organization of slots
+- All 15 slots enabled by default
+
+**Files Modified**:
+- UI/settings_dialog.py: Added `_create_models_gallery_page()` method and navigation item
+- Configuration/config.json: Added `models_gallery.visible_slots` section
+- Functions/config_schema.py: Added validation schema for models_gallery
+- UI/models_overview_widget.py: Apply visibility filters to loaded metadata
+- UI/ui_models_gallery_settings.py: NEW - Settings widget
+- UI/ui_model_gallery_display.py: Improved thumbnail sizing and label visibility
+- Documentations/Settings/SETTINGS_TECHNICAL_DOCUMENTATION.md: Updated with v0.110 Models settings
+- Documentations/Models/MODELS_VISUAL_SYSTEM_DOCUMENTATION.md: Added Models Gallery Settings section
+
 ### v3.1 (January 5, 2026)
 
 **UI Simplification - Model Viewer Dialog**:
@@ -1607,6 +1646,302 @@ ModelsGalleryDisplayWidget.display_thumbnails()
 
 ---
 
+## Models Gallery Settings
+
+**Component**: `UI/ui_models_gallery_settings.py`, `Functions/model_database_manager.py`  
+**Integration Point**: Settings dialog (Settings > Models 🖼️)  
+**Related**: `Configuration/config.json`, `Functions/config_schema.py`
+
+### Overview
+
+The Models Gallery Settings system allows users to customize which model categories appear in the Models Gallery. Users can enable or disable each of the 15 model slot categories through an intuitive checkbox interface in the Settings dialog.
+
+### 15 Model Slots (Alphabetically Sorted)
+
+1. **Arms** - Character arm models
+2. **Boats** - Boat/ship models
+3. **Cloaks** - Cape and cloak models
+4. **Deco** - Decorative models
+5. **Feet** - Foot/boot armor models
+6. **Hands** - Hand/glove armor models
+7. **Head** - Helmet and head armor models
+8. **Legs** - Leg/pant armor models
+9. **Misc** - Miscellaneous models
+10. **Quiver** - Quiver models for archers
+11. **Shields** - Shield and defense models
+12. **Siege** - Siege equipment models
+13. **Tents** - Tent and camp models
+14. **Torso** - Chest/body armor models
+15. **Weapons** - Weapon models (swords, bows, etc.)
+
+### Configuration Structure
+
+**Config Section**: `models_gallery.visible_slots`
+
+**Default Configuration** (all slots enabled):
+```json
+{
+  "models_gallery": {
+    "visible_slots": [
+      "Arms", "Boats", "Cloaks", "Deco", "Feet",
+      "Hands", "Head", "Legs", "Misc", "Quiver",
+      "Shields", "Siege", "Tents", "Torso", "Weapons"
+    ]
+  }
+}
+```
+
+**Schema Validation** (Functions/config_schema.py):
+```python
+"models_gallery": {
+    "type": "object",
+    "properties": {
+        "visible_slots": {
+            "type": "array",
+            "items": {"type": "string"},
+            "default": ["Arms", "Boats", "Cloaks", ...],
+            "description": "Model slots to display in gallery"
+        }
+    }
+}
+```
+
+### UI Component
+
+**File**: `UI/ui_models_gallery_settings.py` (150 lines)
+
+**Class**: `ModelsGallerySettingsWidget(QWidget)`
+
+**Features**:
+- ✅ 15 checkboxes for model slot visibility
+- ✅ Alphabetical ordering of slots
+- ✅ Auto-save on checkbox state change
+- ✅ Real-time config persistence
+- ✅ Clean, organized layout
+
+**Architecture**:
+```python
+class ModelsGallerySettingsWidget(QWidget):
+    def __init__(self, parent=None):
+        """Initialize with config singleton."""
+        self.config = config  # Import from Functions.config_manager
+        self.checkboxes = {}  # Dict[slot_name: QCheckBox]
+        self._setup_ui()
+        self._load_settings()
+    
+    def _setup_ui(self):
+        """Create checkboxes for each slot (alphabetically)."""
+        # Create grid layout with checkboxes
+        # self.all_slots = ["Arms", "Boats", "Cloaks", ...]
+    
+    def _load_settings(self):
+        """Load visible_slots from config and update checkboxes."""
+        visible_slots = self.config.get("models_gallery.visible_slots", [])
+        for slot in self.all_slots:
+            self.checkboxes[slot].setChecked(slot in visible_slots)
+    
+    def _on_checkbox_changed(self):
+        """Save to config when checkbox state changes."""
+        visible_slots = [slot for slot, cb in self.checkboxes.items() if cb.isChecked()]
+        self.config.set("models_gallery.visible_slots", visible_slots)
+        self.config.save_config()
+```
+
+**Settings Dialog Integration** (UI/settings_dialog.py):
+
+```python
+def _create_models_gallery_page(self):
+    """Create Models Gallery settings page."""
+    from UI.ui_models_gallery_settings import ModelsGallerySettingsWidget
+    
+    page = QWidget()
+    layout = QVBoxLayout(page)
+    layout.setAlignment(Qt.AlignTop)
+    
+    # Title
+    title = QLabel(lang.get("settings_models_gallery_title"))
+    title_font = title.font()
+    title_font.setPointSize(title_font.pointSize() + 4)
+    title_font.setBold(True)
+    title.setFont(title_font)
+    
+    # Subtitle
+    subtitle = QLabel(lang.get("settings_models_gallery_subtitle"))
+    subtitle.setStyleSheet("color: gray;")
+    
+    # Settings widget
+    settings_widget = ModelsGallerySettingsWidget(self)
+    
+    layout.addWidget(title)
+    layout.addWidget(subtitle)
+    layout.addSpacing(10)
+    layout.addWidget(settings_widget)
+    layout.addStretch()
+    
+    self.pages.addWidget(page)
+```
+
+**Navigation Item** (UI/settings_dialog.py, line ~141):
+```python
+self._add_nav_item(lang.get("settings_models_gallery"), "🖼️", 7)
+```
+
+### Filtering Function
+
+**File**: `Functions/model_database_manager.py`
+
+**Function**: `model_gallery_apply_visibility_filters(metadata: dict) -> dict`
+
+**Purpose**: Filter gallery metadata based on visible_slots setting
+
+**Implementation**:
+```python
+def model_gallery_apply_visibility_filters(metadata: dict) -> dict:
+    """
+    Filter model metadata based on visible_slots configuration.
+    
+    Removes disabled model slots from the metadata, allowing users to
+    customize which categories appear in the Models Gallery.
+    
+    Args:
+        metadata: Raw metadata with all slots
+                 {
+                     "items": {
+                         "model_id": {"slot": "Arms", "models": [...], ...}
+                     }
+                 }
+    
+    Returns:
+        Filtered metadata with only visible slots
+    
+    Logic:
+        1. Get visible_slots from config.models_gallery.visible_slots
+        2. Iterate through metadata items
+        3. Keep only items where slot is in visible_slots
+        4. Return filtered metadata
+    """
+    from Functions.config_manager import config
+    
+    visible_slots = config.get("models_gallery.visible_slots", 
+                               [list of all 15 slots])
+    
+    if not metadata or "items" not in metadata:
+        return metadata
+    
+    filtered_metadata = {"items": {}}
+    
+    for model_id, item_data in metadata["items"].items():
+        if item_data.get("slot") in visible_slots:
+            filtered_metadata["items"][model_id] = item_data
+    
+    return filtered_metadata
+```
+
+### Gallery Integration
+
+**File**: `UI/models_overview_widget.py`
+
+**Implementation**:
+```python
+from Functions.model_database_manager import (
+    model_gallery_load_metadata,
+    model_gallery_apply_visibility_filters
+)
+
+def load_gallery_metadata(self):
+    """Load and filter gallery metadata based on settings."""
+    # Load raw metadata
+    raw_metadata = model_gallery_load_metadata()
+    
+    # Apply visibility filters from config
+    self.metadata = model_gallery_apply_visibility_filters(raw_metadata)
+    
+    # Build gallery UI with filtered metadata
+    self.builder.build_thumbnails(self.metadata)
+```
+
+### User Experience Flow
+
+**Workflow**:
+```
+User opens Settings
+    ↓
+Selects "Models 🖼️" tab
+    ↓
+Views 15 checkboxes (alphabetically sorted)
+    ↓
+Checks/unchecks boxes to show/hide categories
+    ↓
+Changes auto-saved to config
+    ↓
+User closes Settings
+    ↓
+Returns to Models Gallery
+    ↓
+Gallery automatically displays only visible slots
+```
+
+**Real-Time Updates**:
+- ✅ Checkbox state changes immediately saved to config
+- ✅ Changes persist across application restarts
+- ✅ Gallery refreshes on next load using filtered metadata
+- ✅ No dialog reload needed
+
+### Translation Keys
+
+**Language Files** (Language/*.json):
+
+Required translations:
+```json
+{
+  "settings_models_gallery": "🖼️ Models",
+  "settings_models_gallery_title": "Models Gallery Settings",
+  "settings_models_gallery_subtitle": "Choose which model categories to display in the gallery",
+  "model_slot_arms": "Arms",
+  "model_slot_boats": "Boats",
+  "model_slot_cloaks": "Cloaks",
+  "model_slot_deco": "Deco",
+  "model_slot_feet": "Feet",
+  "model_slot_hands": "Hands",
+  "model_slot_head": "Head",
+  "model_slot_legs": "Legs",
+  "model_slot_misc": "Misc",
+  "model_slot_quiver": "Quiver",
+  "model_slot_shields": "Shields",
+  "model_slot_siege": "Siege",
+  "model_slot_tents": "Tents",
+  "model_slot_torso": "Torso",
+  "model_slot_weapons": "Weapons"
+}
+```
+
+### File Locations
+
+```
+Configuration/
+└── config.json
+    └── models_gallery section
+
+Functions/
+├── config_manager.py (config singleton)
+├── config_schema.py (validation)
+└── model_database_manager.py
+    └── model_gallery_apply_visibility_filters()
+
+UI/
+├── settings_dialog.py (_create_models_gallery_page method)
+├── ui_models_gallery_settings.py (NEW)
+│   └── ModelsGallerySettingsWidget class
+└── models_overview_widget.py (applies filters)
+
+Language/
+├── en.json (translation keys)
+├── fr.json (translation keys)
+└── de.json (translation keys)
+```
+
+---
+
 ## References
 
 **Image Source**: [Eve-of-Darkness/DolModels](https://github.com/Eve-of-Darkness/DolModels)  
@@ -1624,4 +1959,4 @@ ModelsGalleryDisplayWidget.display_thumbnails()
 
 ---
 
-*Last Updated: January 17, 2026 (Version 110 - Models Overview Gallery v1.0)*
+*Last Updated: January 17, 2026 (Version 110 - Models Overview Gallery v1.0 + Models Gallery Settings)*

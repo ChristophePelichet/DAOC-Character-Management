@@ -17,9 +17,10 @@
 5. [Backup Integration](#backup-integration)
 6. [Folder Management](#folder-management)
 7. [SuperAdmin Tools](#superadmin-tools)
-8. [UI Components](#ui-components)
-9. [Translation System](#translation-system)
-10. [Version History](#version-history)
+8. [Models Gallery Settings](#models-gallery-settings)
+9. [UI Components](#ui-components)
+10. [Translation System](#translation-system)
+11. [Version History](#version-history)
 
 ---
 
@@ -271,7 +272,26 @@ def _create_<section>_page(self):
 **Info Box**:
 - Explains debug log location
 
-### **Page 7: SuperAdmin 🔧⚡** (Conditional)
+### **Page 7: Models 🖼️**
+
+**Content**:
+- **Model Visibility**: Checkboxes for each model slot (15 total)
+  * Arms, Boats, Cloaks, Deco, Feet, Hands, Head
+  * Legs, Misc, Quiver, Shields, Siege, Tents, Torso, Weapons
+- **Alphabetical Sorting**: Slots displayed in alphabetical order
+
+**Features**:
+- Enable/disable model slots to control gallery visibility
+- Changes apply immediately to Models Gallery view
+- Settings persist in `config.json` under `models_gallery.visible_slots`
+- All slots enabled by default
+
+**Related Files**:
+- Widget: `UI/ui_models_gallery_settings.py` (150 lines)
+- Function: `Functions/model_database_manager.py` - `model_gallery_apply_visibility_filters()`
+- Integration: `UI/models_overview_widget.py` applies filters when loading metadata
+
+### **Page 8: SuperAdmin 🔧⚡** (Conditional)
 
 **Access Control**:
 - **Required**: `python main.py --admin` flag
@@ -845,17 +865,48 @@ ALWAYS: <executable_directory>/Configuration/config.json
 | **Debug** | Debug mode, Show window | `debug_mode`, `show_debug_window` |
 | **Startup** | Disclaimer disabled | `disable_disclaimer` |
 | **Language** | UI language | `language` |
+| **Models Gallery** | Visible model slots | `models_gallery.visible_slots` (list of 15 slots) |
 
 ---
 
 ## Version History
+
+### **v0.110 - Models Gallery Settings**
+
+**New Features**:
+- **Page 7: Models Gallery 🖼️**
+  * 15 checkboxes for model slot visibility control
+  * Alphabetical sorting of slots (Arms, Boats, Cloaks, ...)
+  * Enable/disable categories to customize gallery view
+  * Settings persist in config under `models_gallery.visible_slots`
+- **Configuration Section**: New `models_gallery` section in config.json
+  * Default: All 15 slots enabled
+  * Schema validation in config_schema.py
+- **Filtering Function**: `model_gallery_apply_visibility_filters()` in model_database_manager.py
+  * Filters metadata based on visible_slots setting
+  * Removes disabled slots from gallery display
+- **UI Widget**: New `ModelsGallerySettingsWidget` in UI/ui_models_gallery_settings.py
+  * Auto-save on checkbox change
+  * Real-time config persistence via `config.save_config()`
+- **Gallery Integration**: ModelsOverviewWidget applies filters when loading metadata
+  * Gallery automatically reflects visibility settings
+
+**Files Modified**:
+- UI/settings_dialog.py: Added `_create_models_gallery_page()` method and navigation item
+- Configuration/config.json: Added `models_gallery` section with all 15 slots
+- Functions/config_schema.py: Added schema validation for models_gallery
+- UI/models_overview_widget.py: Apply visibility filters to loaded metadata
+- UI/ui_model_gallery_display.py: Improved thumbnail sizing and label visibility
+
+**Settings Table Update**:
+- New entry: Models Gallery with visible_slots configuration
 
 ### **v0.108 - Complete Reorganization**
 
 **Major Changes**:
 - Complete reorganization with sidebar navigation
 - Removed monolithic dialog
-- Added 7 distinct pages (+ SuperAdmin conditional)
+- Added 8 distinct pages (+ SuperAdmin conditional)
 - Integrated Backup settings
 - Added folder move functionality
 - Removed Tools menu
@@ -902,28 +953,31 @@ Functions/
 ├── backup_manager.py
 ├── config_manager.py
 ├── language_manager.py
-└── path_manager.py
+├── path_manager.py
+├── config_schema.py (with models_gallery section)
+└── model_database_manager.py (model_gallery_apply_visibility_filters)
 ```
 
 ### **UI**
 
 ```
 UI/
-└── settings_dialog.py (2651 lines)
-    ├── Conditional Page Creation (lines 88-95)
-    ├── Navigation Items (lines 131-155)
-    ├── _create_general_page() (lines 141-245)
-    ├── _create_themes_page() (lines 247-299)
-    ├── _create_startup_page() (lines 301-350)
-    ├── _create_columns_page() (lines 352-413)
-    ├── _create_herald_page() (lines 415-495)
-    ├── _create_backup_page() (lines 497-700)
-    ├── _create_debug_page() (lines 702-780)
-    ├── _create_superadmin_page() (lines 1140-1320)
-    ├── Browse methods (lines 782-806)
-    ├── Backup methods (lines 808-878)
-    ├── _move_folder() (lines 880-980)
-    └── _load_settings() (lines 982-1020)
+├── settings_dialog.py (2651+ lines)
+│   ├── Conditional Page Creation (lines 88-95)
+│   ├── Navigation Items (lines 131-155)
+│   ├── _create_general_page() (lines 141-245)
+│   ├── _create_themes_page() (lines 247-299)
+│   ├── _create_startup_page() (lines 301-350)
+│   ├── _create_columns_page() (lines 352-413)
+│   ├── _create_herald_page() (lines 415-495)
+│   ├── _create_backup_page() (lines 497-700)
+│   ├── _create_debug_page() (lines 702-780)
+│   ├── _create_models_gallery_page() (NEW)
+│   └── _create_superadmin_page() (lines 1140-1320)
+├── ui_models_gallery_settings.py (NEW - 150 lines)
+│   └── ModelsGallerySettingsWidget class
+├── models_overview_widget.py (with visibility filtering)
+└── ui_model_gallery_display.py (improved thumbnails)
 ```
 
 ### **Translations**
@@ -937,6 +991,6 @@ Language/
 
 ---
 
-**Current Version**: v0.108  
+**Current Version**: v0.110  
 **Status**: ✅ Active Standard  
-**Last Updated**: 2025-11-18
+**Last Updated**: 2026-01-17

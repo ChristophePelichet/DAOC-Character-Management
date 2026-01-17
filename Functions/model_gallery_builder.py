@@ -58,7 +58,7 @@ def model_gallery_build_thumbnail_list(
 
     Example:
         metadata = model_gallery_load_metadata()
-        models = model_gallery_apply_filters(metadata, type_filter='armor', subtype_filter='arms')
+        models = model_gallery_apply_filters(metadata, type_filter='items', subtype_filter='bow')
         thumbnails = model_gallery_build_thumbnail_list(metadata, models)
         # Display thumbnails in gallery widget
     """
@@ -83,33 +83,67 @@ def model_gallery_build_thumbnail_list(
 
     thumbnails = []
 
-    for type_name, subtypes in metadata.items():
-        for subtype_name, type_models in subtypes.items():
-            for model_id in type_models:
-                if model_id not in model_ids_set:
-                    continue
+    # Handle hierarchical structure: metadata['items']['weapon']['bow'] = [list]
+    for type_name, type_data in metadata.items():
+        if isinstance(type_data, dict):
+            if type_name == 'items':
+                # Special handling for items: 3-level hierarchy
+                for category_name, subcats in type_data.items():
+                    if isinstance(subcats, dict):
+                        for subtype_name, type_models in subcats.items():
+                            if isinstance(type_models, list):
+                                for model_id in type_models:
+                                    if model_id not in model_ids_set:
+                                        continue
 
-                # Look up file from cache
-                file_path = file_cache.get(model_id)
-                
-                if file_path:
-                    full_path = Path(file_path)
-                    try:
-                        rel_path = full_path.relative_to(img_base_path)
-                        rel_str = str(rel_path).replace("\\", "/")
-                    except ValueError:
-                        # If relative_to fails, just use the file path as is
-                        rel_str = str(file_path)
-                    
-                    thumbnail = ModelThumbnail(
-                        model_id=model_id,
-                        type_name=type_name,
-                        subtype_name=subtype_name,
-                        file_path=rel_str,
-                        full_path=full_path,
-                        display_label=model_id,
-                    )
-                    thumbnails.append(thumbnail)
+                                    # Look up file from cache
+                                    file_path = file_cache.get(model_id)
+                                    
+                                    if file_path:
+                                        full_path = Path(file_path)
+                                        try:
+                                            rel_path = full_path.relative_to(img_base_path)
+                                            rel_str = str(rel_path).replace("\\", "/")
+                                        except ValueError:
+                                            rel_str = str(file_path)
+                                        
+                                        thumbnail = ModelThumbnail(
+                                            model_id=model_id,
+                                            type_name=type_name,
+                                            subtype_name=subtype_name,
+                                            file_path=rel_str,
+                                            full_path=full_path,
+                                            display_label=model_id,
+                                        )
+                                        thumbnails.append(thumbnail)
+            else:
+                # Standard 2-level hierarchy
+                for subtype_name, type_models in type_data.items():
+                    if isinstance(type_models, list):
+                        for model_id in type_models:
+                            if model_id not in model_ids_set:
+                                continue
+
+                            # Look up file from cache
+                            file_path = file_cache.get(model_id)
+                            
+                            if file_path:
+                                full_path = Path(file_path)
+                                try:
+                                    rel_path = full_path.relative_to(img_base_path)
+                                    rel_str = str(rel_path).replace("\\", "/")
+                                except ValueError:
+                                    rel_str = str(file_path)
+                                
+                                thumbnail = ModelThumbnail(
+                                    model_id=model_id,
+                                    type_name=type_name,
+                                    subtype_name=subtype_name,
+                                    file_path=rel_str,
+                                    full_path=full_path,
+                                    display_label=model_id,
+                                )
+                                thumbnails.append(thumbnail)
 
     return thumbnails
 

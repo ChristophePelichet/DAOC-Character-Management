@@ -379,21 +379,24 @@ class ModelsDataDatabaseEditor(QDialog):
             return {}
 
     def _load_subtypes(self):
-        """Load all available subtypes"""
+        """Load all available subtypes from hierarchical structure"""
         self.subtypes = set()
-        for category in self.metadata.values():
-            for entry in category.values():
-                if isinstance(entry, dict) and 'subcategory' in entry:
-                    self.subtypes.add(entry['subcategory'])
+        
+        # Extract all subtypes from the hierarchical structure
+        if 'items' in self.metadata:
+            for category, subcats in self.metadata['items'].items():
+                if isinstance(subcats, dict):
+                    for subtype in subcats.keys():
+                        self.subtypes.add(subtype)
+        
         self.subtypes = sorted(list(self.subtypes))
 
     def _get_all_categories(self) -> List[str]:
         """Get all main categories"""
         categories = set()
-        for category in self.metadata.values():
-            for entry in category.values():
-                if isinstance(entry, dict) and 'main_category' in entry:
-                    categories.add(entry['main_category'])
+        if 'items' in self.metadata:
+            for category in self.metadata['items'].keys():
+                categories.add(category)
         return sorted(list(categories))
 
     def _get_all_subtypes(self) -> List[str]:
@@ -405,18 +408,27 @@ class ModelsDataDatabaseEditor(QDialog):
         self.entries_list.clear()
         self.all_entries = []
 
-        for category_name, entries in self.metadata.items():
-            for entry_id, entry_data in entries.items():
-                if isinstance(entry_data, dict):
-                    name = entry_data.get('name', 'Unknown')
-                    subcat = entry_data.get('subcategory', 'Unknown')
-                    self.all_entries.append({
-                        'category': category_name,
-                        'id': entry_id,
-                        'name': name,
-                        'main_category': entry_data.get('main_category', ''),
-                        'subcategory': subcat
-                    })
+        if 'items' not in self.metadata:
+            return
+
+        for category, subcats in self.metadata['items'].items():
+            if not isinstance(subcats, dict):
+                continue
+                
+            for subcat, entries in subcats.items():
+                if not isinstance(entries, dict):
+                    continue
+                    
+                for entry_id, entry_data in entries.items():
+                    if isinstance(entry_data, dict):
+                        name = entry_data.get('name', 'Unknown')
+                        self.all_entries.append({
+                            'category': category,
+                            'subcat': subcat,
+                            'id': entry_id,
+                            'name': name,
+                            'entry_data': entry_data
+                        })
 
         self._filter_entries()
 
@@ -428,14 +440,14 @@ class ModelsDataDatabaseEditor(QDialog):
 
         for entry in self.all_entries:
             # Filter by category
-            if category_filter != "All Categories" and entry['main_category'] != category_filter:
+            if category_filter != "All Categories" and entry['category'] != category_filter:
                 continue
 
             # Filter by search text
             if search_text and search_text not in entry['name'].lower() and search_text not in entry['id'].lower():
                 continue
 
-            item = QListWidgetItem(f"{entry['id']} - {entry['name']} ({entry['subcategory']})")
+            item = QListWidgetItem(f"{entry['id']} - {entry['name']} ({entry['subcat']})")
             item.setData(Qt.ItemDataRole.UserRole, entry)
             self.entries_list.addItem(item)
 
@@ -446,7 +458,7 @@ class ModelsDataDatabaseEditor(QDialog):
         self.current_entry = entry
         self.entry_id_label.setText(entry['id'])
         self.entry_name.setText(entry['name'])
-        self.entry_main_cat.setText(entry['main_category'])
+        self.entry_main_cat.setText(entry['category'])
 
         # Load preview image
         self._load_entry_preview(entry)
@@ -455,7 +467,7 @@ class ModelsDataDatabaseEditor(QDialog):
         self.entry_subcat.blockSignals(True)
         self.entry_subcat.clear()
         self.entry_subcat.addItems(self._get_all_subtypes())
-        self.entry_subcat.setCurrentText(entry['subcategory'])
+        self.entry_subcat.setCurrentText(entry['subcat'])
         self.entry_subcat.blockSignals(False)
 
     def _load_entry_preview(self, entry: Dict[str, str]):
@@ -492,10 +504,12 @@ class ModelsDataDatabaseEditor(QDialog):
 
         new_subcat = self.entry_subcat.currentText()
         category = self.current_entry['category']
+        subcat = self.current_entry['subcat']
         entry_id = self.current_entry['id']
 
-        self.metadata[category][entry_id]['subcategory'] = new_subcat
-        self.current_entry['subcategory'] = new_subcat
+        # Update in hierarchical structure
+        self.metadata['items'][category][subcat][entry_id]['subcategory'] = new_subcat
+        self.current_entry['subcat'] = new_subcat
 
         QMessageBox.information(self, "Success", f"Entry {entry_id} updated successfully!")
         self._populate_entries_list()
@@ -535,14 +549,17 @@ class ModelsDataDatabaseEditor(QDialog):
             QMessageBox.warning(self, "Warning", "Please fill in all fields")
             return
 
-        # Add to metadata
-        if main_cat not in self.metadata:
-            self.metadata[main_cat] = {}
+        # Add to hierarchical metadata
+        if main_cat not in self.metadata.get('items', {}):
+            if 'items' not in self.metadata:
+                self.metadata['items'] = {}
+            self.metadata['items'][main_cat] = {}
 
-        self.metadata[main_cat][entry_id] = {
+        if subcat not in self.metadata['items'][main_cat]:
+            self.metadata['items'][main_cat][subcat] = {}
+
+        self.metadata['items'][main_cat][subcat][entry_id] = {
             'name': entry_name,
-            'main_category': main_cat,
-            'subcategory': subcat,
             'source_url': ''
         }
 
@@ -626,33 +643,31 @@ class ModelsDataDatabaseEditor(QDialog):
         self.missing_images_list.clear()
         self.missing_images = []
 
-        # Get all image files from the directories
-        for category_dir in ["items", "mobs", "icons"]:
-            full_dir = self.models_dir / category_dir
-            if not full_dir.exists():
-                continue
+        # Get all existing IDs from metadata
+        existing_ids = set()
+        if 'items' in self.metadata:
+            for category in self.metadata['items'].values():
+                for subcat in category.values():
+                    existing_ids.update(subcat.keys())
 
-            for image_file in full_dir.glob("*.webp"):
+        # Get all image files from the items directory
+        items_dir = self.models_dir / "items"
+        if items_dir.exists():
+            for image_file in items_dir.glob("*.webp"):
                 image_id = image_file.stem  # Get filename without extension
                 
                 # Check if this ID exists in metadata
-                found = False
-                for category in self.metadata.values():
-                    if image_id in category:
-                        found = True
-                        break
-
-                if not found:
+                if image_id not in existing_ids:
                     self.missing_images.append({
                         'id': image_id,
                         'file': image_file,
-                        'category': category_dir,
+                        'category': 'items',
                         'file_size': image_file.stat().st_size
                     })
 
         # Display missing images
-        for img in sorted(self.missing_images, key=lambda x: x['id']):
-            item = QListWidgetItem(f"{img['id']} ({img['category']})")
+        for img in sorted(self.missing_images, key=lambda x: int(x['id']) if x['id'].isdigit() else 0):
+            item = QListWidgetItem(f"{img['id']}")
             item.setData(Qt.ItemDataRole.UserRole, img)
             self.missing_images_list.addItem(item)
 
@@ -692,14 +707,16 @@ class ModelsDataDatabaseEditor(QDialog):
             QMessageBox.warning(self, "Warning", "Please enter an image name")
             return
 
-        # Add to metadata
-        if main_cat not in self.metadata:
-            self.metadata[main_cat] = {}
+        # Add to hierarchical metadata
+        if 'items' not in self.metadata:
+            self.metadata['items'] = {}
+        if main_cat not in self.metadata['items']:
+            self.metadata['items'][main_cat] = {}
+        if subcat not in self.metadata['items'][main_cat]:
+            self.metadata['items'][main_cat][subcat] = {}
 
-        self.metadata[main_cat][entry_id] = {
+        self.metadata['items'][main_cat][subcat][entry_id] = {
             'name': entry_name,
-            'main_category': main_cat,
-            'subcategory': subcat,
             'source_url': ''
         }
 

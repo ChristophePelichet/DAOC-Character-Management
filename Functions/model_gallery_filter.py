@@ -23,22 +23,22 @@ def model_gallery_apply_filters(
     Apply filters to model metadata and return matching model IDs.
 
     Supports filtering by:
-    - Type (e.g., 'armor', 'weapons')
-    - Subtype (e.g., 'arms', 'feet' for armor)
+    - Type (e.g., 'items')
+    - Subtype (e.g., 'bow', 'helm' for items)
     - Search query (by model ID, partial match)
 
     Args:
         metadata: Output from model_gallery_load_metadata()
-        type_filter: Type to filter by (e.g., 'armor'). None = all types
-        subtype_filter: Subtype to filter by (e.g., 'arms'). Ignored if type_filter is None
+        type_filter: Type to filter by (e.g., 'items'). None = all types
+        subtype_filter: Subtype to filter by (e.g., 'bow'). Ignored if type_filter is None
         search_query: Search string to match against model IDs. None = no search filtering
 
     Returns:
         Sorted list of model IDs matching all applied filters
 
     Example:
-        # Get all armor arms models
-        models = model_gallery_apply_filters(metadata, type_filter='armor', subtype_filter='arms')
+        # Get all weapon bow models
+        models = model_gallery_apply_filters(metadata, type_filter='items', subtype_filter='bow')
 
         # Search for model ID containing '100'
         models = model_gallery_apply_filters(metadata, search_query='100')
@@ -46,8 +46,8 @@ def model_gallery_apply_filters(
         # Combine filters
         models = model_gallery_apply_filters(
             metadata,
-            type_filter='armor',
-            subtype_filter='feet',
+            type_filter='items',
+            subtype_filter='bow',
             search_query='50'
         )
     """
@@ -57,11 +57,19 @@ def model_gallery_apply_filters(
             metadata, type_filter, subtype_filter
         )
     else:
-        # Get all models from all types
+        # Get all models from all types - handle hierarchical structure
         candidate_models = []
-        for type_name, subtypes in metadata.items():
-            for models in subtypes.values():
-                candidate_models.extend(models)
+        for type_name, type_data in metadata.items():
+            if isinstance(type_data, dict):
+                for subtype_data in type_data.values():
+                    if isinstance(subtype_data, dict):
+                        # For hierarchical types like 'items'
+                        for models in subtype_data.values():
+                            if isinstance(models, list):
+                                candidate_models.extend(models)
+                    elif isinstance(subtype_data, list):
+                        # For flat types
+                        candidate_models.extend(subtype_data)
 
     # Apply search filter if provided
     if search_query:

@@ -129,8 +129,9 @@ class ModelsFilterPanelWidget(QWidget):
             )
             return
 
-        # Get item subtypes (Bras, Casque, etc.)
-        item_subtypes = self.metadata.get("items", {})
+        # Get item subtypes - extract all subcategories from hierarchical structure
+        # metadata['items'] = {'weapon': {'bow': [...], 'sword': [...]}, 'armor': {'helm': [...], ...}}
+        items_data = self.metadata.get("items", {})
         
         self.subtype_combo.blockSignals(True)
         self.subtype_combo.clear()
@@ -138,11 +139,20 @@ class ModelsFilterPanelWidget(QWidget):
             lang.get("models_overview.all_types", default="-- All --"), None
         )
 
-        for subtype_name in sorted(item_subtypes.keys()):
-            if subtype_name != "_":  # Skip underscore placeholder
-                count = len(item_subtypes.get(subtype_name, []))
-                display_name = f"{subtype_name.capitalize()} ({count})"
-                self.subtype_combo.addItem(display_name, subtype_name)
+        # Extract all subcategories from all categories
+        all_subcategories = {}
+        for category, subcats in items_data.items():
+            if isinstance(subcats, dict):
+                for subcat_name, model_ids in subcats.items():
+                    if subcat_name != "_" and isinstance(model_ids, list):
+                        # Store subcategory with count of items
+                        all_subcategories[subcat_name] = len(model_ids)
+
+        # Add subcategories to dropdown, sorted by name
+        for subcat_name in sorted(all_subcategories.keys()):
+            count = all_subcategories[subcat_name]
+            display_name = f"{subcat_name.capitalize()} ({count})"
+            self.subtype_combo.addItem(display_name, subcat_name)
 
         self.subtype_combo.blockSignals(False)
 

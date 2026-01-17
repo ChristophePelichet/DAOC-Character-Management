@@ -1553,7 +1553,7 @@
         "refresh_metadata": "🔄 Actualiser les métadonnées",
         "refresh_metadata_btn": "🔄 Actualiser les métadonnées",
         "refresh_metadata_tooltip": "Re-scraper les métadonnées des modèles depuis le site Los Ojos",
-        "viewer_btn": "🔍 Visionneuse de Base de Données des Modèles",
+        "viewer_btn": "🔍 Éditeur de Base de Données",
         "viewer_tooltip": "Voir et explorer tous les modèles dans la base de données",
         "refresh_confirm_title": "Actualiser les métadonnées",
         "refresh_confirm_msg": "Ceci va re-scraper les métadonnées depuis le site Los Ojos. Continuer?",

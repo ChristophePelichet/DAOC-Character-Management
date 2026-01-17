@@ -1,0 +1,5036 @@
+{
+  "items": {
+    "132": {
+      "name": "briton longbow",
+      "main_category": "Weapon",
+      "subcategory": "Bow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/132.jpg"
+    },
+    "471": {
+      "name": "Recurve Bow",
+      "main_category": "Weapon",
+      "subcategory": "Bow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/471.jpg"
+    },
+    "564": {
+      "name": "Norse Composite bow",
+      "main_category": "Weapon",
+      "subcategory": "Bow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/564.jpg"
+    },
+    "569": {
+      "name": "Briton shortbow",
+      "main_category": "Weapon",
+      "subcategory": "Bow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/569.jpg"
+    },
+    "570": {
+      "name": "Briton greatbow",
+      "main_category": "Weapon",
+      "subcategory": "Bow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/570.jpg"
+    },
+    "848": {
+      "name": "Alb Brawlers Bow",
+      "main_category": "Weapon",
+      "subcategory": "Bow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/848.jpg"
+    },
+    "849": {
+      "name": "Alb Saracen Long Bow",
+      "main_category": "Weapon",
+      "subcategory": "Bow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/849.jpg"
+    },
+    "850": {
+      "name": "Alb Saracen Short Bow",
+      "main_category": "Weapon",
+      "subcategory": "Bow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/850.jpg"
+    },
+    "851": {
+      "name": "Alb Skinners Bow",
+      "main_category": "Weapon",
+      "subcategory": "Bow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/851.jpg"
+    },
+    "852": {
+      "name": "Alb Thorn Bow",
+      "main_category": "Weapon",
+      "subcategory": "Bow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/852.jpg"
+    },
+    "918": {
+      "name": "Hib Brawlers Bow",
+      "main_category": "Weapon",
+      "subcategory": "Bow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/918.jpg"
+    },
+    "919": {
+      "name": "Hib Celtic Great Bow",
+      "main_category": "Weapon",
+      "subcategory": "Bow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/919.jpg"
+    },
+    "920": {
+      "name": "Hib Cutters Bow",
+      "main_category": "Weapon",
+      "subcategory": "Bow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/920.jpg"
+    },
+    "921": {
+      "name": "Hib Elven Long Bow",
+      "main_category": "Weapon",
+      "subcategory": "Bow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/921.jpg"
+    },
+    "922": {
+      "name": "Hib Elven Short Bow",
+      "main_category": "Weapon",
+      "subcategory": "Bow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/922.jpg"
+    },
+    "923": {
+      "name": "Hib Lurikeen Thorn Bow",
+      "main_category": "Weapon",
+      "subcategory": "Bow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/923.jpg"
+    },
+    "924": {
+      "name": "Hib Recurve Bow",
+      "main_category": "Weapon",
+      "subcategory": "Bow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/924.jpg"
+    },
+    "925": {
+      "name": "Hib Recurve Long Bow",
+      "main_category": "Weapon",
+      "subcategory": "Bow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/925.jpg"
+    },
+    "1037": {
+      "name": "Dwarven Crushing Bow",
+      "main_category": "Weapon",
+      "subcategory": "Bow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1037.jpg"
+    },
+    "1038": {
+      "name": "Kobold Fang Bow",
+      "main_category": "Weapon",
+      "subcategory": "Bow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1038.jpg"
+    },
+    "1039": {
+      "name": "Viking Beared Bow",
+      "main_category": "Weapon",
+      "subcategory": "Bow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1039.jpg"
+    },
+    "1666": {
+      "name": "FoolsBow 01",
+      "main_category": "Weapon",
+      "subcategory": "Bow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1666.jpg"
+    },
+    "1667": {
+      "name": "BraggartsBow 01",
+      "main_category": "Weapon",
+      "subcategory": "Bow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1667.jpg"
+    },
+    "1905": {
+      "name": "Alb Saracen Short Bow Air",
+      "main_category": "Weapon",
+      "subcategory": "Bow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1905.jpg"
+    },
+    "1906": {
+      "name": "Alb Saracen Short Bow Earth",
+      "main_category": "Weapon",
+      "subcategory": "Bow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1906.jpg"
+    },
+    "1907": {
+      "name": "Alb Saracen Short Bow Fire",
+      "main_category": "Weapon",
+      "subcategory": "Bow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1907.jpg"
+    },
+    "1908": {
+      "name": "Alb Saracen Short Bow Water",
+      "main_category": "Weapon",
+      "subcategory": "Bow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1908.jpg"
+    },
+    "1909": {
+      "name": "Alb Thorn Bow Air",
+      "main_category": "Weapon",
+      "subcategory": "Bow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1909.jpg"
+    },
+    "226": {
+      "name": "Crossbow",
+      "main_category": "Weapon",
+      "subcategory": "Crossbow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/226.jpg"
+    },
+    "890": {
+      "name": "Alb Assault Crossbow",
+      "main_category": "Weapon",
+      "subcategory": "Crossbow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/890.jpg"
+    },
+    "891": {
+      "name": "Alb Brawlers Crossbow",
+      "main_category": "Weapon",
+      "subcategory": "Crossbow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/891.jpg"
+    },
+    "892": {
+      "name": "Alb Xbo Crossbow",
+      "main_category": "Weapon",
+      "subcategory": "Crossbow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/892.jpg"
+    },
+    "893": {
+      "name": "Alb Xbo Skinners Crossbow",
+      "main_category": "Weapon",
+      "subcategory": "Crossbow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/893.jpg"
+    },
+    "894": {
+      "name": "Alb Xbo Steel Crossbow",
+      "main_category": "Weapon",
+      "subcategory": "Crossbow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/894.jpg"
+    },
+    "1961": {
+      "name": "Alb Xbo Skinners Crossbow Air",
+      "main_category": "Weapon",
+      "subcategory": "Crossbow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1961.jpg"
+    },
+    "1962": {
+      "name": "Alb Xbo Skinners Crossbow Earth",
+      "main_category": "Weapon",
+      "subcategory": "Crossbow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1962.jpg"
+    },
+    "1963": {
+      "name": "Alb Xbo Skinners Crossbow Fire",
+      "main_category": "Weapon",
+      "subcategory": "Crossbow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1963.jpg"
+    },
+    "1964": {
+      "name": "Alb Xbo Skinners Crossbow Water",
+      "main_category": "Weapon",
+      "subcategory": "Crossbow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1964.jpg"
+    },
+    "3656": {
+      "name": "Lab Crossbow",
+      "main_category": "Weapon",
+      "subcategory": "Crossbow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/3656.jpg"
+    },
+    "3699": {
+      "name": "Scorched Lab Crossbow",
+      "main_category": "Weapon",
+      "subcategory": "Crossbow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/3699.jpg"
+    },
+    "3816": {
+      "name": "Dragonsworn Crossbow",
+      "main_category": "Weapon",
+      "subcategory": "Crossbow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/3816.jpg"
+    },
+    "3876": {
+      "name": "Hib DragonSlayer Crossbow",
+      "main_category": "Weapon",
+      "subcategory": "Crossbow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/3876.jpg"
+    },
+    "3917": {
+      "name": "Mid DragonSlayer Crossbow",
+      "main_category": "Weapon",
+      "subcategory": "Crossbow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/3917.jpg"
+    },
+    "3953": {
+      "name": "Alb DragonSlayer Crossbow",
+      "main_category": "Weapon",
+      "subcategory": "Crossbow",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/3953.jpg"
+    },
+    "21": {
+      "name": "Dirk",
+      "main_category": "Weapon",
+      "subcategory": "Dagger",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/21.jpg"
+    },
+    "22": {
+      "name": "Rapier",
+      "main_category": "Weapon",
+      "subcategory": "Dagger",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/22.jpg"
+    },
+    "23": {
+      "name": "Javelin",
+      "main_category": "Weapon",
+      "subcategory": "Dagger",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/23.jpg"
+    },
+    "24": {
+      "name": "Epee",
+      "main_category": "Weapon",
+      "subcategory": "Dagger",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/24.jpg"
+    },
+    "25": {
+      "name": "main Gauche",
+      "main_category": "Weapon",
+      "subcategory": "Dagger",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/25.jpg"
+    },
+    "28": {
+      "name": "main Gauche",
+      "main_category": "Weapon",
+      "subcategory": "Dagger",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/28.jpg"
+    },
+    "29": {
+      "name": "Foil",
+      "main_category": "Weapon",
+      "subcategory": "Dagger",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/29.jpg"
+    },
+    "30": {
+      "name": "Gladius",
+      "main_category": "Weapon",
+      "subcategory": "Dagger",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/30.jpg"
+    },
+    "454": {
+      "name": "Celtic Dirk",
+      "main_category": "Weapon",
+      "subcategory": "Dagger",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/454.jpg"
+    },
+    "455": {
+      "name": "Celtic Rapier",
+      "main_category": "Weapon",
+      "subcategory": "Dagger",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/455.jpg"
+    },
+    "456": {
+      "name": "Celtic Stilletto",
+      "main_category": "Weapon",
+      "subcategory": "Dagger",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/456.jpg"
+    },
+    "457": {
+      "name": "Curved Dagger",
+      "main_category": "Weapon",
+      "subcategory": "Dagger",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/457.jpg"
+    },
+    "472": {
+      "name": "Celtic Dagger",
+      "main_category": "Weapon",
+      "subcategory": "Dagger",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/472.jpg"
+    },
+    "643": {
+      "name": "Celtic guarded rapier",
+      "main_category": "Weapon",
+      "subcategory": "Dagger",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/643.jpg"
+    },
+    "653": {
+      "name": "Briton Guarded Rapier",
+      "main_category": "Weapon",
+      "subcategory": "Dagger",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/653.jpg"
+    },
+    "943": {
+      "name": "Hib Lurikeen Dagger",
+      "main_category": "Weapon",
+      "subcategory": "Dagger",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/943.jpg"
+    },
+    "944": {
+      "name": "Hib Lurkeen Duel Dagger",
+      "main_category": "Weapon",
+      "subcategory": "Dagger",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/944.jpg"
+    },
+    "945": {
+      "name": "Hib Lurkeen Duel Rapier",
+      "main_category": "Weapon",
+      "subcategory": "Dagger",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/945.jpg"
+    },
+    "946": {
+      "name": "Hib Lurikeen Rapier",
+      "main_category": "Weapon",
+      "subcategory": "Dagger",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/946.jpg"
+    },
+    "1668": {
+      "name": "TraitorsDagger 01",
+      "main_category": "Weapon",
+      "subcategory": "Dagger",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1668.jpg"
+    },
+    "1669": {
+      "name": "CrocodilesTooth 01",
+      "main_category": "Weapon",
+      "subcategory": "Dagger",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1669.jpg"
+    },
+    "1807": {
+      "name": "GoldenSpear 1H",
+      "main_category": "Weapon",
+      "subcategory": "Dagger",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1807.jpg"
+    },
+    "2190": {
+      "name": "TOA O po 1hTrident01",
+      "main_category": "Weapon",
+      "subcategory": "Dagger",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2190.jpg"
+    },
+    "2468": {
+      "name": "SpearofKings 01 (1H)",
+      "main_category": "Weapon",
+      "subcategory": "Dagger",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2468.jpg"
+    },
+    "2685": {
+      "name": "Hib Placeholder 1hd pierce - vampiir unique",
+      "main_category": "Weapon",
+      "subcategory": "Dagger",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2685.jpg"
+    },
+    "2686": {
+      "name": "Hib Placeholder 1hd pierce - vampiir unique",
+      "main_category": "Weapon",
+      "subcategory": "Dagger",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2686.jpg"
+    },
+    "2687": {
+      "name": "Hib Placeholder 1hd pierce - vampiir unique",
+      "main_category": "Weapon",
+      "subcategory": "Dagger",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2687.jpg"
+    },
+    "3232": {
+      "name": "Vampiir Epic Pierce",
+      "main_category": "Weapon",
+      "subcategory": "Dagger",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/3232.jpg"
+    },
+    "857": {
+      "name": "Alb Flex Chain",
+      "main_category": "Weapon",
+      "subcategory": "Flexible",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/857.jpg"
+    },
+    "858": {
+      "name": "Alb Flex Chain Saw",
+      "main_category": "Weapon",
+      "subcategory": "Flexible",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/858.jpg"
+    },
+    "859": {
+      "name": "Alb Flex Chain Whip",
+      "main_category": "Weapon",
+      "subcategory": "Flexible",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/859.jpg"
+    },
+    "860": {
+      "name": "Alb Flex Dagger Flail",
+      "main_category": "Weapon",
+      "subcategory": "Flexible",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/860.jpg"
+    },
+    "861": {
+      "name": "Alb Flex Flail",
+      "main_category": "Weapon",
+      "subcategory": "Flexible",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/861.jpg"
+    },
+    "862": {
+      "name": "Alb Flex Morning Star",
+      "main_category": "Weapon",
+      "subcategory": "Flexible",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/862.jpg"
+    },
+    "863": {
+      "name": "Alb Flex Pick Flail",
+      "main_category": "Weapon",
+      "subcategory": "Flexible",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/863.jpg"
+    },
+    "864": {
+      "name": "Alb Flex Spiked Flail",
+      "main_category": "Weapon",
+      "subcategory": "Flexible",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/864.jpg"
+    },
+    "865": {
+      "name": "Alb Flex Spiked Whip",
+      "main_category": "Weapon",
+      "subcategory": "Flexible",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/865.jpg"
+    },
+    "866": {
+      "name": "Alb Flex War Chain",
+      "main_category": "Weapon",
+      "subcategory": "Flexible",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/866.jpg"
+    },
+    "867": {
+      "name": "Alb Flex Whip",
+      "main_category": "Weapon",
+      "subcategory": "Flexible",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/867.jpg"
+    },
+    "868": {
+      "name": "Alb Flex Whip Dagger",
+      "main_category": "Weapon",
+      "subcategory": "Flexible",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/868.jpg"
+    },
+    "869": {
+      "name": "Alb Flex Whip Mace",
+      "main_category": "Weapon",
+      "subcategory": "Flexible",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/869.jpg"
+    },
+    "1921": {
+      "name": "Alb Flex Spiked Flail Air",
+      "main_category": "Weapon",
+      "subcategory": "Flexible",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1921.jpg"
+    },
+    "1922": {
+      "name": "Alb Flex Spiked Flail Earth",
+      "main_category": "Weapon",
+      "subcategory": "Flexible",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1922.jpg"
+    },
+    "1923": {
+      "name": "Alb Flex Spiked Flail Fire",
+      "main_category": "Weapon",
+      "subcategory": "Flexible",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1923.jpg"
+    },
+    "1924": {
+      "name": "Alb Flex Spiked Flail Water",
+      "main_category": "Weapon",
+      "subcategory": "Flexible",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1924.jpg"
+    },
+    "1925": {
+      "name": "Alb Flex Spiked Whip Air",
+      "main_category": "Weapon",
+      "subcategory": "Flexible",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1925.jpg"
+    },
+    "1926": {
+      "name": "Alb Flex Spiked Whip Earth",
+      "main_category": "Weapon",
+      "subcategory": "Flexible",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1926.jpg"
+    },
+    "1927": {
+      "name": "Alb Flex Spiked Whip Fire",
+      "main_category": "Weapon",
+      "subcategory": "Flexible",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1927.jpg"
+    },
+    "1928": {
+      "name": "Alb Flex Spiked Whip Water",
+      "main_category": "Weapon",
+      "subcategory": "Flexible",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1928.jpg"
+    },
+    "2119": {
+      "name": "TOA Afct Serpent Whip",
+      "main_category": "Weapon",
+      "subcategory": "Flexible",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2119.jpg"
+    },
+    "2669": {
+      "name": "Alb Placeholder flex crush",
+      "main_category": "Weapon",
+      "subcategory": "Flexible",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2669.jpg"
+    },
+    "2670": {
+      "name": "Alb Placeholder flex slash",
+      "main_category": "Weapon",
+      "subcategory": "Flexible",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2670.jpg"
+    },
+    "3287": {
+      "name": "Heretic Epic Flex Crush",
+      "main_category": "Weapon",
+      "subcategory": "Flexible",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/3287.jpg"
+    },
+    "3288": {
+      "name": "Heretic Epic Flex Slash",
+      "main_category": "Weapon",
+      "subcategory": "Flexible",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/3288.jpg"
+    },
+    "3292": {
+      "name": "Reaver Epic Flex Crush",
+      "main_category": "Weapon",
+      "subcategory": "Flexible",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/3292.jpg"
+    },
+    "3293": {
+      "name": "Reaver Epic Flex Crush",
+      "main_category": "Weapon",
+      "subcategory": "Flexible",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/3293.jpg"
+    },
+    "959": {
+      "name": "BladedClawGreave",
+      "main_category": "Weapon",
+      "subcategory": "Greave",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/959.jpg"
+    },
+    "960": {
+      "name": "BladedFangGreave",
+      "main_category": "Weapon",
+      "subcategory": "Greave",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/960.jpg"
+    },
+    "961": {
+      "name": "BladedMoonClaw",
+      "main_category": "Weapon",
+      "subcategory": "Greave",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/961.jpg"
+    },
+    "962": {
+      "name": "BladedMoonFang",
+      "main_category": "Weapon",
+      "subcategory": "Greave",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/962.jpg"
+    },
+    "963": {
+      "name": "ClawGreave",
+      "main_category": "Weapon",
+      "subcategory": "Greave",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/963.jpg"
+    },
+    "964": {
+      "name": "FangGreave",
+      "main_category": "Weapon",
+      "subcategory": "Greave",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/964.jpg"
+    },
+    "965": {
+      "name": "GreatBladedClawGreave",
+      "main_category": "Weapon",
+      "subcategory": "Greave",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/965.jpg"
+    },
+    "966": {
+      "name": "GreatBladedFangGreave",
+      "main_category": "Weapon",
+      "subcategory": "Greave",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/966.jpg"
+    },
+    "967": {
+      "name": "GreatBladedMoonClaw",
+      "main_category": "Weapon",
+      "subcategory": "Greave",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/967.jpg"
+    },
+    "968": {
+      "name": "GreatBladedMoonFang",
+      "main_category": "Weapon",
+      "subcategory": "Greave",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/968.jpg"
+    },
+    "969": {
+      "name": "GreatClawGreave",
+      "main_category": "Weapon",
+      "subcategory": "Greave",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/969.jpg"
+    },
+    "970": {
+      "name": "GreatFangGreave",
+      "main_category": "Weapon",
+      "subcategory": "Greave",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/970.jpg"
+    },
+    "971": {
+      "name": "GreatMoonClaw",
+      "main_category": "Weapon",
+      "subcategory": "Greave",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/971.jpg"
+    },
+    "972": {
+      "name": "GreatMoonFang",
+      "main_category": "Weapon",
+      "subcategory": "Greave",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/972.jpg"
+    },
+    "973": {
+      "name": "LargeBladedClawGreave",
+      "main_category": "Weapon",
+      "subcategory": "Greave",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/973.jpg"
+    },
+    "974": {
+      "name": "LargeBladedFangGreave",
+      "main_category": "Weapon",
+      "subcategory": "Greave",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/974.jpg"
+    },
+    "975": {
+      "name": "LargeBladedMoonClaw",
+      "main_category": "Weapon",
+      "subcategory": "Greave",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/975.jpg"
+    },
+    "976": {
+      "name": "LargeBladedMoonFang",
+      "main_category": "Weapon",
+      "subcategory": "Greave",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/976.jpg"
+    },
+    "977": {
+      "name": "LargeClawGreave",
+      "main_category": "Weapon",
+      "subcategory": "Greave",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/977.jpg"
+    },
+    "978": {
+      "name": "LargeFangGreave",
+      "main_category": "Weapon",
+      "subcategory": "Greave",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/978.jpg"
+    },
+    "979": {
+      "name": "LargeMoonClaw",
+      "main_category": "Weapon",
+      "subcategory": "Greave",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/979.jpg"
+    },
+    "980": {
+      "name": "LargeMoonFang",
+      "main_category": "Weapon",
+      "subcategory": "Greave",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/980.jpg"
+    },
+    "981": {
+      "name": "MoonClaw",
+      "main_category": "Weapon",
+      "subcategory": "Greave",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/981.jpg"
+    },
+    "982": {
+      "name": "MoonFang",
+      "main_category": "Weapon",
+      "subcategory": "Greave",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/982.jpg"
+    },
+    "2021": {
+      "name": "GreatBladedClawGreave Air",
+      "main_category": "Weapon",
+      "subcategory": "Greave",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2021.jpg"
+    },
+    "2022": {
+      "name": "GreatBladedClawGreave Earth",
+      "main_category": "Weapon",
+      "subcategory": "Greave",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2022.jpg"
+    },
+    "2023": {
+      "name": "GreatBladedClawGreave Fire",
+      "main_category": "Weapon",
+      "subcategory": "Greave",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2023.jpg"
+    },
+    "2024": {
+      "name": "GreatBladedClawGreave Water",
+      "main_category": "Weapon",
+      "subcategory": "Greave",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2024.jpg"
+    },
+    "227": {
+      "name": "Lute",
+      "main_category": "Weapon",
+      "subcategory": "Instrument",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/227.jpg"
+    },
+    "228": {
+      "name": "Drum",
+      "main_category": "Weapon",
+      "subcategory": "Instrument",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/228.jpg"
+    },
+    "325": {
+      "name": "Flute",
+      "main_category": "Weapon",
+      "subcategory": "Instrument",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/325.jpg"
+    },
+    "2114": {
+      "name": "TOA_In_Drum",
+      "main_category": "Weapon",
+      "subcategory": "Instrument",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2114.jpg"
+    },
+    "2115": {
+      "name": "TOA_In_Flute",
+      "main_category": "Weapon",
+      "subcategory": "Instrument",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2115.jpg"
+    },
+    "2116": {
+      "name": "TOA_In_Harp",
+      "main_category": "Weapon",
+      "subcategory": "Instrument",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2116.jpg"
+    },
+    "2117": {
+      "name": "TOA_In_Lute",
+      "main_category": "Weapon",
+      "subcategory": "Instrument",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2117.jpg"
+    },
+    "2970": {
+      "name": "Base_Lute.dds",
+      "main_category": "Weapon",
+      "subcategory": "Instrument",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2970.jpg"
+    },
+    "2971": {
+      "name": "Base_drum.dds",
+      "main_category": "Weapon",
+      "subcategory": "Instrument",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2971.jpg"
+    },
+    "2972": {
+      "name": "Base_flute.dds",
+      "main_category": "Weapon",
+      "subcategory": "Instrument",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2972.jpg"
+    },
+    "2973": {
+      "name": "Old_Lute.dds",
+      "main_category": "Weapon",
+      "subcategory": "Instrument",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2973.jpg"
+    },
+    "2974": {
+      "name": "Old_drum.dds",
+      "main_category": "Weapon",
+      "subcategory": "Instrument",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2974.jpg"
+    },
+    "2975": {
+      "name": "Old_flute.dds",
+      "main_category": "Weapon",
+      "subcategory": "Instrument",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2975.jpg"
+    },
+    "2976": {
+      "name": "Albion_Lute.dds",
+      "main_category": "Weapon",
+      "subcategory": "Instrument",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2976.jpg"
+    },
+    "2977": {
+      "name": "Albion_drum.dds",
+      "main_category": "Weapon",
+      "subcategory": "Instrument",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2977.jpg"
+    },
+    "2978": {
+      "name": "Albion_flute.dds",
+      "main_category": "Weapon",
+      "subcategory": "Instrument",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2978.jpg"
+    },
+    "2979": {
+      "name": "Hibernia_Lute.dds",
+      "main_category": "Weapon",
+      "subcategory": "Instrument",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2979.jpg"
+    },
+    "2980": {
+      "name": "Hibernia_drum.dds",
+      "main_category": "Weapon",
+      "subcategory": "Instrument",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2980.jpg"
+    },
+    "2981": {
+      "name": "Hibernia_flute.dds",
+      "main_category": "Weapon",
+      "subcategory": "Instrument",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2981.jpg"
+    },
+    "3237": {
+      "name": "Bard Epic Drum",
+      "main_category": "Weapon",
+      "subcategory": "Instrument",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/3237.jpg"
+    },
+    "3238": {
+      "name": "Bard Epic Flute",
+      "main_category": "Weapon",
+      "subcategory": "Instrument",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/3238.jpg"
+    },
+    "3239": {
+      "name": "Bard Epic Harp",
+      "main_category": "Weapon",
+      "subcategory": "Instrument",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/3239.jpg"
+    },
+    "3240": {
+      "name": "Bard Epic Lute",
+      "main_category": "Weapon",
+      "subcategory": "Instrument",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/3240.jpg"
+    },
+    "3278": {
+      "name": "Minstrel Epic Drum",
+      "main_category": "Weapon",
+      "subcategory": "Instrument",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/3278.jpg"
+    },
+    "3279": {
+      "name": "Minstrel Epic Flute",
+      "main_category": "Weapon",
+      "subcategory": "Instrument",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/3279.jpg"
+    },
+    "3280": {
+      "name": "Minstrel Epic Harp",
+      "main_category": "Weapon",
+      "subcategory": "Instrument",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/3280.jpg"
+    },
+    "3281": {
+      "name": "Minstrel Epic Lute",
+      "main_category": "Weapon",
+      "subcategory": "Instrument",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/3281.jpg"
+    },
+    "3688": {
+      "name": "Lab Harp",
+      "main_category": "Weapon",
+      "subcategory": "Instrument",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/3688.jpg"
+    },
+    "26": {
+      "name": "briton bill",
+      "main_category": "Weapon",
+      "subcategory": "Polearm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/26.jpg"
+    },
+    "27": {
+      "name": "Lance",
+      "main_category": "Weapon",
+      "subcategory": "Polearm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/27.jpg"
+    },
+    "67": {
+      "name": "Halberd",
+      "main_category": "Weapon",
+      "subcategory": "Polearm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/67.jpg"
+    },
+    "68": {
+      "name": "Lochaber Axe",
+      "main_category": "Weapon",
+      "subcategory": "Polearm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/68.jpg"
+    },
+    "69": {
+      "name": "Pike",
+      "main_category": "Weapon",
+      "subcategory": "Polearm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/69.jpg"
+    },
+    "70": {
+      "name": "Lucerne Hammer",
+      "main_category": "Weapon",
+      "subcategory": "Polearm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/70.jpg"
+    },
+    "328": {
+      "name": "Norse Simple Spear",
+      "main_category": "Weapon",
+      "subcategory": "Polearm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/328.jpg"
+    },
+    "329": {
+      "name": "Norse Long Spear",
+      "main_category": "Weapon",
+      "subcategory": "Polearm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/329.jpg"
+    },
+    "330": {
+      "name": "Norse Trident",
+      "main_category": "Weapon",
+      "subcategory": "Polearm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/330.jpg"
+    },
+    "331": {
+      "name": "Norse Bill Spear",
+      "main_category": "Weapon",
+      "subcategory": "Polearm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/331.jpg"
+    },
+    "332": {
+      "name": "Norse Big Spear",
+      "main_category": "Weapon",
+      "subcategory": "Polearm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/332.jpg"
+    },
+    "458": {
+      "name": "Trident",
+      "main_category": "Weapon",
+      "subcategory": "Polearm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/458.jpg"
+    },
+    "469": {
+      "name": "Celtic Spear",
+      "main_category": "Weapon",
+      "subcategory": "Polearm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/469.jpg"
+    },
+    "470": {
+      "name": "Celtic Short Spear",
+      "main_category": "Weapon",
+      "subcategory": "Polearm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/470.jpg"
+    },
+    "475": {
+      "name": "Celtic barbed Spear",
+      "main_category": "Weapon",
+      "subcategory": "Polearm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/475.jpg"
+    },
+    "476": {
+      "name": "Celtic Long spear",
+      "main_category": "Weapon",
+      "subcategory": "Polearm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/476.jpg"
+    },
+    "477": {
+      "name": "Celtic war spear",
+      "main_category": "Weapon",
+      "subcategory": "Polearm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/477.jpg"
+    },
+    "556": {
+      "name": "Special hibernian spear",
+      "main_category": "Weapon",
+      "subcategory": "Polearm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/556.jpg"
+    },
+    "642": {
+      "name": "Celtic Hooked spear",
+      "main_category": "Weapon",
+      "subcategory": "Polearm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/642.jpg"
+    },
+    "648": {
+      "name": "Briton bardiche",
+      "main_category": "Weapon",
+      "subcategory": "Polearm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/648.jpg"
+    },
+    "649": {
+      "name": "Briton Poleaxe",
+      "main_category": "Weapon",
+      "subcategory": "Polearm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/649.jpg"
+    },
+    "650": {
+      "name": "Briton spikedhammer",
+      "main_category": "Weapon",
+      "subcategory": "Polearm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/650.jpg"
+    },
+    "657": {
+      "name": "Norse battle spear",
+      "main_category": "Weapon",
+      "subcategory": "Polearm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/657.jpg"
+    },
+    "661": {
+      "name": "Briton Partizan",
+      "main_category": "Weapon",
+      "subcategory": "Polearm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/661.jpg"
+    },
+    "870": {
+      "name": "Alb Bishops Reach",
+      "main_category": "Weapon",
+      "subcategory": "Polearm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/870.jpg"
+    },
+    "871": {
+      "name": "Alb Footmans Pick",
+      "main_category": "Weapon",
+      "subcategory": "Polearm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/871.jpg"
+    },
+    "872": {
+      "name": "Alb Military Fork",
+      "main_category": "Weapon",
+      "subcategory": "Polearm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/872.jpg"
+    },
+    "873": {
+      "name": "Alb Sabre Axe",
+      "main_category": "Weapon",
+      "subcategory": "Polearm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/873.jpg"
+    },
+    "926": {
+      "name": "Hib Firbolg Great Scythe",
+      "main_category": "Weapon",
+      "subcategory": "Scythe",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/926.jpg"
+    },
+    "927": {
+      "name": "Hib Firbolg Scythe",
+      "main_category": "Weapon",
+      "subcategory": "Scythe",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/927.jpg"
+    },
+    "928": {
+      "name": "Hib Greatwar Scythe",
+      "main_category": "Weapon",
+      "subcategory": "Scythe",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/928.jpg"
+    },
+    "929": {
+      "name": "Hib Harvest Scythe",
+      "main_category": "Weapon",
+      "subcategory": "Scythe",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/929.jpg"
+    },
+    "930": {
+      "name": "Hib Martial Scythe",
+      "main_category": "Weapon",
+      "subcategory": "Scythe",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/930.jpg"
+    },
+    "931": {
+      "name": "Hib Scythe",
+      "main_category": "Weapon",
+      "subcategory": "Scythe",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/931.jpg"
+    },
+    "932": {
+      "name": "Hib War Scythe",
+      "main_category": "Weapon",
+      "subcategory": "Scythe",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/932.jpg"
+    },
+    "2001": {
+      "name": "Hib Firbolg Scythe Air",
+      "main_category": "Weapon",
+      "subcategory": "Scythe",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2001.jpg"
+    },
+    "2002": {
+      "name": "Hib Firbolg Scythe Earth",
+      "main_category": "Weapon",
+      "subcategory": "Scythe",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2002.jpg"
+    },
+    "2003": {
+      "name": "Hib Firbolg Scythe Fire",
+      "main_category": "Weapon",
+      "subcategory": "Scythe",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2003.jpg"
+    },
+    "2004": {
+      "name": "Hib Firbolg Scythe Water",
+      "main_category": "Weapon",
+      "subcategory": "Scythe",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2004.jpg"
+    },
+    "2111": {
+      "name": "Serpent Scythe",
+      "main_category": "Weapon",
+      "subcategory": "Scythe",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2111.jpg"
+    },
+    "2213": {
+      "name": "TOA_V_sc_MagmaScythe01",
+      "main_category": "Weapon",
+      "subcategory": "Scythe",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2213.jpg"
+    },
+    "2693": {
+      "name": "Hib Placeholder scythe",
+      "main_category": "Weapon",
+      "subcategory": "Scythe",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2693.jpg"
+    },
+    "3231": {
+      "name": "Valewalker Epic Scythe",
+      "main_category": "Weapon",
+      "subcategory": "Scythe",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/3231.jpg"
+    },
+    "3450": {
+      "name": "Spear of the King Scythe",
+      "main_category": "Weapon",
+      "subcategory": "Scythe",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/3450.jpg"
+    },
+    "3665": {
+      "name": "Lab Scythe",
+      "main_category": "Weapon",
+      "subcategory": "Scythe",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/3665.jpg"
+    },
+    "3708": {
+      "name": "Scorched Lab Scythe",
+      "main_category": "Weapon",
+      "subcategory": "Scythe",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/3708.jpg"
+    },
+    "3825": {
+      "name": "Dragonsworn Scythe",
+      "main_category": "Weapon",
+      "subcategory": "Scythe",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/3825.jpg"
+    },
+    "3885": {
+      "name": "Hib DragonSlayer Scythe",
+      "main_category": "Weapon",
+      "subcategory": "Scythe",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/3885.jpg"
+    },
+    "3926": {
+      "name": "Mid DragonSlayer Scythe",
+      "main_category": "Weapon",
+      "subcategory": "Scythe",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/3926.jpg"
+    },
+    "3962": {
+      "name": "Alb DragonSlayer Scythe",
+      "main_category": "Weapon",
+      "subcategory": "Scythe",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/3962.jpg"
+    },
+    "59": {
+      "name": "Round wooden shield",
+      "main_category": "Weapon",
+      "subcategory": "Shield",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/59.jpg"
+    },
+    "60": {
+      "name": "Heater Shield",
+      "main_category": "Weapon",
+      "subcategory": "Shield",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/60.jpg"
+    },
+    "61": {
+      "name": "Tower Shield",
+      "main_category": "Weapon",
+      "subcategory": "Shield",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/61.jpg"
+    },
+    "79": {
+      "name": "Tower Shield",
+      "main_category": "Weapon",
+      "subcategory": "Shield",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/79.jpg"
+    },
+    "1040": {
+      "name": "Alb  Leather Buckler",
+      "main_category": "Weapon",
+      "subcategory": "Shield",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1040.jpg"
+    },
+    "1041": {
+      "name": "Alb  Metal Buckler",
+      "main_category": "Weapon",
+      "subcategory": "Shield",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1041.jpg"
+    },
+    "1042": {
+      "name": "Alb  Wood Buckler",
+      "main_category": "Weapon",
+      "subcategory": "Shield",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1042.jpg"
+    },
+    "1043": {
+      "name": "Mid  Leather Buckler",
+      "main_category": "Weapon",
+      "subcategory": "Shield",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1043.jpg"
+    },
+    "1044": {
+      "name": "Mid  Metal Buckler",
+      "main_category": "Weapon",
+      "subcategory": "Shield",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1044.jpg"
+    },
+    "1045": {
+      "name": "MId  Wood Buckler",
+      "main_category": "Weapon",
+      "subcategory": "Shield",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1045.jpg"
+    },
+    "1046": {
+      "name": "Hib  Leather Buckler",
+      "main_category": "Weapon",
+      "subcategory": "Shield",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1046.jpg"
+    },
+    "1047": {
+      "name": "Hib  Metal Buckler",
+      "main_category": "Weapon",
+      "subcategory": "Shield",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1047.jpg"
+    },
+    "1048": {
+      "name": "Hib  Wood Buckler",
+      "main_category": "Weapon",
+      "subcategory": "Shield",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1048.jpg"
+    },
+    "1049": {
+      "name": "Alb  Leather Heater",
+      "main_category": "Weapon",
+      "subcategory": "Shield",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1049.jpg"
+    },
+    "1050": {
+      "name": "Alb  Metal Heater",
+      "main_category": "Weapon",
+      "subcategory": "Shield",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1050.jpg"
+    },
+    "1051": {
+      "name": "Alb  Wood Heater",
+      "main_category": "Weapon",
+      "subcategory": "Shield",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1051.jpg"
+    },
+    "1052": {
+      "name": "Mid  Leather Heater",
+      "main_category": "Weapon",
+      "subcategory": "Shield",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1052.jpg"
+    },
+    "1053": {
+      "name": "Mid  Metal Heater",
+      "main_category": "Weapon",
+      "subcategory": "Shield",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1053.jpg"
+    },
+    "1054": {
+      "name": "MId  Wood Heater",
+      "main_category": "Weapon",
+      "subcategory": "Shield",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1054.jpg"
+    },
+    "1055": {
+      "name": "Hib  Leather Heater",
+      "main_category": "Weapon",
+      "subcategory": "Shield",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1055.jpg"
+    },
+    "1056": {
+      "name": "Hib  Metal Heater",
+      "main_category": "Weapon",
+      "subcategory": "Shield",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1056.jpg"
+    },
+    "1057": {
+      "name": "Hib  Wood Heater",
+      "main_category": "Weapon",
+      "subcategory": "Shield",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1057.jpg"
+    },
+    "1058": {
+      "name": "Alb  Leather LBlock",
+      "main_category": "Weapon",
+      "subcategory": "Shield",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1058.jpg"
+    },
+    "1059": {
+      "name": "Alb  Metal LBlock",
+      "main_category": "Weapon",
+      "subcategory": "Shield",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1059.jpg"
+    },
+    "1060": {
+      "name": "Alb  Wood LBlock",
+      "main_category": "Weapon",
+      "subcategory": "Shield",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1060.jpg"
+    },
+    "1061": {
+      "name": "Mid  Leather LBlock",
+      "main_category": "Weapon",
+      "subcategory": "Shield",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1061.jpg"
+    },
+    "1062": {
+      "name": "Mid  Metal LBlock",
+      "main_category": "Weapon",
+      "subcategory": "Shield",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1062.jpg"
+    },
+    "1063": {
+      "name": "MId  Wood LBlock",
+      "main_category": "Weapon",
+      "subcategory": "Shield",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1063.jpg"
+    },
+    "19": {
+      "name": "Briton mage staff",
+      "main_category": "Weapon",
+      "subcategory": "Staff",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/19.jpg"
+    },
+    "327": {
+      "name": "Norse staff",
+      "main_category": "Weapon",
+      "subcategory": "Staff",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/327.jpg"
+    },
+    "442": {
+      "name": "Quarterstaff",
+      "main_category": "Weapon",
+      "subcategory": "Staff",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/442.jpg"
+    },
+    "468": {
+      "name": "Celtic staff",
+      "main_category": "Weapon",
+      "subcategory": "Staff",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/468.jpg"
+    },
+    "565": {
+      "name": "norse shod staff",
+      "main_category": "Weapon",
+      "subcategory": "Staff",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/565.jpg"
+    },
+    "566": {
+      "name": "norse focus staff",
+      "main_category": "Weapon",
+      "subcategory": "Staff",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/566.jpg"
+    },
+    "567": {
+      "name": "Briton Shod quarterstaff",
+      "main_category": "Weapon",
+      "subcategory": "Staff",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/567.jpg"
+    },
+    "568": {
+      "name": "Briton focus staff",
+      "main_category": "Weapon",
+      "subcategory": "Staff",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/568.jpg"
+    },
+    "821": {
+      "name": "Necro Staff",
+      "main_category": "Weapon",
+      "subcategory": "Staff",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/821.jpg"
+    },
+    "828": {
+      "name": "Claw Hand Staff",
+      "main_category": "Weapon",
+      "subcategory": "Staff",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/828.jpg"
+    },
+    "881": {
+      "name": "Alb Bishops Reach Staff",
+      "main_category": "Weapon",
+      "subcategory": "Staff",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/881.jpg"
+    },
+    "882": {
+      "name": "Alb Spiked Staff",
+      "main_category": "Weapon",
+      "subcategory": "Staff",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/882.jpg"
+    },
+    "883": {
+      "name": "Alb Spiked Staff Mace",
+      "main_category": "Weapon",
+      "subcategory": "Staff",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/883.jpg"
+    },
+    "884": {
+      "name": "Alb Staff Mace",
+      "main_category": "Weapon",
+      "subcategory": "Staff",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/884.jpg"
+    },
+    "1166": {
+      "name": "Albion Mage Staff 01",
+      "main_category": "Weapon",
+      "subcategory": "Staff",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1166.jpg"
+    },
+    "1167": {
+      "name": "Albion Mage Staff 02",
+      "main_category": "Weapon",
+      "subcategory": "Staff",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1167.jpg"
+    },
+    "1168": {
+      "name": "Albion Mage Staff 03",
+      "main_category": "Weapon",
+      "subcategory": "Staff",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1168.jpg"
+    },
+    "1169": {
+      "name": "Albion Mage Staff 04",
+      "main_category": "Weapon",
+      "subcategory": "Staff",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1169.jpg"
+    },
+    "1170": {
+      "name": "Albion Mage Staff 05",
+      "main_category": "Weapon",
+      "subcategory": "Staff",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1170.jpg"
+    },
+    "1171": {
+      "name": "Necro Staff 01",
+      "main_category": "Weapon",
+      "subcategory": "Staff",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1171.jpg"
+    },
+    "1172": {
+      "name": "Necro Staff 02",
+      "main_category": "Weapon",
+      "subcategory": "Staff",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1172.jpg"
+    },
+    "1173": {
+      "name": "Hib Staff 01",
+      "main_category": "Weapon",
+      "subcategory": "Staff",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1173.jpg"
+    },
+    "1174": {
+      "name": "Hib Staff 02",
+      "main_category": "Weapon",
+      "subcategory": "Staff",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1174.jpg"
+    },
+    "1175": {
+      "name": "Hib Staff 03",
+      "main_category": "Weapon",
+      "subcategory": "Staff",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1175.jpg"
+    },
+    "1176": {
+      "name": "Hib Staff 04",
+      "main_category": "Weapon",
+      "subcategory": "Staff",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1176.jpg"
+    },
+    "1177": {
+      "name": "Hib Staff 05",
+      "main_category": "Weapon",
+      "subcategory": "Staff",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1177.jpg"
+    },
+    "1178": {
+      "name": "Hib Staff 06",
+      "main_category": "Weapon",
+      "subcategory": "Staff",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1178.jpg"
+    },
+    "1179": {
+      "name": "Hib Staff 07",
+      "main_category": "Weapon",
+      "subcategory": "Staff",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1179.jpg"
+    },
+    "1": {
+      "name": "briton dagger",
+      "main_category": "Weapon",
+      "subcategory": "Sword",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1.jpg"
+    },
+    "2": {
+      "name": "Briton hand axe",
+      "main_category": "Weapon",
+      "subcategory": "Sword",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2.jpg"
+    },
+    "3": {
+      "name": "Briton short sword",
+      "main_category": "Weapon",
+      "subcategory": "Sword",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/3.jpg"
+    },
+    "4": {
+      "name": "briton longsword",
+      "main_category": "Weapon",
+      "subcategory": "Sword",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/4.jpg"
+    },
+    "5": {
+      "name": "briton broadsword",
+      "main_category": "Weapon",
+      "subcategory": "Sword",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/5.jpg"
+    },
+    "8": {
+      "name": "Scimitar",
+      "main_category": "Weapon",
+      "subcategory": "Sword",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/8.jpg"
+    },
+    "10": {
+      "name": "Bastard Sword",
+      "main_category": "Weapon",
+      "subcategory": "Sword",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/10.jpg"
+    },
+    "11": {
+      "name": "Club",
+      "main_category": "Weapon",
+      "subcategory": "Sword",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/11.jpg"
+    },
+    "12": {
+      "name": "Hammer",
+      "main_category": "Weapon",
+      "subcategory": "Sword",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/12.jpg"
+    },
+    "13": {
+      "name": "Mace",
+      "main_category": "Weapon",
+      "subcategory": "Sword",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/13.jpg"
+    },
+    "14": {
+      "name": "Flanged Mace",
+      "main_category": "Weapon",
+      "subcategory": "Sword",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/14.jpg"
+    },
+    "15": {
+      "name": "War Hammer",
+      "main_category": "Weapon",
+      "subcategory": "Sword",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/15.jpg"
+    },
+    "18": {
+      "name": "mornign star (not used)",
+      "main_category": "Weapon",
+      "subcategory": "Sword",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/18.jpg"
+    },
+    "20": {
+      "name": "Spiked Mace",
+      "main_category": "Weapon",
+      "subcategory": "Sword",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/20.jpg"
+    },
+    "71": {
+      "name": "Stilletto",
+      "main_category": "Weapon",
+      "subcategory": "Sword",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/71.jpg"
+    },
+    "310": {
+      "name": "Norse Long Sword",
+      "main_category": "Weapon",
+      "subcategory": "Sword",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/310.jpg"
+    },
+    "311": {
+      "name": "Norse Short Sword",
+      "main_category": "Weapon",
+      "subcategory": "Sword",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/311.jpg"
+    },
+    "312": {
+      "name": "Norse Broad Sword",
+      "main_category": "Weapon",
+      "subcategory": "Sword",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/312.jpg"
+    },
+    "313": {
+      "name": "Norse Bastard Sword",
+      "main_category": "Weapon",
+      "subcategory": "Sword",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/313.jpg"
+    },
+    "315": {
+      "name": "Norse Spiked axe",
+      "main_category": "Weapon",
+      "subcategory": "Sword",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/315.jpg"
+    },
+    "316": {
+      "name": "Norse Bearded Axe",
+      "main_category": "Weapon",
+      "subcategory": "Sword",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/316.jpg"
+    },
+    "319": {
+      "name": "Norse War Axe",
+      "main_category": "Weapon",
+      "subcategory": "Sword",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/319.jpg"
+    },
+    "320": {
+      "name": "Norse small hammer 1H",
+      "main_category": "Weapon",
+      "subcategory": "Sword",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/320.jpg"
+    },
+    "321": {
+      "name": "norse hammer 1H",
+      "main_category": "Weapon",
+      "subcategory": "Sword",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/321.jpg"
+    },
+    "322": {
+      "name": "norse warhammer 1H",
+      "main_category": "Weapon",
+      "subcategory": "Sword",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/322.jpg"
+    },
+    "323": {
+      "name": "norse pickhammer 1H",
+      "main_category": "Weapon",
+      "subcategory": "Sword",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/323.jpg"
+    },
+    "324": {
+      "name": "norse greathammer 1H",
+      "main_category": "Weapon",
+      "subcategory": "Sword",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/324.jpg"
+    },
+    "444": {
+      "name": "Celtic Falcata",
+      "main_category": "Weapon",
+      "subcategory": "Sword",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/444.jpg"
+    },
+    "333": {
+      "name": "Norse Throwing Axe",
+      "main_category": "Weapon",
+      "subcategory": "Throwing",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/333.jpg"
+    },
+    "334": {
+      "name": "Norse Throwing Hammer",
+      "main_category": "Weapon",
+      "subcategory": "Throwing",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/334.jpg"
+    },
+    "638": {
+      "name": "Norse Throwing Dagger",
+      "main_category": "Weapon",
+      "subcategory": "Throwing",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/638.jpg"
+    },
+    "6": {
+      "name": "briton 2h sword",
+      "main_category": "Weapon",
+      "subcategory": "Two Handed",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/6.jpg"
+    },
+    "7": {
+      "name": "Great Sword",
+      "main_category": "Weapon",
+      "subcategory": "Two Handed",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/7.jpg"
+    },
+    "9": {
+      "name": "Battle Axe",
+      "main_category": "Weapon",
+      "subcategory": "Two Handed",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/9.jpg"
+    },
+    "16": {
+      "name": "War Mattock",
+      "main_category": "Weapon",
+      "subcategory": "Two Handed",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/16.jpg"
+    },
+    "17": {
+      "name": "Great Hammer",
+      "main_category": "Weapon",
+      "subcategory": "Two Handed",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/17.jpg"
+    },
+    "72": {
+      "name": "Great Axe",
+      "main_category": "Weapon",
+      "subcategory": "Two Handed",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/72.jpg"
+    },
+    "73": {
+      "name": "War Axe",
+      "main_category": "Weapon",
+      "subcategory": "Two Handed",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/73.jpg"
+    },
+    "314": {
+      "name": "Norse Two Sword",
+      "main_category": "Weapon",
+      "subcategory": "Two Handed",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/314.jpg"
+    },
+    "317": {
+      "name": "Norse Great Axe",
+      "main_category": "Weapon",
+      "subcategory": "Two Handed",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/317.jpg"
+    },
+    "318": {
+      "name": "Norse Large Axe",
+      "main_category": "Weapon",
+      "subcategory": "Two Handed",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/318.jpg"
+    },
+    "448": {
+      "name": "Celtic Great Sword",
+      "main_category": "Weapon",
+      "subcategory": "Two Handed",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/448.jpg"
+    },
+    "459": {
+      "name": "Celtic Two Handed Sword",
+      "main_category": "Weapon",
+      "subcategory": "Two Handed",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/459.jpg"
+    },
+    "462": {
+      "name": "Celtic Great Hammer",
+      "main_category": "Weapon",
+      "subcategory": "Two Handed",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/462.jpg"
+    },
+    "463": {
+      "name": "2H spiked mace",
+      "main_category": "Weapon",
+      "subcategory": "Two Handed",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/463.jpg"
+    },
+    "474": {
+      "name": "2H Shilelaugh",
+      "main_category": "Weapon",
+      "subcategory": "Two Handed",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/474.jpg"
+    },
+    "572": {
+      "name": "Norse Great Sword",
+      "main_category": "Weapon",
+      "subcategory": "Two Handed",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/572.jpg"
+    },
+    "574": {
+      "name": "norse 2h hammer",
+      "main_category": "Weapon",
+      "subcategory": "Two Handed",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/574.jpg"
+    },
+    "575": {
+      "name": "norse 2h warhammer",
+      "main_category": "Weapon",
+      "subcategory": "Two Handed",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/575.jpg"
+    },
+    "576": {
+      "name": "norse 2h greathammer",
+      "main_category": "Weapon",
+      "subcategory": "Two Handed",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/576.jpg"
+    },
+    "577": {
+      "name": "Norse 2h battleaxe",
+      "main_category": "Weapon",
+      "subcategory": "Two Handed",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/577.jpg"
+    },
+    "639": {
+      "name": "Celtic Great Falcata",
+      "main_category": "Weapon",
+      "subcategory": "Two Handed",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/639.jpg"
+    },
+    "640": {
+      "name": "Celtic Sledgehammer",
+      "main_category": "Weapon",
+      "subcategory": "Two Handed",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/640.jpg"
+    },
+    "644": {
+      "name": "Briton 2h arch mace",
+      "main_category": "Weapon",
+      "subcategory": "Two Handed",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/644.jpg"
+    },
+    "645": {
+      "name": "briton 2h scimitar",
+      "main_category": "Weapon",
+      "subcategory": "Two Handed",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/645.jpg"
+    },
+    "646": {
+      "name": "Briton 2h War pick",
+      "main_category": "Weapon",
+      "subcategory": "Two Handed",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/646.jpg"
+    },
+    "658": {
+      "name": "Norse dwarven 2h sword",
+      "main_category": "Weapon",
+      "subcategory": "Two Handed",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/658.jpg"
+    },
+    "659": {
+      "name": "Norse 2h spiked hammer",
+      "main_category": "Weapon",
+      "subcategory": "Two Handed",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/659.jpg"
+    },
+    "660": {
+      "name": "Norse 2h war cleaver",
+      "main_category": "Weapon",
+      "subcategory": "Two Handed",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/660.jpg"
+    },
+    "57": {
+      "name": "Cloak",
+      "main_category": "Armor",
+      "subcategory": "Cloak",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/57.jpg"
+    },
+    "91": {
+      "name": "Guard Cloak (Briton)",
+      "main_category": "Armor",
+      "subcategory": "Cloak",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/91.jpg"
+    },
+    "92": {
+      "name": "Guard Cloak (Avalonian)",
+      "main_category": "Armor",
+      "subcategory": "Cloak",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/92.jpg"
+    },
+    "96": {
+      "name": "Hooded Cloak",
+      "main_category": "Armor",
+      "subcategory": "Cloak",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/96.jpg"
+    },
+    "144": {
+      "name": "Guardian Cloak",
+      "main_category": "Armor",
+      "subcategory": "Cloak",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/144.jpg"
+    },
+    "326": {
+      "name": "Norse Cloak",
+      "main_category": "Armor",
+      "subcategory": "Cloak",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/326.jpg"
+    },
+    "443": {
+      "name": "Mage Cloak",
+      "main_category": "Armor",
+      "subcategory": "Cloak",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/443.jpg"
+    },
+    "467": {
+      "name": "Celtic Cloak",
+      "main_category": "Armor",
+      "subcategory": "Cloak",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/467.jpg"
+    },
+    "557": {
+      "name": "Mage Cloak 2",
+      "main_category": "Armor",
+      "subcategory": "Cloak",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/557.jpg"
+    },
+    "558": {
+      "name": "Mage Cloak 3",
+      "main_category": "Armor",
+      "subcategory": "Cloak",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/558.jpg"
+    },
+    "559": {
+      "name": "Cloak 2",
+      "main_category": "Armor",
+      "subcategory": "Cloak",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/559.jpg"
+    },
+    "560": {
+      "name": "Cloak 3",
+      "main_category": "Armor",
+      "subcategory": "Cloak",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/560.jpg"
+    },
+    "669": {
+      "name": "collar cloak",
+      "main_category": "Armor",
+      "subcategory": "Cloak",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/669.jpg"
+    },
+    "676": {
+      "name": "PVP Guard Cloak (Briton)",
+      "main_category": "Armor",
+      "subcategory": "Cloak",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/676.jpg"
+    },
+    "677": {
+      "name": "PvP Guard Cloak (Midgard)",
+      "main_category": "Armor",
+      "subcategory": "Cloak",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/677.jpg"
+    },
+    "678": {
+      "name": "PvPGuard Cloak (Hibernia)",
+      "main_category": "Armor",
+      "subcategory": "Cloak",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/678.jpg"
+    },
+    "1720": {
+      "name": "TOA A Feather Cloak",
+      "main_category": "Armor",
+      "subcategory": "Cloak",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1720.jpg"
+    },
+    "1721": {
+      "name": "TOA O Harpy Cloak",
+      "main_category": "Armor",
+      "subcategory": "Cloak",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1721.jpg"
+    },
+    "1722": {
+      "name": "TOA O Scaled Cloak",
+      "main_category": "Armor",
+      "subcategory": "Cloak",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1722.jpg"
+    },
+    "1723": {
+      "name": "TOA S Healing Cloak",
+      "main_category": "Armor",
+      "subcategory": "Cloak",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1723.jpg"
+    },
+    "1724": {
+      "name": "TOA S Stygian Cloak",
+      "main_category": "Armor",
+      "subcategory": "Cloak",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1724.jpg"
+    },
+    "1725": {
+      "name": "TOA V Magma Cloak",
+      "main_category": "Armor",
+      "subcategory": "Cloak",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1725.jpg"
+    },
+    "1726": {
+      "name": "TOA V Mist Cloak",
+      "main_category": "Armor",
+      "subcategory": "Cloak",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1726.jpg"
+    },
+    "1727": {
+      "name": "TOA A Cloud Cloak",
+      "main_category": "Armor",
+      "subcategory": "Cloak",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1727.jpg"
+    },
+    "3632": {
+      "name": "Corrupt Mino Cloak 1",
+      "main_category": "Armor",
+      "subcategory": "Cloak",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/3632.jpg"
+    },
+    "3633": {
+      "name": "Corrupt Mino Cloak 2",
+      "main_category": "Armor",
+      "subcategory": "Cloak",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/3633.jpg"
+    },
+    "3634": {
+      "name": "Corrupt Mino Cloak 3",
+      "main_category": "Armor",
+      "subcategory": "Cloak",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/3634.jpg"
+    },
+    "3635": {
+      "name": "Regular Mino Cloak 1",
+      "main_category": "Armor",
+      "subcategory": "Cloak",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/3635.jpg"
+    },
+    "40": {
+      "name": "Hard Leather Boots",
+      "main_category": "Armor",
+      "subcategory": "Feet",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/40.jpg"
+    },
+    "45": {
+      "name": "Chain Boots",
+      "main_category": "Armor",
+      "subcategory": "Feet",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/45.jpg"
+    },
+    "50": {
+      "name": "Alb Plate 1 Boots",
+      "main_category": "Armor",
+      "subcategory": "Feet",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/50.jpg"
+    },
+    "54": {
+      "name": "riveted (studded) boots",
+      "main_category": "Armor",
+      "subcategory": "Feet",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/54.jpg"
+    },
+    "78": {
+      "name": "Reinf. Leather Boots",
+      "main_category": "Armor",
+      "subcategory": "Feet",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/78.jpg"
+    },
+    "84": {
+      "name": "Studded Studs Boots",
+      "main_category": "Armor",
+      "subcategory": "Feet",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/84.jpg"
+    },
+    "90": {
+      "name": "Alb Plate 2 Boots",
+      "main_category": "Armor",
+      "subcategory": "Feet",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/90.jpg"
+    },
+    "133": {
+      "name": "Leather Boots",
+      "main_category": "Armor",
+      "subcategory": "Feet",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/133.jpg"
+    },
+    "138": {
+      "name": "Patterned Leather Boots",
+      "main_category": "Armor",
+      "subcategory": "Feet",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/138.jpg"
+    },
+    "143": {
+      "name": "Cloth Boots",
+      "main_category": "Armor",
+      "subcategory": "Feet",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/143.jpg"
+    },
+    "150": {
+      "name": "Crude Leather Boots",
+      "main_category": "Armor",
+      "subcategory": "Feet",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/150.jpg"
+    },
+    "155": {
+      "name": "Quilted (cloth) Boots",
+      "main_category": "Armor",
+      "subcategory": "Feet",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/155.jpg"
+    },
+    "160": {
+      "name": "Heavy Studded Boots",
+      "main_category": "Armor",
+      "subcategory": "Feet",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/160.jpg"
+    },
+    "165": {
+      "name": "New Cloth 3 Boots",
+      "main_category": "Armor",
+      "subcategory": "Feet",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/165.jpg"
+    },
+    "170": {
+      "name": "New Cloth 4 Boots",
+      "main_category": "Armor",
+      "subcategory": "Feet",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/170.jpg"
+    },
+    "175": {
+      "name": "Special Cloth Boots",
+      "main_category": "Armor",
+      "subcategory": "Feet",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/175.jpg"
+    },
+    "180": {
+      "name": "Special Leather Boots",
+      "main_category": "Armor",
+      "subcategory": "Feet",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/180.jpg"
+    },
+    "185": {
+      "name": "Chain 2 Boots",
+      "main_category": "Armor",
+      "subcategory": "Feet",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/185.jpg"
+    },
+    "190": {
+      "name": "Chain 3 Boots",
+      "main_category": "Armor",
+      "subcategory": "Feet",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/190.jpg"
+    },
+    "195": {
+      "name": "Chain 4 Boots",
+      "main_category": "Armor",
+      "subcategory": "Feet",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/195.jpg"
+    },
+    "200": {
+      "name": "Special Chain Boots",
+      "main_category": "Armor",
+      "subcategory": "Feet",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/200.jpg"
+    },
+    "205": {
+      "name": "Plate 3 Boots",
+      "main_category": "Armor",
+      "subcategory": "Feet",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/205.jpg"
+    },
+    "210": {
+      "name": "Plate 4 Boots",
+      "main_category": "Armor",
+      "subcategory": "Feet",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/210.jpg"
+    },
+    "215": {
+      "name": "Special Plate Boots",
+      "main_category": "Armor",
+      "subcategory": "Feet",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/215.jpg"
+    },
+    "220": {
+      "name": "Studded 4 Boots",
+      "main_category": "Armor",
+      "subcategory": "Feet",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/220.jpg"
+    },
+    "225": {
+      "name": "Special Studded Boots",
+      "main_category": "Armor",
+      "subcategory": "Feet",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/225.jpg"
+    },
+    "234": {
+      "name": "Norse Studded Boots",
+      "main_category": "Armor",
+      "subcategory": "Feet",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/234.jpg"
+    },
+    "239": {
+      "name": "Norse Chain Boots",
+      "main_category": "Armor",
+      "subcategory": "Feet",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/239.jpg"
+    },
+    "34": {
+      "name": "Leather Gloves",
+      "main_category": "Armor",
+      "subcategory": "Hands",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/34.jpg"
+    },
+    "39": {
+      "name": "Hard Leather Gloves",
+      "main_category": "Armor",
+      "subcategory": "Hands",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/39.jpg"
+    },
+    "44": {
+      "name": "Chain Gloves",
+      "main_category": "Armor",
+      "subcategory": "Hands",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/44.jpg"
+    },
+    "49": {
+      "name": "Alb Plate 1 Gloves",
+      "main_category": "Armor",
+      "subcategory": "Hands",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/49.jpg"
+    },
+    "77": {
+      "name": "Reinf. Leather Gloves",
+      "main_category": "Armor",
+      "subcategory": "Hands",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/77.jpg"
+    },
+    "80": {
+      "name": "riveted(studded) gloves",
+      "main_category": "Armor",
+      "subcategory": "Hands",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/80.jpg"
+    },
+    "85": {
+      "name": "Studded Studs Gloves",
+      "main_category": "Armor",
+      "subcategory": "Hands",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/85.jpg"
+    },
+    "89": {
+      "name": "Alb Plate 2 Gloves",
+      "main_category": "Armor",
+      "subcategory": "Hands",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/89.jpg"
+    },
+    "137": {
+      "name": "Patterned Leather Gloves",
+      "main_category": "Armor",
+      "subcategory": "Hands",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/137.jpg"
+    },
+    "142": {
+      "name": "Cloth Gloves",
+      "main_category": "Armor",
+      "subcategory": "Hands",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/142.jpg"
+    },
+    "149": {
+      "name": "Crude Leather Gloves",
+      "main_category": "Armor",
+      "subcategory": "Hands",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/149.jpg"
+    },
+    "154": {
+      "name": "Quilted (cloth) Gloves",
+      "main_category": "Armor",
+      "subcategory": "Hands",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/154.jpg"
+    },
+    "159": {
+      "name": "Heavy Studded Gloves",
+      "main_category": "Armor",
+      "subcategory": "Hands",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/159.jpg"
+    },
+    "164": {
+      "name": "New Cloth 3 Gloves",
+      "main_category": "Armor",
+      "subcategory": "Hands",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/164.jpg"
+    },
+    "169": {
+      "name": "New Cloth 4 Gloves",
+      "main_category": "Armor",
+      "subcategory": "Hands",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/169.jpg"
+    },
+    "174": {
+      "name": "Special Cloth Gloves",
+      "main_category": "Armor",
+      "subcategory": "Hands",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/174.jpg"
+    },
+    "179": {
+      "name": "Special Leather Gloves",
+      "main_category": "Armor",
+      "subcategory": "Hands",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/179.jpg"
+    },
+    "184": {
+      "name": "Chain 2 Gloves",
+      "main_category": "Armor",
+      "subcategory": "Hands",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/184.jpg"
+    },
+    "189": {
+      "name": "Chain 3 Gloves",
+      "main_category": "Armor",
+      "subcategory": "Hands",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/189.jpg"
+    },
+    "194": {
+      "name": "Chain 4 Gloves",
+      "main_category": "Armor",
+      "subcategory": "Hands",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/194.jpg"
+    },
+    "199": {
+      "name": "Special Chain Gloves",
+      "main_category": "Armor",
+      "subcategory": "Hands",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/199.jpg"
+    },
+    "204": {
+      "name": "Plate 3 Gloves",
+      "main_category": "Armor",
+      "subcategory": "Hands",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/204.jpg"
+    },
+    "209": {
+      "name": "Plate 4 Gloves",
+      "main_category": "Armor",
+      "subcategory": "Hands",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/209.jpg"
+    },
+    "214": {
+      "name": "Special Plate Gloves",
+      "main_category": "Armor",
+      "subcategory": "Hands",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/214.jpg"
+    },
+    "219": {
+      "name": "Studded 4 Gloves",
+      "main_category": "Armor",
+      "subcategory": "Hands",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/219.jpg"
+    },
+    "224": {
+      "name": "Special Studded Gloves",
+      "main_category": "Armor",
+      "subcategory": "Hands",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/224.jpg"
+    },
+    "233": {
+      "name": "Norse Studded Gloves",
+      "main_category": "Armor",
+      "subcategory": "Hands",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/233.jpg"
+    },
+    "238": {
+      "name": "Norse Chain Gloves",
+      "main_category": "Armor",
+      "subcategory": "Hands",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/238.jpg"
+    },
+    "62": {
+      "name": "Albion Leather Helm 1",
+      "main_category": "Armor",
+      "subcategory": "Helm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/62.jpg"
+    },
+    "63": {
+      "name": "Albion Chain Helmet 1 (Cap)",
+      "main_category": "Armor",
+      "subcategory": "Helm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/63.jpg"
+    },
+    "64": {
+      "name": "Albion Plate Helmet 1(Cap)",
+      "main_category": "Armor",
+      "subcategory": "Helm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/64.jpg"
+    },
+    "93": {
+      "name": "Albion Plate Helmet 2 (Full)",
+      "main_category": "Armor",
+      "subcategory": "Helm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/93.jpg"
+    },
+    "94": {
+      "name": "Albion Guard Plate Helmet 1 (Cap)",
+      "main_category": "Armor",
+      "subcategory": "Helm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/94.jpg"
+    },
+    "95": {
+      "name": "Albion Guard Plate Helmet 2 (full)",
+      "main_category": "Armor",
+      "subcategory": "Helm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/95.jpg"
+    },
+    "335": {
+      "name": "Norse Leather Helm 1",
+      "main_category": "Armor",
+      "subcategory": "Helm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/335.jpg"
+    },
+    "336": {
+      "name": "Norse Leather Helm 2",
+      "main_category": "Armor",
+      "subcategory": "Helm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/336.jpg"
+    },
+    "337": {
+      "name": "Norse Leather Helm 3",
+      "main_category": "Armor",
+      "subcategory": "Helm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/337.jpg"
+    },
+    "438": {
+      "name": "Celtic Leather helm 1",
+      "main_category": "Armor",
+      "subcategory": "Helm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/438.jpg"
+    },
+    "439": {
+      "name": "Celtic Leather helm 2",
+      "main_category": "Armor",
+      "subcategory": "Helm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/439.jpg"
+    },
+    "440": {
+      "name": "Celtic Leather helm 3",
+      "main_category": "Armor",
+      "subcategory": "Helm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/440.jpg"
+    },
+    "823": {
+      "name": "Albion Cloth Helm",
+      "main_category": "Armor",
+      "subcategory": "Helm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/823.jpg"
+    },
+    "824": {
+      "name": "Albion Studded Helm",
+      "main_category": "Armor",
+      "subcategory": "Helm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/824.jpg"
+    },
+    "825": {
+      "name": "Norse Cloth Cap",
+      "main_category": "Armor",
+      "subcategory": "Helm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/825.jpg"
+    },
+    "826": {
+      "name": "Celtic Cloth Cap 1",
+      "main_category": "Armor",
+      "subcategory": "Helm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/826.jpg"
+    },
+    "827": {
+      "name": "Hibernia Studded Cap",
+      "main_category": "Armor",
+      "subcategory": "Helm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/827.jpg"
+    },
+    "829": {
+      "name": "Norse studded helm 1",
+      "main_category": "Armor",
+      "subcategory": "Helm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/829.jpg"
+    },
+    "830": {
+      "name": "Norse studded helm 2",
+      "main_category": "Armor",
+      "subcategory": "Helm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/830.jpg"
+    },
+    "831": {
+      "name": "Norse studded helm 3",
+      "main_category": "Armor",
+      "subcategory": "Helm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/831.jpg"
+    },
+    "832": {
+      "name": "Norse chain helm 1",
+      "main_category": "Armor",
+      "subcategory": "Helm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/832.jpg"
+    },
+    "833": {
+      "name": "Norse chain helm 2",
+      "main_category": "Armor",
+      "subcategory": "Helm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/833.jpg"
+    },
+    "834": {
+      "name": "Norse chain helm 3",
+      "main_category": "Armor",
+      "subcategory": "Helm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/834.jpg"
+    },
+    "835": {
+      "name": "Celtic reinforced helm 1",
+      "main_category": "Armor",
+      "subcategory": "Helm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/835.jpg"
+    },
+    "836": {
+      "name": "Celtic reinforced helm 2",
+      "main_category": "Armor",
+      "subcategory": "Helm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/836.jpg"
+    },
+    "837": {
+      "name": "Celtic reinforced helm 3",
+      "main_category": "Armor",
+      "subcategory": "Helm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/837.jpg"
+    },
+    "838": {
+      "name": "Celtic scale helm 1",
+      "main_category": "Armor",
+      "subcategory": "Helm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/838.jpg"
+    },
+    "839": {
+      "name": "Celtic scale helm 2",
+      "main_category": "Armor",
+      "subcategory": "Helm",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/839.jpg"
+    },
+    "31": {
+      "name": "Leather Tunic",
+      "main_category": "Armor",
+      "subcategory": "Chest",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/31.jpg"
+    },
+    "36": {
+      "name": "Hard Leather Vest",
+      "main_category": "Armor",
+      "subcategory": "Chest",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/36.jpg"
+    },
+    "41": {
+      "name": "Chain Hauberk",
+      "main_category": "Armor",
+      "subcategory": "Chest",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/41.jpg"
+    },
+    "46": {
+      "name": "Alb Plate 1 Breast",
+      "main_category": "Armor",
+      "subcategory": "Chest",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/46.jpg"
+    },
+    "51": {
+      "name": "Riveted (Studded) armor",
+      "main_category": "Armor",
+      "subcategory": "Chest",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/51.jpg"
+    },
+    "58": {
+      "name": "Robe 1",
+      "main_category": "Armor",
+      "subcategory": "Chest",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/58.jpg"
+    },
+    "65": {
+      "name": "Robe 2",
+      "main_category": "Armor",
+      "subcategory": "Chest",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/65.jpg"
+    },
+    "66": {
+      "name": "Robe 3",
+      "main_category": "Armor",
+      "subcategory": "Chest",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/66.jpg"
+    },
+    "74": {
+      "name": "Rein. Leather Vest",
+      "main_category": "Armor",
+      "subcategory": "Chest",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/74.jpg"
+    },
+    "81": {
+      "name": "Studded Studs Vest",
+      "main_category": "Armor",
+      "subcategory": "Chest",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/81.jpg"
+    },
+    "86": {
+      "name": "Alb Plate 2 Breast",
+      "main_category": "Armor",
+      "subcategory": "Chest",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/86.jpg"
+    },
+    "97": {
+      "name": "Fancy Robe #2",
+      "main_category": "Armor",
+      "subcategory": "Chest",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/97.jpg"
+    },
+    "98": {
+      "name": "Fance Robe #3",
+      "main_category": "Armor",
+      "subcategory": "Chest",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/98.jpg"
+    },
+    "134": {
+      "name": "Patterned Leather Vest",
+      "main_category": "Armor",
+      "subcategory": "Chest",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/134.jpg"
+    },
+    "139": {
+      "name": "Cloth Vest",
+      "main_category": "Armor",
+      "subcategory": "Chest",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/139.jpg"
+    },
+    "146": {
+      "name": "Crude Leather Vest",
+      "main_category": "Armor",
+      "subcategory": "Chest",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/146.jpg"
+    },
+    "151": {
+      "name": "Quilted (cloth) vest",
+      "main_category": "Armor",
+      "subcategory": "Chest",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/151.jpg"
+    },
+    "156": {
+      "name": "Heavy Studded Vest",
+      "main_category": "Armor",
+      "subcategory": "Chest",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/156.jpg"
+    },
+    "161": {
+      "name": "New Cloth 3 Vest",
+      "main_category": "Armor",
+      "subcategory": "Chest",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/161.jpg"
+    },
+    "166": {
+      "name": "New Cloth 4 Vest",
+      "main_category": "Armor",
+      "subcategory": "Chest",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/166.jpg"
+    },
+    "171": {
+      "name": "Special Cloth Vest",
+      "main_category": "Armor",
+      "subcategory": "Chest",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/171.jpg"
+    },
+    "176": {
+      "name": "Special Leather Vest",
+      "main_category": "Armor",
+      "subcategory": "Chest",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/176.jpg"
+    },
+    "181": {
+      "name": "Chain 2 Hauberk",
+      "main_category": "Armor",
+      "subcategory": "Chest",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/181.jpg"
+    },
+    "186": {
+      "name": "Chain 3 Hauberk",
+      "main_category": "Armor",
+      "subcategory": "Chest",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/186.jpg"
+    },
+    "191": {
+      "name": "Chain 4 Hauberk",
+      "main_category": "Armor",
+      "subcategory": "Chest",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/191.jpg"
+    },
+    "196": {
+      "name": "Special Chain Hauberk",
+      "main_category": "Armor",
+      "subcategory": "Chest",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/196.jpg"
+    },
+    "201": {
+      "name": "Plate 3 Breast",
+      "main_category": "Armor",
+      "subcategory": "Chest",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/201.jpg"
+    },
+    "206": {
+      "name": "Plate 4 Breast",
+      "main_category": "Armor",
+      "subcategory": "Chest",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/206.jpg"
+    },
+    "32": {
+      "name": "Leather Leggings",
+      "main_category": "Armor",
+      "subcategory": "Legs",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/32.jpg"
+    },
+    "37": {
+      "name": "Hard Leather Legs",
+      "main_category": "Armor",
+      "subcategory": "Legs",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/37.jpg"
+    },
+    "42": {
+      "name": "Chain Leggings",
+      "main_category": "Armor",
+      "subcategory": "Legs",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/42.jpg"
+    },
+    "47": {
+      "name": "Alb Plate 1 Legs",
+      "main_category": "Armor",
+      "subcategory": "Legs",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/47.jpg"
+    },
+    "52": {
+      "name": "riveted (studded) legs",
+      "main_category": "Armor",
+      "subcategory": "Legs",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/52.jpg"
+    },
+    "75": {
+      "name": "Reinf. Leather Legs",
+      "main_category": "Armor",
+      "subcategory": "Legs",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/75.jpg"
+    },
+    "82": {
+      "name": "Studded Studs Legs",
+      "main_category": "Armor",
+      "subcategory": "Legs",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/82.jpg"
+    },
+    "87": {
+      "name": "Alb Plate 2 Legs",
+      "main_category": "Armor",
+      "subcategory": "Legs",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/87.jpg"
+    },
+    "135": {
+      "name": "Patterned Leather Legs",
+      "main_category": "Armor",
+      "subcategory": "Legs",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/135.jpg"
+    },
+    "140": {
+      "name": "Cloth Legs",
+      "main_category": "Armor",
+      "subcategory": "Legs",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/140.jpg"
+    },
+    "147": {
+      "name": "Crude Leather Legs",
+      "main_category": "Armor",
+      "subcategory": "Legs",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/147.jpg"
+    },
+    "152": {
+      "name": "Quilted (cloth) Legs",
+      "main_category": "Armor",
+      "subcategory": "Legs",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/152.jpg"
+    },
+    "157": {
+      "name": "Heavy Studded Legs",
+      "main_category": "Armor",
+      "subcategory": "Legs",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/157.jpg"
+    },
+    "162": {
+      "name": "New Cloth 3 Legs",
+      "main_category": "Armor",
+      "subcategory": "Legs",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/162.jpg"
+    },
+    "167": {
+      "name": "New Cloth 4 Legs",
+      "main_category": "Armor",
+      "subcategory": "Legs",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/167.jpg"
+    },
+    "172": {
+      "name": "Special Cloth Legs",
+      "main_category": "Armor",
+      "subcategory": "Legs",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/172.jpg"
+    },
+    "177": {
+      "name": "Special Leather Legs",
+      "main_category": "Armor",
+      "subcategory": "Legs",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/177.jpg"
+    },
+    "182": {
+      "name": "Chain 2 Leggings",
+      "main_category": "Armor",
+      "subcategory": "Legs",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/182.jpg"
+    },
+    "187": {
+      "name": "Chain 3 Leggings",
+      "main_category": "Armor",
+      "subcategory": "Legs",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/187.jpg"
+    },
+    "192": {
+      "name": "Chain 4 Leggings",
+      "main_category": "Armor",
+      "subcategory": "Legs",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/192.jpg"
+    },
+    "197": {
+      "name": "Special Chain Leggings",
+      "main_category": "Armor",
+      "subcategory": "Legs",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/197.jpg"
+    },
+    "202": {
+      "name": "Plate 3 Legs",
+      "main_category": "Armor",
+      "subcategory": "Legs",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/202.jpg"
+    },
+    "207": {
+      "name": "Plate 4 Legs",
+      "main_category": "Armor",
+      "subcategory": "Legs",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/207.jpg"
+    },
+    "212": {
+      "name": "Special Plate Legs",
+      "main_category": "Armor",
+      "subcategory": "Legs",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/212.jpg"
+    },
+    "217": {
+      "name": "Studded 4 Legs",
+      "main_category": "Armor",
+      "subcategory": "Legs",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/217.jpg"
+    },
+    "222": {
+      "name": "Special Studded Legs",
+      "main_category": "Armor",
+      "subcategory": "Legs",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/222.jpg"
+    },
+    "231": {
+      "name": "Norse Studded Legs",
+      "main_category": "Armor",
+      "subcategory": "Legs",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/231.jpg"
+    },
+    "236": {
+      "name": "Norse Chain Legs",
+      "main_category": "Armor",
+      "subcategory": "Legs",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/236.jpg"
+    },
+    "33": {
+      "name": "Leather Arms",
+      "main_category": "Armor",
+      "subcategory": "Sleeves",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/33.jpg"
+    },
+    "38": {
+      "name": "Hard Leather Arms",
+      "main_category": "Armor",
+      "subcategory": "Sleeves",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/38.jpg"
+    },
+    "43": {
+      "name": "Chain Arms",
+      "main_category": "Armor",
+      "subcategory": "Sleeves",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/43.jpg"
+    },
+    "48": {
+      "name": "Alb Plate 1 Arms",
+      "main_category": "Armor",
+      "subcategory": "Sleeves",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/48.jpg"
+    },
+    "53": {
+      "name": "riveted (studded) arms",
+      "main_category": "Armor",
+      "subcategory": "Sleeves",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/53.jpg"
+    },
+    "76": {
+      "name": "Reinf. Leather Arms",
+      "main_category": "Armor",
+      "subcategory": "Sleeves",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/76.jpg"
+    },
+    "83": {
+      "name": "Studded Studs Arms",
+      "main_category": "Armor",
+      "subcategory": "Sleeves",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/83.jpg"
+    },
+    "88": {
+      "name": "Alb Plate 2 Arms",
+      "main_category": "Armor",
+      "subcategory": "Sleeves",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/88.jpg"
+    },
+    "136": {
+      "name": "Patterned Leather Arms",
+      "main_category": "Armor",
+      "subcategory": "Sleeves",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/136.jpg"
+    },
+    "141": {
+      "name": "Cloth Arms",
+      "main_category": "Armor",
+      "subcategory": "Sleeves",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/141.jpg"
+    },
+    "148": {
+      "name": "Crude Leather Arms",
+      "main_category": "Armor",
+      "subcategory": "Sleeves",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/148.jpg"
+    },
+    "153": {
+      "name": "Quilted (cloth) Arms",
+      "main_category": "Armor",
+      "subcategory": "Sleeves",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/153.jpg"
+    },
+    "158": {
+      "name": "Heavy Studded Arms",
+      "main_category": "Armor",
+      "subcategory": "Sleeves",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/158.jpg"
+    },
+    "163": {
+      "name": "New Cloth 3 Arms",
+      "main_category": "Armor",
+      "subcategory": "Sleeves",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/163.jpg"
+    },
+    "168": {
+      "name": "New Cloth 4 Arms",
+      "main_category": "Armor",
+      "subcategory": "Sleeves",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/168.jpg"
+    },
+    "173": {
+      "name": "Special Cloth Arms",
+      "main_category": "Armor",
+      "subcategory": "Sleeves",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/173.jpg"
+    },
+    "178": {
+      "name": "Special Leather Arms",
+      "main_category": "Armor",
+      "subcategory": "Sleeves",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/178.jpg"
+    },
+    "183": {
+      "name": "Chain 2 Arms",
+      "main_category": "Armor",
+      "subcategory": "Sleeves",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/183.jpg"
+    },
+    "188": {
+      "name": "Chain 3 Arms",
+      "main_category": "Armor",
+      "subcategory": "Sleeves",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/188.jpg"
+    },
+    "193": {
+      "name": "Chain 4 Arms",
+      "main_category": "Armor",
+      "subcategory": "Sleeves",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/193.jpg"
+    },
+    "198": {
+      "name": "Special Chain Arms",
+      "main_category": "Armor",
+      "subcategory": "Sleeves",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/198.jpg"
+    },
+    "203": {
+      "name": "Plate 3 Arms",
+      "main_category": "Armor",
+      "subcategory": "Sleeves",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/203.jpg"
+    },
+    "208": {
+      "name": "Plate 4 Arms",
+      "main_category": "Armor",
+      "subcategory": "Sleeves",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/208.jpg"
+    },
+    "213": {
+      "name": "Special Plate Arms",
+      "main_category": "Armor",
+      "subcategory": "Sleeves",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/213.jpg"
+    },
+    "218": {
+      "name": "Studded 4 Arms",
+      "main_category": "Armor",
+      "subcategory": "Sleeves",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/218.jpg"
+    },
+    "223": {
+      "name": "Special Studded Arms",
+      "main_category": "Armor",
+      "subcategory": "Sleeves",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/223.jpg"
+    },
+    "232": {
+      "name": "Norse Studded Arms",
+      "main_category": "Armor",
+      "subcategory": "Sleeves",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/232.jpg"
+    },
+    "237": {
+      "name": "Norse Chain Arms",
+      "main_category": "Armor",
+      "subcategory": "Sleeves",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/237.jpg"
+    },
+    "1315": {
+      "name": "Exterior Bench 1",
+      "main_category": "Armor",
+      "subcategory": "Housing",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1315.jpg"
+    },
+    "1316": {
+      "name": "Exterior Bench 2",
+      "main_category": "Armor",
+      "subcategory": "Housing",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1316.jpg"
+    },
+    "1317": {
+      "name": "Exterior Birdbath",
+      "main_category": "Armor",
+      "subcategory": "Housing",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1317.jpg"
+    },
+    "1318": {
+      "name": "Exterior Fountain 01",
+      "main_category": "Armor",
+      "subcategory": "Housing",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1318.jpg"
+    },
+    "1319": {
+      "name": "Exterior Fountain 02",
+      "main_category": "Armor",
+      "subcategory": "Housing",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1319.jpg"
+    },
+    "1320": {
+      "name": "Exterior Fountain 03",
+      "main_category": "Armor",
+      "subcategory": "Housing",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1320.jpg"
+    },
+    "1321": {
+      "name": "Exterior Fountain 04",
+      "main_category": "Armor",
+      "subcategory": "Housing",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1321.jpg"
+    },
+    "1322": {
+      "name": "Exterior Garden 01",
+      "main_category": "Armor",
+      "subcategory": "Housing",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1322.jpg"
+    },
+    "1323": {
+      "name": "Exterior Garden 02",
+      "main_category": "Armor",
+      "subcategory": "Housing",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1323.jpg"
+    },
+    "1324": {
+      "name": "Exterior Garden 03",
+      "main_category": "Armor",
+      "subcategory": "Housing",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1324.jpg"
+    },
+    "1325": {
+      "name": "Exterior Hedge 01",
+      "main_category": "Armor",
+      "subcategory": "Housing",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1325.jpg"
+    },
+    "1326": {
+      "name": "Exterior Plant 01",
+      "main_category": "Armor",
+      "subcategory": "Housing",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1326.jpg"
+    },
+    "1327": {
+      "name": "Exterior Plant 02",
+      "main_category": "Armor",
+      "subcategory": "Housing",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1327.jpg"
+    },
+    "1328": {
+      "name": "Exterior Sundial",
+      "main_category": "Armor",
+      "subcategory": "Housing",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1328.jpg"
+    },
+    "1329": {
+      "name": "Long Wall 1",
+      "main_category": "Armor",
+      "subcategory": "Housing",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1329.jpg"
+    },
+    "1330": {
+      "name": "Wall 2 (Corner)",
+      "main_category": "Armor",
+      "subcategory": "Housing",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1330.jpg"
+    },
+    "1331": {
+      "name": "Short Wall 3",
+      "main_category": "Armor",
+      "subcategory": "Housing",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1331.jpg"
+    },
+    "1338": {
+      "name": "Barrel",
+      "main_category": "Armor",
+      "subcategory": "Housing",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1338.jpg"
+    },
+    "1339": {
+      "name": "Bed 01",
+      "main_category": "Armor",
+      "subcategory": "Housing",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1339.jpg"
+    },
+    "1340": {
+      "name": "Bed 02",
+      "main_category": "Armor",
+      "subcategory": "Housing",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1340.jpg"
+    },
+    "1341": {
+      "name": "Bed 03",
+      "main_category": "Armor",
+      "subcategory": "Housing",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1341.jpg"
+    },
+    "1342": {
+      "name": "Bench 01",
+      "main_category": "Armor",
+      "subcategory": "Housing",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1342.jpg"
+    },
+    "1343": {
+      "name": "Bench 02",
+      "main_category": "Armor",
+      "subcategory": "Housing",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1343.jpg"
+    },
+    "1344": {
+      "name": "Bench 03",
+      "main_category": "Armor",
+      "subcategory": "Housing",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1344.jpg"
+    },
+    "1345": {
+      "name": "Bookshelf 01",
+      "main_category": "Armor",
+      "subcategory": "Housing",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1345.jpg"
+    },
+    "1346": {
+      "name": "Bookshelf 02",
+      "main_category": "Armor",
+      "subcategory": "Housing",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1346.jpg"
+    },
+    "1347": {
+      "name": "Box",
+      "main_category": "Armor",
+      "subcategory": "Housing",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1347.jpg"
+    },
+    "1348": {
+      "name": "Chair 01",
+      "main_category": "Armor",
+      "subcategory": "Housing",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1348.jpg"
+    },
+    "561": {
+      "name": "Ballista",
+      "main_category": "Armor",
+      "subcategory": "Siege",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/561.jpg"
+    },
+    "562": {
+      "name": "Ram",
+      "main_category": "Armor",
+      "subcategory": "Siege",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/562.jpg"
+    },
+    "563": {
+      "name": "Mangonel",
+      "main_category": "Armor",
+      "subcategory": "Siege",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/563.jpg"
+    },
+    "1673": {
+      "name": "trebuchet",
+      "main_category": "Armor",
+      "subcategory": "Siege",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1673.jpg"
+    },
+    "1674": {
+      "name": "Ballista Low",
+      "main_category": "Armor",
+      "subcategory": "Siege",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1674.jpg"
+    },
+    "1675": {
+      "name": "Ballista High",
+      "main_category": "Armor",
+      "subcategory": "Siege",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1675.jpg"
+    },
+    "1676": {
+      "name": "Catapult W",
+      "main_category": "Armor",
+      "subcategory": "Siege",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1676.jpg"
+    },
+    "1677": {
+      "name": "Catapult G",
+      "main_category": "Armor",
+      "subcategory": "Siege",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1677.jpg"
+    },
+    "1678": {
+      "name": "Ram High",
+      "main_category": "Armor",
+      "subcategory": "Siege",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1678.jpg"
+    },
+    "1679": {
+      "name": "Ram Mid",
+      "main_category": "Armor",
+      "subcategory": "Siege",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1679.jpg"
+    },
+    "1680": {
+      "name": "Ram Low",
+      "main_category": "Armor",
+      "subcategory": "Siege",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1680.jpg"
+    },
+    "2594": {
+      "name": "Frontiers Mounted Ballista",
+      "main_category": "Armor",
+      "subcategory": "Siege",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2594.jpg"
+    },
+    "2596": {
+      "name": "Frontiers Ranged Ballista",
+      "main_category": "Armor",
+      "subcategory": "Siege",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2596.jpg"
+    },
+    "2597": {
+      "name": "Frontiers Mounted Catapult",
+      "main_category": "Armor",
+      "subcategory": "Siege",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2597.jpg"
+    },
+    "2598": {
+      "name": "Ranged Catapult",
+      "main_category": "Armor",
+      "subcategory": "Siege",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2598.jpg"
+    },
+    "2599": {
+      "name": "Frontiers Ranged Trebuchet",
+      "main_category": "Armor",
+      "subcategory": "Siege",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2599.jpg"
+    },
+    "2600": {
+      "name": "Light Siege Ram",
+      "main_category": "Armor",
+      "subcategory": "Siege",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2600.jpg"
+    },
+    "2601": {
+      "name": "Medium Siege Ram",
+      "main_category": "Armor",
+      "subcategory": "Siege",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2601.jpg"
+    },
+    "2602": {
+      "name": "Heavy Siege Ram",
+      "main_category": "Armor",
+      "subcategory": "Siege",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2602.jpg"
+    },
+    "2604": {
+      "name": "Frontiers Scorpion",
+      "main_category": "Armor",
+      "subcategory": "Siege",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2604.jpg"
+    },
+    "2605": {
+      "name": "Frontiers Mini Ram",
+      "main_category": "Armor",
+      "subcategory": "Siege",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2605.jpg"
+    },
+    "2606": {
+      "name": "Frontiers Mounted Trebuchet",
+      "main_category": "Armor",
+      "subcategory": "Siege",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2606.jpg"
+    },
+    "2607": {
+      "name": "Frontiers Boiling Oil",
+      "main_category": "Armor",
+      "subcategory": "Siege",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2607.jpg"
+    },
+    "2645": {
+      "name": "Frontiers Ranged Scorpion",
+      "main_category": "Armor",
+      "subcategory": "Siege",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2645.jpg"
+    },
+    "2652": {
+      "name": "Mine Cart",
+      "main_category": "Armor",
+      "subcategory": "Siege",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2652.jpg"
+    },
+    "145": {
+      "name": "Albion Gravestone",
+      "main_category": "Armor",
+      "subcategory": "World",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/145.jpg"
+    },
+    "464": {
+      "name": "Albion Pennant",
+      "main_category": "Armor",
+      "subcategory": "World",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/464.jpg"
+    },
+    "465": {
+      "name": "Midgard Pennant",
+      "main_category": "Armor",
+      "subcategory": "World",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/465.jpg"
+    },
+    "466": {
+      "name": "Hibernian Pennant",
+      "main_category": "Armor",
+      "subcategory": "World",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/466.jpg"
+    },
+    "478": {
+      "name": "Forge",
+      "main_category": "Armor",
+      "subcategory": "World",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/478.jpg"
+    },
+    "479": {
+      "name": "Stretcher",
+      "main_category": "Armor",
+      "subcategory": "World",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/479.jpg"
+    },
+    "480": {
+      "name": "Loom",
+      "main_category": "Armor",
+      "subcategory": "World",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/480.jpg"
+    },
+    "481": {
+      "name": "Lathe",
+      "main_category": "Armor",
+      "subcategory": "World",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/481.jpg"
+    },
+    "482": {
+      "name": "Trebutchet",
+      "main_category": "Armor",
+      "subcategory": "World",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/482.jpg"
+    },
+    "512": {
+      "name": "Arrows",
+      "main_category": "Armor",
+      "subcategory": "World",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/512.jpg"
+    },
+    "630": {
+      "name": "Albion Relic Staff",
+      "main_category": "Armor",
+      "subcategory": "World",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/630.jpg"
+    },
+    "631": {
+      "name": "Albion Relic Scabbard",
+      "main_category": "Armor",
+      "subcategory": "World",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/631.jpg"
+    },
+    "632": {
+      "name": "Hiberniean Relic Cauldron",
+      "main_category": "Armor",
+      "subcategory": "World",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/632.jpg"
+    },
+    "633": {
+      "name": "Hibernian Relic Spear",
+      "main_category": "Armor",
+      "subcategory": "World",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/633.jpg"
+    },
+    "634": {
+      "name": "Norse Relic Hammer",
+      "main_category": "Armor",
+      "subcategory": "World",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/634.jpg"
+    },
+    "635": {
+      "name": "Norse Relic Horn",
+      "main_category": "Armor",
+      "subcategory": "World",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/635.jpg"
+    },
+    "636": {
+      "name": "norse gravestone",
+      "main_category": "Armor",
+      "subcategory": "World",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/636.jpg"
+    },
+    "637": {
+      "name": "hibernian gravestone",
+      "main_category": "Armor",
+      "subcategory": "World",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/637.jpg"
+    },
+    "679": {
+      "name": "Briton Guild Banner",
+      "main_category": "Armor",
+      "subcategory": "World",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/679.jpg"
+    },
+    "680": {
+      "name": "Hibernian Guild Banner",
+      "main_category": "Armor",
+      "subcategory": "World",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/680.jpg"
+    },
+    "681": {
+      "name": "Norse Guild Banner",
+      "main_category": "Armor",
+      "subcategory": "World",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/681.jpg"
+    },
+    "820": {
+      "name": "Alchemist Table",
+      "main_category": "Armor",
+      "subcategory": "World",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/820.jpg"
+    },
+    "1277": {
+      "name": "Ice Queen Ice Crown(MON ONLY)",
+      "main_category": "Armor",
+      "subcategory": "World",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1277.jpg"
+    },
+    "1293": {
+      "name": "Ground Target",
+      "main_category": "Armor",
+      "subcategory": "World",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1293.jpg"
+    },
+    "1306": {
+      "name": "Midgard PHouse Lot",
+      "main_category": "Armor",
+      "subcategory": "World",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1306.jpg"
+    }
+  },
+  "mobs": {
+    "1": {
+      "name": "Demon",
+      "main_category": "Biped",
+      "subcategory": "BipedMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/1.jpg"
+    },
+    "8": {
+      "name": "Briton Male Merchant 1",
+      "main_category": "Biped",
+      "subcategory": "BipedMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/8.jpg"
+    },
+    "9": {
+      "name": "Briton Male Merchant 2",
+      "main_category": "Biped",
+      "subcategory": "BipedMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/9.jpg"
+    },
+    "10": {
+      "name": "Briton Male Merchant 3",
+      "main_category": "Biped",
+      "subcategory": "BipedMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/10.jpg"
+    },
+    "14": {
+      "name": "Briton Male",
+      "main_category": "Biped",
+      "subcategory": "BipedMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/14.jpg"
+    },
+    "16": {
+      "name": "Briton Bandit 1",
+      "main_category": "Biped",
+      "subcategory": "BipedMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/16.jpg"
+    },
+    "17": {
+      "name": "Britain Bandit 2",
+      "main_category": "Biped",
+      "subcategory": "BipedMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/17.jpg"
+    },
+    "18": {
+      "name": "Briton Bandit Leader",
+      "main_category": "Biped",
+      "subcategory": "BipedMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/18.jpg"
+    },
+    "19": {
+      "name": "Female briton bandit caster",
+      "main_category": "Biped",
+      "subcategory": "BipedMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/19.jpg"
+    },
+    "20": {
+      "name": "Briton Bandit Lieutenant",
+      "main_category": "Biped",
+      "subcategory": "BipedMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/20.jpg"
+    },
+    "22": {
+      "name": "Player Skeleton w/Res",
+      "main_category": "Biped",
+      "subcategory": "BipedMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/22.jpg"
+    },
+    "23": {
+      "name": "Flesh Wight used for Player Model",
+      "main_category": "Biped",
+      "subcategory": "BipedMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/23.jpg"
+    },
+    "24": {
+      "name": "Small Skeleton",
+      "main_category": "Biped",
+      "subcategory": "BipedMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/24.jpg"
+    },
+    "25": {
+      "name": "Skeleton",
+      "main_category": "Biped",
+      "subcategory": "BipedMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/25.jpg"
+    },
+    "26": {
+      "name": "Large Skeleton",
+      "main_category": "Biped",
+      "subcategory": "BipedMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/26.jpg"
+    },
+    "27": {
+      "name": "Highlander Guard",
+      "main_category": "Biped",
+      "subcategory": "BipedMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/27.jpg"
+    },
+    "28": {
+      "name": "Briton Guard",
+      "main_category": "Biped",
+      "subcategory": "BipedMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/28.jpg"
+    },
+    "32": {
+      "name": "Briton Male",
+      "main_category": "Biped",
+      "subcategory": "BipedMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/32.jpg"
+    },
+    "33": {
+      "name": "Briton Male",
+      "main_category": "Biped",
+      "subcategory": "BipedMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/33.jpg"
+    },
+    "34": {
+      "name": "Briton Male",
+      "main_category": "Biped",
+      "subcategory": "BipedMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/34.jpg"
+    },
+    "39": {
+      "name": "High Male",
+      "main_category": "Biped",
+      "subcategory": "BipedMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/39.jpg"
+    },
+    "40": {
+      "name": "High Male",
+      "main_category": "Biped",
+      "subcategory": "BipedMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/40.jpg"
+    },
+    "41": {
+      "name": "High Male",
+      "main_category": "Biped",
+      "subcategory": "BipedMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/41.jpg"
+    },
+    "42": {
+      "name": "High Male",
+      "main_category": "Biped",
+      "subcategory": "BipedMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/42.jpg"
+    },
+    "48": {
+      "name": "Saracen Male",
+      "main_category": "Biped",
+      "subcategory": "BipedMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/48.jpg"
+    },
+    "49": {
+      "name": "Saracen Male",
+      "main_category": "Biped",
+      "subcategory": "BipedMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/49.jpg"
+    },
+    "50": {
+      "name": "Saracen Male",
+      "main_category": "Biped",
+      "subcategory": "BipedMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/50.jpg"
+    },
+    "51": {
+      "name": "Saracen Male",
+      "main_category": "Biped",
+      "subcategory": "BipedMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/51.jpg"
+    },
+    "5": {
+      "name": "Briton Female Merchant 1",
+      "main_category": "Biped",
+      "subcategory": "BipedFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/5.jpg"
+    },
+    "6": {
+      "name": "Briton Female Merchant 2",
+      "main_category": "Biped",
+      "subcategory": "BipedFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/6.jpg"
+    },
+    "7": {
+      "name": "Briton Female Merchant 3",
+      "main_category": "Biped",
+      "subcategory": "BipedFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/7.jpg"
+    },
+    "35": {
+      "name": "Briton Female",
+      "main_category": "Biped",
+      "subcategory": "BipedFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/35.jpg"
+    },
+    "36": {
+      "name": "Briton Female",
+      "main_category": "Biped",
+      "subcategory": "BipedFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/36.jpg"
+    },
+    "37": {
+      "name": "Briton Female",
+      "main_category": "Biped",
+      "subcategory": "BipedFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/37.jpg"
+    },
+    "38": {
+      "name": "Briton Female",
+      "main_category": "Biped",
+      "subcategory": "BipedFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/38.jpg"
+    },
+    "43": {
+      "name": "High Female",
+      "main_category": "Biped",
+      "subcategory": "BipedFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/43.jpg"
+    },
+    "44": {
+      "name": "High Female",
+      "main_category": "Biped",
+      "subcategory": "BipedFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/44.jpg"
+    },
+    "45": {
+      "name": "High Female",
+      "main_category": "Biped",
+      "subcategory": "BipedFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/45.jpg"
+    },
+    "46": {
+      "name": "High Female",
+      "main_category": "Biped",
+      "subcategory": "BipedFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/46.jpg"
+    },
+    "52": {
+      "name": "Saracen Female",
+      "main_category": "Biped",
+      "subcategory": "BipedFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/52.jpg"
+    },
+    "53": {
+      "name": "Saracen Female",
+      "main_category": "Biped",
+      "subcategory": "BipedFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/53.jpg"
+    },
+    "54": {
+      "name": "Saracen Female",
+      "main_category": "Biped",
+      "subcategory": "BipedFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/54.jpg"
+    },
+    "55": {
+      "name": "Saracen Female",
+      "main_category": "Biped",
+      "subcategory": "BipedFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/55.jpg"
+    },
+    "65": {
+      "name": "Avalonian Female",
+      "main_category": "Biped",
+      "subcategory": "BipedFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/65.jpg"
+    },
+    "66": {
+      "name": "Avalonian Female",
+      "main_category": "Biped",
+      "subcategory": "BipedFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/66.jpg"
+    },
+    "67": {
+      "name": "Avalonian Female",
+      "main_category": "Biped",
+      "subcategory": "BipedFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/67.jpg"
+    },
+    "68": {
+      "name": "Avalonian Female",
+      "main_category": "Biped",
+      "subcategory": "BipedFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/68.jpg"
+    },
+    "75": {
+      "name": "High Female Merchant 1",
+      "main_category": "Biped",
+      "subcategory": "BipedFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/75.jpg"
+    },
+    "76": {
+      "name": "High Female Merchant 2",
+      "main_category": "Biped",
+      "subcategory": "BipedFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/76.jpg"
+    },
+    "77": {
+      "name": "High Female Merchant 3",
+      "main_category": "Biped",
+      "subcategory": "BipedFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/77.jpg"
+    },
+    "81": {
+      "name": "Saracen Female Merchant 1",
+      "main_category": "Biped",
+      "subcategory": "BipedFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/81.jpg"
+    },
+    "82": {
+      "name": "Saracen Female Merchant 2",
+      "main_category": "Biped",
+      "subcategory": "BipedFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/82.jpg"
+    },
+    "83": {
+      "name": "Saracen Female Merchant 3",
+      "main_category": "Biped",
+      "subcategory": "BipedFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/83.jpg"
+    },
+    "87": {
+      "name": "Av Female Merchant 1",
+      "main_category": "Biped",
+      "subcategory": "BipedFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/87.jpg"
+    },
+    "88": {
+      "name": "av Female Merchant 2",
+      "main_category": "Biped",
+      "subcategory": "BipedFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/88.jpg"
+    },
+    "89": {
+      "name": "av Female Merchant 3",
+      "main_category": "Biped",
+      "subcategory": "BipedFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/89.jpg"
+    },
+    "1888": {
+      "name": "Celt Male Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/1888.jpg"
+    },
+    "1890": {
+      "name": "Lurikeen Male Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/1890.jpg"
+    },
+    "1892": {
+      "name": "Shar Male Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/1892.jpg"
+    },
+    "1994": {
+      "name": "Celt Male Tutorial Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/1994.jpg"
+    },
+    "1996": {
+      "name": "Lurikeen Male Tutorial Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/1996.jpg"
+    },
+    "1998": {
+      "name": "Shar Male Tutorial Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/1998.jpg"
+    },
+    "2078": {
+      "name": "Bri Male Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2078.jpg"
+    },
+    "2080": {
+      "name": "High Male Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2080.jpg"
+    },
+    "2082": {
+      "name": "Saracen Male Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2082.jpg"
+    },
+    "2084": {
+      "name": "Avalonian Male Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2084.jpg"
+    },
+    "2086": {
+      "name": "Troll Male Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2086.jpg"
+    },
+    "2088": {
+      "name": "Norse Male Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2088.jpg"
+    },
+    "2090": {
+      "name": "Kobold Male Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2090.jpg"
+    },
+    "2092": {
+      "name": "Dwarf Male Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2092.jpg"
+    },
+    "2094": {
+      "name": "Elf Male Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2094.jpg"
+    },
+    "2096": {
+      "name": "Firbolg Male Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2096.jpg"
+    },
+    "2098": {
+      "name": "Albion Old Man Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2098.jpg"
+    },
+    "2100": {
+      "name": "Hibernian Old Man Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2100.jpg"
+    },
+    "2102": {
+      "name": "Norse Old Man Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2102.jpg"
+    },
+    "2104": {
+      "name": "Albion Old Man Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2104.jpg"
+    },
+    "2106": {
+      "name": "Hibernian Old Man Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2106.jpg"
+    },
+    "2108": {
+      "name": "Norse Old Man Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2108.jpg"
+    },
+    "2110": {
+      "name": "Elf Male Pale Skin",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2110.jpg"
+    },
+    "2133": {
+      "name": "Bri Male Vampiir (DR Fallback)",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2133.jpg"
+    },
+    "2215": {
+      "name": "Valkyn Male Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2215.jpg"
+    },
+    "2217": {
+      "name": "Walking Vampiir Skeleton",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2217.jpg"
+    },
+    "2218": {
+      "name": "Frostalf Male Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2218.jpg"
+    },
+    "2310": {
+      "name": "Troll Male Pale Skin",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirMale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2310.jpg"
+    },
+    "1889": {
+      "name": "Celt Female Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/1889.jpg"
+    },
+    "1891": {
+      "name": "Lurikeen Female Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/1891.jpg"
+    },
+    "1893": {
+      "name": "Shar Female Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/1893.jpg"
+    },
+    "1995": {
+      "name": "Celt Female Tutorial Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/1995.jpg"
+    },
+    "1997": {
+      "name": "Lurikeen Female Tutorial Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/1997.jpg"
+    },
+    "1999": {
+      "name": "Shar Female Tutorial Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/1999.jpg"
+    },
+    "2079": {
+      "name": "Briton Female Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2079.jpg"
+    },
+    "2081": {
+      "name": "High Female Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2081.jpg"
+    },
+    "2083": {
+      "name": "Saracen Female Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2083.jpg"
+    },
+    "2085": {
+      "name": "Avalonian Female Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2085.jpg"
+    },
+    "2087": {
+      "name": "Troll Female Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2087.jpg"
+    },
+    "2089": {
+      "name": "Norse Female Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2089.jpg"
+    },
+    "2091": {
+      "name": "Kobold Female Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2091.jpg"
+    },
+    "2093": {
+      "name": "Dwarf Female Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2093.jpg"
+    },
+    "2095": {
+      "name": "Elf Female Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2095.jpg"
+    },
+    "2097": {
+      "name": "Firbolg Female Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2097.jpg"
+    },
+    "2099": {
+      "name": "Albion Old Woman Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2099.jpg"
+    },
+    "2101": {
+      "name": "Hibernian Old Woman Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2101.jpg"
+    },
+    "2103": {
+      "name": "Norse Old Woman Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2103.jpg"
+    },
+    "2105": {
+      "name": "Albion Old Woman Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2105.jpg"
+    },
+    "2107": {
+      "name": "Hibernian Old Woman Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2107.jpg"
+    },
+    "2109": {
+      "name": "Norse Old Woman Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2109.jpg"
+    },
+    "2111": {
+      "name": "Elf Female Pale Skin",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2111.jpg"
+    },
+    "2216": {
+      "name": "Valkyn Female Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2216.jpg"
+    },
+    "2219": {
+      "name": "Frostalf Female Vampiir",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2219.jpg"
+    },
+    "2311": {
+      "name": "Troll Female Pale Skin",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2311.jpg"
+    },
+    "2313": {
+      "name": "Norse Female Pale Skin",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2313.jpg"
+    },
+    "2315": {
+      "name": "Kobold Female Pale Skin",
+      "main_category": "Vampiir",
+      "subcategory": "VampiirFemale",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2315.jpg"
+    },
+    "98": {
+      "name": "Elder Fellwood",
+      "main_category": "Vampiir",
+      "subcategory": "Demon",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/98.jpg"
+    },
+    "106": {
+      "name": "Roman Dead",
+      "main_category": "Vampiir",
+      "subcategory": "Demon",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/106.jpg"
+    },
+    "107": {
+      "name": "Robed Roman Dead",
+      "main_category": "Vampiir",
+      "subcategory": "Demon",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/107.jpg"
+    },
+    "108": {
+      "name": "Grungy Roman Dead",
+      "main_category": "Vampiir",
+      "subcategory": "Demon",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/108.jpg"
+    },
+    "109": {
+      "name": "Robed Grungy Roman Dead",
+      "main_category": "Vampiir",
+      "subcategory": "Demon",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/109.jpg"
+    },
+    "110": {
+      "name": "Zombie",
+      "main_category": "Vampiir",
+      "subcategory": "Demon",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/110.jpg"
+    },
+    "111": {
+      "name": "Alternate Zombie",
+      "main_category": "Vampiir",
+      "subcategory": "Demon",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/111.jpg"
+    },
+    "114": {
+      "name": "Rock Creature",
+      "main_category": "Vampiir",
+      "subcategory": "Demon",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/114.jpg"
+    },
+    "126": {
+      "name": "Ice Creature",
+      "main_category": "Vampiir",
+      "subcategory": "Demon",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/126.jpg"
+    },
+    "2268": {
+      "name": "Labyrinth - Stone Minotaur Golem",
+      "main_category": "Vampiir",
+      "subcategory": "Demon",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2268.jpg"
+    },
+    "2272": {
+      "name": "Lab - Agramons Minion - Horns Up",
+      "main_category": "Vampiir",
+      "subcategory": "Demon",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2272.jpg"
+    },
+    "2303": {
+      "name": "Winged Baby Stone Dragon",
+      "main_category": "Vampiir",
+      "subcategory": "Demon",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2303.jpg"
+    },
+    "2304": {
+      "name": "Wingless Baby Stone Dragon",
+      "main_category": "Vampiir",
+      "subcategory": "Demon",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2304.jpg"
+    },
+    "2306": {
+      "name": "Wingless Baby Glimmer Dragon",
+      "main_category": "Vampiir",
+      "subcategory": "Demon",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2306.jpg"
+    },
+    "2307": {
+      "name": "Winged Baby Glimmer Dragon",
+      "main_category": "Vampiir",
+      "subcategory": "Demon",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2307.jpg"
+    },
+    "2355": {
+      "name": "harbinger_of_spring",
+      "main_category": "Vampiir",
+      "subcategory": "Demon",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2355.jpg"
+    },
+    "2357": {
+      "name": "Draco_Spirit of War",
+      "main_category": "Vampiir",
+      "subcategory": "Demon",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2357.jpg"
+    },
+    "29": {
+      "name": "Brown Snake",
+      "main_category": "Vampiir",
+      "subcategory": "Animal",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/29.jpg"
+    },
+    "30": {
+      "name": "Green Snake",
+      "main_category": "Vampiir",
+      "subcategory": "Animal",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/30.jpg"
+    },
+    "31": {
+      "name": "Red Snake",
+      "main_category": "Vampiir",
+      "subcategory": "Animal",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/31.jpg"
+    },
+    "47": {
+      "name": "Small Grey Wolf",
+      "main_category": "Vampiir",
+      "subcategory": "Animal",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/47.jpg"
+    },
+    "60": {
+      "name": "Large Black Spider",
+      "main_category": "Vampiir",
+      "subcategory": "Animal",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/60.jpg"
+    },
+    "71": {
+      "name": "Small Brown Spider",
+      "main_category": "Vampiir",
+      "subcategory": "Animal",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/71.jpg"
+    },
+    "96": {
+      "name": "Brown Bear",
+      "main_category": "Vampiir",
+      "subcategory": "Animal",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/96.jpg"
+    },
+    "99": {
+      "name": "Boar",
+      "main_category": "Vampiir",
+      "subcategory": "Animal",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/99.jpg"
+    },
+    "100": {
+      "name": "Tan Lion",
+      "main_category": "Vampiir",
+      "subcategory": "Animal",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/100.jpg"
+    },
+    "101": {
+      "name": "Black Bear",
+      "main_category": "Vampiir",
+      "subcategory": "Animal",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/101.jpg"
+    },
+    "102": {
+      "name": "Black Wolf",
+      "main_category": "Vampiir",
+      "subcategory": "Animal",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/102.jpg"
+    },
+    "103": {
+      "name": "Zombie Boar",
+      "main_category": "Vampiir",
+      "subcategory": "Animal",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/103.jpg"
+    },
+    "104": {
+      "name": "Black Lion",
+      "main_category": "Vampiir",
+      "subcategory": "Animal",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/104.jpg"
+    },
+    "105": {
+      "name": "Lizard",
+      "main_category": "Vampiir",
+      "subcategory": "Animal",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/105.jpg"
+    },
+    "115": {
+      "name": "Ant",
+      "main_category": "Vampiir",
+      "subcategory": "Animal",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/115.jpg"
+    },
+    "116": {
+      "name": "Carrion Eater (spider)",
+      "main_category": "Vampiir",
+      "subcategory": "Animal",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/116.jpg"
+    },
+    "117": {
+      "name": "Vein Spider",
+      "main_category": "Vampiir",
+      "subcategory": "Animal",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/117.jpg"
+    },
+    "118": {
+      "name": "Frog",
+      "main_category": "Vampiir",
+      "subcategory": "Animal",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/118.jpg"
+    },
+    "129": {
+      "name": "Carrion Eater 2 (spider)",
+      "main_category": "Vampiir",
+      "subcategory": "Animal",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/129.jpg"
+    },
+    "130": {
+      "name": "Vein Spider 2",
+      "main_category": "Vampiir",
+      "subcategory": "Animal",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/130.jpg"
+    },
+    "131": {
+      "name": "Carrion Eater 3 (spider)",
+      "main_category": "Vampiir",
+      "subcategory": "Animal",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/131.jpg"
+    },
+    "132": {
+      "name": "Icky Spider",
+      "main_category": "Vampiir",
+      "subcategory": "Animal",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/132.jpg"
+    },
+    "133": {
+      "name": "Lynx",
+      "main_category": "Vampiir",
+      "subcategory": "Animal",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/133.jpg"
+    },
+    "134": {
+      "name": "Savage Lynx",
+      "main_category": "Vampiir",
+      "subcategory": "Animal",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/134.jpg"
+    },
+    "135": {
+      "name": "Grass Lynx",
+      "main_category": "Vampiir",
+      "subcategory": "Animal",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/135.jpg"
+    },
+    "569": {
+      "name": "Polar Bear",
+      "main_category": "Vampiir",
+      "subcategory": "Animal",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/569.jpg"
+    },
+    "2167": {
+      "name": "Diseaesd Bear",
+      "main_category": "Vampiir",
+      "subcategory": "Animal",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2167.jpg"
+    },
+    "2346": {
+      "name": "Black Cat",
+      "main_category": "Vampiir",
+      "subcategory": "Animal",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/2346.jpg"
+    },
+    "11": {
+      "name": "Siege Tower",
+      "main_category": "Vampiir",
+      "subcategory": "Other",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/11.jpg"
+    },
+    "112": {
+      "name": "Brownie",
+      "main_category": "Vampiir",
+      "subcategory": "Other",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/112.jpg"
+    },
+    "113": {
+      "name": "Troglodyte",
+      "main_category": "Vampiir",
+      "subcategory": "Other",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/113.jpg"
+    },
+    "119": {
+      "name": "Giant",
+      "main_category": "Vampiir",
+      "subcategory": "Other",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/119.jpg"
+    },
+    "120": {
+      "name": "Forest Giant",
+      "main_category": "Vampiir",
+      "subcategory": "Other",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/120.jpg"
+    },
+    "121": {
+      "name": "Ice Giant",
+      "main_category": "Vampiir",
+      "subcategory": "Other",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/121.jpg"
+    },
+    "122": {
+      "name": "Fire Giant",
+      "main_category": "Vampiir",
+      "subcategory": "Other",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/122.jpg"
+    },
+    "136": {
+      "name": "Sprite",
+      "main_category": "Vampiir",
+      "subcategory": "Other",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/136.jpg"
+    },
+    "56": {
+      "name": "Large Grey Wolf",
+      "main_category": "Vampiir",
+      "subcategory": "NotCatagorised",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/56.jpg"
+    },
+    "59": {
+      "name": "Small Black Spider",
+      "main_category": "Vampiir",
+      "subcategory": "NotCatagorised",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/59.jpg"
+    },
+    "97": {
+      "name": "Fellwood",
+      "main_category": "Vampiir",
+      "subcategory": "NotCatagorised",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/97.jpg"
+    },
+    "123": {
+      "name": "Worm",
+      "main_category": "Vampiir",
+      "subcategory": "NotCatagorised",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/123.jpg"
+    },
+    "398": {
+      "name": "ice lizard",
+      "main_category": "Vampiir",
+      "subcategory": "NotCatagorised",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/398.jpg"
+    },
+    "399": {
+      "name": "green lizard",
+      "main_category": "Vampiir",
+      "subcategory": "NotCatagorised",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/399.jpg"
+    },
+    "400": {
+      "name": "silver lizard",
+      "main_category": "Vampiir",
+      "subcategory": "NotCatagorised",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/400.jpg"
+    },
+    "401": {
+      "name": "Ettin",
+      "main_category": "Vampiir",
+      "subcategory": "NotCatagorised",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/401.jpg"
+    },
+    "404": {
+      "name": "Arachite 1/Skin 1",
+      "main_category": "Vampiir",
+      "subcategory": "NotCatagorised",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/404.jpg"
+    },
+    "405": {
+      "name": "Arachite 1/ Skin 2",
+      "main_category": "Vampiir",
+      "subcategory": "NotCatagorised",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/405.jpg"
+    },
+    "406": {
+      "name": "Arachite 2/ Skin 1",
+      "main_category": "Vampiir",
+      "subcategory": "NotCatagorised",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/406.jpg"
+    },
+    "407": {
+      "name": "Arachite 2/ Skin 2",
+      "main_category": "Vampiir",
+      "subcategory": "NotCatagorised",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/407.jpg"
+    },
+    "408": {
+      "name": "Red CSR",
+      "main_category": "Vampiir",
+      "subcategory": "NotCatagorised",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/408.jpg"
+    },
+    "409": {
+      "name": "Yellow CSR",
+      "main_category": "Vampiir",
+      "subcategory": "NotCatagorised",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/409.jpg"
+    },
+    "410": {
+      "name": "Blue CSR",
+      "main_category": "Vampiir",
+      "subcategory": "NotCatagorised",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/410.jpg"
+    },
+    "411": {
+      "name": "Green CSR",
+      "main_category": "Vampiir",
+      "subcategory": "NotCatagorised",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/411.jpg"
+    },
+    "412": {
+      "name": "Scrag",
+      "main_category": "Vampiir",
+      "subcategory": "NotCatagorised",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/412.jpg"
+    },
+    "413": {
+      "name": "Brown horse",
+      "main_category": "Vampiir",
+      "subcategory": "NotCatagorised",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/413.jpg"
+    },
+    "414": {
+      "name": "Nightmare/Black Horse",
+      "main_category": "Vampiir",
+      "subcategory": "NotCatagorised",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/414.jpg"
+    },
+    "447": {
+      "name": "white horse",
+      "main_category": "Vampiir",
+      "subcategory": "NotCatagorised",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/447.jpg"
+    },
+    "448": {
+      "name": "Speckled Horse",
+      "main_category": "Vampiir",
+      "subcategory": "NotCatagorised",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/448.jpg"
+    },
+    "449": {
+      "name": "Dark Brown Horse",
+      "main_category": "Vampiir",
+      "subcategory": "NotCatagorised",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/449.jpg"
+    },
+    "450": {
+      "name": "Black Horse",
+      "main_category": "Vampiir",
+      "subcategory": "NotCatagorised",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/450.jpg"
+    },
+    "453": {
+      "name": "Snow Spider",
+      "main_category": "Vampiir",
+      "subcategory": "NotCatagorised",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/453.jpg"
+    },
+    "454": {
+      "name": "Snow Worm",
+      "main_category": "Vampiir",
+      "subcategory": "NotCatagorised",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/454.jpg"
+    },
+    "455": {
+      "name": "Cockatrice",
+      "main_category": "Vampiir",
+      "subcategory": "NotCatagorised",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/455.jpg"
+    },
+    "456": {
+      "name": "Wyvern",
+      "main_category": "Vampiir",
+      "subcategory": "NotCatagorised",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/456.jpg"
+    },
+    "457": {
+      "name": "swamp worm",
+      "main_category": "Vampiir",
+      "subcategory": "NotCatagorised",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/mobs/457.jpg"
+    }
+  },
+  "icons": {
+    "1200": {
+      "name": "leather cap",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1200.jpg"
+    },
+    "1201": {
+      "name": "chain cap",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1201.jpg"
+    },
+    "1202": {
+      "name": "plate cap",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1202.jpg"
+    },
+    "1203": {
+      "name": "plate full helmet",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1203.jpg"
+    },
+    "1204": {
+      "name": "cloth vest",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1204.jpg"
+    },
+    "1205": {
+      "name": "leather tunic",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1205.jpg"
+    },
+    "1206": {
+      "name": "chain hauberk",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1206.jpg"
+    },
+    "1209": {
+      "name": "plate breastplate",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1209.jpg"
+    },
+    "1210": {
+      "name": "cloth arms",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1210.jpg"
+    },
+    "1211": {
+      "name": "leather arms",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1211.jpg"
+    },
+    "1212": {
+      "name": "chain arms",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1212.jpg"
+    },
+    "1213": {
+      "name": "plate arms",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1213.jpg"
+    },
+    "1214": {
+      "name": "cloth gloves",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1214.jpg"
+    },
+    "1215": {
+      "name": "leather gloves",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1215.jpg"
+    },
+    "1216": {
+      "name": "chain gloves",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1216.jpg"
+    },
+    "1217": {
+      "name": "plate gloves",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1217.jpg"
+    },
+    "1218": {
+      "name": "cloth robe",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1218.jpg"
+    },
+    "1219": {
+      "name": "cloak",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1219.jpg"
+    },
+    "1220": {
+      "name": "cloth leggings",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1220.jpg"
+    },
+    "1221": {
+      "name": "leather leggings",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1221.jpg"
+    },
+    "1222": {
+      "name": "chain leggings",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1222.jpg"
+    },
+    "1223": {
+      "name": "plate leggings",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1223.jpg"
+    },
+    "1224": {
+      "name": "cloth boots",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1224.jpg"
+    },
+    "1225": {
+      "name": "leather boots",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1225.jpg"
+    },
+    "1226": {
+      "name": "chain boots",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1226.jpg"
+    },
+    "1227": {
+      "name": "plate boots",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1227.jpg"
+    },
+    "1228": {
+      "name": "cloth cap",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1228.jpg"
+    },
+    "1229": {
+      "name": "studded cap",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1229.jpg"
+    },
+    "1230": {
+      "name": "copper coin",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1230.jpg"
+    },
+    "1231": {
+      "name": "silver coin",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1231.jpg"
+    },
+    "1232": {
+      "name": "gold coin",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1232.jpg"
+    },
+    "1233": {
+      "name": "platinum coin",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1233.jpg"
+    },
+    "1234": {
+      "name": "mithril coin",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1234.jpg"
+    },
+    "1235": {
+      "name": "all purpose bag",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1235.jpg"
+    },
+    "1236": {
+      "name": "water skin",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1236.jpg"
+    },
+    "1237": {
+      "name": "potion/flask",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1237.jpg"
+    },
+    "1238": {
+      "name": "full leather helmet",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1238.jpg"
+    },
+    "1239": {
+      "name": "full studded helmet",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1239.jpg"
+    },
+    "1240": {
+      "name": "animal skin",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1240.jpg"
+    },
+    "1241": {
+      "name": "jeweled necklace",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1241.jpg"
+    },
+    "1242": {
+      "name": "meat",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1242.jpg"
+    },
+    "1243": {
+      "name": "ring",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1243.jpg"
+    },
+    "1244": {
+      "name": "totem",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1244.jpg"
+    },
+    "1245": {
+      "name": "skull and bone",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1245.jpg"
+    },
+    "1246": {
+      "name": "tooth/claw",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1246.jpg"
+    },
+    "1247": {
+      "name": "snake skin",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1247.jpg"
+    },
+    "1248": {
+      "name": "spider leg",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1248.jpg"
+    },
+    "1249": {
+      "name": "collar",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1249.jpg"
+    },
+    "1250": {
+      "name": "red gem",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1250.jpg"
+    },
+    "1251": {
+      "name": "orange gem",
+      "main_category": "Inventory",
+      "subcategory": "Icons",
+      "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/icons/items/1251.jpg"
+    }
+  }
+}

@@ -1510,7 +1510,7 @@
         "refresh_metadata": "🔄 Metadaten aktualisieren",
         "refresh_metadata_btn": "🔄 Metadaten aktualisieren",
         "refresh_metadata_tooltip": "Modell-Metadaten von der Los Ojos-Website neu scrapen",
-        "viewer_btn": "🔍 Modell-Datenbank-Viewer",
+        "viewer_btn": "🔍 Datenbank-Editor",
         "viewer_tooltip": "Alle Modelle in der Datenbank anzeigen und erkunden",
         "refresh_confirm_title": "Metadaten aktualisieren",
         "refresh_confirm_msg": "Dies wird die Metadaten von der Los Ojos-Website neu scrapen. Fortfahren?",

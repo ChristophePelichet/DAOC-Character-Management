@@ -15,50 +15,60 @@ from typing import Dict, List, Tuple, Optional
 import json
 
 
-def model_gallery_load_item_slots() -> Dict[str, List[str]]:
+def model_gallery_load_item_slots() -> Dict[str, Dict[str, List[str]]]:
     """
-    Load DOL models database and create mapping of model IDs to item slots.
+    Load models metadata with hierarchical structure.
     
-    Uses dol_models_database.json which contains all 3444 models scraped from
-    the Eden model gallery, organized by category (armor/feet, armor/hands, etc.)
+    Converts hierarchical structure to 2-level mapping for gallery:
+    {
+      "items": {
+        "weapon": {"bow": {"132": {...}, "471": {...}}, "sword": {...}},
+        "armor": {"head": {...}, "chest": {...}}
+      }
+    }
+    
+    Returns 2-level mapping: category -> subcategory -> [model_ids]
     
     Returns:
-        Dict mapping {slot: [model_ids]} for all items
-        Example: {'Feet': ['40', '45', ...], 'Hands': ['34', '39', ...]}
+        Dict mapping {category: {subtype: [model_ids]}}
+        Example: {'weapon': {'bow': ['132', '471', ...], 'sword': [...]}, 'armor': {...}}
     """
-    db_file = Path(__file__).parent.parent / "Data" / "dol_models_database.json"
+    metadata_file = Path(__file__).parent.parent / "Data" / "models_metadata.json"
     
-    if not db_file.exists():
-        logging.warning(f"DOL models database not found: {db_file}")
+    if not metadata_file.exists():
+        logging.warning(f"Models metadata file not found: {metadata_file}")
         return {}
     
     try:
-        with open(db_file, 'r', encoding='utf-8') as f:
+        with open(metadata_file, 'r', encoding='utf-8') as f:
             data = json.load(f)
         
-        # Build mapping of slot -> model IDs
-        # Each item_id maps to a slot, and we use item_id as the model_id for the gallery
-        slot_mapping: Dict[str, List[str]] = {}
+        # Build 2-level mapping for gallery display
+        category_mapping: Dict[str, Dict[str, List[str]]] = {}
         
-        for item_id, item_data in data.items():
-            slot = item_data.get("slot")
-            
-            if slot:
-                if slot not in slot_mapping:
-                    slot_mapping[slot] = []
-                # Use item_id directly as the model_id
-                slot_mapping[slot].append(item_id)
+        if 'items' in data:
+            for category, subcats in data['items'].items():
+                if not isinstance(subcats, dict):
+                    continue
+                
+                category_mapping[category] = {}
+                    
+                for subcat, items in subcats.items():
+                    if not isinstance(items, dict):
+                        continue
+                    
+                    model_ids = list(items.keys())
+                    
+                    # Sort numerically
+                    numeric_ids = sorted([mid for mid in model_ids if mid.isdigit()], key=int)
+                    category_mapping[category][subcat] = numeric_ids
         
-        # Sort numeric IDs numerically
-        result = {}
-        for slot, model_ids in slot_mapping.items():
-            numeric_ids = sorted([mid for mid in model_ids if mid.isdigit()], key=int)
-            result[slot] = numeric_ids
-        
-        return result
+        total_items = sum(sum(len(v) for v in subcats.values()) for subcats in category_mapping.values())
+        logging.info(f"Loaded {total_items} items from models_metadata.json")
+        return category_mapping
     
     except Exception as e:
-        logging.error(f"Error loading DOL models database: {e}")
+        logging.error(f"Error loading models metadata: {e}")
         return {}
 
 
@@ -198,17 +208,31 @@ def model_gallery_apply_visibility_filters(metadata: Dict) -> Dict:
         if not metadata or "items" not in metadata:
             return metadata
 
-        # Filter items to only include visible slots
-        filtered_items = {
-            slot_name: model_ids
-            for slot_name, model_ids in metadata["items"].items()
-            if slot_name in visible_slots
+        # Filter items: metadata['items'] = {'weapon': {'bow': [...], 'sword': [...]}, ...}
+        # visible_slots = ['Weapons', 'Shields', ...] but with different case/names
+        # Map new category names to visible_slots
+        category_mapping = {
+            'weapon': 'Weapons',
+            'armor': 'Arms',  # Maps to armor subcategories (arms, helm, chest, etc.)
+            'other': 'Misc',
         }
+
+        filtered_items = {}
+        
+        for category, subcats in metadata["items"].items():
+            # Get the old slot name for this category
+            visible_slot_name = category_mapping.get(category)
+            
+            # Only include if the parent category is visible
+            if visible_slot_name and visible_slot_name in visible_slots:
+                # Keep all subcategories for this category
+                if isinstance(subcats, dict):
+                    filtered_items[category] = subcats
 
         filtered_metadata = {"items": filtered_items}
 
         logging.info(
-            f"Applied visibility filters: {len(filtered_items)} visible slots out of {len(metadata['items'])}"
+            f"Applied visibility filters: {sum(sum(len(v) for v in subcats.values()) for subcats in filtered_items.values())} items in visible categories"
         )
 
         return filtered_metadata
@@ -343,32 +367,61 @@ def model_gallery_get_models_by_type_subtype(
     """
     Get list of model IDs for a specific type/subtype combination.
 
+    For hierarchical 'items' type: searches all categories for the subtype.
+    Example: type_name='items', subtype_name='bow' finds it under 'weapon'
+
     Args:
         metadata: Output from model_gallery_load_metadata()
-        type_name: Type to query (e.g., 'armor')
-        subtype_name: Subtype to query (e.g., 'arms'). If None, returns all for type.
+        type_name: Type to query (e.g., 'items', 'armor')
+        subtype_name: Subtype to query (e.g., 'bow', 'arms'). If None, returns all for type.
 
     Returns:
         Sorted list of model IDs
 
     Example:
-        models = model_gallery_get_models_by_type_subtype(metadata, 'armor', 'arms')
-        # ['1002', '1189', '1194', '1248', ...]
+        models = model_gallery_get_models_by_type_subtype(metadata, 'items', 'bow')
+        # ['132', '471', '564', ...]
     """
     if type_name not in metadata:
         return []
 
+    # Special handling for 'items' type: search through all categories
+    if type_name == 'items':
+        if subtype_name is None:
+            # Return all models from all categories
+            all_models = []
+            for category, subcats in metadata[type_name].items():
+                if isinstance(subcats, dict):
+                    for models in subcats.values():
+                        if isinstance(models, list):
+                            all_models.extend(models)
+            return sorted(all_models, key=lambda x: int(x) if x.isdigit() else float('inf'))
+        else:
+            # Search for subtype in all categories
+            for category, subcats in metadata[type_name].items():
+                if isinstance(subcats, dict) and subtype_name in subcats:
+                    models = subcats[subtype_name]
+                    if isinstance(models, list):
+                        return sorted(models, key=lambda x: int(x) if x.isdigit() else float('inf'))
+            return []
+    
+    # Standard handling for other types
     if subtype_name is None:
         # Return all models for this type
         all_models = []
-        for models in metadata[type_name].values():
-            all_models.extend(models)
-        return sorted(all_models, key=int)
+        type_data = metadata[type_name]
+        if isinstance(type_data, dict):
+            for models in type_data.values():
+                if isinstance(models, list):
+                    all_models.extend(models)
+        return sorted(all_models, key=lambda x: int(x) if x.isdigit() else float('inf'))
 
-    if subtype_name not in metadata[type_name]:
-        return []
+    if isinstance(metadata[type_name], dict) and subtype_name in metadata[type_name]:
+        models = metadata[type_name][subtype_name]
+        if isinstance(models, list):
+            return sorted(models, key=lambda x: int(x) if x.isdigit() else float('inf'))
 
-    return metadata[type_name][subtype_name]
+    return []
 
 
 def model_gallery_find_model_path(

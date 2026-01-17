@@ -1523,7 +1523,7 @@
         "refresh_metadata": "🔄 Refresh Metadata",
         "refresh_metadata_btn": "🔄 Refresh Metadata",
         "refresh_metadata_tooltip": "Re-scrape models metadata from Los Ojos website",
-        "viewer_btn": "🔍 Models Database Viewer",
+        "viewer_btn": "🔍 Database Editor",
         "viewer_tooltip": "View and explore all models in the database",
         "refresh_confirm_title": "Refresh Metadata",
         "refresh_confirm_msg": "This will re-scrape the metadata from Los Ojos website. Continue?",

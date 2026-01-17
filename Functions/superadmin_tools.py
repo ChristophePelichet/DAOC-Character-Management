@@ -868,11 +868,11 @@ class SuperAdminTools:
         Returns:
             Dictionary with models database statistics:
             {
-                "total_models": 838,
-                "items": 595,
-                "mobs": 193,
-                "icons": 50,
-                "file_size": "180.6 KB",
+                "total_models": 3444,
+                "items": 3444,
+                "mobs": 0,
+                "icons": 0,
+                "file_size": "354.9 KB",
                 "last_updated": "2025-01-17 14:23:45"
             }
         """
@@ -893,10 +893,32 @@ class SuperAdminTools:
             with open(metadata_path, 'r', encoding='utf-8') as f:
                 metadata = json.load(f)
             
-            # Count models per type
-            items_count = len(metadata.get("items", {}))
-            mobs_count = len(metadata.get("mobs", {}))
-            icons_count = len(metadata.get("icons", {}))
+            # Count models per type from hierarchical structure
+            items_count = 0
+            mobs_count = 0
+            icons_count = 0
+            
+            if 'items' in metadata:
+                for category, subcats in metadata['items'].items():
+                    if isinstance(subcats, dict):
+                        for subcat, entries in subcats.items():
+                            if isinstance(entries, dict):
+                                items_count += len(entries)
+            
+            if 'mobs' in metadata:
+                for category, subcats in metadata['mobs'].items():
+                    if isinstance(subcats, dict):
+                        for subcat, entries in subcats.items():
+                            if isinstance(entries, dict):
+                                mobs_count += len(entries)
+            
+            if 'icons' in metadata:
+                for category, subcats in metadata['icons'].items():
+                    if isinstance(subcats, dict):
+                        for subcat, entries in subcats.items():
+                            if isinstance(entries, dict):
+                                icons_count += len(entries)
+            
             total_count = items_count + mobs_count + icons_count
             
             # Get file size

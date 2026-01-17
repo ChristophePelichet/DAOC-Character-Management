@@ -67,22 +67,9 @@ class ModelsOverviewWidget(QWidget):
         # Right: Gallery + stats
         right_layout = QVBoxLayout()
 
-        # Title bar
-        title_layout = QHBoxLayout()
-        title_label = QLabel(
-            lang.get("models_overview.gallery_title",
-                    default="🖼️ Model Gallery")
-        )
-        title_font = QFont()
-        title_font.setPointSize(14)
-        title_font.setBold(True)
-        title_label.setFont(title_font)
-        title_layout.addWidget(title_label)
-        title_layout.addStretch()
-
+        # Stats label
         self.stats_label = QLabel()
-        title_layout.addWidget(self.stats_label)
-        right_layout.addLayout(title_layout)
+        right_layout.addWidget(self.stats_label)
 
         # Gallery display
         self.gallery_display = ModelsGalleryDisplayWidget()

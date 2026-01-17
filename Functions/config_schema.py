@@ -94,7 +94,6 @@ DEFAULT_CONFIG = {
             "Weapons"
         ]
     }
-    }
 }
 
 # Validation schema

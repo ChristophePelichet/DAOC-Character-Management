@@ -54,14 +54,19 @@ class ModelsDataDatabaseEditor(QDialog):
 
         # Toolbar with window controls
         toolbar_layout = QHBoxLayout()
+        toolbar_layout.setContentsMargins(5, 5, 5, 5)
+        toolbar_layout.setSpacing(5)
         
-        minimize_btn = QPushButton("➖")
-        minimize_btn.setMaximumWidth(40)
+        toolbar_label = QLabel("🪟 Window Controls:")
+        toolbar_layout.addWidget(toolbar_label)
+        
+        minimize_btn = QPushButton("📥 Minimize")
+        minimize_btn.setMinimumWidth(100)
         minimize_btn.clicked.connect(self.showMinimized)
         toolbar_layout.addWidget(minimize_btn)
         
-        maximize_btn = QPushButton("⬜")
-        maximize_btn.setMaximumWidth(40)
+        maximize_btn = QPushButton("📤 Maximize")
+        maximize_btn.setMinimumWidth(100)
         maximize_btn.clicked.connect(self._toggle_maximize)
         toolbar_layout.addWidget(maximize_btn)
         

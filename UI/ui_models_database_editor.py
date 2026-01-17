@@ -35,6 +35,9 @@ class ModelsDataDatabaseEditor(QDialog):
         self.setWindowTitle(lang.get('models_db.viewer_btn', default="🔍 Database Editor"))
         self.setGeometry(100, 100, 1200, 800)
         self.setStyleSheet(parent.styleSheet() if parent else "")
+        
+        # Enable minimize and maximize buttons in title bar
+        self.setWindowFlags(self.windowFlags() | Qt.WindowType.WindowMinimizeButtonHint | Qt.WindowType.WindowMaximizeButtonHint)
 
         # Load metadata
         base_path = Path(get_base_path())

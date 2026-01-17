@@ -4024,6 +4024,574 @@
           "name": "Item 3985",
           "source_url": ""
         }
+      },
+      "quiver": {
+        "4250": {
+          "name": "Item 4250",
+          "source_url": ""
+        },
+        "4251": {
+          "name": "Item 4251",
+          "source_url": ""
+        },
+        "4252": {
+          "name": "Item 4252",
+          "source_url": ""
+        }
+      },
+      "shields": {
+        "1064": {
+          "name": "Item 1064",
+          "source_url": ""
+        },
+        "1065": {
+          "name": "Item 1065",
+          "source_url": ""
+        },
+        "1066": {
+          "name": "Item 1066",
+          "source_url": ""
+        },
+        "1067": {
+          "name": "Item 1067",
+          "source_url": ""
+        },
+        "1068": {
+          "name": "Item 1068",
+          "source_url": ""
+        },
+        "1069": {
+          "name": "Item 1069",
+          "source_url": ""
+        },
+        "1070": {
+          "name": "Item 1070",
+          "source_url": ""
+        },
+        "1071": {
+          "name": "Item 1071",
+          "source_url": ""
+        },
+        "1072": {
+          "name": "Item 1072",
+          "source_url": ""
+        },
+        "1073": {
+          "name": "Item 1073",
+          "source_url": ""
+        },
+        "1074": {
+          "name": "Item 1074",
+          "source_url": ""
+        },
+        "1075": {
+          "name": "Item 1075",
+          "source_url": ""
+        },
+        "1076": {
+          "name": "Item 1076",
+          "source_url": ""
+        },
+        "1077": {
+          "name": "Item 1077",
+          "source_url": ""
+        },
+        "1078": {
+          "name": "Item 1078",
+          "source_url": ""
+        },
+        "1079": {
+          "name": "Item 1079",
+          "source_url": ""
+        },
+        "1080": {
+          "name": "Item 1080",
+          "source_url": ""
+        },
+        "1081": {
+          "name": "Item 1081",
+          "source_url": ""
+        },
+        "1082": {
+          "name": "Item 1082",
+          "source_url": ""
+        },
+        "1083": {
+          "name": "Item 1083",
+          "source_url": ""
+        },
+        "1084": {
+          "name": "Item 1084",
+          "source_url": ""
+        },
+        "1085": {
+          "name": "Item 1085",
+          "source_url": ""
+        },
+        "1086": {
+          "name": "Item 1086",
+          "source_url": ""
+        },
+        "1087": {
+          "name": "Item 1087",
+          "source_url": ""
+        },
+        "1088": {
+          "name": "Item 1088",
+          "source_url": ""
+        },
+        "1089": {
+          "name": "Item 1089",
+          "source_url": ""
+        },
+        "1090": {
+          "name": "Item 1090",
+          "source_url": ""
+        },
+        "1091": {
+          "name": "Item 1091",
+          "source_url": ""
+        },
+        "1092": {
+          "name": "Item 1092",
+          "source_url": ""
+        },
+        "1093": {
+          "name": "Item 1093",
+          "source_url": ""
+        },
+        "1094": {
+          "name": "Item 1094",
+          "source_url": ""
+        },
+        "1095": {
+          "name": "Item 1095",
+          "source_url": ""
+        },
+        "1096": {
+          "name": "Item 1096",
+          "source_url": ""
+        },
+        "1097": {
+          "name": "Item 1097",
+          "source_url": ""
+        },
+        "1098": {
+          "name": "Item 1098",
+          "source_url": ""
+        },
+        "1099": {
+          "name": "Item 1099",
+          "source_url": ""
+        },
+        "1100": {
+          "name": "Item 1100",
+          "source_url": ""
+        },
+        "1101": {
+          "name": "Item 1101",
+          "source_url": ""
+        },
+        "1102": {
+          "name": "Item 1102",
+          "source_url": ""
+        },
+        "1103": {
+          "name": "Item 1103",
+          "source_url": ""
+        },
+        "1104": {
+          "name": "Item 1104",
+          "source_url": ""
+        },
+        "1105": {
+          "name": "Item 1105",
+          "source_url": ""
+        },
+        "1106": {
+          "name": "Item 1106",
+          "source_url": ""
+        },
+        "1107": {
+          "name": "Item 1107",
+          "source_url": ""
+        },
+        "1108": {
+          "name": "Item 1108",
+          "source_url": ""
+        },
+        "1109": {
+          "name": "Item 1109",
+          "source_url": ""
+        },
+        "1110": {
+          "name": "Item 1110",
+          "source_url": ""
+        },
+        "1111": {
+          "name": "Item 1111",
+          "source_url": ""
+        },
+        "1112": {
+          "name": "Item 1112",
+          "source_url": ""
+        },
+        "1113": {
+          "name": "Item 1113",
+          "source_url": ""
+        },
+        "1114": {
+          "name": "Item 1114",
+          "source_url": ""
+        },
+        "1115": {
+          "name": "Item 1115",
+          "source_url": ""
+        },
+        "1116": {
+          "name": "Item 1116",
+          "source_url": ""
+        },
+        "1117": {
+          "name": "Item 1117",
+          "source_url": ""
+        },
+        "1118": {
+          "name": "Item 1118",
+          "source_url": ""
+        },
+        "1119": {
+          "name": "Item 1119",
+          "source_url": ""
+        },
+        "1120": {
+          "name": "Item 1120",
+          "source_url": ""
+        },
+        "1121": {
+          "name": "Item 1121",
+          "source_url": ""
+        },
+        "1122": {
+          "name": "Item 1122",
+          "source_url": ""
+        },
+        "1123": {
+          "name": "Item 1123",
+          "source_url": ""
+        },
+        "1124": {
+          "name": "Item 1124",
+          "source_url": ""
+        },
+        "1125": {
+          "name": "Item 1125",
+          "source_url": ""
+        },
+        "1126": {
+          "name": "Item 1126",
+          "source_url": ""
+        },
+        "1127": {
+          "name": "Item 1127",
+          "source_url": ""
+        },
+        "1128": {
+          "name": "Item 1128",
+          "source_url": ""
+        },
+        "1129": {
+          "name": "Item 1129",
+          "source_url": ""
+        },
+        "1130": {
+          "name": "Item 1130",
+          "source_url": ""
+        },
+        "1131": {
+          "name": "Item 1131",
+          "source_url": ""
+        },
+        "1132": {
+          "name": "Item 1132",
+          "source_url": ""
+        },
+        "1133": {
+          "name": "Item 1133",
+          "source_url": ""
+        },
+        "1134": {
+          "name": "Item 1134",
+          "source_url": ""
+        },
+        "1135": {
+          "name": "Item 1135",
+          "source_url": ""
+        },
+        "1136": {
+          "name": "Item 1136",
+          "source_url": ""
+        },
+        "1137": {
+          "name": "Item 1137",
+          "source_url": ""
+        },
+        "1138": {
+          "name": "Item 1138",
+          "source_url": ""
+        },
+        "1139": {
+          "name": "Item 1139",
+          "source_url": ""
+        },
+        "1140": {
+          "name": "Item 1140",
+          "source_url": ""
+        },
+        "1141": {
+          "name": "Item 1141",
+          "source_url": ""
+        },
+        "1142": {
+          "name": "Item 1142",
+          "source_url": ""
+        },
+        "1143": {
+          "name": "Item 1143",
+          "source_url": ""
+        },
+        "1144": {
+          "name": "Item 1144",
+          "source_url": ""
+        },
+        "1145": {
+          "name": "Item 1145",
+          "source_url": ""
+        },
+        "1146": {
+          "name": "Item 1146",
+          "source_url": ""
+        },
+        "1147": {
+          "name": "Item 1147",
+          "source_url": ""
+        },
+        "1148": {
+          "name": "Item 1148",
+          "source_url": ""
+        },
+        "1149": {
+          "name": "Item 1149",
+          "source_url": ""
+        },
+        "1150": {
+          "name": "Item 1150",
+          "source_url": ""
+        },
+        "1151": {
+          "name": "Item 1151",
+          "source_url": ""
+        },
+        "1152": {
+          "name": "Item 1152",
+          "source_url": ""
+        },
+        "1153": {
+          "name": "Item 1153",
+          "source_url": ""
+        },
+        "1154": {
+          "name": "Item 1154",
+          "source_url": ""
+        },
+        "1155": {
+          "name": "Item 1155",
+          "source_url": ""
+        },
+        "1156": {
+          "name": "Item 1156",
+          "source_url": ""
+        },
+        "1157": {
+          "name": "Item 1157",
+          "source_url": ""
+        },
+        "1158": {
+          "name": "Item 1158",
+          "source_url": ""
+        },
+        "1159": {
+          "name": "Item 1159",
+          "source_url": ""
+        },
+        "1160": {
+          "name": "Item 1160",
+          "source_url": ""
+        },
+        "1161": {
+          "name": "Item 1161",
+          "source_url": ""
+        },
+        "1162": {
+          "name": "Item 1162",
+          "source_url": ""
+        },
+        "1163": {
+          "name": "Item 1163",
+          "source_url": ""
+        },
+        "1164": {
+          "name": "Item 1164",
+          "source_url": ""
+        },
+        "1165": {
+          "name": "Item 1165",
+          "source_url": ""
+        },
+        "1663": {
+          "name": "Item 1663",
+          "source_url": ""
+        },
+        "1664": {
+          "name": "Item 1664",
+          "source_url": ""
+        },
+        "1665": {
+          "name": "Item 1665",
+          "source_url": ""
+        },
+        "2192": {
+          "name": "Item 2192",
+          "source_url": ""
+        },
+        "2193": {
+          "name": "Item 2193",
+          "source_url": ""
+        },
+        "2194": {
+          "name": "Item 2194",
+          "source_url": ""
+        },
+        "2200": {
+          "name": "Item 2200",
+          "source_url": ""
+        },
+        "2201": {
+          "name": "Item 2201",
+          "source_url": ""
+        },
+        "2202": {
+          "name": "Item 2202",
+          "source_url": ""
+        },
+        "2210": {
+          "name": "Item 2210",
+          "source_url": ""
+        },
+        "2211": {
+          "name": "Item 2211",
+          "source_url": ""
+        },
+        "2212": {
+          "name": "Item 2212",
+          "source_url": ""
+        },
+        "2218": {
+          "name": "Item 2218",
+          "source_url": ""
+        },
+        "2219": {
+          "name": "Item 2219",
+          "source_url": ""
+        },
+        "2220": {
+          "name": "Item 2220",
+          "source_url": ""
+        },
+        "2725": {
+          "name": "Item 2725",
+          "source_url": ""
+        },
+        "2726": {
+          "name": "Item 2726",
+          "source_url": ""
+        },
+        "2727": {
+          "name": "Item 2727",
+          "source_url": ""
+        },
+        "3668": {
+          "name": "Item 3668",
+          "source_url": ""
+        },
+        "3669": {
+          "name": "Item 3669",
+          "source_url": ""
+        },
+        "3670": {
+          "name": "Item 3670",
+          "source_url": ""
+        },
+        "3711": {
+          "name": "Item 3711",
+          "source_url": ""
+        },
+        "3712": {
+          "name": "Item 3712",
+          "source_url": ""
+        },
+        "3713": {
+          "name": "Item 3713",
+          "source_url": ""
+        },
+        "3828": {
+          "name": "Item 3828",
+          "source_url": ""
+        },
+        "3829": {
+          "name": "Item 3829",
+          "source_url": ""
+        },
+        "3830": {
+          "name": "Item 3830",
+          "source_url": ""
+        },
+        "3888": {
+          "name": "Item 3888",
+          "source_url": ""
+        },
+        "3889": {
+          "name": "Item 3889",
+          "source_url": ""
+        },
+        "3890": {
+          "name": "Item 3890",
+          "source_url": ""
+        },
+        "3929": {
+          "name": "Item 3929",
+          "source_url": ""
+        },
+        "3930": {
+          "name": "Item 3930",
+          "source_url": ""
+        },
+        "3931": {
+          "name": "Item 3931",
+          "source_url": ""
+        },
+        "3965": {
+          "name": "Item 3965",
+          "source_url": ""
+        },
+        "3966": {
+          "name": "Item 3966",
+          "source_url": ""
+        },
+        "3967": {
+          "name": "Item 3967",
+          "source_url": ""
+        }
       }
     },
     "armor": {
@@ -4139,6 +4707,70 @@
         "3635": {
           "name": "Regular Mino Cloak 1",
           "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/3635.jpg"
+        },
+        "3636": {
+          "name": "Item 3636",
+          "source_url": ""
+        },
+        "3637": {
+          "name": "Item 3637",
+          "source_url": ""
+        },
+        "3752": {
+          "name": "Item 3752",
+          "source_url": ""
+        },
+        "3789": {
+          "name": "Item 3789",
+          "source_url": ""
+        },
+        "3790": {
+          "name": "Item 3790",
+          "source_url": ""
+        },
+        "3791": {
+          "name": "Item 3791",
+          "source_url": ""
+        },
+        "3800": {
+          "name": "Item 3800",
+          "source_url": ""
+        },
+        "3801": {
+          "name": "Item 3801",
+          "source_url": ""
+        },
+        "3802": {
+          "name": "Item 3802",
+          "source_url": ""
+        },
+        "4105": {
+          "name": "Item 4105",
+          "source_url": ""
+        },
+        "4106": {
+          "name": "Item 4106",
+          "source_url": ""
+        },
+        "4107": {
+          "name": "Item 4107",
+          "source_url": ""
+        },
+        "4108": {
+          "name": "Item 4108",
+          "source_url": ""
+        },
+        "4109": {
+          "name": "Item 4109",
+          "source_url": ""
+        },
+        "4110": {
+          "name": "Item 4110",
+          "source_url": ""
+        },
+        "4115": {
+          "name": "Item 4115",
+          "source_url": ""
         }
       },
       "feet": {
@@ -4253,6 +4885,1046 @@
         "239": {
           "name": "Norse Chain Boots",
           "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/239.jpg"
+        },
+        "244": {
+          "name": "Item 244",
+          "source_url": ""
+        },
+        "249": {
+          "name": "Item 249",
+          "source_url": ""
+        },
+        "254": {
+          "name": "Item 254",
+          "source_url": ""
+        },
+        "259": {
+          "name": "Item 259",
+          "source_url": ""
+        },
+        "264": {
+          "name": "Item 264",
+          "source_url": ""
+        },
+        "268": {
+          "name": "Item 268",
+          "source_url": ""
+        },
+        "269": {
+          "name": "Item 269",
+          "source_url": ""
+        },
+        "274": {
+          "name": "Item 274",
+          "source_url": ""
+        },
+        "278": {
+          "name": "Item 278",
+          "source_url": ""
+        },
+        "279": {
+          "name": "Item 279",
+          "source_url": ""
+        },
+        "284": {
+          "name": "Item 284",
+          "source_url": ""
+        },
+        "289": {
+          "name": "Item 289",
+          "source_url": ""
+        },
+        "294": {
+          "name": "Item 294",
+          "source_url": ""
+        },
+        "299": {
+          "name": "Item 299",
+          "source_url": ""
+        },
+        "304": {
+          "name": "Item 304",
+          "source_url": ""
+        },
+        "309": {
+          "name": "Item 309",
+          "source_url": ""
+        },
+        "342": {
+          "name": "Item 342",
+          "source_url": ""
+        },
+        "347": {
+          "name": "Item 347",
+          "source_url": ""
+        },
+        "352": {
+          "name": "Item 352",
+          "source_url": ""
+        },
+        "357": {
+          "name": "Item 357",
+          "source_url": ""
+        },
+        "362": {
+          "name": "Item 362",
+          "source_url": ""
+        },
+        "367": {
+          "name": "Item 367",
+          "source_url": ""
+        },
+        "372": {
+          "name": "Item 372",
+          "source_url": ""
+        },
+        "377": {
+          "name": "Item 377",
+          "source_url": ""
+        },
+        "382": {
+          "name": "Item 382",
+          "source_url": ""
+        },
+        "392": {
+          "name": "Item 392",
+          "source_url": ""
+        },
+        "397": {
+          "name": "Item 397",
+          "source_url": ""
+        },
+        "402": {
+          "name": "Item 402",
+          "source_url": ""
+        },
+        "407": {
+          "name": "Item 407",
+          "source_url": ""
+        },
+        "412": {
+          "name": "Item 412",
+          "source_url": ""
+        },
+        "417": {
+          "name": "Item 417",
+          "source_url": ""
+        },
+        "422": {
+          "name": "Item 422",
+          "source_url": ""
+        },
+        "427": {
+          "name": "Item 427",
+          "source_url": ""
+        },
+        "432": {
+          "name": "Item 432",
+          "source_url": ""
+        },
+        "437": {
+          "name": "Item 437",
+          "source_url": ""
+        },
+        "666": {
+          "name": "Item 666",
+          "source_url": ""
+        },
+        "692": {
+          "name": "Item 692",
+          "source_url": ""
+        },
+        "697": {
+          "name": "Item 697",
+          "source_url": ""
+        },
+        "702": {
+          "name": "Item 702",
+          "source_url": ""
+        },
+        "707": {
+          "name": "Item 707",
+          "source_url": ""
+        },
+        "712": {
+          "name": "Item 712",
+          "source_url": ""
+        },
+        "717": {
+          "name": "Item 717",
+          "source_url": ""
+        },
+        "722": {
+          "name": "Item 722",
+          "source_url": ""
+        },
+        "727": {
+          "name": "Item 727",
+          "source_url": ""
+        },
+        "731": {
+          "name": "Item 731",
+          "source_url": ""
+        },
+        "738": {
+          "name": "Item 738",
+          "source_url": ""
+        },
+        "743": {
+          "name": "Item 743",
+          "source_url": ""
+        },
+        "750": {
+          "name": "Item 750",
+          "source_url": ""
+        },
+        "755": {
+          "name": "Item 755",
+          "source_url": ""
+        },
+        "760": {
+          "name": "Item 760",
+          "source_url": ""
+        },
+        "765": {
+          "name": "Item 765",
+          "source_url": ""
+        },
+        "770": {
+          "name": "Item 770",
+          "source_url": ""
+        },
+        "775": {
+          "name": "Item 775",
+          "source_url": ""
+        },
+        "780": {
+          "name": "Item 780",
+          "source_url": ""
+        },
+        "786": {
+          "name": "Item 786",
+          "source_url": ""
+        },
+        "791": {
+          "name": "Item 791",
+          "source_url": ""
+        },
+        "796": {
+          "name": "Item 796",
+          "source_url": ""
+        },
+        "803": {
+          "name": "Item 803",
+          "source_url": ""
+        },
+        "809": {
+          "name": "Item 809",
+          "source_url": ""
+        },
+        "814": {
+          "name": "Item 814",
+          "source_url": ""
+        },
+        "819": {
+          "name": "Item 819",
+          "source_url": ""
+        },
+        "987": {
+          "name": "Item 987",
+          "source_url": ""
+        },
+        "992": {
+          "name": "Item 992",
+          "source_url": ""
+        },
+        "997": {
+          "name": "Item 997",
+          "source_url": ""
+        },
+        "1001": {
+          "name": "Item 1001",
+          "source_url": ""
+        },
+        "1190": {
+          "name": "Item 1190",
+          "source_url": ""
+        },
+        "1196": {
+          "name": "Item 1196",
+          "source_url": ""
+        },
+        "1250": {
+          "name": "Item 1250",
+          "source_url": ""
+        },
+        "1255": {
+          "name": "Item 1255",
+          "source_url": ""
+        },
+        "1260": {
+          "name": "Item 1260",
+          "source_url": ""
+        },
+        "1264": {
+          "name": "Item 1264",
+          "source_url": ""
+        },
+        "1270": {
+          "name": "Item 1270",
+          "source_url": ""
+        },
+        "1276": {
+          "name": "Item 1276",
+          "source_url": ""
+        },
+        "1301": {
+          "name": "Item 1301",
+          "source_url": ""
+        },
+        "1310": {
+          "name": "Item 1310",
+          "source_url": ""
+        },
+        "1333": {
+          "name": "Item 1333",
+          "source_url": ""
+        },
+        "1557": {
+          "name": "Item 1557",
+          "source_url": ""
+        },
+        "1629": {
+          "name": "Item 1629",
+          "source_url": ""
+        },
+        "1630": {
+          "name": "Item 1630",
+          "source_url": ""
+        },
+        "1643": {
+          "name": "Item 1643",
+          "source_url": ""
+        },
+        "1644": {
+          "name": "Item 1644",
+          "source_url": ""
+        },
+        "1688": {
+          "name": "Item 1688",
+          "source_url": ""
+        },
+        "1689": {
+          "name": "Item 1689",
+          "source_url": ""
+        },
+        "1697": {
+          "name": "Item 1697",
+          "source_url": ""
+        },
+        "1698": {
+          "name": "Item 1698",
+          "source_url": ""
+        },
+        "1706": {
+          "name": "Item 1706",
+          "source_url": ""
+        },
+        "1707": {
+          "name": "Item 1707",
+          "source_url": ""
+        },
+        "1715": {
+          "name": "Item 1715",
+          "source_url": ""
+        },
+        "1716": {
+          "name": "Item 1716",
+          "source_url": ""
+        },
+        "1728": {
+          "name": "Item 1728",
+          "source_url": ""
+        },
+        "1729": {
+          "name": "Item 1729",
+          "source_url": ""
+        },
+        "1730": {
+          "name": "Item 1730",
+          "source_url": ""
+        },
+        "1731": {
+          "name": "Item 1731",
+          "source_url": ""
+        },
+        "1739": {
+          "name": "Item 1739",
+          "source_url": ""
+        },
+        "1740": {
+          "name": "Item 1740",
+          "source_url": ""
+        },
+        "1751": {
+          "name": "Item 1751",
+          "source_url": ""
+        },
+        "1752": {
+          "name": "Item 1752",
+          "source_url": ""
+        },
+        "1760": {
+          "name": "Item 1760",
+          "source_url": ""
+        },
+        "1761": {
+          "name": "Item 1761",
+          "source_url": ""
+        },
+        "1774": {
+          "name": "Item 1774",
+          "source_url": ""
+        },
+        "1775": {
+          "name": "Item 1775",
+          "source_url": ""
+        },
+        "1783": {
+          "name": "Item 1783",
+          "source_url": ""
+        },
+        "1784": {
+          "name": "Item 1784",
+          "source_url": ""
+        },
+        "1792": {
+          "name": "Item 1792",
+          "source_url": ""
+        },
+        "1793": {
+          "name": "Item 1793",
+          "source_url": ""
+        },
+        "1801": {
+          "name": "Item 1801",
+          "source_url": ""
+        },
+        "1802": {
+          "name": "Item 1802",
+          "source_url": ""
+        },
+        "1812": {
+          "name": "Item 1812",
+          "source_url": ""
+        },
+        "1813": {
+          "name": "Item 1813",
+          "source_url": ""
+        },
+        "1851": {
+          "name": "Item 1851",
+          "source_url": ""
+        },
+        "1852": {
+          "name": "Item 1852",
+          "source_url": ""
+        },
+        "2095": {
+          "name": "Item 2095",
+          "source_url": ""
+        },
+        "2096": {
+          "name": "Item 2096",
+          "source_url": ""
+        },
+        "2104": {
+          "name": "Item 2104",
+          "source_url": ""
+        },
+        "2105": {
+          "name": "Item 2105",
+          "source_url": ""
+        },
+        "2127": {
+          "name": "Item 2127",
+          "source_url": ""
+        },
+        "2128": {
+          "name": "Item 2128",
+          "source_url": ""
+        },
+        "2138": {
+          "name": "Item 2138",
+          "source_url": ""
+        },
+        "2139": {
+          "name": "Item 2139",
+          "source_url": ""
+        },
+        "2147": {
+          "name": "Item 2147",
+          "source_url": ""
+        },
+        "2148": {
+          "name": "Item 2148",
+          "source_url": ""
+        },
+        "2156": {
+          "name": "Item 2156",
+          "source_url": ""
+        },
+        "2157": {
+          "name": "Item 2157",
+          "source_url": ""
+        },
+        "2165": {
+          "name": "Item 2165",
+          "source_url": ""
+        },
+        "2166": {
+          "name": "Item 2166",
+          "source_url": ""
+        },
+        "2179": {
+          "name": "Item 2179",
+          "source_url": ""
+        },
+        "2180": {
+          "name": "Item 2180",
+          "source_url": ""
+        },
+        "2236": {
+          "name": "Item 2236",
+          "source_url": ""
+        },
+        "2241": {
+          "name": "Item 2241",
+          "source_url": ""
+        },
+        "2242": {
+          "name": "Item 2242",
+          "source_url": ""
+        },
+        "2485": {
+          "name": "Item 2485",
+          "source_url": ""
+        },
+        "2486": {
+          "name": "Item 2486",
+          "source_url": ""
+        },
+        "2487": {
+          "name": "Item 2487",
+          "source_url": ""
+        },
+        "2488": {
+          "name": "Item 2488",
+          "source_url": ""
+        },
+        "2489": {
+          "name": "Item 2489",
+          "source_url": ""
+        },
+        "2699": {
+          "name": "Item 2699",
+          "source_url": ""
+        },
+        "2705": {
+          "name": "Item 2705",
+          "source_url": ""
+        },
+        "2711": {
+          "name": "Item 2711",
+          "source_url": ""
+        },
+        "2717": {
+          "name": "Item 2717",
+          "source_url": ""
+        },
+        "2723": {
+          "name": "Item 2723",
+          "source_url": ""
+        },
+        "2733": {
+          "name": "Item 2733",
+          "source_url": ""
+        },
+        "2739": {
+          "name": "Item 2739",
+          "source_url": ""
+        },
+        "2745": {
+          "name": "Item 2745",
+          "source_url": ""
+        },
+        "2751": {
+          "name": "Item 2751",
+          "source_url": ""
+        },
+        "2757": {
+          "name": "Item 2757",
+          "source_url": ""
+        },
+        "2764": {
+          "name": "Item 2764",
+          "source_url": ""
+        },
+        "2770": {
+          "name": "Item 2770",
+          "source_url": ""
+        },
+        "2776": {
+          "name": "Item 2776",
+          "source_url": ""
+        },
+        "2782": {
+          "name": "Item 2782",
+          "source_url": ""
+        },
+        "2788": {
+          "name": "Item 2788",
+          "source_url": ""
+        },
+        "2795": {
+          "name": "Item 2795",
+          "source_url": ""
+        },
+        "2801": {
+          "name": "Item 2801",
+          "source_url": ""
+        },
+        "2807": {
+          "name": "Item 2807",
+          "source_url": ""
+        },
+        "2813": {
+          "name": "Item 2813",
+          "source_url": ""
+        },
+        "2819": {
+          "name": "Item 2819",
+          "source_url": ""
+        },
+        "2826": {
+          "name": "Item 2826",
+          "source_url": ""
+        },
+        "2832": {
+          "name": "Item 2832",
+          "source_url": ""
+        },
+        "2838": {
+          "name": "Item 2838",
+          "source_url": ""
+        },
+        "2844": {
+          "name": "Item 2844",
+          "source_url": ""
+        },
+        "2850": {
+          "name": "Item 2850",
+          "source_url": ""
+        },
+        "2857": {
+          "name": "Item 2857",
+          "source_url": ""
+        },
+        "2863": {
+          "name": "Item 2863",
+          "source_url": ""
+        },
+        "2869": {
+          "name": "Item 2869",
+          "source_url": ""
+        },
+        "2875": {
+          "name": "Item 2875",
+          "source_url": ""
+        },
+        "2881": {
+          "name": "Item 2881",
+          "source_url": ""
+        },
+        "2927": {
+          "name": "Item 2927",
+          "source_url": ""
+        },
+        "2932": {
+          "name": "Item 2932",
+          "source_url": ""
+        },
+        "2937": {
+          "name": "Item 2937",
+          "source_url": ""
+        },
+        "2942": {
+          "name": "Item 2942",
+          "source_url": ""
+        },
+        "2946": {
+          "name": "Item 2946",
+          "source_url": ""
+        },
+        "2952": {
+          "name": "Item 2952",
+          "source_url": ""
+        },
+        "2992": {
+          "name": "Item 2992",
+          "source_url": ""
+        },
+        "2998": {
+          "name": "Item 2998",
+          "source_url": ""
+        },
+        "3004": {
+          "name": "Item 3004",
+          "source_url": ""
+        },
+        "3010": {
+          "name": "Item 3010",
+          "source_url": ""
+        },
+        "3015": {
+          "name": "Item 3015",
+          "source_url": ""
+        },
+        "3021": {
+          "name": "Item 3021",
+          "source_url": ""
+        },
+        "3031": {
+          "name": "Item 3031",
+          "source_url": ""
+        },
+        "3036": {
+          "name": "Item 3036",
+          "source_url": ""
+        },
+        "3041": {
+          "name": "Item 3041",
+          "source_url": ""
+        },
+        "3046": {
+          "name": "Item 3046",
+          "source_url": ""
+        },
+        "3051": {
+          "name": "Item 3051",
+          "source_url": ""
+        },
+        "3056": {
+          "name": "Item 3056",
+          "source_url": ""
+        },
+        "3062": {
+          "name": "Item 3062",
+          "source_url": ""
+        },
+        "3067": {
+          "name": "Item 3067",
+          "source_url": ""
+        },
+        "3073": {
+          "name": "Item 3073",
+          "source_url": ""
+        },
+        "3078": {
+          "name": "Item 3078",
+          "source_url": ""
+        },
+        "3084": {
+          "name": "Item 3084",
+          "source_url": ""
+        },
+        "3089": {
+          "name": "Item 3089",
+          "source_url": ""
+        },
+        "3094": {
+          "name": "Item 3094",
+          "source_url": ""
+        },
+        "3099": {
+          "name": "Item 3099",
+          "source_url": ""
+        },
+        "3104": {
+          "name": "Item 3104",
+          "source_url": ""
+        },
+        "3109": {
+          "name": "Item 3109",
+          "source_url": ""
+        },
+        "3114": {
+          "name": "Item 3114",
+          "source_url": ""
+        },
+        "3119": {
+          "name": "Item 3119",
+          "source_url": ""
+        },
+        "3124": {
+          "name": "Item 3124",
+          "source_url": ""
+        },
+        "3129": {
+          "name": "Item 3129",
+          "source_url": ""
+        },
+        "3134": {
+          "name": "Item 3134",
+          "source_url": ""
+        },
+        "3139": {
+          "name": "Item 3139",
+          "source_url": ""
+        },
+        "3144": {
+          "name": "Item 3144",
+          "source_url": ""
+        },
+        "3149": {
+          "name": "Item 3149",
+          "source_url": ""
+        },
+        "3154": {
+          "name": "Item 3154",
+          "source_url": ""
+        },
+        "3159": {
+          "name": "Item 3159",
+          "source_url": ""
+        },
+        "3165": {
+          "name": "Item 3165",
+          "source_url": ""
+        },
+        "3170": {
+          "name": "Item 3170",
+          "source_url": ""
+        },
+        "3175": {
+          "name": "Item 3175",
+          "source_url": ""
+        },
+        "3180": {
+          "name": "Item 3180",
+          "source_url": ""
+        },
+        "3185": {
+          "name": "Item 3185",
+          "source_url": ""
+        },
+        "3191": {
+          "name": "Item 3191",
+          "source_url": ""
+        },
+        "3196": {
+          "name": "Item 3196",
+          "source_url": ""
+        },
+        "3201": {
+          "name": "Item 3201",
+          "source_url": ""
+        },
+        "3206": {
+          "name": "Item 3206",
+          "source_url": ""
+        },
+        "3213": {
+          "name": "Item 3213",
+          "source_url": ""
+        },
+        "3218": {
+          "name": "Item 3218",
+          "source_url": ""
+        },
+        "3222": {
+          "name": "Item 3222",
+          "source_url": ""
+        },
+        "3366": {
+          "name": "Item 3366",
+          "source_url": ""
+        },
+        "3374": {
+          "name": "Item 3374",
+          "source_url": ""
+        },
+        "3379": {
+          "name": "Item 3379",
+          "source_url": ""
+        },
+        "3384": {
+          "name": "Item 3384",
+          "source_url": ""
+        },
+        "3389": {
+          "name": "Item 3389",
+          "source_url": ""
+        },
+        "3394": {
+          "name": "Item 3394",
+          "source_url": ""
+        },
+        "3564": {
+          "name": "Item 3564",
+          "source_url": ""
+        },
+        "3574": {
+          "name": "Item 3574",
+          "source_url": ""
+        },
+        "3584": {
+          "name": "Item 3584",
+          "source_url": ""
+        },
+        "3589": {
+          "name": "Item 3589",
+          "source_url": ""
+        },
+        "3594": {
+          "name": "Item 3594",
+          "source_url": ""
+        },
+        "3599": {
+          "name": "Item 3599",
+          "source_url": ""
+        },
+        "3603": {
+          "name": "Item 3603",
+          "source_url": ""
+        },
+        "3610": {
+          "name": "Item 3610",
+          "source_url": ""
+        },
+        "3615": {
+          "name": "Item 3615",
+          "source_url": ""
+        },
+        "3620": {
+          "name": "Item 3620",
+          "source_url": ""
+        },
+        "3625": {
+          "name": "Item 3625",
+          "source_url": ""
+        },
+        "3629": {
+          "name": "Item 3629",
+          "source_url": ""
+        },
+        "3642": {
+          "name": "Item 3642",
+          "source_url": ""
+        },
+        "3646": {
+          "name": "Item 3646",
+          "source_url": ""
+        },
+        "3650": {
+          "name": "Item 3650",
+          "source_url": ""
+        },
+        "3762": {
+          "name": "Item 3762",
+          "source_url": ""
+        },
+        "3767": {
+          "name": "Item 3767",
+          "source_url": ""
+        },
+        "3772": {
+          "name": "Item 3772",
+          "source_url": ""
+        },
+        "3777": {
+          "name": "Item 3777",
+          "source_url": ""
+        },
+        "3781": {
+          "name": "Item 3781",
+          "source_url": ""
+        },
+        "3787": {
+          "name": "Item 3787",
+          "source_url": ""
+        },
+        "3994": {
+          "name": "Item 3994",
+          "source_url": ""
+        },
+        "3999": {
+          "name": "Item 3999",
+          "source_url": ""
+        },
+        "4004": {
+          "name": "Item 4004",
+          "source_url": ""
+        },
+        "4009": {
+          "name": "Item 4009",
+          "source_url": ""
+        },
+        "4013": {
+          "name": "Item 4013",
+          "source_url": ""
+        },
+        "4019": {
+          "name": "Item 4019",
+          "source_url": ""
+        },
+        "4025": {
+          "name": "Item 4025",
+          "source_url": ""
+        },
+        "4030": {
+          "name": "Item 4030",
+          "source_url": ""
+        },
+        "4035": {
+          "name": "Item 4035",
+          "source_url": ""
+        },
+        "4040": {
+          "name": "Item 4040",
+          "source_url": ""
+        },
+        "4044": {
+          "name": "Item 4044",
+          "source_url": ""
+        },
+        "4050": {
+          "name": "Item 4050",
+          "source_url": ""
+        },
+        "4078": {
+          "name": "Item 4078",
+          "source_url": ""
+        },
+        "4083": {
+          "name": "Item 4083",
+          "source_url": ""
+        },
+        "4088": {
+          "name": "Item 4088",
+          "source_url": ""
+        },
+        "4093": {
+          "name": "Item 4093",
+          "source_url": ""
+        },
+        "4097": {
+          "name": "Item 4097",
+          "source_url": ""
+        },
+        "4103": {
+          "name": "Item 4103",
+          "source_url": ""
         }
       },
       "hands": {
@@ -4367,120 +6039,934 @@
         "238": {
           "name": "Norse Chain Gloves",
           "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/238.jpg"
-        }
-      },
-      "helm": {
-        "62": {
-          "name": "Albion Leather Helm 1",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/62.jpg"
         },
-        "63": {
-          "name": "Albion Chain Helmet 1 (Cap)",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/63.jpg"
+        "243": {
+          "name": "Item 243",
+          "source_url": ""
         },
-        "64": {
-          "name": "Albion Plate Helmet 1(Cap)",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/64.jpg"
+        "248": {
+          "name": "Item 248",
+          "source_url": ""
         },
-        "93": {
-          "name": "Albion Plate Helmet 2 (Full)",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/93.jpg"
+        "253": {
+          "name": "Item 253",
+          "source_url": ""
         },
-        "94": {
-          "name": "Albion Guard Plate Helmet 1 (Cap)",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/94.jpg"
+        "258": {
+          "name": "Item 258",
+          "source_url": ""
         },
-        "95": {
-          "name": "Albion Guard Plate Helmet 2 (full)",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/95.jpg"
+        "263": {
+          "name": "Item 263",
+          "source_url": ""
         },
-        "335": {
-          "name": "Norse Leather Helm 1",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/335.jpg"
+        "273": {
+          "name": "Item 273",
+          "source_url": ""
         },
-        "336": {
-          "name": "Norse Leather Helm 2",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/336.jpg"
+        "283": {
+          "name": "Item 283",
+          "source_url": ""
         },
-        "337": {
-          "name": "Norse Leather Helm 3",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/337.jpg"
+        "288": {
+          "name": "Item 288",
+          "source_url": ""
         },
-        "438": {
-          "name": "Celtic Leather helm 1",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/438.jpg"
+        "293": {
+          "name": "Item 293",
+          "source_url": ""
         },
-        "439": {
-          "name": "Celtic Leather helm 2",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/439.jpg"
+        "298": {
+          "name": "Item 298",
+          "source_url": ""
         },
-        "440": {
-          "name": "Celtic Leather helm 3",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/440.jpg"
+        "303": {
+          "name": "Item 303",
+          "source_url": ""
         },
-        "823": {
-          "name": "Albion Cloth Helm",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/823.jpg"
+        "308": {
+          "name": "Item 308",
+          "source_url": ""
         },
-        "824": {
-          "name": "Albion Studded Helm",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/824.jpg"
+        "341": {
+          "name": "Item 341",
+          "source_url": ""
         },
-        "825": {
-          "name": "Norse Cloth Cap",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/825.jpg"
+        "346": {
+          "name": "Item 346",
+          "source_url": ""
         },
-        "826": {
-          "name": "Celtic Cloth Cap 1",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/826.jpg"
+        "351": {
+          "name": "Item 351",
+          "source_url": ""
         },
-        "827": {
-          "name": "Hibernia Studded Cap",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/827.jpg"
+        "356": {
+          "name": "Item 356",
+          "source_url": ""
         },
-        "829": {
-          "name": "Norse studded helm 1",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/829.jpg"
+        "361": {
+          "name": "Item 361",
+          "source_url": ""
         },
-        "830": {
-          "name": "Norse studded helm 2",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/830.jpg"
+        "366": {
+          "name": "Item 366",
+          "source_url": ""
         },
-        "831": {
-          "name": "Norse studded helm 3",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/831.jpg"
+        "371": {
+          "name": "Item 371",
+          "source_url": ""
         },
-        "832": {
-          "name": "Norse chain helm 1",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/832.jpg"
+        "376": {
+          "name": "Item 376",
+          "source_url": ""
         },
-        "833": {
-          "name": "Norse chain helm 2",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/833.jpg"
+        "381": {
+          "name": "Item 381",
+          "source_url": ""
         },
-        "834": {
-          "name": "Norse chain helm 3",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/834.jpg"
+        "386": {
+          "name": "Item 386",
+          "source_url": ""
         },
-        "835": {
-          "name": "Celtic reinforced helm 1",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/835.jpg"
+        "387": {
+          "name": "Item 387",
+          "source_url": ""
         },
-        "836": {
-          "name": "Celtic reinforced helm 2",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/836.jpg"
+        "391": {
+          "name": "Item 391",
+          "source_url": ""
         },
-        "837": {
-          "name": "Celtic reinforced helm 3",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/837.jpg"
+        "396": {
+          "name": "Item 396",
+          "source_url": ""
         },
-        "838": {
-          "name": "Celtic scale helm 1",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/838.jpg"
+        "401": {
+          "name": "Item 401",
+          "source_url": ""
         },
-        "839": {
-          "name": "Celtic scale helm 2",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/839.jpg"
+        "406": {
+          "name": "Item 406",
+          "source_url": ""
+        },
+        "411": {
+          "name": "Item 411",
+          "source_url": ""
+        },
+        "416": {
+          "name": "Item 416",
+          "source_url": ""
+        },
+        "421": {
+          "name": "Item 421",
+          "source_url": ""
+        },
+        "426": {
+          "name": "Item 426",
+          "source_url": ""
+        },
+        "431": {
+          "name": "Item 431",
+          "source_url": ""
+        },
+        "436": {
+          "name": "Item 436",
+          "source_url": ""
+        },
+        "665": {
+          "name": "Item 665",
+          "source_url": ""
+        },
+        "691": {
+          "name": "Item 691",
+          "source_url": ""
+        },
+        "696": {
+          "name": "Item 696",
+          "source_url": ""
+        },
+        "701": {
+          "name": "Item 701",
+          "source_url": ""
+        },
+        "706": {
+          "name": "Item 706",
+          "source_url": ""
+        },
+        "711": {
+          "name": "Item 711",
+          "source_url": ""
+        },
+        "716": {
+          "name": "Item 716",
+          "source_url": ""
+        },
+        "721": {
+          "name": "Item 721",
+          "source_url": ""
+        },
+        "726": {
+          "name": "Item 726",
+          "source_url": ""
+        },
+        "732": {
+          "name": "Item 732",
+          "source_url": ""
+        },
+        "737": {
+          "name": "Item 737",
+          "source_url": ""
+        },
+        "742": {
+          "name": "Item 742",
+          "source_url": ""
+        },
+        "749": {
+          "name": "Item 749",
+          "source_url": ""
+        },
+        "754": {
+          "name": "Item 754",
+          "source_url": ""
+        },
+        "759": {
+          "name": "Item 759",
+          "source_url": ""
+        },
+        "764": {
+          "name": "Item 764",
+          "source_url": ""
+        },
+        "769": {
+          "name": "Item 769",
+          "source_url": ""
+        },
+        "774": {
+          "name": "Item 774",
+          "source_url": ""
+        },
+        "779": {
+          "name": "Item 779",
+          "source_url": ""
+        },
+        "785": {
+          "name": "Item 785",
+          "source_url": ""
+        },
+        "790": {
+          "name": "Item 790",
+          "source_url": ""
+        },
+        "795": {
+          "name": "Item 795",
+          "source_url": ""
+        },
+        "802": {
+          "name": "Item 802",
+          "source_url": ""
+        },
+        "808": {
+          "name": "Item 808",
+          "source_url": ""
+        },
+        "813": {
+          "name": "Item 813",
+          "source_url": ""
+        },
+        "818": {
+          "name": "Item 818",
+          "source_url": ""
+        },
+        "986": {
+          "name": "Item 986",
+          "source_url": ""
+        },
+        "991": {
+          "name": "Item 991",
+          "source_url": ""
+        },
+        "996": {
+          "name": "Item 996",
+          "source_url": ""
+        },
+        "1000": {
+          "name": "Item 1000",
+          "source_url": ""
+        },
+        "1191": {
+          "name": "Item 1191",
+          "source_url": ""
+        },
+        "1195": {
+          "name": "Item 1195",
+          "source_url": ""
+        },
+        "1249": {
+          "name": "Item 1249",
+          "source_url": ""
+        },
+        "1254": {
+          "name": "Item 1254",
+          "source_url": ""
+        },
+        "1259": {
+          "name": "Item 1259",
+          "source_url": ""
+        },
+        "1263": {
+          "name": "Item 1263",
+          "source_url": ""
+        },
+        "1271": {
+          "name": "Item 1271",
+          "source_url": ""
+        },
+        "1275": {
+          "name": "Item 1275",
+          "source_url": ""
+        },
+        "1302": {
+          "name": "Item 1302",
+          "source_url": ""
+        },
+        "1311": {
+          "name": "Item 1311",
+          "source_url": ""
+        },
+        "1334": {
+          "name": "Item 1334",
+          "source_url": ""
+        },
+        "1558": {
+          "name": "Item 1558",
+          "source_url": ""
+        },
+        "1620": {
+          "name": "Item 1620",
+          "source_url": ""
+        },
+        "1622": {
+          "name": "Item 1622",
+          "source_url": ""
+        },
+        "1624": {
+          "name": "Item 1624",
+          "source_url": ""
+        },
+        "1645": {
+          "name": "Item 1645",
+          "source_url": ""
+        },
+        "1690": {
+          "name": "Item 1690",
+          "source_url": ""
+        },
+        "1699": {
+          "name": "Item 1699",
+          "source_url": ""
+        },
+        "1708": {
+          "name": "Item 1708",
+          "source_url": ""
+        },
+        "1717": {
+          "name": "Item 1717",
+          "source_url": ""
+        },
+        "1734": {
+          "name": "Item 1734",
+          "source_url": ""
+        },
+        "1741": {
+          "name": "Item 1741",
+          "source_url": ""
+        },
+        "1746": {
+          "name": "Item 1746",
+          "source_url": ""
+        },
+        "1753": {
+          "name": "Item 1753",
+          "source_url": ""
+        },
+        "1762": {
+          "name": "Item 1762",
+          "source_url": ""
+        },
+        "1776": {
+          "name": "Item 1776",
+          "source_url": ""
+        },
+        "1785": {
+          "name": "Item 1785",
+          "source_url": ""
+        },
+        "1794": {
+          "name": "Item 1794",
+          "source_url": ""
+        },
+        "1803": {
+          "name": "Item 1803",
+          "source_url": ""
+        },
+        "1814": {
+          "name": "Item 1814",
+          "source_url": ""
+        },
+        "1853": {
+          "name": "Item 1853",
+          "source_url": ""
+        },
+        "2097": {
+          "name": "Item 2097",
+          "source_url": ""
+        },
+        "2106": {
+          "name": "Item 2106",
+          "source_url": ""
+        },
+        "2129": {
+          "name": "Item 2129",
+          "source_url": ""
+        },
+        "2140": {
+          "name": "Item 2140",
+          "source_url": ""
+        },
+        "2149": {
+          "name": "Item 2149",
+          "source_url": ""
+        },
+        "2181": {
+          "name": "Item 2181",
+          "source_url": ""
+        },
+        "2235": {
+          "name": "Item 2235",
+          "source_url": ""
+        },
+        "2248": {
+          "name": "Item 2248",
+          "source_url": ""
+        },
+        "2249": {
+          "name": "Item 2249",
+          "source_url": ""
+        },
+        "2250": {
+          "name": "Item 2250",
+          "source_url": ""
+        },
+        "2492": {
+          "name": "Item 2492",
+          "source_url": ""
+        },
+        "2493": {
+          "name": "Item 2493",
+          "source_url": ""
+        },
+        "2494": {
+          "name": "Item 2494",
+          "source_url": ""
+        },
+        "2495": {
+          "name": "Item 2495",
+          "source_url": ""
+        },
+        "2700": {
+          "name": "Item 2700",
+          "source_url": ""
+        },
+        "2706": {
+          "name": "Item 2706",
+          "source_url": ""
+        },
+        "2712": {
+          "name": "Item 2712",
+          "source_url": ""
+        },
+        "2718": {
+          "name": "Item 2718",
+          "source_url": ""
+        },
+        "2724": {
+          "name": "Item 2724",
+          "source_url": ""
+        },
+        "2734": {
+          "name": "Item 2734",
+          "source_url": ""
+        },
+        "2740": {
+          "name": "Item 2740",
+          "source_url": ""
+        },
+        "2746": {
+          "name": "Item 2746",
+          "source_url": ""
+        },
+        "2752": {
+          "name": "Item 2752",
+          "source_url": ""
+        },
+        "2758": {
+          "name": "Item 2758",
+          "source_url": ""
+        },
+        "2765": {
+          "name": "Item 2765",
+          "source_url": ""
+        },
+        "2771": {
+          "name": "Item 2771",
+          "source_url": ""
+        },
+        "2777": {
+          "name": "Item 2777",
+          "source_url": ""
+        },
+        "2783": {
+          "name": "Item 2783",
+          "source_url": ""
+        },
+        "2789": {
+          "name": "Item 2789",
+          "source_url": ""
+        },
+        "2796": {
+          "name": "Item 2796",
+          "source_url": ""
+        },
+        "2802": {
+          "name": "Item 2802",
+          "source_url": ""
+        },
+        "2808": {
+          "name": "Item 2808",
+          "source_url": ""
+        },
+        "2814": {
+          "name": "Item 2814",
+          "source_url": ""
+        },
+        "2820": {
+          "name": "Item 2820",
+          "source_url": ""
+        },
+        "2827": {
+          "name": "Item 2827",
+          "source_url": ""
+        },
+        "2833": {
+          "name": "Item 2833",
+          "source_url": ""
+        },
+        "2839": {
+          "name": "Item 2839",
+          "source_url": ""
+        },
+        "2845": {
+          "name": "Item 2845",
+          "source_url": ""
+        },
+        "2851": {
+          "name": "Item 2851",
+          "source_url": ""
+        },
+        "2858": {
+          "name": "Item 2858",
+          "source_url": ""
+        },
+        "2864": {
+          "name": "Item 2864",
+          "source_url": ""
+        },
+        "2870": {
+          "name": "Item 2870",
+          "source_url": ""
+        },
+        "2876": {
+          "name": "Item 2876",
+          "source_url": ""
+        },
+        "2882": {
+          "name": "Item 2882",
+          "source_url": ""
+        },
+        "2926": {
+          "name": "Item 2926",
+          "source_url": ""
+        },
+        "2931": {
+          "name": "Item 2931",
+          "source_url": ""
+        },
+        "2936": {
+          "name": "Item 2936",
+          "source_url": ""
+        },
+        "2941": {
+          "name": "Item 2941",
+          "source_url": ""
+        },
+        "2945": {
+          "name": "Item 2945",
+          "source_url": ""
+        },
+        "2950": {
+          "name": "Item 2950",
+          "source_url": ""
+        },
+        "2993": {
+          "name": "Item 2993",
+          "source_url": ""
+        },
+        "2999": {
+          "name": "Item 2999",
+          "source_url": ""
+        },
+        "3005": {
+          "name": "Item 3005",
+          "source_url": ""
+        },
+        "3011": {
+          "name": "Item 3011",
+          "source_url": ""
+        },
+        "3016": {
+          "name": "Item 3016",
+          "source_url": ""
+        },
+        "3022": {
+          "name": "Item 3022",
+          "source_url": ""
+        },
+        "3032": {
+          "name": "Item 3032",
+          "source_url": ""
+        },
+        "3037": {
+          "name": "Item 3037",
+          "source_url": ""
+        },
+        "3042": {
+          "name": "Item 3042",
+          "source_url": ""
+        },
+        "3047": {
+          "name": "Item 3047",
+          "source_url": ""
+        },
+        "3052": {
+          "name": "Item 3052",
+          "source_url": ""
+        },
+        "3057": {
+          "name": "Item 3057",
+          "source_url": ""
+        },
+        "3063": {
+          "name": "Item 3063",
+          "source_url": ""
+        },
+        "3068": {
+          "name": "Item 3068",
+          "source_url": ""
+        },
+        "3074": {
+          "name": "Item 3074",
+          "source_url": ""
+        },
+        "3079": {
+          "name": "Item 3079",
+          "source_url": ""
+        },
+        "3085": {
+          "name": "Item 3085",
+          "source_url": ""
+        },
+        "3090": {
+          "name": "Item 3090",
+          "source_url": ""
+        },
+        "3095": {
+          "name": "Item 3095",
+          "source_url": ""
+        },
+        "3100": {
+          "name": "Item 3100",
+          "source_url": ""
+        },
+        "3105": {
+          "name": "Item 3105",
+          "source_url": ""
+        },
+        "3110": {
+          "name": "Item 3110",
+          "source_url": ""
+        },
+        "3115": {
+          "name": "Item 3115",
+          "source_url": ""
+        },
+        "3120": {
+          "name": "Item 3120",
+          "source_url": ""
+        },
+        "3125": {
+          "name": "Item 3125",
+          "source_url": ""
+        },
+        "3130": {
+          "name": "Item 3130",
+          "source_url": ""
+        },
+        "3135": {
+          "name": "Item 3135",
+          "source_url": ""
+        },
+        "3140": {
+          "name": "Item 3140",
+          "source_url": ""
+        },
+        "3145": {
+          "name": "Item 3145",
+          "source_url": ""
+        },
+        "3150": {
+          "name": "Item 3150",
+          "source_url": ""
+        },
+        "3155": {
+          "name": "Item 3155",
+          "source_url": ""
+        },
+        "3160": {
+          "name": "Item 3160",
+          "source_url": ""
+        },
+        "3166": {
+          "name": "Item 3166",
+          "source_url": ""
+        },
+        "3171": {
+          "name": "Item 3171",
+          "source_url": ""
+        },
+        "3176": {
+          "name": "Item 3176",
+          "source_url": ""
+        },
+        "3181": {
+          "name": "Item 3181",
+          "source_url": ""
+        },
+        "3186": {
+          "name": "Item 3186",
+          "source_url": ""
+        },
+        "3192": {
+          "name": "Item 3192",
+          "source_url": ""
+        },
+        "3197": {
+          "name": "Item 3197",
+          "source_url": ""
+        },
+        "3202": {
+          "name": "Item 3202",
+          "source_url": ""
+        },
+        "3207": {
+          "name": "Item 3207",
+          "source_url": ""
+        },
+        "3212": {
+          "name": "Item 3212",
+          "source_url": ""
+        },
+        "3217": {
+          "name": "Item 3217",
+          "source_url": ""
+        },
+        "3367": {
+          "name": "Item 3367",
+          "source_url": ""
+        },
+        "3373": {
+          "name": "Item 3373",
+          "source_url": ""
+        },
+        "3378": {
+          "name": "Item 3378",
+          "source_url": ""
+        },
+        "3383": {
+          "name": "Item 3383",
+          "source_url": ""
+        },
+        "3388": {
+          "name": "Item 3388",
+          "source_url": ""
+        },
+        "3393": {
+          "name": "Item 3393",
+          "source_url": ""
+        },
+        "3563": {
+          "name": "Item 3563",
+          "source_url": ""
+        },
+        "3573": {
+          "name": "Item 3573",
+          "source_url": ""
+        },
+        "3583": {
+          "name": "Item 3583",
+          "source_url": ""
+        },
+        "3588": {
+          "name": "Item 3588",
+          "source_url": ""
+        },
+        "3593": {
+          "name": "Item 3593",
+          "source_url": ""
+        },
+        "3598": {
+          "name": "Item 3598",
+          "source_url": ""
+        },
+        "3604": {
+          "name": "Item 3604",
+          "source_url": ""
+        },
+        "3609": {
+          "name": "Item 3609",
+          "source_url": ""
+        },
+        "3614": {
+          "name": "Item 3614",
+          "source_url": ""
+        },
+        "3619": {
+          "name": "Item 3619",
+          "source_url": ""
+        },
+        "3624": {
+          "name": "Item 3624",
+          "source_url": ""
+        },
+        "3630": {
+          "name": "Item 3630",
+          "source_url": ""
+        },
+        "3641": {
+          "name": "Item 3641",
+          "source_url": ""
+        },
+        "3645": {
+          "name": "Item 3645",
+          "source_url": ""
+        },
+        "3649": {
+          "name": "Item 3649",
+          "source_url": ""
+        },
+        "3761": {
+          "name": "Item 3761",
+          "source_url": ""
+        },
+        "3766": {
+          "name": "Item 3766",
+          "source_url": ""
+        },
+        "3771": {
+          "name": "Item 3771",
+          "source_url": ""
+        },
+        "3776": {
+          "name": "Item 3776",
+          "source_url": ""
+        },
+        "3782": {
+          "name": "Item 3782",
+          "source_url": ""
+        },
+        "3786": {
+          "name": "Item 3786",
+          "source_url": ""
+        },
+        "3993": {
+          "name": "Item 3993",
+          "source_url": ""
+        },
+        "3998": {
+          "name": "Item 3998",
+          "source_url": ""
+        },
+        "4003": {
+          "name": "Item 4003",
+          "source_url": ""
+        },
+        "4008": {
+          "name": "Item 4008",
+          "source_url": ""
+        },
+        "4014": {
+          "name": "Item 4014",
+          "source_url": ""
+        },
+        "4018": {
+          "name": "Item 4018",
+          "source_url": ""
+        },
+        "4024": {
+          "name": "Item 4024",
+          "source_url": ""
+        },
+        "4029": {
+          "name": "Item 4029",
+          "source_url": ""
+        },
+        "4034": {
+          "name": "Item 4034",
+          "source_url": ""
+        },
+        "4039": {
+          "name": "Item 4039",
+          "source_url": ""
+        },
+        "4045": {
+          "name": "Item 4045",
+          "source_url": ""
+        },
+        "4049": {
+          "name": "Item 4049",
+          "source_url": ""
+        },
+        "4077": {
+          "name": "Item 4077",
+          "source_url": ""
+        },
+        "4082": {
+          "name": "Item 4082",
+          "source_url": ""
+        },
+        "4087": {
+          "name": "Item 4087",
+          "source_url": ""
+        },
+        "4092": {
+          "name": "Item 4092",
+          "source_url": ""
+        },
+        "4098": {
+          "name": "Item 4098",
+          "source_url": ""
+        },
+        "4102": {
+          "name": "Item 4102",
+          "source_url": ""
         }
       },
       "chest": {
@@ -4595,557 +7081,7 @@
         "206": {
           "name": "Plate 4 Breast",
           "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/206.jpg"
-        }
-      },
-      "legs": {
-        "32": {
-          "name": "Leather Leggings",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/32.jpg"
         },
-        "37": {
-          "name": "Hard Leather Legs",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/37.jpg"
-        },
-        "42": {
-          "name": "Chain Leggings",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/42.jpg"
-        },
-        "47": {
-          "name": "Alb Plate 1 Legs",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/47.jpg"
-        },
-        "52": {
-          "name": "riveted (studded) legs",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/52.jpg"
-        },
-        "75": {
-          "name": "Reinf. Leather Legs",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/75.jpg"
-        },
-        "82": {
-          "name": "Studded Studs Legs",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/82.jpg"
-        },
-        "87": {
-          "name": "Alb Plate 2 Legs",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/87.jpg"
-        },
-        "135": {
-          "name": "Patterned Leather Legs",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/135.jpg"
-        },
-        "140": {
-          "name": "Cloth Legs",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/140.jpg"
-        },
-        "147": {
-          "name": "Crude Leather Legs",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/147.jpg"
-        },
-        "152": {
-          "name": "Quilted (cloth) Legs",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/152.jpg"
-        },
-        "157": {
-          "name": "Heavy Studded Legs",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/157.jpg"
-        },
-        "162": {
-          "name": "New Cloth 3 Legs",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/162.jpg"
-        },
-        "167": {
-          "name": "New Cloth 4 Legs",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/167.jpg"
-        },
-        "172": {
-          "name": "Special Cloth Legs",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/172.jpg"
-        },
-        "177": {
-          "name": "Special Leather Legs",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/177.jpg"
-        },
-        "182": {
-          "name": "Chain 2 Leggings",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/182.jpg"
-        },
-        "187": {
-          "name": "Chain 3 Leggings",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/187.jpg"
-        },
-        "192": {
-          "name": "Chain 4 Leggings",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/192.jpg"
-        },
-        "197": {
-          "name": "Special Chain Leggings",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/197.jpg"
-        },
-        "202": {
-          "name": "Plate 3 Legs",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/202.jpg"
-        },
-        "207": {
-          "name": "Plate 4 Legs",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/207.jpg"
-        },
-        "212": {
-          "name": "Special Plate Legs",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/212.jpg"
-        },
-        "217": {
-          "name": "Studded 4 Legs",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/217.jpg"
-        },
-        "222": {
-          "name": "Special Studded Legs",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/222.jpg"
-        },
-        "231": {
-          "name": "Norse Studded Legs",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/231.jpg"
-        },
-        "236": {
-          "name": "Norse Chain Legs",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/236.jpg"
-        }
-      },
-      "sleeves": {
-        "33": {
-          "name": "Leather Arms",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/33.jpg"
-        },
-        "38": {
-          "name": "Hard Leather Arms",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/38.jpg"
-        },
-        "43": {
-          "name": "Chain Arms",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/43.jpg"
-        },
-        "48": {
-          "name": "Alb Plate 1 Arms",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/48.jpg"
-        },
-        "53": {
-          "name": "riveted (studded) arms",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/53.jpg"
-        },
-        "76": {
-          "name": "Reinf. Leather Arms",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/76.jpg"
-        },
-        "83": {
-          "name": "Studded Studs Arms",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/83.jpg"
-        },
-        "88": {
-          "name": "Alb Plate 2 Arms",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/88.jpg"
-        },
-        "136": {
-          "name": "Patterned Leather Arms",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/136.jpg"
-        },
-        "141": {
-          "name": "Cloth Arms",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/141.jpg"
-        },
-        "148": {
-          "name": "Crude Leather Arms",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/148.jpg"
-        },
-        "153": {
-          "name": "Quilted (cloth) Arms",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/153.jpg"
-        },
-        "158": {
-          "name": "Heavy Studded Arms",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/158.jpg"
-        },
-        "163": {
-          "name": "New Cloth 3 Arms",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/163.jpg"
-        },
-        "168": {
-          "name": "New Cloth 4 Arms",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/168.jpg"
-        },
-        "173": {
-          "name": "Special Cloth Arms",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/173.jpg"
-        },
-        "178": {
-          "name": "Special Leather Arms",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/178.jpg"
-        },
-        "183": {
-          "name": "Chain 2 Arms",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/183.jpg"
-        },
-        "188": {
-          "name": "Chain 3 Arms",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/188.jpg"
-        },
-        "193": {
-          "name": "Chain 4 Arms",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/193.jpg"
-        },
-        "198": {
-          "name": "Special Chain Arms",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/198.jpg"
-        },
-        "203": {
-          "name": "Plate 3 Arms",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/203.jpg"
-        },
-        "208": {
-          "name": "Plate 4 Arms",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/208.jpg"
-        },
-        "213": {
-          "name": "Special Plate Arms",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/213.jpg"
-        },
-        "218": {
-          "name": "Studded 4 Arms",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/218.jpg"
-        },
-        "223": {
-          "name": "Special Studded Arms",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/223.jpg"
-        },
-        "232": {
-          "name": "Norse Studded Arms",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/232.jpg"
-        },
-        "237": {
-          "name": "Norse Chain Arms",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/237.jpg"
-        }
-      },
-      "housing": {
-        "1315": {
-          "name": "Exterior Bench 1",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1315.jpg"
-        },
-        "1316": {
-          "name": "Exterior Bench 2",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1316.jpg"
-        },
-        "1317": {
-          "name": "Exterior Birdbath",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1317.jpg"
-        },
-        "1318": {
-          "name": "Exterior Fountain 01",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1318.jpg"
-        },
-        "1319": {
-          "name": "Exterior Fountain 02",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1319.jpg"
-        },
-        "1320": {
-          "name": "Exterior Fountain 03",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1320.jpg"
-        },
-        "1321": {
-          "name": "Exterior Fountain 04",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1321.jpg"
-        },
-        "1322": {
-          "name": "Exterior Garden 01",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1322.jpg"
-        },
-        "1323": {
-          "name": "Exterior Garden 02",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1323.jpg"
-        },
-        "1324": {
-          "name": "Exterior Garden 03",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1324.jpg"
-        },
-        "1325": {
-          "name": "Exterior Hedge 01",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1325.jpg"
-        },
-        "1326": {
-          "name": "Exterior Plant 01",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1326.jpg"
-        },
-        "1327": {
-          "name": "Exterior Plant 02",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1327.jpg"
-        },
-        "1328": {
-          "name": "Exterior Sundial",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1328.jpg"
-        },
-        "1329": {
-          "name": "Long Wall 1",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1329.jpg"
-        },
-        "1330": {
-          "name": "Wall 2 (Corner)",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1330.jpg"
-        },
-        "1331": {
-          "name": "Short Wall 3",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1331.jpg"
-        },
-        "1338": {
-          "name": "Barrel",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1338.jpg"
-        },
-        "1339": {
-          "name": "Bed 01",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1339.jpg"
-        },
-        "1340": {
-          "name": "Bed 02",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1340.jpg"
-        },
-        "1341": {
-          "name": "Bed 03",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1341.jpg"
-        },
-        "1342": {
-          "name": "Bench 01",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1342.jpg"
-        },
-        "1343": {
-          "name": "Bench 02",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1343.jpg"
-        },
-        "1344": {
-          "name": "Bench 03",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1344.jpg"
-        },
-        "1345": {
-          "name": "Bookshelf 01",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1345.jpg"
-        },
-        "1346": {
-          "name": "Bookshelf 02",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1346.jpg"
-        },
-        "1347": {
-          "name": "Box",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1347.jpg"
-        },
-        "1348": {
-          "name": "Chair 01",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1348.jpg"
-        }
-      },
-      "siege": {
-        "561": {
-          "name": "Ballista",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/561.jpg"
-        },
-        "562": {
-          "name": "Ram",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/562.jpg"
-        },
-        "563": {
-          "name": "Mangonel",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/563.jpg"
-        },
-        "1673": {
-          "name": "trebuchet",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1673.jpg"
-        },
-        "1674": {
-          "name": "Ballista Low",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1674.jpg"
-        },
-        "1675": {
-          "name": "Ballista High",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1675.jpg"
-        },
-        "1676": {
-          "name": "Catapult W",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1676.jpg"
-        },
-        "1677": {
-          "name": "Catapult G",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1677.jpg"
-        },
-        "1678": {
-          "name": "Ram High",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1678.jpg"
-        },
-        "1679": {
-          "name": "Ram Mid",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1679.jpg"
-        },
-        "1680": {
-          "name": "Ram Low",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1680.jpg"
-        },
-        "2594": {
-          "name": "Frontiers Mounted Ballista",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2594.jpg"
-        },
-        "2596": {
-          "name": "Frontiers Ranged Ballista",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2596.jpg"
-        },
-        "2597": {
-          "name": "Frontiers Mounted Catapult",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2597.jpg"
-        },
-        "2598": {
-          "name": "Ranged Catapult",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2598.jpg"
-        },
-        "2599": {
-          "name": "Frontiers Ranged Trebuchet",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2599.jpg"
-        },
-        "2600": {
-          "name": "Light Siege Ram",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2600.jpg"
-        },
-        "2601": {
-          "name": "Medium Siege Ram",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2601.jpg"
-        },
-        "2602": {
-          "name": "Heavy Siege Ram",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2602.jpg"
-        },
-        "2604": {
-          "name": "Frontiers Scorpion",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2604.jpg"
-        },
-        "2605": {
-          "name": "Frontiers Mini Ram",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2605.jpg"
-        },
-        "2606": {
-          "name": "Frontiers Mounted Trebuchet",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2606.jpg"
-        },
-        "2607": {
-          "name": "Frontiers Boiling Oil",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2607.jpg"
-        },
-        "2645": {
-          "name": "Frontiers Ranged Scorpion",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2645.jpg"
-        },
-        "2652": {
-          "name": "Mine Cart",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2652.jpg"
-        }
-      },
-      "world": {
-        "145": {
-          "name": "Albion Gravestone",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/145.jpg"
-        },
-        "464": {
-          "name": "Albion Pennant",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/464.jpg"
-        },
-        "465": {
-          "name": "Midgard Pennant",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/465.jpg"
-        },
-        "466": {
-          "name": "Hibernian Pennant",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/466.jpg"
-        },
-        "478": {
-          "name": "Forge",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/478.jpg"
-        },
-        "479": {
-          "name": "Stretcher",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/479.jpg"
-        },
-        "480": {
-          "name": "Loom",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/480.jpg"
-        },
-        "481": {
-          "name": "Lathe",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/481.jpg"
-        },
-        "482": {
-          "name": "Trebutchet",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/482.jpg"
-        },
-        "512": {
-          "name": "Arrows",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/512.jpg"
-        },
-        "630": {
-          "name": "Albion Relic Staff",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/630.jpg"
-        },
-        "631": {
-          "name": "Albion Relic Scabbard",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/631.jpg"
-        },
-        "632": {
-          "name": "Hiberniean Relic Cauldron",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/632.jpg"
-        },
-        "633": {
-          "name": "Hibernian Relic Spear",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/633.jpg"
-        },
-        "634": {
-          "name": "Norse Relic Hammer",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/634.jpg"
-        },
-        "635": {
-          "name": "Norse Relic Horn",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/635.jpg"
-        },
-        "636": {
-          "name": "norse gravestone",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/636.jpg"
-        },
-        "637": {
-          "name": "hibernian gravestone",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/637.jpg"
-        },
-        "679": {
-          "name": "Briton Guild Banner",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/679.jpg"
-        },
-        "680": {
-          "name": "Hibernian Guild Banner",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/680.jpg"
-        },
-        "681": {
-          "name": "Norse Guild Banner",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/681.jpg"
-        },
-        "820": {
-          "name": "Alchemist Table",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/820.jpg"
-        },
-        "1277": {
-          "name": "Ice Queen Ice Crown(MON ONLY)",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1277.jpg"
-        },
-        "1293": {
-          "name": "Ground Target",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1293.jpg"
-        },
-        "1306": {
-          "name": "Midgard PHouse Lot",
-          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1306.jpg"
-        }
-      }
-    },
-    "other": {
-      "torso": {
         "211": {
           "name": "Item 211",
           "source_url": ""
@@ -6652,6 +8588,118 @@
         }
       },
       "legs": {
+        "32": {
+          "name": "Leather Leggings",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/32.jpg"
+        },
+        "37": {
+          "name": "Hard Leather Legs",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/37.jpg"
+        },
+        "42": {
+          "name": "Chain Leggings",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/42.jpg"
+        },
+        "47": {
+          "name": "Alb Plate 1 Legs",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/47.jpg"
+        },
+        "52": {
+          "name": "riveted (studded) legs",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/52.jpg"
+        },
+        "75": {
+          "name": "Reinf. Leather Legs",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/75.jpg"
+        },
+        "82": {
+          "name": "Studded Studs Legs",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/82.jpg"
+        },
+        "87": {
+          "name": "Alb Plate 2 Legs",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/87.jpg"
+        },
+        "135": {
+          "name": "Patterned Leather Legs",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/135.jpg"
+        },
+        "140": {
+          "name": "Cloth Legs",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/140.jpg"
+        },
+        "147": {
+          "name": "Crude Leather Legs",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/147.jpg"
+        },
+        "152": {
+          "name": "Quilted (cloth) Legs",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/152.jpg"
+        },
+        "157": {
+          "name": "Heavy Studded Legs",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/157.jpg"
+        },
+        "162": {
+          "name": "New Cloth 3 Legs",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/162.jpg"
+        },
+        "167": {
+          "name": "New Cloth 4 Legs",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/167.jpg"
+        },
+        "172": {
+          "name": "Special Cloth Legs",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/172.jpg"
+        },
+        "177": {
+          "name": "Special Leather Legs",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/177.jpg"
+        },
+        "182": {
+          "name": "Chain 2 Leggings",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/182.jpg"
+        },
+        "187": {
+          "name": "Chain 3 Leggings",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/187.jpg"
+        },
+        "192": {
+          "name": "Chain 4 Leggings",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/192.jpg"
+        },
+        "197": {
+          "name": "Special Chain Leggings",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/197.jpg"
+        },
+        "202": {
+          "name": "Plate 3 Legs",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/202.jpg"
+        },
+        "207": {
+          "name": "Plate 4 Legs",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/207.jpg"
+        },
+        "212": {
+          "name": "Special Plate Legs",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/212.jpg"
+        },
+        "217": {
+          "name": "Studded 4 Legs",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/217.jpg"
+        },
+        "222": {
+          "name": "Special Studded Legs",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/222.jpg"
+        },
+        "231": {
+          "name": "Norse Studded Legs",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/231.jpg"
+        },
+        "236": {
+          "name": "Norse Chain Legs",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/236.jpg"
+        },
         "241": {
           "name": "Item 241",
           "source_url": ""
@@ -7709,6 +9757,120 @@
           "source_url": ""
         }
       },
+      "sleeves": {
+        "33": {
+          "name": "Leather Arms",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/33.jpg"
+        },
+        "38": {
+          "name": "Hard Leather Arms",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/38.jpg"
+        },
+        "43": {
+          "name": "Chain Arms",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/43.jpg"
+        },
+        "48": {
+          "name": "Alb Plate 1 Arms",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/48.jpg"
+        },
+        "53": {
+          "name": "riveted (studded) arms",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/53.jpg"
+        },
+        "76": {
+          "name": "Reinf. Leather Arms",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/76.jpg"
+        },
+        "83": {
+          "name": "Studded Studs Arms",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/83.jpg"
+        },
+        "88": {
+          "name": "Alb Plate 2 Arms",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/88.jpg"
+        },
+        "136": {
+          "name": "Patterned Leather Arms",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/136.jpg"
+        },
+        "141": {
+          "name": "Cloth Arms",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/141.jpg"
+        },
+        "148": {
+          "name": "Crude Leather Arms",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/148.jpg"
+        },
+        "153": {
+          "name": "Quilted (cloth) Arms",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/153.jpg"
+        },
+        "158": {
+          "name": "Heavy Studded Arms",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/158.jpg"
+        },
+        "163": {
+          "name": "New Cloth 3 Arms",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/163.jpg"
+        },
+        "168": {
+          "name": "New Cloth 4 Arms",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/168.jpg"
+        },
+        "173": {
+          "name": "Special Cloth Arms",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/173.jpg"
+        },
+        "178": {
+          "name": "Special Leather Arms",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/178.jpg"
+        },
+        "183": {
+          "name": "Chain 2 Arms",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/183.jpg"
+        },
+        "188": {
+          "name": "Chain 3 Arms",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/188.jpg"
+        },
+        "193": {
+          "name": "Chain 4 Arms",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/193.jpg"
+        },
+        "198": {
+          "name": "Special Chain Arms",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/198.jpg"
+        },
+        "203": {
+          "name": "Plate 3 Arms",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/203.jpg"
+        },
+        "208": {
+          "name": "Plate 4 Arms",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/208.jpg"
+        },
+        "213": {
+          "name": "Special Plate Arms",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/213.jpg"
+        },
+        "218": {
+          "name": "Studded 4 Arms",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/218.jpg"
+        },
+        "223": {
+          "name": "Special Studded Arms",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/223.jpg"
+        },
+        "232": {
+          "name": "Norse Studded Arms",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/232.jpg"
+        },
+        "237": {
+          "name": "Norse Chain Arms",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/237.jpg"
+        }
+      },
       "arms": {
         "242": {
           "name": "Item 242",
@@ -8624,1978 +10786,6 @@
         },
         "4101": {
           "name": "Item 4101",
-          "source_url": ""
-        }
-      },
-      "hands": {
-        "243": {
-          "name": "Item 243",
-          "source_url": ""
-        },
-        "248": {
-          "name": "Item 248",
-          "source_url": ""
-        },
-        "253": {
-          "name": "Item 253",
-          "source_url": ""
-        },
-        "258": {
-          "name": "Item 258",
-          "source_url": ""
-        },
-        "263": {
-          "name": "Item 263",
-          "source_url": ""
-        },
-        "273": {
-          "name": "Item 273",
-          "source_url": ""
-        },
-        "283": {
-          "name": "Item 283",
-          "source_url": ""
-        },
-        "288": {
-          "name": "Item 288",
-          "source_url": ""
-        },
-        "293": {
-          "name": "Item 293",
-          "source_url": ""
-        },
-        "298": {
-          "name": "Item 298",
-          "source_url": ""
-        },
-        "303": {
-          "name": "Item 303",
-          "source_url": ""
-        },
-        "308": {
-          "name": "Item 308",
-          "source_url": ""
-        },
-        "341": {
-          "name": "Item 341",
-          "source_url": ""
-        },
-        "346": {
-          "name": "Item 346",
-          "source_url": ""
-        },
-        "351": {
-          "name": "Item 351",
-          "source_url": ""
-        },
-        "356": {
-          "name": "Item 356",
-          "source_url": ""
-        },
-        "361": {
-          "name": "Item 361",
-          "source_url": ""
-        },
-        "366": {
-          "name": "Item 366",
-          "source_url": ""
-        },
-        "371": {
-          "name": "Item 371",
-          "source_url": ""
-        },
-        "376": {
-          "name": "Item 376",
-          "source_url": ""
-        },
-        "381": {
-          "name": "Item 381",
-          "source_url": ""
-        },
-        "386": {
-          "name": "Item 386",
-          "source_url": ""
-        },
-        "387": {
-          "name": "Item 387",
-          "source_url": ""
-        },
-        "391": {
-          "name": "Item 391",
-          "source_url": ""
-        },
-        "396": {
-          "name": "Item 396",
-          "source_url": ""
-        },
-        "401": {
-          "name": "Item 401",
-          "source_url": ""
-        },
-        "406": {
-          "name": "Item 406",
-          "source_url": ""
-        },
-        "411": {
-          "name": "Item 411",
-          "source_url": ""
-        },
-        "416": {
-          "name": "Item 416",
-          "source_url": ""
-        },
-        "421": {
-          "name": "Item 421",
-          "source_url": ""
-        },
-        "426": {
-          "name": "Item 426",
-          "source_url": ""
-        },
-        "431": {
-          "name": "Item 431",
-          "source_url": ""
-        },
-        "436": {
-          "name": "Item 436",
-          "source_url": ""
-        },
-        "665": {
-          "name": "Item 665",
-          "source_url": ""
-        },
-        "691": {
-          "name": "Item 691",
-          "source_url": ""
-        },
-        "696": {
-          "name": "Item 696",
-          "source_url": ""
-        },
-        "701": {
-          "name": "Item 701",
-          "source_url": ""
-        },
-        "706": {
-          "name": "Item 706",
-          "source_url": ""
-        },
-        "711": {
-          "name": "Item 711",
-          "source_url": ""
-        },
-        "716": {
-          "name": "Item 716",
-          "source_url": ""
-        },
-        "721": {
-          "name": "Item 721",
-          "source_url": ""
-        },
-        "726": {
-          "name": "Item 726",
-          "source_url": ""
-        },
-        "732": {
-          "name": "Item 732",
-          "source_url": ""
-        },
-        "737": {
-          "name": "Item 737",
-          "source_url": ""
-        },
-        "742": {
-          "name": "Item 742",
-          "source_url": ""
-        },
-        "749": {
-          "name": "Item 749",
-          "source_url": ""
-        },
-        "754": {
-          "name": "Item 754",
-          "source_url": ""
-        },
-        "759": {
-          "name": "Item 759",
-          "source_url": ""
-        },
-        "764": {
-          "name": "Item 764",
-          "source_url": ""
-        },
-        "769": {
-          "name": "Item 769",
-          "source_url": ""
-        },
-        "774": {
-          "name": "Item 774",
-          "source_url": ""
-        },
-        "779": {
-          "name": "Item 779",
-          "source_url": ""
-        },
-        "785": {
-          "name": "Item 785",
-          "source_url": ""
-        },
-        "790": {
-          "name": "Item 790",
-          "source_url": ""
-        },
-        "795": {
-          "name": "Item 795",
-          "source_url": ""
-        },
-        "802": {
-          "name": "Item 802",
-          "source_url": ""
-        },
-        "808": {
-          "name": "Item 808",
-          "source_url": ""
-        },
-        "813": {
-          "name": "Item 813",
-          "source_url": ""
-        },
-        "818": {
-          "name": "Item 818",
-          "source_url": ""
-        },
-        "986": {
-          "name": "Item 986",
-          "source_url": ""
-        },
-        "991": {
-          "name": "Item 991",
-          "source_url": ""
-        },
-        "996": {
-          "name": "Item 996",
-          "source_url": ""
-        },
-        "1000": {
-          "name": "Item 1000",
-          "source_url": ""
-        },
-        "1191": {
-          "name": "Item 1191",
-          "source_url": ""
-        },
-        "1195": {
-          "name": "Item 1195",
-          "source_url": ""
-        },
-        "1249": {
-          "name": "Item 1249",
-          "source_url": ""
-        },
-        "1254": {
-          "name": "Item 1254",
-          "source_url": ""
-        },
-        "1259": {
-          "name": "Item 1259",
-          "source_url": ""
-        },
-        "1263": {
-          "name": "Item 1263",
-          "source_url": ""
-        },
-        "1271": {
-          "name": "Item 1271",
-          "source_url": ""
-        },
-        "1275": {
-          "name": "Item 1275",
-          "source_url": ""
-        },
-        "1302": {
-          "name": "Item 1302",
-          "source_url": ""
-        },
-        "1311": {
-          "name": "Item 1311",
-          "source_url": ""
-        },
-        "1334": {
-          "name": "Item 1334",
-          "source_url": ""
-        },
-        "1558": {
-          "name": "Item 1558",
-          "source_url": ""
-        },
-        "1620": {
-          "name": "Item 1620",
-          "source_url": ""
-        },
-        "1622": {
-          "name": "Item 1622",
-          "source_url": ""
-        },
-        "1624": {
-          "name": "Item 1624",
-          "source_url": ""
-        },
-        "1645": {
-          "name": "Item 1645",
-          "source_url": ""
-        },
-        "1690": {
-          "name": "Item 1690",
-          "source_url": ""
-        },
-        "1699": {
-          "name": "Item 1699",
-          "source_url": ""
-        },
-        "1708": {
-          "name": "Item 1708",
-          "source_url": ""
-        },
-        "1717": {
-          "name": "Item 1717",
-          "source_url": ""
-        },
-        "1734": {
-          "name": "Item 1734",
-          "source_url": ""
-        },
-        "1741": {
-          "name": "Item 1741",
-          "source_url": ""
-        },
-        "1746": {
-          "name": "Item 1746",
-          "source_url": ""
-        },
-        "1753": {
-          "name": "Item 1753",
-          "source_url": ""
-        },
-        "1762": {
-          "name": "Item 1762",
-          "source_url": ""
-        },
-        "1776": {
-          "name": "Item 1776",
-          "source_url": ""
-        },
-        "1785": {
-          "name": "Item 1785",
-          "source_url": ""
-        },
-        "1794": {
-          "name": "Item 1794",
-          "source_url": ""
-        },
-        "1803": {
-          "name": "Item 1803",
-          "source_url": ""
-        },
-        "1814": {
-          "name": "Item 1814",
-          "source_url": ""
-        },
-        "1853": {
-          "name": "Item 1853",
-          "source_url": ""
-        },
-        "2097": {
-          "name": "Item 2097",
-          "source_url": ""
-        },
-        "2106": {
-          "name": "Item 2106",
-          "source_url": ""
-        },
-        "2129": {
-          "name": "Item 2129",
-          "source_url": ""
-        },
-        "2140": {
-          "name": "Item 2140",
-          "source_url": ""
-        },
-        "2149": {
-          "name": "Item 2149",
-          "source_url": ""
-        },
-        "2181": {
-          "name": "Item 2181",
-          "source_url": ""
-        },
-        "2235": {
-          "name": "Item 2235",
-          "source_url": ""
-        },
-        "2248": {
-          "name": "Item 2248",
-          "source_url": ""
-        },
-        "2249": {
-          "name": "Item 2249",
-          "source_url": ""
-        },
-        "2250": {
-          "name": "Item 2250",
-          "source_url": ""
-        },
-        "2492": {
-          "name": "Item 2492",
-          "source_url": ""
-        },
-        "2493": {
-          "name": "Item 2493",
-          "source_url": ""
-        },
-        "2494": {
-          "name": "Item 2494",
-          "source_url": ""
-        },
-        "2495": {
-          "name": "Item 2495",
-          "source_url": ""
-        },
-        "2700": {
-          "name": "Item 2700",
-          "source_url": ""
-        },
-        "2706": {
-          "name": "Item 2706",
-          "source_url": ""
-        },
-        "2712": {
-          "name": "Item 2712",
-          "source_url": ""
-        },
-        "2718": {
-          "name": "Item 2718",
-          "source_url": ""
-        },
-        "2724": {
-          "name": "Item 2724",
-          "source_url": ""
-        },
-        "2734": {
-          "name": "Item 2734",
-          "source_url": ""
-        },
-        "2740": {
-          "name": "Item 2740",
-          "source_url": ""
-        },
-        "2746": {
-          "name": "Item 2746",
-          "source_url": ""
-        },
-        "2752": {
-          "name": "Item 2752",
-          "source_url": ""
-        },
-        "2758": {
-          "name": "Item 2758",
-          "source_url": ""
-        },
-        "2765": {
-          "name": "Item 2765",
-          "source_url": ""
-        },
-        "2771": {
-          "name": "Item 2771",
-          "source_url": ""
-        },
-        "2777": {
-          "name": "Item 2777",
-          "source_url": ""
-        },
-        "2783": {
-          "name": "Item 2783",
-          "source_url": ""
-        },
-        "2789": {
-          "name": "Item 2789",
-          "source_url": ""
-        },
-        "2796": {
-          "name": "Item 2796",
-          "source_url": ""
-        },
-        "2802": {
-          "name": "Item 2802",
-          "source_url": ""
-        },
-        "2808": {
-          "name": "Item 2808",
-          "source_url": ""
-        },
-        "2814": {
-          "name": "Item 2814",
-          "source_url": ""
-        },
-        "2820": {
-          "name": "Item 2820",
-          "source_url": ""
-        },
-        "2827": {
-          "name": "Item 2827",
-          "source_url": ""
-        },
-        "2833": {
-          "name": "Item 2833",
-          "source_url": ""
-        },
-        "2839": {
-          "name": "Item 2839",
-          "source_url": ""
-        },
-        "2845": {
-          "name": "Item 2845",
-          "source_url": ""
-        },
-        "2851": {
-          "name": "Item 2851",
-          "source_url": ""
-        },
-        "2858": {
-          "name": "Item 2858",
-          "source_url": ""
-        },
-        "2864": {
-          "name": "Item 2864",
-          "source_url": ""
-        },
-        "2870": {
-          "name": "Item 2870",
-          "source_url": ""
-        },
-        "2876": {
-          "name": "Item 2876",
-          "source_url": ""
-        },
-        "2882": {
-          "name": "Item 2882",
-          "source_url": ""
-        },
-        "2926": {
-          "name": "Item 2926",
-          "source_url": ""
-        },
-        "2931": {
-          "name": "Item 2931",
-          "source_url": ""
-        },
-        "2936": {
-          "name": "Item 2936",
-          "source_url": ""
-        },
-        "2941": {
-          "name": "Item 2941",
-          "source_url": ""
-        },
-        "2945": {
-          "name": "Item 2945",
-          "source_url": ""
-        },
-        "2950": {
-          "name": "Item 2950",
-          "source_url": ""
-        },
-        "2993": {
-          "name": "Item 2993",
-          "source_url": ""
-        },
-        "2999": {
-          "name": "Item 2999",
-          "source_url": ""
-        },
-        "3005": {
-          "name": "Item 3005",
-          "source_url": ""
-        },
-        "3011": {
-          "name": "Item 3011",
-          "source_url": ""
-        },
-        "3016": {
-          "name": "Item 3016",
-          "source_url": ""
-        },
-        "3022": {
-          "name": "Item 3022",
-          "source_url": ""
-        },
-        "3032": {
-          "name": "Item 3032",
-          "source_url": ""
-        },
-        "3037": {
-          "name": "Item 3037",
-          "source_url": ""
-        },
-        "3042": {
-          "name": "Item 3042",
-          "source_url": ""
-        },
-        "3047": {
-          "name": "Item 3047",
-          "source_url": ""
-        },
-        "3052": {
-          "name": "Item 3052",
-          "source_url": ""
-        },
-        "3057": {
-          "name": "Item 3057",
-          "source_url": ""
-        },
-        "3063": {
-          "name": "Item 3063",
-          "source_url": ""
-        },
-        "3068": {
-          "name": "Item 3068",
-          "source_url": ""
-        },
-        "3074": {
-          "name": "Item 3074",
-          "source_url": ""
-        },
-        "3079": {
-          "name": "Item 3079",
-          "source_url": ""
-        },
-        "3085": {
-          "name": "Item 3085",
-          "source_url": ""
-        },
-        "3090": {
-          "name": "Item 3090",
-          "source_url": ""
-        },
-        "3095": {
-          "name": "Item 3095",
-          "source_url": ""
-        },
-        "3100": {
-          "name": "Item 3100",
-          "source_url": ""
-        },
-        "3105": {
-          "name": "Item 3105",
-          "source_url": ""
-        },
-        "3110": {
-          "name": "Item 3110",
-          "source_url": ""
-        },
-        "3115": {
-          "name": "Item 3115",
-          "source_url": ""
-        },
-        "3120": {
-          "name": "Item 3120",
-          "source_url": ""
-        },
-        "3125": {
-          "name": "Item 3125",
-          "source_url": ""
-        },
-        "3130": {
-          "name": "Item 3130",
-          "source_url": ""
-        },
-        "3135": {
-          "name": "Item 3135",
-          "source_url": ""
-        },
-        "3140": {
-          "name": "Item 3140",
-          "source_url": ""
-        },
-        "3145": {
-          "name": "Item 3145",
-          "source_url": ""
-        },
-        "3150": {
-          "name": "Item 3150",
-          "source_url": ""
-        },
-        "3155": {
-          "name": "Item 3155",
-          "source_url": ""
-        },
-        "3160": {
-          "name": "Item 3160",
-          "source_url": ""
-        },
-        "3166": {
-          "name": "Item 3166",
-          "source_url": ""
-        },
-        "3171": {
-          "name": "Item 3171",
-          "source_url": ""
-        },
-        "3176": {
-          "name": "Item 3176",
-          "source_url": ""
-        },
-        "3181": {
-          "name": "Item 3181",
-          "source_url": ""
-        },
-        "3186": {
-          "name": "Item 3186",
-          "source_url": ""
-        },
-        "3192": {
-          "name": "Item 3192",
-          "source_url": ""
-        },
-        "3197": {
-          "name": "Item 3197",
-          "source_url": ""
-        },
-        "3202": {
-          "name": "Item 3202",
-          "source_url": ""
-        },
-        "3207": {
-          "name": "Item 3207",
-          "source_url": ""
-        },
-        "3212": {
-          "name": "Item 3212",
-          "source_url": ""
-        },
-        "3217": {
-          "name": "Item 3217",
-          "source_url": ""
-        },
-        "3367": {
-          "name": "Item 3367",
-          "source_url": ""
-        },
-        "3373": {
-          "name": "Item 3373",
-          "source_url": ""
-        },
-        "3378": {
-          "name": "Item 3378",
-          "source_url": ""
-        },
-        "3383": {
-          "name": "Item 3383",
-          "source_url": ""
-        },
-        "3388": {
-          "name": "Item 3388",
-          "source_url": ""
-        },
-        "3393": {
-          "name": "Item 3393",
-          "source_url": ""
-        },
-        "3563": {
-          "name": "Item 3563",
-          "source_url": ""
-        },
-        "3573": {
-          "name": "Item 3573",
-          "source_url": ""
-        },
-        "3583": {
-          "name": "Item 3583",
-          "source_url": ""
-        },
-        "3588": {
-          "name": "Item 3588",
-          "source_url": ""
-        },
-        "3593": {
-          "name": "Item 3593",
-          "source_url": ""
-        },
-        "3598": {
-          "name": "Item 3598",
-          "source_url": ""
-        },
-        "3604": {
-          "name": "Item 3604",
-          "source_url": ""
-        },
-        "3609": {
-          "name": "Item 3609",
-          "source_url": ""
-        },
-        "3614": {
-          "name": "Item 3614",
-          "source_url": ""
-        },
-        "3619": {
-          "name": "Item 3619",
-          "source_url": ""
-        },
-        "3624": {
-          "name": "Item 3624",
-          "source_url": ""
-        },
-        "3630": {
-          "name": "Item 3630",
-          "source_url": ""
-        },
-        "3641": {
-          "name": "Item 3641",
-          "source_url": ""
-        },
-        "3645": {
-          "name": "Item 3645",
-          "source_url": ""
-        },
-        "3649": {
-          "name": "Item 3649",
-          "source_url": ""
-        },
-        "3761": {
-          "name": "Item 3761",
-          "source_url": ""
-        },
-        "3766": {
-          "name": "Item 3766",
-          "source_url": ""
-        },
-        "3771": {
-          "name": "Item 3771",
-          "source_url": ""
-        },
-        "3776": {
-          "name": "Item 3776",
-          "source_url": ""
-        },
-        "3782": {
-          "name": "Item 3782",
-          "source_url": ""
-        },
-        "3786": {
-          "name": "Item 3786",
-          "source_url": ""
-        },
-        "3993": {
-          "name": "Item 3993",
-          "source_url": ""
-        },
-        "3998": {
-          "name": "Item 3998",
-          "source_url": ""
-        },
-        "4003": {
-          "name": "Item 4003",
-          "source_url": ""
-        },
-        "4008": {
-          "name": "Item 4008",
-          "source_url": ""
-        },
-        "4014": {
-          "name": "Item 4014",
-          "source_url": ""
-        },
-        "4018": {
-          "name": "Item 4018",
-          "source_url": ""
-        },
-        "4024": {
-          "name": "Item 4024",
-          "source_url": ""
-        },
-        "4029": {
-          "name": "Item 4029",
-          "source_url": ""
-        },
-        "4034": {
-          "name": "Item 4034",
-          "source_url": ""
-        },
-        "4039": {
-          "name": "Item 4039",
-          "source_url": ""
-        },
-        "4045": {
-          "name": "Item 4045",
-          "source_url": ""
-        },
-        "4049": {
-          "name": "Item 4049",
-          "source_url": ""
-        },
-        "4077": {
-          "name": "Item 4077",
-          "source_url": ""
-        },
-        "4082": {
-          "name": "Item 4082",
-          "source_url": ""
-        },
-        "4087": {
-          "name": "Item 4087",
-          "source_url": ""
-        },
-        "4092": {
-          "name": "Item 4092",
-          "source_url": ""
-        },
-        "4098": {
-          "name": "Item 4098",
-          "source_url": ""
-        },
-        "4102": {
-          "name": "Item 4102",
-          "source_url": ""
-        }
-      },
-      "feet": {
-        "244": {
-          "name": "Item 244",
-          "source_url": ""
-        },
-        "249": {
-          "name": "Item 249",
-          "source_url": ""
-        },
-        "254": {
-          "name": "Item 254",
-          "source_url": ""
-        },
-        "259": {
-          "name": "Item 259",
-          "source_url": ""
-        },
-        "264": {
-          "name": "Item 264",
-          "source_url": ""
-        },
-        "268": {
-          "name": "Item 268",
-          "source_url": ""
-        },
-        "269": {
-          "name": "Item 269",
-          "source_url": ""
-        },
-        "274": {
-          "name": "Item 274",
-          "source_url": ""
-        },
-        "278": {
-          "name": "Item 278",
-          "source_url": ""
-        },
-        "279": {
-          "name": "Item 279",
-          "source_url": ""
-        },
-        "284": {
-          "name": "Item 284",
-          "source_url": ""
-        },
-        "289": {
-          "name": "Item 289",
-          "source_url": ""
-        },
-        "294": {
-          "name": "Item 294",
-          "source_url": ""
-        },
-        "299": {
-          "name": "Item 299",
-          "source_url": ""
-        },
-        "304": {
-          "name": "Item 304",
-          "source_url": ""
-        },
-        "309": {
-          "name": "Item 309",
-          "source_url": ""
-        },
-        "342": {
-          "name": "Item 342",
-          "source_url": ""
-        },
-        "347": {
-          "name": "Item 347",
-          "source_url": ""
-        },
-        "352": {
-          "name": "Item 352",
-          "source_url": ""
-        },
-        "357": {
-          "name": "Item 357",
-          "source_url": ""
-        },
-        "362": {
-          "name": "Item 362",
-          "source_url": ""
-        },
-        "367": {
-          "name": "Item 367",
-          "source_url": ""
-        },
-        "372": {
-          "name": "Item 372",
-          "source_url": ""
-        },
-        "377": {
-          "name": "Item 377",
-          "source_url": ""
-        },
-        "382": {
-          "name": "Item 382",
-          "source_url": ""
-        },
-        "392": {
-          "name": "Item 392",
-          "source_url": ""
-        },
-        "397": {
-          "name": "Item 397",
-          "source_url": ""
-        },
-        "402": {
-          "name": "Item 402",
-          "source_url": ""
-        },
-        "407": {
-          "name": "Item 407",
-          "source_url": ""
-        },
-        "412": {
-          "name": "Item 412",
-          "source_url": ""
-        },
-        "417": {
-          "name": "Item 417",
-          "source_url": ""
-        },
-        "422": {
-          "name": "Item 422",
-          "source_url": ""
-        },
-        "427": {
-          "name": "Item 427",
-          "source_url": ""
-        },
-        "432": {
-          "name": "Item 432",
-          "source_url": ""
-        },
-        "437": {
-          "name": "Item 437",
-          "source_url": ""
-        },
-        "666": {
-          "name": "Item 666",
-          "source_url": ""
-        },
-        "692": {
-          "name": "Item 692",
-          "source_url": ""
-        },
-        "697": {
-          "name": "Item 697",
-          "source_url": ""
-        },
-        "702": {
-          "name": "Item 702",
-          "source_url": ""
-        },
-        "707": {
-          "name": "Item 707",
-          "source_url": ""
-        },
-        "712": {
-          "name": "Item 712",
-          "source_url": ""
-        },
-        "717": {
-          "name": "Item 717",
-          "source_url": ""
-        },
-        "722": {
-          "name": "Item 722",
-          "source_url": ""
-        },
-        "727": {
-          "name": "Item 727",
-          "source_url": ""
-        },
-        "731": {
-          "name": "Item 731",
-          "source_url": ""
-        },
-        "738": {
-          "name": "Item 738",
-          "source_url": ""
-        },
-        "743": {
-          "name": "Item 743",
-          "source_url": ""
-        },
-        "750": {
-          "name": "Item 750",
-          "source_url": ""
-        },
-        "755": {
-          "name": "Item 755",
-          "source_url": ""
-        },
-        "760": {
-          "name": "Item 760",
-          "source_url": ""
-        },
-        "765": {
-          "name": "Item 765",
-          "source_url": ""
-        },
-        "770": {
-          "name": "Item 770",
-          "source_url": ""
-        },
-        "775": {
-          "name": "Item 775",
-          "source_url": ""
-        },
-        "780": {
-          "name": "Item 780",
-          "source_url": ""
-        },
-        "786": {
-          "name": "Item 786",
-          "source_url": ""
-        },
-        "791": {
-          "name": "Item 791",
-          "source_url": ""
-        },
-        "796": {
-          "name": "Item 796",
-          "source_url": ""
-        },
-        "803": {
-          "name": "Item 803",
-          "source_url": ""
-        },
-        "809": {
-          "name": "Item 809",
-          "source_url": ""
-        },
-        "814": {
-          "name": "Item 814",
-          "source_url": ""
-        },
-        "819": {
-          "name": "Item 819",
-          "source_url": ""
-        },
-        "987": {
-          "name": "Item 987",
-          "source_url": ""
-        },
-        "992": {
-          "name": "Item 992",
-          "source_url": ""
-        },
-        "997": {
-          "name": "Item 997",
-          "source_url": ""
-        },
-        "1001": {
-          "name": "Item 1001",
-          "source_url": ""
-        },
-        "1190": {
-          "name": "Item 1190",
-          "source_url": ""
-        },
-        "1196": {
-          "name": "Item 1196",
-          "source_url": ""
-        },
-        "1250": {
-          "name": "Item 1250",
-          "source_url": ""
-        },
-        "1255": {
-          "name": "Item 1255",
-          "source_url": ""
-        },
-        "1260": {
-          "name": "Item 1260",
-          "source_url": ""
-        },
-        "1264": {
-          "name": "Item 1264",
-          "source_url": ""
-        },
-        "1270": {
-          "name": "Item 1270",
-          "source_url": ""
-        },
-        "1276": {
-          "name": "Item 1276",
-          "source_url": ""
-        },
-        "1301": {
-          "name": "Item 1301",
-          "source_url": ""
-        },
-        "1310": {
-          "name": "Item 1310",
-          "source_url": ""
-        },
-        "1333": {
-          "name": "Item 1333",
-          "source_url": ""
-        },
-        "1557": {
-          "name": "Item 1557",
-          "source_url": ""
-        },
-        "1629": {
-          "name": "Item 1629",
-          "source_url": ""
-        },
-        "1630": {
-          "name": "Item 1630",
-          "source_url": ""
-        },
-        "1643": {
-          "name": "Item 1643",
-          "source_url": ""
-        },
-        "1644": {
-          "name": "Item 1644",
-          "source_url": ""
-        },
-        "1688": {
-          "name": "Item 1688",
-          "source_url": ""
-        },
-        "1689": {
-          "name": "Item 1689",
-          "source_url": ""
-        },
-        "1697": {
-          "name": "Item 1697",
-          "source_url": ""
-        },
-        "1698": {
-          "name": "Item 1698",
-          "source_url": ""
-        },
-        "1706": {
-          "name": "Item 1706",
-          "source_url": ""
-        },
-        "1707": {
-          "name": "Item 1707",
-          "source_url": ""
-        },
-        "1715": {
-          "name": "Item 1715",
-          "source_url": ""
-        },
-        "1716": {
-          "name": "Item 1716",
-          "source_url": ""
-        },
-        "1728": {
-          "name": "Item 1728",
-          "source_url": ""
-        },
-        "1729": {
-          "name": "Item 1729",
-          "source_url": ""
-        },
-        "1730": {
-          "name": "Item 1730",
-          "source_url": ""
-        },
-        "1731": {
-          "name": "Item 1731",
-          "source_url": ""
-        },
-        "1739": {
-          "name": "Item 1739",
-          "source_url": ""
-        },
-        "1740": {
-          "name": "Item 1740",
-          "source_url": ""
-        },
-        "1751": {
-          "name": "Item 1751",
-          "source_url": ""
-        },
-        "1752": {
-          "name": "Item 1752",
-          "source_url": ""
-        },
-        "1760": {
-          "name": "Item 1760",
-          "source_url": ""
-        },
-        "1761": {
-          "name": "Item 1761",
-          "source_url": ""
-        },
-        "1774": {
-          "name": "Item 1774",
-          "source_url": ""
-        },
-        "1775": {
-          "name": "Item 1775",
-          "source_url": ""
-        },
-        "1783": {
-          "name": "Item 1783",
-          "source_url": ""
-        },
-        "1784": {
-          "name": "Item 1784",
-          "source_url": ""
-        },
-        "1792": {
-          "name": "Item 1792",
-          "source_url": ""
-        },
-        "1793": {
-          "name": "Item 1793",
-          "source_url": ""
-        },
-        "1801": {
-          "name": "Item 1801",
-          "source_url": ""
-        },
-        "1802": {
-          "name": "Item 1802",
-          "source_url": ""
-        },
-        "1812": {
-          "name": "Item 1812",
-          "source_url": ""
-        },
-        "1813": {
-          "name": "Item 1813",
-          "source_url": ""
-        },
-        "1851": {
-          "name": "Item 1851",
-          "source_url": ""
-        },
-        "1852": {
-          "name": "Item 1852",
-          "source_url": ""
-        },
-        "2095": {
-          "name": "Item 2095",
-          "source_url": ""
-        },
-        "2096": {
-          "name": "Item 2096",
-          "source_url": ""
-        },
-        "2104": {
-          "name": "Item 2104",
-          "source_url": ""
-        },
-        "2105": {
-          "name": "Item 2105",
-          "source_url": ""
-        },
-        "2127": {
-          "name": "Item 2127",
-          "source_url": ""
-        },
-        "2128": {
-          "name": "Item 2128",
-          "source_url": ""
-        },
-        "2138": {
-          "name": "Item 2138",
-          "source_url": ""
-        },
-        "2139": {
-          "name": "Item 2139",
-          "source_url": ""
-        },
-        "2147": {
-          "name": "Item 2147",
-          "source_url": ""
-        },
-        "2148": {
-          "name": "Item 2148",
-          "source_url": ""
-        },
-        "2156": {
-          "name": "Item 2156",
-          "source_url": ""
-        },
-        "2157": {
-          "name": "Item 2157",
-          "source_url": ""
-        },
-        "2165": {
-          "name": "Item 2165",
-          "source_url": ""
-        },
-        "2166": {
-          "name": "Item 2166",
-          "source_url": ""
-        },
-        "2179": {
-          "name": "Item 2179",
-          "source_url": ""
-        },
-        "2180": {
-          "name": "Item 2180",
-          "source_url": ""
-        },
-        "2236": {
-          "name": "Item 2236",
-          "source_url": ""
-        },
-        "2241": {
-          "name": "Item 2241",
-          "source_url": ""
-        },
-        "2242": {
-          "name": "Item 2242",
-          "source_url": ""
-        },
-        "2485": {
-          "name": "Item 2485",
-          "source_url": ""
-        },
-        "2486": {
-          "name": "Item 2486",
-          "source_url": ""
-        },
-        "2487": {
-          "name": "Item 2487",
-          "source_url": ""
-        },
-        "2488": {
-          "name": "Item 2488",
-          "source_url": ""
-        },
-        "2489": {
-          "name": "Item 2489",
-          "source_url": ""
-        },
-        "2699": {
-          "name": "Item 2699",
-          "source_url": ""
-        },
-        "2705": {
-          "name": "Item 2705",
-          "source_url": ""
-        },
-        "2711": {
-          "name": "Item 2711",
-          "source_url": ""
-        },
-        "2717": {
-          "name": "Item 2717",
-          "source_url": ""
-        },
-        "2723": {
-          "name": "Item 2723",
-          "source_url": ""
-        },
-        "2733": {
-          "name": "Item 2733",
-          "source_url": ""
-        },
-        "2739": {
-          "name": "Item 2739",
-          "source_url": ""
-        },
-        "2745": {
-          "name": "Item 2745",
-          "source_url": ""
-        },
-        "2751": {
-          "name": "Item 2751",
-          "source_url": ""
-        },
-        "2757": {
-          "name": "Item 2757",
-          "source_url": ""
-        },
-        "2764": {
-          "name": "Item 2764",
-          "source_url": ""
-        },
-        "2770": {
-          "name": "Item 2770",
-          "source_url": ""
-        },
-        "2776": {
-          "name": "Item 2776",
-          "source_url": ""
-        },
-        "2782": {
-          "name": "Item 2782",
-          "source_url": ""
-        },
-        "2788": {
-          "name": "Item 2788",
-          "source_url": ""
-        },
-        "2795": {
-          "name": "Item 2795",
-          "source_url": ""
-        },
-        "2801": {
-          "name": "Item 2801",
-          "source_url": ""
-        },
-        "2807": {
-          "name": "Item 2807",
-          "source_url": ""
-        },
-        "2813": {
-          "name": "Item 2813",
-          "source_url": ""
-        },
-        "2819": {
-          "name": "Item 2819",
-          "source_url": ""
-        },
-        "2826": {
-          "name": "Item 2826",
-          "source_url": ""
-        },
-        "2832": {
-          "name": "Item 2832",
-          "source_url": ""
-        },
-        "2838": {
-          "name": "Item 2838",
-          "source_url": ""
-        },
-        "2844": {
-          "name": "Item 2844",
-          "source_url": ""
-        },
-        "2850": {
-          "name": "Item 2850",
-          "source_url": ""
-        },
-        "2857": {
-          "name": "Item 2857",
-          "source_url": ""
-        },
-        "2863": {
-          "name": "Item 2863",
-          "source_url": ""
-        },
-        "2869": {
-          "name": "Item 2869",
-          "source_url": ""
-        },
-        "2875": {
-          "name": "Item 2875",
-          "source_url": ""
-        },
-        "2881": {
-          "name": "Item 2881",
-          "source_url": ""
-        },
-        "2927": {
-          "name": "Item 2927",
-          "source_url": ""
-        },
-        "2932": {
-          "name": "Item 2932",
-          "source_url": ""
-        },
-        "2937": {
-          "name": "Item 2937",
-          "source_url": ""
-        },
-        "2942": {
-          "name": "Item 2942",
-          "source_url": ""
-        },
-        "2946": {
-          "name": "Item 2946",
-          "source_url": ""
-        },
-        "2952": {
-          "name": "Item 2952",
-          "source_url": ""
-        },
-        "2992": {
-          "name": "Item 2992",
-          "source_url": ""
-        },
-        "2998": {
-          "name": "Item 2998",
-          "source_url": ""
-        },
-        "3004": {
-          "name": "Item 3004",
-          "source_url": ""
-        },
-        "3010": {
-          "name": "Item 3010",
-          "source_url": ""
-        },
-        "3015": {
-          "name": "Item 3015",
-          "source_url": ""
-        },
-        "3021": {
-          "name": "Item 3021",
-          "source_url": ""
-        },
-        "3031": {
-          "name": "Item 3031",
-          "source_url": ""
-        },
-        "3036": {
-          "name": "Item 3036",
-          "source_url": ""
-        },
-        "3041": {
-          "name": "Item 3041",
-          "source_url": ""
-        },
-        "3046": {
-          "name": "Item 3046",
-          "source_url": ""
-        },
-        "3051": {
-          "name": "Item 3051",
-          "source_url": ""
-        },
-        "3056": {
-          "name": "Item 3056",
-          "source_url": ""
-        },
-        "3062": {
-          "name": "Item 3062",
-          "source_url": ""
-        },
-        "3067": {
-          "name": "Item 3067",
-          "source_url": ""
-        },
-        "3073": {
-          "name": "Item 3073",
-          "source_url": ""
-        },
-        "3078": {
-          "name": "Item 3078",
-          "source_url": ""
-        },
-        "3084": {
-          "name": "Item 3084",
-          "source_url": ""
-        },
-        "3089": {
-          "name": "Item 3089",
-          "source_url": ""
-        },
-        "3094": {
-          "name": "Item 3094",
-          "source_url": ""
-        },
-        "3099": {
-          "name": "Item 3099",
-          "source_url": ""
-        },
-        "3104": {
-          "name": "Item 3104",
-          "source_url": ""
-        },
-        "3109": {
-          "name": "Item 3109",
-          "source_url": ""
-        },
-        "3114": {
-          "name": "Item 3114",
-          "source_url": ""
-        },
-        "3119": {
-          "name": "Item 3119",
-          "source_url": ""
-        },
-        "3124": {
-          "name": "Item 3124",
-          "source_url": ""
-        },
-        "3129": {
-          "name": "Item 3129",
-          "source_url": ""
-        },
-        "3134": {
-          "name": "Item 3134",
-          "source_url": ""
-        },
-        "3139": {
-          "name": "Item 3139",
-          "source_url": ""
-        },
-        "3144": {
-          "name": "Item 3144",
-          "source_url": ""
-        },
-        "3149": {
-          "name": "Item 3149",
-          "source_url": ""
-        },
-        "3154": {
-          "name": "Item 3154",
-          "source_url": ""
-        },
-        "3159": {
-          "name": "Item 3159",
-          "source_url": ""
-        },
-        "3165": {
-          "name": "Item 3165",
-          "source_url": ""
-        },
-        "3170": {
-          "name": "Item 3170",
-          "source_url": ""
-        },
-        "3175": {
-          "name": "Item 3175",
-          "source_url": ""
-        },
-        "3180": {
-          "name": "Item 3180",
-          "source_url": ""
-        },
-        "3185": {
-          "name": "Item 3185",
-          "source_url": ""
-        },
-        "3191": {
-          "name": "Item 3191",
-          "source_url": ""
-        },
-        "3196": {
-          "name": "Item 3196",
-          "source_url": ""
-        },
-        "3201": {
-          "name": "Item 3201",
-          "source_url": ""
-        },
-        "3206": {
-          "name": "Item 3206",
-          "source_url": ""
-        },
-        "3213": {
-          "name": "Item 3213",
-          "source_url": ""
-        },
-        "3218": {
-          "name": "Item 3218",
-          "source_url": ""
-        },
-        "3222": {
-          "name": "Item 3222",
-          "source_url": ""
-        },
-        "3366": {
-          "name": "Item 3366",
-          "source_url": ""
-        },
-        "3374": {
-          "name": "Item 3374",
-          "source_url": ""
-        },
-        "3379": {
-          "name": "Item 3379",
-          "source_url": ""
-        },
-        "3384": {
-          "name": "Item 3384",
-          "source_url": ""
-        },
-        "3389": {
-          "name": "Item 3389",
-          "source_url": ""
-        },
-        "3394": {
-          "name": "Item 3394",
-          "source_url": ""
-        },
-        "3564": {
-          "name": "Item 3564",
-          "source_url": ""
-        },
-        "3574": {
-          "name": "Item 3574",
-          "source_url": ""
-        },
-        "3584": {
-          "name": "Item 3584",
-          "source_url": ""
-        },
-        "3589": {
-          "name": "Item 3589",
-          "source_url": ""
-        },
-        "3594": {
-          "name": "Item 3594",
-          "source_url": ""
-        },
-        "3599": {
-          "name": "Item 3599",
-          "source_url": ""
-        },
-        "3603": {
-          "name": "Item 3603",
-          "source_url": ""
-        },
-        "3610": {
-          "name": "Item 3610",
-          "source_url": ""
-        },
-        "3615": {
-          "name": "Item 3615",
-          "source_url": ""
-        },
-        "3620": {
-          "name": "Item 3620",
-          "source_url": ""
-        },
-        "3625": {
-          "name": "Item 3625",
-          "source_url": ""
-        },
-        "3629": {
-          "name": "Item 3629",
-          "source_url": ""
-        },
-        "3642": {
-          "name": "Item 3642",
-          "source_url": ""
-        },
-        "3646": {
-          "name": "Item 3646",
-          "source_url": ""
-        },
-        "3650": {
-          "name": "Item 3650",
-          "source_url": ""
-        },
-        "3762": {
-          "name": "Item 3762",
-          "source_url": ""
-        },
-        "3767": {
-          "name": "Item 3767",
-          "source_url": ""
-        },
-        "3772": {
-          "name": "Item 3772",
-          "source_url": ""
-        },
-        "3777": {
-          "name": "Item 3777",
-          "source_url": ""
-        },
-        "3781": {
-          "name": "Item 3781",
-          "source_url": ""
-        },
-        "3787": {
-          "name": "Item 3787",
-          "source_url": ""
-        },
-        "3994": {
-          "name": "Item 3994",
-          "source_url": ""
-        },
-        "3999": {
-          "name": "Item 3999",
-          "source_url": ""
-        },
-        "4004": {
-          "name": "Item 4004",
-          "source_url": ""
-        },
-        "4009": {
-          "name": "Item 4009",
-          "source_url": ""
-        },
-        "4013": {
-          "name": "Item 4013",
-          "source_url": ""
-        },
-        "4019": {
-          "name": "Item 4019",
-          "source_url": ""
-        },
-        "4025": {
-          "name": "Item 4025",
-          "source_url": ""
-        },
-        "4030": {
-          "name": "Item 4030",
-          "source_url": ""
-        },
-        "4035": {
-          "name": "Item 4035",
-          "source_url": ""
-        },
-        "4040": {
-          "name": "Item 4040",
-          "source_url": ""
-        },
-        "4044": {
-          "name": "Item 4044",
-          "source_url": ""
-        },
-        "4050": {
-          "name": "Item 4050",
-          "source_url": ""
-        },
-        "4078": {
-          "name": "Item 4078",
-          "source_url": ""
-        },
-        "4083": {
-          "name": "Item 4083",
-          "source_url": ""
-        },
-        "4088": {
-          "name": "Item 4088",
-          "source_url": ""
-        },
-        "4093": {
-          "name": "Item 4093",
-          "source_url": ""
-        },
-        "4097": {
-          "name": "Item 4097",
-          "source_url": ""
-        },
-        "4103": {
-          "name": "Item 4103",
           "source_url": ""
         }
       },
@@ -12011,562 +12201,122 @@
         "4073": {
           "name": "Item 4073",
           "source_url": ""
+        },
+        "62": {
+          "name": "Albion Leather Helm 1",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/62.jpg"
+        },
+        "63": {
+          "name": "Albion Chain Helmet 1 (Cap)",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/63.jpg"
+        },
+        "64": {
+          "name": "Albion Plate Helmet 1(Cap)",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/64.jpg"
+        },
+        "93": {
+          "name": "Albion Plate Helmet 2 (Full)",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/93.jpg"
+        },
+        "94": {
+          "name": "Albion Guard Plate Helmet 1 (Cap)",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/94.jpg"
+        },
+        "95": {
+          "name": "Albion Guard Plate Helmet 2 (full)",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/95.jpg"
+        },
+        "335": {
+          "name": "Norse Leather Helm 1",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/335.jpg"
+        },
+        "336": {
+          "name": "Norse Leather Helm 2",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/336.jpg"
+        },
+        "337": {
+          "name": "Norse Leather Helm 3",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/337.jpg"
+        },
+        "438": {
+          "name": "Celtic Leather helm 1",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/438.jpg"
+        },
+        "439": {
+          "name": "Celtic Leather helm 2",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/439.jpg"
+        },
+        "440": {
+          "name": "Celtic Leather helm 3",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/440.jpg"
+        },
+        "823": {
+          "name": "Albion Cloth Helm",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/823.jpg"
+        },
+        "824": {
+          "name": "Albion Studded Helm",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/824.jpg"
+        },
+        "825": {
+          "name": "Norse Cloth Cap",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/825.jpg"
+        },
+        "826": {
+          "name": "Celtic Cloth Cap 1",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/826.jpg"
+        },
+        "827": {
+          "name": "Hibernia Studded Cap",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/827.jpg"
+        },
+        "829": {
+          "name": "Norse studded helm 1",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/829.jpg"
+        },
+        "830": {
+          "name": "Norse studded helm 2",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/830.jpg"
+        },
+        "831": {
+          "name": "Norse studded helm 3",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/831.jpg"
+        },
+        "832": {
+          "name": "Norse chain helm 1",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/832.jpg"
+        },
+        "833": {
+          "name": "Norse chain helm 2",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/833.jpg"
+        },
+        "834": {
+          "name": "Norse chain helm 3",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/834.jpg"
+        },
+        "835": {
+          "name": "Celtic reinforced helm 1",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/835.jpg"
+        },
+        "836": {
+          "name": "Celtic reinforced helm 2",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/836.jpg"
+        },
+        "837": {
+          "name": "Celtic reinforced helm 3",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/837.jpg"
+        },
+        "838": {
+          "name": "Celtic scale helm 1",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/838.jpg"
+        },
+        "839": {
+          "name": "Celtic scale helm 2",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/839.jpg"
         }
-      },
-      "shields": {
-        "1064": {
-          "name": "Item 1064",
-          "source_url": ""
-        },
-        "1065": {
-          "name": "Item 1065",
-          "source_url": ""
-        },
-        "1066": {
-          "name": "Item 1066",
-          "source_url": ""
-        },
-        "1067": {
-          "name": "Item 1067",
-          "source_url": ""
-        },
-        "1068": {
-          "name": "Item 1068",
-          "source_url": ""
-        },
-        "1069": {
-          "name": "Item 1069",
-          "source_url": ""
-        },
-        "1070": {
-          "name": "Item 1070",
-          "source_url": ""
-        },
-        "1071": {
-          "name": "Item 1071",
-          "source_url": ""
-        },
-        "1072": {
-          "name": "Item 1072",
-          "source_url": ""
-        },
-        "1073": {
-          "name": "Item 1073",
-          "source_url": ""
-        },
-        "1074": {
-          "name": "Item 1074",
-          "source_url": ""
-        },
-        "1075": {
-          "name": "Item 1075",
-          "source_url": ""
-        },
-        "1076": {
-          "name": "Item 1076",
-          "source_url": ""
-        },
-        "1077": {
-          "name": "Item 1077",
-          "source_url": ""
-        },
-        "1078": {
-          "name": "Item 1078",
-          "source_url": ""
-        },
-        "1079": {
-          "name": "Item 1079",
-          "source_url": ""
-        },
-        "1080": {
-          "name": "Item 1080",
-          "source_url": ""
-        },
-        "1081": {
-          "name": "Item 1081",
-          "source_url": ""
-        },
-        "1082": {
-          "name": "Item 1082",
-          "source_url": ""
-        },
-        "1083": {
-          "name": "Item 1083",
-          "source_url": ""
-        },
-        "1084": {
-          "name": "Item 1084",
-          "source_url": ""
-        },
-        "1085": {
-          "name": "Item 1085",
-          "source_url": ""
-        },
-        "1086": {
-          "name": "Item 1086",
-          "source_url": ""
-        },
-        "1087": {
-          "name": "Item 1087",
-          "source_url": ""
-        },
-        "1088": {
-          "name": "Item 1088",
-          "source_url": ""
-        },
-        "1089": {
-          "name": "Item 1089",
-          "source_url": ""
-        },
-        "1090": {
-          "name": "Item 1090",
-          "source_url": ""
-        },
-        "1091": {
-          "name": "Item 1091",
-          "source_url": ""
-        },
-        "1092": {
-          "name": "Item 1092",
-          "source_url": ""
-        },
-        "1093": {
-          "name": "Item 1093",
-          "source_url": ""
-        },
-        "1094": {
-          "name": "Item 1094",
-          "source_url": ""
-        },
-        "1095": {
-          "name": "Item 1095",
-          "source_url": ""
-        },
-        "1096": {
-          "name": "Item 1096",
-          "source_url": ""
-        },
-        "1097": {
-          "name": "Item 1097",
-          "source_url": ""
-        },
-        "1098": {
-          "name": "Item 1098",
-          "source_url": ""
-        },
-        "1099": {
-          "name": "Item 1099",
-          "source_url": ""
-        },
-        "1100": {
-          "name": "Item 1100",
-          "source_url": ""
-        },
-        "1101": {
-          "name": "Item 1101",
-          "source_url": ""
-        },
-        "1102": {
-          "name": "Item 1102",
-          "source_url": ""
-        },
-        "1103": {
-          "name": "Item 1103",
-          "source_url": ""
-        },
-        "1104": {
-          "name": "Item 1104",
-          "source_url": ""
-        },
-        "1105": {
-          "name": "Item 1105",
-          "source_url": ""
-        },
-        "1106": {
-          "name": "Item 1106",
-          "source_url": ""
-        },
-        "1107": {
-          "name": "Item 1107",
-          "source_url": ""
-        },
-        "1108": {
-          "name": "Item 1108",
-          "source_url": ""
-        },
-        "1109": {
-          "name": "Item 1109",
-          "source_url": ""
-        },
-        "1110": {
-          "name": "Item 1110",
-          "source_url": ""
-        },
-        "1111": {
-          "name": "Item 1111",
-          "source_url": ""
-        },
-        "1112": {
-          "name": "Item 1112",
-          "source_url": ""
-        },
-        "1113": {
-          "name": "Item 1113",
-          "source_url": ""
-        },
-        "1114": {
-          "name": "Item 1114",
-          "source_url": ""
-        },
-        "1115": {
-          "name": "Item 1115",
-          "source_url": ""
-        },
-        "1116": {
-          "name": "Item 1116",
-          "source_url": ""
-        },
-        "1117": {
-          "name": "Item 1117",
-          "source_url": ""
-        },
-        "1118": {
-          "name": "Item 1118",
-          "source_url": ""
-        },
-        "1119": {
-          "name": "Item 1119",
-          "source_url": ""
-        },
-        "1120": {
-          "name": "Item 1120",
-          "source_url": ""
-        },
-        "1121": {
-          "name": "Item 1121",
-          "source_url": ""
-        },
-        "1122": {
-          "name": "Item 1122",
-          "source_url": ""
-        },
-        "1123": {
-          "name": "Item 1123",
-          "source_url": ""
-        },
-        "1124": {
-          "name": "Item 1124",
-          "source_url": ""
-        },
-        "1125": {
-          "name": "Item 1125",
-          "source_url": ""
-        },
-        "1126": {
-          "name": "Item 1126",
-          "source_url": ""
-        },
-        "1127": {
-          "name": "Item 1127",
-          "source_url": ""
-        },
-        "1128": {
-          "name": "Item 1128",
-          "source_url": ""
-        },
-        "1129": {
-          "name": "Item 1129",
-          "source_url": ""
-        },
-        "1130": {
-          "name": "Item 1130",
-          "source_url": ""
-        },
-        "1131": {
-          "name": "Item 1131",
-          "source_url": ""
-        },
-        "1132": {
-          "name": "Item 1132",
-          "source_url": ""
-        },
-        "1133": {
-          "name": "Item 1133",
-          "source_url": ""
-        },
-        "1134": {
-          "name": "Item 1134",
-          "source_url": ""
-        },
-        "1135": {
-          "name": "Item 1135",
-          "source_url": ""
-        },
-        "1136": {
-          "name": "Item 1136",
-          "source_url": ""
-        },
-        "1137": {
-          "name": "Item 1137",
-          "source_url": ""
-        },
-        "1138": {
-          "name": "Item 1138",
-          "source_url": ""
-        },
-        "1139": {
-          "name": "Item 1139",
-          "source_url": ""
-        },
-        "1140": {
-          "name": "Item 1140",
-          "source_url": ""
-        },
-        "1141": {
-          "name": "Item 1141",
-          "source_url": ""
-        },
-        "1142": {
-          "name": "Item 1142",
-          "source_url": ""
-        },
-        "1143": {
-          "name": "Item 1143",
-          "source_url": ""
-        },
-        "1144": {
-          "name": "Item 1144",
-          "source_url": ""
-        },
-        "1145": {
-          "name": "Item 1145",
-          "source_url": ""
-        },
-        "1146": {
-          "name": "Item 1146",
-          "source_url": ""
-        },
-        "1147": {
-          "name": "Item 1147",
-          "source_url": ""
-        },
-        "1148": {
-          "name": "Item 1148",
-          "source_url": ""
-        },
-        "1149": {
-          "name": "Item 1149",
-          "source_url": ""
-        },
-        "1150": {
-          "name": "Item 1150",
-          "source_url": ""
-        },
-        "1151": {
-          "name": "Item 1151",
-          "source_url": ""
-        },
-        "1152": {
-          "name": "Item 1152",
-          "source_url": ""
-        },
-        "1153": {
-          "name": "Item 1153",
-          "source_url": ""
-        },
-        "1154": {
-          "name": "Item 1154",
-          "source_url": ""
-        },
-        "1155": {
-          "name": "Item 1155",
-          "source_url": ""
-        },
-        "1156": {
-          "name": "Item 1156",
-          "source_url": ""
-        },
-        "1157": {
-          "name": "Item 1157",
-          "source_url": ""
-        },
-        "1158": {
-          "name": "Item 1158",
-          "source_url": ""
-        },
-        "1159": {
-          "name": "Item 1159",
-          "source_url": ""
-        },
-        "1160": {
-          "name": "Item 1160",
-          "source_url": ""
-        },
-        "1161": {
-          "name": "Item 1161",
-          "source_url": ""
-        },
-        "1162": {
-          "name": "Item 1162",
-          "source_url": ""
-        },
-        "1163": {
-          "name": "Item 1163",
-          "source_url": ""
-        },
-        "1164": {
-          "name": "Item 1164",
-          "source_url": ""
-        },
-        "1165": {
-          "name": "Item 1165",
-          "source_url": ""
-        },
-        "1663": {
-          "name": "Item 1663",
-          "source_url": ""
-        },
-        "1664": {
-          "name": "Item 1664",
-          "source_url": ""
-        },
-        "1665": {
-          "name": "Item 1665",
-          "source_url": ""
-        },
-        "2192": {
-          "name": "Item 2192",
-          "source_url": ""
-        },
-        "2193": {
-          "name": "Item 2193",
-          "source_url": ""
-        },
-        "2194": {
-          "name": "Item 2194",
-          "source_url": ""
-        },
-        "2200": {
-          "name": "Item 2200",
-          "source_url": ""
-        },
-        "2201": {
-          "name": "Item 2201",
-          "source_url": ""
-        },
-        "2202": {
-          "name": "Item 2202",
-          "source_url": ""
-        },
-        "2210": {
-          "name": "Item 2210",
-          "source_url": ""
-        },
-        "2211": {
-          "name": "Item 2211",
-          "source_url": ""
-        },
-        "2212": {
-          "name": "Item 2212",
-          "source_url": ""
-        },
-        "2218": {
-          "name": "Item 2218",
-          "source_url": ""
-        },
-        "2219": {
-          "name": "Item 2219",
-          "source_url": ""
-        },
-        "2220": {
-          "name": "Item 2220",
-          "source_url": ""
-        },
-        "2725": {
-          "name": "Item 2725",
-          "source_url": ""
-        },
-        "2726": {
-          "name": "Item 2726",
-          "source_url": ""
-        },
-        "2727": {
-          "name": "Item 2727",
-          "source_url": ""
-        },
-        "3668": {
-          "name": "Item 3668",
-          "source_url": ""
-        },
-        "3669": {
-          "name": "Item 3669",
-          "source_url": ""
-        },
-        "3670": {
-          "name": "Item 3670",
-          "source_url": ""
-        },
-        "3711": {
-          "name": "Item 3711",
-          "source_url": ""
-        },
-        "3712": {
-          "name": "Item 3712",
-          "source_url": ""
-        },
-        "3713": {
-          "name": "Item 3713",
-          "source_url": ""
-        },
-        "3828": {
-          "name": "Item 3828",
-          "source_url": ""
-        },
-        "3829": {
-          "name": "Item 3829",
-          "source_url": ""
-        },
-        "3830": {
-          "name": "Item 3830",
-          "source_url": ""
-        },
-        "3888": {
-          "name": "Item 3888",
-          "source_url": ""
-        },
-        "3889": {
-          "name": "Item 3889",
-          "source_url": ""
-        },
-        "3890": {
-          "name": "Item 3890",
-          "source_url": ""
-        },
-        "3929": {
-          "name": "Item 3929",
-          "source_url": ""
-        },
-        "3930": {
-          "name": "Item 3930",
-          "source_url": ""
-        },
-        "3931": {
-          "name": "Item 3931",
-          "source_url": ""
-        },
-        "3965": {
-          "name": "Item 3965",
-          "source_url": ""
-        },
-        "3966": {
-          "name": "Item 3966",
-          "source_url": ""
-        },
-        "3967": {
-          "name": "Item 3967",
-          "source_url": ""
-        }
-      },
+      }
+    },
+    "other": {
       "misc": {
         "1307": {
           "name": "Item 1307",
@@ -13615,6 +13365,106 @@
         "1682": {
           "name": "Item 1682",
           "source_url": ""
+        },
+        "561": {
+          "name": "Ballista",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/561.jpg"
+        },
+        "562": {
+          "name": "Ram",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/562.jpg"
+        },
+        "563": {
+          "name": "Mangonel",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/563.jpg"
+        },
+        "1673": {
+          "name": "trebuchet",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1673.jpg"
+        },
+        "1674": {
+          "name": "Ballista Low",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1674.jpg"
+        },
+        "1675": {
+          "name": "Ballista High",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1675.jpg"
+        },
+        "1676": {
+          "name": "Catapult W",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1676.jpg"
+        },
+        "1677": {
+          "name": "Catapult G",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1677.jpg"
+        },
+        "1678": {
+          "name": "Ram High",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1678.jpg"
+        },
+        "1679": {
+          "name": "Ram Mid",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1679.jpg"
+        },
+        "1680": {
+          "name": "Ram Low",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1680.jpg"
+        },
+        "2594": {
+          "name": "Frontiers Mounted Ballista",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2594.jpg"
+        },
+        "2596": {
+          "name": "Frontiers Ranged Ballista",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2596.jpg"
+        },
+        "2597": {
+          "name": "Frontiers Mounted Catapult",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2597.jpg"
+        },
+        "2598": {
+          "name": "Ranged Catapult",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2598.jpg"
+        },
+        "2599": {
+          "name": "Frontiers Ranged Trebuchet",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2599.jpg"
+        },
+        "2600": {
+          "name": "Light Siege Ram",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2600.jpg"
+        },
+        "2601": {
+          "name": "Medium Siege Ram",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2601.jpg"
+        },
+        "2602": {
+          "name": "Heavy Siege Ram",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2602.jpg"
+        },
+        "2604": {
+          "name": "Frontiers Scorpion",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2604.jpg"
+        },
+        "2605": {
+          "name": "Frontiers Mini Ram",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2605.jpg"
+        },
+        "2606": {
+          "name": "Frontiers Mounted Trebuchet",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2606.jpg"
+        },
+        "2607": {
+          "name": "Frontiers Boiling Oil",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2607.jpg"
+        },
+        "2645": {
+          "name": "Frontiers Ranged Scorpion",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2645.jpg"
+        },
+        "2652": {
+          "name": "Mine Cart",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/2652.jpg"
         }
       },
       "tents": {
@@ -13893,86 +13743,105 @@
           "source_url": ""
         }
       },
-      "cloaks": {
-        "3636": {
-          "name": "Item 3636",
-          "source_url": ""
+      "world": {
+        "145": {
+          "name": "Albion Gravestone",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/145.jpg"
         },
-        "3637": {
-          "name": "Item 3637",
-          "source_url": ""
+        "464": {
+          "name": "Albion Pennant",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/464.jpg"
         },
-        "3752": {
-          "name": "Item 3752",
-          "source_url": ""
+        "465": {
+          "name": "Midgard Pennant",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/465.jpg"
         },
-        "3789": {
-          "name": "Item 3789",
-          "source_url": ""
+        "466": {
+          "name": "Hibernian Pennant",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/466.jpg"
         },
-        "3790": {
-          "name": "Item 3790",
-          "source_url": ""
+        "478": {
+          "name": "Forge",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/478.jpg"
         },
-        "3791": {
-          "name": "Item 3791",
-          "source_url": ""
+        "479": {
+          "name": "Stretcher",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/479.jpg"
         },
-        "3800": {
-          "name": "Item 3800",
-          "source_url": ""
+        "480": {
+          "name": "Loom",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/480.jpg"
         },
-        "3801": {
-          "name": "Item 3801",
-          "source_url": ""
+        "481": {
+          "name": "Lathe",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/481.jpg"
         },
-        "3802": {
-          "name": "Item 3802",
-          "source_url": ""
+        "482": {
+          "name": "Trebutchet",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/482.jpg"
         },
-        "4105": {
-          "name": "Item 4105",
-          "source_url": ""
+        "512": {
+          "name": "Arrows",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/512.jpg"
         },
-        "4106": {
-          "name": "Item 4106",
-          "source_url": ""
+        "630": {
+          "name": "Albion Relic Staff",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/630.jpg"
         },
-        "4107": {
-          "name": "Item 4107",
-          "source_url": ""
+        "631": {
+          "name": "Albion Relic Scabbard",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/631.jpg"
         },
-        "4108": {
-          "name": "Item 4108",
-          "source_url": ""
+        "632": {
+          "name": "Hiberniean Relic Cauldron",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/632.jpg"
         },
-        "4109": {
-          "name": "Item 4109",
-          "source_url": ""
+        "633": {
+          "name": "Hibernian Relic Spear",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/633.jpg"
         },
-        "4110": {
-          "name": "Item 4110",
-          "source_url": ""
+        "634": {
+          "name": "Norse Relic Hammer",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/634.jpg"
         },
-        "4115": {
-          "name": "Item 4115",
-          "source_url": ""
+        "635": {
+          "name": "Norse Relic Horn",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/635.jpg"
+        },
+        "636": {
+          "name": "norse gravestone",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/636.jpg"
+        },
+        "637": {
+          "name": "hibernian gravestone",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/637.jpg"
+        },
+        "679": {
+          "name": "Briton Guild Banner",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/679.jpg"
+        },
+        "680": {
+          "name": "Hibernian Guild Banner",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/680.jpg"
+        },
+        "681": {
+          "name": "Norse Guild Banner",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/681.jpg"
+        },
+        "820": {
+          "name": "Alchemist Table",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/820.jpg"
+        },
+        "1293": {
+          "name": "Ground Target",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1293.jpg"
+        },
+        "1306": {
+          "name": "Midgard PHouse Lot",
+          "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/1306.jpg"
         }
       },
-      "quiver": {
-        "4250": {
-          "name": "Item 4250",
-          "source_url": ""
-        },
-        "4251": {
-          "name": "Item 4251",
-          "source_url": ""
-        },
-        "4252": {
-          "name": "Item 4252",
-          "source_url": ""
-        }
-      }
+      "housing": {}
     }
   }
 }

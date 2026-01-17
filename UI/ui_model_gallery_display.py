@@ -60,8 +60,6 @@ class ModelThumbnailWidget(QFrame):
 
         # Image
         self.image_label = QLabel()
-        self.image_label.setMinimumSize(100, 100)
-        self.image_label.setMaximumSize(120, 120)
         self.image_label.setAlignment(Qt.AlignCenter)
         self._load_image()
         layout.addWidget(self.image_label)
@@ -84,8 +82,9 @@ class ModelThumbnailWidget(QFrame):
 
         if self.thumbnail.full_path.exists():
             pixmap = QPixmap(str(self.thumbnail.full_path))
+            # Scale to max width 150 while preserving aspect ratio
             scaled_pixmap = pixmap.scaledToWidth(
-                100, Qt.SmoothTransformation
+                150, Qt.SmoothTransformation
             )
             self.image_label.setPixmap(scaled_pixmap)
         else:

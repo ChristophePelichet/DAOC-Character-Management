@@ -79,6 +79,25 @@ DEFAULT_CONFIG = {
         "personal_db_path": None,
         "auto_add_scraped_items": True,
         "last_internal_db_version": "1.0"
+    },
+    "models_gallery": {
+        "visible_slots": [
+            "Weapons",
+            "Arms",
+            "Hands",
+            "Feet",
+            "Legs",
+            "Torso",
+            "Head",
+            "Shields",
+            "Cloaks",
+            "Quiver",
+            "Misc",
+            "Siege",
+            "Boats",
+            "Tents",
+            "Deco"
+        ]
     }
 }
 
@@ -206,6 +225,28 @@ VALIDATION_SCHEMA = {
             "type": (str, type(None)),
             "allowed": ["Albion", "Midgard", "Hibernia", None],
             "default": None
+        }
+    },
+    "models_gallery": {
+        "visible_slots": {
+            "type": list,
+            "default": [
+                "Weapons",
+                "Arms",
+                "Hands",
+                "Feet",
+                "Legs",
+                "Torso",
+                "Head",
+                "Shields",
+                "Cloaks",
+                "Quiver",
+                "Misc",
+                "Siege",
+                "Boats",
+                "Tents",
+                "Deco"
+            ]
         }
     }
 }

@@ -99,6 +99,7 @@ class SettingsDialog(QDialog):
         self._create_herald_page()
         self._create_backup_page()
         self._create_armory_page()
+        self._create_models_gallery_page()
         self._create_debug_page()
         
         # SuperAdmin page (only in --admin mode) - AFTER Debug to keep indexes consistent
@@ -155,6 +156,7 @@ class SettingsDialog(QDialog):
             ("🌐", lang.get("settings.navigation.herald", default="Eden")),
             ("💾", lang.get("settings.navigation.backup", default="Sauvegardes")),
             ("🛡️", lang.get("settings.navigation.armory", default="Armurerie")),
+            ("🖼️", lang.get("settings.navigation.models", default="Models")),
         ]
         
         nav_items.append(("🐛", lang.get("settings.navigation.debug", default="Debug")))
@@ -1215,6 +1217,20 @@ class SettingsDialog(QDialog):
         self._update_armory_database_mode()
         
         layout.addStretch()
+        self.pages.addWidget(page)
+    
+    def _create_models_gallery_page(self):
+        """Page for Models Gallery settings (visible slots configuration)"""
+        from UI.ui_models_gallery_settings import ModelsGallerySettingsWidget
+        
+        page = QWidget()
+        layout = QVBoxLayout(page)
+        layout.setContentsMargins(0, 0, 0, 0)
+        
+        # Add the models gallery settings widget
+        models_settings = ModelsGallerySettingsWidget()
+        layout.addWidget(models_settings)
+        
         self.pages.addWidget(page)
     
     def _create_superadmin_page(self):

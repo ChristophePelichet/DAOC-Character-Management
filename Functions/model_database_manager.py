@@ -153,6 +153,71 @@ def model_gallery_load_metadata() -> Dict[str, List[str]]:
     return metadata
 
 
+def model_gallery_apply_visibility_filters(metadata: Dict) -> Dict:
+    """
+    Apply visibility filters from configuration to metadata.
+
+    Removes slots that are not in the visible_slots list from the configuration.
+    This allows users to hide certain model categories from the gallery view.
+
+    Args:
+        metadata: Output from model_gallery_load_metadata()
+
+    Returns:
+        Filtered metadata containing only visible slots
+
+    Example:
+        metadata = model_gallery_load_metadata()
+        filtered = model_gallery_apply_visibility_filters(metadata)
+        # Now only contains slots that are enabled in settings
+    """
+    try:
+        from Functions.config_manager import config
+
+        visible_slots = config.get(
+            "models_gallery.visible_slots",
+            [
+                "Weapons",
+                "Arms",
+                "Hands",
+                "Feet",
+                "Legs",
+                "Torso",
+                "Head",
+                "Shields",
+                "Cloaks",
+                "Quiver",
+                "Misc",
+                "Siege",
+                "Boats",
+                "Tents",
+                "Deco",
+            ],
+        )
+
+        if not metadata or "items" not in metadata:
+            return metadata
+
+        # Filter items to only include visible slots
+        filtered_items = {
+            slot_name: model_ids
+            for slot_name, model_ids in metadata["items"].items()
+            if slot_name in visible_slots
+        }
+
+        filtered_metadata = {"items": filtered_items}
+
+        logging.info(
+            f"Applied visibility filters: {len(filtered_items)} visible slots out of {len(metadata['items'])}"
+        )
+
+        return filtered_metadata
+
+    except Exception as e:
+        logging.error(f"Error applying visibility filters: {e}")
+        return metadata
+
+
 def model_gallery_extract_ids_from_dir(directory: Path) -> List[str]:
     """
     Extract model IDs from image filenames in a directory.

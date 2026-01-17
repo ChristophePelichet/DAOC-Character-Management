@@ -13,7 +13,10 @@ from PySide6.QtGui import QFont
 from UI.ui_model_gallery_filter import ModelsFilterPanelWidget
 from UI.ui_model_gallery_display import ModelsGalleryDisplayWidget
 from UI.ui_model_gallery_builder import ModelsGalleryBuilderWidget
-from Functions.model_database_manager import model_gallery_load_metadata
+from Functions.model_database_manager import (
+    model_gallery_load_metadata,
+    model_gallery_apply_visibility_filters,
+)
 from Functions.language_manager import lang
 
 
@@ -40,8 +43,10 @@ class ModelsOverviewWidget(QWidget):
 
         # Load metadata directly (should be fast)
         logging.info("Loading metadata...")
-        self.metadata = model_gallery_load_metadata()
-        logging.info(f"Metadata loaded: {len(self.metadata)} types")
+        raw_metadata = model_gallery_load_metadata()
+        # Apply visibility filters from configuration
+        self.metadata = model_gallery_apply_visibility_filters(raw_metadata)
+        logging.info(f"Metadata loaded and filtered: {len(self.metadata)} types")
 
         # Initialize components
         self._setup_ui()

@@ -143,7 +143,7 @@ class ModelsOverviewWidget(QWidget):
         # Store model IDs and current slot for preview navigation
         self.current_model_list = [t.model_id for t in thumbnails]
         if thumbnails:
-            self.current_slot_name = thumbnails[0].slot_name
+            self.current_slot_name = thumbnails[0].subtype_name
 
         # Update stats
         count = len(thumbnails)

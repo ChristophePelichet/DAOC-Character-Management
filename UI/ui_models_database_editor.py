@@ -50,28 +50,16 @@ class ModelsDataDatabaseEditor(QDialog):
 
     def _init_ui(self):
         """Initialize the user interface"""
-        layout = QVBoxLayout()
+        main_layout = QVBoxLayout()
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setSpacing(0)
 
-        # Toolbar with window controls
-        toolbar_layout = QHBoxLayout()
-        toolbar_layout.setContentsMargins(5, 5, 5, 5)
-        toolbar_layout.setSpacing(5)
-        
-        toolbar_label = QLabel("🪟 Window Controls:")
-        toolbar_layout.addWidget(toolbar_label)
-        
-        minimize_btn = QPushButton("📥 Minimize")
-        minimize_btn.setMinimumWidth(100)
-        minimize_btn.clicked.connect(self.showMinimized)
-        toolbar_layout.addWidget(minimize_btn)
-        
-        maximize_btn = QPushButton("📤 Maximize")
-        maximize_btn.setMinimumWidth(100)
-        maximize_btn.clicked.connect(self._toggle_maximize)
-        toolbar_layout.addWidget(maximize_btn)
-        
-        toolbar_layout.addStretch()
-        layout.addLayout(toolbar_layout)
+        # Custom title bar
+        title_bar = self._create_title_bar()
+        main_layout.addWidget(title_bar)
+
+        # Content layout
+        content_layout = QVBoxLayout()
 
         # Create tabs
         tabs = QTabWidget()
@@ -92,7 +80,7 @@ class ModelsDataDatabaseEditor(QDialog):
         subtypes_tab = self._create_manage_subtypes_tab()
         tabs.addTab(subtypes_tab, "🏷️ Manage Subtypes")
 
-        layout.addWidget(tabs)
+        content_layout.addWidget(tabs)
 
         # Buttons
         button_layout = QHBoxLayout()
@@ -104,11 +92,66 @@ class ModelsDataDatabaseEditor(QDialog):
         button_layout.addStretch()
         button_layout.addWidget(save_btn)
         button_layout.addWidget(close_btn)
-        layout.addLayout(button_layout)
+        content_layout.addLayout(button_layout)
 
-        self.setLayout(layout)
+        main_layout.addLayout(content_layout)
+        self.setLayout(main_layout)
         
         self.is_maximized = False
+
+    def _create_title_bar(self) -> QWidget:
+        """Create custom title bar with window controls"""
+        title_widget = QWidget()
+        title_widget.setStyleSheet("""
+            QWidget {
+                background-color: #3a3a4a;
+                border-bottom: 1px solid #555;
+                padding: 8px 10px;
+            }
+            QPushButton {
+                background-color: #4a4a5a;
+                color: white;
+                border: 1px solid #555;
+                border-radius: 3px;
+                padding: 5px 12px;
+                font-weight: bold;
+                min-width: 30px;
+            }
+            QPushButton:hover {
+                background-color: #5a5a6a;
+            }
+            QPushButton:pressed {
+                background-color: #2a2a3a;
+            }
+        """)
+        
+        title_layout = QHBoxLayout()
+        title_layout.setContentsMargins(0, 0, 0, 0)
+        title_layout.setSpacing(5)
+        
+        title_label = QLabel("🪟 Database Editor")
+        title_label.setStyleSheet("color: white; font-weight: bold;")
+        title_layout.addWidget(title_label)
+        
+        title_layout.addStretch()
+        
+        minimize_btn = QPushButton("−")
+        minimize_btn.setMaximumWidth(40)
+        minimize_btn.clicked.connect(self.showMinimized)
+        title_layout.addWidget(minimize_btn)
+        
+        self.maximize_btn = QPushButton("🗖")
+        self.maximize_btn.setMaximumWidth(40)
+        self.maximize_btn.clicked.connect(self._toggle_maximize)
+        title_layout.addWidget(self.maximize_btn)
+        
+        close_btn = QPushButton("✕")
+        close_btn.setMaximumWidth(40)
+        close_btn.clicked.connect(self.close)
+        title_layout.addWidget(close_btn)
+        
+        title_widget.setLayout(title_layout)
+        return title_widget
 
     def _toggle_maximize(self):
         """Toggle window maximize/restore"""

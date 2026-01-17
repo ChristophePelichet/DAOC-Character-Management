@@ -115,12 +115,6 @@ class ModelPreviewDialog(QDialog):
         
         main_layout.addLayout(nav_layout)
 
-        # Close button
-        self.close_button = QPushButton("Close (Esc)")
-        self.close_button.clicked.connect(self.close)
-        self.close_button.setMaximumWidth(150)
-        main_layout.addWidget(self.close_button)
-
     def _load_image(self, reset_zoom: bool = True):
         """Load and display current model image."""
         if not self.model_id:

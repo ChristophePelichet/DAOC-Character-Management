@@ -1578,12 +1578,6 @@ thumbnail = pixmap.scaled(32, 32, Qt.KeepAspectRatio, Qt.SmoothTransformation)
 
 ### v2.0 Roadmap (Future Enhancements - NOT IMPLEMENTED)
 
-🔮 **Analytics & Intelligence**
-- Most used models statistics
-- Orphaned models (not used by any item)
-- Model distribution charts
-- Rare/unique model discovery
-
 🔮 **Performance**
 - Lazy-loading thumbnails on scroll
 - Thumbnail caching

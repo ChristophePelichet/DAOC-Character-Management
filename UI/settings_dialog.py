@@ -1228,8 +1228,8 @@ class SettingsDialog(QDialog):
         layout.setContentsMargins(0, 0, 0, 0)
         
         # Add the models gallery settings widget
-        models_settings = ModelsGallerySettingsWidget()
-        layout.addWidget(models_settings)
+        self.models_gallery_settings = ModelsGallerySettingsWidget()
+        layout.addWidget(self.models_gallery_settings)
         
         self.pages.addWidget(page)
     
@@ -3243,6 +3243,10 @@ class SettingsDialog(QDialog):
             self.translatable_widgets['clean_cache_button'].setToolTip(
                 lang.get("buttons.clean_cache_tooltip")
             )
+        
+        # Models Gallery Settings widget retranslation
+        if hasattr(self, 'models_gallery_settings'):
+            self.models_gallery_settings.retranslate_ui()
 
 
 

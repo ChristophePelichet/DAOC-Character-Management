@@ -427,6 +427,28 @@
                 "status_loading": "Lädt...",
                 "status_no_date": "-"
             },
+            "models_gallery": {
+                "title": "Modell-Galerie",
+                "subtitle": "Konfigurieren Sie sichtbare Modellkategorien",
+                "description": "Wählen Sie die Modellkategorien aus, die in der Galerie sichtbar sein sollen:",
+                "category_armor": "Rüstung",
+                "category_weapon": "Waffe",
+                "category_other": "Sonstiges",
+                "subcategory_arms": "Arme",
+                "subcategory_cloaks": "Umhänge",
+                "subcategory_feet": "Füße",
+                "subcategory_hands": "Hände",
+                "subcategory_head": "Kopf",
+                "subcategory_legs": "Beine",
+                "subcategory_shields": "Schilde",
+                "subcategory_torso": "Torso",
+                "subcategory_boats": "Boote",
+                "subcategory_deco": "Dekoration",
+                "subcategory_misc": "Verschiedenes",
+                "subcategory_quiver": "Köcher",
+                "subcategory_siege": "Belagerung",
+                "subcategory_tents": "Zelte"
+            },
             "mass_import_monitor": {
                 "window_title": "📦 Template Import Items Tools",
                 "window_title_personal": "🛡️ Template Import Items Tools",

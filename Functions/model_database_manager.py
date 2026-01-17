@@ -8,7 +8,6 @@ and gallery display.
 Domain-driven function naming: model_gallery_*
 """
 
-import os
 import logging
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional

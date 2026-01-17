@@ -61,7 +61,6 @@ class ModelsGallerySettingsWidget(QWidget):
 
     def _setup_ui(self):
         """Build UI layout."""
-        from PySide6.QtCore import Qt
         
         layout = QVBoxLayout()
         layout.setSpacing(10)
@@ -70,8 +69,8 @@ class ModelsGallerySettingsWidget(QWidget):
         # Title
         title = QLabel(
             self.lang.get(
-                "settings.models_gallery_title",
-                default="Models Gallery - Visible Slots",
+                "settings.models_gallery.title",
+                default="Models Gallery",
             )
         )
         title_font = QFont()
@@ -83,7 +82,7 @@ class ModelsGallerySettingsWidget(QWidget):
         # Description
         description = QLabel(
             self.lang.get(
-                "settings.models_gallery_description",
+                "settings.models_gallery.description",
                 default="Select which model categories should be visible in the gallery:",
             )
         )
@@ -121,10 +120,13 @@ class ModelsGallerySettingsWidget(QWidget):
             category_vertical_layout.setSpacing(8)
             category_vertical_layout.setContentsMargins(10, 10, 10, 10)
 
-            # Category header checkbox
-            category_checkbox = QCheckBox(category.capitalize())
+            # Category header checkbox - use localized name
+            category_label = self._get_category_label(category)
+            category_checkbox = QCheckBox(category_label)
             category_checkbox.setFont(QFont())
-            category_checkbox.stateChanged.connect(lambda state, cat=category: self._on_category_checkbox_changed(cat, state))
+            category_checkbox.stateChanged.connect(
+                lambda state, cat=category: self._on_category_checkbox_changed(cat, state)
+            )
             category_vertical_layout.addWidget(category_checkbox)
             self.category_checkboxes[category] = category_checkbox
 
@@ -138,7 +140,9 @@ class ModelsGallerySettingsWidget(QWidget):
             subcategories = self.subcategories_by_category[category]
             for subcategory in subcategories:
                 checkbox_key = f"{category}/{subcategory}"
-                subcat_checkbox = QCheckBox(subcategory.capitalize())
+                # Subcategory label - use localized name
+                subcat_label = self._get_subcategory_label(category, subcategory)
+                subcat_checkbox = QCheckBox(subcat_label)
                 subcat_checkbox.setFont(QFont())
                 subcat_checkbox.stateChanged.connect(self._on_checkbox_changed)
                 category_vertical_layout.addWidget(subcat_checkbox)
@@ -158,6 +162,41 @@ class ModelsGallerySettingsWidget(QWidget):
 
         layout.addWidget(scroll_area)
         self.setLayout(layout)
+
+    def _get_category_label(self, category: str) -> str:
+        """Get localized label for a category."""
+        key_map = {
+            "armor": "settings.models_gallery.category_armor",
+            "weapon": "settings.models_gallery.category_weapon",
+            "other": "settings.models_gallery.category_other",
+        }
+        fallback_map = {
+            "armor": "Armor",
+            "weapon": "Weapon",
+            "other": "Other",
+        }
+        return self.lang.get(key_map.get(category, ""), default=fallback_map.get(category, category))
+
+    def _get_subcategory_label(self, category: str, subcategory: str) -> str:
+        """Get localized label for a subcategory."""
+        key_map = {
+            "arms": "settings.models_gallery.subcategory_arms",
+            "cloaks": "settings.models_gallery.subcategory_cloaks",
+            "feet": "settings.models_gallery.subcategory_feet",
+            "hands": "settings.models_gallery.subcategory_hands",
+            "head": "settings.models_gallery.subcategory_head",
+            "legs": "settings.models_gallery.subcategory_legs",
+            "shields": "settings.models_gallery.subcategory_shields",
+            "torso": "settings.models_gallery.subcategory_torso",
+            "boats": "settings.models_gallery.subcategory_boats",
+            "deco": "settings.models_gallery.subcategory_deco",
+            "misc": "settings.models_gallery.subcategory_misc",
+            "quiver": "settings.models_gallery.subcategory_quiver",
+            "siege": "settings.models_gallery.subcategory_siege",
+            "tents": "settings.models_gallery.subcategory_tents",
+        }
+        fallback = subcategory.capitalize()
+        return self.lang.get(key_map.get(subcategory, ""), default=fallback)
 
     def _load_settings(self):
         """Load settings from configuration and update checkboxes."""
@@ -274,6 +313,19 @@ class ModelsGallerySettingsWidget(QWidget):
                 # Partially checked
                 category_checkbox.setCheckState(Qt.CheckState.PartiallyChecked)
             category_checkbox.blockSignals(False)
+
+    def retranslate_ui(self):
+        """Retranslate all labels when language changes."""
+        # Update category checkbox labels
+        for category, checkbox in self.category_checkboxes.items():
+            category_label = self._get_category_label(category)
+            checkbox.setText(category_label)
+        
+        # Update subcategory checkbox labels
+        for checkbox_key, checkbox in self.checkboxes.items():
+            category, subcategory = checkbox_key.split("/")
+            subcat_label = self._get_subcategory_label(category, subcategory)
+            checkbox.setText(subcat_label)
 
     def get_visible_slots(self) -> List[str]:
         """

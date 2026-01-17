@@ -16,10 +16,9 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QPushButton,
 )
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Signal
 from PySide6.QtGui import QFont
 
-from Functions.model_gallery_builder import model_gallery_build_filter_options
 
 
 class ModelsFilterPanelWidget(QWidget):

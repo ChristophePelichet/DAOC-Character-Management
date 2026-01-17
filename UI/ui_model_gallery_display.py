@@ -5,17 +5,15 @@ Displays model thumbnails in a scrollable grid layout with filter integration.
 Handles image loading, hover effects, and model selection.
 """
 
-from pathlib import Path
 from PySide6.QtWidgets import (
     QWidget,
     QVBoxLayout,
-    QHBoxLayout,
     QScrollArea,
     QGridLayout,
     QLabel,
     QFrame,
 )
-from PySide6.QtCore import Qt, QSize, Signal
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QPixmap, QFont
 
 from Functions.model_gallery_builder import ModelThumbnail

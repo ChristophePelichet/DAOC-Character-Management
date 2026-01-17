@@ -13,8 +13,7 @@ from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QMessageBox, QDialog,
     QGroupBox, QFormLayout
 )
-from PySide6.QtCore import Qt, QThread, Signal
-from pathlib import Path
+from PySide6.QtCore import QThread, Signal
 import logging
 
 from Functions.language_manager import lang

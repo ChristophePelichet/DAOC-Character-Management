@@ -5,7 +5,7 @@ Author: Christophe Pelichet
 Description: Defines the configuration structure, default values, and validation rules
 """
 
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional
 
 # Default configuration v2 (hierarchical structure)
 DEFAULT_CONFIG = {

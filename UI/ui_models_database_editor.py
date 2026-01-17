@@ -9,22 +9,20 @@ Allows editing the models metadata database with:
 """
 
 import json
-import os
 from pathlib import Path
-from typing import Optional, Dict, Any, List
+from typing import Dict, Any, List
 
 from PySide6.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QWidget, QTabWidget,
+    QVBoxLayout, QHBoxLayout, QWidget, QTabWidget, QDialog,
     QPushButton, QLabel, QLineEdit, QComboBox, QListWidget,
     QListWidgetItem, QSplitter, QGroupBox, QMessageBox,
-    QFileDialog, QDialog as QFileSelectionDialog, QInputDialog,
-    QProgressBar, QScrollArea, QFrame
+    QFileDialog, QInputDialog
 )
-from PySide6.QtGui import QPixmap, QIcon
-from PySide6.QtCore import Qt, QSize, QTimer
+from PySide6.QtGui import QPixmap
+from PySide6.QtCore import Qt
 
 from Functions.language_manager import lang
-from Functions.path_manager import PathManager, get_base_path
+from Functions.path_manager import get_base_path
 
 
 class ModelsDataDatabaseEditor(QDialog):

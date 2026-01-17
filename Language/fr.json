@@ -428,6 +428,28 @@
                 "status_loading": "Chargement...",
                 "status_no_date": "-"
             },
+            "models_gallery": {
+                "title": "Galerie de Modèles",
+                "subtitle": "Configurer les catégories de modèles visibles",
+                "description": "Sélectionnez les catégories de modèles qui doivent être visibles dans la galerie:",
+                "category_armor": "Armure",
+                "category_weapon": "Arme",
+                "category_other": "Autre",
+                "subcategory_arms": "Bras",
+                "subcategory_cloaks": "Capes",
+                "subcategory_feet": "Pieds",
+                "subcategory_hands": "Mains",
+                "subcategory_head": "Tête",
+                "subcategory_legs": "Jambes",
+                "subcategory_shields": "Boucliers",
+                "subcategory_torso": "Torse",
+                "subcategory_boats": "Bateaux",
+                "subcategory_deco": "Décoration",
+                "subcategory_misc": "Divers",
+                "subcategory_quiver": "Carquois",
+                "subcategory_siege": "Siège",
+                "subcategory_tents": "Tentes"
+            },
             "mass_import_monitor": {
                 "window_title": "📦 Template Import Items Tools",
                 "window_title_personal": "🛡️ Template Import Items Tools",

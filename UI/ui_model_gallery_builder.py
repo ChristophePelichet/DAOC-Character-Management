@@ -11,7 +11,6 @@ import logging
 from typing import List, Optional
 from PySide6.QtCore import QObject, Signal
 
-from Functions.model_database_manager import model_gallery_load_metadata
 from Functions.model_gallery_filter import model_gallery_apply_filters
 from Functions.model_gallery_builder import (
     model_gallery_build_thumbnail_list,

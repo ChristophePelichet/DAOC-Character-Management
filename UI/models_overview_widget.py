@@ -7,8 +7,6 @@ Acts as the entry point for the Models Overview feature from the main menu.
 
 import logging
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QFont
 
 from UI.ui_model_gallery_filter import ModelsFilterPanelWidget
 from UI.ui_model_gallery_display import ModelsGalleryDisplayWidget

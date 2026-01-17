@@ -15,17 +15,15 @@ Features:
 """
 
 import json
-import shutil
 import time
 from pathlib import Path
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple
 from datetime import datetime
 import logging
 
 from Functions.path_manager import PathManager
-from Functions.items_parser import parse_template_file, search_item_for_database
-from Functions.eden_scraper import EdenScraper, _connect_to_eden_herald
-from Functions.cookie_manager import CookieManager
+from Functions.items_parser import parse_template_file
+from Functions.eden_scraper import _connect_to_eden_herald
 from Functions.items_scraper import ItemsScraper
 
 
@@ -449,7 +447,7 @@ class SuperAdminTools:
                             item_details = items_scraper.get_item_details(item_id, variant_realm, item_name)
                             
                             if not item_details:
-                                logging.warning(f"      ⚠️  Failed to get details")
+                                logging.warning("      ⚠️  Failed to get details")
                                 continue
                             
                             # Format for database v2.0
@@ -482,7 +480,7 @@ class SuperAdminTools:
                                 added_count += 1
                                 logging.info(f"      ✅ Added: {composite_key}")
                             else:
-                                logging.warning(f"      ❌ Skipped (no merchant info)")
+                                logging.warning("      ❌ Skipped (no merchant info)")
                                 failed_count += 1
                         
                     except Exception as e:
@@ -534,7 +532,7 @@ class SuperAdminTools:
                 "errors": parse_errors
             }
             
-            message = f"Database built successfully!\n\n"
+            message = "Database built successfully!\n\n"
             message += f"Files processed: {stats['files_processed']}\n"
             message += f"Unique items: {stats['unique_items_processed']}\n"
             message += f"Variants found: {stats['variants_found']}\n"
@@ -831,14 +829,14 @@ class SuperAdminTools:
                 "fields_updated": fields_updated
             }
             
-            message = f"Database refresh completed!\n\n"
+            message = "Database refresh completed!\n\n"
             message += f"Unique items processed: {total_items}\n"
             message += f"Total variants found: {variants_found}\n"
             message += f"New DB entries: {items_created}\n"
             message += f"Updated DB entries: {items_updated}\n"
             message += f"Failed: {failed_count}\n"
             message += f"Total DB entries: {len(new_items)}\n\n"
-            message += f"Fields updated:\n"
+            message += "Fields updated:\n"
             message += f"• Model: {fields_updated['model']}\n"
             message += f"• DPS: {fields_updated['dps']}\n"
             message += f"• Speed: {fields_updated['speed']}\n"

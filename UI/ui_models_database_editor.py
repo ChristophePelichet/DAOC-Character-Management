@@ -100,57 +100,74 @@ class ModelsDataDatabaseEditor(QDialog):
         self.is_maximized = False
 
     def _create_title_bar(self) -> QWidget:
-        """Create custom title bar with window controls"""
+        """Create custom title bar with window controls (like Windows system title bar)"""
         title_widget = QWidget()
         title_widget.setStyleSheet("""
             QWidget {
-                background-color: #3a3a4a;
-                border-bottom: 1px solid #555;
-                padding: 8px 10px;
+                background-color: #2d2d30;
+                border-bottom: 1px solid #3e3e42;
             }
             QPushButton {
-                background-color: #4a4a5a;
+                background-color: transparent;
                 color: white;
-                border: 1px solid #555;
-                border-radius: 3px;
-                padding: 5px 12px;
-                font-weight: bold;
-                min-width: 30px;
+                border: none;
+                padding: 4px 12px;
+                font-size: 16px;
+                min-width: 46px;
+                min-height: 32px;
             }
             QPushButton:hover {
-                background-color: #5a5a6a;
+                background-color: #3e3e42;
             }
             QPushButton:pressed {
-                background-color: #2a2a3a;
+                background-color: #007acc;
             }
         """)
         
         title_layout = QHBoxLayout()
-        title_layout.setContentsMargins(0, 0, 0, 0)
-        title_layout.setSpacing(5)
+        title_layout.setContentsMargins(10, 0, 0, 0)
+        title_layout.setSpacing(0)
         
         title_label = QLabel("🪟 Database Editor")
-        title_label.setStyleSheet("color: white; font-weight: bold;")
+        title_label.setStyleSheet("color: #cccccc; font-weight: normal; margin-right: 10px;")
         title_layout.addWidget(title_label)
         
         title_layout.addStretch()
         
         minimize_btn = QPushButton("−")
-        minimize_btn.setMaximumWidth(40)
+        minimize_btn.setMaximumWidth(46)
         minimize_btn.clicked.connect(self.showMinimized)
         title_layout.addWidget(minimize_btn)
         
         self.maximize_btn = QPushButton("🗖")
-        self.maximize_btn.setMaximumWidth(40)
+        self.maximize_btn.setMaximumWidth(46)
         self.maximize_btn.clicked.connect(self._toggle_maximize)
         title_layout.addWidget(self.maximize_btn)
         
         close_btn = QPushButton("✕")
-        close_btn.setMaximumWidth(40)
+        close_btn.setMaximumWidth(46)
+        close_btn.setStyleSheet("""
+            QPushButton {
+                background-color: transparent;
+                color: white;
+                border: none;
+                padding: 4px 12px;
+                font-size: 16px;
+                min-width: 46px;
+                min-height: 32px;
+            }
+            QPushButton:hover {
+                background-color: #e81123;
+            }
+            QPushButton:pressed {
+                background-color: #c50a0a;
+            }
+        """)
         close_btn.clicked.connect(self.close)
         title_layout.addWidget(close_btn)
         
         title_widget.setLayout(title_layout)
+        title_widget.setFixedHeight(32)
         return title_widget
 
     def _toggle_maximize(self):

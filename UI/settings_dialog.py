@@ -1380,6 +1380,18 @@ class SettingsDialog(QDialog):
         armory_section.setLayout(armory_layout)
         layout.addWidget(armory_section)
         
+        # === MODELS DATABASE SECTION ===
+        from UI.ui_superadmin_models_database import SuperAdminModelsDatabaseWidget
+        
+        models_section = QGroupBox("🖼️ " + lang.get('superadmin.models_database_section_title', default="Models Database"))
+        models_layout = QVBoxLayout()
+        
+        models_widget = SuperAdminModelsDatabaseWidget(self)
+        models_layout.addWidget(models_widget)
+        
+        models_section.setLayout(models_layout)
+        layout.addWidget(models_section)
+        
         # Initialize statistics on page creation
         self._refresh_superadmin_stats()
         

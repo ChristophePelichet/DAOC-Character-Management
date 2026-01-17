@@ -860,3 +860,74 @@ class SuperAdminTools:
             # Close browser
             if eden_scraper:
                 eden_scraper.close()
+
+    def get_models_database_stats(self) -> Dict[str, any]:
+        """
+        Retrieve statistics about the models database (metadata.json).
+        
+        Returns:
+            Dictionary with models database statistics:
+            {
+                "total_models": 838,
+                "items": 595,
+                "mobs": 193,
+                "icons": 50,
+                "file_size": "180.6 KB",
+                "last_updated": "2025-01-17 14:23:45"
+            }
+        """
+        try:
+            metadata_path = Path(self.path_manager.get_resource_path("Data")) / "models_metadata.json"
+            
+            if not metadata_path.exists():
+                return {
+                    "total_models": 0,
+                    "items": 0,
+                    "mobs": 0,
+                    "icons": 0,
+                    "file_size": "0 B",
+                    "last_updated": "Unknown"
+                }
+            
+            # Load metadata
+            with open(metadata_path, 'r', encoding='utf-8') as f:
+                metadata = json.load(f)
+            
+            # Count models per type
+            items_count = len(metadata.get("items", {}))
+            mobs_count = len(metadata.get("mobs", {}))
+            icons_count = len(metadata.get("icons", {}))
+            total_count = items_count + mobs_count + icons_count
+            
+            # Get file size
+            file_size = metadata_path.stat().st_size
+            size_kb = file_size / 1024
+            if size_kb < 1024:
+                size_str = f"{size_kb:.1f} KB"
+            else:
+                size_mb = size_kb / 1024
+                size_str = f"{size_mb:.1f} MB"
+            
+            # Get last modified time
+            mod_time = datetime.fromtimestamp(metadata_path.stat().st_mtime)
+            last_updated = mod_time.strftime("%Y-%m-%d %H:%M:%S")
+            
+            return {
+                "total_models": total_count,
+                "items": items_count,
+                "mobs": mobs_count,
+                "icons": icons_count,
+                "file_size": size_str,
+                "last_updated": last_updated
+            }
+            
+        except Exception as e:
+            logging.error(f"Error getting models database stats: {e}", extra={"action": "SUPERADMIN_MODELS_STATS_ERROR"})
+            return {
+                "total_models": 0,
+                "items": 0,
+                "mobs": 0,
+                "icons": 0,
+                "file_size": "Error",
+                "last_updated": "Error"
+            }

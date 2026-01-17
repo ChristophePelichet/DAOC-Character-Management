@@ -1038,7 +1038,9 @@
         "refresh_stats_failed": "Échecs",
         "refresh_fields_updated": "Champs mis à jour",
         "progress_title": "Construction en cours...",
-        "progress_description": "Traitement des fichiers template"
+        "progress_description": "Traitement des fichiers template",
+        "models_database_section_title": "Base de Données des Modèles",
+        "items_database_section_title": "Base de Données des Items"
     },
     "db_editor": {
         "window_title": "🗄️ Éditeur de Base de Données - items_database_src.json",
@@ -1525,5 +1527,32 @@
     },
     "error": {
         "data_load_failed": "Erreur lors du chargement des données"
+    },
+    "models_db": {
+        "statistics_title": "Statistiques de la Base de Données des Modèles",
+        "total": "Total des modèles",
+        "items": "Items",
+        "mobs": "Mobs",
+        "icons": "Icônes",
+        "file_size": "Taille du fichier",
+        "last_updated": "Dernière mise à jour",
+        "unknown": "Inconnu",
+        "refresh_stats": "🔄 Actualiser les stats",
+        "refresh_stats_tooltip": "Actualiser les statistiques de la base de données des modèles",
+        "refresh_metadata": "🔄 Actualiser les métadonnées",
+        "refresh_metadata_btn": "🔄 Actualiser les métadonnées",
+        "refresh_metadata_tooltip": "Re-scraper les métadonnées des modèles depuis le site Los Ojos",
+        "viewer_btn": "🔍 Visionneuse de Base de Données des Modèles",
+        "viewer_tooltip": "Voir et explorer tous les modèles dans la base de données",
+        "refresh_confirm_title": "Actualiser les métadonnées",
+        "refresh_confirm_msg": "Ceci va re-scraper les métadonnées depuis le site Los Ojos. Continuer?",
+        "refreshing": "Actualisation des métadonnées...",
+        "refreshing_metadata": "Actualisation des métadonnées...",
+        "refresh_success": "Les métadonnées ont été actualisées avec succès!",
+        "refresh_error": "Erreur lors de l'actualisation des métadonnées",
+        "refresh_complete_title": "Actualisation terminée",
+        "refresh_complete_msg": "Les métadonnées ont été actualisées avec succès!",
+        "stats_error": "Impossible de charger les statistiques de la base de données des modèles",
+        "viewer_error": "Erreur lors de l'ouverture de la visionneuse de base de données des modèles",
+        "viewer_coming_soon": "Visionneuse de base de données des modèles prochainement..."
     }
-}

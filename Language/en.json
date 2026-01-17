@@ -1007,7 +1007,9 @@
         "refresh_stats_failed": "Failed",
         "refresh_fields_updated": "Fields updated",
         "progress_title": "Building...",
-        "progress_description": "Processing template files"
+        "progress_description": "Processing template files",
+        "models_database_section_title": "Models Database",
+        "items_database_section_title": "Items Database"
     },
     "db_editor": {
         "window_title": "🗄️ Database Editor - items_database_src.json",
@@ -1494,5 +1496,34 @@
     },
     "error": {
         "data_load_failed": "Error loading data"
+    },
+    "models_db": {
+        "statistics_title": "Models Database Statistics",
+        "total": "Total models",
+        "items": "Items",
+        "mobs": "Mobs",
+        "icons": "Icons",
+        "file_size": "File size",
+        "last_updated": "Last updated",
+        "unknown": "Unknown",
+        "refresh_stats": "🔄 Refresh Stats",
+        "refresh_stats_tooltip": "Refresh models database statistics",
+        "refresh_metadata": "🔄 Refresh Metadata",
+        "refresh_metadata_btn": "🔄 Refresh Metadata",
+        "refresh_metadata_tooltip": "Re-scrape models metadata from Los Ojos website",
+        "viewer_btn": "🔍 Models Database Viewer",
+        "viewer_tooltip": "View and explore all models in the database",
+        "refresh_confirm_title": "Refresh Metadata",
+        "refresh_confirm_msg": "This will re-scrape the metadata from Los Ojos website. Continue?",
+        "refreshing": "Refreshing metadata...",
+        "refreshing_metadata": "Refreshing metadata...",
+        "refresh_success": "Metadata refreshed successfully!",
+        "refresh_error": "Error refreshing metadata",
+        "refresh_complete_title": "Refresh Complete",
+        "refresh_complete_msg": "Metadata has been refreshed successfully!",
+        "stats_error": "Failed to load models database statistics",
+        "viewer_error": "Error opening Models Database Viewer",
+        "viewer_coming_soon": "Models Database Viewer coming soon..."
     }
 }
+

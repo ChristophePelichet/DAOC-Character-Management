@@ -1006,7 +1006,9 @@
         "refresh_stats_failed": "Fehlgeschlagen",
         "refresh_fields_updated": "Aktualisierte Felder",
         "progress_title": "Wird erstellt...",
-        "progress_description": "Verarbeitung der Vorlagendateien"
+        "progress_description": "Verarbeitung der Vorlagendateien",
+        "models_database_section_title": "Modell-Datenbank",
+        "items_database_section_title": "Gegenstände-Datenbank"
     },
     "db_editor": {
         "window_title": "🗄️ Datenbank-Editor - items_database_src.json",
@@ -1482,5 +1484,33 @@
     },
     "error": {
         "data_load_failed": "Fehler beim Laden der Daten"
+    },
+    "models_db": {
+        "statistics_title": "Statistiken der Modell-Datenbank",
+        "total": "Gesamtmodelle",
+        "items": "Gegenstände",
+        "mobs": "Mobs",
+        "icons": "Symbole",
+        "file_size": "Dateigröße",
+        "last_updated": "Zuletzt aktualisiert",
+        "unknown": "Unbekannt",
+        "refresh_stats": "🔄 Statistiken aktualisieren",
+        "refresh_stats_tooltip": "Statistiken der Modell-Datenbank aktualisieren",
+        "refresh_metadata": "🔄 Metadaten aktualisieren",
+        "refresh_metadata_btn": "🔄 Metadaten aktualisieren",
+        "refresh_metadata_tooltip": "Modell-Metadaten von der Los Ojos-Website neu scrapen",
+        "viewer_btn": "🔍 Modell-Datenbank-Viewer",
+        "viewer_tooltip": "Alle Modelle in der Datenbank anzeigen und erkunden",
+        "refresh_confirm_title": "Metadaten aktualisieren",
+        "refresh_confirm_msg": "Dies wird die Metadaten von der Los Ojos-Website neu scrapen. Fortfahren?",
+        "refreshing": "Metadaten werden aktualisiert...",
+        "refreshing_metadata": "Metadaten werden aktualisiert...",
+        "refresh_success": "Metadaten erfolgreich aktualisiert!",
+        "refresh_error": "Fehler beim Aktualisieren der Metadaten",
+        "refresh_complete_title": "Aktualisierung abgeschlossen",
+        "refresh_complete_msg": "Metadaten wurden erfolgreich aktualisiert!",
+        "stats_error": "Statistiken der Modell-Datenbank konnten nicht geladen werden",
+        "viewer_error": "Fehler beim Öffnen des Modell-Datenbank-Viewers",
+        "viewer_coming_soon": "Modell-Datenbank-Viewer kommt bald..."
     }
 }

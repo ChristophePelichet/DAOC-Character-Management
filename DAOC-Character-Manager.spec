@@ -58,6 +58,15 @@ a = Analysis(
 )
 pyz = PYZ(a.pure)
 
+import sys
+
+# Icon detection based on OS
+if sys.platform == 'darwin': # macOS
+    icon_file = 'IMG\app_icon.icns'
+else:
+    icon_file = 'IMG\app_icon.ico'
+
+
 exe = EXE(
     pyz,
     a.scripts,
@@ -77,5 +86,6 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='Img/app_icon.ico',  # Icône de l'application
+    #icon='Img/app_icon.ico',  # Icône de l'application
+    icon=icon_file,
 )

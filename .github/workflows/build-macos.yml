@@ -29,7 +29,8 @@ jobs:
       run: |
         # Replace 'main.py' with your main script name
         # --onefile creates a single file, --windowed removes console window
-        pyinstaller --onefile --windowed main.py
+        #pyinstaller --onefile --windowed main.py
+        run: pyinstaller DAOC-Character-Manager.spec
 
     - name: Save executable (Artifact)
       uses: actions/upload-artifact@v4

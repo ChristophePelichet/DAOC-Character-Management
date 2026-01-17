@@ -1,7 +1,7 @@
 """
 Model Gallery Filter Panel Widget - UI for filtering models.
 
-Provides filter controls (type, subtype, search) for the model gallery view.
+Provides filter controls (item type, search) for the model gallery view.
 Emits signals when filters change to notify the gallery display to update.
 
 Paired with: Functions/model_gallery_filter.py
@@ -26,7 +26,7 @@ class ModelsFilterPanelWidget(QWidget):
     """
     Filter panel for model gallery.
 
-    Provides controls to filter models by type, subtype, and search.
+    Provides search filter for items.
     Emits filter_changed signal when user applies filters.
     """
 
@@ -64,29 +64,26 @@ class ModelsFilterPanelWidget(QWidget):
         title.setFont(title_font)
         layout.addWidget(title)
 
-        # Type filter
+        # Type label - Static 'items'
         type_layout = QHBoxLayout()
         type_layout.addWidget(
             QLabel(lang.get("models_overview.type_label", default="Type:"))
         )
-        self.type_combo = QComboBox()
-        self.type_combo.addItem(
-            lang.get("models_overview.all_types", default="-- All --"), None
-        )
-        self.type_combo.currentIndexChanged.connect(self._on_type_changed)
-        type_layout.addWidget(self.type_combo)
+        type_label = QLabel("items")
+        type_label.setStyleSheet("font-weight: bold; color: #0078d4;")
+        type_layout.addWidget(type_label)
+        type_layout.addStretch()
         layout.addLayout(type_layout)
 
-        # Subtype filter
+        # Subtype (Item Type) filter
         subtype_layout = QHBoxLayout()
         subtype_layout.addWidget(
             QLabel(
                 lang.get("models_overview.subtype_label",
-                        default="Subtype:")
+                        default="Item Type:")
             )
         )
         self.subtype_combo = QComboBox()
-        self.subtype_combo.setEnabled(False)
         self.subtype_combo.currentIndexChanged.connect(
             self._on_subtype_changed
         )
@@ -123,53 +120,39 @@ class ModelsFilterPanelWidget(QWidget):
         """Populate filter dropdowns with metadata."""
         from Functions.language_manager import lang
 
-        options = model_gallery_build_filter_options(self.metadata)
+        # Handle empty metadata
+        if not self.metadata:
+            self.subtype_combo.clear()
+            self.subtype_combo.addItem(
+                lang.get("models_overview.all_types", default="-- All --"),
+                None
+            )
+            return
 
-        # Populate types
-        self.type_combo.blockSignals(True)
-        self.type_combo.clear()
-        self.type_combo.addItem(
+        # Get item subtypes (Bras, Casque, etc.)
+        item_subtypes = self.metadata.get("items", {})
+        
+        self.subtype_combo.blockSignals(True)
+        self.subtype_combo.clear()
+        self.subtype_combo.addItem(
             lang.get("models_overview.all_types", default="-- All --"), None
         )
 
-        for type_name in options["types"]:
-            self.type_combo.addItem(type_name, type_name)
-
-        self.type_combo.blockSignals(False)
-
-    def _on_type_changed(self):
-        """Handle type selection change."""
-        from Functions.language_manager import lang
-
-        type_name = self.type_combo.currentData()
-
-        # Update subtype combo
-        self.subtype_combo.blockSignals(True)
-        self.subtype_combo.clear()
-
-        if type_name:
-            options = model_gallery_build_filter_options(self.metadata)
-            subtypes = options["subtypes_by_type"].get(type_name, [])
-
-            self.subtype_combo.setEnabled(len(subtypes) > 0)
-
-            if subtypes:
-                self.subtype_combo.addItem(
-                    lang.get(
-                        "models_overview.all_types", default="-- All --"
-                    ),
-                    None
-                )
-                for subtype_name in subtypes:
-                    self.subtype_combo.addItem(subtype_name, subtype_name)
-        else:
-            self.subtype_combo.setEnabled(False)
+        for subtype_name in sorted(item_subtypes.keys()):
+            if subtype_name != "_":  # Skip underscore placeholder
+                count = len(item_subtypes.get(subtype_name, []))
+                display_name = f"{subtype_name.capitalize()} ({count})"
+                self.subtype_combo.addItem(display_name, subtype_name)
 
         self.subtype_combo.blockSignals(False)
 
     def _on_subtype_changed(self):
-        """Handle subtype selection change."""
-        pass  # Auto-trigger on apply
+        """Handle subtype selection change - auto-trigger filter."""
+        type_filter = "items"  # Always items
+        subtype_filter = self.subtype_combo.currentData() or ""
+        search_query = self.search_input.text().strip()
+
+        self.filter_changed.emit(type_filter, subtype_filter, search_query)
 
     def _on_search_changed(self):
         """Handle search input change."""
@@ -177,7 +160,7 @@ class ModelsFilterPanelWidget(QWidget):
 
     def _on_apply_filters(self):
         """Emit filter_changed signal with current filter values."""
-        type_filter = self.type_combo.currentData() or ""
+        type_filter = "items"  # Always items
         subtype_filter = self.subtype_combo.currentData() or ""
         search_query = self.search_input.text().strip()
 
@@ -191,12 +174,22 @@ class ModelsFilterPanelWidget(QWidget):
             Tuple of (type_filter, subtype_filter, search_query)
         """
         return (
-            self.type_combo.currentData() or "",
+            "items",
             self.subtype_combo.currentData() or "",
             self.search_input.text().strip(),
         )
 
     def reset_filters(self):
         """Reset all filters to default state."""
-        self.type_combo.setCurrentIndex(0)
+        self.subtype_combo.setCurrentIndex(0)
         self.search_input.clear()
+
+    def update_metadata(self, metadata: dict):
+        """
+        Update metadata and refresh filter options.
+
+        Args:
+            metadata: Updated metadata dictionary
+        """
+        self.metadata = metadata
+        self._populate_filters()

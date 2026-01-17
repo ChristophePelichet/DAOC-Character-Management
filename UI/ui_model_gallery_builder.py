@@ -7,6 +7,7 @@ It handles filtering operations and prepares thumbnail data for UI rendering.
 Paired with: Functions/model_gallery_builder.py
 """
 
+import logging
 from typing import List, Optional
 from PySide6.QtCore import QObject, Signal
 
@@ -43,28 +44,19 @@ class ModelsGalleryBuilderWidget(QObject):
             parent: Parent QObject
         """
         super().__init__(parent)
-        self.metadata = None
+        self.metadata = {}
         self.current_thumbnails: List[ModelThumbnail] = []
-        self._load_metadata()
 
-    def _load_metadata(self):
-        """Load model metadata from disk."""
-        try:
-            self.metadata = model_gallery_load_metadata()
-            if not self.metadata:
-                from Functions.language_manager import lang
-                error_msg = lang.get(
-                    "models_overview.no_models_error",
-                    default="No models found in Img/ directory"
-                )
-                self.error_occurred.emit(error_msg)
-        except Exception as e:
-            from Functions.language_manager import lang
-            error_msg = lang.get(
-                "models_overview.metadata_error",
-                default="Failed to load metadata: {error}"
-            ).format(error=str(e))
-            self.error_occurred.emit(error_msg)
+    def set_metadata(self, metadata: dict):
+        """
+        Set metadata without automatically loading gallery.
+
+        Args:
+            metadata: Model metadata dictionary
+        """
+        logging.info(f"Builder: set_metadata called with {len(metadata)} types")
+        self.metadata = metadata
+        logging.info("Builder: metadata set (NOT calling apply_filters - wait for user filter action)")
 
     def apply_filters(
         self, type_filter: str = "", subtype_filter: str = "", search_query: str = ""
@@ -80,11 +72,15 @@ class ModelsGalleryBuilderWidget(QObject):
         Returns:
             List of ModelThumbnail objects matching filters
         """
+        logging.info(f"Builder: apply_filters called - type={type_filter}, subtype={subtype_filter}, search={search_query}")
+        
         if not self.metadata:
+            logging.error("Builder: no metadata available")
             return []
 
         try:
             # Apply filters to get matching model IDs
+            logging.info(f"Builder: applying filters to metadata with {len(self.metadata)} types")
             model_ids = model_gallery_apply_filters(
                 self.metadata,
                 type_filter if type_filter else None,
@@ -92,11 +88,14 @@ class ModelsGalleryBuilderWidget(QObject):
                 search_query if search_query else None,
             )
 
+            logging.info(f"Builder: filters returned {len(model_ids)} model IDs")
+
             # Build thumbnail objects
             self.current_thumbnails = model_gallery_build_thumbnail_list(
                 self.metadata, model_ids
             )
 
+            logging.info(f"Builder: emitting thumbnails_ready with {len(self.current_thumbnails)} thumbnails")
             # Emit success signal
             self.thumbnails_ready.emit(self.current_thumbnails)
 
@@ -104,6 +103,7 @@ class ModelsGalleryBuilderWidget(QObject):
 
         except Exception as e:
             from Functions.language_manager import lang
+            logging.error(f"Builder: filter error: {e}")
             error_msg = lang.get(
                 "models_overview.filter_error",
                 default="Filter error: {error}"

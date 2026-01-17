@@ -179,9 +179,7 @@ class ModelsGalleryDisplayWidget(QWidget):
             self.grid_layout.addWidget(widget, row, col)
 
         # Add stretch at end to push items to top-left
-        self.grid_layout.addStretch(
-            self.grid_layout.rowCount(), columns - 1
-        )
+        self.grid_layout.setRowStretch(self.grid_layout.rowCount(), 1)
 
     def clear(self):
         """Clear all displayed thumbnails."""

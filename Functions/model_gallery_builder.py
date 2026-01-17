@@ -11,6 +11,31 @@ Domain-driven function naming: model_gallery_*
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
+import logging
+
+# Global cache for file index to avoid rescanning on every widget open
+_FILE_CACHE: Optional[Dict[str, Path]] = None
+
+
+def model_gallery_warmup_cache():
+    """
+    Pre-load file cache to avoid slow first gallery open.
+    Call this once at application startup.
+    """
+    global _FILE_CACHE
+    if _FILE_CACHE is None:
+        logging.info("Warming up file cache...")
+        img_base_path = Path(__file__).parent.parent / "Img" / "Models"
+        _FILE_CACHE = {}
+        extensions = {".jpg", ".jpeg", ".png", ".webp"}
+        
+        for file in img_base_path.rglob("*"):
+            if file.is_file() and file.suffix.lower() in extensions:
+                model_id = file.stem
+                if model_id not in _FILE_CACHE:
+                    _FILE_CACHE[model_id] = file
+        
+        logging.info(f"File cache warmed up: {len(_FILE_CACHE)} files indexed")
 
 
 @dataclass
@@ -50,7 +75,7 @@ def model_gallery_build_thumbnail_list(
     Args:
         metadata: Output from model_gallery_load_metadata()
         model_ids: List of model IDs to build thumbnails for
-        img_base_path: Base path to Img/ directory. If None, auto-detects.
+        img_base_path: Base path to Img/Models/ directory. If None, auto-detects.
 
     Returns:
         List of ModelThumbnail objects ready for UI display
@@ -62,35 +87,56 @@ def model_gallery_build_thumbnail_list(
         # Display thumbnails in gallery widget
     """
     if img_base_path is None:
-        img_base_path = Path(__file__).parent.parent / "Img"
+        img_base_path = Path(__file__).parent.parent / "Img" / "Models"
+
+    # Convert model_ids to set for O(1) lookup
+    model_ids_set = set(model_ids)
+    
+    # Use global cache to avoid rescanning files
+    global _FILE_CACHE
+    if _FILE_CACHE is None:
+        # Build cache only once
+        logging.info("Building file cache from Img/Models/...")
+        _FILE_CACHE = {}
+        extensions = {".jpg", ".jpeg", ".png", ".webp"}
+        
+        for file in img_base_path.rglob("*"):
+            if file.is_file() and file.suffix.lower() in extensions:
+                model_id = file.stem
+                if model_id not in _FILE_CACHE:  # Keep first occurrence
+                    _FILE_CACHE[model_id] = file
+        
+        logging.info(f"File cache built: {len(_FILE_CACHE)} files indexed")
+    else:
+        logging.info(f"Using cached file index: {len(_FILE_CACHE)} files")
+    
+    file_cache = _FILE_CACHE
 
     thumbnails = []
 
     for type_name, subtypes in metadata.items():
         for subtype_name, type_models in subtypes.items():
             for model_id in type_models:
-                if model_id not in model_ids:
+                if model_id not in model_ids_set:
                     continue
 
-                # Build file path
-                if subtype_name == "_":
-                    # Single-level type (no subtype)
-                    rel_path = _model_gallery_find_image_file(
-                        img_base_path / type_name, model_id
-                    )
-                else:
-                    # Multi-level type
-                    rel_path = _model_gallery_find_image_file(
-                        img_base_path / type_name / subtype_name, model_id
-                    )
-
-                if rel_path:
-                    full_path = img_base_path / rel_path
+                # Look up file from cache
+                file_path = file_cache.get(model_id)
+                
+                if file_path:
+                    full_path = Path(file_path)
+                    try:
+                        rel_path = full_path.relative_to(img_base_path)
+                        rel_str = str(rel_path).replace("\\", "/")
+                    except ValueError:
+                        # If relative_to fails, just use the file path as is
+                        rel_str = str(file_path)
+                    
                     thumbnail = ModelThumbnail(
                         model_id=model_id,
                         type_name=type_name,
                         subtype_name=subtype_name,
-                        file_path=str(rel_path),
+                        file_path=rel_str,
                         full_path=full_path,
                         display_label=model_id,
                     )
@@ -202,7 +248,7 @@ def _model_gallery_find_image_file(
         model_id: Model ID to find
 
     Returns:
-        Relative path from Img/ to the file, or None if not found
+        Relative path from Img/Models/ to the file, or None if not found
 
     Internal function (prefixed with _)
     """
@@ -214,11 +260,7 @@ def _model_gallery_find_image_file(
     for file in directory.iterdir():
         if file.is_file() and file.suffix.lower() in extensions:
             if file.stem == model_id:
-                # Build relative path from Img/
-                try:
-                    rel_path = file.relative_to(directory.parent.parent)
-                    return str(rel_path).replace("\\", "/")
-                except ValueError:
-                    return None
+                # Return the file path directly - caller will compute relative path
+                return str(file).replace("\\", "/")
 
     return None

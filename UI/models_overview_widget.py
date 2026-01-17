@@ -5,6 +5,7 @@ Integrates filter panel and gallery display in a single cohesive interface.
 Acts as the entry point for the Models Overview feature from the main menu.
 """
 
+import logging
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
@@ -29,17 +30,18 @@ class ModelsOverviewWidget(QWidget):
         Initialize Models Overview widget.
 
         Args:
-            parent: Parent widget
+            parent: Parent widget (optional, usually None for standalone window)
         """
         super().__init__(parent)
         self.setWindowTitle(
             lang.get("models_overview.window_title",
                     default="Models Overview - Gallery")
         )
-        self.setMinimumSize(1200, 800)
 
-        # Load metadata
+        # Load metadata directly (should be fast)
+        logging.info("Loading metadata...")
         self.metadata = model_gallery_load_metadata()
+        logging.info(f"Metadata loaded: {len(self.metadata)} types")
 
         # Initialize components
         self._setup_ui()
@@ -81,28 +83,39 @@ class ModelsOverviewWidget(QWidget):
         self.gallery_display = ModelsGalleryDisplayWidget()
         right_layout.addWidget(self.gallery_display)
 
-        # Builder (background logic)
+        # Builder (background logic) - metadata will be set later
         self.builder = ModelsGalleryBuilderWidget()
-
-        # Apply initial filter (show all)
-        self.builder.apply_filters()
 
         main_layout.addLayout(right_layout)
         self.setLayout(main_layout)
 
     def _connect_signals(self):
         """Connect filter and gallery signals."""
+        logging.info("Widget: connecting signals...")
+        
         # When filter changes, apply new filters
         self.filter_panel.filter_changed.connect(self._on_filters_applied)
+        logging.info("Widget: connected filter_changed signal")
 
         # When builder emits thumbnails, display them
         self.builder.thumbnails_ready.connect(self._on_thumbnails_ready)
+        logging.info("Widget: connected thumbnails_ready signal")
 
         # When builder emits error, show error
         self.builder.error_occurred.connect(self._on_error)
+        logging.info("Widget: connected error_occurred signal")
 
-        # Load initial gallery
-        self._on_filters_applied("", "", "")
+        # NOW set metadata on the builder (after signals are connected)
+        logging.info("Widget: setting metadata on builder...")
+        self.builder.set_metadata(self.metadata)
+        logging.info("Widget: metadata set on builder")
+        
+        # Show initial state: "Select filters and click Apply"
+        initial_text = lang.get(
+            "models_overview.models_count",
+            default="{count} models"
+        ).format(count=0)
+        self.stats_label.setText(initial_text)
 
     def _on_filters_applied(
         self, type_filter: str, subtype_filter: str, search_query: str
@@ -126,6 +139,7 @@ class ModelsOverviewWidget(QWidget):
         Args:
             thumbnails: List of ModelThumbnail objects
         """
+        logging.info(f"Widget: _on_thumbnails_ready called with {len(thumbnails)} thumbnails")
         self.gallery_display.display_thumbnails(thumbnails)
 
         # Update stats
@@ -134,6 +148,7 @@ class ModelsOverviewWidget(QWidget):
             "models_overview.models_count",
             default="{count} models"
         ).format(count=count)
+        logging.info(f"Widget: updating stats label to '{stats_text}'")
         self.stats_label.setText(stats_text)
 
     def _on_error(self, error_message: str):

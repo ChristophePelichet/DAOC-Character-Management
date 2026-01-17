@@ -1,16 +1,60 @@
 """
-Model Database Manager - Index and load model data from Img/ directory.
+Model Database Manager - Index and load model data from Img/Models/ directory.
 
 This module handles the discovery and indexing of all model images available
-in the Img/ folder structure. It builds a metadata cache for efficient filtering
+in the Img/Models/ folder structure. It builds a metadata cache for efficient filtering
 and gallery display.
 
 Domain-driven function naming: model_gallery_*
 """
 
 import os
+import logging
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional
+import json
+
+# Global cache for metadata to avoid rescanning on every widget open
+_METADATA_CACHE: Optional[Dict] = None
+
+
+def model_gallery_load_item_slots() -> Dict[str, List[str]]:
+    """
+    Load item database and create mapping of model IDs to item slots.
+    
+    Returns:
+        Dict mapping {slot: [model_ids]} for all items
+        Example: {'Helm': ['4063', '4064'], 'Chest': ['1186', '1187']}
+    """
+    db_file = Path(__file__).parent.parent / "Data" / "items_database_src.json"
+    
+    if not db_file.exists():
+        logging.warning(f"Items database not found: {db_file}")
+        return {}
+    
+    try:
+        with open(db_file, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        # Build mapping of slot -> model IDs
+        slot_mapping: Dict[str, set] = {}
+        
+        for item_key, item_data in data.get("items", {}).items():
+            model_id = item_data.get("model")
+            slot = item_data.get("slot")
+            
+            if model_id and slot:
+                if slot not in slot_mapping:
+                    slot_mapping[slot] = set()
+                slot_mapping[slot].add(str(model_id))
+        
+        # Convert sets to sorted lists
+        return {slot: sorted(list(model_ids), key=int) 
+                for slot, model_ids in slot_mapping.items()}
+    
+    except Exception as e:
+        logging.error(f"Error loading item database: {e}")
+        return {}
 
 
 def model_gallery_load_metadata() -> Dict[str, List[str]]:
@@ -42,39 +86,74 @@ def model_gallery_load_metadata() -> Dict[str, List[str]]:
         #     'weapons': {
         #         '1', '2', '3', ... (no subtype for weapons)
         #     }
-        # }
     """
-    img_dir = Path(__file__).parent.parent / "Img"
+    global _METADATA_CACHE
+    
+    # Return cached metadata if available
+    if _METADATA_CACHE is not None:
+        logging.info("Using cached metadata")
+        return _METADATA_CACHE
+    
+    img_dir = Path(__file__).parent.parent / "Img" / "Models"
 
+    logging.info(f"Loading metadata from: {img_dir}")
     if not img_dir.exists():
+        logging.error(f"Models directory not found: {img_dir}")
         return {}
 
     metadata: Dict[str, Dict[str, List[str]]] = {}
+    
+    # Currently load only 'items' type for performance (3444 items vs 4814+ total)
+    types_to_load = ["items"]
 
-    # Iterate through all directories in Img/
+    # Iterate through all directories in Img/Models/
     for type_dir in img_dir.iterdir():
         if not type_dir.is_dir():
             continue
 
         type_name = type_dir.name.lower()
+        
+        # Skip types not in our whitelist
+        if type_name not in types_to_load:
+            continue
+            
+        logging.info(f"Found type directory: {type_name}")
 
-        # Check if this type has subdirectories (e.g., armor/arms, armor/feet)
-        subdirs = [d for d in type_dir.iterdir() if d.is_dir()]
-
-        if subdirs:
-            # Type has subtypes (e.g., armor -> arms, feet, hands, etc.)
-            metadata[type_name] = {}
-
-            for subtype_dir in subdirs:
-                subtype_name = subtype_dir.name.lower()
-                model_ids = model_gallery_extract_ids_from_dir(subtype_dir)
-                metadata[type_name][subtype_name] = sorted(model_ids, key=int)
-
+        # Special handling for items: use database slots instead of subdirectories
+        if type_name == "items":
+            slot_mapping = model_gallery_load_item_slots()
+            metadata[type_name] = slot_mapping
+            logging.info(f"  Items categorized by slot: {len(slot_mapping)} slots found")
+            for slot, model_ids in slot_mapping.items():
+                logging.info(f"    {slot}: {len(model_ids)} models")
         else:
-            # Type has no subtypes (e.g., weapons -> just images)
-            model_ids = model_gallery_extract_ids_from_dir(type_dir)
-            metadata[type_name] = {"_": sorted(model_ids, key=int)}
+            # Check if this type has subdirectories (e.g., armor/arms, armor/feet)
+            subdirs = [d for d in type_dir.iterdir() if d.is_dir()]
 
+            if subdirs:
+                # Type has subtypes (e.g., armor -> arms, feet, hands, etc.)
+                metadata[type_name] = {}
+
+                for subtype_dir in subdirs:
+                    subtype_name = subtype_dir.name.lower()
+                    model_ids = model_gallery_extract_ids_from_dir(subtype_dir)
+                    # Sort numeric IDs, filter out non-numeric names
+                    numeric_ids = [mid for mid in model_ids if mid.isdigit()]
+                    metadata[type_name][subtype_name] = sorted(numeric_ids, key=int)
+                    logging.info(f"  Subtype {subtype_name}: {len(numeric_ids)} models")
+
+            else:
+                # Type has no subtypes (e.g., weapons -> just images)
+                model_ids = model_gallery_extract_ids_from_dir(type_dir)
+                # Sort numeric IDs, filter out non-numeric names
+                numeric_ids = [mid for mid in model_ids if mid.isdigit()]
+                metadata[type_name] = {"_": sorted(numeric_ids, key=int)}
+                logging.info(f"  No subtypes: {len(numeric_ids)} models")
+
+    logging.info(f"Metadata loading complete: {len(metadata)} types found")
+    
+    # Cache the metadata
+    _METADATA_CACHE = metadata
     return metadata
 
 

@@ -1,5 +1,32 @@
 # 📋 Changelog - DAOC Character Management
 
+## v0.110
+
+### ✨ Features
+
+**Models Overview Gallery - Image Browser & Filter System**
+- New Models Overview Gallery accessible from Tools menu (🖼️ icon)
+- Browse and filter model thumbnails in interactive grid layout (5-column responsive grid)
+- Filter by Type (armor, weapons, mobs, decorations, misc models, etc.)
+- Filter by SubType (arms, feet, hands, legs, torso, shields for armor; specific types for other categories)
+- Search by Model ID with partial matching capability
+- Automatic metadata discovery from Img/ directory structure with hierarchical indexing
+- Dynamic filter population based on available models in system
+- Display model count statistics and real-time result updates
+- Support for multiple image formats (JPG, PNG, WebP) with automatic fallback handling
+- Professional 5-column grid layout with hover effects and image scaling
+- Error handling with user-friendly messages in all 3 supported languages (EN, FR, DE)
+
+**Architecture & Code Quality**
+- Domain-driven naming convention: `model_gallery_*` function prefix for all gallery operations
+- UI/Functions coupling convention: `ui_model_gallery_*` paired files for related UI components
+- Clean separation of concerns: Functions (business logic) vs UI (presentation layer)
+- Qt Signal/Slot based component communication with zero coupling
+- PEP8 compliant code with comprehensive English docstrings
+- All UI strings use `lang.get()` for internationalization (no hardcoded text)
+- Type-safe `ModelThumbnail` dataclass for thumbnail representation
+- Comprehensive error handling with try/catch and logging
+
 ## v0.109
 
 ### 🐛 Bug Fixes

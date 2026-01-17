@@ -620,17 +620,34 @@ class UIManager:
     def _open_models_overview_window(self):
         """Opens the Models Overview Gallery window"""
         import logging
+        from PySide6.QtWidgets import QMainWindow
         from UI.models_overview_widget import ModelsOverviewWidget
 
         logging.info("Opening Models Overview Gallery window")
         try:
-            window = ModelsOverviewWidget(self.main_window)
-            window.show()
+            # Create a standalone window for the gallery
+            gallery_window = QMainWindow()
+            gallery_window.setWindowTitle(
+                lang.get("models_overview.window_title",
+                        default="Models Overview - Gallery")
+            )
+            gallery_window.setMinimumSize(1200, 800)
+            
+            # Create and set the gallery widget
+            gallery_widget = ModelsOverviewWidget()
+            gallery_window.setCentralWidget(gallery_widget)
+            
+            # Show the window
+            gallery_window.show()
+            
+            # Store reference to prevent garbage collection
+            self.models_overview_window = gallery_window
+            
             logging.info("Models Overview Gallery window opened successfully")
         except Exception as e:
             import traceback
             logging.error(f"Error opening Models Overview window: {e}\n{traceback.format_exc()}")
-            from Functions.config_manager import SilentMessageBox
+            from UI.ui_sound_manager import SilentMessageBox
             SilentMessageBox.critical(
                 self.main_window,
                 lang.get("error_title", default="Error"),

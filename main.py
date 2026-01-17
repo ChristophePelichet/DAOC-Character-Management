@@ -1140,6 +1140,11 @@ def main():
         apply_theme(app)
         apply_font_scale(app)
         
+        # Warm up caches before showing main window
+        logging.info("Pre-loading gallery caches...")
+        from Functions.model_gallery_builder import model_gallery_warmup_cache
+        model_gallery_warmup_cache()
+        
         main_window = CharacterApp()
         
         # Calcul et affichage du temps de chargement

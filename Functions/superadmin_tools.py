@@ -15,17 +15,15 @@ Features:
 """
 
 import json
-import shutil
 import time
 from pathlib import Path
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple
 from datetime import datetime
 import logging
 
 from Functions.path_manager import PathManager
-from Functions.items_parser import parse_template_file, search_item_for_database
-from Functions.eden_scraper import EdenScraper, _connect_to_eden_herald
-from Functions.cookie_manager import CookieManager
+from Functions.items_parser import parse_template_file
+from Functions.eden_scraper import _connect_to_eden_herald
 from Functions.items_scraper import ItemsScraper
 
 
@@ -449,7 +447,7 @@ class SuperAdminTools:
                             item_details = items_scraper.get_item_details(item_id, variant_realm, item_name)
                             
                             if not item_details:
-                                logging.warning(f"      ⚠️  Failed to get details")
+                                logging.warning("      ⚠️  Failed to get details")
                                 continue
                             
                             # Format for database v2.0
@@ -482,7 +480,7 @@ class SuperAdminTools:
                                 added_count += 1
                                 logging.info(f"      ✅ Added: {composite_key}")
                             else:
-                                logging.warning(f"      ❌ Skipped (no merchant info)")
+                                logging.warning("      ❌ Skipped (no merchant info)")
                                 failed_count += 1
                         
                     except Exception as e:
@@ -534,7 +532,7 @@ class SuperAdminTools:
                 "errors": parse_errors
             }
             
-            message = f"Database built successfully!\n\n"
+            message = "Database built successfully!\n\n"
             message += f"Files processed: {stats['files_processed']}\n"
             message += f"Unique items: {stats['unique_items_processed']}\n"
             message += f"Variants found: {stats['variants_found']}\n"
@@ -831,14 +829,14 @@ class SuperAdminTools:
                 "fields_updated": fields_updated
             }
             
-            message = f"Database refresh completed!\n\n"
+            message = "Database refresh completed!\n\n"
             message += f"Unique items processed: {total_items}\n"
             message += f"Total variants found: {variants_found}\n"
             message += f"New DB entries: {items_created}\n"
             message += f"Updated DB entries: {items_updated}\n"
             message += f"Failed: {failed_count}\n"
             message += f"Total DB entries: {len(new_items)}\n\n"
-            message += f"Fields updated:\n"
+            message += "Fields updated:\n"
             message += f"• Model: {fields_updated['model']}\n"
             message += f"• DPS: {fields_updated['dps']}\n"
             message += f"• Speed: {fields_updated['speed']}\n"
@@ -860,3 +858,138 @@ class SuperAdminTools:
             # Close browser
             if eden_scraper:
                 eden_scraper.close()
+
+    def get_models_database_stats(self) -> Dict[str, any]:
+        """
+        Retrieve statistics about the models database (metadata.json).
+        
+        Returns:
+            Dictionary with models database statistics:
+            {
+                "total_models": 3444,
+                "items": 3444,
+                "mobs": 0,
+                "icons": 0,
+                "file_size": "354.9 KB",
+                "last_updated": "2025-01-17 14:23:45"
+            }
+        """
+        try:
+            metadata_path = Path(self.path_manager.get_resource_path("Data")) / "models_metadata.json"
+            
+            if not metadata_path.exists():
+                return {
+                    "total_models": 0,
+                    "items": 0,
+                    "mobs": 0,
+                    "icons": 0,
+                    "file_size": "0 B",
+                    "last_updated": "Unknown"
+                }
+            
+            # Load metadata
+            with open(metadata_path, 'r', encoding='utf-8') as f:
+                metadata = json.load(f)
+            
+            # Count models per type from hierarchical structure
+            items_count = 0
+            mobs_count = 0
+            icons_count = 0
+            
+            if 'items' in metadata:
+                for category, subcats in metadata['items'].items():
+                    if isinstance(subcats, dict):
+                        for subcat, entries in subcats.items():
+                            if isinstance(entries, dict):
+                                items_count += len(entries)
+            
+            if 'mobs' in metadata:
+                for category, subcats in metadata['mobs'].items():
+                    if isinstance(subcats, dict):
+                        for subcat, entries in subcats.items():
+                            if isinstance(entries, dict):
+                                mobs_count += len(entries)
+            
+            if 'icons' in metadata:
+                for category, subcats in metadata['icons'].items():
+                    if isinstance(subcats, dict):
+                        for subcat, entries in subcats.items():
+                            if isinstance(entries, dict):
+                                icons_count += len(entries)
+            
+            total_count = items_count + mobs_count + icons_count
+            
+            # Get file size
+            file_size = metadata_path.stat().st_size
+            size_kb = file_size / 1024
+            if size_kb < 1024:
+                size_str = f"{size_kb:.1f} KB"
+            else:
+                size_mb = size_kb / 1024
+                size_str = f"{size_mb:.1f} MB"
+            
+            # Get last modified time
+            mod_time = datetime.fromtimestamp(metadata_path.stat().st_mtime)
+            last_updated = mod_time.strftime("%Y-%m-%d %H:%M:%S")
+            
+            return {
+                "total_models": total_count,
+                "items": items_count,
+                "mobs": mobs_count,
+                "icons": icons_count,
+                "file_size": size_str,
+                "last_updated": last_updated
+            }
+            
+        except Exception as e:
+            logging.error(f"Error getting models database stats: {e}", extra={"action": "SUPERADMIN_MODELS_STATS_ERROR"})
+            return {
+                "total_models": 0,
+                "items": 0,
+                "mobs": 0,
+                "icons": 0,
+                "file_size": "Error",
+                "last_updated": "Error"
+            }
+    
+    def get_models_files_count(self) -> Dict[str, int]:
+        """
+        Count actual image files in Img/Models/ directories.
+        
+        Returns:
+            Dictionary with file counts:
+            {
+                "total_files": 4814,
+                "items": 3444,
+                "mobs": 1000,
+                "icons": 370
+            }
+        """
+        try:
+            base_path = Path(self.path_manager.get_resource_path("Img")) / "Models"
+            
+            # Count actual image files
+            items_dir = base_path / "items"
+            mobs_dir = base_path / "mobs"
+            icons_dir = base_path / "icons" / "items"
+            
+            items_count = len(list(items_dir.glob("*.webp"))) if items_dir.exists() else 0
+            mobs_count = len(list(mobs_dir.glob("*.webp"))) if mobs_dir.exists() else 0
+            icons_count = len(list(icons_dir.glob("*.webp"))) if icons_dir.exists() else 0
+            total_count = items_count + mobs_count + icons_count
+            
+            return {
+                "total_files": total_count,
+                "items": items_count,
+                "mobs": mobs_count,
+                "icons": icons_count
+            }
+            
+        except Exception as e:
+            logging.error(f"Error counting models files: {e}", extra={"action": "SUPERADMIN_MODELS_FILES_ERROR"})
+            return {
+                "total_files": 0,
+                "items": 0,
+                "mobs": 0,
+                "icons": 0
+            }

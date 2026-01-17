@@ -1,5 +1,18 @@
 # 📋 Changelog - DAOC Character Management
 
+## v0.110
+
+### ✨ Features
+
+**Models Overview Gallery - Image Browser & Filter System**
+- New interactive gallery accessible from Tools menu (🖼️ Models Overview)
+- Browse, filter, and search 3400+ model images from game archives
+- Filter by category (Armor, Weapons, Others) and subcategory
+- Search by Model ID with partial matching
+- Professional 5-column grid layout with hover effects
+- Configurable visibility for each model category in Settings
+- Full documentation: [MODELS_VISUAL_SYSTEM_DOCUMENTATION.md](Documentations/Models/MODELS_VISUAL_SYSTEM_DOCUMENTATION.md)
+
 ## v0.109
 
 ### 🐛 Bug Fixes

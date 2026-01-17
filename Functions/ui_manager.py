@@ -104,6 +104,11 @@ class UIManager:
         armor_resists_action.triggered.connect(self._open_armor_resists_dialog)
         tools_menu.addAction(armor_resists_action)
 
+        # Models Overview Gallery - Browse all model images
+        models_overview_action = QAction(lang.get("menu.tools.models_overview", default="🖼️ Models Overview"), self.main_window)
+        models_overview_action.triggered.connect(self._open_models_overview_window)
+        tools_menu.addAction(models_overview_action)
+
         # Menu Aide
         help_menu = menubar.addMenu(lang.get("menu_help"))
 
@@ -611,6 +616,43 @@ class UIManager:
         
         dialog = ui_armor_resists_create_dialog(self.main_window)
         dialog.exec()
+
+    def _open_models_overview_window(self):
+        """Opens the Models Overview Gallery window"""
+        import logging
+        from PySide6.QtWidgets import QMainWindow
+        from UI.models_overview_widget import ModelsOverviewWidget
+
+        logging.info("Opening Models Overview Gallery window")
+        try:
+            # Create a standalone window for the gallery
+            gallery_window = QMainWindow()
+            gallery_window.setWindowTitle(
+                lang.get("models_overview.window_title",
+                        default="Models Overview - Gallery")
+            )
+            gallery_window.setMinimumSize(1200, 800)
+            
+            # Create and set the gallery widget
+            gallery_widget = ModelsOverviewWidget()
+            gallery_window.setCentralWidget(gallery_widget)
+            
+            # Show the window
+            gallery_window.show()
+            
+            # Store reference to prevent garbage collection
+            self.models_overview_window = gallery_window
+            
+            logging.info("Models Overview Gallery window opened successfully")
+        except Exception as e:
+            import traceback
+            logging.error(f"Error opening Models Overview window: {e}\n{traceback.format_exc()}")
+            from UI.ui_sound_manager import SilentMessageBox
+            SilentMessageBox.critical(
+                self.main_window,
+                lang.get("error_title", default="Error"),
+                lang.get("models_overview.window_error", default="Error opening Models Overview Gallery") + f"\n\n{str(e)}"
+            )
 
     def _open_wiki_documentation(self):
         """Ouvre le Wiki GitHub dans le navigateur"""

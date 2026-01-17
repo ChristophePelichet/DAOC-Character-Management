@@ -17,9 +17,10 @@
 5. [Backup Integration](#backup-integration)
 6. [Folder Management](#folder-management)
 7. [SuperAdmin Tools](#superadmin-tools)
-8. [UI Components](#ui-components)
-9. [Translation System](#translation-system)
-10. [Version History](#version-history)
+8. [Models Gallery Settings](#models-gallery-settings)
+9. [UI Components](#ui-components)
+10. [Translation System](#translation-system)
+11. [Version History](#version-history)
 
 ---
 
@@ -271,7 +272,26 @@ def _create_<section>_page(self):
 **Info Box**:
 - Explains debug log location
 
-### **Page 7: SuperAdmin 🔧⚡** (Conditional)
+### **Page 7: Models 🖼️**
+
+**Content**:
+- **Model Visibility**: Checkboxes for each model slot (15 total)
+  * Arms, Boats, Cloaks, Deco, Feet, Hands, Head
+  * Legs, Misc, Quiver, Shields, Siege, Tents, Torso, Weapons
+- **Alphabetical Sorting**: Slots displayed in alphabetical order
+
+**Features**:
+- Enable/disable model slots to control gallery visibility
+- Changes apply immediately to Models Gallery view
+- Settings persist in `config.json` under `models_gallery.visible_slots`
+- All slots enabled by default
+
+**Related Files**:
+- Widget: `UI/ui_models_gallery_settings.py` (150 lines)
+- Function: `Functions/model_database_manager.py` - `model_gallery_apply_visibility_filters()`
+- Integration: `UI/models_overview_widget.py` applies filters when loading metadata
+
+### **Page 8: SuperAdmin 🔧⚡** (Conditional)
 
 **Access Control**:
 - **Required**: `python main.py --admin` flag
@@ -845,17 +865,48 @@ ALWAYS: <executable_directory>/Configuration/config.json
 | **Debug** | Debug mode, Show window | `debug_mode`, `show_debug_window` |
 | **Startup** | Disclaimer disabled | `disable_disclaimer` |
 | **Language** | UI language | `language` |
+| **Models Gallery** | Visible model slots | `models_gallery.visible_slots` (list of 15 slots) |
 
 ---
 
 ## Version History
+
+### **v0.110 - Models Gallery Settings**
+
+**New Features**:
+- **Page 7: Models Gallery 🖼️**
+  * 15 checkboxes for model slot visibility control
+  * Alphabetical sorting of slots (Arms, Boats, Cloaks, ...)
+  * Enable/disable categories to customize gallery view
+  * Settings persist in config under `models_gallery.visible_slots`
+- **Configuration Section**: New `models_gallery` section in config.json
+  * Default: All 15 slots enabled
+  * Schema validation in config_schema.py
+- **Filtering Function**: `model_gallery_apply_visibility_filters()` in model_database_manager.py
+  * Filters metadata based on visible_slots setting
+  * Removes disabled slots from gallery display
+- **UI Widget**: New `ModelsGallerySettingsWidget` in UI/ui_models_gallery_settings.py
+  * Auto-save on checkbox change
+  * Real-time config persistence via `config.save_config()`
+- **Gallery Integration**: ModelsOverviewWidget applies filters when loading metadata
+  * Gallery automatically reflects visibility settings
+
+**Files Modified**:
+- UI/settings_dialog.py: Added `_create_models_gallery_page()` method and navigation item
+- Configuration/config.json: Added `models_gallery` section with all 15 slots
+- Functions/config_schema.py: Added schema validation for models_gallery
+- UI/models_overview_widget.py: Apply visibility filters to loaded metadata
+- UI/ui_model_gallery_display.py: Improved thumbnail sizing and label visibility
+
+**Settings Table Update**:
+- New entry: Models Gallery with visible_slots configuration
 
 ### **v0.108 - Complete Reorganization**
 
 **Major Changes**:
 - Complete reorganization with sidebar navigation
 - Removed monolithic dialog
-- Added 7 distinct pages (+ SuperAdmin conditional)
+- Added 8 distinct pages (+ SuperAdmin conditional)
 - Integrated Backup settings
 - Added folder move functionality
 - Removed Tools menu
@@ -880,7 +931,284 @@ ALWAYS: <executable_directory>/Configuration/config.json
 
 ---
 
-## Related Documentation
+## Models Gallery Settings
+
+**Added in**: v0.110  
+**Component**: `UI/ui_models_gallery_settings.py`  
+**Integration**: Settings dialog, Page 8 (📋 Models)  
+**Related**: `Functions/model_database_manager.py`, `Data/models_metadata.json`
+
+### Overview
+
+The Models Gallery Settings allow users to control which model categories appear in the Models Gallery through an intuitive 3-column hierarchical interface with parent-child checkbox logic. Users can:
+- Select entire category groups (Armor, Weapon, Other)
+- Fine-tune by selecting/deselecting individual subcategories
+- Use parent checkbox to batch-select all subcategories
+- Have changes persist immediately to `config.json`
+
+**Default State**:
+- ✅ **Armor** (with all 8 subcategories)
+- ✅ **Weapon** (flat category)
+- ❌ **Other** (with 6 subcategories)
+
+### Architecture
+
+**UI Component** (`UI/ui_models_gallery_settings.py`, 280+ lines):
+
+```python
+class ModelsGallerySettingsWidget(QWidget):
+    """3-column hierarchical category selector for Models Gallery visibility."""
+    
+    def __init__(self, parent=None):
+        """Initialize with category structure and load saved settings."""
+        self.config = config
+        self.parent_checkboxes = {}  # {category: QCheckBox}
+        self.child_checkboxes = {}   # {category: {subcategory: QCheckBox}}
+        self.category_order = ["armor", "weapon", "other"]
+        self.category_structure = {
+            "armor": ["arms", "cloaks", "feet", "hands", "head", "legs", "shields", "torso"],
+            "weapon": [],  # No subcategories - flat category
+            "other": ["boats", "deco", "misc", "quiver", "siege", "tents"]
+        }
+        self._setup_ui()
+        self._load_settings()
+    
+    def _setup_ui(self):
+        """Create 3-column layout with QFrame borders around each column."""
+        # Creates three equal-width columns, one per category
+        # Each column contains parent checkbox and subcategory checkboxes
+        # Uses signal blocking to prevent infinite loops during updates
+    
+    def _on_parent_changed(self, category):
+        """Parent checkbox clicked - select/deselect all subcategories."""
+        # Block signals during update to prevent recursive calls
+        # Check parent state and apply to all children
+        # Save configuration after update
+    
+    def _on_child_changed(self, category):
+        """Subcategory checkbox clicked - update parent state accordingly."""
+        # Evaluate parent state:
+        #   - All children checked → Parent = checked
+        #   - No children checked → Parent = unchecked  
+        #   - Mixed state → Parent = partial/tri-state
+        # Save configuration after update
+    
+    def _load_settings(self):
+        """Load visible_slots from config.json and update UI."""
+        visible_slots = self.config.get("models_gallery.visible_slots", {})
+        # For each category and subcategory, load saved state
+        # Apply to corresponding checkboxes
+        # Use signal blocking to prevent triggering change handlers
+    
+    def _save_config(self):
+        """Save current checkbox states to models_gallery.visible_slots."""
+        visible_slots = {}
+        for category in self.category_order:
+            visible_slots[category] = {
+                "_selected": self.parent_checkboxes[category].isChecked()
+            }
+            if category != "weapon":
+                for subcategory in self.category_structure[category]:
+                    visible_slots[category][subcategory] = \
+                        self.child_checkboxes[category][subcategory].isChecked()
+        
+        self.config.set("models_gallery.visible_slots", visible_slots)
+        self.config.save_config()
+```
+
+### Configuration Structure
+
+**Location**: `Configuration/config.json`, section `models_gallery`
+
+**Default Configuration**:
+```json
+{
+  "models_gallery": {
+    "visible_slots": {
+      "armor": {
+        "_selected": true,
+        "arms": true,
+        "cloaks": true,
+        "feet": true,
+        "hands": true,
+        "head": true,
+        "legs": true,
+        "shields": true,
+        "torso": true
+      },
+      "weapon": {
+        "_selected": true
+      },
+      "other": {
+        "_selected": false,
+        "boats": false,
+        "deco": false,
+        "misc": false,
+        "quiver": false,
+        "siege": false,
+        "tents": false
+      }
+    }
+  }
+}
+```
+
+**Schema** (`Functions/config_schema.py`):
+```python
+"models_gallery": {
+    "type": "object",
+    "properties": {
+        "visible_slots": {
+            "type": "object",
+            "description": "Visible model categories and subcategories",
+            "properties": {
+                "armor": {"type": "object", "description": "Armor category and subcategories"},
+                "weapon": {"type": "object", "description": "Weapon category"},
+                "other": {"type": "object", "description": "Other category and subcategories"}
+            }
+        }
+    },
+    "default": { /* as shown above */ }
+}
+```
+
+### Parent-Child Checkbox Logic
+
+**Key Feature**: Hierarchical synchronization with signal blocking
+
+**Flow Diagram**:
+```
+User clicks Category Checkbox (Parent)
+    ↓
+_on_parent_changed() triggered
+    ↓
+Block child signals (prevent recursion)
+    ↓
+Set all children to parent state (checked/unchecked)
+    ↓
+Restore signal connections
+    ↓
+_save_config() → config.json
+
+User clicks Subcategory Checkbox (Child)
+    ↓
+_on_child_changed() triggered
+    ↓
+Evaluate all children state
+    ↓
+_update_parent_state():
+    - All checked? → Parent = checked
+    - None checked? → Parent = unchecked
+    - Some checked? → Parent = partial
+    ↓
+_save_config() → config.json
+```
+
+**Signal Blocking Mechanism**:
+```python
+# Prevent infinite loops during cascade updates
+child_cb.blockSignals(True)
+child_cb.setChecked(is_checked)
+child_cb.blockSignals(False)
+
+# Signals remain connected but aren't emitted while blocked
+# Avoids: Parent→Child→Parent→Child→... recursion
+```
+
+### Integration with Models Gallery
+
+**File**: `Functions/model_database_manager.py`
+
+**Function**: `model_gallery_apply_visibility_filters(items, config)`
+
+```python
+def model_gallery_apply_visibility_filters(items, config):
+    """Filter items based on visible_slots configuration."""
+    visible_slots = config.get("models_gallery.visible_slots", {})
+    
+    filtered_items = []
+    for item in items:
+        category = item.get("category", "other")
+        subcategory = item.get("subcategory", "misc")
+        
+        # Check if category is visible
+        category_config = visible_slots.get(category, {})
+        if not category_config.get("_selected", False):
+            continue
+        
+        # Check if subcategory is visible (if category has subcategories)
+        if category != "weapon":
+            if not category_config.get(subcategory, True):
+                continue
+        
+        filtered_items.append(item)
+    
+    return filtered_items
+```
+
+**Integration Flow**:
+```
+ModelsGalleryWidget loads items
+    ↓
+Calls model_gallery_apply_visibility_filters()
+    ↓
+Filters based on visible_slots config
+    ↓
+Displays only visible categories/subcategories
+    ↓
+User changes settings
+    ↓
+ModelsGalleryWidget receives config change signal
+    ↓
+Re-applies filters automatically
+    ↓
+Gallery UI updates in real-time
+```
+
+### UI Layout (v0.110)
+
+**3-Column Design**:
+```
+┌─────────────────────────────────────────────────────────┐
+│     Models Gallery Settings - 3 Equal Columns           │
+├────────────────────┬────────────────────┬────────────────┤
+│                    │                    │                │
+│   ARMOR            │   WEAPON           │   OTHER        │
+│   ┌────────────┐   │   ┌────────────┐   │   ┌────────────┐
+│   │ ☑ Armor    │   │   │ ☑ Weapon   │   │   │ ☐ Other    │
+│   │            │   │   │            │   │   │            │
+│   │ ├─☑ Arms   │   │   │ (Flat cat) │   │   │ ├─☐ Boats  │
+│   │ ├─☑ Cloaks │   │   │ No subs    │   │   │ ├─☐ Deco   │
+│   │ ├─☑ Feet   │   │   │            │   │   │ ├─☐ Misc   │
+│   │ ├─☑ Hands  │   │   │            │   │   │ ├─☐ Quiver │
+│   │ ├─☑ Head   │   │   │            │   │   │ ├─☐ Siege  │
+│   │ ├─☑ Legs   │   │   │            │   │   │ └─☐ Tents  │
+│   │ ├─☑ Shields│   │   │            │   │   │            │
+│   │ └─☑ Torso  │   │   │            │   │   │            │
+│   └────────────┘   │   └────────────┘   │   └────────────┘
+│                    │                    │                │
+└────────────────────┴────────────────────┴────────────────┘
+```
+
+**Features**:
+- ✅ Equal-width columns (33% width each)
+- ✅ QFrame with borders for visual separation
+- ✅ Hierarchical layout (Parent at top, children indented)
+- ✅ Real-time signal connection/disconnection
+- ✅ Persistent configuration (auto-save on change)
+- ✅ Default state: Armor + Weapon selected, Other deselected
+
+### Related Documentation
+
+See [Models Gallery Settings](../../Models/MODELS_VISUAL_SYSTEM_DOCUMENTATION.md#models-gallery-settings) in Models Visual System documentation for comprehensive details on:
+- Category hierarchy structure
+- Database synchronization
+- Image location and format
+- Filtering function integration
+- Category-based distribution
+
+---
+
 
 - **SuperAdmin Tools**: `superadmin_tools.py` (Functions/)
 - **Folder Move System**: Documented in FOLDER_MOVE_SYSTEM_EN.md
@@ -902,41 +1230,140 @@ Functions/
 ├── backup_manager.py
 ├── config_manager.py
 ├── language_manager.py
-└── path_manager.py
+├── path_manager.py
+├── config_schema.py (with models_gallery section)
+└── model_database_manager.py (model_gallery_apply_visibility_filters)
 ```
 
 ### **UI**
 
 ```
 UI/
-└── settings_dialog.py (2651 lines)
-    ├── Conditional Page Creation (lines 88-95)
-    ├── Navigation Items (lines 131-155)
-    ├── _create_general_page() (lines 141-245)
-    ├── _create_themes_page() (lines 247-299)
-    ├── _create_startup_page() (lines 301-350)
-    ├── _create_columns_page() (lines 352-413)
-    ├── _create_herald_page() (lines 415-495)
-    ├── _create_backup_page() (lines 497-700)
-    ├── _create_debug_page() (lines 702-780)
-    ├── _create_superadmin_page() (lines 1140-1320)
-    ├── Browse methods (lines 782-806)
-    ├── Backup methods (lines 808-878)
-    ├── _move_folder() (lines 880-980)
-    └── _load_settings() (lines 982-1020)
+├── settings_dialog.py (2651+ lines)
+│   ├── Conditional Page Creation (lines 88-95)
+│   ├── Navigation Items (lines 131-155)
+│   ├── _create_general_page() (lines 141-245)
+│   ├── _create_themes_page() (lines 247-299)
+│   ├── _create_startup_page() (lines 301-350)
+│   ├── _create_columns_page() (lines 352-413)
+│   ├── _create_herald_page() (lines 415-495)
+│   ├── _create_backup_page() (lines 497-700)
+│   ├── _create_debug_page() (lines 702-780)
+│   ├── _create_models_gallery_page() (NEW - v0.110)
+│   └── _create_superadmin_page() (lines 1140-1320)
+├── ui_models_gallery_settings.py (NEW - v0.110 - 280+ lines)
+│   └── ModelsGallerySettingsWidget(QWidget)
+│       ├── 3-column layout (Armor | Weapon | Other)
+│       ├── Parent-child checkbox synchronization
+│       ├── Signal blocking for infinite loop prevention
+│       └── Real-time config persistence
+├── models_overview_widget.py (with visibility filtering)
+└── ui_model_gallery_display.py (improved thumbnails)
 ```
+
+### **Data**
+
+```
+Data/
+├── models_metadata.json (3,444 items - 100% synchronized)
+│   ├── All items have source_url field
+│   ├── Categories: armor, weapon, other
+│   ├── Subcategories documented in Models Visual System docs
+│   └── Distribution: armor (~1,200), weapon (~500), other (~1,700)
+├── classes_races_stats.json
+├── items_database_src.json
+└── realm_ranks.json
+```
+
+**Deleted in v0.110**:
+- ~~`dol_models_database.json`~~ (merged into models_metadata.json)
+- ~~`models_metadata.json.backup`~~ (cleanup)
+- ~~`models_metadata.json.backup2`~~ (cleanup)  
+- ~~`models_metadata.json.backup3`~~ (cleanup)
+
+### **Image Repository**
+
+```
+Img/Models/
+└── Items/  (Unified directory, v0.110+)
+    ├── 1.webp
+    ├── 2.webp
+    ├── 3.webp
+    └── ... 3,444 total WebP files
+    
+Total Size: ~10.48 MB
+Format: WebP (optimized)
+```
+
+**Note**: Prior to v0.110, images were organized by category (`armor/`, `weapon/`, `other/`). As of v0.110, all images are in the unified `Items/` directory for simplified access and consistent filtering.
 
 ### **Translations**
 
 ```
 Language/
-├── fr.json (settings.* + superadmin.* keys)
-├── en.json (settings.* + superadmin.* keys)
-└── de.json (settings.* + superadmin.* keys)
+├── fr.json (settings.* + superadmin.* keys, updated for Models)
+├── en.json (settings.* + superadmin.* keys, updated for Models)
+└── de.json (settings.* + superadmin.* keys, updated for Models)
+```
+
+**New Keys (v0.110)**:
+- `settings_models_gallery` - Page title
+- `settings_models_gallery_subtitle` - Page subtitle
+- `models_gallery_armor` - Category label
+- `models_gallery_weapon` - Category label
+- `models_gallery_other` - Category label
+- And subcategory labels for each language
+
+### **Tools (Removed in v0.110)**
+
+```
+Deleted:
+├── Tools/merge_models_databases.py (never called - merged functionality)
+├── Tools/move_legs_to_armor.py (never called - data already correct)
+├── Tools/analyze_template.py (debug script - no longer needed)
 ```
 
 ---
 
-**Current Version**: v0.108  
+**Current Version**: v0.110  
 **Status**: ✅ Active Standard  
-**Last Updated**: 2025-11-18
+**Last Updated**: 2025-01-17
+
+---
+
+## Version History - v0.110 Changes
+
+### **Major Updates**
+
+1. **Models Gallery Settings Redesign**:
+   - ✅ New 3-column hierarchical UI with parent-child checkbox logic
+   - ✅ Categories: Armor, Weapon, Other with proper subcategories
+   - ✅ Default state: Armor + Weapon enabled, Other disabled
+   - ✅ Real-time filtering with configuration persistence
+   - ✅ Signal blocking prevents infinite loops
+
+2. **Database Optimization**:
+   - ✅ Added missing source_url fields to all 2,878 items
+   - ✅ Merged dol_models_database.json into models_metadata.json
+   - ✅ Removed temporary backup files (backup, backup2, backup3)
+   - ✅ 3,444 items now 100% complete with URLs
+
+3. **Image System Improvements**:
+   - ✅ Unified image directory: `Img/Models/Items/` (not category-based)
+   - ✅ Fixed preview paths in SuperAdmin database editor
+   - ✅ All 3,444 WebP files properly indexed
+
+4. **Code Cleanup**:
+   - ✅ Removed unused maintenance scripts (never called)
+   - ✅ Removed debug analysis script (analyze_template.py)
+   - ✅ Clean commit history with 8 focused commits
+
+### **Commits**
+- "fix: add missing source_url fields to all 2,878 items in models metadata"
+- "feat: redesign models gallery settings with 3-column category layout and parent-child checkbox logic"
+- "fix: correct weapon category name and improve parent-child checkbox state synchronization"
+- "fix: correct model image preview path from category-based to unified Items directory"
+- "chore: remove temporary database backup files" (3 files)
+- "chore: remove dol_models_database.json - merged into models_metadata.json"
+- "chore: remove unused database maintenance scripts" (2 files)
+- "chore: remove analyze_template.py debug script"

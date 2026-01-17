@@ -99,6 +99,7 @@ class SettingsDialog(QDialog):
         self._create_herald_page()
         self._create_backup_page()
         self._create_armory_page()
+        self._create_models_gallery_page()
         self._create_debug_page()
         
         # SuperAdmin page (only in --admin mode) - AFTER Debug to keep indexes consistent
@@ -155,6 +156,7 @@ class SettingsDialog(QDialog):
             ("🌐", lang.get("settings.navigation.herald", default="Eden")),
             ("💾", lang.get("settings.navigation.backup", default="Sauvegardes")),
             ("🛡️", lang.get("settings.navigation.armory", default="Armurerie")),
+            ("🖼️", lang.get("settings.navigation.models", default="Models")),
         ]
         
         nav_items.append(("🐛", lang.get("settings.navigation.debug", default="Debug")))
@@ -1217,6 +1219,20 @@ class SettingsDialog(QDialog):
         layout.addStretch()
         self.pages.addWidget(page)
     
+    def _create_models_gallery_page(self):
+        """Page for Models Gallery settings (visible slots configuration)"""
+        from UI.ui_models_gallery_settings import ModelsGallerySettingsWidget
+        
+        page = QWidget()
+        layout = QVBoxLayout(page)
+        layout.setContentsMargins(0, 0, 0, 0)
+        
+        # Add the models gallery settings widget
+        self.models_gallery_settings = ModelsGallerySettingsWidget()
+        layout.addWidget(self.models_gallery_settings)
+        
+        self.pages.addWidget(page)
+    
     def _create_superadmin_page(self):
         """Page 8: SuperAdmin Tools (only visible with --admin flag)"""
         page = QWidget()
@@ -1363,6 +1379,18 @@ class SettingsDialog(QDialog):
         # Close Items Database section
         armory_section.setLayout(armory_layout)
         layout.addWidget(armory_section)
+        
+        # === MODELS DATABASE SECTION ===
+        from UI.ui_superadmin_models_database import SuperAdminModelsDatabaseWidget
+        
+        models_section = QGroupBox("🖼️ " + lang.get('superadmin.models_database_section_title', default="Models Database"))
+        models_layout = QVBoxLayout()
+        
+        models_widget = SuperAdminModelsDatabaseWidget(self)
+        models_layout.addWidget(models_widget)
+        
+        models_section.setLayout(models_layout)
+        layout.addWidget(models_section)
         
         # Initialize statistics on page creation
         self._refresh_superadmin_stats()
@@ -3215,6 +3243,10 @@ class SettingsDialog(QDialog):
             self.translatable_widgets['clean_cache_button'].setToolTip(
                 lang.get("buttons.clean_cache_tooltip")
             )
+        
+        # Models Gallery Settings widget retranslation
+        if hasattr(self, 'models_gallery_settings'):
+            self.models_gallery_settings.retranslate_ui()
 
 
 

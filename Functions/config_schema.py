@@ -5,7 +5,7 @@ Author: Christophe Pelichet
 Description: Defines the configuration structure, default values, and validation rules
 """
 
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional
 
 # Default configuration v2 (hierarchical structure)
 DEFAULT_CONFIG = {
@@ -79,6 +79,20 @@ DEFAULT_CONFIG = {
         "personal_db_path": None,
         "auto_add_scraped_items": True,
         "last_internal_db_version": "1.0"
+    },
+    "models_gallery": {
+        "visible_slots": [
+            "Arms",
+            "Cloaks",
+            "Feet",
+            "Hands",
+            "Head",
+            "Legs",
+            "Quiver",
+            "Shields",
+            "Torso",
+            "Weapons"
+        ]
     }
 }
 
@@ -206,6 +220,23 @@ VALIDATION_SCHEMA = {
             "type": (str, type(None)),
             "allowed": ["Albion", "Midgard", "Hibernia", None],
             "default": None
+        }
+    },
+    "models_gallery": {
+        "visible_slots": {
+            "type": list,
+            "default": [
+                "Arms",
+                "Cloaks",
+                "Feet",
+                "Hands",
+                "Head",
+                "Legs",
+                "Quiver",
+                "Shields",
+                "Torso",
+                "Weapons"
+            ]
         }
     }
 }

@@ -2,7 +2,7 @@
 
 **Version**: 3.1
 **Date**: November 2025  
-**Last Updated**: January 5, 2026 (Simplified Model Viewer UI - removed category label)  
+**Last Updated**: January 17, 2026 (Models Gallery Settings - visibility filters for 15 model slots)  
 **Component**: Complete model management system (3 types: Items, Mobs, Icons)  
 **Used by**: Armory, Database Editor, Character Sheet, Item Preview, Model Viewer Dialog  
 **Related**: `Img/Models/`, `Tools/DataScraping/download_all_models.py`, `Tools/DataScraping/scrape_models_metadata.py`, `Data/models_metadata.json`, `UI/model_viewer_dialog.py`, `Functions/item_model_viewer.py`  
@@ -20,7 +20,8 @@
 7. [PyInstaller Compatibility](#pyinstaller-compatibility)
 8. [Maintenance & Updates](#maintenance--updates)
 9. [Performance Considerations](#performance-considerations)
-10. [Troubleshooting](#troubleshooting)
+10. [Models Gallery Settings](#models-gallery-settings)
+11. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -1375,6 +1376,118 @@ thumbnail = pixmap.scaled(32, 32, Qt.KeepAspectRatio, Qt.SmoothTransformation)
 
 ## Version History
 
+### v0.110 (January 17, 2026)
+
+**Major Update: Models Gallery Settings Redesign & Database Optimization**
+
+**1. Models Gallery Settings Redesign**:
+- ✅ **New 3-Column Hierarchical UI** (`UI/ui_models_gallery_settings.py`, 280+ lines)
+  - Column 1: Armor category + 8 subcategories (arms, cloaks, feet, hands, head, legs, shields, torso)
+  - Column 2: Weapon category (flat, no subcategories)
+  - Column 3: Other category + 6 subcategories (boats, deco, misc, quiver, siege, tents)
+  - Equal-width columns with QFrame borders for visual separation
+- ✅ **Parent-Child Checkbox Logic**:
+  - Click parent category → Select/deselect all subcategories
+  - Click subcategory → Parent updates to reflect mixed state (tri-state)
+  - Signal blocking prevents infinite loops during cascade updates
+- ✅ **Default State**: 
+  - ✅ Armor - All subcategories enabled
+  - ✅ Weapon - Enabled
+  - ❌ Other - All subcategories disabled
+- ✅ **Real-Time Persistence**: Changes auto-save to config.json immediately
+- ✅ **Configuration**: Hierarchical structure in `models_gallery.visible_slots`
+  ```json
+  {
+    "armor": {"_selected": true, "arms": true, "cloaks": true, ...},
+    "weapon": {"_selected": true},
+    "other": {"_selected": false, "boats": false, ...}
+  }
+  ```
+
+**2. Database Optimization**:
+- ✅ **URL Completion**: Added missing `source_url` fields to all 2,878 items
+  - Pattern: `http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/{id}.jpg`
+  - 100% completion rate (3,444/3,444 items with URLs)
+- ✅ **Database Consolidation**: Merged `dol_models_database.json` into `models_metadata.json`
+  - Single source of truth for all 3,444 items
+  - Removed database duplication
+- ✅ **Backup Cleanup**: Removed temporary backup files (backup, backup2, backup3)
+- ✅ **Total Items**: 3,444 (100% synchronized with WebP images)
+- ✅ **Distribution**:
+  - Armor: ~1,200 items across 8 subcategories
+  - Weapon: ~500 items (flat category)
+  - Other: ~1,700 items across 6 subcategories
+
+**3. Image System Improvements**:
+- ✅ **Unified Directory Structure**: Changed from category-based to unified `Img/Models/Items/`
+  - Before: `Img/Models/armor/848.webp`, `Img/Models/weapon/848.webp`, etc.
+  - After: `Img/Models/Items/848.webp` (single, organized directory)
+- ✅ **Fixed Image Preview Paths**: Updated `UI/ui_models_database_editor.py`
+  - SuperAdmin database editor now correctly displays model previews
+  - All 3,444 WebP files properly indexed and accessible
+- ✅ **WebP Optimization**: ~10.48 MB total size
+
+**4. Code Cleanup & Maintenance**:
+- ✅ **Removed Unused Scripts** (never called):
+  - `Tools/merge_models_databases.py` (functionality merged)
+  - `Tools/move_legs_to_armor.py` (data already correct)
+  - `Tools/analyze_template.py` (debug script)
+- ✅ **Clean Commit History**: 8 focused, descriptive commits
+  - All code changes tested before commit
+  - Conventional commit format (feat:, fix:, chore:)
+  - Detailed commit messages explaining "what, why, how"
+
+**5. Integration & Testing**:
+- ✅ **Settings Dialog Integration**: New page 8 (📋 Models) in Settings
+- ✅ **Gallery Filtering**: Real-time visibility filter application
+- ✅ **Configuration Validation**: Schema validation in `config_schema.py`
+- ✅ **Multi-Language Support**: Translation keys for all 3 languages
+
+**Files Modified/Created**:
+- **UI Components**:
+  - `UI/ui_models_gallery_settings.py` - NEW: 3-column hierarchical widget
+  - `UI/ui_models_database_editor.py` - FIXED: Image preview paths
+  - `UI/settings_dialog.py` - MODIFIED: Added Models settings page
+- **Data Files**:
+  - `Data/models_metadata.json` - UPDATED: 2,878 new URLs, consolidated database
+  - Removed: `dol_models_database.json`, backup files (3)
+- **Functions**:
+  - `Functions/model_database_manager.py` - UPDATED: Visibility filters
+  - `Functions/config_schema.py` - UPDATED: Models gallery schema
+- **Configuration**:
+  - `Configuration/config.json` - UPDATED: New models_gallery section
+- **Documentation** (this file):
+  - UPDATED: Models Gallery Settings section with comprehensive details
+  - UPDATED: Database structure information
+  - UPDATED: Image location and format details
+
+**Git Commits** (Branch: feature/v0.110-models-overview-view):
+1. "fix: add missing source_url fields to all 2,878 items in models metadata"
+2. "feat: redesign models gallery settings with 3-column category layout and parent-child checkbox logic"
+3. "fix: correct weapon category name and improve parent-child checkbox state synchronization"
+4. "fix: correct model image preview path from category-based to unified Items directory"
+5. "chore: remove temporary database backup files" (3 files)
+6. "chore: remove dol_models_database.json - merged into models_metadata.json"
+7. "chore: remove unused database maintenance scripts" (2 files)
+8. "chore: remove analyze_template.py debug script"
+
+**Testing Verified**:
+- ✅ Application launches without errors
+- ✅ Settings dialog loads and saves correctly
+- ✅ Parent-child checkbox logic works without infinite loops
+- ✅ Gallery filtering applies correctly
+- ✅ Default state loads properly
+- ✅ Image previews display correctly in SuperAdmin
+
+**Benefits**:
+- Intuitive hierarchical UI for category management
+- 100% complete item metadata with URLs
+- Simplified image organization and access
+- Improved code maintainability
+- Real-time configuration persistence
+- No restart required for settings changes
+- Full localization support (EN, FR, DE)
+
 ### v3.1 (January 5, 2026)
 
 **UI Simplification - Model Viewer Dialog**:
@@ -1388,6 +1501,7 @@ thumbnail = pixmap.scaled(32, 32, Qt.KeepAspectRatio, Qt.SmoothTransformation)
 - Simplified the dialog layout for cleaner appearance
 - Category information still available in tooltips if needed
 - Improved code quality and maintainability
+
 
 **Benefits**:
 - More focused UI - attention on the model image itself
@@ -1501,6 +1615,471 @@ thumbnail = pixmap.scaled(32, 32, Qt.KeepAspectRatio, Qt.SmoothTransformation)
 
 ---
 
+---
+
+## 🖼️ Models Overview Gallery (v0.110+)
+
+**Status**: Version 1.0 - Simple Gallery (Current)  
+**Version Target**: v0.110  
+**Branch**: `feature/v0.110-models-overview-view`  
+**Related Files**:
+- Functions: `model_database_manager.py`, `model_gallery_filter.py`, `model_gallery_builder.py`
+- UI: `ui_model_gallery_filter.py`, `ui_model_gallery_builder.py`, `ui_model_gallery_display.py`
+
+### v1.0 Features (Simple Gallery - Current Release)
+
+✅ **Core Gallery**
+- Browsable grid of all model thumbnails
+- Responsive scrollable layout
+- Hover effects on thumbnails
+
+✅ **Filtering**
+- Filter by Type (armor, weapons, mobs, etc.)
+- Filter by SubType (arms, feet, hands, legs, etc.)
+- Search by Model ID (partial match)
+- Dynamic filter options based on metadata
+
+✅ **Metadata**
+- Automatic discovery from Img/ directory
+- Type/Subtype hierarchy indexing
+- Model count statistics per type/subtype
+- Support for multiple image formats (.jpg, .png, .webp)
+
+✅ **Architecture**
+- Clean separation: Functions (logic) vs UI (presentation)
+- Domain-driven naming: `model_gallery_*`
+- UI prefix convention: `ui_model_gallery_*` for paired UI components
+- Dataclass-based ModelThumbnail for type safety
+
+### Implementation Architecture
+
+**Metadata Flow:**
+```
+Img/ directory
+    ↓
+model_gallery_load_metadata()
+    ↓
+{type: {subtype: [model_ids]}}
+    ↓
+Applied to filter/builder functions
+    ↓
+ModelThumbnail objects for UI
+    ↓
+PySide6 grid display
+```
+
+**Signal Flow:**
+```
+ModelsFilterPanelWidget.filter_changed
+    ↓
+ModelsGalleryBuilderWidget.apply_filters()
+    ↓
+thumbnails_ready signal
+    ↓
+ModelsGalleryDisplayWidget.display_thumbnails()
+```
+
+---
+
+## Models Gallery Settings
+
+**Component**: `UI/ui_models_gallery_settings.py`, `Functions/model_database_manager.py`  
+**Integration Point**: Settings dialog (Settings > Models 🖼️)  
+**Related**: `Configuration/config.json`, `Functions/config_schema.py`  
+**Status**: ✅ Redesigned v0.110 - 3-column layout with parent-child checkbox logic
+
+### Overview
+
+The Models Gallery Settings system allows users to customize which model categories appear in the Models Gallery through a hierarchical, intuitive interface. Categories are organized into three main groups (Armor, Weapon, Other), each containing subcategories. Users can select individual categories or use parent-child checkbox logic to select/deselect all subcategories at once.
+
+**Default State**: 
+- ✅ **Armor** - All subcategories enabled
+- ✅ **Weapon** - Enabled (flat category, no subcategories)
+- ❌ **Other** - All subcategories disabled
+
+### Category Hierarchy
+
+**1. Armor** (Parent Category with 8 Subcategories)
+- Arms
+- Cloaks
+- Feet
+- Hands
+- Head
+- Legs
+- Shields
+- Torso
+
+**2. Weapon** (Flat Category - No Subcategories)
+- Single category containing all weapon models
+
+**3. Other** (Parent Category with 6 Subcategories)
+- Boats
+- Deco
+- Misc
+- Quiver
+- Siege
+- Tents
+
+### Configuration Structure
+
+**Config Section**: `models_gallery.visible_slots`
+
+**Default Configuration**:
+```json
+{
+  "models_gallery": {
+    "visible_slots": {
+      "armor": {
+        "_selected": true,
+        "arms": true,
+        "cloaks": true,
+        "feet": true,
+        "hands": true,
+        "head": true,
+        "legs": true,
+        "shields": true,
+        "torso": true
+      },
+      "weapon": {
+        "_selected": true
+      },
+      "other": {
+        "_selected": false,
+        "boats": false,
+        "deco": false,
+        "misc": false,
+        "quiver": false,
+        "siege": false,
+        "tents": false
+      }
+    }
+  }
+}
+```
+
+### UI Design - 3-Column Layout (v0.110+)
+
+**File**: `UI/ui_models_gallery_settings.py` (280+ lines)
+
+**Layout Architecture**:
+```
+┌─────────────────────────────────────────────────────────┐
+│          Models Gallery Settings                         │
+├────────────────────┬────────────────────┬────────────────┤
+│                    │                    │                │
+│   ARMOR            │   WEAPON           │   OTHER        │
+│   ┌────────────┐   │   ┌────────────┐   │   ┌────────────┐
+│   │ ☑ Armor    │   │   │ ☑ Weapon   │   │   │ ☐ Other    │
+│   │ ├─☑ Arms   │   │   │            │   │   │ ├─☐ Boats   │
+│   │ ├─☑ Cloaks │   │   │ No sub-    │   │   │ ├─☐ Deco    │
+│   │ ├─☑ Feet   │   │   │ categories │   │   │ ├─☐ Misc    │
+│   │ ├─☑ Hands  │   │   │            │   │   │ ├─☐ Quiver  │
+│   │ ├─☑ Head   │   │   │            │   │   │ ├─☐ Siege   │
+│   │ ├─☑ Legs   │   │   │            │   │   │ └─☐ Tents   │
+│   │ ├─☑ Shields│   │   │            │   │   │            │
+│   │ └─☑ Torso  │   │   │            │   │   │            │
+│   └────────────┘   │   └────────────┘   │   └────────────┘
+│                    │                    │                │
+└────────────────────┴────────────────────┴────────────────┘
+```
+
+**Features**:
+- ✅ **3 Equal-Width Columns** - Each category in separate column for clarity
+- ✅ **Parent-Child Checkbox Logic** - Clicking category checkbox selects/deselects all subcategories
+- ✅ **QFrame Borders** - Visual grouping with light borders around each column
+- ✅ **Hierarchical Structure** - Category checkboxes show parent state (checked/unchecked/partial)
+- ✅ **Auto-Save** - Configuration persists immediately on checkbox change
+- ✅ **Default State** - Armor + Weapon selected, Other deselected by default
+- ✅ **Real-Time Filtering** - Gallery updates instantly when settings change
+
+**Class**: `ModelsGallerySettingsWidget(QWidget)`
+
+**Architecture**:
+```python
+class ModelsGallerySettingsWidget(QWidget):
+    def __init__(self, parent=None):
+        """Initialize with config singleton and category structure."""
+        self.config = config
+        self.parent_checkboxes = {}  # Dict[category: QCheckBox]
+        self.child_checkboxes = {}   # Dict[category: Dict[subcategory: QCheckBox]]
+        self.category_order = ["armor", "weapon", "other"]
+        self._setup_ui()
+        self._load_settings()
+    
+    def _setup_ui(self):
+        """Create 3-column layout with parent-child checkbox structure."""
+        main_layout = QHBoxLayout()
+        
+        for category in self.category_order:
+            column = self._create_category_column(category)
+            frame = QFrame()
+            frame_layout = QVBoxLayout()
+            frame_layout.addWidget(column)
+            frame.setLayout(frame_layout)
+            frame.setStyleSheet("border: 1px solid #ddd;")
+            main_layout.addWidget(frame)
+        
+        self.setLayout(main_layout)
+    
+    def _create_category_column(self, category):
+        """Create single column with parent checkbox and subcategories."""
+        # Parent checkbox for category
+        parent_cb = QCheckBox(category.capitalize())
+        parent_cb.stateChanged.connect(lambda: self._on_parent_changed(category))
+        
+        # Subcategory checkboxes
+        layout = QVBoxLayout()
+        layout.addWidget(parent_cb)
+        
+        if category != "weapon":  # weapon has no subcategories
+            for subcategory in self.category_structure[category]:
+                child_cb = QCheckBox(f"  {subcategory.capitalize()}")
+                child_cb.stateChanged.connect(lambda state, c=category: self._on_child_changed(c))
+                layout.addWidget(child_cb)
+        
+        return layout
+    
+    def _on_parent_changed(self, category):
+        """Handle parent checkbox change - sync all children."""
+        is_checked = self.parent_checkboxes[category].isChecked()
+        for child_cb in self.child_checkboxes[category].values():
+            child_cb.blockSignals(True)
+            child_cb.setChecked(is_checked)
+            child_cb.blockSignals(False)
+        self._save_config()
+    
+    def _on_child_changed(self, category):
+        """Handle child checkbox change - update parent state."""
+        # Update parent state: all checked = checked, 
+        # none checked = unchecked, mixed = partial
+        self._update_parent_state(category)
+        self._save_config()
+    
+    def _load_settings(self):
+        """Load visible_slots from config and update checkboxes."""
+        visible_slots = self.config.get("models_gallery.visible_slots", {})
+        
+        for category in self.category_order:
+            category_data = visible_slots.get(category, {})
+            is_selected = category_data.get("_selected", category == "armor" or category == "weapon")
+            
+            self.parent_checkboxes[category].blockSignals(True)
+            self.parent_checkboxes[category].setChecked(is_selected)
+            self.parent_checkboxes[category].blockSignals(False)
+            
+            if category != "weapon":
+                for subcategory in self.category_structure[category]:
+                    is_sub_selected = category_data.get(subcategory, is_selected)
+                    self.child_checkboxes[category][subcategory].blockSignals(True)
+                    self.child_checkboxes[category][subcategory].setChecked(is_sub_selected)
+                    self.child_checkboxes[category][subcategory].blockSignals(False)
+    
+    def _save_config(self):
+        """Save current checkbox states to config."""
+        visible_slots = {}
+        for category in self.category_order:
+            visible_slots[category] = {
+                "_selected": self.parent_checkboxes[category].isChecked()
+            }
+            if category != "weapon":
+                for subcategory in self.category_structure[category]:
+                    visible_slots[category][subcategory] = self.child_checkboxes[category][subcategory].isChecked()
+        
+        self.config.set("models_gallery.visible_slots", visible_slots)
+        self.config.save_config()
+```
+
+**Parent-Child Logic** ✨:
+- **Category Click** → Selects/Deselects all subcategories in that category
+- **Subcategory Click** → Updates parent state:
+  - All subcategories checked = Parent checked ✓
+  - No subcategories checked = Parent unchecked ☐
+  - Some subcategories checked = Parent partial (tri-state) ⊗
+- **Signal Blocking** → Prevents infinite loops when updating related checkboxes
+
+### Database Structure (v0.110)
+
+**File**: `Data/models_metadata.json` (3,444 items)
+
+**Total Items**: 3,444 (100% synchronized with WebP images)
+
+**Distribution by Category**:
+- **Armor**: ~1,200 items across 8 subcategories
+- **Weapon**: ~500 items (flat category)
+- **Other**: ~1,700 items across 6 subcategories
+
+**Item Structure**:
+```json
+{
+  "id": 848,
+  "name": "Item 848",
+  "category": "armor",
+  "subcategory": "legs",
+  "source_url": "http://github.com/Eve-of-Darkness/DolModels/raw/master/src/items/848.jpg"
+}
+```
+
+**Image Location**: `Img/Models/Items/` (unified directory)
+- **Format**: WebP (optimized)
+- **Files**: 3,444 total (one per item)
+- **Size**: ~10.48 MB total
+
+### Filtering Function
+
+**File**: `Functions/model_database_manager.py`
+
+**Function**: `model_gallery_apply_visibility_filters(metadata: dict) -> dict`
+
+**Purpose**: Filter gallery metadata based on visible_slots setting
+
+**Implementation**:
+```python
+def model_gallery_apply_visibility_filters(metadata: dict) -> dict:
+    """
+    Filter model metadata based on visible_slots configuration.
+    
+    Removes disabled model slots from the metadata, allowing users to
+    customize which categories appear in the Models Gallery.
+    
+    Args:
+        metadata: Raw metadata with all slots
+                 {
+                     "items": {
+                         "model_id": {"slot": "Arms", "models": [...], ...}
+                     }
+                 }
+    
+    Returns:
+        Filtered metadata with only visible slots
+    
+    Logic:
+        1. Get visible_slots from config.models_gallery.visible_slots
+        2. Iterate through metadata items
+        3. Keep only items where slot is in visible_slots
+        4. Return filtered metadata
+    """
+    from Functions.config_manager import config
+    
+    visible_slots = config.get("models_gallery.visible_slots", 
+                               [list of all 15 slots])
+    
+    if not metadata or "items" not in metadata:
+        return metadata
+    
+    filtered_metadata = {"items": {}}
+    
+    for model_id, item_data in metadata["items"].items():
+        if item_data.get("slot") in visible_slots:
+            filtered_metadata["items"][model_id] = item_data
+    
+    return filtered_metadata
+```
+
+### Gallery Integration
+
+**File**: `UI/models_overview_widget.py`
+
+**Implementation**:
+```python
+from Functions.model_database_manager import (
+    model_gallery_load_metadata,
+    model_gallery_apply_visibility_filters
+)
+
+def load_gallery_metadata(self):
+    """Load and filter gallery metadata based on settings."""
+    # Load raw metadata
+    raw_metadata = model_gallery_load_metadata()
+    
+    # Apply visibility filters from config
+    self.metadata = model_gallery_apply_visibility_filters(raw_metadata)
+    
+    # Build gallery UI with filtered metadata
+    self.builder.build_thumbnails(self.metadata)
+```
+
+### User Experience Flow
+
+**Workflow**:
+```
+User opens Settings
+    ↓
+Selects "Models 🖼️" tab
+    ↓
+Views 15 checkboxes (alphabetically sorted)
+    ↓
+Checks/unchecks boxes to show/hide categories
+    ↓
+Changes auto-saved to config
+    ↓
+User closes Settings
+    ↓
+Returns to Models Gallery
+    ↓
+Gallery automatically displays only visible slots
+```
+
+**Real-Time Updates**:
+- ✅ Checkbox state changes immediately saved to config
+- ✅ Changes persist across application restarts
+- ✅ Gallery refreshes on next load using filtered metadata
+- ✅ No dialog reload needed
+
+### Translation Keys
+
+**Language Files** (Language/*.json):
+
+Required translations:
+```json
+{
+  "settings_models_gallery": "🖼️ Models",
+  "settings_models_gallery_title": "Models Gallery Settings",
+  "settings_models_gallery_subtitle": "Choose which model categories to display in the gallery",
+  "model_slot_arms": "Arms",
+  "model_slot_boats": "Boats",
+  "model_slot_cloaks": "Cloaks",
+  "model_slot_deco": "Deco",
+  "model_slot_feet": "Feet",
+  "model_slot_hands": "Hands",
+  "model_slot_head": "Head",
+  "model_slot_legs": "Legs",
+  "model_slot_misc": "Misc",
+  "model_slot_quiver": "Quiver",
+  "model_slot_shields": "Shields",
+  "model_slot_siege": "Siege",
+  "model_slot_tents": "Tents",
+  "model_slot_torso": "Torso",
+  "model_slot_weapons": "Weapons"
+}
+```
+
+### File Locations
+
+```
+Configuration/
+└── config.json
+    └── models_gallery section
+
+Functions/
+├── config_manager.py (config singleton)
+├── config_schema.py (validation)
+└── model_database_manager.py
+    └── model_gallery_apply_visibility_filters()
+
+UI/
+├── settings_dialog.py (_create_models_gallery_page method)
+├── ui_models_gallery_settings.py (NEW)
+│   └── ModelsGallerySettingsWidget class
+└── models_overview_widget.py (applies filters)
+
+Language/
+├── en.json (translation keys)
+├── fr.json (translation keys)
+└── de.json (translation keys)
+```
+
+---
+
 ## References
 
 **Image Source**: [Eve-of-Darkness/DolModels](https://github.com/Eve-of-Darkness/DolModels)  
@@ -1518,4 +2097,4 @@ thumbnail = pixmap.scaled(32, 32, Qt.KeepAspectRatio, Qt.SmoothTransformation)
 
 ---
 
-*Last Updated: December 19, 2025 (Version 109 - Phase 10 Item Model Viewer Module)*
+*Last Updated: January 17, 2026 (Version 110 - Models Overview Gallery v1.0 + Models Gallery Settings)*

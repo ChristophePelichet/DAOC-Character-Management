@@ -42,6 +42,8 @@ class ModelsFilterPanelWidget(QWidget):
         """
         super().__init__(parent)
         self.metadata = metadata
+        from Functions.language_manager import lang
+        self.lang = lang
         self._setup_ui()
         self._populate_filters()
 
@@ -117,6 +119,63 @@ class ModelsFilterPanelWidget(QWidget):
 
         self.setLayout(layout)
 
+    def _get_category_label(self, category: str) -> str:
+        """Get localized label for a category."""
+        key_map = {
+            "armor": "settings.pages.models_gallery.category_armor",
+            "weapon": "settings.pages.models_gallery.category_weapon",
+            "other": "settings.pages.models_gallery.category_other",
+        }
+        fallback_map = {
+            "armor": "Armor",
+            "weapon": "Weapon",
+            "other": "Other",
+        }
+        key = key_map.get(category, "")
+        result = self.lang.get(key, default=fallback_map.get(category, category))
+        return result
+
+    def _get_subcategory_label(self, subcategory: str) -> str:
+        """Get localized label for a subcategory."""
+        key_map = {
+            "arms": "settings.pages.models_gallery.subcategory_arms",
+            "chest": "settings.pages.models_gallery.subcategory_chest",
+            "cloak": "settings.pages.models_gallery.subcategory_cloak",
+            "feet": "settings.pages.models_gallery.subcategory_feet",
+            "hands": "settings.pages.models_gallery.subcategory_hands",
+            "head": "settings.pages.models_gallery.subcategory_head",
+            "legs": "settings.pages.models_gallery.subcategory_legs",
+            "sleeves": "settings.pages.models_gallery.subcategory_sleeves",
+            "shields": "settings.pages.models_gallery.subcategory_shields",
+            "torso": "settings.pages.models_gallery.subcategory_torso",
+            "bow": "settings.pages.models_gallery.subcategory_bow",
+            "crossbow": "settings.pages.models_gallery.subcategory_crossbow",
+            "dagger": "settings.pages.models_gallery.subcategory_dagger",
+            "flexible": "settings.pages.models_gallery.subcategory_flexible",
+            "greave": "settings.pages.models_gallery.subcategory_greave",
+            "instrument": "settings.pages.models_gallery.subcategory_instrument",
+            "polearm": "settings.pages.models_gallery.subcategory_polearm",
+            "scythe": "settings.pages.models_gallery.subcategory_scythe",
+            "shield": "settings.pages.models_gallery.subcategory_shield",
+            "staff": "settings.pages.models_gallery.subcategory_staff",
+            "sword": "settings.pages.models_gallery.subcategory_sword",
+            "throwing": "settings.pages.models_gallery.subcategory_throwing",
+            "two handed": "settings.pages.models_gallery.subcategory_two_handed",
+            "weapons": "settings.pages.models_gallery.subcategory_weapons",
+            "boats": "settings.pages.models_gallery.subcategory_boats",
+            "deco": "settings.pages.models_gallery.subcategory_deco",
+            "housing": "settings.pages.models_gallery.subcategory_housing",
+            "misc": "settings.pages.models_gallery.subcategory_misc",
+            "quiver": "settings.pages.models_gallery.subcategory_quiver",
+            "siege": "settings.pages.models_gallery.subcategory_siege",
+            "tents": "settings.pages.models_gallery.subcategory_tents",
+            "world": "settings.pages.models_gallery.subcategory_world",
+        }
+        fallback = subcategory.capitalize()
+        key = key_map.get(subcategory, "")
+        result = self.lang.get(key, default=fallback)
+        return result
+
     def _populate_filters(self):
         """Populate filter dropdowns with metadata."""
         from Functions.language_manager import lang
@@ -152,7 +211,8 @@ class ModelsFilterPanelWidget(QWidget):
                     len(subcats) if isinstance(subcats, list) else 0
                     for subcats in items_data[category_name].values()
                 )
-                display_name = f"{category_name.capitalize()} ({total_items})"
+                translated_label = self._get_category_label(category_name)
+                display_name = f"{translated_label} ({total_items})"
                 self.category_combo.addItem(display_name, category_name)
 
         self.category_combo.blockSignals(False)
@@ -191,7 +251,8 @@ class ModelsFilterPanelWidget(QWidget):
                     if subcat_name != "_":
                         model_ids = subcats[subcat_name]
                         count = len(model_ids) if isinstance(model_ids, list) else 0
-                        display_name = f"{subcat_name.capitalize()} ({count})"
+                        translated_label = self._get_subcategory_label(subcat_name)
+                        display_name = f"{translated_label} ({count})"
                         self.subcategory_combo.addItem(display_name, subcat_name)
 
         self.subcategory_combo.blockSignals(False)

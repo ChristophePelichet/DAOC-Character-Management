@@ -4,13 +4,14 @@ SuperAdmin Models Database Widget
 Displays models database statistics and advanced operations for managing
 the models metadata and configuration in SuperAdmin mode.
 
-Design: Two-column layout similar to Source Database Statistics
+Design: Two-column layout identical to Source Database Statistics
 - Left: Statistics panel (total models, items, mobs, icons, file size, last updated)
 - Right: Advanced operations buttons (Models Viewer, Refresh Metadata)
 """
 
 from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QMessageBox, QDialog
+    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QMessageBox, QDialog,
+    QGroupBox, QFormLayout
 )
 from PySide6.QtCore import Qt, QThread, Signal
 from pathlib import Path
@@ -37,13 +38,13 @@ class ModelsMetadataRefreshWorker(QThread):
     def run(self):
         """Run metadata refresh in background thread"""
         try:
-            self.progress.emit(lang.get("models_db_refreshing_metadata", "Refreshing metadata..."))
+            self.progress.emit(lang.get("models_db.refreshing_metadata", "Refreshing metadata..."))
             
             # Run the refresh process
             success, message, stats = self.superadmin.refresh_database()
             
             if success:
-                self.progress.emit(lang.get("models_db_refresh_success", "Metadata refreshed successfully!"))
+                self.progress.emit(lang.get("models_db.refresh_success", "Metadata refreshed successfully!"))
             else:
                 self.error.emit(message)
             
@@ -59,8 +60,8 @@ class SuperAdminModelsDatabaseWidget(QWidget):
     """
     SuperAdmin Models Database management widget.
     
-    Displays:
-    - Left panel: Models database statistics
+    Layout identical to Source Database Statistics:
+    - Left panel: Models database statistics (using QFormLayout)
     - Right panel: Advanced operations buttons
     
     Features:
@@ -86,205 +87,103 @@ class SuperAdminModelsDatabaseWidget(QWidget):
     def _setup_ui(self):
         """Create the UI layout and widgets"""
         main_layout = QHBoxLayout(self)
-        main_layout.setSpacing(15)
+        main_layout.setSpacing(20)
         main_layout.setContentsMargins(0, 0, 0, 0)
         
-        # Left panel: Statistics
+        # Left panel: Statistics (50% width)
         left_panel = self._create_statistics_panel()
         main_layout.addWidget(left_panel, 1)
         
-        # Right panel: Advanced Operations
+        # Right panel: Advanced Operations (50% width)
         right_panel = self._create_advanced_operations_panel()
         main_layout.addWidget(right_panel, 1)
     
-    def _create_statistics_panel(self) -> QWidget:
+    def _create_statistics_panel(self) -> QGroupBox:
         """
         Create left panel with models database statistics
         
         Returns:
-            QWidget containing statistics display
+            QGroupBox containing statistics display
         """
-        panel = QWidget()
-        layout = QVBoxLayout(panel)
-        layout.setSpacing(8)
+        stats_group = QGroupBox(lang.get('models_db.statistics_title', default="Models Database Statistics"))
+        stats_layout = QFormLayout()
         
-        # Title
-        title = QLabel(lang.get("models_db_statistics_title", "Models Database Statistics"))
-        title_font = title.font()
-        title_font.setPointSize(title_font.pointSize() + 2)
-        title_font.setBold(True)
-        title.setFont(title_font)
-        layout.addWidget(title)
+        # Total models
+        self.total_models_label = QLabel("0")
+        self.total_models_label.setStyleSheet("color: #ce9178;")
+        stats_layout.addRow(lang.get('models_db.total', default="Total models:"), 
+                           self.total_models_label)
         
-        # Stats container (styled like database stats)
-        stats_widget = QWidget()
-        stats_widget.setStyleSheet("""
-            QWidget {
-                background-color: #2d2d30;
-                border: 1px solid #3e3e42;
-                border-radius: 4px;
-                padding: 12px;
-            }
-        """)
-        stats_layout = QVBoxLayout(stats_widget)
-        stats_layout.setSpacing(6)
-        stats_layout.setContentsMargins(10, 10, 10, 10)
+        # Items count
+        self.items_label = QLabel("0")
+        self.items_label.setStyleSheet("color: #ce9178;")
+        stats_layout.addRow(lang.get('models_db.items', default="Items:"), 
+                           self.items_label)
         
-        # Create stat labels
-        self.total_models_label = self._create_stat_label(
-            lang.get("models_db_total", "Total models"),
-            "0"
-        )
-        stats_layout.addWidget(self.total_models_label)
+        # Mobs count
+        self.mobs_label = QLabel("0")
+        self.mobs_label.setStyleSheet("color: #ce9178;")
+        stats_layout.addRow(lang.get('models_db.mobs', default="Mobs:"), 
+                           self.mobs_label)
         
-        self.items_label = self._create_stat_label(
-            lang.get("models_db_items", "Items"),
-            "0"
-        )
-        stats_layout.addWidget(self.items_label)
+        # Icons count
+        self.icons_label = QLabel("0")
+        self.icons_label.setStyleSheet("color: #ce9178;")
+        stats_layout.addRow(lang.get('models_db.icons', default="Icons:"), 
+                           self.icons_label)
         
-        self.mobs_label = self._create_stat_label(
-            lang.get("models_db_mobs", "Mobs"),
-            "0"
-        )
-        stats_layout.addWidget(self.mobs_label)
+        # File size
+        self.file_size_label = QLabel("0 B")
+        self.file_size_label.setStyleSheet("color: #ce9178;")
+        stats_layout.addRow(lang.get('models_db.file_size', default="File size:"), 
+                           self.file_size_label)
         
-        self.icons_label = self._create_stat_label(
-            lang.get("models_db_icons", "Icons"),
-            "0"
-        )
-        stats_layout.addWidget(self.icons_label)
+        # Last updated
+        self.last_updated_label = QLabel(lang.get('models_db.unknown', default="Unknown"))
+        self.last_updated_label.setStyleSheet("color: #ce9178;")
+        stats_layout.addRow(lang.get('models_db.last_updated', default="Last updated:"), 
+                           self.last_updated_label)
         
-        self.file_size_label = self._create_stat_label(
-            lang.get("models_db_file_size", "File size"),
-            "0 B"
-        )
-        stats_layout.addWidget(self.file_size_label)
-        
-        self.last_updated_label = self._create_stat_label(
-            lang.get("models_db_last_updated", "Last updated"),
-            lang.get("models_db_unknown", "Unknown")
-        )
-        stats_layout.addWidget(self.last_updated_label)
-        
-        layout.addWidget(stats_widget)
-        
-        # Refresh button for stats
-        refresh_stats_btn = QPushButton(lang.get("models_db_refresh_stats", "🔄 Refresh Stats"))
-        refresh_stats_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #0e639c;
-                color: white;
-                border: none;
-                border-radius: 4px;
-                padding: 6px 12px;
-                font-weight: bold;
-            }
-            QPushButton:hover {
-                background-color: #1177bb;
-            }
-            QPushButton:pressed {
-                background-color: #0a4a7d;
-            }
-        """)
+        # Refresh Stats button
+        refresh_stats_btn = QPushButton(lang.get('models_db.refresh_stats', default="🔄 Refresh Stats"))
+        refresh_stats_btn.setMinimumHeight(35)
         refresh_stats_btn.clicked.connect(self._load_stats)
-        layout.addWidget(refresh_stats_btn)
+        stats_layout.addRow("", refresh_stats_btn)
         
-        layout.addStretch()
-        
-        return panel
+        stats_group.setLayout(stats_layout)
+        return stats_group
     
-    def _create_stat_label(self, label_text: str, value_text: str) -> QWidget:
-        """
-        Create a single statistic label with name and value
-        
-        Args:
-            label_text: Label text (left side)
-            value_text: Value text (right side, colored)
-            
-        Returns:
-            QWidget containing the stat display
-        """
-        container = QWidget()
-        layout = QHBoxLayout(container)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(8)
-        
-        # Label
-        label = QLabel(label_text + ":")
-        label.setStyleSheet("color: #cccccc; font-size: 11px;")
-        layout.addWidget(label)
-        
-        layout.addStretch()
-        
-        # Value
-        value = QLabel(value_text)
-        value.setStyleSheet("color: #ce9178; font-weight: bold; font-size: 11px;")
-        value.setAlignment(Qt.AlignRight)
-        layout.addWidget(value)
-        
-        container.value_label = value
-        return container
-    
-    def _create_advanced_operations_panel(self) -> QWidget:
+    def _create_advanced_operations_panel(self) -> QGroupBox:
         """
         Create right panel with advanced operations buttons
         
         Returns:
-            QWidget containing operation buttons
+            QGroupBox containing operation buttons
         """
-        panel = QWidget()
-        layout = QVBoxLayout(panel)
-        layout.setSpacing(10)
-        
-        # Title
-        title = QLabel(lang.get("superadmin_advanced_operations", "Advanced Operations"))
-        title_font = title.font()
-        title_font.setPointSize(title_font.pointSize() + 2)
-        title_font.setBold(True)
-        title.setFont(title_font)
-        layout.addWidget(title)
+        advanced_group = QGroupBox(lang.get('superadmin.advanced_group_title', 
+            default="⚙️ Advanced Operations"))
+        advanced_layout = QVBoxLayout()
         
         # Models Database Viewer button
-        viewer_btn = QPushButton(lang.get("models_db_viewer_btn", "🔍 Models Database Viewer"))
-        viewer_btn.setStyleSheet(self._get_button_style())
+        viewer_btn = QPushButton(lang.get('models_db.viewer_btn', default="🔍 Models Database Viewer"))
+        viewer_btn.setMinimumHeight(35)
+        viewer_btn.setToolTip(lang.get('models_db.viewer_tooltip', 
+            default="View and explore all models in the database"))
         viewer_btn.clicked.connect(self._open_models_viewer)
-        layout.addWidget(viewer_btn)
+        advanced_layout.addWidget(viewer_btn)
         
         # Refresh Metadata button
-        refresh_btn = QPushButton(lang.get("models_db_refresh_metadata_btn", "🔄 Refresh Metadata"))
-        refresh_btn.setStyleSheet(self._get_button_style())
+        refresh_btn = QPushButton(lang.get('models_db.refresh_metadata_btn', default="🔄 Refresh Metadata"))
+        refresh_btn.setMinimumHeight(35)
+        refresh_btn.setToolTip(lang.get('models_db.refresh_metadata_tooltip', 
+            default="Re-scrape models metadata from Los Ojos website"))
         refresh_btn.clicked.connect(self._refresh_metadata)
-        layout.addWidget(refresh_btn)
+        advanced_layout.addWidget(refresh_btn)
         
-        layout.addStretch()
+        advanced_layout.addStretch()
         
-        return panel
-    
-    def _get_button_style(self) -> str:
-        """
-        Get button stylesheet for operation buttons
-        
-        Returns:
-            CSS stylesheet string
-        """
-        return """
-            QPushButton {
-                background-color: #0e639c;
-                color: white;
-                border: none;
-                border-radius: 4px;
-                padding: 8px 12px;
-                font-weight: bold;
-                text-align: left;
-            }
-            QPushButton:hover {
-                background-color: #1177bb;
-            }
-            QPushButton:pressed {
-                background-color: #0a4a7d;
-            }
-        """
+        advanced_group.setLayout(advanced_layout)
+        return advanced_group
     
     def _load_stats(self):
         """Load and display models database statistics"""
@@ -292,12 +191,12 @@ class SuperAdminModelsDatabaseWidget(QWidget):
             stats = self.superadmin.get_models_database_stats()
             
             # Update labels
-            self.total_models_label.value_label.setText(str(stats.get("total_models", 0)))
-            self.items_label.value_label.setText(str(stats.get("items", 0)))
-            self.mobs_label.value_label.setText(str(stats.get("mobs", 0)))
-            self.icons_label.value_label.setText(str(stats.get("icons", 0)))
-            self.file_size_label.value_label.setText(stats.get("file_size", "Unknown"))
-            self.last_updated_label.value_label.setText(stats.get("last_updated", "Unknown"))
+            self.total_models_label.setText(str(stats.get("total_models", 0)))
+            self.items_label.setText(str(stats.get("items", 0)))
+            self.mobs_label.setText(str(stats.get("mobs", 0)))
+            self.icons_label.setText(str(stats.get("icons", 0)))
+            self.file_size_label.setText(stats.get("file_size", "Unknown"))
+            self.last_updated_label.setText(stats.get("last_updated", "Unknown"))
             
             logging.info("Models database stats loaded successfully", extra={"action": "MODELS_DB_STATS_LOADED"})
             
@@ -306,7 +205,7 @@ class SuperAdminModelsDatabaseWidget(QWidget):
             QMessageBox.warning(
                 self,
                 lang.get("error_title", "Error"),
-                lang.get("models_db_stats_error", "Failed to load models database statistics")
+                lang.get("models_db.stats_error", "Failed to load models database statistics")
             )
     
     def _open_models_viewer(self):
@@ -322,14 +221,14 @@ class SuperAdminModelsDatabaseWidget(QWidget):
             QMessageBox.information(
                 self,
                 lang.get("info_title", "Information"),
-                lang.get("models_db_viewer_coming_soon", "Models Database Viewer coming soon...")
+                lang.get("models_db.viewer_coming_soon", "Models Database Viewer coming soon...")
             )
         except Exception as e:
             logging.error(f"Error opening models viewer: {e}", extra={"action": "MODELS_VIEWER_ERROR"})
             QMessageBox.warning(
                 self,
                 lang.get("error_title", "Error"),
-                lang.get("models_db_viewer_error", "Error opening Models Database Viewer")
+                lang.get("models_db.viewer_error", "Error opening Models Database Viewer")
             )
     
     def _refresh_metadata(self):
@@ -338,8 +237,8 @@ class SuperAdminModelsDatabaseWidget(QWidget):
             # Confirm action
             reply = QMessageBox.question(
                 self,
-                lang.get("models_db_refresh_confirm_title", "Refresh Metadata"),
-                lang.get("models_db_refresh_confirm_msg", "This will re-scrape the metadata from Los Ojos website. Continue?"),
+                lang.get('models_db.refresh_confirm_title', default="Refresh Metadata"),
+                lang.get('models_db.refresh_confirm_msg', default="This will re-scrape the metadata from Los Ojos website. Continue?"),
                 QMessageBox.Yes | QMessageBox.No,
                 QMessageBox.No
             )
@@ -349,8 +248,8 @@ class SuperAdminModelsDatabaseWidget(QWidget):
             
             # Show progress message
             progress_dialog = QMessageBox(self)
-            progress_dialog.setWindowTitle(lang.get("processing_title", "Processing"))
-            progress_dialog.setText(lang.get("models_db_refreshing", "Refreshing metadata..."))
+            progress_dialog.setWindowTitle(lang.get("superadmin.progress_title", "Building..."))
+            progress_dialog.setText(lang.get('models_db.refreshing', default="Refreshing metadata..."))
             progress_dialog.setStandardButtons(QMessageBox.NoButton)
             progress_dialog.show()
             
@@ -366,7 +265,7 @@ class SuperAdminModelsDatabaseWidget(QWidget):
             QMessageBox.warning(
                 self,
                 lang.get("error_title", "Error"),
-                f"{lang.get('models_db_refresh_error', 'Error refreshing metadata')}: {str(e)}"
+                f"{lang.get('models_db.refresh_error', 'Error refreshing metadata')}: {str(e)}"
             )
     
     def _on_refresh_finished(self, dialog: QDialog):
@@ -378,8 +277,8 @@ class SuperAdminModelsDatabaseWidget(QWidget):
         
         QMessageBox.information(
             self,
-            lang.get("models_db_refresh_complete_title", "Refresh Complete"),
-            lang.get("models_db_refresh_complete_msg", "Metadata has been refreshed successfully!")
+            lang.get('models_db.refresh_complete_title', default="Refresh Complete"),
+            lang.get('models_db.refresh_complete_msg', default="Metadata has been refreshed successfully!")
         )
     
     def _on_refresh_error(self, error_msg: str, dialog: QDialog):
@@ -390,5 +289,6 @@ class SuperAdminModelsDatabaseWidget(QWidget):
         QMessageBox.warning(
             self,
             lang.get("error_title", "Error"),
-            f"{lang.get('models_db_refresh_error', 'Error refreshing metadata')}:\n{error_msg}"
+            f"{lang.get('models_db.refresh_error', 'Error refreshing metadata')}:\n{error_msg}"
         )
+

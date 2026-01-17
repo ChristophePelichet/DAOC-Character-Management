@@ -1578,25 +1578,6 @@ thumbnail = pixmap.scaled(32, 32, Qt.KeepAspectRatio, Qt.SmoothTransformation)
 
 ### v2.0 Roadmap (Future Enhancements - NOT IMPLEMENTED)
 
-🔮 **Advanced Filtering**
-- Multi-filter combinations (type + item level + class)
-- Favorite models/collections
-- Recent models history
-- Filter presets/saved searches
-
-🔮 **Item Integration**
-- Link models to actual items in database
-- Display which items use each model
-- Filter by item properties (rarity, level, stats)
-- See item prices alongside models
-
-🔮 **Preview & Details**
-- Full-size image preview on click
-- Model metadata panel (type, subtype, usage count)
-- Item list using this model
-- 3D rotation/preview (if game data available)
-- Download model option
-
 🔮 **Analytics & Intelligence**
 - Most used models statistics
 - Orphaned models (not used by any item)

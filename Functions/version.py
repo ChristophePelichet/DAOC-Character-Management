@@ -2,4 +2,4 @@
 Version information for DAOC Character Manager
 """
 
-__version__ = "0.108"
+__version__ = "0.110"

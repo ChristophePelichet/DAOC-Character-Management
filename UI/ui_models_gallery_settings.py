@@ -61,6 +61,8 @@ class ModelsGallerySettingsWidget(QWidget):
 
     def _setup_ui(self):
         """Build UI layout."""
+        from PySide6.QtCore import Qt
+        
         layout = QVBoxLayout()
         layout.setSpacing(10)
         layout.setContentsMargins(10, 10, 10, 10)
@@ -96,35 +98,60 @@ class ModelsGallerySettingsWidget(QWidget):
         # Container for checkboxes
         checkbox_container = QWidget()
         checkbox_layout = QVBoxLayout()
-        checkbox_layout.setSpacing(5)
+        checkbox_layout.setSpacing(15)
         checkbox_layout.setContentsMargins(0, 0, 0, 0)
 
-        # Create hierarchical checkboxes: Category > Subcategory
-        for category in sorted(self.subcategories_by_category.keys()):
-            # Category checkbox
+        # Define category order: Armor, Weapon, Other
+        category_order = ["armor", "weapons", "other"]
+        
+        # 3-column layout for categories
+        categories_grid_layout = QHBoxLayout()
+        categories_grid_layout.setSpacing(15)
+
+        for category in category_order:
+            if category not in self.subcategories_by_category:
+                continue
+                
+            # Create a frame for this category
+            category_frame = QFrame()
+            category_frame.setStyleSheet("QFrame { border: 1px solid #cccccc; border-radius: 5px; }")
+            category_frame.setLineWidth(1)
+            
+            category_vertical_layout = QVBoxLayout()
+            category_vertical_layout.setSpacing(8)
+            category_vertical_layout.setContentsMargins(10, 10, 10, 10)
+
+            # Category header checkbox
             category_checkbox = QCheckBox(category.capitalize())
             category_checkbox.setFont(QFont())
-            category_checkbox.stateChanged.connect(self._on_checkbox_changed)
-            checkbox_layout.addWidget(category_checkbox)
+            category_checkbox.stateChanged.connect(lambda state, cat=category: self._on_category_checkbox_changed(cat, state))
+            category_vertical_layout.addWidget(category_checkbox)
             self.category_checkboxes[category] = category_checkbox
 
-            # Subcategory checkboxes (indented)
+            # Add separator
+            separator = QFrame()
+            separator.setFrameShape(QFrame.HLine)
+            separator.setFrameShadow(QFrame.Sunken)
+            category_vertical_layout.addWidget(separator)
+
+            # Subcategory checkboxes
             subcategories = self.subcategories_by_category[category]
             for subcategory in subcategories:
-                # Indent subcategories
-                subcat_layout = QHBoxLayout()
-                subcat_layout.setContentsMargins(20, 0, 0, 0)
-                
                 checkbox_key = f"{category}/{subcategory}"
                 subcat_checkbox = QCheckBox(subcategory.capitalize())
                 subcat_checkbox.setFont(QFont())
                 subcat_checkbox.stateChanged.connect(self._on_checkbox_changed)
-                subcat_layout.addWidget(subcat_checkbox)
-                subcat_layout.addStretch()
-                
-                checkbox_layout.addLayout(subcat_layout)
+                category_vertical_layout.addWidget(subcat_checkbox)
                 self.checkboxes[checkbox_key] = subcat_checkbox
+                # Store reference to parent category checkbox for sync
+                subcat_checkbox.category = category
+                subcat_checkbox.category_checkbox = category_checkbox
 
+            category_vertical_layout.addStretch()
+            category_frame.setLayout(category_vertical_layout)
+            categories_grid_layout.addWidget(category_frame, 1)
+
+        checkbox_layout.addLayout(categories_grid_layout)
         checkbox_layout.addStretch()
         checkbox_container.setLayout(checkbox_layout)
         scroll_area.setWidget(checkbox_container)
@@ -136,10 +163,17 @@ class ModelsGallerySettingsWidget(QWidget):
         """Load settings from configuration and update checkboxes."""
         visible_slots = self.config.get(
             "models_gallery.visible_slots", 
-            ["arms", "boats", "bow", "cloaks", "chest", "feet", "hands", 
-             "head", "helm", "legs", "misc", "quiver", "shield", "sword", 
-             "torso", "tents", "siege", "deco"]
+            None
         )
+        
+        # Default: Armor and Weapon checked, Other unchecked
+        if visible_slots is None:
+            # Get all subcategories for armor and weapons
+            visible_slots = []
+            if "armor" in self.subcategories_by_category:
+                visible_slots.extend(self.subcategories_by_category["armor"])
+            if "weapons" in self.subcategories_by_category:
+                visible_slots.extend(self.subcategories_by_category["weapons"])
 
         # Check subcategory checkboxes based on visible_slots
         for checkbox_key, checkbox in self.checkboxes.items():
@@ -150,10 +184,18 @@ class ModelsGallerySettingsWidget(QWidget):
             checkbox.setChecked(subcategory_name.lower() in [s.lower() for s in visible_slots])
             checkbox.blockSignals(False)
 
+        # Update category checkboxes based on subcategory states
+        for category in self.category_checkboxes.keys():
+            self._update_category_checkbox_state(category)
+
         logging.info(f"Loaded models gallery settings: {len(visible_slots)} visible subcategories")
 
     def _on_checkbox_changed(self):
-        """Handle checkbox state changes - save to config."""
+        """Handle checkbox state changes - save to config and update category state."""
+        # Update category checkbox states based on subcategories
+        for category in self.category_checkboxes.keys():
+            self._update_category_checkbox_state(category)
+        
         # Collect visible subcategories (not categories, but the actual items to show)
         visible_slots = []
         
@@ -168,6 +210,63 @@ class ModelsGallerySettingsWidget(QWidget):
         self.config.set("models_gallery.visible_slots", visible_slots)
         self.config.save_config()
         logging.info("Models gallery settings saved")
+
+    def _on_category_checkbox_changed(self, category: str, state: int):
+        """
+        Handle category checkbox state changes - update all subcategories.
+        
+        Args:
+            category: The category name (armor, weapons, other)
+            state: The new state (Qt.CheckState)
+        """
+        from PySide6.QtCore import Qt
+        
+        # Set all subcategories to the same state as the category
+        is_checked = state == Qt.CheckState.Checked
+        
+        for subcategory in self.subcategories_by_category.get(category, []):
+            checkbox_key = f"{category}/{subcategory}"
+            if checkbox_key in self.checkboxes:
+                self.checkboxes[checkbox_key].blockSignals(True)
+                self.checkboxes[checkbox_key].setChecked(is_checked)
+                self.checkboxes[checkbox_key].blockSignals(False)
+        
+        # Save changes
+        self._on_checkbox_changed()
+
+    def _update_category_checkbox_state(self, category: str):
+        """
+        Update category checkbox state based on subcategory states.
+        
+        Args:
+            category: The category name
+        """
+        from PySide6.QtCore import Qt
+        
+        subcategories = self.subcategories_by_category.get(category, [])
+        if not subcategories:
+            return
+        
+        # Count checked subcategories
+        checked_count = sum(
+            1 for subcat in subcategories
+            if self.checkboxes.get(f"{category}/{subcat}", QCheckBox()).isChecked()
+        )
+        
+        # Update category checkbox state
+        category_checkbox = self.category_checkboxes.get(category)
+        if category_checkbox:
+            category_checkbox.blockSignals(True)
+            if checked_count == len(subcategories):
+                # All checked
+                category_checkbox.setCheckState(Qt.CheckState.Checked)
+            elif checked_count == 0:
+                # None checked
+                category_checkbox.setCheckState(Qt.CheckState.Unchecked)
+            else:
+                # Partially checked
+                category_checkbox.setCheckState(Qt.CheckState.PartiallyChecked)
+            category_checkbox.blockSignals(False)
 
     def get_visible_slots(self) -> List[str]:
         """

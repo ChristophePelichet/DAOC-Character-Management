@@ -50,16 +50,7 @@ class ModelsDataDatabaseEditor(QDialog):
 
     def _init_ui(self):
         """Initialize the user interface"""
-        main_layout = QVBoxLayout()
-        main_layout.setContentsMargins(0, 0, 0, 0)
-        main_layout.setSpacing(0)
-
-        # Custom title bar
-        title_bar = self._create_title_bar()
-        main_layout.addWidget(title_bar)
-
-        # Content layout
-        content_layout = QVBoxLayout()
+        layout = QVBoxLayout()
 
         # Create tabs
         tabs = QTabWidget()
@@ -80,7 +71,7 @@ class ModelsDataDatabaseEditor(QDialog):
         subtypes_tab = self._create_manage_subtypes_tab()
         tabs.addTab(subtypes_tab, "🏷️ Manage Subtypes")
 
-        content_layout.addWidget(tabs)
+        layout.addWidget(tabs)
 
         # Buttons
         button_layout = QHBoxLayout()
@@ -92,92 +83,10 @@ class ModelsDataDatabaseEditor(QDialog):
         button_layout.addStretch()
         button_layout.addWidget(save_btn)
         button_layout.addWidget(close_btn)
-        content_layout.addLayout(button_layout)
+        layout.addLayout(button_layout)
 
-        main_layout.addLayout(content_layout)
-        self.setLayout(main_layout)
-        
+        self.setLayout(layout)
         self.is_maximized = False
-
-    def _create_title_bar(self) -> QWidget:
-        """Create custom title bar with window controls (like Windows system title bar)"""
-        title_widget = QWidget()
-        title_widget.setStyleSheet("""
-            QWidget {
-                background-color: #2d2d30;
-                border-bottom: 1px solid #3e3e42;
-            }
-            QPushButton {
-                background-color: transparent;
-                color: white;
-                border: none;
-                padding: 4px 12px;
-                font-size: 16px;
-                min-width: 46px;
-                min-height: 32px;
-            }
-            QPushButton:hover {
-                background-color: #3e3e42;
-            }
-            QPushButton:pressed {
-                background-color: #007acc;
-            }
-        """)
-        
-        title_layout = QHBoxLayout()
-        title_layout.setContentsMargins(10, 0, 0, 0)
-        title_layout.setSpacing(0)
-        
-        title_label = QLabel("🪟 Database Editor")
-        title_label.setStyleSheet("color: #cccccc; font-weight: normal; margin-right: 10px;")
-        title_layout.addWidget(title_label)
-        
-        title_layout.addStretch()
-        
-        minimize_btn = QPushButton("−")
-        minimize_btn.setMaximumWidth(46)
-        minimize_btn.clicked.connect(self.showMinimized)
-        title_layout.addWidget(minimize_btn)
-        
-        self.maximize_btn = QPushButton("🗖")
-        self.maximize_btn.setMaximumWidth(46)
-        self.maximize_btn.clicked.connect(self._toggle_maximize)
-        title_layout.addWidget(self.maximize_btn)
-        
-        close_btn = QPushButton("✕")
-        close_btn.setMaximumWidth(46)
-        close_btn.setStyleSheet("""
-            QPushButton {
-                background-color: transparent;
-                color: white;
-                border: none;
-                padding: 4px 12px;
-                font-size: 16px;
-                min-width: 46px;
-                min-height: 32px;
-            }
-            QPushButton:hover {
-                background-color: #e81123;
-            }
-            QPushButton:pressed {
-                background-color: #c50a0a;
-            }
-        """)
-        close_btn.clicked.connect(self.close)
-        title_layout.addWidget(close_btn)
-        
-        title_widget.setLayout(title_layout)
-        title_widget.setFixedHeight(32)
-        return title_widget
-
-    def _toggle_maximize(self):
-        """Toggle window maximize/restore"""
-        if self.is_maximized:
-            self.showNormal()
-            self.is_maximized = False
-        else:
-            self.showMaximized()
-            self.is_maximized = True
 
     def _create_missing_images_tab(self) -> QWidget:
         """Create tab for managing missing images (not in metadata)"""

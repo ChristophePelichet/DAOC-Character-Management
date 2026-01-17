@@ -931,3 +931,45 @@ class SuperAdminTools:
                 "file_size": "Error",
                 "last_updated": "Error"
             }
+    
+    def get_models_files_count(self) -> Dict[str, int]:
+        """
+        Count actual image files in Img/Models/ directories.
+        
+        Returns:
+            Dictionary with file counts:
+            {
+                "total_files": 4814,
+                "items": 3444,
+                "mobs": 1000,
+                "icons": 370
+            }
+        """
+        try:
+            base_path = Path(self.path_manager.get_resource_path("Img")) / "Models"
+            
+            # Count actual image files
+            items_dir = base_path / "items"
+            mobs_dir = base_path / "mobs"
+            icons_dir = base_path / "icons" / "items"
+            
+            items_count = len(list(items_dir.glob("*.webp"))) if items_dir.exists() else 0
+            mobs_count = len(list(mobs_dir.glob("*.webp"))) if mobs_dir.exists() else 0
+            icons_count = len(list(icons_dir.glob("*.webp"))) if icons_dir.exists() else 0
+            total_count = items_count + mobs_count + icons_count
+            
+            return {
+                "total_files": total_count,
+                "items": items_count,
+                "mobs": mobs_count,
+                "icons": icons_count
+            }
+            
+        except Exception as e:
+            logging.error(f"Error counting models files: {e}", extra={"action": "SUPERADMIN_MODELS_FILES_ERROR"})
+            return {
+                "total_files": 0,
+                "items": 0,
+                "mobs": 0,
+                "icons": 0
+            }

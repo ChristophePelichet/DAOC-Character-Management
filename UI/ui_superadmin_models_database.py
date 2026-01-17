@@ -108,25 +108,25 @@ class SuperAdminModelsDatabaseWidget(QWidget):
         stats_group = QGroupBox(lang.get('models_db.statistics_title', default="Models Database Statistics"))
         stats_layout = QFormLayout()
         
-        # Total models
+        # Total models (metadata)
         self.total_models_label = QLabel("0")
         self.total_models_label.setStyleSheet("color: #ce9178;")
         stats_layout.addRow(lang.get('models_db.total', default="Total models:"), 
                            self.total_models_label)
         
-        # Items count
+        # Items count (metadata)
         self.items_label = QLabel("0")
         self.items_label.setStyleSheet("color: #ce9178;")
         stats_layout.addRow(lang.get('models_db.items', default="Items:"), 
                            self.items_label)
         
-        # Mobs count
+        # Mobs count (metadata)
         self.mobs_label = QLabel("0")
         self.mobs_label.setStyleSheet("color: #ce9178;")
         stats_layout.addRow(lang.get('models_db.mobs', default="Mobs:"), 
                            self.mobs_label)
         
-        # Icons count
+        # Icons count (metadata)
         self.icons_label = QLabel("0")
         self.icons_label.setStyleSheet("color: #ce9178;")
         stats_layout.addRow(lang.get('models_db.icons', default="Icons:"), 
@@ -143,6 +143,40 @@ class SuperAdminModelsDatabaseWidget(QWidget):
         self.last_updated_label.setStyleSheet("color: #ce9178;")
         stats_layout.addRow(lang.get('models_db.last_updated', default="Last updated:"), 
                            self.last_updated_label)
+        
+        # Separator line
+        separator = QLabel("─" * 50)
+        separator.setStyleSheet("color: #3e3e42;")
+        stats_layout.addRow("", separator)
+        
+        # Image Files section
+        files_label = QLabel(lang.get('models_db.image_files', default="Image Files:"))
+        files_label.setStyleSheet("font-weight: bold; color: #ce9178;")
+        stats_layout.addRow("", files_label)
+        
+        # Total files
+        self.total_files_label = QLabel("0")
+        self.total_files_label.setStyleSheet("color: #ce9178;")
+        stats_layout.addRow(lang.get('models_db.total_files', default="Total files:"), 
+                           self.total_files_label)
+        
+        # Items files
+        self.items_files_label = QLabel("0")
+        self.items_files_label.setStyleSheet("color: #ce9178;")
+        stats_layout.addRow(lang.get('models_db.items_files', default="Items files:"), 
+                           self.items_files_label)
+        
+        # Mobs files
+        self.mobs_files_label = QLabel("0")
+        self.mobs_files_label.setStyleSheet("color: #ce9178;")
+        stats_layout.addRow(lang.get('models_db.mobs_files', default="Mobs files:"), 
+                           self.mobs_files_label)
+        
+        # Icons files
+        self.icons_files_label = QLabel("0")
+        self.icons_files_label.setStyleSheet("color: #ce9178;")
+        stats_layout.addRow(lang.get('models_db.icons_files', default="Icons files:"), 
+                           self.icons_files_label)
         
         # Refresh Stats button
         refresh_stats_btn = QPushButton(lang.get('models_db.refresh_stats', default="🔄 Refresh Stats"))
@@ -186,17 +220,27 @@ class SuperAdminModelsDatabaseWidget(QWidget):
         return advanced_group
     
     def _load_stats(self):
-        """Load and display models database statistics"""
+        """Load and display models database statistics (metadata + files)"""
         try:
+            # Load metadata stats
             stats = self.superadmin.get_models_database_stats()
             
-            # Update labels
+            # Load file counts
+            files = self.superadmin.get_models_files_count()
+            
+            # Update metadata labels
             self.total_models_label.setText(str(stats.get("total_models", 0)))
             self.items_label.setText(str(stats.get("items", 0)))
             self.mobs_label.setText(str(stats.get("mobs", 0)))
             self.icons_label.setText(str(stats.get("icons", 0)))
             self.file_size_label.setText(stats.get("file_size", "Unknown"))
             self.last_updated_label.setText(stats.get("last_updated", "Unknown"))
+            
+            # Update file count labels
+            self.total_files_label.setText(str(files.get("total_files", 0)))
+            self.items_files_label.setText(str(files.get("items", 0)))
+            self.mobs_files_label.setText(str(files.get("mobs", 0)))
+            self.icons_files_label.setText(str(files.get("icons", 0)))
             
             logging.info("Models database stats loaded successfully", extra={"action": "MODELS_DB_STATS_LOADED"})
             

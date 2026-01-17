@@ -1576,21 +1576,6 @@ thumbnail = pixmap.scaled(32, 32, Qt.KeepAspectRatio, Qt.SmoothTransformation)
 - UI prefix convention: `ui_model_gallery_*` for paired UI components
 - Dataclass-based ModelThumbnail for type safety
 
-### v2.0 Roadmap (Future Enhancements - NOT IMPLEMENTED)
-
-🔮 **Performance**
-- Lazy-loading thumbnails on scroll
-- Thumbnail caching
-- Virtual scrolling for 1000+ items
-- Background metadata loading
-
-🔮 **User Experience**
-- Keyboard navigation (arrows, pagination)
-- Export selected models
-- Batch operations
-- Model comparison view
-- Custom grid size adjustment
-
 ### Implementation Architecture
 
 **Metadata Flow:**

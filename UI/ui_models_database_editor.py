@@ -41,17 +41,39 @@ class ModelsDataDatabaseEditor(QDialog):
         self.metadata_path = base_path / "Data" / "models_metadata.json"
         self.models_dir = base_path / "Img" / "Models"
         self.metadata = self._load_metadata()
+        
+        # Load subtypes BEFORE creating UI
+        self._load_subtypes()
 
         # Initialize UI
         self._init_ui()
-        self._load_subtypes()
 
     def _init_ui(self):
         """Initialize the user interface"""
         layout = QVBoxLayout()
 
+        # Toolbar with window controls
+        toolbar_layout = QHBoxLayout()
+        
+        minimize_btn = QPushButton("➖")
+        minimize_btn.setMaximumWidth(40)
+        minimize_btn.clicked.connect(self.showMinimized)
+        toolbar_layout.addWidget(minimize_btn)
+        
+        maximize_btn = QPushButton("⬜")
+        maximize_btn.setMaximumWidth(40)
+        maximize_btn.clicked.connect(self._toggle_maximize)
+        toolbar_layout.addWidget(maximize_btn)
+        
+        toolbar_layout.addStretch()
+        layout.addLayout(toolbar_layout)
+
         # Create tabs
         tabs = QTabWidget()
+        
+        # Tab 0: Missing Images
+        missing_tab = self._create_missing_images_tab()
+        tabs.addTab(missing_tab, "🚨 Missing Images")
         
         # Tab 1: Edit Entries
         edit_tab = self._create_edit_entries_tab()
@@ -80,6 +102,82 @@ class ModelsDataDatabaseEditor(QDialog):
         layout.addLayout(button_layout)
 
         self.setLayout(layout)
+        
+        self.is_maximized = False
+
+    def _toggle_maximize(self):
+        """Toggle window maximize/restore"""
+        if self.is_maximized:
+            self.showNormal()
+            self.is_maximized = False
+        else:
+            self.showMaximized()
+            self.is_maximized = True
+
+    def _create_missing_images_tab(self) -> QWidget:
+        """Create tab for managing missing images (not in metadata)"""
+        widget = QWidget()
+        layout = QVBoxLayout()
+
+        layout.addWidget(QLabel("🚨 Images Without Metadata"))
+
+        # Scan for missing images
+        scan_btn = QPushButton("🔍 Scan for Missing Images")
+        scan_btn.clicked.connect(self._scan_missing_images)
+        layout.addWidget(scan_btn)
+
+        # List of missing images
+        self.missing_images_list = QListWidget()
+        self.missing_images_list.itemClicked.connect(self._on_missing_image_selected)
+        layout.addWidget(self.missing_images_list)
+
+        # Quick add panel
+        add_group = QGroupBox("Quick Add to Database")
+        add_layout = QVBoxLayout()
+
+        add_layout.addWidget(QLabel("🖼️ Preview:"))
+        self.missing_preview = QLabel()
+        self.missing_preview.setMinimumSize(300, 300)
+        self.missing_preview.setStyleSheet("border: 1px solid gray; background-color: #222;")
+        self.missing_preview.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        add_layout.addWidget(self.missing_preview)
+
+        add_layout.addWidget(QLabel("Image Info:"))
+        self.missing_info = QLabel()
+        add_layout.addWidget(self.missing_info)
+
+        add_layout.addWidget(QLabel("Entry ID:"))
+        self.missing_id = QLineEdit()
+        add_layout.addWidget(self.missing_id)
+
+        add_layout.addWidget(QLabel("Name:"))
+        self.missing_name = QLineEdit()
+        add_layout.addWidget(self.missing_name)
+
+        add_layout.addWidget(QLabel("Main Category:"))
+        self.missing_main_cat = QComboBox()
+        self.missing_main_cat.addItems(self._get_all_categories())
+        add_layout.addWidget(self.missing_main_cat)
+
+        add_layout.addWidget(QLabel("Subcategory:"))
+        self.missing_subcat = QComboBox()
+        self.missing_subcat.addItems(self._get_all_subtypes())
+        add_layout.addWidget(self.missing_subcat)
+
+        add_btn = QPushButton("✅ Add This Image to Database")
+        add_btn.clicked.connect(self._add_missing_image_to_db)
+        add_layout.addWidget(add_btn)
+
+        skip_btn = QPushButton("⏭️ Skip This Image")
+        skip_btn.clicked.connect(self._skip_missing_image)
+        add_layout.addWidget(skip_btn)
+
+        add_group.setLayout(add_layout)
+        layout.addWidget(add_group)
+
+        widget.setLayout(layout)
+        return widget
+
 
     def _create_edit_entries_tab(self) -> QWidget:
         """Create tab for editing existing entries"""
@@ -293,6 +391,10 @@ class ModelsDataDatabaseEditor(QDialog):
     def _load_metadata(self) -> Dict[str, Any]:
         """Load metadata from JSON file"""
         try:
+            if not self.metadata_path.exists():
+                QMessageBox.warning(self, "Warning", f"Metadata file not found: {self.metadata_path}")
+                return {}
+            
             with open(self.metadata_path, 'r', encoding='utf-8') as f:
                 return json.load(f)
         except Exception as e:
@@ -389,7 +491,7 @@ class ModelsDataDatabaseEditor(QDialog):
             scaled_pixmap = pixmap.scaledToWidth(300, Qt.TransformationMode.SmoothTransformation)
             self.preview_label.setPixmap(scaled_pixmap)
         else:
-            self.preview_label.setText("Image not found")
+            self.preview_label.setText(f"Image not found:\n{image_path}")
 
     def _on_subcat_changed(self, text: str):
         """Handle subcategory change"""
@@ -424,10 +526,11 @@ class ModelsDataDatabaseEditor(QDialog):
     def _browse_image_file(self):
         """Browse for image file"""
         file_dialog = QFileDialog()
+        start_dir = str(self.models_dir) if self.models_dir.exists() else str(Path.home())
         file_path, _ = file_dialog.getOpenFileName(
             self,
             "Select Image",
-            str(self.models_dir),
+            start_dir,
             "Image Files (*.webp *.jpg *.png);;All Files (*)"
         )
 
@@ -541,3 +644,101 @@ class ModelsDataDatabaseEditor(QDialog):
             self._save_metadata()
 
         event.accept()
+    def _scan_missing_images(self):
+        """Scan for images that don't have metadata entries"""
+        self.missing_images_list.clear()
+        self.missing_images = []
+
+        # Get all image files from the directories
+        for category_dir in ["items", "mobs", "icons"]:
+            full_dir = self.models_dir / category_dir
+            if not full_dir.exists():
+                continue
+
+            for image_file in full_dir.glob("*.webp"):
+                image_id = image_file.stem  # Get filename without extension
+                
+                # Check if this ID exists in metadata
+                found = False
+                for category in self.metadata.values():
+                    if image_id in category:
+                        found = True
+                        break
+
+                if not found:
+                    self.missing_images.append({
+                        'id': image_id,
+                        'file': image_file,
+                        'category': category_dir,
+                        'file_size': image_file.stat().st_size
+                    })
+
+        # Display missing images
+        for img in sorted(self.missing_images, key=lambda x: x['id']):
+            item = QListWidgetItem(f"{img['id']} ({img['category']})")
+            item.setData(Qt.ItemDataRole.UserRole, img)
+            self.missing_images_list.addItem(item)
+
+        QMessageBox.information(self, "Scan Complete", f"Found {len(self.missing_images)} images without metadata")
+
+    def _on_missing_image_selected(self, item: QListWidgetItem):
+        """Handle missing image selection"""
+        img = item.data(Qt.ItemDataRole.UserRole)
+        self.current_missing_image = img
+
+        # Load preview
+        pixmap = QPixmap(str(img['file']))
+        scaled = pixmap.scaledToWidth(300, Qt.TransformationMode.SmoothTransformation)
+        self.missing_preview.setPixmap(scaled)
+
+        # Display info
+        file_size_kb = img['file_size'] / 1024
+        info = f"File: {img['file'].name}\nSize: {file_size_kb:.1f} KB\nCategory: {img['category']}"
+        self.missing_info.setText(info)
+
+        # Pre-fill ID
+        self.missing_id.setText(img['id'])
+        self.missing_name.clear()
+
+    def _add_missing_image_to_db(self):
+        """Add the selected missing image to database"""
+        if not hasattr(self, 'current_missing_image'):
+            QMessageBox.warning(self, "Warning", "No image selected")
+            return
+
+        entry_id = self.missing_id.text().strip()
+        entry_name = self.missing_name.text().strip()
+        main_cat = self.missing_main_cat.currentText()
+        subcat = self.missing_subcat.currentText()
+
+        if not entry_name:
+            QMessageBox.warning(self, "Warning", "Please enter an image name")
+            return
+
+        # Add to metadata
+        if main_cat not in self.metadata:
+            self.metadata[main_cat] = {}
+
+        self.metadata[main_cat][entry_id] = {
+            'name': entry_name,
+            'main_category': main_cat,
+            'subcategory': subcat,
+            'source_url': ''
+        }
+
+        QMessageBox.information(self, "Success", f"Image {entry_id} added to database!")
+        self._skip_missing_image()
+
+    def _skip_missing_image(self):
+        """Skip current missing image and move to next"""
+        current_row = self.missing_images_list.currentRow()
+        if current_row >= 0:
+            self.missing_images_list.takeItem(current_row)
+            
+            # Select next item
+            if self.missing_images_list.count() > 0:
+                self.missing_images_list.setCurrentRow(min(current_row, self.missing_images_list.count() - 1))
+                self.missing_images_list.itemClicked.emit(self.missing_images_list.currentItem())
+            else:
+                self.missing_preview.clear()
+                self.missing_info.setText("No more images")

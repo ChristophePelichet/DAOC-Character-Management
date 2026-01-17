@@ -90,23 +90,53 @@ class SuperAdminModelsDatabaseWidget(QWidget):
         main_layout.setSpacing(20)
         main_layout.setContentsMargins(0, 0, 0, 0)
         
-        # Left panel: Statistics (50% width)
-        left_panel = self._create_statistics_panel()
+        # Left panel: Two separated statistics sections (50% width)
+        left_panel = self._create_left_panels()
         main_layout.addWidget(left_panel, 1)
         
         # Right panel: Advanced Operations (50% width)
         right_panel = self._create_advanced_operations_panel()
         main_layout.addWidget(right_panel, 1)
     
-    def _create_statistics_panel(self) -> QGroupBox:
+    def _create_left_panels(self) -> QWidget:
         """
-        Create left panel with models database statistics
+        Create left panel with two separated statistics sections
         
         Returns:
-            QGroupBox containing statistics display
+            QWidget containing both statistics sections
         """
-        stats_group = QGroupBox(lang.get('models_db.statistics_title', default="Models Database Statistics"))
+        container = QWidget()
+        layout = QVBoxLayout(container)
+        layout.setSpacing(15)
+        layout.setContentsMargins(0, 0, 0, 0)
+        
+        # Section 1: Metadata Statistics
+        metadata_group = self._create_metadata_statistics_panel()
+        layout.addWidget(metadata_group)
+        
+        # Section 2: Image Files Statistics
+        files_group = self._create_image_files_statistics_panel()
+        layout.addWidget(files_group)
+        
+        layout.addStretch()
+        
+        return container
+    
+    def _create_metadata_statistics_panel(self) -> QGroupBox:
+        """
+        Create metadata statistics panel
+        
+        Returns:
+            QGroupBox with metadata stats and refresh button
+        """
+        stats_group = QGroupBox(lang.get('models_db.metadata_stats_title', default="📊 Models"))
         stats_layout = QFormLayout()
+        
+        # Database name
+        self.database_name_label = QLabel("models_metadata.json")
+        self.database_name_label.setStyleSheet("font-weight: bold; color: #2196f3;")
+        stats_layout.addRow(lang.get('models_db.database_name', default="Database:"), 
+                           self.database_name_label)
         
         # Total models (metadata)
         self.total_models_label = QLabel("0")
@@ -144,48 +174,57 @@ class SuperAdminModelsDatabaseWidget(QWidget):
         stats_layout.addRow(lang.get('models_db.last_updated', default="Last updated:"), 
                            self.last_updated_label)
         
-        # Separator line
-        separator = QLabel("─" * 50)
-        separator.setStyleSheet("color: #3e3e42;")
-        stats_layout.addRow("", separator)
+        # Refresh Metadata button
+        refresh_metadata_btn = QPushButton(lang.get('models_db.refresh_db_stats', default="🔄 Refresh Database"))
+        refresh_metadata_btn.setMinimumHeight(35)
+        refresh_metadata_btn.clicked.connect(self._load_metadata_stats)
+        stats_layout.addRow("", refresh_metadata_btn)
         
-        # Image Files section
-        files_label = QLabel(lang.get('models_db.image_files', default="Image Files:"))
-        files_label.setStyleSheet("font-weight: bold; color: #ce9178;")
-        stats_layout.addRow("", files_label)
+        stats_group.setLayout(stats_layout)
+        return stats_group
+    
+    def _create_image_files_statistics_panel(self) -> QGroupBox:
+        """
+        Create image files statistics panel
+        
+        Returns:
+            QGroupBox with image file counts and refresh button
+        """
+        files_group = QGroupBox(lang.get('models_db.image_stats_title', default="🖼️ Models Database"))
+        files_layout = QFormLayout()
         
         # Total files
         self.total_files_label = QLabel("0")
         self.total_files_label.setStyleSheet("color: #ce9178;")
-        stats_layout.addRow(lang.get('models_db.total_files', default="Total files:"), 
+        files_layout.addRow(lang.get('models_db.total_files', default="Total files:"), 
                            self.total_files_label)
         
         # Items files
         self.items_files_label = QLabel("0")
         self.items_files_label.setStyleSheet("color: #ce9178;")
-        stats_layout.addRow(lang.get('models_db.items_files', default="Items files:"), 
+        files_layout.addRow(lang.get('models_db.items_files', default="Items files:"), 
                            self.items_files_label)
         
         # Mobs files
         self.mobs_files_label = QLabel("0")
         self.mobs_files_label.setStyleSheet("color: #ce9178;")
-        stats_layout.addRow(lang.get('models_db.mobs_files', default="Mobs files:"), 
+        files_layout.addRow(lang.get('models_db.mobs_files', default="Mobs files:"), 
                            self.mobs_files_label)
         
         # Icons files
         self.icons_files_label = QLabel("0")
         self.icons_files_label.setStyleSheet("color: #ce9178;")
-        stats_layout.addRow(lang.get('models_db.icons_files', default="Icons files:"), 
+        files_layout.addRow(lang.get('models_db.icons_files', default="Icons files:"), 
                            self.icons_files_label)
         
-        # Refresh Stats button
-        refresh_stats_btn = QPushButton(lang.get('models_db.refresh_stats', default="🔄 Refresh Stats"))
-        refresh_stats_btn.setMinimumHeight(35)
-        refresh_stats_btn.clicked.connect(self._load_stats)
-        stats_layout.addRow("", refresh_stats_btn)
+        # Refresh Files button
+        refresh_files_btn = QPushButton(lang.get('models_db.refresh_files_stats', default="🔄 Refresh Files"))
+        refresh_files_btn.setMinimumHeight(35)
+        refresh_files_btn.clicked.connect(self._load_files_stats)
+        files_layout.addRow("", refresh_files_btn)
         
-        stats_group.setLayout(stats_layout)
-        return stats_group
+        files_group.setLayout(files_layout)
+        return files_group
     
     def _create_advanced_operations_panel(self) -> QGroupBox:
         """
@@ -206,27 +245,20 @@ class SuperAdminModelsDatabaseWidget(QWidget):
         viewer_btn.clicked.connect(self._open_models_viewer)
         advanced_layout.addWidget(viewer_btn)
         
-        # Refresh Metadata button
-        refresh_btn = QPushButton(lang.get('models_db.refresh_metadata_btn', default="🔄 Refresh Metadata"))
-        refresh_btn.setMinimumHeight(35)
-        refresh_btn.setToolTip(lang.get('models_db.refresh_metadata_tooltip', 
-            default="Re-scrape models metadata from Los Ojos website"))
-        refresh_btn.clicked.connect(self._refresh_metadata)
-        advanced_layout.addWidget(refresh_btn)
-        
         advanced_layout.addStretch()
         
         advanced_group.setLayout(advanced_layout)
         return advanced_group
     
     def _load_stats(self):
-        """Load and display models database statistics (metadata + files)"""
+        """Load and display all statistics (metadata + files)"""
+        self._load_metadata_stats()
+        self._load_files_stats()
+    
+    def _load_metadata_stats(self):
+        """Load and display metadata database statistics"""
         try:
-            # Load metadata stats
             stats = self.superadmin.get_models_database_stats()
-            
-            # Load file counts
-            files = self.superadmin.get_models_files_count()
             
             # Update metadata labels
             self.total_models_label.setText(str(stats.get("total_models", 0)))
@@ -236,43 +268,59 @@ class SuperAdminModelsDatabaseWidget(QWidget):
             self.file_size_label.setText(stats.get("file_size", "Unknown"))
             self.last_updated_label.setText(stats.get("last_updated", "Unknown"))
             
+            logging.info("Models metadata stats loaded successfully", extra={"action": "MODELS_DB_METADATA_STATS_LOADED"})
+            
+        except Exception as e:
+            logging.error(f"Error loading models metadata stats: {e}", extra={"action": "MODELS_DB_METADATA_STATS_ERROR"})
+            QMessageBox.warning(
+                self,
+                lang.get("error_title", "Error"),
+                lang.get("models_db.metadata_stats_error", "Failed to load metadata database statistics")
+            )
+    
+    def _load_files_stats(self):
+        """Load and display image files statistics"""
+        try:
+            files = self.superadmin.get_models_files_count()
+            
             # Update file count labels
             self.total_files_label.setText(str(files.get("total_files", 0)))
             self.items_files_label.setText(str(files.get("items", 0)))
             self.mobs_files_label.setText(str(files.get("mobs", 0)))
             self.icons_files_label.setText(str(files.get("icons", 0)))
             
-            logging.info("Models database stats loaded successfully", extra={"action": "MODELS_DB_STATS_LOADED"})
+            logging.info("Models image files stats loaded successfully", extra={"action": "MODELS_DB_FILES_STATS_LOADED"})
             
         except Exception as e:
-            logging.error(f"Error loading models database stats: {e}", extra={"action": "MODELS_DB_STATS_ERROR"})
+            logging.error(f"Error loading models files stats: {e}", extra={"action": "MODELS_DB_FILES_STATS_ERROR"})
             QMessageBox.warning(
                 self,
                 lang.get("error_title", "Error"),
-                lang.get("models_db.stats_error", "Failed to load models database statistics")
+                lang.get("models_db.files_stats_error", "Failed to load image files statistics")
             )
     
     def _open_models_viewer(self):
-        """Open models database viewer dialog"""
+        """Open models database editor dialog"""
         try:
-            from UI.ui_models_database_viewer import ModelsDatabaseViewerDialog
+            from UI.ui_models_database_editor import ModelsDataDatabaseEditor
             
-            dialog = ModelsDatabaseViewerDialog(self)
+            dialog = ModelsDataDatabaseEditor(self)
             dialog.exec()
             
-        except ImportError:
-            logging.error("Models Database Viewer not available", extra={"action": "MODELS_VIEWER_IMPORT_ERROR"})
-            QMessageBox.information(
-                self,
-                lang.get("info_title", "Information"),
-                lang.get("models_db.viewer_coming_soon", "Models Database Viewer coming soon...")
-            )
-        except Exception as e:
-            logging.error(f"Error opening models viewer: {e}", extra={"action": "MODELS_VIEWER_ERROR"})
+        except ImportError as e:
+            logging.error(f"Models Database Editor import error: {e}", extra={"action": "MODELS_EDITOR_IMPORT_ERROR"})
             QMessageBox.warning(
                 self,
                 lang.get("error_title", "Error"),
-                lang.get("models_db.viewer_error", "Error opening Models Database Viewer")
+                f"Import error: {str(e)}"
+            )
+        except Exception as e:
+            logging.error(f"Error opening models editor: {e}", extra={"action": "MODELS_EDITOR_ERROR"})
+            import traceback
+            QMessageBox.warning(
+                self,
+                lang.get("error_title", "Error"),
+                f"Error: {str(e)}\n\n{traceback.format_exc()}"
             )
     
     def _refresh_metadata(self):

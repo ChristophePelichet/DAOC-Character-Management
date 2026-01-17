@@ -102,7 +102,7 @@ class ModelsGallerySettingsWidget(QWidget):
         checkbox_layout.setContentsMargins(0, 0, 0, 0)
 
         # Define category order: Armor, Weapon, Other
-        category_order = ["armor", "weapons", "other"]
+        category_order = ["armor", "weapon", "other"]
         
         # 3-column layout for categories
         categories_grid_layout = QHBoxLayout()
@@ -172,8 +172,8 @@ class ModelsGallerySettingsWidget(QWidget):
             visible_slots = []
             if "armor" in self.subcategories_by_category:
                 visible_slots.extend(self.subcategories_by_category["armor"])
-            if "weapons" in self.subcategories_by_category:
-                visible_slots.extend(self.subcategories_by_category["weapons"])
+            if "weapon" in self.subcategories_by_category:
+                visible_slots.extend(self.subcategories_by_category["weapon"])
 
         # Check subcategory checkboxes based on visible_slots
         for checkbox_key, checkbox in self.checkboxes.items():
@@ -216,13 +216,11 @@ class ModelsGallerySettingsWidget(QWidget):
         Handle category checkbox state changes - update all subcategories.
         
         Args:
-            category: The category name (armor, weapons, other)
-            state: The new state (Qt.CheckState)
+            category: The category name (armor, weapon, other)
+            state: The new state (2=checked, 0=unchecked)
         """
-        from PySide6.QtCore import Qt
-        
         # Set all subcategories to the same state as the category
-        is_checked = state == Qt.CheckState.Checked
+        is_checked = state == 2  # Qt.CheckState.Checked value
         
         for subcategory in self.subcategories_by_category.get(category, []):
             checkbox_key = f"{category}/{subcategory}"
@@ -231,8 +229,17 @@ class ModelsGallerySettingsWidget(QWidget):
                 self.checkboxes[checkbox_key].setChecked(is_checked)
                 self.checkboxes[checkbox_key].blockSignals(False)
         
-        # Save changes
-        self._on_checkbox_changed()
+        # Manually save changes (without updating category state to avoid loops)
+        visible_slots = []
+        for cat in sorted(self.subcategories_by_category.keys()):
+            for subcat in self.subcategories_by_category[cat]:
+                checkbox_key = f"{cat}/{subcat}"
+                if checkbox_key in self.checkboxes and self.checkboxes[checkbox_key].isChecked():
+                    visible_slots.append(subcat)
+        
+        logging.info(f"Category '{category}' toggled to {is_checked}: {len(visible_slots)} items visible")
+        self.config.set("models_gallery.visible_slots", visible_slots)
+        self.config.save_config()
 
     def _update_category_checkbox_state(self, category: str):
         """

@@ -10,6 +10,27 @@ Character management application for Dark Age of Camelot (DAOC), developed in Py
 
 ---
 
+## 📥 Installation & Download
+
+### Quick Download
+* 🪟 **Windows:** Download `DaocCharacterManager.exe` from [Releases](https://github.com/ChristophePelichet/DAOC-Character-Management/releases)
+* 🍎 **macOS:** Download `DaocCharacterManager-Mac.zip` from [Releases](https://github.com/ChristophePelichet/DAOC-Character-Management/releases)
+
+### Setup Instructions
+
+#### Windows
+1. Download `DaocCharacterManager.exe` from the latest release
+2. Run the executable directly (no installation required)
+3. Start managing your DAOC characters!
+
+#### macOS
+1. Download `DaocCharacterManager-Mac.zip` from the latest release
+2. Extract the `.zip` file to your Applications folder
+3. Open `DaocCharacterManager.app`
+4. ⚠️ **Security Note:** On first launch, if you see a security warning, **Right-Click** the app and select **Open**
+
+---
+
 ## 🎮 Features
 
 ### Character Management

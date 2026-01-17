@@ -41,6 +41,7 @@ class ModelsGallerySettingsWidget(QWidget):
 
         self.config = config
         self.lang = lang
+        logging.info(f"[MODELS_GALLERY] Initializing ModelsGallerySettingsWidget - current language: {lang.current_language}")
         self.checkboxes = {}  # Maps "category/subcategory" -> checkbox
         self.category_checkboxes = {}  # Maps "category" -> checkbox
         
@@ -166,37 +167,61 @@ class ModelsGallerySettingsWidget(QWidget):
     def _get_category_label(self, category: str) -> str:
         """Get localized label for a category."""
         key_map = {
-            "armor": "settings.models_gallery.category_armor",
-            "weapon": "settings.models_gallery.category_weapon",
-            "other": "settings.models_gallery.category_other",
+            "armor": "settings.pages.models_gallery.category_armor",
+            "weapon": "settings.pages.models_gallery.category_weapon",
+            "other": "settings.pages.models_gallery.category_other",
         }
         fallback_map = {
             "armor": "Armor",
             "weapon": "Weapon",
             "other": "Other",
         }
-        return self.lang.get(key_map.get(category, ""), default=fallback_map.get(category, category))
+        key = key_map.get(category, "")
+        result = self.lang.get(key, default=fallback_map.get(category, category))
+        logging.info(f"[MODELS_GALLERY] _get_category_label('{category}'): key='{key}' -> result='{result}'")
+        return result
 
     def _get_subcategory_label(self, category: str, subcategory: str) -> str:
         """Get localized label for a subcategory."""
         key_map = {
-            "arms": "settings.models_gallery.subcategory_arms",
-            "cloaks": "settings.models_gallery.subcategory_cloaks",
-            "feet": "settings.models_gallery.subcategory_feet",
-            "hands": "settings.models_gallery.subcategory_hands",
-            "head": "settings.models_gallery.subcategory_head",
-            "legs": "settings.models_gallery.subcategory_legs",
-            "shields": "settings.models_gallery.subcategory_shields",
-            "torso": "settings.models_gallery.subcategory_torso",
-            "boats": "settings.models_gallery.subcategory_boats",
-            "deco": "settings.models_gallery.subcategory_deco",
-            "misc": "settings.models_gallery.subcategory_misc",
-            "quiver": "settings.models_gallery.subcategory_quiver",
-            "siege": "settings.models_gallery.subcategory_siege",
-            "tents": "settings.models_gallery.subcategory_tents",
+            "arms": "settings.pages.models_gallery.subcategory_arms",
+            "chest": "settings.pages.models_gallery.subcategory_chest",
+            "cloak": "settings.pages.models_gallery.subcategory_cloak",
+            "feet": "settings.pages.models_gallery.subcategory_feet",
+            "hands": "settings.pages.models_gallery.subcategory_hands",
+            "head": "settings.pages.models_gallery.subcategory_head",
+            "legs": "settings.pages.models_gallery.subcategory_legs",
+            "sleeves": "settings.pages.models_gallery.subcategory_sleeves",
+            "shields": "settings.pages.models_gallery.subcategory_shields",
+            "torso": "settings.pages.models_gallery.subcategory_torso",
+            "bow": "settings.pages.models_gallery.subcategory_bow",
+            "crossbow": "settings.pages.models_gallery.subcategory_crossbow",
+            "dagger": "settings.pages.models_gallery.subcategory_dagger",
+            "flexible": "settings.pages.models_gallery.subcategory_flexible",
+            "greave": "settings.pages.models_gallery.subcategory_greave",
+            "instrument": "settings.pages.models_gallery.subcategory_instrument",
+            "polearm": "settings.pages.models_gallery.subcategory_polearm",
+            "scythe": "settings.pages.models_gallery.subcategory_scythe",
+            "shield": "settings.pages.models_gallery.subcategory_shield",
+            "staff": "settings.pages.models_gallery.subcategory_staff",
+            "sword": "settings.pages.models_gallery.subcategory_sword",
+            "throwing": "settings.pages.models_gallery.subcategory_throwing",
+            "two handed": "settings.pages.models_gallery.subcategory_two_handed",
+            "weapons": "settings.pages.models_gallery.subcategory_weapons",
+            "boats": "settings.pages.models_gallery.subcategory_boats",
+            "deco": "settings.pages.models_gallery.subcategory_deco",
+            "housing": "settings.pages.models_gallery.subcategory_housing",
+            "misc": "settings.pages.models_gallery.subcategory_misc",
+            "quiver": "settings.pages.models_gallery.subcategory_quiver",
+            "siege": "settings.pages.models_gallery.subcategory_siege",
+            "tents": "settings.pages.models_gallery.subcategory_tents",
+            "world": "settings.pages.models_gallery.subcategory_world",
         }
         fallback = subcategory.capitalize()
-        return self.lang.get(key_map.get(subcategory, ""), default=fallback)
+        key = key_map.get(subcategory, "")
+        result = self.lang.get(key, default=fallback)
+        logging.info(f"[MODELS_GALLERY] _get_subcategory_label('{category}', '{subcategory}'): key='{key}' -> result='{result}'")
+        return result
 
     def _load_settings(self):
         """Load settings from configuration and update checkboxes."""
@@ -316,6 +341,7 @@ class ModelsGallerySettingsWidget(QWidget):
 
     def retranslate_ui(self):
         """Retranslate all labels when language changes."""
+        logging.info(f"[MODELS_GALLERY] retranslate_ui() called - current language: {self.lang.current_language}")
         # Update category checkbox labels
         for category, checkbox in self.category_checkboxes.items():
             category_label = self._get_category_label(category)

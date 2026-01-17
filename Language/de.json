@@ -1125,7 +1125,18 @@
                 "armor_pieces": "Rüstungsteile",
                 "jewelry": "Schmuck",
                 "weapons": "Waffen"
-            }
+            },
+            "format_loki": "Loki-Format",
+            "format_zenkcraft": "Zenkcraft-Format",
+            "stats_title": "STATISTIKEN",
+            "resists_title": "WIDERSTÄNDE",
+            "skills_title": "FÄHIGKEITEN",
+            "bonuses_title": "BONI",
+            "equipment_title": "AUSRÜSTUNG",
+            "equipment_count": "{count}/18 Plätze",
+            "currency_summary_title": "WÄHRUNGSÜBERSICHT",
+            "currency_summary_missing": "{count} Element(e) ohne Preis",
+            "item_without_price": "Element(e) ohne Preis"
         },
         "buttons": {
             "import_template": "📥 Vorlage importieren",

@@ -50,6 +50,8 @@ class ModelsOverviewWidget(QWidget):
 
         # Initialize components
         self._setup_ui()
+        self.current_model_list = []  # Store current models for preview navigation
+        self.current_slot_name = ""   # Store current slot for preview dialog
         self._connect_signals()
 
     def _setup_ui(self):
@@ -97,6 +99,10 @@ class ModelsOverviewWidget(QWidget):
         self.builder.error_occurred.connect(self._on_error)
         logging.info("Widget: connected error_occurred signal")
 
+        # When thumbnail is clicked, show preview dialog
+        self.gallery_display.thumbnail_clicked.connect(self._on_thumbnail_clicked)
+        logging.info("Widget: connected thumbnail_clicked signal")
+
         # NOW set metadata on the builder (after signals are connected)
         logging.info("Widget: setting metadata on builder...")
         self.builder.set_metadata(self.metadata)
@@ -134,6 +140,11 @@ class ModelsOverviewWidget(QWidget):
         logging.info(f"Widget: _on_thumbnails_ready called with {len(thumbnails)} thumbnails")
         self.gallery_display.display_thumbnails(thumbnails)
 
+        # Store model IDs and current slot for preview navigation
+        self.current_model_list = [t.model_id for t in thumbnails]
+        if thumbnails:
+            self.current_slot_name = thumbnails[0].slot_name
+
         # Update stats
         count = len(thumbnails)
         stats_text = lang.get(
@@ -142,6 +153,25 @@ class ModelsOverviewWidget(QWidget):
         ).format(count=count)
         logging.info(f"Widget: updating stats label to '{stats_text}'")
         self.stats_label.setText(stats_text)
+
+    def _on_thumbnail_clicked(self, model_id: str):
+        """
+        Handle thumbnail click - open preview dialog.
+
+        Args:
+            model_id: ID of clicked model
+        """
+        from UI.ui_model_preview_dialog import ModelPreviewDialog
+        
+        logging.info(f"Widget: thumbnail clicked for model {model_id}")
+        
+        preview_dialog = ModelPreviewDialog(
+            parent=self,
+            model_id=model_id,
+            model_list=self.current_model_list,
+            slot_name=self.current_slot_name
+        )
+        preview_dialog.show()
 
     def _on_error(self, error_message: str):
         """

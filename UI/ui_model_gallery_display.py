@@ -15,7 +15,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QFrame,
 )
-from PySide6.QtCore import Qt, QSize
+from PySide6.QtCore import Qt, QSize, Signal
 from PySide6.QtGui import QPixmap, QFont
 
 from Functions.model_gallery_builder import ModelThumbnail
@@ -23,6 +23,9 @@ from Functions.model_gallery_builder import ModelThumbnail
 
 class ModelThumbnailWidget(QFrame):
     """Single model thumbnail widget."""
+
+    # Signal emitted when thumbnail is clicked
+    clicked = Signal(str)  # Emits model_id
 
     def __init__(self, thumbnail: ModelThumbnail, parent=None):
         """
@@ -36,6 +39,7 @@ class ModelThumbnailWidget(QFrame):
         self.thumbnail = thumbnail
         self.setFrameShape(QFrame.Box)
         self.setFrameShadow(QFrame.Raised)
+        self.setCursor(Qt.PointingHandCursor)  # Show clickable cursor
         self.setStyleSheet(
             """
             ModelThumbnailWidget {
@@ -51,6 +55,11 @@ class ModelThumbnailWidget(QFrame):
         """
         )
         self._setup_ui()
+
+    def mousePressEvent(self, event):
+        """Handle click on thumbnail."""
+        self.clicked.emit(self.thumbnail.model_id)
+        super().mousePressEvent(event)
 
     def _setup_ui(self):
         """Build UI."""
@@ -102,6 +111,9 @@ class ModelsGalleryDisplayWidget(QWidget):
 
     Shows model thumbnails in a grid layout with scrolling.
     """
+
+    # Signal emitted when a thumbnail is clicked
+    thumbnail_clicked = Signal(str)  # Emits model_id
 
     def __init__(self, parent=None):
         """
@@ -174,6 +186,8 @@ class ModelsGalleryDisplayWidget(QWidget):
         columns = 5
         for idx, thumbnail in enumerate(thumbnails):
             widget = ModelThumbnailWidget(thumbnail)
+            # Connect thumbnail click signal to gallery signal
+            widget.clicked.connect(self.thumbnail_clicked.emit)
             row = idx // columns
             col = idx % columns
             self.grid_layout.addWidget(widget, row, col)

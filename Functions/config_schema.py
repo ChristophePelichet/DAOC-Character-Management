@@ -82,22 +82,18 @@ DEFAULT_CONFIG = {
     },
     "models_gallery": {
         "visible_slots": [
-            "Weapons",
             "Arms",
-            "Hands",
-            "Feet",
-            "Legs",
-            "Torso",
-            "Head",
-            "Shields",
             "Cloaks",
+            "Feet",
+            "Hands",
+            "Head",
+            "Legs",
             "Quiver",
-            "Misc",
-            "Siege",
-            "Boats",
-            "Tents",
-            "Deco"
+            "Shields",
+            "Torso",
+            "Weapons"
         ]
+    }
     }
 }
 
@@ -231,21 +227,16 @@ VALIDATION_SCHEMA = {
         "visible_slots": {
             "type": list,
             "default": [
-                "Weapons",
                 "Arms",
-                "Hands",
-                "Feet",
-                "Legs",
-                "Torso",
-                "Head",
-                "Shields",
                 "Cloaks",
+                "Feet",
+                "Hands",
+                "Head",
+                "Legs",
                 "Quiver",
-                "Misc",
-                "Siege",
-                "Boats",
-                "Tents",
-                "Deco"
+                "Shields",
+                "Torso",
+                "Weapons"
             ]
         }
     }

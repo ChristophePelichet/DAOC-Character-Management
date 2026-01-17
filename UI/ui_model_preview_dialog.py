@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QScrollArea
 )
 from PySide6.QtGui import QPixmap, QFont, Qt
-from PySide6.QtCore import Qt as QtCore_Qt
+from PySide6.QtCore import Qt as QtCore_Qt, QEvent
 
 
 class ModelPreviewDialog(QDialog):
@@ -79,6 +79,8 @@ class ModelPreviewDialog(QDialog):
         self.scroll_area = QScrollArea()
         self.scroll_area.setWidgetResizable(True)
         self.scroll_area.setStyleSheet("QScrollArea { background-color: #1a1a1a; }")
+        # Install event filter to handle arrow keys
+        self.scroll_area.installEventFilter(self)
         
         self.image_label = QLabel()
         self.image_label.setAlignment(QtCore_Qt.AlignCenter)
@@ -119,7 +121,7 @@ class ModelPreviewDialog(QDialog):
         self.close_button.setMaximumWidth(150)
         main_layout.addWidget(self.close_button)
 
-    def _load_image(self):
+    def _load_image(self, reset_zoom: bool = True):
         """Load and display current model image."""
         if not self.model_id:
             self.image_label.setText("No model selected")
@@ -141,8 +143,9 @@ class ModelPreviewDialog(QDialog):
             self._update_info()
             return
 
-        # Reset zoom to fit screen
-        self.zoom_level = 1.0
+        # Reset zoom to fit screen (only when changing model, not on zoom)
+        if reset_zoom:
+            self.zoom_level = 1.0
         self._display_pixmap(pixmap)
         self._update_info()
 
@@ -216,7 +219,15 @@ class ModelPreviewDialog(QDialog):
             # Wheel down = zoom out
             self.zoom_level = max(self.zoom_level - 0.1, 0.5)  # Min 50%
         
-        self._load_image()
+        # Redisplay with new zoom level (don't reset zoom)
+        if self.model_id:
+            image_path = Path(f"Img/Models/items/{self.model_id}.webp")
+            if image_path.exists():
+                pixmap = QPixmap(str(image_path))
+                if not pixmap.isNull():
+                    self._display_pixmap(pixmap)
+                    self._update_info()
+        
         event.accept()
 
     def keyPressEvent(self, event):
@@ -245,3 +256,11 @@ class ModelPreviewDialog(QDialog):
         super().resizeEvent(event)
         if self.model_id:
             self._load_image()
+
+    def eventFilter(self, obj, event):
+        """Intercept keyboard events from scroll area to handle navigation."""
+        if obj is self.scroll_area and event.type() == QEvent.KeyPress:
+            # Delegate to keyPressEvent so arrow keys work
+            self.keyPressEvent(event)
+            return True
+        return super().eventFilter(obj, event)

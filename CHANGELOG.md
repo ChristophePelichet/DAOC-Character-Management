@@ -13,6 +13,14 @@
 - Configurable visibility for each model category in Settings
 - Full documentation: [MODELS_VISUAL_SYSTEM_DOCUMENTATION.md](Documentations/Models/MODELS_VISUAL_SYSTEM_DOCUMENTATION.md)
 
+### 🐛 Bug Fixes
+
+**Language File Key Structure Synchronization**
+- Fixed missing translation keys in German (de.json) for Armory dialog preview section
+- Added 11 missing keys: format_loki, format_zenkcraft, stats_title, resists_title, skills_title, bonuses_title, equipment_title, equipment_count, currency_summary_title, currency_summary_missing, item_without_price
+- All 3 language files (en.json, fr.json, de.json) now have identical key structure (1457 keys each)
+- Ensured consistent translations across all supported languages (English, French, German)
+
 ## v0.109
 
 ### 🐛 Bug Fixes
@@ -73,14 +81,6 @@
 - Toggle maximize button shows window state (□ = normal, ▢ = maximized)
 - Flexible window sizing for better workspace management
 - Visual feedback with state indicator changes
-
-### 🐛 Bug Fixes
-
-**Language File Key Structure Synchronization**
-- Fixed missing translation keys in German (de.json) for Armory dialog preview section
-- Added 11 missing keys: format_loki, format_zenkcraft, stats_title, resists_title, skills_title, bonuses_title, equipment_title, equipment_count, currency_summary_title, currency_summary_missing, item_without_price
-- All 3 language files (en.json, fr.json, de.json) now have identical key structure (1457 keys each)
-- Ensured consistent translations across all supported languages (English, French, German)
 
 ### 🧹 Code Quality - Ruff PEP 8 Cleanup
 

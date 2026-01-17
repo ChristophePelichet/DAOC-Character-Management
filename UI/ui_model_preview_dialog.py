@@ -12,6 +12,8 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import QPixmap, QFont, Qt
 from PySide6.QtCore import Qt as QtCore_Qt, QEvent
 
+from Functions.language_manager import lang
+
 
 class ModelPreviewDialog(QDialog):
     """Full-size model image preview with zoom and navigation."""
@@ -44,7 +46,7 @@ class ModelPreviewDialog(QDialog):
         self._load_image()
         
         # Set dialog properties
-        self.setWindowTitle("Model Preview")
+        self.setWindowTitle(lang.get("model_preview.window_title", default="Model Preview"))
         self.setModal(False)
         self.resize(900, 700)
         self.setStyleSheet("background-color: #2b2b2b; color: #ffffff;")
@@ -92,7 +94,7 @@ class ModelPreviewDialog(QDialog):
         # Navigation bar
         nav_layout = QHBoxLayout()
         
-        self.prev_button = QPushButton("← Previous")
+        self.prev_button = QPushButton(lang.get("model_preview.button_previous", default="← Previous"))
         self.prev_button.clicked.connect(self._show_previous)
         self.prev_button.setMaximumWidth(120)
         nav_layout.addWidget(self.prev_button)
@@ -108,7 +110,7 @@ class ModelPreviewDialog(QDialog):
         
         nav_layout.addStretch()
         
-        self.next_button = QPushButton("Next →")
+        self.next_button = QPushButton(lang.get("model_preview.button_next", default="Next →"))
         self.next_button.clicked.connect(self._show_next)
         self.next_button.setMaximumWidth(120)
         nav_layout.addWidget(self.next_button)
@@ -118,14 +120,18 @@ class ModelPreviewDialog(QDialog):
     def _load_image(self, reset_zoom: bool = True):
         """Load and display current model image."""
         if not self.model_id:
-            self.image_label.setText("No model selected")
+            self.image_label.setText(
+                lang.get("model_preview.error_no_model", default="No model selected")
+            )
             self._update_info()
             return
 
         image_path = Path(f"Img/Models/items/{self.model_id}.webp")
         
         if not image_path.exists():
-            self.image_label.setText(f"Image not found:\n{image_path}")
+            self.image_label.setText(
+                lang.get("model_preview.error_image_not_found", default="Image not found:\n{path}").format(path=image_path)
+            )
             self._update_info()
             return
 
@@ -133,7 +139,9 @@ class ModelPreviewDialog(QDialog):
         pixmap = QPixmap(str(image_path))
         
         if pixmap.isNull():
-            self.image_label.setText(f"Failed to load image:\n{self.model_id}.webp")
+            self.image_label.setText(
+                lang.get("model_preview.error_failed_to_load", default="Failed to load image:\n{model_id}.webp").format(model_id=self.model_id)
+            )
             self._update_info()
             return
 

@@ -1478,8 +1478,16 @@
         "models_count": "{count} modèles",
         "no_models_error": "Aucun modèle trouvé dans le répertoire Img/",
         "metadata_error": "Échec du chargement des métadonnées : {error}",
-        "filter_error": "Erreur de filtre : {error}",
+        "filter_error": "Erreur de filtrage : {error}",
         "error_prefix": "❌ Erreur : "
+    },
+    "model_preview": {
+        "window_title": "Aperçu du modèle",
+        "button_previous": "← Précédent",
+        "button_next": "Suivant →",
+        "error_no_model": "Aucun modèle sélectionné",
+        "error_image_not_found": "Image non trouvée :\n{path}",
+        "error_failed_to_load": "Impossible de charger l'image :\n{model_id}.webp"
     },
     "version_check": {
         "current": "Version actuelle:",

@@ -1450,6 +1450,14 @@
         "filter_error": "Filter error: {error}",
         "error_prefix": "❌ Error: "
     },
+    "model_preview": {
+        "window_title": "Model Preview",
+        "button_previous": "← Previous",
+        "button_next": "Next →",
+        "error_no_model": "No model selected",
+        "error_image_not_found": "Image not found:\n{path}",
+        "error_failed_to_load": "Failed to load image:\n{model_id}.webp"
+    },
     "version_check": {
         "current": "Current version:",
         "latest": "Latest version:",

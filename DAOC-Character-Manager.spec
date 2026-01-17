@@ -66,11 +66,11 @@ exe = EXE(
     icon=icon_file,
 )
 
-# Optionnel : Pour macOS, cela crée le dossier .app proprement dit
+# macOS: Create proper .app bundle
 if sys.platform == 'darwin':
     app = BUNDLE(
         exe,
-        name='DAOC Character Manager.app',
+        name='DaocCharacterManager.app',
         icon=icon_file,
         bundle_identifier='com.daoc.charman',
     )

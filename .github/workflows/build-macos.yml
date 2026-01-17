@@ -37,20 +37,20 @@ jobs:
       # macOS apps are folders; they must be zipped for easy distribution
       run: |
         cd dist
-        zip -r ../DAOC-Character-Manager-Mac.zip "DAOC Character Manager.app"
+        zip -r ../DaocCharacterManager-Mac.zip "DaocCharacterManager.app"
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: DAOC-Character-Manager-Mac-Zip
-        path: DAOC-Character-Manager-Mac.zip
+        name: DaocCharacterManager-Mac-Zip
+        path: DaocCharacterManager-Mac.zip
 
     - name: Publish Release
       # Only runs when a tag is pushed (v1.0.0, etc.)
       if: startsWith(github.ref, 'refs/tags/')
       uses: softprops/action-gh-release@v2
       with:
-        files: DAOC-Character-Manager-Mac.zip
+        files: DaocCharacterManager-Mac.zip
         generate_release_notes: true
         overwrite: true
         body: |

@@ -1531,6 +1531,7 @@
         "statistics_title": "Statistiken der Modell-Datenbank",
         "metadata_stats_title": "📊 Modell-Datenbank",
         "image_stats_title": "🖼️ Dateien",
+        "database_name": "Datenbank:",
         "total": "Gesamtmodelle",
         "items": "Gegenstände",
         "mobs": "Mobs",

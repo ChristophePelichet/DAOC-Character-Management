@@ -1573,6 +1573,7 @@
         "statistics_title": "Statistiques de la Base de Données des Modèles",
         "metadata_stats_title": "📊 Base de Données des Modèles",
         "image_stats_title": "🖼️ Fichiers",
+        "database_name": "Base de données:",
         "total": "Total des modèles",
         "items": "Items",
         "mobs": "Mobs",

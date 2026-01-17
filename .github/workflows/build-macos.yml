@@ -1,0 +1,38 @@
+name: Build macOS Executable
+
+on:
+  push:
+    branches: [ main ] # Triggered when pushing to main branch
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: macos-latest # GitHub starts a virtual Mac machine
+
+    steps:
+    - name: Get source code
+      uses: actions/checkout@v4
+
+    - name: Install Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13' # Update according to your Python version
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pyinstaller
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    - name: Compile with PyInstaller
+      run: |
+        # Replace 'main.py' with your main script name
+        # --onefile creates a single file, --windowed removes console window
+        pyinstaller --onefile --windowed main.py
+
+    - name: Save executable (Artifact)
+      uses: actions/upload-artifact@v4
+      with:
+        name: mon-programme-macos
+        path: dist/ # Directory where PyInstaller saves the executable

@@ -161,6 +161,8 @@
 
 - **Always run main.py from the virtual environment** - Use `python .\main.py` after activating `.venv`
 - **Never run tests outside .venv** - Dependencies are installed in virtual environment only
+- **Always reuse the existing terminal for running commands** - Do not create new terminal instances if one is already open
+- **Ensure all Python commands are run within the activated virtual environment** - Activate `.venv` before executing Python code
 
 
 **Otherwise: Code only, then STOP and wait**

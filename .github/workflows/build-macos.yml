@@ -28,8 +28,6 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install pyinstaller
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        # Specific macos requirements if any
         if [ -f requirements-macos.txt ]; then pip install -r requirements-macos.txt; fi
 
     - name: Compile executable

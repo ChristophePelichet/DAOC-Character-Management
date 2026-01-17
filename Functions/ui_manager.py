@@ -104,6 +104,11 @@ class UIManager:
         armor_resists_action.triggered.connect(self._open_armor_resists_dialog)
         tools_menu.addAction(armor_resists_action)
 
+        # Models Overview Gallery - Browse all model images
+        models_overview_action = QAction(lang.get("menu.tools.models_overview", default="🖼️ Models Overview"), self.main_window)
+        models_overview_action.triggered.connect(self._open_models_overview_window)
+        tools_menu.addAction(models_overview_action)
+
         # Menu Aide
         help_menu = menubar.addMenu(lang.get("menu_help"))
 
@@ -611,6 +616,26 @@ class UIManager:
         
         dialog = ui_armor_resists_create_dialog(self.main_window)
         dialog.exec()
+
+    def _open_models_overview_window(self):
+        """Opens the Models Overview Gallery window"""
+        import logging
+        from UI.models_overview_widget import ModelsOverviewWidget
+
+        logging.info("Opening Models Overview Gallery window")
+        try:
+            window = ModelsOverviewWidget(self.main_window)
+            window.show()
+            logging.info("Models Overview Gallery window opened successfully")
+        except Exception as e:
+            import traceback
+            logging.error(f"Error opening Models Overview window: {e}\n{traceback.format_exc()}")
+            from Functions.config_manager import SilentMessageBox
+            SilentMessageBox.critical(
+                self.main_window,
+                lang.get("error_title", default="Error"),
+                lang.get("models_overview.window_error", default="Error opening Models Overview Gallery") + f"\n\n{str(e)}"
+            )
 
     def _open_wiki_documentation(self):
         """Ouvre le Wiki GitHub dans le navigateur"""

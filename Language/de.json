@@ -1419,6 +1419,25 @@
         "error_title": "Fehler",
         "window_error": "Fehler beim Öffnen des Vorlagenfensters"
     },
+    "models_overview": {
+        "window_error": "Fehler beim Öffnen des Modell-Galerie-Fensters",
+        "window_title": "Modell-Galerie - Übersicht",
+        "gallery_title": "🖼️ Modellgalerie",
+        "filters_title": "Filter",
+        "type_label": "Typ:",
+        "subtype_label": "Untertyp:",
+        "search_label": "Suche:",
+        "search_placeholder": "Modell-ID...",
+        "apply_button": "Anwenden",
+        "all_types": "-- Alle --",
+        "no_image": "Kein Bild",
+        "no_models": "Keine Modelle gefunden",
+        "models_count": "{count} Modelle",
+        "no_models_error": "Keine Modelle im Img/-Verzeichnis gefunden",
+        "metadata_error": "Fehler beim Laden der Metadaten: {error}",
+        "filter_error": "Filterfehler: {error}",
+        "error_prefix": "❌ Fehler: "
+    },
     "version_check": {
         "current": "Aktuelle Version:",
         "latest": "Neueste Version:",

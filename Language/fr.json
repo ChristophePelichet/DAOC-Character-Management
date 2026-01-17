@@ -140,6 +140,7 @@
             "label": "Outils",
             "armory": "⚔️ Armurerie",
             "armor_resists": "🛡️ Résistances d'Armure",
+            "models_overview": "🖼️ Galerie de Modèles",
             "backup": "Sauvegarde"
         },
         "view": {
@@ -1460,6 +1461,25 @@
         "context_download": "Télécharger le Modèle",
         "error_title": "Erreur",
         "window_error": "Erreur lors de l'ouverture de la fenêtre des modèles"
+    },
+    "models_overview": {
+        "window_error": "Erreur lors de l'ouverture de la galerie de modèles",
+        "window_title": "Galerie des modèles - Aperçu",
+        "gallery_title": "🖼️ Galerie de modèles",
+        "filters_title": "Filtres",
+        "type_label": "Type :",
+        "subtype_label": "Sous-type :",
+        "search_label": "Recherche :",
+        "search_placeholder": "ID du modèle...",
+        "apply_button": "Appliquer",
+        "all_types": "-- Tous --",
+        "no_image": "Aucune image",
+        "no_models": "Aucun modèle trouvé",
+        "models_count": "{count} modèles",
+        "no_models_error": "Aucun modèle trouvé dans le répertoire Img/",
+        "metadata_error": "Échec du chargement des métadonnées : {error}",
+        "filter_error": "Erreur de filtre : {error}",
+        "error_prefix": "❌ Erreur : "
     },
     "version_check": {
         "current": "Version actuelle:",

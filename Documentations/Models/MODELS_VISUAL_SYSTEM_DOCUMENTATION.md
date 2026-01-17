@@ -1501,6 +1501,112 @@ thumbnail = pixmap.scaled(32, 32, Qt.KeepAspectRatio, Qt.SmoothTransformation)
 
 ---
 
+---
+
+## 🖼️ Models Overview Gallery (v0.110+)
+
+**Status**: Version 1.0 - Simple Gallery (Current)  
+**Version Target**: v0.110  
+**Branch**: `feature/v0.110-models-overview-view`  
+**Related Files**:
+- Functions: `model_database_manager.py`, `model_gallery_filter.py`, `model_gallery_builder.py`
+- UI: `ui_model_gallery_filter.py`, `ui_model_gallery_builder.py`, `ui_model_gallery_display.py`
+
+### v1.0 Features (Simple Gallery - Current Release)
+
+✅ **Core Gallery**
+- Browsable grid of all model thumbnails
+- Responsive scrollable layout
+- Hover effects on thumbnails
+
+✅ **Filtering**
+- Filter by Type (armor, weapons, mobs, etc.)
+- Filter by SubType (arms, feet, hands, legs, etc.)
+- Search by Model ID (partial match)
+- Dynamic filter options based on metadata
+
+✅ **Metadata**
+- Automatic discovery from Img/ directory
+- Type/Subtype hierarchy indexing
+- Model count statistics per type/subtype
+- Support for multiple image formats (.jpg, .png, .webp)
+
+✅ **Architecture**
+- Clean separation: Functions (logic) vs UI (presentation)
+- Domain-driven naming: `model_gallery_*`
+- UI prefix convention: `ui_model_gallery_*` for paired UI components
+- Dataclass-based ModelThumbnail for type safety
+
+### v2.0 Roadmap (Future Enhancements - NOT IMPLEMENTED)
+
+🔮 **Advanced Filtering**
+- Multi-filter combinations (type + item level + class)
+- Favorite models/collections
+- Recent models history
+- Filter presets/saved searches
+
+🔮 **Item Integration**
+- Link models to actual items in database
+- Display which items use each model
+- Filter by item properties (rarity, level, stats)
+- See item prices alongside models
+
+🔮 **Preview & Details**
+- Full-size image preview on click
+- Model metadata panel (type, subtype, usage count)
+- Item list using this model
+- 3D rotation/preview (if game data available)
+- Download model option
+
+🔮 **Analytics & Intelligence**
+- Most used models statistics
+- Orphaned models (not used by any item)
+- Model distribution charts
+- Rare/unique model discovery
+
+🔮 **Performance**
+- Lazy-loading thumbnails on scroll
+- Thumbnail caching
+- Virtual scrolling for 1000+ items
+- Background metadata loading
+
+🔮 **User Experience**
+- Keyboard navigation (arrows, pagination)
+- Export selected models
+- Batch operations
+- Model comparison view
+- Custom grid size adjustment
+
+### Implementation Architecture
+
+**Metadata Flow:**
+```
+Img/ directory
+    ↓
+model_gallery_load_metadata()
+    ↓
+{type: {subtype: [model_ids]}}
+    ↓
+Applied to filter/builder functions
+    ↓
+ModelThumbnail objects for UI
+    ↓
+PySide6 grid display
+```
+
+**Signal Flow:**
+```
+ModelsFilterPanelWidget.filter_changed
+    ↓
+ModelsGalleryBuilderWidget.apply_filters()
+    ↓
+thumbnails_ready signal
+    ↓
+ModelsGalleryDisplayWidget.display_thumbnails()
+```
+
+---
+
 ## References
 
 **Image Source**: [Eve-of-Darkness/DolModels](https://github.com/Eve-of-Darkness/DolModels)  
@@ -1518,4 +1624,4 @@ thumbnail = pixmap.scaled(32, 32, Qt.KeepAspectRatio, Qt.SmoothTransformation)
 
 ---
 
-*Last Updated: December 19, 2025 (Version 109 - Phase 10 Item Model Viewer Module)*
+*Last Updated: January 17, 2026 (Version 110 - Models Overview Gallery v1.0)*

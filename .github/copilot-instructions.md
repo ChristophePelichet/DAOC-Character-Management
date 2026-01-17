@@ -51,12 +51,12 @@
 ## 📝 Code Rules
 
 ### Language Requirements
-- **ALL code comments MUST be in English** - No exceptions, no French in code
+- **ALL code comments MUST be in English** - No exceptions, no French or German in code
 - **ALL docstrings MUST be in English** - Function/class/module documentation in English only
 - **ALL technical documentation MUST be in English** - Documentation files, README, technical specs
 - **Variable names in English**
 - **Function/class names in English**
-- **Only UI strings use lang.get() for translations** - User-facing text only
+- **Only UI strings use lang.get() for translations** - User-facing text only (English fallback)
 
 ### Python Code Standards (PEP 8)
 - **Follow PEP 8 style guide strictly**
@@ -81,16 +81,39 @@
   - **Herald integration**: `herald_update_character()`, `herald_scrape_stats()`, `herald_apply_scraped_data()`
   - **Armor handling**: `armor_upload_to_s3()`, `armor_validate_structure()`, `armor_build_payload()`
   - **Image processing**: `image_capture_sheet()`, `image_save_to_armory()`, `image_resize_for_upload()`
+  - **Model gallery**: `model_gallery_load_metadata()`, `model_gallery_apply_filters()`, `model_gallery_build_thumbnail_list()`
 - **Benefits**:
   - ✅ Autocomplete groups related functions (type `template_` to see all template functions)
   - ✅ Immediate clarity on function domain (`realm_rank_` = realm rank functions)
   - ✅ Easy maintenance and searching (`grep "^def herald_"`)
   - ✅ Logical grouping in imports and documentation
 
+### File Naming Convention for UI/Functions Coupling
+- **Pattern**: When a UI component is tightly coupled to specific business logic, name them consistently
+- **Rule**: If `Functions/{domain}_{feature}.py` exists → Create `UI/ui_{domain}_{feature}.py`
+- **Examples**:
+  - `Functions/model_gallery_filter.py` → `UI/ui_model_gallery_filter.py`
+  - `Functions/herald_url_validator.py` → `UI/ui_herald_url_validator.py` (if UI needed)
+  - `Functions/character_actions_manager.py` → `UI/ui_character_actions_manager.py` (if UI needed)
+- **Benefits**:
+  - ✅ Immediate visual pairing in IDE (ui_* prefix makes relationship clear)
+  - ✅ Easy to find related business logic
+  - ✅ Clear separation: Functions = logic, UI = presentation
+  - ✅ Scalability: Adding new features maintains predictable structure
+
 ### Translation & UI Rules
+
+**Supported Languages (Software UI only):**
+- 🇬🇧 English (en.json)
+- 🇫🇷 French (fr.json)
+- 🇩🇪 German (de.json)
+
+**Translation Guidelines:**
 - **NEVER hardcode user-facing text in code** - Always use Language/*.json files with lang.get()
 - **Always implement retranslate_ui() for dialogs/windows** - UI must refresh when language changes
 - **Always think about refreshing UI items when language changes** - Update labels, buttons, menus, etc.
+- **Update ALL language files** - When adding new UI text, add translations to en.json, fr.json, AND de.json
+- **Note**: These 3 languages apply ONLY to the software UI. All documentation, comments, docstrings, and technical specs MUST remain in English only
 
 ## 📁 Folder Structure Rules
 

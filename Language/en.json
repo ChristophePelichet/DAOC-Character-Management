@@ -140,6 +140,7 @@
             "label": "Tools",
             "armory": "⚔️ Armory",
             "armor_resists": "🛡️ Armor Resistances",
+            "models_overview": "🖼️ Models Overview",
             "backup": "Backup"
         },
         "view": {
@@ -1429,6 +1430,25 @@
         "context_download": "Download Template",
         "error_title": "Error",
         "window_error": "Error opening templates window"
+    },
+    "models_overview": {
+        "window_error": "Error opening Models Gallery window",
+        "window_title": "Models Overview - Gallery",
+        "gallery_title": "🖼️ Model Gallery",
+        "filters_title": "Filters",
+        "type_label": "Type:",
+        "subtype_label": "Subtype:",
+        "search_label": "Search:",
+        "search_placeholder": "Model ID...",
+        "apply_button": "Apply",
+        "all_types": "-- All --",
+        "no_image": "No image",
+        "no_models": "No models found",
+        "models_count": "{count} models",
+        "no_models_error": "No models found in Img/ directory",
+        "metadata_error": "Failed to load metadata: {error}",
+        "filter_error": "Filter error: {error}",
+        "error_prefix": "❌ Error: "
     },
     "version_check": {
         "current": "Current version:",

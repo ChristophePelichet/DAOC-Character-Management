@@ -31,6 +31,11 @@ jobs:
     - name: Compile executable
       run: pyinstaller DAOC-Character-Manager.spec
 
+    - name: Rename executable
+      run: |
+        Get-ChildItem dist/*.exe | Rename-Item -NewName "DAOC Character Manager.exe"
+      shell: powershell
+
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:

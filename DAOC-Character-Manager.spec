@@ -50,7 +50,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='DAOC Character Manager',
+    name='DaocCharacterManager',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

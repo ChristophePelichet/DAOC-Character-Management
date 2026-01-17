@@ -31,24 +31,6 @@ jobs:
     - name: Compile executable
       run: pyinstaller DAOC-Character-Manager.spec
 
-    - name: Check and Rename executable
-      run: |
-        Write-Host "Files in dist directory:"
-        Get-ChildItem -Path "dist\" -Filter "*.exe" | Format-List
-        
-        $exeFile = Get-ChildItem -Path "dist\" -Filter "*.exe" | Select-Object -First 1
-        if ($exeFile) {
-          $newName = "DAOC Character Manager.exe"
-          $newPath = Join-Path -Path $exeFile.DirectoryName -ChildPath $newName
-          Rename-Item -Path $exeFile.FullName -NewName $newName -Force
-          Write-Host "Renamed to: $newName"
-          Write-Host "Updated files in dist:"
-          Get-ChildItem -Path "dist\" -Filter "*.exe" | Format-List
-        } else {
-          Write-Host "No .exe file found!"
-        }
-      shell: powershell
-
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:

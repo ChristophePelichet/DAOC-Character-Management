@@ -67,10 +67,6 @@ class ModelsOverviewWidget(QWidget):
         # Right: Gallery + stats
         right_layout = QVBoxLayout()
 
-        # Stats label
-        self.stats_label = QLabel()
-        right_layout.addWidget(self.stats_label)
-
         # Gallery display
         self.gallery_display = ModelsGalleryDisplayWidget()
         right_layout.addWidget(self.gallery_display)
@@ -105,13 +101,6 @@ class ModelsOverviewWidget(QWidget):
         logging.info("Widget: setting metadata on builder...")
         self.builder.set_metadata(self.metadata)
         logging.info("Widget: metadata set on builder")
-        
-        # Show initial state: "Select filters and click Apply"
-        initial_text = lang.get(
-            "models_overview.models_count",
-            default="{count} models"
-        ).format(count=0)
-        self.stats_label.setText(initial_text)
 
     def _on_filters_applied(
         self, type_filter: str, subtype_filter: str, search_query: str
@@ -142,15 +131,6 @@ class ModelsOverviewWidget(QWidget):
         self.current_model_list = [t.model_id for t in thumbnails]
         if thumbnails:
             self.current_slot_name = thumbnails[0].subtype_name
-
-        # Update stats
-        count = len(thumbnails)
-        stats_text = lang.get(
-            "models_overview.models_count",
-            default="{count} models"
-        ).format(count=count)
-        logging.info(f"Widget: updating stats label to '{stats_text}'")
-        self.stats_label.setText(stats_text)
 
     def _on_thumbnail_clicked(self, model_id: str):
         """
